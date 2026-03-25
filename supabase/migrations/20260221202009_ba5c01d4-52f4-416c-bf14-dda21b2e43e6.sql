@@ -1,0 +1,1 @@
+ALTER TABLE certificates ADD COLUMN student_name text;

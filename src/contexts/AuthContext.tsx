@@ -1,0 +1,175 @@
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
+
+type AppRole = 'super_admin' | 'editor' | 'viewer';
+
+interface UserProfile {
+  id: string;
+  user_id: string;
+  email: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  is_admin: boolean;
+}
+
+interface AuthContextType {
+  user: User | null;
+  session: Session | null;
+  profile: UserProfile | null;
+  roles: AppRole[];
+  isLoading: boolean;
+  isAdmin: boolean;
+  canEdit: boolean;
+  isSuperAdmin: boolean;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signOut: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [roles, setRoles] = useState<AppRole[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchProfile = async (userId: string, userObj?: User) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (error && error.code === 'PGRST116' && userObj) {
+        // Profile not found — auto-create for OAuth/Magic Link users
+        const meta = userObj.user_metadata || {};
+        const email = userObj.email || meta.email || '';
+        const fullName = meta.full_name || meta.name || null;
+        const avatarUrl = meta.avatar_url || meta.picture || null;
+
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: userId,
+            email,
+            full_name: fullName,
+            avatar_url: avatarUrl,
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+          setProfile(null);
+        } else {
+          setProfile(newProfile as UserProfile);
+        }
+        return;
+      }
+
+      if (error) throw error;
+      setProfile(data as UserProfile);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      setProfile(null);
+    }
+  };
+
+  const fetchRoles = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+
+      if (error) throw error;
+      setRoles((data || []).map((r) => r.role as AppRole));
+    } catch (error) {
+      console.error('Error fetching roles:', error);
+      setRoles([]);
+    }
+  };
+
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          // Use setTimeout to avoid Supabase deadlock
+          setTimeout(() => {
+            fetchProfile(session.user.id, session.user);
+            fetchRoles(session.user.id);
+          }, 0);
+        } else {
+          setProfile(null);
+          setRoles([]);
+        }
+        setIsLoading(false);
+      }
+    );
+
+    // THEN check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+
+      if (session?.user) {
+        fetchProfile(session.user.id, session.user);
+        fetchRoles(session.user.id);
+      }
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signIn = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return { error };
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
+    setProfile(null);
+    setRoles([]);
+  };
+
+  const isAdmin = roles.some((r) => ['super_admin', 'editor', 'viewer'].includes(r));
+  const canEdit = roles.some((r) => ['super_admin', 'editor'].includes(r));
+  const isSuperAdmin = roles.includes('super_admin');
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        profile,
+        roles,
+        isLoading,
+        isAdmin,
+        canEdit,
+        isSuperAdmin,
+        signIn,
+        signOut,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

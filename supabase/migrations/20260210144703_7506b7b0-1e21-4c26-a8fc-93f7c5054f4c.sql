@@ -1,0 +1,1 @@
+ALTER TABLE public.whatsapp_welcome_queue ALTER COLUMN scheduled_at SET DEFAULT (now() + interval '1 minute');

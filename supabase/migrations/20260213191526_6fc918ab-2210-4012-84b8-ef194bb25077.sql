@@ -1,0 +1,1 @@
+ALTER TABLE public.zapi_connections ADD COLUMN waba_id text;

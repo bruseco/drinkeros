@@ -1,0 +1,1 @@
+ALTER TABLE public.packages ADD COLUMN lesson_order text NOT NULL DEFAULT 'asc';

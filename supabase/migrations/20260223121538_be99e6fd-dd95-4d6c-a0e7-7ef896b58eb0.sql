@@ -1,0 +1,1 @@
+ALTER TABLE public.certificates ADD COLUMN workload_seconds integer NOT NULL DEFAULT 0;
