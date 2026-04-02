@@ -18,8 +18,6 @@ import { Button } from '@/components/ui/button';
 
 const menuItems = [
   { title: 'Dashboard', icon: Home, href: '/admin' },
-  { title: 'Aulas', icon: Play, href: '/admin/aulas' },
-  { title: 'Módulos', icon: GraduationCap, href: '/admin/modulos' },
   { title: 'Cursos', icon: BookOpen, href: '/admin/cursos' },
   { title: 'Combos', icon: Layers, href: '/admin/combos' },
 ];
