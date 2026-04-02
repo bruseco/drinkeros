@@ -29,6 +29,8 @@ import AdminProdutos from "./pages/admin/AdminProdutos";
 import ProdutoForm from "./pages/admin/ProdutoForm";
 import AdminEbooks from "./pages/admin/AdminEbooks";
 import EbookForm from "./pages/admin/EbookForm";
+import AdminExclusiveContent from "./pages/admin/AdminExclusiveContent";
+import ExclusivePostForm from "./pages/admin/ExclusivePostForm";
 import AdminTeam from "./pages/admin/AdminTeam";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminEmailSettings from "./pages/admin/AdminEmailSettings";
