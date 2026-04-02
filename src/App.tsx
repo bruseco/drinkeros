@@ -110,9 +110,12 @@ const App = () => (
               <Route path="cursos" element={<AdminCourses />} />
               <Route path="cursos/novo" element={<CourseForm />} />
               <Route path="cursos/:id" element={<CourseForm />} />
-              <Route path="combos" element={<AdminCombos />} />
-              <Route path="combos/novo" element={<ComboForm />} />
-              <Route path="combos/:id" element={<ComboForm />} />
+              <Route path="produtos" element={<AdminProdutos />} />
+              <Route path="produtos/novo" element={<ProdutoForm />} />
+              <Route path="produtos/:id" element={<ProdutoForm />} />
+              <Route path="ebooks" element={<AdminEbooks />} />
+              <Route path="ebooks/novo" element={<EbookForm />} />
+              <Route path="ebooks/:id" element={<EbookForm />} />
               <Route path="team" element={<AdminTeam />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="configuracoes" element={<AdminEmailSettings />} />
