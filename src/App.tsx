@@ -25,8 +25,10 @@ import AdminPackages from "./pages/admin/AdminPackages";
 import PackageForm from "./pages/admin/PackageForm";
 import AdminCourses from "./pages/admin/AdminCourses";
 import CourseForm from "./pages/admin/CourseForm";
-import AdminCombos from "./pages/admin/AdminCombos";
-import ComboForm from "./pages/admin/ComboForm";
+import AdminProdutos from "./pages/admin/AdminProdutos";
+import ProdutoForm from "./pages/admin/ProdutoForm";
+import AdminEbooks from "./pages/admin/AdminEbooks";
+import EbookForm from "./pages/admin/EbookForm";
 import AdminTeam from "./pages/admin/AdminTeam";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminEmailSettings from "./pages/admin/AdminEmailSettings";
@@ -108,9 +110,12 @@ const App = () => (
               <Route path="cursos" element={<AdminCourses />} />
               <Route path="cursos/novo" element={<CourseForm />} />
               <Route path="cursos/:id" element={<CourseForm />} />
-              <Route path="combos" element={<AdminCombos />} />
-              <Route path="combos/novo" element={<ComboForm />} />
-              <Route path="combos/:id" element={<ComboForm />} />
+              <Route path="produtos" element={<AdminProdutos />} />
+              <Route path="produtos/novo" element={<ProdutoForm />} />
+              <Route path="produtos/:id" element={<ProdutoForm />} />
+              <Route path="ebooks" element={<AdminEbooks />} />
+              <Route path="ebooks/novo" element={<EbookForm />} />
+              <Route path="ebooks/:id" element={<EbookForm />} />
               <Route path="team" element={<AdminTeam />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="configuracoes" element={<AdminEmailSettings />} />

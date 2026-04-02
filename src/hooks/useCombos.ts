@@ -16,6 +16,7 @@ export interface Combo {
   is_free: boolean;
   is_available_for_sale: boolean;
   display_order: number | null;
+  price: number | null;
   created_at: string;
   updated_at: string;
 }
