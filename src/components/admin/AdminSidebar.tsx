@@ -19,7 +19,8 @@ import { Button } from '@/components/ui/button';
 const menuItems = [
   { title: 'Dashboard', icon: Home, href: '/admin' },
   { title: 'Cursos', icon: BookOpen, href: '/admin/cursos' },
-  { title: 'Combos', icon: Layers, href: '/admin/combos' },
+  { title: 'E-books', icon: FileText, href: '/admin/ebooks' },
+  { title: 'Produtos', icon: ShoppingBag, href: '/admin/produtos' },
 ];
 
 const adminItems = [
