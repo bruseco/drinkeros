@@ -29,6 +29,8 @@ import AdminProdutos from "./pages/admin/AdminProdutos";
 import ProdutoForm from "./pages/admin/ProdutoForm";
 import AdminEbooks from "./pages/admin/AdminEbooks";
 import EbookForm from "./pages/admin/EbookForm";
+import AdminExclusiveContent from "./pages/admin/AdminExclusiveContent";
+import ExclusivePostForm from "./pages/admin/ExclusivePostForm";
 import AdminTeam from "./pages/admin/AdminTeam";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminEmailSettings from "./pages/admin/AdminEmailSettings";
@@ -116,6 +118,9 @@ const App = () => (
               <Route path="ebooks" element={<AdminEbooks />} />
               <Route path="ebooks/novo" element={<EbookForm />} />
               <Route path="ebooks/:id" element={<EbookForm />} />
+              <Route path="conteudo-exclusivo" element={<AdminExclusiveContent />} />
+              <Route path="conteudo-exclusivo/novo" element={<ExclusivePostForm />} />
+              <Route path="conteudo-exclusivo/:id" element={<ExclusivePostForm />} />
               <Route path="team" element={<AdminTeam />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="configuracoes" element={<AdminEmailSettings />} />
