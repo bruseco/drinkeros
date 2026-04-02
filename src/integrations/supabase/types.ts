@@ -672,6 +672,42 @@ export type Database = {
         }
         Relationships: []
       }
+      exclusive_posts: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_published: boolean
+          title: string
+          updated_at: string
+          youtube_url: string | null
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_published?: boolean
+          title: string
+          updated_at?: string
+          youtube_url?: string | null
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_published?: boolean
+          title?: string
+          updated_at?: string
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           created_at: string
