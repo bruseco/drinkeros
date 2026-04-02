@@ -13,7 +13,7 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
 } from '@/components/ui/sidebar';
-import { Scale, GraduationCap, Play, Users, UserCog, LogOut, Home, Mail, Bell, BookOpen, Rocket, MessageCircle, Webhook, Layers, ClipboardCheck, Clock, Target, BarChart3 } from 'lucide-react';
+import { Scale, GraduationCap, Play, Users, UserCog, LogOut, Home, Mail, Bell, BookOpen, Rocket, MessageCircle, Webhook, Layers, ClipboardCheck, Clock, Target, BarChart3, FileText, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const menuItems = [
