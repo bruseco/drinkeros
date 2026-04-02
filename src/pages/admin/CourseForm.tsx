@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useCourse, useCreateCourse, useUpdateCourse, useCoursePackages, useSaveCoursePackages } from '@/hooks/useCourses';
-import { usePackages } from '@/hooks/usePackages';
+import { usePackages, useCreatePackage, useUpdatePackage, useDeletePackage } from '@/hooks/usePackages';
 import { useRecipes } from '@/hooks/useRecipes';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { Button } from '@/components/ui/button';
@@ -11,14 +11,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ArrowLeft, Loader2, Upload, X, GraduationCap, Search, ChevronDown, ChevronRight, Plus, Pencil, Play } from 'lucide-react';
+import { ArrowLeft, Loader2, Upload, X, GraduationCap, ChevronDown, ChevronRight, Plus, Pencil, Play, Trash2, GripVertical } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+interface InlineModule {
+  id: string | null; // null = new, not yet saved
+  name: string;
+  isNew: boolean;
+}
 
 const CourseForm: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = !!id;
+  const { toast } = useToast();
 
   const { data: course, isLoading: isLoadingCourse } = useCourse(id || '');
   const { data: existingCoursePackages = [] } = useCoursePackages(id || '');
@@ -27,6 +33,9 @@ const CourseForm: React.FC = () => {
   const createCourse = useCreateCourse();
   const updateCourse = useUpdateCourse();
   const saveCoursePackages = useSaveCoursePackages();
+  const createPackage = useCreatePackage();
+  const updatePackageMut = useUpdatePackage();
+  const deletePackageMut = useDeletePackage();
   const { upload, isUploading } = useImageUpload('package-covers');
 
   const [formData, setFormData] = useState({
@@ -43,10 +52,11 @@ const CourseForm: React.FC = () => {
     workload_hours: 0,
   });
 
-  const [selectedPackageIds, setSelectedPackageIds] = useState<string[]>([]);
-  const [moduleSearch, setModuleSearch] = useState('');
-  const [showModuleSelector, setShowModuleSelector] = useState(false);
-  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [modules, setModules] = useState<InlineModule[]>([]);
+  const [expandedModules, setExpandedModules] = useState<Set<string | number>>(new Set());
+  const [editingModuleKey, setEditingModuleKey] = useState<string | number | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const newModuleCounter = useRef(0);
 
   useEffect(() => {
     if (course) {
@@ -67,10 +77,18 @@ const CourseForm: React.FC = () => {
   }, [course]);
 
   useEffect(() => {
-    if (existingCoursePackages.length > 0) {
-      setSelectedPackageIds(existingCoursePackages.map(cp => cp.package_id));
+    if (existingCoursePackages.length > 0 && allPackages.length > 0) {
+      const sorted = [...existingCoursePackages].sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+      const mods: InlineModule[] = sorted
+        .map(cp => {
+          const pkg = allPackages.find(p => p.id === cp.package_id);
+          if (!pkg) return null;
+          return { id: pkg.id, name: pkg.name, isNew: false };
+        })
+        .filter(Boolean) as InlineModule[];
+      setModules(mods);
     }
-  }, [existingCoursePackages]);
+  }, [existingCoursePackages, allPackages]);
 
   const generateSlug = (name: string) => {
     return name
@@ -103,24 +121,30 @@ const CourseForm: React.FC = () => {
     }
   };
 
-  const togglePackage = (packageId: string) => {
-    setSelectedPackageIds((prev) =>
-      prev.includes(packageId)
-        ? prev.filter((pid) => pid !== packageId)
-        : [...prev, packageId]
-    );
-  };
-
-  const toggleModuleExpand = (moduleId: string) => {
+  const toggleModuleExpand = (key: string | number) => {
     setExpandedModules(prev => {
       const next = new Set(prev);
-      if (next.has(moduleId)) {
-        next.delete(moduleId);
-      } else {
-        next.add(moduleId);
-      }
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
+  };
+
+  const addModule = () => {
+    const tempKey = `new_${++newModuleCounter.current}`;
+    const newMod: InlineModule = { id: null, name: '', isNew: true };
+    setModules(prev => [...prev, newMod]);
+    const idx = modules.length;
+    setExpandedModules(prev => new Set(prev).add(idx));
+    setEditingModuleKey(idx);
+  };
+
+  const updateModuleName = (index: number, name: string) => {
+    setModules(prev => prev.map((m, i) => i === index ? { ...m, name } : m));
+  };
+
+  const removeModule = (index: number) => {
+    setModules(prev => prev.filter((_, i) => i !== index));
   };
 
   const getLessonsForModule = (moduleId: string) => {
@@ -136,33 +160,77 @@ const CourseForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const data = {
-      name: formData.name,
-      slug: formData.slug,
-      description: formData.description || null,
-      cover_image_url: formData.cover_image_url || null,
-      hotmart_product_code: formData.is_free ? null : (formData.hotmart_product_code || null),
-      woocommerce_product_id: formData.is_free ? null : (formData.woocommerce_product_id || null),
-      is_active: formData.is_active,
-      is_free: formData.is_free,
-      is_available_for_sale: formData.is_free ? false : formData.is_available_for_sale,
-      display_order: formData.display_order,
-      workload_hours: formData.workload_hours,
-    } as any;
-
-    let courseId: string;
-
-    if (isEditing) {
-      const result = await updateCourse.mutateAsync({ id, data });
-      courseId = result.id;
-    } else {
-      const result = await createCourse.mutateAsync(data);
-      courseId = result.id;
+    // Validate modules have names
+    const emptyModules = modules.filter(m => !m.name.trim());
+    if (emptyModules.length > 0) {
+      toast({ title: 'Preencha o nome de todos os módulos', variant: 'destructive' });
+      return;
     }
 
-    await saveCoursePackages.mutateAsync({ courseId, packageIds: selectedPackageIds });
+    setIsSaving(true);
 
-    navigate('/admin/cursos');
+    try {
+      const courseData = {
+        name: formData.name,
+        slug: formData.slug,
+        description: formData.description || null,
+        cover_image_url: formData.cover_image_url || null,
+        hotmart_product_code: formData.is_free ? null : (formData.hotmart_product_code || null),
+        woocommerce_product_id: formData.is_free ? null : (formData.woocommerce_product_id || null),
+        is_active: formData.is_active,
+        is_free: formData.is_free,
+        is_available_for_sale: formData.is_free ? false : formData.is_available_for_sale,
+        display_order: formData.display_order,
+        workload_hours: formData.workload_hours,
+      } as any;
+
+      let courseId: string;
+
+      if (isEditing) {
+        const result = await updateCourse.mutateAsync({ id, data: courseData });
+        courseId = result.id;
+      } else {
+        const result = await createCourse.mutateAsync(courseData);
+        courseId = result.id;
+      }
+
+      // Create new modules (packages) and collect all IDs
+      const packageIds: string[] = [];
+      for (const mod of modules) {
+        if (mod.id) {
+          // Existing module - update name if changed
+          const existing = allPackages.find(p => p.id === mod.id);
+          if (existing && existing.name !== mod.name) {
+            await updatePackageMut.mutateAsync({
+              id: mod.id,
+              data: { name: mod.name, slug: generateSlug(mod.name) },
+            });
+          }
+          packageIds.push(mod.id);
+        } else {
+          // New module - create package
+          const slug = generateSlug(mod.name);
+          const newPkg = await createPackage.mutateAsync({
+            name: mod.name,
+            slug: slug || `modulo-${Date.now()}`,
+            is_active: true,
+            is_free: false,
+            is_available_for_sale: false,
+            lesson_order: 'asc',
+            display_order: 0,
+          } as any);
+          packageIds.push(newPkg.id);
+        }
+      }
+
+      await saveCoursePackages.mutateAsync({ courseId, packageIds });
+
+      navigate('/admin/cursos');
+    } catch (error) {
+      console.error('Error saving course:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (isEditing && isLoadingCourse) {
@@ -172,15 +240,6 @@ const CourseForm: React.FC = () => {
       </div>
     );
   }
-
-  const selectedModules = selectedPackageIds
-    .map(pid => allPackages.find(p => p.id === pid))
-    .filter(Boolean);
-
-  const unselectedPackages = allPackages
-    .filter(pkg => !selectedPackageIds.includes(pkg.id))
-    .filter(pkg => pkg.name.toLowerCase().includes(moduleSearch.toLowerCase()))
-    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
 
   return (
     <div className="space-y-6">
@@ -256,9 +315,6 @@ const CourseForm: React.FC = () => {
                         }
                         placeholder="https://www.criminallab.com.br/pagamento/nome-do-produto/"
                       />
-                      <p className="text-xs text-muted-foreground">
-                        URL completa da página de checkout para este curso
-                      </p>
                     </div>
 
                     <div className="space-y-2">
@@ -271,9 +327,6 @@ const CourseForm: React.FC = () => {
                         }
                         placeholder="Ex: 12345"
                       />
-                      <p className="text-xs text-muted-foreground">
-                        ID do produto no WooCommerce. Usado para mapear compras via webhook.
-                      </p>
                     </div>
                   </>
                 )}
@@ -311,121 +364,88 @@ const CourseForm: React.FC = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Módulos e Aulas</CardTitle>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowModuleSelector(!showModuleSelector)}
-                    >
-                      <Plus className="mr-1 h-3 w-3" />
-                      Vincular Módulo
-                    </Button>
-                    {isEditing && (
-                      <Button
-                        type="button"
-                        variant="default"
-                        size="sm"
-                        onClick={() => navigate('/admin/modulos/novo')}
-                      >
-                        <Plus className="mr-1 h-3 w-3" />
-                        Novo Módulo
-                      </Button>
-                    )}
-                  </div>
+                  <Button
+                    type="button"
+                    variant="default"
+                    size="sm"
+                    onClick={addModule}
+                  >
+                    <Plus className="mr-1 h-3 w-3" />
+                    Adicionar Módulo
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                {/* Module Selector (toggle) */}
-                {showModuleSelector && (
-                  <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Buscar módulo para vincular..."
-                        value={moduleSearch}
-                        onChange={(e) => setModuleSearch(e.target.value)}
-                        className="pl-9"
-                      />
-                    </div>
-                    <div className="max-h-48 overflow-y-auto space-y-1">
-                      {unselectedPackages.length === 0 ? (
-                        <p className="text-sm text-muted-foreground py-2 text-center">
-                          Nenhum módulo disponível
-                        </p>
-                      ) : (
-                        unselectedPackages.map((pkg) => (
-                          <label
-                            key={pkg.id}
-                            className="flex items-center gap-3 rounded-md border bg-background p-2 cursor-pointer hover:bg-muted/50 transition-colors"
-                          >
-                            <Checkbox
-                              checked={false}
-                              onCheckedChange={() => {
-                                togglePackage(pkg.id);
-                              }}
-                            />
-                            <span className="text-sm">{pkg.name}</span>
-                            {!pkg.is_active && (
-                              <Badge variant="secondary" className="text-xs ml-auto">Inativo</Badge>
-                            )}
-                          </label>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Selected Modules with Expandable Lessons */}
-                {selectedModules.length === 0 ? (
+                {modules.length === 0 ? (
                   <div className="rounded-lg border border-dashed p-8 text-center">
                     <GraduationCap className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground">Nenhum módulo vinculado a este curso</p>
-                    <p className="text-xs text-muted-foreground mt-1">Clique em "Vincular Módulo" para adicionar</p>
+                    <p className="text-sm text-muted-foreground">Nenhum módulo neste curso</p>
+                    <p className="text-xs text-muted-foreground mt-1">Clique em "Adicionar Módulo" para criar uma seção</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {selectedModules.map((mod, idx) => {
-                      if (!mod) return null;
-                      const isExpanded = expandedModules.has(mod.id);
-                      const lessons = getLessonsForModule(mod.id);
+                    {modules.map((mod, idx) => {
+                      const isExpanded = expandedModules.has(idx);
+                      const isEditingName = editingModuleKey === idx;
+                      const lessons = mod.id ? getLessonsForModule(mod.id) : [];
 
                       return (
-                        <div key={mod.id} className="rounded-lg border">
-                          <div
-                            className="flex items-center gap-3 p-3 cursor-pointer hover:bg-muted/30 transition-colors"
-                            onClick={() => toggleModuleExpand(mod.id)}
-                          >
-                            {isExpanded ? (
-                              <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                            )}
-                            {mod.cover_image_url ? (
-                              <img
-                                src={mod.cover_image_url}
-                                alt={mod.name}
-                                className="h-8 w-12 rounded object-cover flex-shrink-0"
+                        <div key={mod.id || `new_${idx}`} className="rounded-lg border">
+                          {/* Module Header */}
+                          <div className="flex items-center gap-2 p-3">
+                            <button
+                              type="button"
+                              className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+                              onClick={() => toggleModuleExpand(idx)}
+                            >
+                              {isExpanded ? (
+                                <ChevronDown className="h-4 w-4" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4" />
+                              )}
+                            </button>
+
+                            <GraduationCap className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+
+                            {isEditingName || mod.isNew ? (
+                              <Input
+                                value={mod.name}
+                                onChange={(e) => updateModuleName(idx, e.target.value)}
+                                onBlur={() => setEditingModuleKey(null)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    setEditingModuleKey(null);
+                                  }
+                                }}
+                                placeholder="Nome do módulo..."
+                                className="h-8 text-sm font-medium"
+                                autoFocus={mod.isNew}
                               />
                             ) : (
-                              <div className="h-8 w-12 rounded bg-muted flex items-center justify-center flex-shrink-0">
-                                <GraduationCap className="h-3 w-3 text-muted-foreground" />
-                              </div>
+                              <span
+                                className="text-sm font-medium flex-1 cursor-pointer hover:text-primary transition-colors"
+                                onClick={() => setEditingModuleKey(idx)}
+                                title="Clique para editar o nome"
+                              >
+                                {mod.name || 'Sem nome'}
+                              </span>
                             )}
-                            <div className="flex-1 min-w-0">
-                              <span className="text-sm font-medium truncate block">{mod.name}</span>
-                              <span className="text-xs text-muted-foreground">
+
+                            {!isEditingName && !mod.isNew && (
+                              <span className="text-xs text-muted-foreground flex-shrink-0">
                                 {lessons.length} {lessons.length === 1 ? 'aula' : 'aulas'}
                               </span>
-                            </div>
-                            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                            )}
+
+                            <div className="flex items-center gap-1 flex-shrink-0">
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
                                 className="h-7 w-7"
-                                onClick={() => navigate(`/admin/modulos/${mod.id}`)}
-                                title="Editar módulo"
+                                onClick={() => setEditingModuleKey(idx)}
+                                title="Renomear módulo"
                               >
                                 <Pencil className="h-3 w-3" />
                               </Button>
@@ -434,74 +454,85 @@ const CourseForm: React.FC = () => {
                                 variant="ghost"
                                 size="icon"
                                 className="h-7 w-7 text-destructive hover:text-destructive"
-                                onClick={() => togglePackage(mod.id)}
-                                title="Desvincular módulo"
+                                onClick={() => removeModule(idx)}
+                                title="Remover módulo"
                               >
-                                <X className="h-3 w-3" />
+                                <Trash2 className="h-3 w-3" />
                               </Button>
                             </div>
                           </div>
 
+                          {/* Expanded: Lessons */}
                           {isExpanded && (
                             <div className="border-t bg-muted/10 px-3 pb-3">
-                              {lessons.length === 0 ? (
-                                <p className="text-xs text-muted-foreground py-3 text-center">
-                                  Nenhuma aula neste módulo
-                                </p>
-                              ) : (
-                                <div className="space-y-1 pt-2">
-                                  {lessons.map((lesson: any, lessonIdx: number) => (
-                                    <div
-                                      key={lesson.id}
-                                      className="flex items-center gap-3 rounded-md p-2 hover:bg-muted/50 transition-colors group"
-                                    >
-                                      <span className="text-xs text-muted-foreground w-5 text-right flex-shrink-0">
-                                        {lessonIdx + 1}.
-                                      </span>
-                                      {lesson.image_url ? (
-                                        <img
-                                          src={lesson.image_url}
-                                          alt={lesson.name}
-                                          className="h-6 w-10 rounded object-cover flex-shrink-0"
-                                        />
-                                      ) : (
-                                        <div className="h-6 w-10 rounded bg-muted flex items-center justify-center flex-shrink-0">
-                                          <Play className="h-2.5 w-2.5 text-muted-foreground" />
+                              {mod.id ? (
+                                <>
+                                  {lessons.length === 0 ? (
+                                    <p className="text-xs text-muted-foreground py-3 text-center">
+                                      Nenhuma aula neste módulo
+                                    </p>
+                                  ) : (
+                                    <div className="space-y-1 pt-2">
+                                      {lessons.map((lesson: any, lessonIdx: number) => (
+                                        <div
+                                          key={lesson.id}
+                                          className="flex items-center gap-3 rounded-md p-2 hover:bg-muted/50 transition-colors group"
+                                        >
+                                          <span className="text-xs text-muted-foreground w-5 text-right flex-shrink-0">
+                                            {lessonIdx + 1}.
+                                          </span>
+                                          {lesson.image_url ? (
+                                            <img
+                                              src={lesson.image_url}
+                                              alt={lesson.name}
+                                              className="h-6 w-10 rounded object-cover flex-shrink-0"
+                                            />
+                                          ) : (
+                                            <div className="h-6 w-10 rounded bg-muted flex items-center justify-center flex-shrink-0">
+                                              <Play className="h-2.5 w-2.5 text-muted-foreground" />
+                                            </div>
+                                          )}
+                                          <span className="text-sm truncate flex-1">{lesson.name}</span>
+                                          <Badge
+                                            variant={lesson.status === 'published' ? 'default' : 'secondary'}
+                                            className="text-xs flex-shrink-0"
+                                          >
+                                            {lesson.status === 'published' ? 'Publicada' : 'Rascunho'}
+                                          </Badge>
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                                            onClick={() => navigate(`/admin/aulas/${lesson.id}`)}
+                                            title="Editar aula"
+                                          >
+                                            <Pencil className="h-3 w-3" />
+                                          </Button>
                                         </div>
-                                      )}
-                                      <span className="text-sm truncate flex-1">{lesson.name}</span>
-                                      <Badge
-                                        variant={lesson.status === 'published' ? 'default' : 'secondary'}
-                                        className="text-xs flex-shrink-0"
-                                      >
-                                        {lesson.status === 'published' ? 'Publicada' : 'Rascunho'}
-                                      </Badge>
-                                      <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                                        onClick={() => navigate(`/admin/aulas/${lesson.id}`)}
-                                        title="Editar aula"
-                                      >
-                                        <Pencil className="h-3 w-3" />
-                                      </Button>
+                                      ))}
                                     </div>
-                                  ))}
+                                  )}
+                                  <div className="pt-2 border-t mt-2">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      className="w-full text-xs"
+                                      onClick={() => navigate(`/admin/aulas/nova?modulo=${mod.id}`)}
+                                    >
+                                      <Plus className="mr-1 h-3 w-3" />
+                                      Nova Aula
+                                    </Button>
+                                  </div>
+                                </>
+                              ) : (
+                                <div className="py-4 text-center">
+                                  <p className="text-xs text-muted-foreground">
+                                    Salve o curso para poder adicionar aulas a este módulo
+                                  </p>
                                 </div>
                               )}
-                              <div className="pt-2 border-t mt-2">
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  className="w-full text-xs"
-                                  onClick={() => navigate('/admin/aulas/nova')}
-                                >
-                                  <Plus className="mr-1 h-3 w-3" />
-                                  Nova Aula
-                                </Button>
-                              </div>
                             </div>
                           )}
                         </div>
@@ -617,8 +648,8 @@ const CourseForm: React.FC = () => {
           <Button type="button" variant="outline" onClick={() => navigate('/admin/cursos')}>
             Cancelar
           </Button>
-          <Button type="submit" disabled={createCourse.isPending || updateCourse.isPending || saveCoursePackages.isPending}>
-            {(createCourse.isPending || updateCourse.isPending || saveCoursePackages.isPending) && (
+          <Button type="submit" disabled={isSaving}>
+            {isSaving && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
             {isEditing ? 'Salvar Alterações' : 'Criar Curso'}
