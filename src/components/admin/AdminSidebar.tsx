@@ -13,7 +13,8 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
 } from '@/components/ui/sidebar';
-import { Scale, GraduationCap, Play, Users, UserCog, LogOut, Home, Mail, Bell, BookOpen, Rocket, MessageCircle, Webhook, Layers, ClipboardCheck, Clock, Target, BarChart3, FileText, ShoppingBag, Crown } from 'lucide-react';
+import { GraduationCap, Play, Users, UserCog, LogOut, Home, Mail, Bell, BookOpen, Rocket, MessageCircle, Webhook, Layers, ClipboardCheck, Clock, Target, BarChart3, FileText, ShoppingBag, Crown } from 'lucide-react';
+import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { Button } from '@/components/ui/button';
 
 const menuItems = [
@@ -45,9 +46,8 @@ export const AdminSidebar: React.FC = () => {
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border p-4">
-        <Link to="/admin" className="flex items-center gap-2">
-          <Scale className="h-8 w-8 text-primary" />
-          <span className="text-xl font-bold text-sidebar-foreground">Admin</span>
+        <Link to="/admin" className="flex items-center justify-center">
+          <img src={drinkrosLogo} alt="Drinkeros" className="h-8" />
         </Link>
       </SidebarHeader>
 
