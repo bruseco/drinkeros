@@ -152,6 +152,45 @@ export type Database = {
           },
         ]
       }
+      combo_ebooks: {
+        Row: {
+          combo_id: string
+          created_at: string
+          display_order: number | null
+          ebook_id: string
+          id: string
+        }
+        Insert: {
+          combo_id: string
+          created_at?: string
+          display_order?: number | null
+          ebook_id: string
+          id?: string
+        }
+        Update: {
+          combo_id?: string
+          created_at?: string
+          display_order?: number | null
+          ebook_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "combo_ebooks_combo_id_fkey"
+            columns: ["combo_id"]
+            isOneToOne: false
+            referencedRelation: "combos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "combo_ebooks_ebook_id_fkey"
+            columns: ["ebook_id"]
+            isOneToOne: false
+            referencedRelation: "ebooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       combos: {
         Row: {
           cover_image_url: string | null
@@ -164,6 +203,7 @@ export type Database = {
           is_available_for_sale: boolean
           is_free: boolean
           name: string
+          price: number | null
           slug: string
           updated_at: string
           woocommerce_product_id: string | null
@@ -180,6 +220,7 @@ export type Database = {
           is_available_for_sale?: boolean
           is_free?: boolean
           name: string
+          price?: number | null
           slug: string
           updated_at?: string
           woocommerce_product_id?: string | null
@@ -196,6 +237,7 @@ export type Database = {
           is_available_for_sale?: boolean
           is_free?: boolean
           name?: string
+          price?: number | null
           slug?: string
           updated_at?: string
           woocommerce_product_id?: string | null
@@ -525,6 +567,48 @@ export type Database = {
           phone?: string | null
           summary?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      ebooks: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          file_url: string | null
+          id: string
+          is_active: boolean
+          name: string
+          price: number | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          file_url?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          price?: number | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          file_url?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number | null
+          slug?: string
+          updated_at?: string
         }
         Relationships: []
       }
