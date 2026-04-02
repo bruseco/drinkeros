@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useCourse, useCreateCourse, useUpdateCourse, useCoursePackages, useSaveCoursePackages } from '@/hooks/useCourses';
 import { usePackages } from '@/hooks/usePackages';
+import { useRecipes } from '@/hooks/useRecipes';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, Loader2, Upload, X, GraduationCap, Search } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ArrowLeft, Loader2, Upload, X, GraduationCap, Search, ChevronDown, ChevronRight, Plus, Pencil, Play } from 'lucide-react';
 
 const CourseForm: React.FC = () => {
   const { id } = useParams();
@@ -21,6 +23,7 @@ const CourseForm: React.FC = () => {
   const { data: course, isLoading: isLoadingCourse } = useCourse(id || '');
   const { data: existingCoursePackages = [] } = useCoursePackages(id || '');
   const { data: allPackages = [] } = usePackages();
+  const { data: allLessons = [] } = useRecipes();
   const createCourse = useCreateCourse();
   const updateCourse = useUpdateCourse();
   const saveCoursePackages = useSaveCoursePackages();
@@ -42,6 +45,8 @@ const CourseForm: React.FC = () => {
 
   const [selectedPackageIds, setSelectedPackageIds] = useState<string[]>([]);
   const [moduleSearch, setModuleSearch] = useState('');
+  const [showModuleSelector, setShowModuleSelector] = useState(false);
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (course) {
@@ -101,9 +106,31 @@ const CourseForm: React.FC = () => {
   const togglePackage = (packageId: string) => {
     setSelectedPackageIds((prev) =>
       prev.includes(packageId)
-        ? prev.filter((id) => id !== packageId)
+        ? prev.filter((pid) => pid !== packageId)
         : [...prev, packageId]
     );
+  };
+
+  const toggleModuleExpand = (moduleId: string) => {
+    setExpandedModules(prev => {
+      const next = new Set(prev);
+      if (next.has(moduleId)) {
+        next.delete(moduleId);
+      } else {
+        next.add(moduleId);
+      }
+      return next;
+    });
+  };
+
+  const getLessonsForModule = (moduleId: string) => {
+    return (allLessons as any[]).filter((lesson: any) =>
+      lesson.recipe_packages?.some((rp: any) => rp.package_id === moduleId)
+    ).sort((a: any, b: any) => {
+      const aOrder = a.recipe_packages?.find((rp: any) => rp.package_id === moduleId)?.display_order ?? 999;
+      const bOrder = b.recipe_packages?.find((rp: any) => rp.package_id === moduleId)?.display_order ?? 999;
+      return aOrder - bOrder;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -133,7 +160,6 @@ const CourseForm: React.FC = () => {
       courseId = result.id;
     }
 
-    // Save course-package associations
     await saveCoursePackages.mutateAsync({ courseId, packageIds: selectedPackageIds });
 
     navigate('/admin/cursos');
@@ -146,6 +172,15 @@ const CourseForm: React.FC = () => {
       </div>
     );
   }
+
+  const selectedModules = selectedPackageIds
+    .map(pid => allPackages.find(p => p.id === pid))
+    .filter(Boolean);
+
+  const unselectedPackages = allPackages
+    .filter(pkg => !selectedPackageIds.includes(pkg.id))
+    .filter(pkg => pkg.name.toLowerCase().includes(moduleSearch.toLowerCase()))
+    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
 
   return (
     <div className="space-y-6">
@@ -271,46 +306,105 @@ const CourseForm: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Module Selection */}
+            {/* Modules & Lessons Section */}
             <Card>
               <CardHeader>
-                <CardTitle>Módulos do Curso</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Módulos e Aulas</CardTitle>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowModuleSelector(!showModuleSelector)}
+                    >
+                      <Plus className="mr-1 h-3 w-3" />
+                      Vincular Módulo
+                    </Button>
+                    {isEditing && (
+                      <Button
+                        type="button"
+                        variant="default"
+                        size="sm"
+                        onClick={() => navigate('/admin/modulos/novo')}
+                      >
+                        <Plus className="mr-1 h-3 w-3" />
+                        Novo Módulo
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
-                {allPackages.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Nenhum módulo disponível</p>
-                ) : (
-                  <div className="space-y-3">
-                    <p className="text-sm text-muted-foreground">
-                      Selecione os módulos que fazem parte deste curso ({selectedPackageIds.length} selecionados)
-                    </p>
+              <CardContent className="space-y-3">
+                {/* Module Selector (toggle) */}
+                {showModuleSelector && (
+                  <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        placeholder="Buscar módulo..."
+                        placeholder="Buscar módulo para vincular..."
                         value={moduleSearch}
                         onChange={(e) => setModuleSearch(e.target.value)}
                         className="pl-9"
                       />
                     </div>
-                    <div className="space-y-2 max-h-80 overflow-y-auto">
-                      {allPackages
-                        .filter(pkg => pkg.name.toLowerCase().includes(moduleSearch.toLowerCase()))
-                        .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
-                        .map((pkg) => (
-                        <label
-                          key={pkg.id}
-                          className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/50 transition-colors"
-                        >
-                          <Checkbox
-                            checked={selectedPackageIds.includes(pkg.id)}
-                            onCheckedChange={() => togglePackage(pkg.id)}
-                          />
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            {pkg.cover_image_url ? (
+                    <div className="max-h-48 overflow-y-auto space-y-1">
+                      {unselectedPackages.length === 0 ? (
+                        <p className="text-sm text-muted-foreground py-2 text-center">
+                          Nenhum módulo disponível
+                        </p>
+                      ) : (
+                        unselectedPackages.map((pkg) => (
+                          <label
+                            key={pkg.id}
+                            className="flex items-center gap-3 rounded-md border bg-background p-2 cursor-pointer hover:bg-muted/50 transition-colors"
+                          >
+                            <Checkbox
+                              checked={false}
+                              onCheckedChange={() => {
+                                togglePackage(pkg.id);
+                              }}
+                            />
+                            <span className="text-sm">{pkg.name}</span>
+                            {!pkg.is_active && (
+                              <Badge variant="secondary" className="text-xs ml-auto">Inativo</Badge>
+                            )}
+                          </label>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Selected Modules with Expandable Lessons */}
+                {selectedModules.length === 0 ? (
+                  <div className="rounded-lg border border-dashed p-8 text-center">
+                    <GraduationCap className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground">Nenhum módulo vinculado a este curso</p>
+                    <p className="text-xs text-muted-foreground mt-1">Clique em "Vincular Módulo" para adicionar</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {selectedModules.map((mod, idx) => {
+                      if (!mod) return null;
+                      const isExpanded = expandedModules.has(mod.id);
+                      const lessons = getLessonsForModule(mod.id);
+
+                      return (
+                        <div key={mod.id} className="rounded-lg border">
+                          <div
+                            className="flex items-center gap-3 p-3 cursor-pointer hover:bg-muted/30 transition-colors"
+                            onClick={() => toggleModuleExpand(mod.id)}
+                          >
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            )}
+                            {mod.cover_image_url ? (
                               <img
-                                src={pkg.cover_image_url}
-                                alt={pkg.name}
+                                src={mod.cover_image_url}
+                                alt={mod.name}
                                 className="h-8 w-12 rounded object-cover flex-shrink-0"
                               />
                             ) : (
@@ -318,33 +412,101 @@ const CourseForm: React.FC = () => {
                                 <GraduationCap className="h-3 w-3 text-muted-foreground" />
                               </div>
                             )}
-                            <span className="text-sm font-medium truncate">{pkg.name}</span>
-                          </div>
-                          {!pkg.is_active && (
-                            <Badge variant="secondary" className="text-xs">Inativo</Badge>
-                          )}
-                        </label>
-                      ))}
-                    </div>
-                    {selectedPackageIds.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 pt-2 border-t">
-                        {selectedPackageIds.map((pid) => {
-                          const pkg = allPackages.find((p) => p.id === pid);
-                          return pkg ? (
-                            <Badge key={pid} variant="secondary" className="gap-1">
-                              {pkg.name}
-                              <button
+                            <div className="flex-1 min-w-0">
+                              <span className="text-sm font-medium truncate block">{mod.name}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {lessons.length} {lessons.length === 1 ? 'aula' : 'aulas'}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                              <Button
                                 type="button"
-                                onClick={() => togglePackage(pid)}
-                                className="ml-1 hover:text-destructive"
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={() => navigate(`/admin/modulos/${mod.id}`)}
+                                title="Editar módulo"
+                              >
+                                <Pencil className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-destructive hover:text-destructive"
+                                onClick={() => togglePackage(mod.id)}
+                                title="Desvincular módulo"
                               >
                                 <X className="h-3 w-3" />
-                              </button>
-                            </Badge>
-                          ) : null;
-                        })}
-                      </div>
-                    )}
+                              </Button>
+                            </div>
+                          </div>
+
+                          {isExpanded && (
+                            <div className="border-t bg-muted/10 px-3 pb-3">
+                              {lessons.length === 0 ? (
+                                <p className="text-xs text-muted-foreground py-3 text-center">
+                                  Nenhuma aula neste módulo
+                                </p>
+                              ) : (
+                                <div className="space-y-1 pt-2">
+                                  {lessons.map((lesson: any, lessonIdx: number) => (
+                                    <div
+                                      key={lesson.id}
+                                      className="flex items-center gap-3 rounded-md p-2 hover:bg-muted/50 transition-colors group"
+                                    >
+                                      <span className="text-xs text-muted-foreground w-5 text-right flex-shrink-0">
+                                        {lessonIdx + 1}.
+                                      </span>
+                                      {lesson.image_url ? (
+                                        <img
+                                          src={lesson.image_url}
+                                          alt={lesson.name}
+                                          className="h-6 w-10 rounded object-cover flex-shrink-0"
+                                        />
+                                      ) : (
+                                        <div className="h-6 w-10 rounded bg-muted flex items-center justify-center flex-shrink-0">
+                                          <Play className="h-2.5 w-2.5 text-muted-foreground" />
+                                        </div>
+                                      )}
+                                      <span className="text-sm truncate flex-1">{lesson.name}</span>
+                                      <Badge
+                                        variant={lesson.status === 'published' ? 'default' : 'secondary'}
+                                        className="text-xs flex-shrink-0"
+                                      >
+                                        {lesson.status === 'published' ? 'Publicada' : 'Rascunho'}
+                                      </Badge>
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                                        onClick={() => navigate(`/admin/aulas/${lesson.id}`)}
+                                        title="Editar aula"
+                                      >
+                                        <Pencil className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              <div className="pt-2 border-t mt-2">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full text-xs"
+                                  onClick={() => navigate('/admin/aulas/nova')}
+                                >
+                                  <Plus className="mr-1 h-3 w-3" />
+                                  Nova Aula
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>
