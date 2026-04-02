@@ -46,9 +46,8 @@ export const AdminSidebar: React.FC = () => {
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border p-4">
-        <Link to="/admin" className="flex items-center gap-2">
-          <Scale className="h-8 w-8 text-primary" />
-          <span className="text-xl font-bold text-sidebar-foreground">Admin</span>
+        <Link to="/admin" className="flex items-center justify-center">
+          <img src={drinkrosLogo} alt="Drinkeros" className="h-8" />
         </Link>
       </SidebarHeader>
 
