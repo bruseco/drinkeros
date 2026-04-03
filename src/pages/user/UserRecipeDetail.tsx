@@ -1,0 +1,189 @@
+import React from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { useExclusivePost } from '@/hooks/useExclusivePosts';
+import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, ArrowLeft, Heart, Share2, Wine } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+const UserRecipeDetail: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const { data: recipe, isLoading } = useExclusivePost(id || '');
+  const { data: favorites = [] } = useFavorites();
+  const toggleFavorite = useToggleFavorite();
+  const { toast } = useToast();
+
+  // We use exclusive_posts id, but favorites table uses recipe_id referencing recipes table
+  // For exclusive_posts favorites we'll handle separately  
+  const isFavorite = false; // TODO: implement exclusive post favorites if needed
+
+  const getYouTubeEmbedUrl = (url: string) => {
+    try {
+      let videoId = '';
+      if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1]?.split(/[?&#]/)[0] || '';
+      } else if (url.includes('youtube.com')) {
+        const urlObj = new URL(url);
+        videoId = urlObj.searchParams.get('v') || '';
+        if (!videoId && url.includes('/shorts/')) {
+          videoId = url.split('/shorts/')[1]?.split(/[?&#]/)[0] || '';
+        }
+      }
+      if (videoId) {
+        return `https://www.youtube-nocookie.com/embed/${videoId}?modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`;
+      }
+    } catch {}
+    return null;
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: recipe?.title,
+          url: window.location.href,
+        });
+      } catch {}
+    } else {
+      await navigator.clipboard.writeText(window.location.href);
+      toast({ title: 'Link copiado!' });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!recipe) {
+    return (
+      <div className="container mx-auto px-4 py-6 text-center">
+        <p className="text-muted-foreground">Receita não encontrada</p>
+        <Link to="/app/receitas">
+          <Button variant="link" className="mt-2">Voltar</Button>
+        </Link>
+      </div>
+    );
+  }
+
+  const embedUrl = recipe.youtube_url ? getYouTubeEmbedUrl(recipe.youtube_url) : null;
+
+  // Parse instructions into numbered steps
+  const instructionLines = recipe.instructions
+    ? recipe.instructions.split('\n').filter(l => l.trim())
+    : [];
+
+  return (
+    <div className="pb-24">
+      {/* YouTube Video */}
+      {embedUrl ? (
+        <div className="w-full aspect-video bg-black">
+          <iframe
+            src={embedUrl}
+            title={recipe.title}
+            className="w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      ) : recipe.cover_image_url ? (
+        <div className="w-full aspect-video bg-black">
+          <img src={recipe.cover_image_url} alt={recipe.title} className="w-full h-full object-cover" />
+        </div>
+      ) : null}
+
+      {/* Action buttons row */}
+      <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center gap-2">
+          <Link to="/app/receitas">
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Button variant="ghost" size="icon" className="rounded-full" onClick={handleShare}>
+            <Share2 className="h-5 w-5" />
+          </Button>
+        </div>
+        {/* Heart icon placeholder - can be wired to a favorites system for exclusive posts */}
+        <Button variant="ghost" size="icon" className="rounded-full">
+          <Heart className="h-5 w-5" />
+        </Button>
+      </div>
+
+      {/* Content */}
+      <div className="container mx-auto px-4 space-y-6">
+        {/* Title */}
+        <h1 className="text-3xl font-bold text-foreground">{recipe.title}</h1>
+
+        {/* Ingredients */}
+        {recipe.ingredients && recipe.ingredients.length > 0 && (
+          <div>
+            <h2 className="text-lg font-bold text-foreground mb-2">Ingredientes:</h2>
+            <div className="flex flex-wrap gap-1.5">
+              {recipe.ingredients.map((ing, i) => (
+                <Badge
+                  key={i}
+                  variant="outline"
+                  className="text-sm text-amber-500 border-amber-500/40"
+                >
+                  {ing}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Modo de preparo */}
+        {instructionLines.length > 0 && (
+          <div>
+            <h2 className="text-lg font-bold text-foreground mb-3">Modo de preparo:</h2>
+            <ol className="space-y-2">
+              {instructionLines.map((line, i) => {
+                // Remove leading number/dot if present
+                const cleaned = line.replace(/^\d+[\.\)]\s*/, '').trim();
+                return (
+                  <li key={i} className="flex gap-3 items-start text-muted-foreground">
+                    <span className="font-semibold text-foreground min-w-[28px]">{i + 1}.</span>
+                    <span>{cleaned}</span>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        )}
+
+        {/* Características */}
+        {recipe.characteristics && recipe.characteristics.length > 0 && (
+          <div>
+            <h2 className="text-lg font-bold text-foreground mb-2">Características:</h2>
+            <div className="flex flex-wrap gap-1.5">
+              {recipe.characteristics.map((c, i) => (
+                <Badge
+                  key={i}
+                  variant="outline"
+                  className="text-sm text-amber-500 border-amber-500/40"
+                >
+                  {c}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Description */}
+        {recipe.description && (
+          <div>
+            <h2 className="text-lg font-bold text-foreground mb-2">Descrição:</h2>
+            <p className="text-muted-foreground whitespace-pre-line">{recipe.description}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default UserRecipeDetail;

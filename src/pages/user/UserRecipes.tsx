@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useExclusivePosts } from '@/hooks/useExclusivePosts';
 import { Loader2, Wine } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -33,34 +34,38 @@ const UserRecipes: React.FC = () => {
       ) : (
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((recipe) => (
-            <Card key={recipe.id} className="overflow-hidden">
-              {recipe.cover_image_url ? (
-                <img
-                  src={recipe.cover_image_url}
-                  alt={recipe.title}
-                  className="w-full h-44 object-cover"
-                />
-              ) : (
-                <div className="w-full h-44 bg-muted flex items-center justify-center">
-                  <Wine className="h-10 w-10 text-muted-foreground" />
-                </div>
-              )}
-              <div className="p-4 space-y-2">
-                <h3 className="font-semibold text-foreground line-clamp-2">{recipe.title}</h3>
-                {recipe.characteristics && recipe.characteristics.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {recipe.characteristics.slice(0, 3).map((c, i) => (
-                      <Badge key={i} variant="outline" className="text-xs">{c}</Badge>
-                    ))}
+            <Link key={recipe.id} to={`/app/receita/${recipe.id}`}>
+              <Card className="group overflow-hidden rounded-2xl border-0 bg-card shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                {recipe.cover_image_url ? (
+                  <div className="aspect-video overflow-hidden">
+                    <img
+                      src={recipe.cover_image_url}
+                      alt={recipe.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  </div>
+                ) : (
+                  <div className="aspect-video bg-muted flex items-center justify-center">
+                    <Wine className="h-10 w-10 text-muted-foreground" />
                   </div>
                 )}
-                {recipe.ingredients && recipe.ingredients.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    {recipe.ingredients.length} ingredientes
-                  </p>
-                )}
-              </div>
-            </Card>
+                <div className="p-4 space-y-2">
+                  <h3 className="font-semibold text-foreground line-clamp-2">{recipe.title}</h3>
+                  {recipe.characteristics && recipe.characteristics.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {recipe.characteristics.slice(0, 4).map((c, i) => (
+                        <Badge key={i} variant="outline" className="text-xs">{c}</Badge>
+                      ))}
+                    </div>
+                  )}
+                  {recipe.ingredients && recipe.ingredients.length > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {recipe.ingredients.length} ingredientes
+                    </p>
+                  )}
+                </div>
+              </Card>
+            </Link>
           ))}
         </div>
       )}
