@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useExclusivePosts, useDeleteExclusivePost, useBulkCreateExclusivePosts } from '@/hooks/useExclusivePosts';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
@@ -20,17 +21,72 @@ import { parseRecipeCsv } from '@/lib/recipeCsv';
 
 const AdminExclusiveContent: React.FC = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const lastSelectedIndex = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: posts = [], isLoading } = useExclusivePosts();
   const deletePost = useDeleteExclusivePost();
   const bulkCreate = useBulkCreateExclusivePosts();
   const { toast } = useToast();
 
+  const handleSelect = useCallback((id: string, index: number, shiftKey: boolean) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+
+      if (shiftKey && lastSelectedIndex.current !== null) {
+        const start = Math.min(lastSelectedIndex.current, index);
+        const end = Math.max(lastSelectedIndex.current, index);
+        for (let i = start; i <= end; i++) {
+          next.add(posts[i].id);
+        }
+      } else {
+        if (next.has(id)) {
+          next.delete(id);
+        } else {
+          next.add(id);
+        }
+      }
+
+      return next;
+    });
+    lastSelectedIndex.current = index;
+  }, [posts]);
+
+  const toggleAll = useCallback(() => {
+    setSelected(prev => {
+      if (prev.size === posts.length) return new Set();
+      return new Set(posts.map(p => p.id));
+    });
+  }, [posts]);
+
   const handleDelete = async () => {
     if (deleteId) {
       await deletePost.mutateAsync(deleteId);
       setDeleteId(null);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const ids = Array.from(selected);
+      const { error } = await supabase
+        .from('exclusive_posts')
+        .delete()
+        .in('id', ids);
+      if (error) throw error;
+      toast({ title: `${ids.length} receitas excluídas com sucesso!` });
+      setSelected(new Set());
+      // Invalidate via window reload of query
+      window.location.reload();
+    } catch (err: any) {
+      toast({ title: 'Erro ao excluir receitas', description: err.message, variant: 'destructive' });
+    } finally {
+      setIsDeleting(false);
+      setBulkDeleteOpen(false);
     }
   };
 
@@ -66,7 +122,7 @@ const AdminExclusiveContent: React.FC = () => {
         return;
       }
 
-      const posts = await Promise.all(parsedRows.map(async (row, index) => {
+      const newPosts = await Promise.all(parsedRows.map(async (row, index) => {
         const coverUrl = row.coverUrl
           ? await downloadAndUploadImage(row.coverUrl, index)
           : null;
@@ -84,8 +140,8 @@ const AdminExclusiveContent: React.FC = () => {
         };
       }));
 
-      if (posts.length > 0) {
-        await bulkCreate.mutateAsync(posts);
+      if (newPosts.length > 0) {
+        await bulkCreate.mutateAsync(newPosts);
       } else {
         toast({ title: 'Nenhuma receita válida encontrada no CSV', variant: 'destructive' });
       }
@@ -125,6 +181,24 @@ const AdminExclusiveContent: React.FC = () => {
         </div>
       </div>
 
+      {selected.size > 0 && (
+        <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3">
+          <span className="text-sm font-medium">{selected.size} selecionada(s)</span>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => setBulkDeleteOpen(true)}
+            disabled={isDeleting}
+          >
+            {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+            Excluir selecionadas
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>
+            Limpar seleção
+          </Button>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="flex justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -145,6 +219,12 @@ const AdminExclusiveContent: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-12">
+                  <Checkbox
+                    checked={selected.size === posts.length && posts.length > 0}
+                    onCheckedChange={toggleAll}
+                  />
+                </TableHead>
                 <TableHead>Receita</TableHead>
                 <TableHead>Ingredientes</TableHead>
                 <TableHead>Status</TableHead>
@@ -152,8 +232,21 @@ const AdminExclusiveContent: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {posts.map((post) => (
-                <TableRow key={post.id}>
+              {posts.map((post, index) => (
+                <TableRow
+                  key={post.id}
+                  data-state={selected.has(post.id) ? 'selected' : undefined}
+                >
+                  <TableCell>
+                    <Checkbox
+                      checked={selected.has(post.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelect(post.id, index, e.shiftKey);
+                      }}
+                      onCheckedChange={() => {}}
+                    />
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       {post.cover_image_url ? (
@@ -207,6 +300,7 @@ const AdminExclusiveContent: React.FC = () => {
         </div>
       )}
 
+      {/* Single delete dialog */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -216,6 +310,23 @@ const AdminExclusiveContent: React.FC = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">Excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk delete dialog */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir {selected.size} receitas?</AlertDialogTitle>
+            <AlertDialogDescription>Esta ação não pode ser desfeita. Todas as receitas selecionadas serão removidas permanentemente.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleBulkDelete} className="bg-destructive text-destructive-foreground" disabled={isDeleting}>
+              {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Excluir {selected.size} receitas
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
