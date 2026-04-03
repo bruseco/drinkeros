@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Home, Heart, LogOut, GraduationCap, Trophy, BookOpen, UserCircle } from 'lucide-react';
+import { Wine, Heart, LogOut, BookOpen, UserCircle, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
