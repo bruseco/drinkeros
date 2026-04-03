@@ -109,9 +109,20 @@ const UserRecipeDetail: React.FC = () => {
             <Share2 className="h-5 w-5" />
           </Button>
         </div>
-        {/* Heart icon placeholder - can be wired to a favorites system for exclusive posts */}
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <Heart className="h-5 w-5" />
+        {/* Heart / favorite button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full"
+          onClick={() => {
+            if (isFavorite) {
+              toggleFavorite.mutate({ recipeId: id!, isFavorite: true });
+            } else {
+              setShowFavoriteDialog(true);
+            }
+          }}
+        >
+          <Heart className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
         </Button>
       </div>
 
