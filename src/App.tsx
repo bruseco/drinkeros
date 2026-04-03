@@ -63,6 +63,7 @@ import UserCourseModules from "./pages/user/UserCourseModules";
 import UserCombos from "./pages/user/UserCombos";
 import UserComboDetail from "./pages/user/UserComboDetail";
 import UserProfile from "./pages/user/UserProfile";
+import UserRecipeDetail from "./pages/user/UserRecipeDetail";
 
 const queryClient = new QueryClient();
 
@@ -145,6 +146,7 @@ const App = () => (
               <Route index element={<UserHome />} />
               <Route path="aula/:id" element={<UserLesson />} />
               <Route path="receitas" element={<UserRecipes />} />
+              <Route path="receita/:id" element={<UserRecipeDetail />} />
               <Route path="ebooks" element={<UserEbooks />} />
               <Route path="favoritos" element={<UserFavorites />} />
               <Route path="modulos" element={<UserModules />} />
