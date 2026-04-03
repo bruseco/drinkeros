@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ChefHat, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { useToast } from '@/hooks/use-toast';
 
 const AdminLogin: React.FC = () => {
