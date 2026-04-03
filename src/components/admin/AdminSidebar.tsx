@@ -13,7 +13,7 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
 } from '@/components/ui/sidebar';
-import { GraduationCap, Play, Users, UserCog, LogOut, Home, Mail, Bell, BookOpen, Rocket, MessageCircle, Webhook, Layers, ClipboardCheck, Clock, Target, BarChart3, FileText, ShoppingBag, Crown } from 'lucide-react';
+import { GraduationCap, Play, Users, UserCog, LogOut, Home, Mail, Bell, BookOpen, Rocket, MessageCircle, Webhook, Layers, ClipboardCheck, Clock, Target, BarChart3, FileText, ShoppingBag, Wine } from 'lucide-react';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { Button } from '@/components/ui/button';
 
@@ -21,7 +21,7 @@ const menuItems = [
   { title: 'Dashboard', icon: Home, href: '/admin' },
   { title: 'Cursos', icon: BookOpen, href: '/admin/cursos' },
   { title: 'E-books', icon: FileText, href: '/admin/ebooks' },
-  { title: 'Conteúdo Exclusivo', icon: Crown, href: '/admin/conteudo-exclusivo' },
+  { title: 'Receitas', icon: Wine, href: '/admin/receitas' },
   { title: 'Produtos', icon: ShoppingBag, href: '/admin/produtos' },
 ];
 

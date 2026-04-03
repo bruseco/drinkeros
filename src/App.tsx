@@ -118,9 +118,9 @@ const App = () => (
               <Route path="ebooks" element={<AdminEbooks />} />
               <Route path="ebooks/novo" element={<EbookForm />} />
               <Route path="ebooks/:id" element={<EbookForm />} />
-              <Route path="conteudo-exclusivo" element={<AdminExclusiveContent />} />
-              <Route path="conteudo-exclusivo/novo" element={<ExclusivePostForm />} />
-              <Route path="conteudo-exclusivo/:id" element={<ExclusivePostForm />} />
+              <Route path="receitas" element={<AdminExclusiveContent />} />
+              <Route path="receitas/nova" element={<ExclusivePostForm />} />
+              <Route path="receitas/:id" element={<ExclusivePostForm />} />
               <Route path="team" element={<AdminTeam />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="configuracoes" element={<AdminEmailSettings />} />

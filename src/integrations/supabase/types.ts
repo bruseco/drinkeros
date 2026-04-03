@@ -674,33 +674,42 @@ export type Database = {
       }
       exclusive_posts: {
         Row: {
+          characteristics: string[] | null
           cover_image_url: string | null
           created_at: string
           description: string | null
           display_order: number | null
           id: string
+          ingredients: string[] | null
+          instructions: string | null
           is_published: boolean
           title: string
           updated_at: string
           youtube_url: string | null
         }
         Insert: {
+          characteristics?: string[] | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
           display_order?: number | null
           id?: string
+          ingredients?: string[] | null
+          instructions?: string | null
           is_published?: boolean
           title: string
           updated_at?: string
           youtube_url?: string | null
         }
         Update: {
+          characteristics?: string[] | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
           display_order?: number | null
           id?: string
+          ingredients?: string[] | null
+          instructions?: string | null
           is_published?: boolean
           title?: string
           updated_at?: string
