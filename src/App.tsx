@@ -146,6 +146,7 @@ const App = () => (
               <Route index element={<UserHome />} />
               <Route path="aula/:id" element={<UserLesson />} />
               <Route path="receitas" element={<UserRecipes />} />
+              <Route path="receita/:id" element={<UserRecipeDetail />} />
               <Route path="ebooks" element={<UserEbooks />} />
               <Route path="favoritos" element={<UserFavorites />} />
               <Route path="modulos" element={<UserModules />} />
