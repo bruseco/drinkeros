@@ -75,14 +75,6 @@ export const UserNavbar: React.FC = () => {
                       isActive && "scale-110"
                     )} 
                   />
-                  {item.count > 0 && (
-                    <Badge 
-                      variant="destructive" 
-                      className="absolute -top-2 -right-3 h-4 min-w-4 px-1 text-[10px] font-bold"
-                    >
-                      {item.count > 99 ? '99+' : item.count}
-                    </Badge>
-                  )}
                 </div>
                 <span className={cn(
                   "text-xs font-medium transition-all duration-300",
