@@ -24,6 +24,7 @@ const ExclusivePostForm: React.FC = () => {
   const [formData, setFormData] = useState({
     title: '',
     cover_image_url: '',
+    youtube_url: '',
     ingredients: [] as string[],
     instructions: '',
     characteristics: [] as string[],
