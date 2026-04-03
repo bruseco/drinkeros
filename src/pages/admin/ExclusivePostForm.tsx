@@ -24,6 +24,7 @@ const ExclusivePostForm: React.FC = () => {
   const [formData, setFormData] = useState({
     title: '',
     cover_image_url: '',
+    youtube_url: '',
     ingredients: [] as string[],
     instructions: '',
     characteristics: [] as string[],
@@ -39,6 +40,7 @@ const ExclusivePostForm: React.FC = () => {
       setFormData({
         title: post.title,
         cover_image_url: post.cover_image_url || '',
+        youtube_url: post.youtube_url || '',
         ingredients: post.ingredients || [],
         instructions: post.instructions || '',
         characteristics: post.characteristics || [],
@@ -81,7 +83,7 @@ const ExclusivePostForm: React.FC = () => {
     const data = {
       title: formData.title,
       description: null,
-      youtube_url: null,
+      youtube_url: formData.youtube_url || null,
       cover_image_url: formData.cover_image_url || null,
       is_published: formData.is_published,
       display_order: formData.display_order,
@@ -132,6 +134,11 @@ const ExclusivePostForm: React.FC = () => {
                 <div className="space-y-2">
                   <Label htmlFor="title">Título *</Label>
                   <Input id="title" value={formData.title} onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))} placeholder="Ex: Caipirinha Clássica" required />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="youtube_url">Link do YouTube</Label>
+                  <Input id="youtube_url" type="url" value={formData.youtube_url} onChange={(e) => setFormData((prev) => ({ ...prev, youtube_url: e.target.value }))} placeholder="https://www.youtube.com/watch?v=..." />
                 </div>
 
                 <div className="space-y-2">
