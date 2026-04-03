@@ -40,6 +40,7 @@ const ExclusivePostForm: React.FC = () => {
       setFormData({
         title: post.title,
         cover_image_url: post.cover_image_url || '',
+        youtube_url: post.youtube_url || '',
         ingredients: post.ingredients || [],
         instructions: post.instructions || '',
         characteristics: post.characteristics || [],
