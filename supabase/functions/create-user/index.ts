@@ -72,13 +72,20 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Create user
     const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
-      email,
+      email: normalizedEmail,
       password: tempPassword,
       email_confirm: true,
       user_metadata: { full_name: fullName },
     });
 
     if (createError) {
+      // Handle duplicate in auth.users (profile check may miss orphaned auth entries)
+      if (createError.message?.includes("already been registered")) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Usuário já existe com este e-mail" }),
+          { status: 409, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
       throw new Error(`Failed to create user: ${createError.message}`);
     }
 
