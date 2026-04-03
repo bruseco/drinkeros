@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, Search, Loader2, XCircle } from 'lucide-react';
-import criminalLogo from '@/assets/criminal-logo.png';
+import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
 function formatCpfInput(value: string): string {
   const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -89,7 +89,7 @@ const ValidateCertificate: React.FC = () => {
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-6">
         <div className="flex flex-col items-center gap-3">
-          <img src={criminalLogo} alt="Criminal Lab" className="h-12" />
+          <img src={drinkrosLogo} alt="Drinkeros" className="h-12" />
           <h1 className="text-2xl font-bold text-foreground">Validar Certificado</h1>
           <p className="text-sm text-muted-foreground text-center">
             Informe o CPF do aluno e o código de verificação para confirmar a autenticidade do certificado.

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { 
-  Scale, 
   Download, 
   Share, 
   Plus, 
@@ -84,8 +84,8 @@ const Install: React.FC = () => {
 
         {/* App Preview */}
         <div className="text-center mb-8">
-          <div className="inline-flex h-24 w-24 items-center justify-center rounded-3xl bg-primary shadow-xl shadow-primary/30 mb-4">
-            <Scale className="h-12 w-12 text-primary-foreground" />
+          <div className="mb-4">
+            <img src={drinkrosLogo} alt="Drinkeros" className="h-20 mx-auto" />
           </div>
           <h2 className="text-2xl font-bold mb-2">Criminal Lab</h2>
           <p className="text-muted-foreground">Sua plataforma de estudos de Direito Criminal</p>

@@ -19,7 +19,7 @@ import { Loader2, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { InstallBanner } from '@/components/user/InstallBanner';
 import { WhatsAppFloatingButton } from '@/components/user/WhatsAppFloatingButton';
-import criminalLogo from '@/assets/criminal-logo.avif';
+import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
 const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -208,7 +208,7 @@ const Login: React.FC = () => {
       <Card className="w-full max-w-md border-0 shadow-xl">
         <CardHeader className="text-center">
           <Link to="/" className="mx-auto mb-4">
-            <img src={criminalLogo} alt="Criminal Lab" className="h-20 w-20 rounded-full object-contain" />
+            <img src={drinkrosLogo} alt="Drinkeros" className="h-14 object-contain" />
           </Link>
           <CardTitle className="text-2xl">Bem-vindo!</CardTitle>
           <CardDescription>Acesse a Criminal Lab</CardDescription>

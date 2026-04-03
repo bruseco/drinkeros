@@ -235,7 +235,7 @@ async function generatePDF(cert: Certificate, studentName: string, certificateTy
 
   // Logo
   try {
-    const { default: logoUrl } = await import('@/assets/criminal-logo-white.png');
+    const { default: logoUrl } = await import('@/assets/logotipo-drinkeros.png');
     const logoBase64 = await loadImageAsBase64(logoUrl);
     doc.addImage(logoBase64, 'PNG', centerX - 20, 18, 40, 16);
   } catch (e) {

@@ -14,7 +14,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Home, Heart, LogOut, GraduationCap, Trophy, BookOpen, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import criminalLogo from '@/assets/criminal-logo.avif';
+import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
 export const UserNavbar: React.FC = () => {
   const location = useLocation();
@@ -49,7 +49,7 @@ export const UserNavbar: React.FC = () => {
       <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/app" className="flex items-center gap-2.5">
-            <img src={criminalLogo} alt="Criminal Lab" className="h-10 object-contain" />
+            <img src={drinkrosLogo} alt="Drinkeros" className="h-10 object-contain" />
           </Link>
 
           <DropdownMenu>

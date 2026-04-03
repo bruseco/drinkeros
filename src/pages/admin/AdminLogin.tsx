@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ChefHat, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { useToast } from '@/hooks/use-toast';
 
 const AdminLogin: React.FC = () => {
@@ -39,8 +40,8 @@ const AdminLogin: React.FC = () => {
     <div className="flex min-h-screen items-center justify-center bg-muted p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary">
-            <ChefHat className="h-8 w-8 text-primary-foreground" />
+          <div className="mx-auto mb-4">
+            <img src={drinkrosLogo} alt="Drinkeros" className="h-14 mx-auto" />
           </div>
           <CardTitle className="text-2xl">Painel Administrativo</CardTitle>
           <CardDescription>Faça login para gerenciar suas receitas</CardDescription>
