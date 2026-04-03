@@ -1,7 +1,5 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useFavorites } from '@/hooks/useUserData';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Wine, Heart, BookOpen, UserCircle, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
