@@ -28,7 +28,6 @@ export const UserLayout: React.FC = () => {
       <main className="flex-1 pb-20">
         <Outlet />
       </main>
-      <WhatsAppFloatingButton />
     </div>
   );
 };
