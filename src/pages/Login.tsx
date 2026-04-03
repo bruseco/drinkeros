@@ -208,7 +208,7 @@ const Login: React.FC = () => {
       <Card className="w-full max-w-md border-0 shadow-xl">
         <CardHeader className="text-center">
           <Link to="/" className="mx-auto mb-4">
-            <img src={criminalLogo} alt="Criminal Lab" className="h-20 w-20 rounded-full object-contain" />
+            <img src={drinkrosLogo} alt="Drinkeros" className="h-14 object-contain" />
           </Link>
           <CardTitle className="text-2xl">Bem-vindo!</CardTitle>
           <CardDescription>Acesse a Criminal Lab</CardDescription>
