@@ -16,6 +16,7 @@ import {
 import { Plus, MoreHorizontal, Pencil, Trash2, Loader2, Wine, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { parseRecipeCsv } from '@/lib/recipeCsv';
 
 const AdminExclusiveContent: React.FC = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -58,63 +59,30 @@ const AdminExclusiveContent: React.FC = () => {
 
     try {
       const text = await file.text();
-      const lines = text.split('\n').filter(l => l.trim());
-      if (lines.length < 2) {
+      const parsedRows = parseRecipeCsv(text);
+
+      if (parsedRows.length === 0) {
         toast({ title: 'CSV vazio ou inválido', variant: 'destructive' });
         return;
       }
 
-      const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
-      const rows = lines.slice(1).map(line => {
-        const values: string[] = [];
-        let current = '';
-        let inQuotes = false;
-        for (const char of line) {
-          if (char === '"') { inQuotes = !inQuotes; }
-          else if (char === ',' && !inQuotes) { values.push(current.trim()); current = ''; }
-          else { current += char; }
-        }
-        values.push(current.trim());
-        return values;
-      });
+      const posts = await Promise.all(parsedRows.map(async (row, index) => {
+        const coverUrl = row.coverUrl
+          ? await downloadAndUploadImage(row.coverUrl, index)
+          : null;
 
-      const getIdx = (name: string) => headers.findIndex(h => h.includes(name));
-      const titleIdx = getIdx('titulo') !== -1 ? getIdx('titulo') : getIdx('title');
-      const coverIdx = getIdx('capa') !== -1 ? getIdx('capa') : getIdx('cover') !== -1 ? getIdx('cover') : getIdx('image');
-      const ingredientsIdx = getIdx('ingrediente') !== -1 ? getIdx('ingrediente') : getIdx('ingredient');
-      const instructionsIdx = getIdx('preparo') !== -1 ? getIdx('preparo') : getIdx('instruction') !== -1 ? getIdx('instruction') : getIdx('modo');
-      const characteristicsIdx = getIdx('caracteristic') !== -1 ? getIdx('caracteristic') : getIdx('characteristic');
-
-      if (titleIdx === -1) {
-        toast({ title: 'Coluna "titulo" não encontrada no CSV', variant: 'destructive' });
-        return;
-      }
-
-      const posts = [];
-      for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        const title = row[titleIdx];
-        if (!title) continue;
-
-        let coverUrl: string | null = null;
-        if (coverIdx !== -1 && row[coverIdx]) {
-          coverUrl = await downloadAndUploadImage(row[coverIdx], i);
-        }
-
-        const parseTags = (val: string | undefined) => val ? val.split(';').map(t => t.trim()).filter(Boolean) : [];
-
-        posts.push({
-          title,
+        return {
+          title: row.title,
           description: null,
-          youtube_url: null,
+          youtube_url: row.youtubeUrl,
           cover_image_url: coverUrl,
           is_published: true,
-          display_order: i,
-          ingredients: ingredientsIdx !== -1 ? parseTags(row[ingredientsIdx]) : [],
-          instructions: instructionsIdx !== -1 ? (row[instructionsIdx] || null) : null,
-          characteristics: characteristicsIdx !== -1 ? parseTags(row[characteristicsIdx]) : [],
-        });
-      }
+          display_order: index,
+          ingredients: row.ingredients,
+          instructions: row.instructions,
+          characteristics: row.characteristics,
+        };
+      }));
 
       if (posts.length > 0) {
         await bulkCreate.mutateAsync(posts);
