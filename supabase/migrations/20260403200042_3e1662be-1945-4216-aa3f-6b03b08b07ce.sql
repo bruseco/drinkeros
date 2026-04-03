@@ -1,0 +1,1 @@
+ALTER TABLE public.collection_recipes DROP CONSTRAINT IF EXISTS collection_recipes_recipe_id_fkey;
