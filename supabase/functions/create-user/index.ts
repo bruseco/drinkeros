@@ -51,11 +51,13 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Email is required");
     }
 
-    // Check if user already exists (by profile email, avoids listUsers limit)
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Check if user already exists in profiles
     const { data: existingProfile } = await supabase
       .from("profiles")
       .select("user_id")
-      .eq("email", email.toLowerCase().trim())
+      .eq("email", normalizedEmail)
       .maybeSingle();
 
     if (existingProfile) {
@@ -70,13 +72,20 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Create user
     const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
-      email,
+      email: normalizedEmail,
       password: tempPassword,
       email_confirm: true,
       user_metadata: { full_name: fullName },
     });
 
     if (createError) {
+      // Handle duplicate in auth.users (profile check may miss orphaned auth entries)
+      if (createError.message?.includes("already been registered")) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Usuário já existe com este e-mail" }),
+          { status: 409, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
       throw new Error(`Failed to create user: ${createError.message}`);
     }
 
