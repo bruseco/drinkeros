@@ -1,23 +1,17 @@
 import React from 'react';
 import defaultCover from '@/assets/default-cover.png';
 import { Link } from 'react-router-dom';
-import { useUserCourses } from '@/hooks/useCourses';
-import { usePackages } from '@/hooks/usePackages';
-import { useCourses } from '@/hooks/useCourses';
+import { useUserCourses, useCourses } from '@/hooks/useCourses';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Loader2, BookOpen, ChevronRight, Play, Sparkles } from 'lucide-react';
-import { UpsellCardCompact } from '@/components/user/UpsellCardCompact';
+import { Loader2, BookOpen, ChevronRight, Play, Lock } from 'lucide-react';
 
 const UserCourses: React.FC = () => {
-  const { data: userCourses = [], isLoading } = useUserCourses();
-  const { data: allCourses = [] } = useCourses(true);
+  const { data: userCourses = [], isLoading: userLoading } = useUserCourses();
+  const { data: allCourses = [], isLoading: coursesLoading } = useCourses(true);
 
-  const userCourseIds = userCourses.map((uc) => uc.course_id);
-  const upsellCourses = allCourses.filter(
-    (c) => !userCourseIds.includes(c.id) && !c.is_free && c.is_available_for_sale && !!c.hotmart_product_code
-  );
+  const isLoading = userLoading || coursesLoading;
+  const userCourseIds = new Set(userCourses.map((uc) => uc.course_id));
 
   if (isLoading) {
     return (
@@ -28,57 +22,28 @@ const UserCourses: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-10">
-      {/* Header */}
+    <div className="container mx-auto px-4 py-6 space-y-6">
       <section>
-        <h1 className="text-2xl font-bold text-foreground mb-2">Meus Cursos</h1>
-        <p className="text-muted-foreground">Seus cursos e formações</p>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Cursos</h1>
+        <p className="text-muted-foreground">Explore todos os cursos disponíveis</p>
       </section>
 
-      {/* User's courses */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold flex items-center gap-2">
-          <span className="text-primary">📚</span>
-          Cursos Adquiridos ({userCourses.length})
-        </h2>
-        {userCourses.length === 0 ? (
-          <div className="rounded-3xl border-2 border-dashed border-muted p-8 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-              <BookOpen className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <p className="text-muted-foreground font-medium">Você ainda não tem cursos</p>
+      {allCourses.length === 0 ? (
+        <div className="rounded-3xl border-2 border-dashed border-muted p-8 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+            <BookOpen className="h-8 w-8 text-muted-foreground" />
           </div>
-        ) : (
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-            {userCourses.map((uc) => (
-              <CourseCard key={uc.id} course={uc} />
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Upsell courses */}
-      {upsellCourses.length > 0 && (
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-accent" />
-            Descubra Mais
-          </h2>
-          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-            {upsellCourses.map((course) => (
-              <UpsellCardCompact
-                key={course.id}
-                pkg={{
-                  id: course.id,
-                  name: course.name,
-                  description: course.description,
-                  cover_image_url: course.cover_image_url,
-                  hotmart_product_code: course.hotmart_product_code,
-                }}
-              />
-            ))}
-          </div>
-        </section>
+          <p className="text-muted-foreground font-medium">Nenhum curso disponível</p>
+        </div>
+      ) : (
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+          {allCourses.map((course) => {
+            const owned = userCourseIds.has(course.id) || course.is_free;
+            return (
+              <CourseCard key={course.id} course={course} owned={owned} />
+            );
+          })}
+        </div>
       )}
     </div>
   );
@@ -86,57 +51,68 @@ const UserCourses: React.FC = () => {
 
 interface CourseCardProps {
   course: {
-    course_id: string;
-    course: {
-      id: string;
-      name: string;
-      description: string | null;
-      cover_image_url: string | null;
-    };
-    modules: Array<{
-      id: string;
-      name: string;
-    }>;
+    id: string;
+    name: string;
+    description: string | null;
+    cover_image_url: string | null;
+    hotmart_product_code: string | null;
   };
+  owned: boolean;
 }
 
-const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
+const CourseCard: React.FC<CourseCardProps> = ({ course, owned }) => {
+  const linkTo = owned
+    ? `/app/curso/${course.id}`
+    : `/app/curso/${course.id}?locked=true`;
+
   return (
-    <Link to={`/app/curso/${course.course_id}`}>
+    <Link to={linkTo}>
       <Card className="group overflow-hidden rounded-2xl border-0 bg-card shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1 aspect-video relative">
         <img
-          src={course.course.cover_image_url || defaultCover}
-          alt={course.course.name}
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          src={course.cover_image_url || defaultCover}
+          alt={course.name}
+          className={`absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110 ${
+            !owned ? 'opacity-50 grayscale-[30%]' : ''
+          }`}
         />
 
-        {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-        {/* Play button */}
+        {/* Play / Lock icon on hover */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/90 shadow-lg">
-            <Play className="h-6 w-6 text-primary-foreground ml-0.5" />
+          <div className={`flex h-14 w-14 items-center justify-center rounded-full shadow-lg ${
+            owned ? 'bg-primary/90' : 'bg-black/50 border border-white/20'
+          }`}>
+            {owned ? (
+              <Play className="h-6 w-6 text-primary-foreground ml-0.5" />
+            ) : (
+              <Lock className="h-6 w-6 text-white/80" />
+            )}
           </div>
         </div>
 
         {/* Content */}
         <div className="relative h-full flex flex-col justify-between p-4">
           <div className="flex justify-between items-start">
-            <Badge className="bg-primary/80 text-primary-foreground border-0 shadow-md text-xs">
-              {course.modules.length} {course.modules.length === 1 ? 'módulo' : 'módulos'}
-            </Badge>
-            <Badge className="bg-success text-success-foreground border-0 shadow-md text-xs">
-              ✓ Adquirido
-            </Badge>
+            <div />
+            {owned ? (
+              <Badge className="bg-success text-success-foreground border-0 shadow-md text-xs">
+                ✓ Adquirido
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="bg-muted/60 text-muted-foreground border-0 shadow-md text-xs gap-1">
+                <Lock className="h-3 w-3" />
+                Bloqueado
+              </Badge>
+            )}
           </div>
 
           <div className="space-y-1">
             <h3 className="font-semibold text-white text-base line-clamp-2 drop-shadow-md">
-              {course.course.name}
+              {course.name}
             </h3>
             <div className="flex items-center gap-1 text-white/80 text-xs">
-              <span>Ver módulos</span>
+              <span>{owned ? 'Ver módulos' : 'Saiba mais'}</span>
               <ChevronRight className="h-3 w-3" />
             </div>
           </div>
