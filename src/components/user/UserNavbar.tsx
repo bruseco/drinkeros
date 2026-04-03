@@ -1,7 +1,5 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useFavorites } from '@/hooks/useUserData';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Wine, Heart, BookOpen, UserCircle, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -11,16 +9,13 @@ import { useAuth } from '@/contexts/AuthContext';
 export const UserNavbar: React.FC = () => {
   const location = useLocation();
   const { user, profile } = useAuth();
-  const { data: favorites = [] } = useFavorites();
-
-  const favoritesCount = favorites.length;
 
   const navItems = [
-    { icon: Wine, label: 'Receitas', href: '/app/receitas', count: 0 },
-    { icon: BookOpen, label: 'Cursos', href: '/app/cursos', count: 0 },
-    { icon: FileText, label: 'Ebooks', href: '/app/ebooks', count: 0 },
-    { icon: Heart, label: 'Favoritos', href: '/app/favoritos', count: favoritesCount },
-    { icon: UserCircle, label: 'Perfil', href: '/app/perfil', count: 0 },
+    { icon: Wine, label: 'Receitas', href: '/app/receitas' },
+    { icon: BookOpen, label: 'Cursos', href: '/app/cursos' },
+    { icon: FileText, label: 'Ebooks', href: '/app/ebooks' },
+    { icon: Heart, label: 'Favoritos', href: '/app/favoritos' },
+    { icon: UserCircle, label: 'Perfil', href: '/app/perfil' },
   ];
 
   const getInitials = () => {
@@ -80,14 +75,6 @@ export const UserNavbar: React.FC = () => {
                       isActive && "scale-110"
                     )} 
                   />
-                  {item.count > 0 && (
-                    <Badge 
-                      variant="destructive" 
-                      className="absolute -top-2 -right-3 h-4 min-w-4 px-1 text-[10px] font-bold"
-                    >
-                      {item.count > 99 ? '99+' : item.count}
-                    </Badge>
-                  )}
                 </div>
                 <span className={cn(
                   "text-xs font-medium transition-all duration-300",
