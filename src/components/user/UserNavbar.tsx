@@ -1,14 +1,18 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Wine, Heart, BookOpen, UserCircle, FileText } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Wine, Heart, BookOpen, UserCircle, FileText, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
-import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+
+// Main tab routes (no back button needed)
+const mainRoutes = ['/app', '/app/receitas', '/app/cursos', '/app/ebooks', '/app/favoritos', '/app/perfil'];
 
 export const UserNavbar: React.FC = () => {
   const location = useLocation();
-  const { user, profile } = useAuth();
+  const navigate = useNavigate();
+
+  const isInternalPage = !mainRoutes.includes(location.pathname);
 
   const navItems = [
     { icon: Wine, label: 'Receitas', href: '/app/receitas' },
@@ -18,36 +22,23 @@ export const UserNavbar: React.FC = () => {
     { icon: UserCircle, label: 'Perfil', href: '/app/perfil' },
   ];
 
-  const getInitials = () => {
-    if (profile?.full_name) {
-      return profile.full_name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
-    }
-    return user?.email?.[0].toUpperCase() || 'U';
-  };
-
   return (
     <>
       {/* Top Navbar */}
       <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link to="/app" className="flex items-center gap-2.5">
+        <div className="container mx-auto flex h-16 items-center justify-center px-4 relative">
+          {isInternalPage && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(-1)}
+              className="absolute left-4 h-9 w-9 rounded-full"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          )}
+          <Link to="/app">
             <img src={drinkrosLogo} alt="Drinkeros" className="h-10 object-contain" />
-          </Link>
-
-          <Link to="/app/perfil">
-            <div className="relative h-11 w-11 rounded-full p-0">
-              <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-primary to-accent opacity-75" />
-              <Avatar className="relative h-10 w-10 border-2 border-card">
-                <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
-                  {getInitials()}
-                </AvatarFallback>
-              </Avatar>
-            </div>
           </Link>
         </div>
       </header>
