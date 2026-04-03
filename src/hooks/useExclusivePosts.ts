@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -37,6 +37,53 @@ export const useExclusivePosts = (publishedOnly = false) => {
       if (error) throw error;
       return data as ExclusivePost[];
     },
+  });
+};
+
+interface PaginatedPostsParams {
+  search?: string;
+  pageSize?: number;
+  publishedOnly?: boolean;
+}
+
+export const useExclusivePostsPaginated = ({
+  search = '',
+  pageSize = 30,
+  publishedOnly = false,
+}: PaginatedPostsParams = {}) => {
+  return useInfiniteQuery({
+    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly }],
+    queryFn: async ({ pageParam = 0 }) => {
+      const from = pageParam * pageSize;
+      const to = from + pageSize - 1;
+
+      let query = supabase
+        .from('exclusive_posts')
+        .select('*', { count: 'exact' })
+        .order('display_order', { ascending: true })
+        .range(from, to);
+
+      if (publishedOnly) {
+        query = query.eq('is_published', true);
+      }
+
+      if (search.trim()) {
+        const term = `%${search.trim()}%`;
+        query = query.or(`title.ilike.${term},ingredients::text.ilike.${term},characteristics::text.ilike.${term}`);
+      }
+
+      const { data, count, error } = await query;
+      if (error) throw error;
+
+      return {
+        posts: data as ExclusivePost[],
+        total: count ?? 0,
+        hasMore: from + pageSize < (count ?? 0),
+      };
+    },
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.hasMore ? allPages.length : undefined,
+    initialPageParam: 0,
   });
 };
 

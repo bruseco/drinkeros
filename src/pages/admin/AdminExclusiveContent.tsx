@@ -1,8 +1,9 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { useExclusivePosts, useDeleteExclusivePost, useBulkCreateExclusivePosts } from '@/hooks/useExclusivePosts';
+import { useExclusivePostsPaginated, useDeleteExclusivePost, useBulkCreateExclusivePosts } from '@/hooks/useExclusivePosts';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
@@ -14,10 +15,11 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, MoreHorizontal, Pencil, Trash2, Loader2, Wine, Upload } from 'lucide-react';
+import { Plus, MoreHorizontal, Pencil, Trash2, Loader2, Wine, Upload, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { parseRecipeCsv } from '@/lib/recipeCsv';
+import { useDebounce } from '@/hooks/useDebounce';
 
 const AdminExclusiveContent: React.FC = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -25,9 +27,22 @@ const AdminExclusiveContent: React.FC = () => {
   const [isImporting, setIsImporting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
   const lastSelectedIndex = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { data: posts = [], isLoading } = useExclusivePosts();
+
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useExclusivePostsPaginated({ search: debouncedSearch, pageSize: 30 });
+
+  const posts = data?.pages.flatMap(p => p.posts) ?? [];
+  const total = data?.pages[0]?.total ?? 0;
+
   const deletePost = useDeleteExclusivePost();
   const bulkCreate = useBulkCreateExclusivePosts();
   const { toast } = useToast();
@@ -35,7 +50,6 @@ const AdminExclusiveContent: React.FC = () => {
   const handleSelect = useCallback((id: string, index: number, shiftKey: boolean) => {
     setSelected(prev => {
       const next = new Set(prev);
-
       if (shiftKey && lastSelectedIndex.current !== null) {
         const start = Math.min(lastSelectedIndex.current, index);
         const end = Math.max(lastSelectedIndex.current, index);
@@ -43,13 +57,9 @@ const AdminExclusiveContent: React.FC = () => {
           next.add(posts[i].id);
         }
       } else {
-        if (next.has(id)) {
-          next.delete(id);
-        } else {
-          next.add(id);
-        }
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
       }
-
       return next;
     });
     lastSelectedIndex.current = index;
@@ -73,14 +83,10 @@ const AdminExclusiveContent: React.FC = () => {
     setIsDeleting(true);
     try {
       const ids = Array.from(selected);
-      const { error } = await supabase
-        .from('exclusive_posts')
-        .delete()
-        .in('id', ids);
+      const { error } = await supabase.from('exclusive_posts').delete().in('id', ids);
       if (error) throw error;
       toast({ title: `${ids.length} receitas excluídas com sucesso!` });
       setSelected(new Set());
-      // Invalidate via window reload of query
       window.location.reload();
     } catch (err: any) {
       toast({ title: 'Erro ao excluir receitas', description: err.message, variant: 'destructive' });
@@ -112,21 +118,15 @@ const AdminExclusiveContent: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     setIsImporting(true);
-
     try {
       const text = await file.text();
       const parsedRows = parseRecipeCsv(text);
-
       if (parsedRows.length === 0) {
         toast({ title: 'CSV vazio ou inválido', variant: 'destructive' });
         return;
       }
-
       const newPosts = await Promise.all(parsedRows.map(async (row, index) => {
-        const coverUrl = row.coverUrl
-          ? await downloadAndUploadImage(row.coverUrl, index)
-          : null;
-
+        const coverUrl = row.coverUrl ? await downloadAndUploadImage(row.coverUrl, index) : null;
         return {
           title: row.title,
           description: null,
@@ -139,7 +139,6 @@ const AdminExclusiveContent: React.FC = () => {
           characteristics: row.characteristics,
         };
       }));
-
       if (newPosts.length > 0) {
         await bulkCreate.mutateAsync(newPosts);
       } else {
@@ -161,13 +160,7 @@ const AdminExclusiveContent: React.FC = () => {
           <p className="text-muted-foreground">Gerencie as receitas de drinks</p>
         </div>
         <div className="flex gap-2">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".csv"
-            onChange={handleCSVImport}
-            className="hidden"
-          />
+          <input ref={fileInputRef} type="file" accept=".csv" onChange={handleCSVImport} className="hidden" />
           <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isImporting}>
             {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
             Importar CSV
@@ -181,21 +174,25 @@ const AdminExclusiveContent: React.FC = () => {
         </div>
       </div>
 
+      {/* Search */}
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Buscar por nome, ingrediente ou característica..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+
       {selected.size > 0 && (
         <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3">
           <span className="text-sm font-medium">{selected.size} selecionada(s)</span>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setBulkDeleteOpen(true)}
-            disabled={isDeleting}
-          >
+          <Button variant="destructive" size="sm" onClick={() => setBulkDeleteOpen(true)} disabled={isDeleting}>
             {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
             Excluir selecionadas
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>
-            Limpar seleção
-          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>Limpar seleção</Button>
         </div>
       )}
 
@@ -206,101 +203,102 @@ const AdminExclusiveContent: React.FC = () => {
       ) : posts.length === 0 ? (
         <div className="rounded-lg border border-dashed p-12 text-center">
           <Wine className="mx-auto h-10 w-10 text-muted-foreground mb-3" />
-          <p className="text-muted-foreground">Nenhuma receita cadastrada</p>
-          <Button asChild className="mt-4">
-            <Link to="/admin/receitas/nova">
-              <Plus className="mr-2 h-4 w-4" />
-              Criar primeira receita
-            </Link>
-          </Button>
+          <p className="text-muted-foreground">
+            {debouncedSearch ? 'Nenhuma receita encontrada' : 'Nenhuma receita cadastrada'}
+          </p>
+          {!debouncedSearch && (
+            <Button asChild className="mt-4">
+              <Link to="/admin/receitas/nova"><Plus className="mr-2 h-4 w-4" />Criar primeira receita</Link>
+            </Button>
+          )}
         </div>
       ) : (
-        <div className="rounded-lg border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={selected.size === posts.length && posts.length > 0}
-                    onCheckedChange={toggleAll}
-                  />
-                </TableHead>
-                <TableHead>Receita</TableHead>
-                <TableHead>Ingredientes</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-12"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {posts.map((post, index) => (
-                <TableRow
-                  key={post.id}
-                  data-state={selected.has(post.id) ? 'selected' : undefined}
-                >
-                  <TableCell>
-                    <Checkbox
-                      checked={selected.has(post.id)}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSelect(post.id, index, e.shiftKey);
-                      }}
-                      onCheckedChange={() => {}}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      {post.cover_image_url ? (
-                        <img src={post.cover_image_url} alt={post.title} className="h-10 w-16 rounded-md object-cover" />
-                      ) : (
-                        <div className="h-10 w-16 rounded-md bg-muted flex items-center justify-center">
-                          <Wine className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                      )}
-                      <div>
-                        <span className="font-medium">{post.title}</span>
-                        {post.characteristics?.length > 0 && (
-                          <div className="flex gap-1 mt-0.5 flex-wrap">
-                            {post.characteristics.slice(0, 3).map((c, i) => (
-                              <Badge key={i} variant="outline" className="text-xs">{c}</Badge>
-                            ))}
+        <>
+          <div className="text-sm text-muted-foreground">{total} receita(s) encontrada(s)</div>
+          <div className="rounded-lg border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">
+                    <Checkbox checked={selected.size === posts.length && posts.length > 0} onCheckedChange={toggleAll} />
+                  </TableHead>
+                  <TableHead>Receita</TableHead>
+                  <TableHead>Ingredientes</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-12"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {posts.map((post, index) => (
+                  <TableRow key={post.id} data-state={selected.has(post.id) ? 'selected' : undefined}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selected.has(post.id)}
+                        onClick={(e) => { e.stopPropagation(); handleSelect(post.id, index, e.shiftKey); }}
+                        onCheckedChange={() => {}}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        {post.cover_image_url ? (
+                          <img src={post.cover_image_url} alt={post.title} className="h-10 w-16 rounded-md object-cover" />
+                        ) : (
+                          <div className="h-10 w-16 rounded-md bg-muted flex items-center justify-center">
+                            <Wine className="h-4 w-4 text-muted-foreground" />
                           </div>
                         )}
+                        <div>
+                          <span className="font-medium">{post.title}</span>
+                          {post.characteristics?.length > 0 && (
+                            <div className="flex gap-1 mt-0.5 flex-wrap">
+                              {post.characteristics.slice(0, 3).map((c, i) => (
+                                <Badge key={i} variant="outline" className="text-xs">{c}</Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-sm text-muted-foreground">
-                      {post.ingredients?.length || 0} ingredientes
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={post.is_published ? 'default' : 'secondary'}>
-                      {post.is_published ? 'Publicada' : 'Rascunho'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link to={`/admin/receitas/${post.id}`}><Pencil className="mr-2 h-4 w-4" />Editar</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive" onClick={() => setDeleteId(post.id)}>
-                          <Trash2 className="mr-2 h-4 w-4" />Excluir
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-muted-foreground">{post.ingredients?.length || 0} ingredientes</span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={post.is_published ? 'default' : 'secondary'}>
+                        {post.is_published ? 'Publicada' : 'Rascunho'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link to={`/admin/receitas/${post.id}`}><Pencil className="mr-2 h-4 w-4" />Editar</Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive" onClick={() => setDeleteId(post.id)}>
+                            <Trash2 className="mr-2 h-4 w-4" />Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {hasNextPage && (
+            <div className="flex justify-center pt-2">
+              <Button variant="outline" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+                {isFetchingNextPage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Carregar mais
+              </Button>
+            </div>
+          )}
+        </>
       )}
 
-      {/* Single delete dialog */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -314,7 +312,6 @@ const AdminExclusiveContent: React.FC = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Bulk delete dialog */}
       <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
