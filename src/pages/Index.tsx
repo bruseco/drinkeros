@@ -10,14 +10,9 @@ const Index: React.FC = () => {
       {/* Hero Section */}
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="max-w-2xl mx-auto text-center">
-          {/* Logo / Icon */}
+          {/* Logo */}
           <div className="mb-8 inline-flex items-center justify-center">
-            <div className="relative">
-              <div className="absolute -inset-4 bg-gradient-to-r from-primary to-accent rounded-full blur-2xl opacity-30 animate-pulse" />
-              <div className="relative bg-gradient-to-br from-primary to-accent p-6 rounded-full shadow-2xl">
-                <Scale className="h-16 w-16 text-primary-foreground" />
-              </div>
-            </div>
+            <img src={drinkrosLogo} alt="Drinkeros" className="h-20" />
           </div>
 
           {/* Title */}

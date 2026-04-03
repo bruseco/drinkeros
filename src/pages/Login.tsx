@@ -19,7 +19,7 @@ import { Loader2, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { InstallBanner } from '@/components/user/InstallBanner';
 import { WhatsAppFloatingButton } from '@/components/user/WhatsAppFloatingButton';
-import criminalLogo from '@/assets/criminal-logo.avif';
+import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
 const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
