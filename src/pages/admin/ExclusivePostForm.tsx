@@ -83,7 +83,7 @@ const ExclusivePostForm: React.FC = () => {
     const data = {
       title: formData.title,
       description: null,
-      youtube_url: null,
+      youtube_url: formData.youtube_url || null,
       cover_image_url: formData.cover_image_url || null,
       is_published: formData.is_published,
       display_order: formData.display_order,
