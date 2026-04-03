@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle } from 'lucide-react';
 
 const UserProfile: React.FC = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, signOut } = useAuth();
 
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
