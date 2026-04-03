@@ -168,9 +168,9 @@ const UserFavorites: React.FC = () => {
                       key={fav.id}
                       lesson={{
                         id: fav.recipe_id,
-                        name: (fav.recipe as any).name,
-                        image_url: (fav.recipe as any).image_url,
-                        servings: (fav.recipe as any).servings,
+                        name: fav.recipe.name,
+                        image_url: fav.recipe.image_url,
+                        servings: fav.recipe.servings,
                       }}
                       compact
                     />
