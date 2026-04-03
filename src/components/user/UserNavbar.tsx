@@ -25,10 +25,11 @@ export const UserNavbar: React.FC = () => {
   const favoritesCount = favorites.length;
 
   const navItems = [
-    { icon: Home, label: 'Início', href: '/app', count: 0 },
+    { icon: Wine, label: 'Receitas', href: '/app/receitas', count: 0 },
     { icon: BookOpen, label: 'Cursos', href: '/app/cursos', count: 0 },
-    { icon: Heart, label: 'Rever', href: '/app/favoritos', count: favoritesCount },
-    { icon: Trophy, label: 'Concluídos', href: '/app/concluidos', count: 0 },
+    { icon: FileText, label: 'Ebooks', href: '/app/ebooks', count: 0 },
+    { icon: Heart, label: 'Favoritos', href: '/app/favoritos', count: favoritesCount },
+    { icon: UserCircle, label: 'Perfil', href: '/app/perfil', count: 0 },
   ];
 
   const getInitials = () => {
