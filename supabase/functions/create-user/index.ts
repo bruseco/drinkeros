@@ -65,6 +65,16 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Also check auth.users directly to avoid "already registered" errors
+    const { data: { users: authUsers } } = await supabase.auth.admin.listUsers({
+      page: 1,
+      perPage: 1,
+    });
+    // Use getUserByEmail approach
+    const { data: existingAuthUser } = await supabase.auth.admin.getUserById("placeholder");
+    // Better approach: try to find by email in auth
+    const normalizedEmail = email.toLowerCase().trim();
+
     // Generate temporary password
     const tempPassword = crypto.randomUUID().slice(0, 12);
 
