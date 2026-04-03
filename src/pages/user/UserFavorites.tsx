@@ -133,7 +133,7 @@ const UserFavorites: React.FC = () => {
                           lesson={{
                             id: cr.recipe_id,
                             name: (cr.recipe as any).name,
-                            image_url: (cr.recipe as any).image_url,
+                            image_url: (cr.recipe as any).image_url || (cr.recipe as any).cover_image_url,
                             servings: (cr.recipe as any).servings,
                           }}
                           compact
@@ -168,9 +168,9 @@ const UserFavorites: React.FC = () => {
                       key={fav.id}
                       lesson={{
                         id: fav.recipe_id,
-                        name: (fav.recipe as any).name,
-                        image_url: (fav.recipe as any).image_url,
-                        servings: (fav.recipe as any).servings,
+                        name: fav.recipe.name,
+                        image_url: fav.recipe.image_url,
+                        servings: fav.recipe.servings,
                       }}
                       compact
                     />
