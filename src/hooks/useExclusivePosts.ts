@@ -10,6 +10,9 @@ export interface ExclusivePost {
   cover_image_url: string | null;
   is_published: boolean;
   display_order: number | null;
+  ingredients: string[];
+  instructions: string | null;
+  characteristics: string[];
   created_at: string;
   updated_at: string;
 }
@@ -62,7 +65,7 @@ export const useCreateExclusivePost = () => {
     mutationFn: async (post: ExclusivePostInsert) => {
       const { data, error } = await supabase
         .from('exclusive_posts')
-        .insert(post)
+        .insert(post as any)
         .select()
         .single();
 
@@ -71,10 +74,10 @@ export const useCreateExclusivePost = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['exclusive-posts'] });
-      toast({ title: 'Post criado com sucesso!' });
+      toast({ title: 'Receita criada com sucesso!' });
     },
     onError: (error) => {
-      toast({ title: 'Erro ao criar post', description: error.message, variant: 'destructive' });
+      toast({ title: 'Erro ao criar receita', description: error.message, variant: 'destructive' });
     },
   });
 };
@@ -87,7 +90,7 @@ export const useUpdateExclusivePost = () => {
     mutationFn: async ({ id, data }: { id: string; data: ExclusivePostUpdate }) => {
       const { data: updated, error } = await supabase
         .from('exclusive_posts')
-        .update(data)
+        .update(data as any)
         .eq('id', id)
         .select()
         .single();
@@ -97,10 +100,10 @@ export const useUpdateExclusivePost = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['exclusive-posts'] });
-      toast({ title: 'Post atualizado com sucesso!' });
+      toast({ title: 'Receita atualizada com sucesso!' });
     },
     onError: (error) => {
-      toast({ title: 'Erro ao atualizar post', description: error.message, variant: 'destructive' });
+      toast({ title: 'Erro ao atualizar receita', description: error.message, variant: 'destructive' });
     },
   });
 };
@@ -116,10 +119,34 @@ export const useDeleteExclusivePost = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['exclusive-posts'] });
-      toast({ title: 'Post excluído com sucesso!' });
+      toast({ title: 'Receita excluída com sucesso!' });
     },
     onError: (error) => {
-      toast({ title: 'Erro ao excluir post', description: error.message, variant: 'destructive' });
+      toast({ title: 'Erro ao excluir receita', description: error.message, variant: 'destructive' });
+    },
+  });
+};
+
+export const useBulkCreateExclusivePosts = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (posts: ExclusivePostInsert[]) => {
+      const { data, error } = await supabase
+        .from('exclusive_posts')
+        .insert(posts as any[])
+        .select();
+
+      if (error) throw error;
+      return data as ExclusivePost[];
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['exclusive-posts'] });
+      toast({ title: `${data.length} receitas importadas com sucesso!` });
+    },
+    onError: (error) => {
+      toast({ title: 'Erro ao importar receitas', description: error.message, variant: 'destructive' });
     },
   });
 };
