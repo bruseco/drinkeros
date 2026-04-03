@@ -51,11 +51,13 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Email is required");
     }
 
-    // Check if user already exists (by profile email, avoids listUsers limit)
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Check if user already exists in profiles
     const { data: existingProfile } = await supabase
       .from("profiles")
       .select("user_id")
-      .eq("email", email.toLowerCase().trim())
+      .eq("email", normalizedEmail)
       .maybeSingle();
 
     if (existingProfile) {
@@ -64,16 +66,6 @@ const handler = async (req: Request): Promise<Response> => {
         { status: 409, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
-
-    // Also check auth.users directly to avoid "already registered" errors
-    const { data: { users: authUsers } } = await supabase.auth.admin.listUsers({
-      page: 1,
-      perPage: 1,
-    });
-    // Use getUserByEmail approach
-    const { data: existingAuthUser } = await supabase.auth.admin.getUserById("placeholder");
-    // Better approach: try to find by email in auth
-    const normalizedEmail = email.toLowerCase().trim();
 
     // Generate temporary password
     const tempPassword = crypto.randomUUID().slice(0, 12);
