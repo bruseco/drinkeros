@@ -63,6 +63,7 @@ import UserCourseModules from "./pages/user/UserCourseModules";
 import UserCombos from "./pages/user/UserCombos";
 import UserComboDetail from "./pages/user/UserComboDetail";
 import UserProfile from "./pages/user/UserProfile";
+import UserRecipeDetail from "./pages/user/UserRecipeDetail";
 
 const queryClient = new QueryClient();
 
