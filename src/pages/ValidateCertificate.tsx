@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, Search, Loader2, XCircle } from 'lucide-react';
-import criminalLogo from '@/assets/criminal-logo.png';
+import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
 function formatCpfInput(value: string): string {
   const digits = value.replace(/\D/g, '').slice(0, 11);
