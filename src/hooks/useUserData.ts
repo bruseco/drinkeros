@@ -284,16 +284,36 @@ export const useFavorites = () => {
 
       const { data, error } = await supabase
         .from('favorites')
-        .select(`
-          id,
-          recipe_id,
-          created_at,
-          recipe:recipes(*)
-        `)
+        .select('id, recipe_id, created_at')
         .eq('user_id', user.id);
 
       if (error) throw error;
-      return data;
+
+      if (!data || data.length === 0) return [];
+
+      const recipeIds = data.map((f) => f.recipe_id);
+
+      // Try to fetch from recipes (aulas) and exclusive_posts (receitas de drink)
+      const [recipesRes, postsRes] = await Promise.all([
+        supabase.from('recipes').select('id, name, image_url, servings').in('id', recipeIds),
+        supabase.from('exclusive_posts').select('id, title, cover_image_url').in('id', recipeIds),
+      ]);
+
+      const recipesMap = new Map((recipesRes.data || []).map((r) => [r.id, r]));
+      const postsMap = new Map((postsRes.data || []).map((p) => [p.id, p]));
+
+      return data.map((fav) => {
+        const recipe = recipesMap.get(fav.recipe_id);
+        const post = postsMap.get(fav.recipe_id);
+        return {
+          ...fav,
+          recipe: recipe
+            ? { id: recipe.id, name: recipe.name, image_url: recipe.image_url, servings: recipe.servings }
+            : post
+            ? { id: post.id, name: post.title, image_url: post.cover_image_url, servings: null }
+            : null,
+        };
+      });
     },
     enabled: !!user,
   });
