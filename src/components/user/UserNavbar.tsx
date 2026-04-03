@@ -14,7 +14,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Home, Heart, LogOut, GraduationCap, Trophy, BookOpen, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import criminalLogo from '@/assets/criminal-logo.avif';
+import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
 export const UserNavbar: React.FC = () => {
   const location = useLocation();
