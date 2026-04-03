@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useExclusivePost } from '@/hooks/useExclusivePosts';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, ArrowLeft, Heart, Share2, Wine } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import FavoriteDialog from '@/components/user/FavoriteDialog';
 
 const UserRecipeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -13,10 +14,10 @@ const UserRecipeDetail: React.FC = () => {
   const { data: favorites = [] } = useFavorites();
   const toggleFavorite = useToggleFavorite();
   const { toast } = useToast();
+  const [showFavoriteDialog, setShowFavoriteDialog] = useState(false);
 
-  // We use exclusive_posts id, but favorites table uses recipe_id referencing recipes table
-  // For exclusive_posts favorites we'll handle separately  
-  const isFavorite = false; // TODO: implement exclusive post favorites if needed
+  // Check if this recipe is already in favorites
+  const isFavorite = favorites.some((f) => f.recipe_id === id);
 
   const getYouTubeEmbedUrl = (url: string) => {
     try {
@@ -108,9 +109,20 @@ const UserRecipeDetail: React.FC = () => {
             <Share2 className="h-5 w-5" />
           </Button>
         </div>
-        {/* Heart icon placeholder - can be wired to a favorites system for exclusive posts */}
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <Heart className="h-5 w-5" />
+        {/* Heart / favorite button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full"
+          onClick={() => {
+            if (isFavorite) {
+              toggleFavorite.mutate({ recipeId: id!, isFavorite: true });
+            } else {
+              setShowFavoriteDialog(true);
+            }
+          }}
+        >
+          <Heart className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
         </Button>
       </div>
 
@@ -182,6 +194,15 @@ const UserRecipeDetail: React.FC = () => {
           </div>
         )}
       </div>
+      {/* Favorite Dialog */}
+      {id && (
+        <FavoriteDialog
+          open={showFavoriteDialog}
+          onOpenChange={setShowFavoriteDialog}
+          recipeId={id}
+          isFavorite={isFavorite}
+        />
+      )}
     </div>
   );
 };
