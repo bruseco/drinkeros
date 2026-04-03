@@ -10,8 +10,8 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export const UserNavbar: React.FC = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile } = useAuth();
+  const { data: favorites = [] } = useFavorites();
   const { data: favorites = [] } = useFavorites();
 
   const favoritesCount = favorites.length;
