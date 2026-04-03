@@ -194,6 +194,15 @@ const UserRecipeDetail: React.FC = () => {
           </div>
         )}
       </div>
+      {/* Favorite Dialog */}
+      {id && (
+        <FavoriteDialog
+          open={showFavoriteDialog}
+          onOpenChange={setShowFavoriteDialog}
+          recipeId={id}
+          isFavorite={isFavorite}
+        />
+      )}
     </div>
   );
 };
