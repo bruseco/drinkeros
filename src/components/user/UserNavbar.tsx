@@ -12,7 +12,6 @@ export const UserNavbar: React.FC = () => {
   const location = useLocation();
   const { user, profile } = useAuth();
   const { data: favorites = [] } = useFavorites();
-  const { data: favorites = [] } = useFavorites();
 
   const favoritesCount = favorites.length;
 
