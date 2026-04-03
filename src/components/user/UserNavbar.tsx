@@ -1,20 +1,12 @@
 import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { Link, useLocation } from 'react-router-dom';
 import { useFavorites } from '@/hooks/useUserData';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Wine, Heart, LogOut, BookOpen, UserCircle, FileText } from 'lucide-react';
+import { Wine, Heart, BookOpen, UserCircle, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const UserNavbar: React.FC = () => {
   const location = useLocation();

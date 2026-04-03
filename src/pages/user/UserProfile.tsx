@@ -281,6 +281,27 @@ const UserProfile: React.FC = () => {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Support & Logout */}
+      <div className="space-y-3">
+        <Button
+          variant="outline"
+          className="w-full justify-start"
+          onClick={() => window.open('https://wa.me/5511999999999', '_blank')}
+        >
+          <MessageCircle className="mr-2 h-4 w-4" />
+          Suporte via WhatsApp
+        </Button>
+
+        <Button
+          variant="destructive"
+          className="w-full justify-start"
+          onClick={signOut}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Sair da Conta
+        </Button>
+      </div>
     </div>
   );
 };
