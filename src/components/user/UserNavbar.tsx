@@ -1,34 +1,26 @@
 import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { Link, useLocation } from 'react-router-dom';
 import { useFavorites } from '@/hooks/useUserData';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Home, Heart, LogOut, GraduationCap, Trophy, BookOpen, UserCircle } from 'lucide-react';
+import { Wine, Heart, BookOpen, UserCircle, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const UserNavbar: React.FC = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile } = useAuth();
   const { data: favorites = [] } = useFavorites();
 
   const favoritesCount = favorites.length;
 
   const navItems = [
-    { icon: Home, label: 'Início', href: '/app', count: 0 },
+    { icon: Wine, label: 'Receitas', href: '/app/receitas', count: 0 },
     { icon: BookOpen, label: 'Cursos', href: '/app/cursos', count: 0 },
-    { icon: Heart, label: 'Rever', href: '/app/favoritos', count: favoritesCount },
-    { icon: Trophy, label: 'Concluídos', href: '/app/concluidos', count: 0 },
+    { icon: FileText, label: 'Ebooks', href: '/app/ebooks', count: 0 },
+    { icon: Heart, label: 'Favoritos', href: '/app/favoritos', count: favoritesCount },
+    { icon: UserCircle, label: 'Perfil', href: '/app/perfil', count: 0 },
   ];
 
   const getInitials = () => {
@@ -52,66 +44,16 @@ export const UserNavbar: React.FC = () => {
             <img src={drinkrosLogo} alt="Drinkeros" className="h-10 object-contain" />
           </Link>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-11 w-11 rounded-full p-0">
-                <div className="relative">
-                  <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-primary to-accent opacity-75" />
-                  <Avatar className="relative h-10 w-10 border-2 border-card">
-                    <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
-                      {getInitials()}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <div className="flex items-center gap-3 p-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
-                    {getInitials()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold">{profile?.full_name || 'Aluno'}</span>
-                  <span className="text-xs text-muted-foreground">{user?.email}</span>
-                </div>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/app/cursos')}>
-                <BookOpen className="mr-2 h-4 w-4" />
-                Meus Cursos
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/app/modulos')}>
-                <GraduationCap className="mr-2 h-4 w-4" />
-                Meus Módulos
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/app/favoritos')} className="flex justify-between">
-                <span className="flex items-center">
-                  <Heart className="mr-2 h-4 w-4" />
-                  Aulas para Rever
-                </span>
-                {favoritesCount > 0 && (
-                  <Badge variant="secondary" className="ml-2 h-5 min-w-5 px-1.5 text-xs">
-                    {favoritesCount}
-                  </Badge>
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/app/concluidos')}>
-                <Trophy className="mr-2 h-4 w-4" />
-                Concluídos
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/app/perfil')}>
-                <UserCircle className="mr-2 h-4 w-4" />
-                Meu Perfil
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive">
-                <LogOut className="mr-2 h-4 w-4" />
-                Sair
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Link to="/app/perfil">
+            <div className="relative h-11 w-11 rounded-full p-0">
+              <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-primary to-accent opacity-75" />
+              <Avatar className="relative h-10 w-10 border-2 border-card">
+                <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+                  {getInitials()}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+          </Link>
         </div>
       </header>
 

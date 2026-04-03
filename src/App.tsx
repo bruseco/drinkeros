@@ -53,6 +53,8 @@ import { UserLayout } from "./components/user/UserLayout";
 import UserHome from "./pages/user/UserHome";
 import UserLesson from "./pages/user/UserLesson";
 import UserFavorites from "./pages/user/UserFavorites";
+import UserRecipes from "./pages/user/UserRecipes";
+import UserEbooks from "./pages/user/UserEbooks";
 import UserModules from "./pages/user/UserModules";
 import UserModuleLessons from "./pages/user/UserModuleLessons";
 import UserCompleted from "./pages/user/UserCompleted";
@@ -142,6 +144,8 @@ const App = () => (
             <Route path="/app" element={<UserLayout />}>
               <Route index element={<UserHome />} />
               <Route path="aula/:id" element={<UserLesson />} />
+              <Route path="receitas" element={<UserRecipes />} />
+              <Route path="ebooks" element={<UserEbooks />} />
               <Route path="favoritos" element={<UserFavorites />} />
               <Route path="modulos" element={<UserModules />} />
               <Route path="modulo/:moduleId" element={<UserModuleLessons />} />

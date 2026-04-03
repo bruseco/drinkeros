@@ -7,10 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { User, Lock, Save, Eye, EyeOff } from 'lucide-react';
+import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle } from 'lucide-react';
 
 const UserProfile: React.FC = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, signOut } = useAuth();
 
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
@@ -281,6 +281,27 @@ const UserProfile: React.FC = () => {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Support & Logout */}
+      <div className="space-y-3">
+        <Button
+          variant="outline"
+          className="w-full justify-start"
+          onClick={() => window.open('https://wa.me/5511999999999', '_blank')}
+        >
+          <MessageCircle className="mr-2 h-4 w-4" />
+          Suporte via WhatsApp
+        </Button>
+
+        <Button
+          variant="destructive"
+          className="w-full justify-start"
+          onClick={signOut}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Sair da Conta
+        </Button>
+      </div>
     </div>
   );
 };
