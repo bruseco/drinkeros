@@ -14,10 +14,10 @@ const UserRecipeDetail: React.FC = () => {
   const { data: favorites = [] } = useFavorites();
   const toggleFavorite = useToggleFavorite();
   const { toast } = useToast();
+  const [showFavoriteDialog, setShowFavoriteDialog] = useState(false);
 
-  // We use exclusive_posts id, but favorites table uses recipe_id referencing recipes table
-  // For exclusive_posts favorites we'll handle separately  
-  const isFavorite = false; // TODO: implement exclusive post favorites if needed
+  // Check if this recipe is already in favorites
+  const isFavorite = favorites.some((f) => f.recipe_id === id);
 
   const getYouTubeEmbedUrl = (url: string) => {
     try {
