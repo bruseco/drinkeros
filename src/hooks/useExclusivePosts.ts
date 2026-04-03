@@ -69,7 +69,7 @@ export const useExclusivePostsPaginated = ({
 
       if (search.trim()) {
         const term = `%${search.trim()}%`;
-        query = query.or(`title.ilike.${term},ingredients.cs.{"${search.trim()}"},characteristics.cs.{"${search.trim()}"}`);
+        query = query.or(`title.ilike.${term},ingredients::text.ilike.${term},characteristics::text.ilike.${term}`);
       }
 
       const { data, count, error } = await query;
