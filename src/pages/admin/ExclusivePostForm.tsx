@@ -137,6 +137,11 @@ const ExclusivePostForm: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="youtube_url">Link do YouTube</Label>
+                  <Input id="youtube_url" type="url" value={formData.youtube_url} onChange={(e) => setFormData((prev) => ({ ...prev, youtube_url: e.target.value }))} placeholder="https://www.youtube.com/watch?v=..." />
+                </div>
+
+                <div className="space-y-2">
                   <Label>Ingredientes</Label>
                   <div className="flex flex-wrap gap-1.5 mb-2">
                     {formData.ingredients.map((tag, i) => (
