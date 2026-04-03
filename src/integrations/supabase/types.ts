@@ -83,13 +83,6 @@ export type Database = {
             referencedRelation: "collections"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "collection_recipes_recipe_id_fkey"
-            columns: ["recipe_id"]
-            isOneToOne: false
-            referencedRelation: "recipes"
-            referencedColumns: ["id"]
-          },
         ]
       }
       collections: {
