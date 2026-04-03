@@ -3,7 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserNavbar } from './UserNavbar';
 import { PushNotificationPrompt } from './PushNotificationPrompt';
-import { WhatsAppFloatingButton } from './WhatsAppFloatingButton';
+
 import { Loader2 } from 'lucide-react';
 
 export const UserLayout: React.FC = () => {
