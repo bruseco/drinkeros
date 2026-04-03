@@ -144,6 +144,8 @@ const App = () => (
             <Route path="/app" element={<UserLayout />}>
               <Route index element={<UserHome />} />
               <Route path="aula/:id" element={<UserLesson />} />
+              <Route path="receitas" element={<UserRecipes />} />
+              <Route path="ebooks" element={<UserEbooks />} />
               <Route path="favoritos" element={<UserFavorites />} />
               <Route path="modulos" element={<UserModules />} />
               <Route path="modulo/:moduleId" element={<UserModuleLessons />} />
