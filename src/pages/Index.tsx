@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Scale } from 'lucide-react';
 import { InstallBanner } from '@/components/user/InstallBanner';
+import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
 const Index: React.FC = () => {
   return (
