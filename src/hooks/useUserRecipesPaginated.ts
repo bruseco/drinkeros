@@ -182,7 +182,7 @@ export const useUserRecipesPaginated = ({
       });
     },
     enabled: enabled && !!user,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000, // 30 seconds — allows re-shuffle on navigation
     placeholderData: (previousData) => previousData,
   });
 };
