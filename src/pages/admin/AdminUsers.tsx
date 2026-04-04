@@ -172,6 +172,7 @@ const AdminUsers: React.FC = () => {
   const { data: allPackages = [] } = usePackages();
   const { data: allCombos = [] } = useCombos();
   const { data: allCourses = [] } = useCourses();
+  const { data: allEbooks = [] } = useEbooks();
   const updateRole = useUpdateUserRole();
   const updateAccess = useUpdateUserAccess();
   const createUser = useCreateUser();
@@ -185,12 +186,14 @@ const AdminUsers: React.FC = () => {
     const combos = allCombos.map((c) => ({ id: c.id, name: c.name, type: 'combo' as const }));
     const courses = allCourses.map((c) => ({ id: c.id, name: c.name, type: 'course' as const }));
     const modules = allPackages.map((p) => ({ id: p.id, name: p.name, type: 'module' as const }));
+    const ebooks = allEbooks.map((e) => ({ id: e.id, name: e.name, type: 'ebook' as const }));
     return [
       ...combos.sort((a, b) => a.name.localeCompare(b.name)),
       ...courses.sort((a, b) => a.name.localeCompare(b.name)),
       ...modules.sort((a, b) => a.name.localeCompare(b.name)),
+      ...ebooks.sort((a, b) => a.name.localeCompare(b.name)),
     ];
-  }, [allCombos, allCourses, allPackages]);
+  }, [allCombos, allCourses, allPackages, allEbooks]);
 
   const handleResendEmail = (user: UserWithRole) => {
     resendEmail.mutate(user.user_id);
