@@ -1477,6 +1477,35 @@ export type Database = {
           },
         ]
       }
+      user_ebooks: {
+        Row: {
+          ebook_id: string
+          id: string
+          purchased_at: string
+          user_id: string
+        }
+        Insert: {
+          ebook_id: string
+          id?: string
+          purchased_at?: string
+          user_id: string
+        }
+        Update: {
+          ebook_id?: string
+          id?: string
+          purchased_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_ebooks_ebook_id_fkey"
+            columns: ["ebook_id"]
+            isOneToOne: false
+            referencedRelation: "ebooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_packages: {
         Row: {
           hotmart_transaction_id: string | null
