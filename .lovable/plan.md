@@ -1,23 +1,40 @@
 
+Objetivo: corrigir a vitrine de e-books no painel do usuário para que a capa não fique “zoomada” nem cortada, aparecendo inteira e limitada à largura típica de uma tela de celular.
 
-## Rodar retry-failed-messages para reenfileirar mensagens com erro 131042
+Plano
+1. Ajustar o card de e-book em `src/pages/user/UserEbooks.tsx`
+- Remover a configuração que hoje força corte da imagem (`objectFit: 'cover'` + `aspectRatio: '1/1'` no próprio `<img>`).
+- Fazer a capa usar a proporção original do arquivo, com `w-full h-auto object-contain`.
+- Limitar a largura máxima do card para algo próximo de mobile real, centralizando na tela (`max-w` fixo e `mx-auto`).
 
-### Ação
+2. Redimensionar a apresentação para “largura de celular”
+- Em vez de deixar a imagem ocupar toda a largura disponível do layout no desktop/tablet, o bloco do e-book ficará com largura máxima parecida com um celular (ex.: ~360–420px).
+- Em telas menores, continua ocupando 100% da largura disponível; em telas maiores, para de crescer.
 
-Invocar a edge function `retry-failed-messages` com `action: "retry_131042"` para reenfileirar as 544 mensagens que falharam com o erro de pagamento da Meta.
+3. Preservar o layout visual já aprovado
+- Manter badge de “Bloqueado” / “Adquirido” no topo direito da capa.
+- Manter o título menor, centralizado, em negrito, com sombra preta e sobreposição por cima da imagem usando margem negativa.
+- Manter o botão menor abaixo da capa, com texto condicional:
+  - `Saiba Mais` quando bloqueado
+  - `Baixar E-book` quando adquirido
 
-### Detalhe técnico
+4. Ajustar o estado sem capa
+- Garantir que o placeholder sem imagem siga a mesma largura máxima do card para não quebrar a consistência visual.
 
-1. **Primeiro em dry run** (`dryRun: true`) para confirmar o número exato de mensagens a serem reenfileiradas e a distribuição por source (upsell, welcome, CRM, etc.)
-2. **Depois em modo real** (`dryRun: false`) para efetivamente inserir na `whatsapp_send_queue` e marcar as mensagens originais como `retry_queued`
-3. A função processa em lotes de 200 — se houver mais de 200, será necessário invocar múltiplas vezes (campo `hasMore` na resposta)
+Resultado esperado
+- A capa deixa de ser cortada.
+- O e-book passa a aparecer inteiro.
+- A largura visual fica compatível com uma tela de celular, mesmo quando o app estiver aberto em uma viewport maior.
+- O restante do visual (badge, título sobreposto e botão) continua igual.
 
-### Pré-requisito
-
-O pagamento da Meta precisa estar regularizado antes da execução real. Caso contrário, as mensagens reenfileiradas falharão novamente com o mesmo erro 131042.
-
-### Resultado esperado
-
-- ~544 mensagens inseridas na fila de envio com prioridades adequadas por tipo (welcome=8, CRM=7, upsell=5, etc.)
-- Mensagens originais marcadas como `retry_queued` para evitar reprocessamento duplicado
-
+Detalhes técnicos
+- Arquivo principal: `src/pages/user/UserEbooks.tsx`
+- Troca principal:
+  - de imagem “quadrada e cortada”
+  - para imagem “proporcional e inteira”
+- Estratégia de layout:
+```text
+container do item: w-full max-w-[390px] mx-auto
+imagem: w-full h-auto object-contain
+```
+- Se necessário, o ajuste fino do `max-w` pode ser feito rapidamente depois de validar visualmente no preview mobile.
