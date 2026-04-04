@@ -123,10 +123,10 @@ const handler = async (req: Request): Promise<Response> => {
       supabase.from("email_templates").select("*").eq("slug", "reset-password").single(),
     ]);
 
-    const senderName = settingsResult.data?.sender_name || "Criminal Lab";
+    const senderName = settingsResult.data?.sender_name || "Drinkeros";
     const senderEmail = settingsResult.data?.sender_email || "noreply@criminallab.com.br";
     const replyTo = settingsResult.data?.reply_to_email || undefined;
-    const subject = templateResult.data?.subject || "Redefina sua senha - Criminal Lab";
+    const subject = templateResult.data?.subject || "Redefina sua senha - Drinkeros";
     let htmlBody = templateResult.data?.html_body || DEFAULT_HTML;
 
     // Replace variables

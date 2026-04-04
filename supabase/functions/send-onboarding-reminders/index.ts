@@ -114,7 +114,7 @@ serve(async (req: Request) => {
       supabase.from("email_templates").select("*").eq("slug", "onboarding-reminder").single(),
     ]);
 
-    const senderName = settingsResult.data?.sender_name || "Criminal Lab";
+    const senderName = settingsResult.data?.sender_name || "Drinkeros";
     const senderEmail = settingsResult.data?.sender_email || "noreply@criminallab.com.br";
     const replyTo = settingsResult.data?.reply_to_email || undefined;
     const subject = templateResult.data?.subject || "📚 Seu curso está esperando por você!";

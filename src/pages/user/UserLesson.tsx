@@ -340,7 +340,7 @@ const UserLesson: React.FC = () => {
                         doc.setTextColor(255, 255, 255);
                         doc.setFontSize(12);
                         doc.setFont('helvetica', 'bold');
-                        doc.text('Criminal Lab', margin, 13);
+                        doc.text('Drinkeros', margin, 13);
                       }
 
                       doc.setTextColor(255, 255, 255);
@@ -454,7 +454,7 @@ const UserLesson: React.FC = () => {
                         doc.setFontSize(7);
                         doc.setTextColor(150, 150, 150);
                         doc.text(
-                          'Resumo gerado automaticamente pelo Criminal Lab',
+                          'Resumo gerado automaticamente pelo Drinkeros',
                           pageWidth / 2,
                           pageHeight - 8,
                           { align: 'center' }

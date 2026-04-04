@@ -370,7 +370,7 @@ serve(async (req: Request) => {
       supabase.from("upsell_unsubscribes").select("user_id"),
     ]);
 
-    const senderName = emailSettingsRes.data?.sender_name || "Criminal Lab";
+    const senderName = emailSettingsRes.data?.sender_name || "Drinkeros";
     const senderEmail = emailSettingsRes.data?.sender_email || "noreply@criminallab.com.br";
     const replyTo = emailSettingsRes.data?.reply_to_email || undefined;
     const emailTemplate = templateRes.data?.html_body || "";
@@ -1016,7 +1016,7 @@ serve(async (req: Request) => {
                     status: "sent", channel: "whatsapp",
                   });
                 } else {
-                  console.error(`[process-upsell] Criminal Lab 3 connection not available, skipping WhatsApp for ${student.phone}`);
+                  console.error(`[process-upsell] Drinkeros 3 connection not available, skipping WhatsApp for ${student.phone}`);
                 }
 
                 whatsappSent++;

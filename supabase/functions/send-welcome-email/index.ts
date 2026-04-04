@@ -83,7 +83,7 @@ const handler = async (req: Request): Promise<Response> => {
     ]);
 
     // Use DB values or fallback
-    const senderName = settingsResult.data?.sender_name || "Criminal Lab";
+    const senderName = settingsResult.data?.sender_name || "Drinkeros";
     const senderEmail = settingsResult.data?.sender_email || "noreply@criminallab.com.br";
     const replyTo = settingsResult.data?.reply_to_email || undefined;
     const subject = templateResult.data?.subject || "Bem-vindo! Seu acesso está pronto";

@@ -32,7 +32,7 @@ Mas faça isso agora, você sabe como as coisas funcionam…
 Quem chega primeiro tem MUITO MAIS vantagens :)
 
 Um abraço,
-Equipe Criminal Lab`,
+Equipe Drinkeros`,
   },
   {
     step: 2,
@@ -54,7 +54,7 @@ Acesse aqui Para Garantir Sua Vaga Com Desconto Especial!
 Esperamos que você consiga aproveitar esta oportunidade a tempo…
 
 Um abraço,
-Equipe Criminal Lab`,
+Equipe Drinkeros`,
   },
   {
     step: 3,
@@ -78,7 +78,7 @@ e mais, muito mais…
 Veja todos os detalhes aqui e garanta já a sua vaga!
 
 Um abraço,
-Equipe Criminal Lab`,
+Equipe Drinkeros`,
   },
   {
     step: 4,
@@ -106,7 +106,7 @@ Acesse aqui e garanta sua vaga!
 Esperamos que você consiga aproveitar esta oportunidade a tempo!
 
 Um abraço,
-Equipe Criminal Lab`,
+Equipe Drinkeros`,
   },
   {
     step: 5,
@@ -136,7 +136,7 @@ E muito mais!
 Acesse aqui, veja a descrição completa e garanta já a sua vaga!
 
 Um abraço,
-Equipe Criminal Lab`,
+Equipe Drinkeros`,
   },
   {
     step: 6,
@@ -168,7 +168,7 @@ Esperamos sinceramente que você não deixe essa oportunidade passar :)
 Vamos ficar muito felizes de ver seu nome na lista de inscritos!
 
 Um abraço,
-Equipe Criminal Lab`,
+Equipe Drinkeros`,
   },
   {
     step: 7,
@@ -188,7 +188,7 @@ Acesse aqui, veja a descrição completa e garanta já a sua vaga!
 Faltam apenas algumas horas para encerrar, esperamos sinceramente que você consiga aproveitar esta oportunidade...
 
 Um abraço,
-Equipe Criminal Lab`,
+Equipe Drinkeros`,
   },
   {
     step: 8,
@@ -226,7 +226,7 @@ Depois das 23:59 de hoje já não garantimos mais que você vai ter acesso a est
 Esperamos que você consiga aproveitar esta oportunidade a tempo!
 
 Um abraço,
-Equipe Criminal Lab`,
+Equipe Drinkeros`,
   },
   {
     step: 9,
@@ -264,7 +264,7 @@ Acesse aqui, veja a descrição completa e garanta já a sua vaga!
 Esperamos que você consiga aproveitar esta oportunidade a tempo :)
 
 Um abraço,
-Equipe Criminal Lab`,
+Equipe Drinkeros`,
   },
 ];
 
@@ -395,7 +395,7 @@ serve(async (req: Request) => {
     const unsubscribeUrl = `${supabaseUrl}/functions/v1/upsell-unsubscribe?token=${encodeURIComponent(btoa(JSON.stringify({ userId: productId ? studentName : "" })))}`;
 
     const systemPrompt = `Você é um copywriter especialista em educação online e direito penal/criminal.
-Seu objetivo é adaptar templates de email de upsell para a plataforma educacional "Criminal Lab".
+Seu objetivo é adaptar templates de email de upsell para a plataforma educacional "Drinkeros".
 REGRAS OBRIGATÓRIAS:
 1. SEMPRE use a primeira pessoa do PLURAL (nós, nosso, nossa, liberamos, temos, etc.) - NUNCA use "eu", "meu", "minha".
 2. O tom deve ser profissional, motivador e com senso de urgência, sem ser agressivo.
@@ -403,7 +403,7 @@ REGRAS OBRIGATÓRIAS:
 4. NÃO use emojis excessivos. Máximo 1-2 por email.
 5. Mantenha a estrutura e o estilo do template original, apenas adaptando ao produto específico.
 6. O email deve ter entre 150-400 palavras no corpo.
-7. Assine sempre como "Equipe Criminal Lab".
+7. Assine sempre como "Equipe Drinkeros".
 8. Todos os links devem apontar para: ${checkoutUrl}
 9. Se houver conteúdo da página de vendas disponível, USE-O como fonte principal de benefícios, argumentos e linguagem.
 10. NÃO inclua o link de descadastramento no corpo - ele será adicionado automaticamente no rodapé do template.`;

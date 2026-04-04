@@ -105,7 +105,7 @@ const EmailSettingsTab: React.FC = () => {
               id="senderName"
               value={senderName}
               onChange={(e) => setSenderName(e.target.value)}
-              placeholder="Criminal Lab"
+              placeholder="Drinkeros"
             />
           </div>
           <div className="space-y-2">

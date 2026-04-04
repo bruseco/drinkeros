@@ -41,11 +41,11 @@ function buildWelcomeMessages(data: {
 
   if (names.length > 1) {
     const productList = names.map(n => `- ${n}`).join("\n");
-    messages.push(`Aqui é da equipe Criminal Lab! Seus acessos já estão liberados 🎉\n\n${productList}`);
+    messages.push(`Aqui é da equipe Drinkeros! Seus acessos já estão liberados 🎉\n\n${productList}`);
   } else if (names.length === 1) {
-    messages.push(`Aqui é da equipe Criminal Lab! Seu acesso ao ${names[0]} já está liberado 🎉`);
+    messages.push(`Aqui é da equipe Drinkeros! Seu acesso ao ${names[0]} já está liberado 🎉`);
   } else {
-    messages.push(`Aqui é da equipe Criminal Lab! Bem-vindo(a) à plataforma 🎉`);
+    messages.push(`Aqui é da equipe Drinkeros! Bem-vindo(a) à plataforma 🎉`);
   }
 
   if (data.isNewUser && data.temporaryPassword) {
@@ -296,7 +296,7 @@ Deno.serve(async (req) => {
         const firstName = firstItem.full_name?.split(" ")[0] || "aluno(a)";
         const productText = productNames.length > 1
           ? productNames.join(", ")
-          : productNames[0] || "Criminal Lab";
+          : productNames[0] || "Drinkeros";
 
         const processKey = isNewUser ? "welcome_new" : "welcome_existing";
 
@@ -617,7 +617,7 @@ Deno.serve(async (req) => {
                   const firstItem = stalePhoneItems[0];
                   const firstName = firstItem.full_name?.split(" ")[0] || "aluno(a)";
                   const productNames = stalePhoneItems.map((i: any) => i.product_name).filter(Boolean);
-                  const productText = productNames.length > 1 ? productNames.join(", ") : productNames[0] || "Criminal Lab";
+                  const productText = productNames.length > 1 ? productNames.join(", ") : productNames[0] || "Drinkeros";
                   const isNewUser = stalePhoneItems.some((i: any) => i.is_new_user);
                   const tempPass = stalePhoneItems.find((i: any) => i.is_new_user && i.temporary_password)?.temporary_password;
                   const processKey = isNewUser ? "welcome_new" : "welcome_existing";

@@ -186,7 +186,7 @@ MENSAGEM ATUAL:
         messages: [
           {
             role: "system",
-            content: `Você é um classificador de intenções para um sistema de atendimento via WhatsApp de uma plataforma de cursos de Direito Criminal (Criminal Lab).
+            content: `Você é um classificador de intenções para um sistema de atendimento via WhatsApp de uma plataforma de cursos de Direito Criminal (Drinkeros).
 
 Classifique a mensagem do contato em UMA das 4 categorias:
 

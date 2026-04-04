@@ -26,8 +26,8 @@ export default defineConfig(({ mode }) => ({
         navigateFallbackDenylist: [/^\/~oauth/],
       },
       manifest: {
-        name: "Criminal Lab - Área de Membros",
-        short_name: "Criminal Lab",
+        name: "Drinkeros - Área de Membros",
+        short_name: "Drinkeros",
         description: "Sua plataforma de estudos de Direito Criminal",
         theme_color: "#dc2626",
         background_color: "#0a0a0a",

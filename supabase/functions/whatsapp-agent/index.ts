@@ -462,7 +462,7 @@ ${agentSettings.business_context}
 ${studentContext}
 
 REGRAS IMPORTANTES:
-1. Responda dúvidas sobre cursos, aulas, módulos e a plataforma Criminal Lab.
+1. Responda dúvidas sobre cursos, aulas, módulos e a plataforma Drinkeros.
 2. Se o aluno demonstrar interesse em novos produtos, recomende naturalmente com base nos produtos disponíveis listados acima.
 3. Se NÃO souber responder algo sobre um curso ou módulo específico, retorne needsMoreInfo: true e productQuery com o nome do produto. NÃO escale para humano ainda.
 4. Para reclamações graves, pedidos de reembolso, questões financeiras, ameaças legais ou problemas técnicos complexos: SEMPRE escale (shouldEscalate: true).

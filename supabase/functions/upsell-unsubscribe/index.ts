@@ -65,7 +65,7 @@ function htmlPage(title: string, message: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title} - Criminal Lab</title>
+  <title>${title} - Drinkeros</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f9fafb; color: #1f2937; }
     .container { text-align: center; padding: 2rem; max-width: 500px; }

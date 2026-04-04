@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 const PROCESSES = [
-  { id: 'welcome_new', label: 'Boas-vindas (aluno novo)', description: 'Enviado automaticamente quando o aluno se matricula pela primeira vez no Criminal Lab. Contém credenciais de acesso.', availableVars: ['student_name', 'product_name', 'email', 'password', 'login_url'] },
+  { id: 'welcome_new', label: 'Boas-vindas (aluno novo)', description: 'Enviado automaticamente quando o aluno se matricula pela primeira vez no Drinkeros. Contém credenciais de acesso.', availableVars: ['student_name', 'product_name', 'email', 'password', 'login_url'] },
   { id: 'welcome_existing', label: 'Boas-vindas (aluno existente)', description: 'Enviado quando um aluno que já tem conta compra um novo curso, combo ou módulo. Ele já possui login.', availableVars: ['student_name', 'product_name', 'email', 'login_url'] },
   { id: 'onboarding_followup', label: 'Reforço de onboarding (24h)', description: 'Enviado 24h após uma nova matrícula se o aluno ainda não fez login para consumir o conteúdo adquirido.', availableVars: ['student_name', 'login_url'] },
   { id: 'study_reminder', label: 'Reforço de estudo (7d inativo)', description: 'Enviado para alunos que iniciaram um curso mas estão há 7+ dias sem acessar a plataforma. Objetivo: trazer o aluno de volta para estudar.', availableVars: ['student_name', 'login_url'] },
