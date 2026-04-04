@@ -127,26 +127,20 @@ const UserRecipes: React.FC = () => {
       {/* Sentinel element to detect scroll position */}
       <div ref={sentinelRef} className="h-0 w-full" />
 
-      {/* Sticky search bar with logo - sits on top of the main header */}
-      <div
-        className={`transition-all duration-300 ${
-          isSticky
-            ? 'fixed top-0 left-0 right-0 z-[60] bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 border-b shadow-sm px-4 py-2'
-            : ''
-        }`}
-      >
-        <div className={`${isSticky ? 'container mx-auto flex items-center gap-3' : ''}`}>
-          {isSticky && (
+      {/* Search bar - becomes fixed with logo when scrolled */}
+      {searchInput}
+
+      {/* Fixed sticky bar that appears on scroll */}
+      {isSticky && (
+        <div className="fixed top-0 left-0 right-0 z-[60] bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 border-b shadow-sm px-4 py-2">
+          <div className="container mx-auto flex items-center gap-3">
             <Link to="/app" className="shrink-0">
               <img src={drinkrosLogo} alt="Drinkeros" className="h-7 object-contain" />
             </Link>
-          )}
-          {searchInput}
+            {searchInput}
+          </div>
         </div>
-      </div>
-
-      {/* Spacer when sticky to prevent content jump */}
-      {isSticky && <div className="h-12" />}
+      )}
 
       {isLoading ? (
         <div className="flex justify-center py-12">
