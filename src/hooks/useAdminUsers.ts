@@ -108,6 +108,7 @@ export interface UserWithRole {
   package_ids: string[];
   combo_ids: string[];
   course_ids: string[];
+  ebook_ids: string[];
 }
 
 export interface AdminUsersResult {
