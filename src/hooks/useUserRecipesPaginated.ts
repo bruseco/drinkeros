@@ -127,10 +127,11 @@ const fetchPaginatedRecipes = async ({
       return a.name.localeCompare(b.name);
     });
   } else {
-    // Fisher-Yates shuffle for random order
+    // Seeded Fisher-Yates shuffle — stable within session, different across page loads
     sorted = [...(data || [])];
+    const rng = seededRandom(sessionSeed);
     for (let i = sorted.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      const j = Math.floor(rng() * (i + 1));
       [sorted[i], sorted[j]] = [sorted[j], sorted[i]];
     }
   }
