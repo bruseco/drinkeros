@@ -13,6 +13,7 @@ export interface LessonCardProps {
     servings: string | null; // used as duration
   };
   compact?: boolean;
+  hideTitle?: boolean;
 }
 
 export const LessonCard: React.FC<LessonCardProps> = ({ lesson, compact = false }) => {
