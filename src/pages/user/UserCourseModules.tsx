@@ -87,7 +87,7 @@ const UserCourseModules: React.FC = () => {
         <img
           src={course.cover_image_url || defaultCover}
           alt={course.name}
-          className={`w-full object-cover ${isLocked ? 'opacity-60 grayscale-[20%]' : ''}`}
+          className={`w-full object-contain ${isLocked ? 'opacity-60 grayscale-[20%]' : ''}`}
         />
         {isLocked && (
           <div className="absolute inset-0 flex items-center justify-center">
