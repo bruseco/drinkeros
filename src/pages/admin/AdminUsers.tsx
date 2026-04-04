@@ -279,6 +279,7 @@ const AdminUsers: React.FC = () => {
     const packageIds = idsFromSet(newUserAccess, 'module');
     const comboIds = idsFromSet(newUserAccess, 'combo');
     const courseIds = idsFromSet(newUserAccess, 'course');
+    const ebookIds = idsFromSet(newUserAccess, 'ebook');
     createUser.mutate(
       {
         email: newUserEmail,
@@ -286,6 +287,7 @@ const AdminUsers: React.FC = () => {
         packageIds: packageIds.length > 0 ? packageIds : undefined,
         comboIds: comboIds.length > 0 ? comboIds : undefined,
         courseIds: courseIds.length > 0 ? courseIds : undefined,
+        ebookIds: ebookIds.length > 0 ? ebookIds : undefined,
       },
       { onSuccess: () => closeCreateDialog() }
     );
