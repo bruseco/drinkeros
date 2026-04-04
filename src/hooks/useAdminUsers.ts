@@ -11,6 +11,7 @@ interface CreateUserData {
   packageIds?: string[];
   comboIds?: string[];
   courseIds?: string[];
+  ebookIds?: string[];
 }
 
 export const useCreateUser = () => {
