@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Wine, Heart, BookOpen, UserCircle, FileText, ArrowLeft } from 'lucide-react';
+import { Wine, Heart, GraduationCap, UserCircle, BookOpen, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { Button } from '@/components/ui/button';
