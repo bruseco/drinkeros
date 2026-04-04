@@ -218,6 +218,7 @@ const AdminUsers: React.FC = () => {
     user.combo_ids.forEach((id) => s.add(`combo:${id}`));
     user.course_ids.forEach((id) => s.add(`course:${id}`));
     user.package_ids.forEach((id) => s.add(`module:${id}`));
+    user.ebook_ids.forEach((id) => s.add(`ebook:${id}`));
     return s;
   };
 
@@ -254,6 +255,8 @@ const AdminUsers: React.FC = () => {
         newComboIds: idsFromSet(selectedAccess, 'combo'),
         currentCourseIds: selectedUser.course_ids,
         newCourseIds: idsFromSet(selectedAccess, 'course'),
+        currentEbookIds: selectedUser.ebook_ids,
+        newEbookIds: idsFromSet(selectedAccess, 'ebook'),
       },
       { onSuccess: () => closeAccessDialog() }
     );
