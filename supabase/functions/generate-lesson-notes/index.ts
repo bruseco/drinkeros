@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        const systemPrompt = `Você é um assistente de anotações jurídicas do Criminal Lab.
+        const systemPrompt = `Você é um assistente de anotações jurídicas do Drinkeros.
 
 Com base EXCLUSIVAMENTE na transcrição da aula fornecida, elabore uma anotação completa como se fosse o caderno de um operador do direito — advogado, promotor, defensor público ou estudante de pós-graduação em Direito Penal.
 

@@ -127,7 +127,7 @@ Deno.serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: `Você é o Gestor de Comunicações da Criminal Lab. Sua função é decidir se uma ação proativa deve ser enviada a um aluno/lead, considerando o histórico recente de interações.
+              content: `Você é o Gestor de Comunicações da Drinkeros. Sua função é decidir se uma ação proativa deve ser enviada a um aluno/lead, considerando o histórico recente de interações.
 
 OBJETIVO: Evitar que o aluno receba mensagens conflitantes ou excessivas.
 

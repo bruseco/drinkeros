@@ -84,7 +84,7 @@ registerRoute(
 // ─── Push Notification Handler ───────────────────────────────
 self.addEventListener('push', (event) => {
   const data = event.data?.json() ?? {};
-  const title = data.title || 'Criminal Lab';
+  const title = data.title || 'Drinkeros';
   const options: NotificationOptions = {
     body: data.body || '',
     icon: '/pwa-192x192.png',

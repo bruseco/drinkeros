@@ -134,7 +134,7 @@ HISTÓRICO DE ATIVIDADES:
 ${activitiesText || "  Nenhuma atividade"}`;
     }
 
-    const systemPrompt = `Você é o agente de RECUPERAÇÃO DE VENDAS da Criminal Lab, plataforma de cursos de Direito Criminal.
+    const systemPrompt = `Você é o agente de RECUPERAÇÃO DE VENDAS da Drinkeros, plataforma de cursos de Direito Criminal.
 
 Seu papel é recuperar vendas perdidas: carrinho abandonado, PIX não pago, cartão recusado.
 
@@ -253,7 +253,7 @@ async function sendWithWindowCheck(adminClient: any, conversationId: string, pho
   const { data: binding } = await adminClient.from("whatsapp_template_bindings").select("template_name").eq("connection_id", conv.zapi_connection_id).eq("process", "reabertura_atendimento").eq("is_active", true).limit(1).maybeSingle();
   if (!binding) return { sent: false, method: "blocked" };
   try {
-    const params = [conv.contact_name || "aluno(a)", "equipe Criminal Lab"];
+    const params = [conv.contact_name || "aluno(a)", "equipe Drinkeros"];
     const res = await fetch(`${creds.apiUrl}/v1/messages`, { method: "POST", headers: { "Content-Type": "application/json", "X-API-Key": creds.token! }, body: JSON.stringify({ to: phone, type: "template", template: { name: binding.template_name, language: { code: "pt_BR" }, components: [{ type: "body", parameters: params.map(p => ({ type: "text", text: p })) }] } }) });
     const data = await res.json(); if (!res.ok) return { sent: false, method: "blocked" };
     return { sent: true, method: "template", result: data };

@@ -211,7 +211,7 @@ const Login: React.FC = () => {
             <img src={drinkrosLogo} alt="Drinkeros" className="h-14 object-contain" />
           </Link>
           <CardTitle className="text-2xl">Bem-vindo!</CardTitle>
-          <CardDescription>Acesse a Criminal Lab</CardDescription>
+          <CardDescription>Acesse a Drinkeros</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* OAuth Buttons */}

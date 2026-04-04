@@ -22,8 +22,8 @@ const DEFAULT_HTML = `<!DOCTYPE html>
   <div style="max-width: 600px; margin: 0 auto; background: #1a1a1a; border-radius: 16px; padding: 40px; color: #f5f5f5;">
     <h1 style="color: #f5f5f5;">Seu link de acesso</h1>
     <p>Olá, {{user_name}}!</p>
-    <p>Você solicitou um link para acessar a Criminal Lab sem precisar de senha. Clique no botão abaixo:</p>
-    <a href="{{magic_link_url}}" style="background:#dc2626;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:16px;">Acessar Criminal Lab</a>
+    <p>Você solicitou um link para acessar a Drinkeros sem precisar de senha. Clique no botão abaixo:</p>
+    <a href="{{magic_link_url}}" style="background:#dc2626;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:16px;">Acessar Drinkeros</a>
     <p style="color:#a3a3a3;font-size:13px;margin-top:24px;">Este link expira em 1 hora. Se você não solicitou este acesso, ignore este email.</p>
   </div>
 </body></html>`;
@@ -121,10 +121,10 @@ const handler = async (req: Request): Promise<Response> => {
       supabase.from("email_templates").select("*").eq("slug", "magic-link").single(),
     ]);
 
-    const senderName = settingsResult.data?.sender_name || "Criminal Lab";
+    const senderName = settingsResult.data?.sender_name || "Drinkeros";
     const senderEmail = settingsResult.data?.sender_email || "noreply@criminallab.com.br";
     const replyTo = settingsResult.data?.reply_to_email || undefined;
-    const subject = templateResult.data?.subject || "Seu link de acesso - Criminal Lab";
+    const subject = templateResult.data?.subject || "Seu link de acesso - Drinkeros";
     let htmlBody = templateResult.data?.html_body || DEFAULT_HTML;
 
     // Replace variables

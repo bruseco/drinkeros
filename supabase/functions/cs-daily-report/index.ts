@@ -15,7 +15,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const CS_SYSTEM_PROMPT = `Você é o gerente de Customer Success da Criminal Lab, uma plataforma de cursos online de Direito Criminal.
+const CS_SYSTEM_PROMPT = `Você é o gerente de Customer Success da Drinkeros, uma plataforma de cursos online de Direito Criminal.
 
 Sua tarefa é analisar as métricas operacionais fornecidas e gerar um relatório diário conciso e acionável.
 
@@ -381,7 +381,7 @@ serve(async (req) => {
 
           if (adminEmails.length > 0) {
             const senderEmail = emailSettings?.sender_email || "noreply@poderdelconocimiento.com";
-            const senderName = emailSettings?.sender_name || "Criminal Lab";
+            const senderName = emailSettings?.sender_name || "Drinkeros";
             const replyTo = emailSettings?.reply_to_email;
             const reportDate = now.toISOString().split("T")[0];
 

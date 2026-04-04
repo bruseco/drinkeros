@@ -18,7 +18,7 @@ const Index: React.FC = () => {
           {/* Title */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-4">
             <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-              Criminal Lab
+              Drinkeros
             </span>
           </h1>
 
@@ -47,7 +47,7 @@ const Index: React.FC = () => {
 
       {/* Footer */}
       <footer className="py-6 text-center text-sm text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} Criminal Lab. Todos os direitos reservados.</p>
+        <p>&copy; {new Date().getFullYear()} Drinkeros. Todos os direitos reservados.</p>
       </footer>
     </div>
   );

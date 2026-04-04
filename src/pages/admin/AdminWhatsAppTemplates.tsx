@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 
 const WELCOME_TEMPLATE_BODY = `Oi, {{1}}! Tudo bem? 😊
 
-Aqui é da equipe Criminal Lab! Seu acesso ao {{2}} já está liberado 🎉
+Aqui é da equipe Drinkeros! Seu acesso ao {{2}} já está liberado 🎉
 
 Seus dados de acesso:
 

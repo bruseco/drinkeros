@@ -430,7 +430,7 @@ const handler = async (req: Request): Promise<Response> => {
         supabase.from("email_templates").select("*").eq("slug", "module-access").single(),
       ]);
 
-      const senderName = settingsResult.data?.sender_name || "Criminal Lab";
+      const senderName = settingsResult.data?.sender_name || "Drinkeros";
       const senderEmail = settingsResult.data?.sender_email || "noreply@criminallab.com.br";
       const replyTo = settingsResult.data?.reply_to_email || undefined;
 

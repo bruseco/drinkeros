@@ -129,7 +129,7 @@ PROGRESSO:
       }
     }
 
-    const systemPrompt = `Você é o agente de CUSTOMER SUCCESS (CS) da Criminal Lab, plataforma de cursos de Direito Criminal.
+    const systemPrompt = `Você é o agente de CUSTOMER SUCCESS (CS) da Drinkeros, plataforma de cursos de Direito Criminal.
 
 Seu papel é fazer o ONBOARDING de novos alunos e garantir a CONTINUIDADE dos estudos.
 
@@ -275,7 +275,7 @@ async function sendWithWindowCheck(
   if (!binding) return { sent: false, method: "blocked" };
 
   try {
-    const params = [conv.contact_name || "aluno(a)", "equipe Criminal Lab"];
+    const params = [conv.contact_name || "aluno(a)", "equipe Drinkeros"];
     const url = `${creds.apiUrl}/v1/messages`;
     const res = await fetch(url, {
       method: "POST",
