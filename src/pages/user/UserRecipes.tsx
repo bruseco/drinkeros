@@ -45,7 +45,7 @@ const UserRecipes: React.FC = () => {
     search: debouncedSearch,
     pageSize: 15,
     publishedOnly: true,
-    randomOrder: true,
+    randomOrder: true as const,
   });
 
   const recipes = data?.pages.flatMap((p) => p.posts) ?? [];

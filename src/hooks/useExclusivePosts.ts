@@ -44,15 +44,17 @@ interface PaginatedPostsParams {
   search?: string;
   pageSize?: number;
   publishedOnly?: boolean;
+  randomOrder?: boolean;
 }
 
 export const useExclusivePostsPaginated = ({
   search = '',
   pageSize = 30,
   publishedOnly = false,
+  randomOrder = false,
 }: PaginatedPostsParams = {}) => {
   return useInfiniteQuery({
-    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly }],
+    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder }],
     queryFn: async ({ pageParam = 0 }) => {
       const from = pageParam * pageSize;
       const to = from + pageSize - 1;
@@ -60,8 +62,13 @@ export const useExclusivePostsPaginated = ({
       let query = supabase
         .from('exclusive_posts')
         .select('*', { count: 'exact' })
-        .order('display_order', { ascending: true })
         .range(from, to);
+
+      if (!randomOrder) {
+        query = query.order('display_order', { ascending: true });
+      } else {
+        query = query.order('created_at', { ascending: false });
+      }
 
       if (publishedOnly) {
         query = query.eq('is_published', true);
