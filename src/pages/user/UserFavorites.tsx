@@ -323,6 +323,7 @@ const UserFavorites: React.FC = () => {
                         servings: fav.recipe.servings,
                       }}
                       compact
+                      hideTitle
                     />
                   ) : null
                 )}
