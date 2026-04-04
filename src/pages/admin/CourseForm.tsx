@@ -195,24 +195,32 @@ const CourseForm: React.FC = () => {
       }
 
       // Create new modules (packages) and collect all IDs
+      const makeUniqueSlug = (base: string, excludeId?: string) => {
+        const slug = base || `modulo-${Date.now()}`;
+        const existing = allPackages.filter(p => p.id !== excludeId);
+        if (!existing.some(p => p.slug === slug)) return slug;
+        return `${slug}-${Date.now().toString(36)}`;
+      };
+
       const packageIds: string[] = [];
       for (const mod of modules) {
         if (mod.id) {
           // Existing module - update name if changed
           const existing = allPackages.find(p => p.id === mod.id);
           if (existing && existing.name !== mod.name) {
+            const newSlug = makeUniqueSlug(generateSlug(mod.name), mod.id);
             await updatePackageMut.mutateAsync({
               id: mod.id,
-              data: { name: mod.name, slug: generateSlug(mod.name) },
+              data: { name: mod.name, slug: newSlug },
             });
           }
           packageIds.push(mod.id);
         } else {
           // New module - create package
-          const slug = generateSlug(mod.name);
+          const slug = makeUniqueSlug(generateSlug(mod.name));
           const newPkg = await createPackage.mutateAsync({
             name: mod.name,
-            slug: slug || `modulo-${Date.now()}`,
+            slug,
             is_active: true,
             is_free: false,
             is_available_for_sale: false,
