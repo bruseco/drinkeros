@@ -3,6 +3,7 @@ import { useAdminUsers, useUpdateUserRole, useUpdateUserAccess, useCreateUser, u
 import { usePackages } from '@/hooks/usePackages';
 import { useCombos } from '@/hooks/useCombos';
 import { useCourses } from '@/hooks/useCourses';
+import { useEbooks } from '@/hooks/useEbooks';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDebounce } from '@/hooks/useDebounce';
 import {
