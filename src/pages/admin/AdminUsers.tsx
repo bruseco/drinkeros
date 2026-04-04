@@ -35,7 +35,7 @@ type AccessType = 'all' | 'combo' | 'course' | 'module' | 'ebook';
 interface AccessItem {
   id: string;
   name: string;
-  type: 'combo' | 'course' | 'module';
+  type: 'combo' | 'course' | 'module' | 'ebook';
 }
 
 const PAGE_SIZE = 50;
