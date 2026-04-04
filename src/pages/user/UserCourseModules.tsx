@@ -83,11 +83,11 @@ const UserCourseModules: React.FC = () => {
       )}
 
       {/* Course cover - full width */}
-      <div className="relative overflow-hidden rounded-2xl">
+      <div className="relative rounded-2xl">
         <img
           src={course.cover_image_url || defaultCover}
           alt={course.name}
-          className={`w-full object-contain ${isLocked ? 'opacity-60 grayscale-[20%]' : ''}`}
+          className={`w-full h-auto rounded-2xl ${isLocked ? 'opacity-60 grayscale-[20%]' : ''}`}
         />
         {isLocked && (
           <div className="absolute inset-0 flex items-center justify-center">
