@@ -36,52 +36,57 @@ const UserEbooks: React.FC = () => {
           {activeEbooks.map((ebook) => {
             const owned = ownedSet.has(ebook.id);
             return (
-              <div key={ebook.id} className="relative">
-                {/* Badge */}
-                <div className="absolute top-3 right-3 z-10">
-                  {owned ? (
-                    <Badge className="bg-success text-success-foreground border-0 shadow-md text-xs">
-                      ✓ Adquirido
-                    </Badge>
-                  ) : (
-                    <Badge variant="secondary" className="bg-muted/60 text-muted-foreground border-0 shadow-md text-xs gap-1">
-                      <Lock className="h-3 w-3" />
-                      Bloqueado
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Cover */}
-                <div className={`overflow-hidden rounded-2xl shadow-md ${!owned ? 'opacity-50 grayscale-[30%]' : ''}`}>
+              <div key={ebook.id} className="flex flex-col items-center">
+                {/* Cover 1:1 */}
+                <div className="relative w-full aspect-square overflow-hidden rounded-2xl shadow-md">
                   {ebook.cover_image_url ? (
                     <img
                       src={ebook.cover_image_url}
                       alt={ebook.name}
-                      className="w-full object-contain"
+                      className={`w-full h-full object-cover ${!owned ? 'opacity-50 grayscale-[30%]' : ''}`}
                     />
                   ) : (
-                    <div className="w-full h-52 bg-muted flex items-center justify-center">
+                    <div className="w-full h-full bg-muted flex items-center justify-center">
                       <FileText className="h-10 w-10 text-muted-foreground" />
                     </div>
                   )}
+                  {/* Badge */}
+                  <div className="absolute top-3 right-3 z-10">
+                    {owned ? (
+                      <Badge className="bg-success text-success-foreground border-0 shadow-md text-xs">
+                        ✓ Adquirido
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="bg-muted/60 text-muted-foreground border-0 shadow-md text-xs gap-1">
+                        <Lock className="h-3 w-3" />
+                        Bloqueado
+                      </Badge>
+                    )}
+                  </div>
                 </div>
 
-                {/* Title + Download */}
-                <div className="mt-3 space-y-2">
-                  <h3 className="font-semibold text-foreground text-lg">{ebook.name}</h3>
+                {/* Title overlapping cover */}
+                <h3
+                  className="font-bold text-foreground text-base text-center -mt-5 relative z-10"
+                  style={{ textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 1px 3px rgba(0,0,0,0.9)' }}
+                >
+                  {ebook.name}
+                </h3>
+
+                {/* Button */}
+                <div className="mt-2">
                   {owned && ebook.file_url ? (
-                    <Button asChild size="sm" className="w-full">
+                    <Button asChild size="sm">
                       <a href={ebook.file_url} target="_blank" rel="noopener noreferrer">
                         <Download className="mr-2 h-4 w-4" />
                         Baixar E-book
                       </a>
                     </Button>
-                  ) : !owned ? (
-                    <Button size="sm" variant="secondary" className="w-full" disabled>
-                      <Lock className="mr-2 h-4 w-4" />
-                      E-book Bloqueado
+                  ) : (
+                    <Button size="sm" variant="secondary">
+                      Saiba Mais
                     </Button>
-                  ) : null}
+                  )}
                 </div>
               </div>
             );
