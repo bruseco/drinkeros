@@ -37,7 +37,7 @@ const fetchPaginatedRecipes = async ({
   page: number;
   pageSize: number;
   lessonOrder?: string;
-}): Promise<PaginatedRecipesResult> => {
+packageId?: string | null;
   // First get user's purchased package IDs
   const { data: userPackages } = await supabase
     .from('user_packages')
