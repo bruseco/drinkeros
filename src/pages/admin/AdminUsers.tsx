@@ -30,7 +30,7 @@ import { Database } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
 
 type AppRole = Database['public']['Enums']['app_role'];
-type AccessType = 'all' | 'combo' | 'course' | 'module';
+type AccessType = 'all' | 'combo' | 'course' | 'module' | 'ebook';
 
 interface AccessItem {
   id: string;
