@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useRecipe } from '@/hooks/useRecipes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
+import { useAddToCursosCollection } from '@/hooks/useCollections';
 import { useTrackRecipeView, useToggleLessonComplete } from '@/hooks/useRecipeViews';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
