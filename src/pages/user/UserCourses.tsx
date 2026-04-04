@@ -76,7 +76,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, owned }) => {
           }`}
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 via-40% to-transparent" />
 
         {/* Play / Lock icon on hover */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
