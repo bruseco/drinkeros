@@ -143,11 +143,12 @@ export const useAdminUsers = (page: number = 0, pageSize: number = 50, search: s
 
       const userIds = profiles.map((p) => p.user_id);
 
-      const [rolesResult, packagesResult, combosResult, coursesResult] = await Promise.all([
+      const [rolesResult, packagesResult, combosResult, coursesResult, ebooksResult] = await Promise.all([
         supabase.from('user_roles').select('id, user_id, role').in('user_id', userIds),
         supabase.from('user_packages').select('user_id, package_id').in('user_id', userIds),
         supabase.from('user_combos').select('user_id, combo_id').in('user_id', userIds),
         supabase.from('user_courses').select('user_id, course_id').in('user_id', userIds),
+        supabase.from('user_ebooks').select('user_id, ebook_id').in('user_id', userIds),
       ]);
 
       if (rolesResult.error) throw rolesResult.error;
