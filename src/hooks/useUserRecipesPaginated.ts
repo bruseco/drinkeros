@@ -1,6 +1,19 @@
 import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRef } from 'react';
+
+// Seeded random for stable shuffle within a session
+function seededRandom(seed: number) {
+  let s = seed;
+  return () => {
+    s = (s * 16807 + 0) % 2147483647;
+    return s / 2147483647;
+  };
+}
+
+// Generate a session seed (changes on each page load / navigation)
+const sessionSeed = Math.floor(Math.random() * 2147483647);
 
 export interface Recipe {
   id: string;
@@ -103,14 +116,25 @@ const fetchPaginatedRecipes = async ({
 
   if (error) throw error;
 
-  // Sort by display_order respecting lesson_order, then by name as tiebreaker
-  const isAsc = lessonOrder !== 'desc';
-  const sorted = (data || []).sort((a, b) => {
-    const orderA = orderMap.get(a.id) ?? 0;
-    const orderB = orderMap.get(b.id) ?? 0;
-    if (orderA !== orderB) return isAsc ? orderA - orderB : orderB - orderA;
-    return a.name.localeCompare(b.name);
-  });
+  // If viewing a specific package, sort by display_order; otherwise shuffle randomly
+  let sorted: typeof data;
+  if (packageId) {
+    const isAsc = lessonOrder !== 'desc';
+    sorted = (data || []).sort((a, b) => {
+      const orderA = orderMap.get(a.id) ?? 0;
+      const orderB = orderMap.get(b.id) ?? 0;
+      if (orderA !== orderB) return isAsc ? orderA - orderB : orderB - orderA;
+      return a.name.localeCompare(b.name);
+    });
+  } else {
+    // Seeded Fisher-Yates shuffle — stable within session, different across page loads
+    sorted = [...(data || [])];
+    const rng = seededRandom(sessionSeed);
+    for (let i = sorted.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [sorted[i], sorted[j]] = [sorted[j], sorted[i]];
+    }
+  }
 
   const total = sorted.length;
   const from = page * pageSize;
@@ -158,7 +182,7 @@ export const useUserRecipesPaginated = ({
       });
     },
     enabled: enabled && !!user,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000, // 30 seconds — allows re-shuffle on navigation
     placeholderData: (previousData) => previousData,
   });
 };
@@ -190,7 +214,7 @@ export const useInfiniteRecipes = ({
       lastPage.hasMore ? allPages.length : undefined,
     initialPageParam: 0,
     enabled: enabled && !!user,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
   });
 };
 
