@@ -214,7 +214,7 @@ export const useInfiniteRecipes = ({
       lastPage.hasMore ? allPages.length : undefined,
     initialPageParam: 0,
     enabled: enabled && !!user,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
   });
 };
 
