@@ -57,12 +57,33 @@ export const useExclusivePostsPaginated = ({
     queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder }],
     queryFn: async ({ pageParam = 0 }) => {
       const from = pageParam * pageSize;
-      const to = from + pageSize - 1;
 
+      if (search.trim()) {
+        // Use RPC for deep search across arrays
+        const { data, error } = await supabase.rpc('search_exclusive_posts', {
+          p_term: search.trim(),
+          p_published_only: publishedOnly,
+          p_limit: pageSize,
+          p_offset: from,
+        });
+
+        if (error) throw error;
+
+        const posts = (data || []) as (ExclusivePost & { total_count: number })[];
+        const total = posts.length > 0 ? Number(posts[0].total_count) : 0;
+
+        return {
+          posts: posts.map(({ total_count, ...rest }) => rest) as ExclusivePost[],
+          total,
+          hasMore: from + pageSize < total,
+        };
+      }
+
+      // No search — use normal query
       let query = supabase
         .from('exclusive_posts')
         .select('*', { count: 'exact' })
-        .range(from, to);
+        .range(from, from + pageSize - 1);
 
       if (!randomOrder) {
         query = query.order('display_order', { ascending: true });
@@ -72,11 +93,6 @@ export const useExclusivePostsPaginated = ({
 
       if (publishedOnly) {
         query = query.eq('is_published', true);
-      }
-
-      if (search.trim()) {
-        const term = `%${search.trim()}%`;
-        query = query.or(`title.ilike.${term},ingredients::text.ilike.${term},characteristics::text.ilike.${term}`);
       }
 
       const { data, count, error } = await query;

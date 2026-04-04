@@ -2138,6 +2138,29 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      search_exclusive_posts: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_published_only?: boolean
+          p_term: string
+        }
+        Returns: {
+          characteristics: string[]
+          cover_image_url: string
+          created_at: string
+          description: string
+          display_order: number
+          id: string
+          ingredients: string[]
+          instructions: string
+          is_published: boolean
+          title: string
+          total_count: number
+          updated_at: string
+          youtube_url: string
+        }[]
+      }
       select_zapi_connection: {
         Args: { p_conversation_id?: string; p_is_new_contact?: boolean }
         Returns: string
