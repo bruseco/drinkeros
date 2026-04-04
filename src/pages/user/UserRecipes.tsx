@@ -127,11 +127,11 @@ const UserRecipes: React.FC = () => {
       {/* Sentinel element to detect scroll position */}
       <div ref={sentinelRef} className="h-0 w-full" />
 
-      {/* Sticky search bar with logo */}
+      {/* Sticky search bar with logo - sits on top of the main header */}
       <div
         className={`transition-all duration-300 ${
           isSticky
-            ? 'fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 border-b shadow-sm px-4 py-2'
+            ? 'fixed top-0 left-0 right-0 z-[60] bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 border-b shadow-sm px-4 py-2'
             : ''
         }`}
       >
