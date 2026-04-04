@@ -103,14 +103,24 @@ const fetchPaginatedRecipes = async ({
 
   if (error) throw error;
 
-  // Sort by display_order respecting lesson_order, then by name as tiebreaker
-  const isAsc = lessonOrder !== 'desc';
-  const sorted = (data || []).sort((a, b) => {
-    const orderA = orderMap.get(a.id) ?? 0;
-    const orderB = orderMap.get(b.id) ?? 0;
-    if (orderA !== orderB) return isAsc ? orderA - orderB : orderB - orderA;
-    return a.name.localeCompare(b.name);
-  });
+  // If viewing a specific package, sort by display_order; otherwise shuffle randomly
+  let sorted: typeof data;
+  if (packageId) {
+    const isAsc = lessonOrder !== 'desc';
+    sorted = (data || []).sort((a, b) => {
+      const orderA = orderMap.get(a.id) ?? 0;
+      const orderB = orderMap.get(b.id) ?? 0;
+      if (orderA !== orderB) return isAsc ? orderA - orderB : orderB - orderA;
+      return a.name.localeCompare(b.name);
+    });
+  } else {
+    // Fisher-Yates shuffle for random order
+    sorted = [...(data || [])];
+    for (let i = sorted.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [sorted[i], sorted[j]] = [sorted[j], sorted[i]];
+    }
+  }
 
   const total = sorted.length;
   const from = page * pageSize;
