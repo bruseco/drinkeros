@@ -1,6 +1,19 @@
 import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRef } from 'react';
+
+// Seeded random for stable shuffle within a session
+function seededRandom(seed: number) {
+  let s = seed;
+  return () => {
+    s = (s * 16807 + 0) % 2147483647;
+    return s / 2147483647;
+  };
+}
+
+// Generate a session seed (changes on each page load / navigation)
+const sessionSeed = Math.floor(Math.random() * 2147483647);
 
 export interface Recipe {
   id: string;
