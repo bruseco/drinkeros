@@ -11,6 +11,9 @@ interface CreateUserRequest {
   email: string;
   fullName?: string;
   packageIds?: string[];
+  comboIds?: string[];
+  courseIds?: string[];
+  ebookIds?: string[];
   phone?: string;
 }
 
