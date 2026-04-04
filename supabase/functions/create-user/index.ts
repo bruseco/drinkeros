@@ -48,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Permission denied");
     }
 
-    const { email, fullName, packageIds, phone }: CreateUserRequest = await req.json();
+    const { email, fullName, packageIds, comboIds, courseIds, ebookIds, phone }: CreateUserRequest = await req.json();
 
     if (!email) {
       throw new Error("Email is required");
