@@ -123,3 +123,45 @@ All colors MUST be HSL.
     text-wrap: balance;
   }
 }
+
+/* Page transition animations */
+.page-transition {
+  will-change: transform, opacity;
+}
+
+.page-enter,
+.page-enter-right {
+  animation: slide-in-from-right 0.2s ease-out forwards;
+}
+
+.page-enter-left {
+  animation: slide-in-from-left 0.2s ease-out forwards;
+}
+
+.page-exit-left {
+  animation: slide-out-to-left 0.15s ease-in forwards;
+}
+
+.page-exit-right {
+  animation: slide-out-to-right 0.15s ease-in forwards;
+}
+
+@keyframes slide-in-from-right {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slide-in-from-left {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slide-out-to-left {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-30px); }
+}
+
+@keyframes slide-out-to-right {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(30px); }
+}
