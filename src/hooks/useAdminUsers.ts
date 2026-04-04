@@ -155,6 +155,7 @@ export const useAdminUsers = (page: number = 0, pageSize: number = 50, search: s
       if (packagesResult.error) throw packagesResult.error;
       if (combosResult.error) throw combosResult.error;
       if (coursesResult.error) throw coursesResult.error;
+      if (ebooksResult.error) throw ebooksResult.error;
 
       const rolesMap = new Map(rolesResult.data?.map((r) => [r.user_id, { role: r.role, id: r.id }]));
       
@@ -179,11 +180,19 @@ export const useAdminUsers = (page: number = 0, pageSize: number = 50, search: s
         coursesMap.set(uc.user_id, existing);
       });
 
+      const ebooksMap = new Map<string, string[]>();
+      ebooksResult.data?.forEach((ue) => {
+        const existing = ebooksMap.get(ue.user_id) || [];
+        existing.push(ue.ebook_id);
+        ebooksMap.set(ue.user_id, existing);
+      });
+
       const users: UserWithRole[] = profiles.map((profile) => {
         const roleData = rolesMap.get(profile.user_id);
         const packageIds = packagesMap.get(profile.user_id) || [];
         const comboIds = combosMap.get(profile.user_id) || [];
         const courseIds = coursesMap.get(profile.user_id) || [];
+        const ebookIds = ebooksMap.get(profile.user_id) || [];
         return {
           id: profile.id,
           user_id: profile.user_id,
@@ -193,10 +202,11 @@ export const useAdminUsers = (page: number = 0, pageSize: number = 50, search: s
           created_at: profile.created_at,
           role: roleData?.role || null,
           role_id: roleData?.id || null,
-          packages_count: packageIds.length + comboIds.length + courseIds.length,
+          packages_count: packageIds.length + comboIds.length + courseIds.length + ebookIds.length,
           package_ids: packageIds,
           combo_ids: comboIds,
           course_ids: courseIds,
+          ebook_ids: ebookIds,
         };
       });
 
