@@ -264,11 +264,13 @@ export const useUpdateUserAccess = () => {
       currentPackageIds, newPackageIds,
       currentComboIds, newComboIds,
       currentCourseIds, newCourseIds,
+      currentEbookIds = [], newEbookIds = [],
     }: { 
       userId: string; 
       currentPackageIds: string[]; newPackageIds: string[];
       currentComboIds: string[]; newComboIds: string[];
       currentCourseIds: string[]; newCourseIds: string[];
+      currentEbookIds?: string[]; newEbookIds?: string[];
     }) => {
       // Packages
       const pkgRemove = currentPackageIds.filter((id) => !newPackageIds.includes(id));
@@ -303,6 +305,18 @@ export const useUpdateUserAccess = () => {
       }
       if (courseAdd.length > 0) {
         const { error } = await supabase.from('user_courses').insert(courseAdd.map((id) => ({ user_id: userId, course_id: id })));
+        if (error) throw error;
+      }
+
+      // Ebooks
+      const ebookRemove = currentEbookIds.filter((id) => !newEbookIds.includes(id));
+      const ebookAdd = newEbookIds.filter((id) => !currentEbookIds.includes(id));
+      if (ebookRemove.length > 0) {
+        const { error } = await supabase.from('user_ebooks').delete().eq('user_id', userId).in('ebook_id', ebookRemove);
+        if (error) throw error;
+      }
+      if (ebookAdd.length > 0) {
+        const { error } = await supabase.from('user_ebooks').insert(ebookAdd.map((id) => ({ user_id: userId, ebook_id: id })));
         if (error) throw error;
       }
     },
