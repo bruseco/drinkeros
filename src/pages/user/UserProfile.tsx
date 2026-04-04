@@ -287,7 +287,7 @@ const UserProfile: React.FC = () => {
         <Button
           variant="outline"
           className="w-full justify-start"
-          onClick={() => window.open('https://wa.me/5511999999999', '_blank')}
+          onClick={() => window.open('https://wa.me/5548991601025', '_blank')}
         >
           <MessageCircle className="mr-2 h-4 w-4" />
           Suporte via WhatsApp
