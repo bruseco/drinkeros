@@ -29,7 +29,11 @@ export const PushNotificationPrompt: React.FC = () => {
     if (success) {
       toast.success('Notificações ativadas!');
     } else {
-      toast.error('Não foi possível ativar as notificações');
+      if (Notification.permission === 'denied') {
+        toast.error('Notificações bloqueadas. Ative nas configurações do navegador.');
+      } else {
+        toast.error('Não foi possível ativar as notificações. Tente novamente pelo site publicado.');
+      }
     }
   };
 
