@@ -36,6 +36,7 @@ const UserLesson: React.FC = () => {
   const { data: lesson, isLoading } = useRecipe(id || '');
   const { data: favorites = [] } = useFavorites();
   const toggleFavorite = useToggleFavorite();
+  const addToCursos = useAddToCursosCollection();
   const trackLessonView = useTrackRecipeView();
   const toggleComplete = useToggleLessonComplete();
 
