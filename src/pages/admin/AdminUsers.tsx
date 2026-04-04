@@ -102,11 +102,12 @@ const AccessItemList: React.FC<{
         />
       </div>
       <Tabs value={typeFilter} onValueChange={(v) => onTypeChange(v as AccessType)}>
-        <TabsList className="w-full">
+         <TabsList className="w-full">
           <TabsTrigger value="all" className="flex-1">Todos</TabsTrigger>
           <TabsTrigger value="combo" className="flex-1">Combos</TabsTrigger>
           <TabsTrigger value="course" className="flex-1">Cursos</TabsTrigger>
           <TabsTrigger value="module" className="flex-1">Módulos</TabsTrigger>
+          <TabsTrigger value="ebook" className="flex-1">Ebooks</TabsTrigger>
         </TabsList>
       </Tabs>
       <div className={`space-y-2 overflow-y-auto pr-1`} style={{ maxHeight }}>
