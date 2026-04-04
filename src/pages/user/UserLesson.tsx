@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useRecipe } from '@/hooks/useRecipes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
+import { useAddToCursosCollection } from '@/hooks/useCollections';
 import { useTrackRecipeView, useToggleLessonComplete } from '@/hooks/useRecipeViews';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -35,6 +36,7 @@ const UserLesson: React.FC = () => {
   const { data: lesson, isLoading } = useRecipe(id || '');
   const { data: favorites = [] } = useFavorites();
   const toggleFavorite = useToggleFavorite();
+  const addToCursos = useAddToCursosCollection();
   const trackLessonView = useTrackRecipeView();
   const toggleComplete = useToggleLessonComplete();
 
@@ -187,7 +189,12 @@ const UserLesson: React.FC = () => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => toggleFavorite.mutate({ recipeId: lesson.id, isFavorite })}
+          onClick={() => {
+            toggleFavorite.mutate({ recipeId: lesson.id, isFavorite });
+            if (!isFavorite) {
+              addToCursos.mutate(lesson.id);
+            }
+          }}
         >
           <Heart
             className={cn('h-5 w-5', isFavorite && 'fill-destructive text-destructive')}

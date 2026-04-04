@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useCallback } from 'react';
 
 export const useCollections = () => {
   const { user } = useAuth();
@@ -126,6 +127,61 @@ export const useRemoveFromCollection = () => {
       if (error) throw error;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['collection-recipes'] });
+    },
+  });
+};
+
+/**
+ * Auto-add a lesson (recipe) to the "Cursos" collection when favorited from a course.
+ * Finds or creates the "Cursos" collection, then inserts the recipe (idempotent).
+ */
+export const useAddToCursosCollection = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (recipeId: string) => {
+      if (!user) throw new Error('Not authenticated');
+
+      // Find or create "Cursos" collection
+      const { data: existing } = await supabase
+        .from('collections')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('name', 'Cursos')
+        .maybeSingle();
+
+      let collectionId: string;
+      if (existing) {
+        collectionId = existing.id;
+      } else {
+        const { data: created, error } = await supabase
+          .from('collections')
+          .insert({ name: 'Cursos', user_id: user.id })
+          .select('id')
+          .single();
+        if (error) throw error;
+        collectionId = created.id;
+      }
+
+      // Check if already in collection
+      const { data: alreadyIn } = await supabase
+        .from('collection_recipes')
+        .select('id')
+        .eq('collection_id', collectionId)
+        .eq('recipe_id', recipeId)
+        .maybeSingle();
+
+      if (!alreadyIn) {
+        const { error } = await supabase
+          .from('collection_recipes')
+          .insert({ collection_id: collectionId, recipe_id: recipeId });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
       queryClient.invalidateQueries({ queryKey: ['collection-recipes'] });
     },
   });
