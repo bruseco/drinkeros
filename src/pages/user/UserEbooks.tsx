@@ -32,25 +32,24 @@ const UserEbooks: React.FC = () => {
           <p className="text-muted-foreground">Nenhum e-book disponível no momento</p>
         </div>
       ) : (
-        <div className="grid gap-6 grid-cols-1">
+        <div className="grid gap-8 grid-cols-1">
           {activeEbooks.map((ebook) => {
             const owned = ownedSet.has(ebook.id);
             return (
               <div key={ebook.id} className="flex flex-col items-center">
-                {/* Cover 1:1 */}
-                <div className="relative w-full aspect-square overflow-hidden rounded-2xl shadow-md">
+                <div className="relative w-full">
                   {ebook.cover_image_url ? (
                     <img
                       src={ebook.cover_image_url}
                       alt={ebook.name}
-                      className={`w-full h-full object-cover ${!owned ? 'opacity-50 grayscale-[30%]' : ''}`}
+                      className={`w-full rounded-2xl ${!owned ? 'opacity-60 grayscale-[30%]' : ''}`}
+                      style={{ aspectRatio: '1/1', objectFit: 'cover' }}
                     />
                   ) : (
-                    <div className="w-full h-full bg-muted flex items-center justify-center">
+                    <div className="w-full rounded-2xl bg-muted flex items-center justify-center" style={{ aspectRatio: '1/1' }}>
                       <FileText className="h-10 w-10 text-muted-foreground" />
                     </div>
                   )}
-                  {/* Badge */}
                   <div className="absolute top-3 right-3 z-10">
                     {owned ? (
                       <Badge className="bg-success text-success-foreground border-0 shadow-md text-xs">
@@ -65,7 +64,6 @@ const UserEbooks: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Title overlapping cover */}
                 <h3
                   className="font-bold text-foreground text-base text-center -mt-5 relative z-10"
                   style={{ textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 1px 3px rgba(0,0,0,0.9)' }}
@@ -73,7 +71,6 @@ const UserEbooks: React.FC = () => {
                   {ebook.name}
                 </h3>
 
-                {/* Button */}
                 <div className="mt-2">
                   {owned && ebook.file_url ? (
                     <Button asChild size="sm">
