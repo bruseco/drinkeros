@@ -36,17 +36,16 @@ const UserEbooks: React.FC = () => {
           {activeEbooks.map((ebook) => {
             const owned = ownedSet.has(ebook.id);
             return (
-              <div key={ebook.id} className="flex flex-col items-center">
+              <div key={ebook.id} className="flex flex-col items-center w-full max-w-[390px] mx-auto">
                 <div className="relative w-full">
                   {ebook.cover_image_url ? (
                     <img
                       src={ebook.cover_image_url}
                       alt={ebook.name}
-                      className={`w-full rounded-2xl ${!owned ? 'opacity-60 grayscale-[30%]' : ''}`}
-                      style={{ aspectRatio: '1/1', objectFit: 'cover' }}
+                      className={`w-full h-auto object-contain rounded-2xl ${!owned ? 'opacity-60 grayscale-[30%]' : ''}`}
                     />
                   ) : (
-                    <div className="w-full rounded-2xl bg-muted flex items-center justify-center" style={{ aspectRatio: '1/1' }}>
+                    <div className="w-full rounded-2xl bg-muted flex items-center justify-center aspect-square">
                       <FileText className="h-10 w-10 text-muted-foreground" />
                     </div>
                   )}
