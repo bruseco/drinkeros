@@ -44,7 +44,8 @@ const UserEbooks: React.FC = () => {
                         src={ebook.cover_image_url}
                         alt={ebook.name}
                         className="w-full h-full object-contain"
-                    />
+                      />
+                    </div>
                   ) : (
                     <div className="w-full rounded-2xl bg-muted flex items-center justify-center aspect-square">
                       <FileText className="h-10 w-10 text-muted-foreground" />
