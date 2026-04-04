@@ -13,9 +13,10 @@ export interface LessonCardProps {
     servings: string | null; // used as duration
   };
   compact?: boolean;
+  hideTitle?: boolean;
 }
 
-export const LessonCard: React.FC<LessonCardProps> = ({ lesson, compact = false }) => {
+export const LessonCard: React.FC<LessonCardProps> = ({ lesson, compact = false, hideTitle = false }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -81,11 +82,13 @@ export const LessonCard: React.FC<LessonCardProps> = ({ lesson, compact = false 
             </div>
           )}
         </div>
-        <CardContent className={compact ? 'p-3 min-h-[3.5rem]' : 'p-4'}>
-          <h3 className={`font-semibold text-foreground group-hover:text-primary transition-colors whitespace-normal break-words text-balance ${compact ? 'text-sm leading-tight line-clamp-2' : ''}`}>
-            {lesson.name}
-          </h3>
-        </CardContent>
+        {!hideTitle && (
+          <CardContent className={compact ? 'p-3 min-h-[3.5rem]' : 'p-4'}>
+            <h3 className={`font-semibold text-foreground group-hover:text-primary transition-colors whitespace-normal break-words text-balance ${compact ? 'text-sm leading-tight line-clamp-2' : ''}`}>
+              {lesson.name}
+            </h3>
+          </CardContent>
+        )}
       </Card>
     </Link>
   );
