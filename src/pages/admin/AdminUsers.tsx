@@ -57,12 +57,14 @@ const typeBadgeVariant: Record<string, 'default' | 'secondary' | 'outline'> = {
   combo: 'default',
   course: 'secondary',
   module: 'outline',
+  ebook: 'outline',
 };
 
 const typeLabel: Record<string, string> = {
   combo: 'Combo',
   course: 'Curso',
   module: 'Módulo',
+  ebook: 'E-book',
 };
 
 // Reusable access list component
