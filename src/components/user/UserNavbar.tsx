@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Wine, Heart, BookOpen, UserCircle, FileText, ArrowLeft } from 'lucide-react';
+import { Wine, Heart, GraduationCap, UserCircle, BookOpen, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { Button } from '@/components/ui/button';
@@ -16,8 +16,8 @@ export const UserNavbar: React.FC = () => {
 
   const navItems = [
     { icon: Wine, label: 'Receitas', href: '/app/receitas' },
-    { icon: BookOpen, label: 'Cursos', href: '/app/cursos' },
-    { icon: FileText, label: 'Ebooks', href: '/app/ebooks' },
+    { icon: GraduationCap, label: 'Cursos', href: '/app/cursos' },
+    { icon: BookOpen, label: 'Ebooks', href: '/app/ebooks' },
     { icon: Heart, label: 'Favoritos', href: '/app/favoritos' },
     { icon: UserCircle, label: 'Perfil', href: '/app/perfil' },
   ];
