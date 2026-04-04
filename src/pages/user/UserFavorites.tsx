@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { useFavorites } from '@/hooks/useUserData';
 import { useCollections, useCollectionRecipes, useDeleteCollection } from '@/hooks/useCollections';
 import { Button } from '@/components/ui/button';
-import { Heart, FolderOpen, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Heart, FolderOpen, Trash2, ChevronDown, ChevronUp, GraduationCap } from 'lucide-react';
 import { LessonCard, LessonCardSkeleton } from '@/components/user/LessonCard';
 import {
   AlertDialog,
@@ -23,8 +25,66 @@ const UserFavorites: React.FC = () => {
   const { data: collectionRecipes = [], isLoading: loadingCR } = useCollectionRecipes();
   const deleteCollection = useDeleteCollection();
   const [expandedLists, setExpandedLists] = useState<Set<string>>(new Set());
+  const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
 
   const isLoading = loadingFavs || loadingCols || loadingCR;
+
+  // Find the "Cursos" collection
+  const cursosCollection = collections.find((c) => c.name === 'Cursos');
+  const cursosRecipeIds = cursosCollection
+    ? collectionRecipes.filter((cr) => cr.collection_id === cursosCollection.id).map((cr) => cr.recipe_id)
+    : [];
+
+  // Fetch package (course) info for recipes in "Cursos" collection
+  const { data: recipePackageMap = {} } = useQuery({
+    queryKey: ['recipe-package-map', cursosRecipeIds.sort().join(',')],
+    queryFn: async () => {
+      if (cursosRecipeIds.length === 0) return {};
+      
+      // Get recipe_packages for these recipes
+      const { data: rps } = await supabase
+        .from('recipe_packages')
+        .select('recipe_id, package_id')
+        .in('recipe_id', cursosRecipeIds);
+
+      if (!rps || rps.length === 0) return {};
+
+      const packageIds = [...new Set(rps.map((rp) => rp.package_id))];
+
+      // Get course_packages to find course names
+      const { data: cps } = await supabase
+        .from('course_packages')
+        .select('package_id, course:courses(id, name)')
+        .in('package_id', packageIds);
+
+      // Build: recipe_id -> course name
+      const pkgToCourse: Record<string, string> = {};
+      for (const cp of cps || []) {
+        if (cp.course) {
+          pkgToCourse[cp.package_id] = (cp.course as any).name;
+        }
+      }
+
+      // Also get package names as fallback
+      const { data: pkgs } = await supabase
+        .from('packages')
+        .select('id, name')
+        .in('id', packageIds);
+
+      const pkgNameMap: Record<string, string> = {};
+      for (const p of pkgs || []) {
+        pkgNameMap[p.id] = p.name;
+      }
+
+      const result: Record<string, string> = {};
+      for (const rp of rps) {
+        // Prefer course name, fallback to package name
+        result[rp.recipe_id] = pkgToCourse[rp.package_id] || pkgNameMap[rp.package_id] || 'Curso';
+      }
+      return result;
+    },
+    enabled: cursosRecipeIds.length > 0,
+  });
 
   const toggleExpand = (id: string) => {
     setExpandedLists((prev) => {
@@ -34,11 +94,22 @@ const UserFavorites: React.FC = () => {
     });
   };
 
+  const toggleCourseExpand = (courseName: string) => {
+    setExpandedCourses((prev) => {
+      const next = new Set(prev);
+      next.has(courseName) ? next.delete(courseName) : next.add(courseName);
+      return next;
+    });
+  };
+
   // Recipes in any collection (to separate from "ungrouped" favorites)
   const recipesInCollections = new Set(collectionRecipes.map((cr) => cr.recipe_id));
 
   // Ungrouped favorites = favorites NOT in any collection
   const ungroupedFavorites = favorites.filter((f) => !recipesInCollections.has(f.recipe_id));
+
+  // Other collections (not "Cursos")
+  const otherCollections = collections.filter((c) => c.name !== 'Cursos');
 
   if (isLoading) {
     return (
@@ -55,13 +126,25 @@ const UserFavorites: React.FC = () => {
 
   const totalCount = favorites.length;
 
+  // Group cursos recipes by course name
+  const cursosRecipes = cursosCollection
+    ? collectionRecipes.filter((cr) => cr.collection_id === cursosCollection.id)
+    : [];
+
+  const courseGroups: Record<string, typeof cursosRecipes> = {};
+  for (const cr of cursosRecipes) {
+    const courseName = recipePackageMap[cr.recipe_id] || 'Outros';
+    if (!courseGroups[courseName]) courseGroups[courseName] = [];
+    courseGroups[courseName].push(cr);
+  }
+
   return (
     <div className="container mx-auto px-4 py-6 pb-24 space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground mb-2">Favoritos</h1>
         <p className="text-muted-foreground">
-          {totalCount} {totalCount === 1 ? 'receita salva' : 'receitas salvas'}
+          {totalCount} {totalCount === 1 ? 'item salvo' : 'itens salvos'}
         </p>
       </div>
 
@@ -79,8 +162,73 @@ const UserFavorites: React.FC = () => {
         </div>
       ) : (
         <>
-          {/* Collections */}
-          {collections.map((col) => {
+          {/* "Cursos" collection with sub-grouping */}
+          {cursosCollection && cursosRecipes.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => toggleExpand(cursosCollection.id)}
+                  className="flex items-center gap-2 text-left"
+                >
+                  <GraduationCap className="h-5 w-5 text-primary" />
+                  <span className="font-semibold text-foreground">Cursos</span>
+                  <span className="text-sm text-muted-foreground">({cursosRecipes.length})</span>
+                  {expandedLists.has(cursosCollection.id) ? (
+                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </button>
+              </div>
+
+              {expandedLists.has(cursosCollection.id) && (
+                <div className="space-y-2 pl-2">
+                  {Object.entries(courseGroups).map(([courseName, recipes]) => {
+                    const isCourseExpanded = expandedCourses.has(courseName);
+                    return (
+                      <div key={courseName} className="space-y-2">
+                        <button
+                          onClick={() => toggleCourseExpand(courseName)}
+                          className="flex items-center gap-2 text-left w-full py-1"
+                        >
+                          <FolderOpen className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium text-sm text-foreground">{courseName}</span>
+                          <span className="text-xs text-muted-foreground">({recipes.length})</span>
+                          {isCourseExpanded ? (
+                            <ChevronUp className="h-3.5 w-3.5 text-muted-foreground ml-auto" />
+                          ) : (
+                            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground ml-auto" />
+                          )}
+                        </button>
+
+                        {isCourseExpanded && (
+                          <div className="grid gap-3 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pl-2">
+                            {recipes.map((cr) =>
+                              cr.recipe ? (
+                                <LessonCard
+                                  key={cr.id}
+                                  lesson={{
+                                    id: cr.recipe_id,
+                                    name: (cr.recipe as any).name,
+                                    image_url: (cr.recipe as any).image_url || (cr.recipe as any).cover_image_url,
+                                    servings: (cr.recipe as any).servings,
+                                  }}
+                                  compact
+                                />
+                              ) : null
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Other Collections */}
+          {otherCollections.map((col) => {
             const colRecipes = collectionRecipes.filter((cr) => cr.collection_id === col.id);
             const isExpanded = expandedLists.has(col.id);
 
@@ -154,7 +302,7 @@ const UserFavorites: React.FC = () => {
           {/* Ungrouped favorites */}
           {ungroupedFavorites.length > 0 && (
             <div className="space-y-3">
-              {collections.length > 0 && (
+              {(otherCollections.length > 0 || cursosCollection) && (
                 <div className="flex items-center gap-2">
                   <Heart className="h-5 w-5 text-red-500" />
                   <span className="font-semibold text-foreground">Sem lista</span>
