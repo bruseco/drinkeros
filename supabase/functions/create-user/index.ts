@@ -11,6 +11,9 @@ interface CreateUserRequest {
   email: string;
   fullName?: string;
   packageIds?: string[];
+  comboIds?: string[];
+  courseIds?: string[];
+  ebookIds?: string[];
   phone?: string;
 }
 
@@ -45,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Permission denied");
     }
 
-    const { email, fullName, packageIds, phone }: CreateUserRequest = await req.json();
+    const { email, fullName, packageIds, comboIds, courseIds, ebookIds, phone }: CreateUserRequest = await req.json();
 
     if (!email) {
       throw new Error("Email is required");
@@ -94,18 +97,31 @@ const handler = async (req: Request): Promise<Response> => {
     // Assign packages if provided
     if (packageIds && packageIds.length > 0) {
       const { error: packagesError } = await supabase.from("user_packages").insert(
-        packageIds.map((packageId) => ({
-          user_id: userId,
-          package_id: packageId,
-        }))
+        packageIds.map((packageId) => ({ user_id: userId, package_id: packageId }))
       );
-
-      if (packagesError) {
-        console.warn("Failed to assign packages:", packagesError);
-      }
+      if (packagesError) console.warn("Failed to assign packages:", packagesError);
     }
 
-    // Send welcome email
+    if (comboIds && comboIds.length > 0) {
+      const { error: combosError } = await supabase.from("user_combos").insert(
+        comboIds.map((comboId) => ({ user_id: userId, combo_id: comboId }))
+      );
+      if (combosError) console.warn("Failed to assign combos:", combosError);
+    }
+
+    if (courseIds && courseIds.length > 0) {
+      const { error: coursesError } = await supabase.from("user_courses").insert(
+        courseIds.map((courseId) => ({ user_id: userId, course_id: courseId }))
+      );
+      if (coursesError) console.warn("Failed to assign courses:", coursesError);
+    }
+
+    if (ebookIds && ebookIds.length > 0) {
+      const { error: ebooksError } = await supabase.from("user_ebooks").insert(
+        ebookIds.map((ebookId) => ({ user_id: userId, ebook_id: ebookId }))
+      );
+      if (ebooksError) console.warn("Failed to assign ebooks:", ebooksError);
+    }
     const loginUrl = "https://alunos.criminallab.com.br";
     try {
       const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-welcome-email`, {
