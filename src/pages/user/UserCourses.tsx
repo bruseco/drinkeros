@@ -67,11 +67,11 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, owned }) => {
 
   return (
     <Link to={linkTo}>
-      <div className="group overflow-hidden rounded-2xl shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative">
+      <div className="group rounded-2xl shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative">
         <img
           src={course.cover_image_url || defaultCover}
           alt={course.name}
-          className={`w-full object-contain transition-transform duration-500 group-hover:scale-105 ${
+          className={`w-full h-auto rounded-2xl transition-transform duration-500 ${
             !owned ? 'opacity-50 grayscale-[30%]' : ''
           }`}
         />
