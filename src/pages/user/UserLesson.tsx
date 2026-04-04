@@ -189,7 +189,12 @@ const UserLesson: React.FC = () => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => toggleFavorite.mutate({ recipeId: lesson.id, isFavorite })}
+          onClick={() => {
+            toggleFavorite.mutate({ recipeId: lesson.id, isFavorite });
+            if (!isFavorite) {
+              addToCursos.mutate(lesson.id);
+            }
+          }}
         >
           <Heart
             className={cn('h-5 w-5', isFavorite && 'fill-destructive text-destructive')}
