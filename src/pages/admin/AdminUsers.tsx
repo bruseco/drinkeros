@@ -71,7 +71,7 @@ const typeLabel: Record<string, string> = {
 const AccessItemList: React.FC<{
   items: AccessItem[];
   selectedIds: Set<string>;
-  onToggle: (id: string, type: 'combo' | 'course' | 'module') => void;
+  onToggle: (id: string, type: 'combo' | 'course' | 'module' | 'ebook') => void;
   searchFilter: string;
   typeFilter: AccessType;
   onSearchChange: (v: string) => void;
