@@ -79,7 +79,6 @@ export const useExclusivePostsPaginated = ({
       const from = pageParam * pageSize;
 
       if (search.trim()) {
-        // Use RPC for deep search across arrays
         const { data, error } = await supabase.rpc('search_exclusive_posts', {
           p_term: search.trim(),
           p_published_only: publishedOnly,
@@ -99,17 +98,53 @@ export const useExclusivePostsPaginated = ({
         };
       }
 
-      // No search — use normal query
+      if (randomOrder) {
+        // Fetch ALL ids, shuffle with seed, then fetch only the page slice
+        let allQuery = supabase
+          .from('exclusive_posts')
+          .select('id');
+
+        if (publishedOnly) {
+          allQuery = allQuery.eq('is_published', true);
+        }
+
+        const { data: allIds, error: allErr } = await allQuery;
+        if (allErr) throw allErr;
+
+        const shuffled = seededShuffle(allIds || [], postsSeed);
+        const total = shuffled.length;
+        const pageIds = shuffled.slice(from, from + pageSize).map(r => r.id);
+
+        if (pageIds.length === 0) {
+          return { posts: [] as ExclusivePost[], total, hasMore: false };
+        }
+
+        const { data, error } = await supabase
+          .from('exclusive_posts')
+          .select('*')
+          .in('id', pageIds);
+
+        if (error) throw error;
+
+        // Re-sort to match shuffled order
+        const orderMap = new Map(pageIds.map((id, i) => [id, i]));
+        const sorted = (data as ExclusivePost[]).sort(
+          (a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)
+        );
+
+        return {
+          posts: sorted,
+          total,
+          hasMore: from + pageSize < total,
+        };
+      }
+
+      // No search, no random — use normal query
       let query = supabase
         .from('exclusive_posts')
         .select('*', { count: 'exact' })
+        .order('display_order', { ascending: true })
         .range(from, from + pageSize - 1);
-
-      if (!randomOrder) {
-        query = query.order('display_order', { ascending: true });
-      } else {
-        query = query.order('created_at', { ascending: false });
-      }
 
       if (publishedOnly) {
         query = query.eq('is_published', true);
