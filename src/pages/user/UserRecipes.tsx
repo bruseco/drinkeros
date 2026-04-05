@@ -124,6 +124,17 @@ const UserRecipes: React.FC = () => {
 
   const recipes = data?.pages.flatMap((page) => page.posts) ?? [];
 
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el || !hasNextPage || isFetchingNextPage) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) fetchNextPage(); },
+      { rootMargin: '200px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
       <div className="space-y-5">
