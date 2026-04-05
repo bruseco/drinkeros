@@ -44,6 +44,8 @@ const detectPlatform = (url: string): VideoPlatform => {
 
 const LessonForm: React.FC = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const preselectedModule = searchParams.get('modulo');
   const navigate = useNavigate();
   const { user } = useAuth();
   const isEditing = !!id;
