@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FullscreenVideo } from '@/components/user/FullscreenVideo';
 import { useParams, Link } from 'react-router-dom';
 import { useExclusivePost } from '@/hooks/useExclusivePosts';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';

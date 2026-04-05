@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { FullscreenVideo } from '@/components/user/FullscreenVideo';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import logoUrl from '@/assets/logotipo-drinkeros.png';
 import ReactMarkdown from 'react-markdown';
