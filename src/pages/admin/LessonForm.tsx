@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useRecipe, useCreateRecipe, useUpdateRecipe } from '@/hooks/useRecipes';
 import { usePackages } from '@/hooks/usePackages';
 import { useImageUpload } from '@/hooks/useImageUpload';
@@ -44,6 +44,8 @@ const detectPlatform = (url: string): VideoPlatform => {
 
 const LessonForm: React.FC = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const preselectedModule = searchParams.get('modulo');
   const navigate = useNavigate();
   const { user } = useAuth();
   const isEditing = !!id;
@@ -109,6 +111,13 @@ const LessonForm: React.FC = () => {
         });
     }
   }, [lesson]);
+
+  // Pre-select module from query param when creating a new lesson
+  useEffect(() => {
+    if (!isEditing && preselectedModule && selectedModules.length === 0) {
+      setSelectedModules([preselectedModule]);
+    }
+  }, [isEditing, preselectedModule]);
 
   const fetchVimeoData = async (videoUrl: string, force = false): Promise<{ thumbnails: ThumbnailOption[]; duration?: number }> => {
     const match = videoUrl.match(/vimeo\.com\/(\d+)(?:\/([a-zA-Z0-9]+))?/);
