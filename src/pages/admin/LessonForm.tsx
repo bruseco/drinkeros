@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useRecipe, useCreateRecipe, useUpdateRecipe } from '@/hooks/useRecipes';
 import { usePackages } from '@/hooks/usePackages';
 import { useImageUpload } from '@/hooks/useImageUpload';
