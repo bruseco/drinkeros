@@ -2,6 +2,26 @@ import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tansta
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+// Seed that changes on every call to refreshPostsSeed()
+let postsSeed = Math.floor(Math.random() * 2147483647);
+export function refreshPostsSeed() {
+  postsSeed = Math.floor(Math.random() * 2147483647);
+}
+
+function seededShuffle<T>(arr: T[], seed: number): T[] {
+  const result = [...arr];
+  let s = seed;
+  const rng = () => {
+    s = (s * 16807 + 0) % 2147483647;
+    return s / 2147483647;
+  };
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
 export interface ExclusivePost {
   id: string;
   title: string;
