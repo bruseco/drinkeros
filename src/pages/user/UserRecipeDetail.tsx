@@ -82,15 +82,11 @@ const UserRecipeDetail: React.FC = () => {
     <div className="pb-24">
       {/* YouTube Video */}
       {embedUrl ? (
-        <div className="w-full aspect-video bg-black">
-          <iframe
-            src={embedUrl}
-            title={recipe.title}
-            className="w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
+        <FullscreenVideo
+          embedUrl={embedUrl}
+          title={recipe.title}
+          thumbnailUrl={recipe.cover_image_url || undefined}
+        />
       ) : recipe.cover_image_url ? (
         <div className="w-full aspect-video bg-black">
           <img src={recipe.cover_image_url} alt={recipe.title} className="w-full h-full object-cover" />
