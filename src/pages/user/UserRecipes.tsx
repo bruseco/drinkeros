@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useExclusivePostsPaginated } from '@/hooks/useExclusivePosts';
 import { Loader2, Search, Wine } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useDebounce } from '@/hooks/useDebounce';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
