@@ -11,25 +11,29 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
   const [displayChildren, setDisplayChildren] = useState(children);
   const [transitionClass, setTransitionClass] = useState('page-enter');
   const prevKeyRef = useRef(location.key);
+  const disableWrapper = location.pathname === '/app/receitas';
 
   useEffect(() => {
-    if (location.key === prevKeyRef.current) return;
+    if (disableWrapper || location.key === prevKeyRef.current) return;
 
     const isPop = navigationType === 'POP';
     const exitClass = isPop ? 'page-exit-right' : 'page-exit-left';
     const enterClass = isPop ? 'page-enter-left' : 'page-enter-right';
 
-    // Start exit animation on current content
     setTransitionClass(exitClass);
 
     const timeout = setTimeout(() => {
       setDisplayChildren(children);
       setTransitionClass(enterClass);
       prevKeyRef.current = location.key;
-    }, 150); // match CSS duration
+    }, 150);
 
     return () => clearTimeout(timeout);
-  }, [location.key, navigationType, children]);
+  }, [location.key, navigationType, children, disableWrapper]);
+
+  if (disableWrapper) {
+    return <>{children}</>;
+  }
 
   return (
     <div className={`page-transition ${transitionClass}`}>
