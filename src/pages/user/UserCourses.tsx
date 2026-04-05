@@ -77,7 +77,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, owned }) => {
         />
 
         {/* Badge */}
-        <div className="absolute top-3 right-3">
+        <div className="absolute top-3 right-3 z-20">
           {owned ? (
             <Badge className="bg-success text-success-foreground border-0 shadow-md text-xs">
               ✓ Adquirido
