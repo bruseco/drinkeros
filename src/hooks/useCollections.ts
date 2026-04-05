@@ -31,6 +31,15 @@ export const useCollectionRecipes = () => {
     queryKey: ['collection-recipes', user?.id],
     queryFn: async () => {
       if (!user) return [];
+      // First check if user has any collections to avoid unnecessary join query
+      const { data: cols } = await supabase
+        .from('collections')
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1);
+      
+      if (!cols || cols.length === 0) return [];
+
       const { data, error } = await supabase
         .from('collection_recipes')
         .select(`
@@ -40,11 +49,11 @@ export const useCollectionRecipes = () => {
           recipe:recipes(id, name, image_url, servings)
         `)
         .order('created_at', { ascending: true });
-      // RLS ensures only user's collections' recipes are returned
       if (error) throw error;
       return data;
     },
     enabled: !!user,
+    staleTime: 2 * 60 * 1000,
   });
 };
 
