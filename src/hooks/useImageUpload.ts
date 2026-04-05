@@ -104,7 +104,7 @@ const optimizeImage = (file: File): Promise<{ blob: Blob; format: string }> => {
   });
 };
 
-export const useImageUpload = (bucket: 'recipe-images' | 'package-covers') => {
+export const useImageUpload = (bucket: 'recipe-images' | 'package-covers', options?: { skipOptimize?: boolean }) => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
@@ -117,6 +117,18 @@ export const useImageUpload = (bucket: 'recipe-images' | 'package-covers') => {
         const { error: uploadError } = await supabase.storage
           .from(bucket)
           .upload(fileName, file, { contentType: 'image/gif' });
+        if (uploadError) throw uploadError;
+        const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(fileName);
+        return publicUrl;
+      }
+
+      // Skip optimization: upload original file without crop/resize
+      if (options?.skipOptimize) {
+        const ext = file.name.split('.').pop() || 'png';
+        const fileName = `${crypto.randomUUID()}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from(bucket)
+          .upload(fileName, file, { contentType: file.type });
         if (uploadError) throw uploadError;
         const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(fileName);
         return publicUrl;
