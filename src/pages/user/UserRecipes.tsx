@@ -127,7 +127,13 @@ const UserRecipes: React.FC = () => {
     <div className="container mx-auto px-4 py-6 pb-24">
       <div className="space-y-5">
         <div ref={stickyRef} className="sticky top-0 z-[60] -mx-4 px-4 py-2">
-          <div className="mx-auto flex items-center gap-3 rounded-full border border-border/60 bg-background/95 px-3 py-2 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80">
+          <div className="mx-auto flex items-center gap-2 rounded-full border border-border/60 bg-background/95 px-3 py-2 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80">
+            {isStuck && (
+              <Link to="/app" className="shrink-0 animate-fade-in" aria-label="Ir para a página inicial">
+                <img src={drinkrosLogo} alt="Drinkeros" className="h-5 w-auto object-contain" />
+              </Link>
+            )}
+
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -140,12 +146,6 @@ const UserRecipes: React.FC = () => {
                 aria-label="Buscar receitas"
               />
             </div>
-
-            {isStuck && (
-              <Link to="/app" className="shrink-0 animate-fade-in" aria-label="Ir para a página inicial">
-                <img src={drinkrosLogo} alt="Drinkeros" className="h-7 w-auto object-contain" />
-              </Link>
-            )}
           </div>
         </div>
 
