@@ -198,13 +198,13 @@ const EbookForm: React.FC = () => {
               <CardContent>
                 {formData.cover_image_url ? (
                   <div className="relative">
-                    <img src={formData.cover_image_url} alt="Preview" className="aspect-[3/4] w-full rounded-lg object-cover" />
+                    <img src={formData.cover_image_url} alt="Preview" className="aspect-square w-full rounded-lg object-contain" />
                     <Button type="button" variant="destructive" size="icon" className="absolute right-2 top-2" onClick={() => setFormData((prev) => ({ ...prev, cover_image_url: '' }))}>
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
                 ) : (
-                  <label className="flex aspect-[3/4] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 transition-colors hover:bg-muted">
+                  <label className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 transition-colors hover:bg-muted">
                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={isUploadingImage} />
                     {isUploadingImage ? <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /> : (
                       <>
