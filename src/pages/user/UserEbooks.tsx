@@ -39,11 +39,11 @@ const UserEbooks: React.FC = () => {
               <div key={ebook.id} className="flex flex-col items-center w-full max-w-[390px] mx-auto">
                 <div className="relative w-full">
                   {ebook.cover_image_url ? (
-                    <div className={`w-full aspect-square rounded-2xl overflow-hidden flex items-center justify-center bg-black ${!owned ? 'opacity-60 grayscale-[30%]' : ''}`}>
+                    <div className={`w-full rounded-2xl overflow-hidden flex items-center justify-center ${!owned ? 'opacity-60 grayscale-[30%]' : ''}`}>
                       <img
                         src={ebook.cover_image_url}
                         alt={ebook.name}
-                        className="w-full h-full object-contain"
+                        className="w-full h-auto object-contain"
                       />
                     </div>
                   ) : (
