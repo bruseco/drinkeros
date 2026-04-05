@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useExclusivePostsPaginated } from '@/hooks/useExclusivePosts';
 import { Loader2, Search, Wine } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { useDebounce } from '@/hooks/useDebounce';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
@@ -89,6 +88,8 @@ const UserRecipes: React.FC = () => {
   const { display: typingPlaceholder, isFocused, setIsFocused } = useTypingPlaceholder(SEARCH_PLACEHOLDERS);
   const debouncedSearch = useDebounce(search, 300);
   const stickyRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
 
   useEffect(() => {
     const el = stickyRef.current;
@@ -122,6 +123,17 @@ const UserRecipes: React.FC = () => {
   });
 
   const recipes = data?.pages.flatMap((page) => page.posts) ?? [];
+
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el || !hasNextPage || isFetchingNextPage) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) fetchNextPage(); },
+      { rootMargin: '200px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
@@ -186,16 +198,8 @@ const UserRecipes: React.FC = () => {
             </div>
 
             {hasNextPage && (
-              <div className="flex justify-center pt-2">
-                <Button
-                  variant="outline"
-                  onClick={() => fetchNextPage()}
-                  disabled={isFetchingNextPage}
-                  className="rounded-full"
-                >
-                  {isFetchingNextPage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  Carregar mais
-                </Button>
+              <div ref={loadMoreRef} className="flex justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             )}
           </>
