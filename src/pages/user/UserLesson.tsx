@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { FullscreenVideo } from '@/components/user/FullscreenVideo';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import logoUrl from '@/assets/logotipo-drinkeros.png';
 import ReactMarkdown from 'react-markdown';
@@ -209,14 +210,11 @@ const UserLesson: React.FC = () => {
           {/* Video Player */}
           {lesson.video_url ? (
             <Card className="mb-4 overflow-hidden rounded-xl border-0 shadow-lg">
-              <div className="aspect-video bg-black">
-                <iframe
-                  src={getVideoEmbedUrl(lesson.video_url)}
-                  className="h-full w-full"
-                  allowFullScreen
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                />
-              </div>
+              <FullscreenVideo
+                embedUrl={getVideoEmbedUrl(lesson.video_url)}
+                title={lesson.name}
+                thumbnailUrl={lesson.image_url || undefined}
+              />
             </Card>
           ) : lesson.image_url ? (
             <div className="mb-4 overflow-hidden rounded-xl">
