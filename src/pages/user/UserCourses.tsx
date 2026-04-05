@@ -91,7 +91,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, owned }) => {
         </div>
 
         {/* Top label */}
-        <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/70 to-transparent p-3 pb-8">
+        <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/70 to-transparent p-3 pb-8 z-10">
           <div className="flex items-center gap-1 text-white/90 text-xs">
             <span>{owned ? 'Ver módulos' : 'Saiba mais'}</span>
             <ChevronRight className="h-3 w-3" />
