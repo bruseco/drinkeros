@@ -24,8 +24,8 @@ export const UserNavbar: React.FC = () => {
 
   return (
     <>
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+      {/* Top Navbar - hidden on desktop where sidebar is used */}
+      <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 lg:hidden">
         <div className="container mx-auto flex h-16 items-center justify-center px-4 relative">
           {isInternalPage && (
             <Button
@@ -44,7 +44,7 @@ export const UserNavbar: React.FC = () => {
       </header>
 
       {/* Bottom Navigation (Mobile) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.3)] backdrop-blur supports-[backdrop-filter]:bg-card/80 md:hidden pb-[7px]">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.3)] backdrop-blur supports-[backdrop-filter]:bg-card/80 lg:hidden pb-[7px]">
         <div className="flex items-center justify-around py-2 px-2">
           {navItems.map((item) => {
             const isActive = location.pathname === item.href;

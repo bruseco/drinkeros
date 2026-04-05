@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserNavbar } from './UserNavbar';
+import { UserSidebar } from './UserSidebar';
 import { PushNotificationPrompt } from './PushNotificationPrompt';
 import { PageTransition } from './PageTransition';
 
@@ -23,14 +24,17 @@ export const UserLayout: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <UserNavbar />
-      <PushNotificationPrompt />
-      <main className="flex-1 pb-20 overflow-x-hidden">
-        <PageTransition>
-          <Outlet />
-        </PageTransition>
-      </main>
+    <div className="flex min-h-screen bg-background">
+      <UserSidebar />
+      <div className="flex flex-1 flex-col min-w-0">
+        <UserNavbar />
+        <PushNotificationPrompt />
+        <main className="flex-1 pb-20 lg:pb-0 overflow-x-hidden">
+          <PageTransition>
+            <Outlet />
+          </PageTransition>
+        </main>
+      </div>
     </div>
   );
 };
