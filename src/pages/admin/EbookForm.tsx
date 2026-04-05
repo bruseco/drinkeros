@@ -19,7 +19,7 @@ const EbookForm: React.FC = () => {
   const { data: ebook, isLoading } = useEbook(id || '');
   const createEbook = useCreateEbook();
   const updateEbook = useUpdateEbook();
-  const { upload: uploadImage, isUploading: isUploadingImage } = useImageUpload('package-covers');
+  const { upload: uploadImage, isUploading: isUploadingImage } = useImageUpload('package-covers', { skipOptimize: true });
   const { upload: uploadFile, isUploading: isUploadingFile } = useFileUpload('ebook-files');
 
   const [formData, setFormData] = useState({
