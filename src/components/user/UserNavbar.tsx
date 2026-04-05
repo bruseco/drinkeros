@@ -24,8 +24,8 @@ export const UserNavbar: React.FC = () => {
 
   return (
     <>
-      {/* Top Navbar - hidden on desktop where sidebar is used */}
-      <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 lg:hidden">
+      {/* Top Navbar - scrolls with content, hidden on desktop */}
+      <header className="z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 lg:hidden">
         <div className="container mx-auto flex h-16 items-center justify-center px-4 relative">
           {isInternalPage && (
             <Button
