@@ -26,10 +26,10 @@ export const UserLayout: React.FC = () => {
   return (
     <div className="flex min-h-screen bg-background">
       <UserSidebar />
-      <div className="flex flex-1 flex-col min-w-0">
+      <div className="flex flex-1 flex-col min-w-0 overflow-x-hidden">
         <UserNavbar />
         <PushNotificationPrompt />
-        <main className="flex-1 pb-20 lg:pb-0 overflow-x-hidden">
+        <main className="flex-1 pb-20 lg:pb-0">
           <PageTransition>
             <Outlet />
           </PageTransition>
