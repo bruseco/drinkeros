@@ -2,6 +2,26 @@ import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tansta
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+// Seed that changes on every call to refreshPostsSeed()
+let postsSeed = Math.floor(Math.random() * 2147483647);
+export function refreshPostsSeed() {
+  postsSeed = Math.floor(Math.random() * 2147483647);
+}
+
+function seededShuffle<T>(arr: T[], seed: number): T[] {
+  const result = [...arr];
+  let s = seed;
+  const rng = () => {
+    s = (s * 16807 + 0) % 2147483647;
+    return s / 2147483647;
+  };
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
 export interface ExclusivePost {
   id: string;
   title: string;
@@ -54,12 +74,11 @@ export const useExclusivePostsPaginated = ({
   randomOrder = false,
 }: PaginatedPostsParams = {}) => {
   return useInfiniteQuery({
-    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder }],
+    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder, seed: randomOrder ? postsSeed : 0 }],
     queryFn: async ({ pageParam = 0 }) => {
       const from = pageParam * pageSize;
 
       if (search.trim()) {
-        // Use RPC for deep search across arrays
         const { data, error } = await supabase.rpc('search_exclusive_posts', {
           p_term: search.trim(),
           p_published_only: publishedOnly,
@@ -79,17 +98,53 @@ export const useExclusivePostsPaginated = ({
         };
       }
 
-      // No search — use normal query
+      if (randomOrder) {
+        // Fetch ALL ids, shuffle with seed, then fetch only the page slice
+        let allQuery = supabase
+          .from('exclusive_posts')
+          .select('id');
+
+        if (publishedOnly) {
+          allQuery = allQuery.eq('is_published', true);
+        }
+
+        const { data: allIds, error: allErr } = await allQuery;
+        if (allErr) throw allErr;
+
+        const shuffled = seededShuffle(allIds || [], postsSeed);
+        const total = shuffled.length;
+        const pageIds = shuffled.slice(from, from + pageSize).map(r => r.id);
+
+        if (pageIds.length === 0) {
+          return { posts: [] as ExclusivePost[], total, hasMore: false };
+        }
+
+        const { data, error } = await supabase
+          .from('exclusive_posts')
+          .select('*')
+          .in('id', pageIds);
+
+        if (error) throw error;
+
+        // Re-sort to match shuffled order
+        const orderMap = new Map(pageIds.map((id, i) => [id, i]));
+        const sorted = (data as ExclusivePost[]).sort(
+          (a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)
+        );
+
+        return {
+          posts: sorted,
+          total,
+          hasMore: from + pageSize < total,
+        };
+      }
+
+      // No search, no random — use normal query
       let query = supabase
         .from('exclusive_posts')
         .select('*', { count: 'exact' })
+        .order('display_order', { ascending: true })
         .range(from, from + pageSize - 1);
-
-      if (!randomOrder) {
-        query = query.order('display_order', { ascending: true });
-      } else {
-        query = query.order('created_at', { ascending: false });
-      }
 
       if (publishedOnly) {
         query = query.eq('is_published', true);

@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useExclusivePostsPaginated } from '@/hooks/useExclusivePosts';
+import { useExclusivePostsPaginated, refreshPostsSeed } from '@/hooks/useExclusivePosts';
 import { Loader2, Search, Wine } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from '@/hooks/useDebounce';
+import { refreshRecipeSeed } from '@/hooks/useUserRecipesPaginated';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
 const SEARCH_PLACEHOLDERS = [
@@ -83,6 +84,8 @@ const useTypingPlaceholder = (texts: string[], typingSpeed = 80, pauseMs = 2000)
 };
 
 const UserRecipes: React.FC = () => {
+  // Refresh seed on every mount so drinks appear in a new order
+  useEffect(() => { refreshRecipeSeed(); refreshPostsSeed(); }, []);
   const [search, setSearch] = useState('');
   const [isStuck, setIsStuck] = useState(false);
   const { display: typingPlaceholder, isFocused, setIsFocused } = useTypingPlaceholder(SEARCH_PLACEHOLDERS);
