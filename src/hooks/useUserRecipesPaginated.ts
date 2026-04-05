@@ -12,8 +12,13 @@ function seededRandom(seed: number) {
   };
 }
 
-// Generate a session seed (changes on each page load / navigation)
-const sessionSeed = Math.floor(Math.random() * 2147483647);
+// Generate a fresh seed every time this module is evaluated OR when refreshSeed() is called
+let currentSeed = Math.floor(Math.random() * 2147483647);
+
+/** Call this to get a new random order on next fetch */
+export function refreshRecipeSeed() {
+  currentSeed = Math.floor(Math.random() * 2147483647);
+}
 
 export interface Recipe {
   id: string;
