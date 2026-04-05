@@ -134,7 +134,7 @@ const fetchPaginatedRecipes = async ({
   } else {
     // Seeded Fisher-Yates shuffle — stable within session, different across page loads
     sorted = [...(data || [])];
-    const rng = seededRandom(sessionSeed);
+    const rng = seededRandom(currentSeed);
     for (let i = sorted.length - 1; i > 0; i--) {
       const j = Math.floor(rng() * (i + 1));
       [sorted[i], sorted[j]] = [sorted[j], sorted[i]];
