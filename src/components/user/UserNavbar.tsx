@@ -13,6 +13,7 @@ export const UserNavbar: React.FC = () => {
   const navigate = useNavigate();
 
   const isInternalPage = !mainRoutes.includes(location.pathname);
+  const isRecipesListPage = location.pathname === '/app/receitas';
 
   const navItems = [
     { icon: Wine, label: 'Receitas', href: '/app/receitas' },
@@ -24,8 +25,11 @@ export const UserNavbar: React.FC = () => {
 
   return (
     <>
-      {/* Top Navbar - scrolls with content, hidden on desktop */}
-      <header className="z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 lg:hidden">
+      {/* Top Navbar - sticky in all user sections except recipes list, hidden on desktop */}
+      <header className={cn(
+        'z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 lg:hidden',
+        !isRecipesListPage && 'sticky top-0'
+      )}>
         <div className="container mx-auto flex h-16 items-center justify-center px-4 relative">
           {isInternalPage && (
             <Button
