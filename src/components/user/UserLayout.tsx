@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserNavbar } from './UserNavbar';
+import { UserSidebar } from './UserSidebar';
 import { PushNotificationPrompt } from './PushNotificationPrompt';
 import { PageTransition } from './PageTransition';
 
