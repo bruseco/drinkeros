@@ -20,6 +20,7 @@ export const useCollections = () => {
       return data;
     },
     enabled: !!user,
+    staleTime: 2 * 60 * 1000,
   });
 };
 
