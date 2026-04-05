@@ -74,7 +74,7 @@ export const useExclusivePostsPaginated = ({
   randomOrder = false,
 }: PaginatedPostsParams = {}) => {
   return useInfiniteQuery({
-    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder }],
+    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder, seed: randomOrder ? postsSeed : 0 }],
     queryFn: async ({ pageParam = 0 }) => {
       const from = pageParam * pageSize;
 
