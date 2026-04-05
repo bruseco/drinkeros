@@ -51,7 +51,7 @@ const UserEbooks: React.FC = () => {
                       <FileText className="h-10 w-10 text-muted-foreground" />
                     </div>
                   )}
-                  <div className="absolute top-6 right-5 z-10">
+                  <div className="absolute top-15 right-20 z-10">
                     {owned ? (
                       <Badge className="bg-success text-success-foreground border-0 shadow-md text-xs">
                         ✓ Adquirido
