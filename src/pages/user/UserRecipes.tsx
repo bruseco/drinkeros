@@ -84,6 +84,8 @@ const useTypingPlaceholder = (texts: string[], typingSpeed = 80, pauseMs = 2000)
 };
 
 const UserRecipes: React.FC = () => {
+  // Refresh seed on every mount so drinks appear in a new order
+  useEffect(() => { refreshRecipeSeed(); }, []);
   const [search, setSearch] = useState('');
   const [isStuck, setIsStuck] = useState(false);
   const { display: typingPlaceholder, isFocused, setIsFocused } = useTypingPlaceholder(SEARCH_PLACEHOLDERS);
