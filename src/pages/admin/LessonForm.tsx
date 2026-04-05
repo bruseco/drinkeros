@@ -112,6 +112,13 @@ const LessonForm: React.FC = () => {
     }
   }, [lesson]);
 
+  // Pre-select module from query param when creating a new lesson
+  useEffect(() => {
+    if (!isEditing && preselectedModule && selectedModules.length === 0) {
+      setSelectedModules([preselectedModule]);
+    }
+  }, [isEditing, preselectedModule]);
+
   const fetchVimeoData = async (videoUrl: string, force = false): Promise<{ thumbnails: ThumbnailOption[]; duration?: number }> => {
     const match = videoUrl.match(/vimeo\.com\/(\d+)(?:\/([a-zA-Z0-9]+))?/);
     if (!match) return { thumbnails: [] };
