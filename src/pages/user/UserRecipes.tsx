@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useExclusivePostsPaginated } from '@/hooks/useExclusivePosts';
 import { Loader2, Search, Wine } from 'lucide-react';
@@ -85,8 +85,28 @@ const useTypingPlaceholder = (texts: string[], typingSpeed = 80, pauseMs = 2000)
 
 const UserRecipes: React.FC = () => {
   const [search, setSearch] = useState('');
+  const [isStuck, setIsStuck] = useState(false);
   const { display: typingPlaceholder, isFocused, setIsFocused } = useTypingPlaceholder(SEARCH_PLACEHOLDERS);
   const debouncedSearch = useDebounce(search, 300);
+  const stickyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = stickyRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsStuck(!entry.isIntersecting),
+      { threshold: 1, rootMargin: '-1px 0px 0px 0px' }
+    );
+    // Observe a sentinel element right above the sticky bar
+    const sentinel = document.createElement('div');
+    sentinel.style.height = '1px';
+    el.parentElement?.insertBefore(sentinel, el);
+    observer.observe(sentinel);
+    return () => {
+      observer.disconnect();
+      sentinel.remove();
+    };
+  }, []);
 
   const {
     data,
@@ -106,7 +126,7 @@ const UserRecipes: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
       <div className="space-y-5">
-        <div className="sticky top-0 z-[60] -mx-4 px-4 py-2">
+        <div ref={stickyRef} className="sticky top-0 z-[60] -mx-4 px-4 py-2">
           <div className="mx-auto flex items-center gap-3 rounded-full border border-border/60 bg-background/95 px-3 py-2 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -120,6 +140,12 @@ const UserRecipes: React.FC = () => {
                 aria-label="Buscar receitas"
               />
             </div>
+
+            {isStuck && (
+              <Link to="/app" className="shrink-0 animate-fade-in" aria-label="Ir para a página inicial">
+                <img src={drinkrosLogo} alt="Drinkeros" className="h-7 w-auto object-contain" />
+              </Link>
+            )}
           </div>
         </div>
 
