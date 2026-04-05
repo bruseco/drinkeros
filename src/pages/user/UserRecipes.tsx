@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useExclusivePostsPaginated } from '@/hooks/useExclusivePosts';
+import { useExclusivePostsPaginated, refreshPostsSeed } from '@/hooks/useExclusivePosts';
 import { Loader2, Search, Wine } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from '@/hooks/useDebounce';
