@@ -109,6 +109,9 @@ export const useExclusivePostsPaginated = ({
         if (publishedOnly) {
           allQuery = allQuery.eq('is_published', true);
         }
+        if (characteristicFilter) {
+          allQuery = allQuery.contains('characteristics', [characteristicFilter]);
+        }
 
         const { data: allIds, error: allErr } = await allQuery;
         if (allErr) throw allErr;
