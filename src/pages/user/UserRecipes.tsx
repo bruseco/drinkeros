@@ -154,7 +154,32 @@ const UserRecipes: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
-      <div className="space-y-5">
+      <div className="space-y-3">
+        {/* Category filter chips */}
+        <ScrollArea className="w-full whitespace-nowrap -mx-4 px-4">
+          <div className="flex gap-2 pb-1">
+            {CATEGORY_FILTERS.map((cat) => {
+              const active = selectedCategory === cat.value;
+              return (
+                <button
+                  key={cat.value}
+                  onClick={() => setSelectedCategory(active ? null : cat.value)}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors border',
+                    active
+                      ? 'bg-accent text-accent-foreground border-accent'
+                      : 'bg-background text-muted-foreground border-border hover:bg-muted'
+                  )}
+                >
+                  <cat.icon className="h-3.5 w-3.5" />
+                  {cat.label}
+                </button>
+              );
+            })}
+          </div>
+          <ScrollBar orientation="horizontal" className="invisible" />
+        </ScrollArea>
+
         <div ref={stickyRef} className="sticky top-0 z-[60] -mx-4 px-4 py-2">
           <div className="mx-auto flex items-center gap-2 rounded-full border border-border/60 bg-background/95 px-3 py-2 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80">
             <div className="relative flex-1">
