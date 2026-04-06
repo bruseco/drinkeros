@@ -65,6 +65,7 @@ interface PaginatedPostsParams {
   pageSize?: number;
   publishedOnly?: boolean;
   randomOrder?: boolean;
+  characteristicFilter?: string;
 }
 
 export const useExclusivePostsPaginated = ({
@@ -72,9 +73,10 @@ export const useExclusivePostsPaginated = ({
   pageSize = 30,
   publishedOnly = false,
   randomOrder = false,
+  characteristicFilter,
 }: PaginatedPostsParams = {}) => {
   return useInfiniteQuery({
-    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder, seed: randomOrder ? postsSeed : 0 }],
+    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder, characteristicFilter, seed: randomOrder ? postsSeed : 0 }],
     queryFn: async ({ pageParam = 0 }) => {
       const from = pageParam * pageSize;
 
