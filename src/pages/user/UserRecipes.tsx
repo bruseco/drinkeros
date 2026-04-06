@@ -13,9 +13,9 @@ const CATEGORY_FILTERS = [
   { label: 'Xaropes Artesanais', value: 'Xaropes Artesanais', icon: GlassWater },
   { label: 'Drinks de Galera', value: 'Drinks de Galera', icon: Users },
   { label: 'Caipirinhas', value: 'Caipirinha', icon: Citrus },
-  { label: 'Batidas', value: 'Batidas', icon: CupSoda },
-  { label: 'Clássicos e Variações', value: 'Clássicos', icon: Martini },
-  { label: 'Sobremesas', value: 'Sobremesas', icon: IceCream },
+  { label: 'Batidas', value: 'Batida', icon: CupSoda },
+  { label: 'Clássicos e Variações', value: 'Clássico', icon: Martini },
+  { label: 'Sobremesas', value: 'Sobremesa', icon: IceCream },
   { label: 'Frozens', value: 'Frozen', icon: Snowflake },
 ];
 
