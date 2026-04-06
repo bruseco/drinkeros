@@ -230,6 +230,7 @@ const AdminExclusiveContent: React.FC = () => {
                   </TableHead>
                   <TableHead>Receita</TableHead>
                   <TableHead>Ingredientes</TableHead>
+                  <TableHead>Características</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="w-12"></TableHead>
                 </TableRow>
