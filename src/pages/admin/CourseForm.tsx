@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCourse, useCreateCourse, useUpdateCourse, useCoursePackages, useSaveCoursePackages } from '@/hooks/useCourses';
 import { usePackages, useCreatePackage, useUpdatePackage, useDeletePackage } from '@/hooks/usePackages';
-import { useRecipes } from '@/hooks/useRecipes';
+import { useRecipes, useDeleteRecipe } from '@/hooks/useRecipes';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,16 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Loader2, Upload, X, GraduationCap, ChevronDown, ChevronRight, Plus, Pencil, Play, Trash2, GripVertical } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface InlineModule {
   id: string | null; // null = new, not yet saved
@@ -36,7 +46,9 @@ const CourseForm: React.FC = () => {
   const createPackage = useCreatePackage();
   const updatePackageMut = useUpdatePackage();
   const deletePackageMut = useDeletePackage();
+  const deleteLesson = useDeleteRecipe();
   const { upload, isUploading } = useImageUpload('package-covers', { skipOptimize: true });
+  const [deleteLessonId, setDeleteLessonId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -517,6 +529,16 @@ const CourseForm: React.FC = () => {
                                           >
                                             <Pencil className="h-3 w-3" />
                                           </Button>
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 text-destructive hover:text-destructive"
+                                            onClick={() => setDeleteLessonId(lesson.id)}
+                                            title="Excluir aula"
+                                          >
+                                            <Trash2 className="h-3 w-3" />
+                                          </Button>
                                         </div>
                                       ))}
                                     </div>
@@ -664,6 +686,31 @@ const CourseForm: React.FC = () => {
           </Button>
         </div>
       </form>
+
+      <AlertDialog open={!!deleteLessonId} onOpenChange={() => setDeleteLessonId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir aula?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. A aula será removida permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (deleteLessonId) {
+                  await deleteLesson.mutateAsync(deleteLessonId);
+                  setDeleteLessonId(null);
+                }
+              }}
+              className="bg-destructive text-destructive-foreground"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
