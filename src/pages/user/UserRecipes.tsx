@@ -1,11 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useExclusivePostsPaginated, refreshPostsSeed } from '@/hooks/useExclusivePosts';
-import { Loader2, Search, Wine } from 'lucide-react';
+import { Loader2, Search, Wine, GlassWater, Users, Citrus, CupSoda, Martini, IceCream, Snowflake } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useDebounce } from '@/hooks/useDebounce';
 import { refreshRecipeSeed } from '@/hooks/useUserRecipesPaginated';
+import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
+
+const CATEGORY_FILTERS = [
+  { label: 'Xaropes Artesanais', value: 'Xaropes Artesanais', icon: GlassWater },
+  { label: 'Drinks de Galera', value: 'Drinks de Galera', icon: Users },
+  { label: 'Caipirinhas', value: 'Caipirinhas', icon: Citrus },
+  { label: 'Batidas', value: 'Batidas', icon: CupSoda },
+  { label: 'Clássicos e Variações', value: 'Clássicos e Variações', icon: Martini },
+  { label: 'Sobremesas', value: 'Sobremesas', icon: IceCream },
+  { label: 'Frozens', value: 'Frozens', icon: Snowflake },
+];
 
 const SEARCH_PLACEHOLDERS = [
   'Drinks com vodka',
@@ -89,6 +101,7 @@ const UserRecipes: React.FC = () => {
   const [search, setSearch] = useState('');
   const [isStuck, setIsStuck] = useState(false);
   const { display: typingPlaceholder, isFocused, setIsFocused } = useTypingPlaceholder(SEARCH_PLACEHOLDERS);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const debouncedSearch = useDebounce(search, 300);
   const stickyRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -123,6 +136,7 @@ const UserRecipes: React.FC = () => {
     pageSize: 15,
     publishedOnly: true,
     randomOrder: true as const,
+    characteristicFilter: selectedCategory || undefined,
   });
 
   const recipes = data?.pages.flatMap((page) => page.posts) ?? [];
@@ -140,7 +154,32 @@ const UserRecipes: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
-      <div className="space-y-5">
+      <div className="space-y-3">
+        {/* Category filter chips */}
+        <ScrollArea className="w-full whitespace-nowrap -mx-4 px-4">
+          <div className="flex gap-2 pb-1">
+            {CATEGORY_FILTERS.map((cat) => {
+              const active = selectedCategory === cat.value;
+              return (
+                <button
+                  key={cat.value}
+                  onClick={() => setSelectedCategory(active ? null : cat.value)}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors border',
+                    active
+                      ? 'bg-accent text-accent-foreground border-accent'
+                      : 'bg-background text-muted-foreground border-border hover:bg-muted'
+                  )}
+                >
+                  <cat.icon className="h-3.5 w-3.5" />
+                  {cat.label}
+                </button>
+              );
+            })}
+          </div>
+          <ScrollBar orientation="horizontal" className="invisible" />
+        </ScrollArea>
+
         <div ref={stickyRef} className="sticky top-0 z-[60] -mx-4 px-4 py-2">
           <div className="mx-auto flex items-center gap-2 rounded-full border border-border/60 bg-background/95 px-3 py-2 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80">
             <div className="relative flex-1">
