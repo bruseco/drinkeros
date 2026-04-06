@@ -1,21 +1,21 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import { toast } from "sonner";
 import { registerSW } from "virtual:pwa-register";
 
 if (import.meta.env.PROD) {
+  // Auto-update: when a new SW is ready, activate it immediately without asking
   const updateSW = registerSW({
     immediate: true,
     onNeedRefresh() {
-      toast("Atualização disponível", {
-        description: "Toque em Atualizar para carregar o novo layout.",
-        action: {
-          label: "Atualizar",
-          onClick: () => updateSW(true),
-        },
-        duration: Infinity,
-      });
+      // Automatically apply the update — no user prompt needed
+      updateSW(true);
+    },
+    onOfflineReady() {
+      console.log("App ready for offline use");
+    },
+    onRegisterError(error) {
+      console.error("SW registration error:", error);
     },
   });
 } else if ("serviceWorker" in navigator) {
