@@ -36,7 +36,9 @@ const CourseForm: React.FC = () => {
   const createPackage = useCreatePackage();
   const updatePackageMut = useUpdatePackage();
   const deletePackageMut = useDeletePackage();
+  const deleteLesson = useDeleteRecipe();
   const { upload, isUploading } = useImageUpload('package-covers', { skipOptimize: true });
+  const [deleteLessonId, setDeleteLessonId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
