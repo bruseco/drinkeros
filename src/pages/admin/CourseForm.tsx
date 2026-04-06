@@ -519,6 +519,16 @@ const CourseForm: React.FC = () => {
                                           >
                                             <Pencil className="h-3 w-3" />
                                           </Button>
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 text-destructive hover:text-destructive"
+                                            onClick={() => setDeleteLessonId(lesson.id)}
+                                            title="Excluir aula"
+                                          >
+                                            <Trash2 className="h-3 w-3" />
+                                          </Button>
                                         </div>
                                       ))}
                                     </div>
