@@ -686,6 +686,31 @@ const CourseForm: React.FC = () => {
           </Button>
         </div>
       </form>
+
+      <AlertDialog open={!!deleteLessonId} onOpenChange={() => setDeleteLessonId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir aula?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. A aula será removida permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (deleteLessonId) {
+                  await deleteLesson.mutateAsync(deleteLessonId);
+                  setDeleteLessonId(null);
+                }
+              }}
+              className="bg-destructive text-destructive-foreground"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
