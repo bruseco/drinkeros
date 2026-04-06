@@ -256,18 +256,22 @@ const AdminExclusiveContent: React.FC = () => {
                         )}
                         <div>
                           <span className="font-medium">{post.title}</span>
-                          {post.characteristics?.length > 0 && (
-                            <div className="flex gap-1 mt-0.5 flex-wrap">
-                              {post.characteristics.slice(0, 3).map((c, i) => (
-                                <Badge key={i} variant="outline" className="text-xs">{c}</Badge>
-                              ))}
-                            </div>
-                          )}
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm text-muted-foreground">{post.ingredients?.length || 0} ingredientes</span>
+                      <InlineTagEditor
+                        tags={post.ingredients || []}
+                        onSave={(tags) => handleUpdateTags(post.id, 'ingredients', tags)}
+                        placeholder="Adicionar ingrediente..."
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <InlineTagEditor
+                        tags={post.characteristics || []}
+                        onSave={(tags) => handleUpdateTags(post.id, 'characteristics', tags)}
+                        placeholder="Adicionar característica..."
+                      />
                     </TableCell>
                     <TableCell>
                       <Badge variant={post.is_published ? 'default' : 'secondary'}>
