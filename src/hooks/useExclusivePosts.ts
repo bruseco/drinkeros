@@ -154,6 +154,9 @@ export const useExclusivePostsPaginated = ({
       if (publishedOnly) {
         query = query.eq('is_published', true);
       }
+      if (characteristicFilter) {
+        query = query.contains('characteristics', [characteristicFilter]);
+      }
 
       const { data, count, error } = await query;
       if (error) throw error;
