@@ -136,6 +136,7 @@ const UserRecipes: React.FC = () => {
     pageSize: 15,
     publishedOnly: true,
     randomOrder: true as const,
+    characteristicFilter: selectedCategory || undefined,
   });
 
   const recipes = data?.pages.flatMap((page) => page.posts) ?? [];
