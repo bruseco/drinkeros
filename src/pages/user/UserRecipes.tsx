@@ -101,6 +101,7 @@ const UserRecipes: React.FC = () => {
   const [search, setSearch] = useState('');
   const [isStuck, setIsStuck] = useState(false);
   const { display: typingPlaceholder, isFocused, setIsFocused } = useTypingPlaceholder(SEARCH_PLACEHOLDERS);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const debouncedSearch = useDebounce(search, 300);
   const stickyRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
