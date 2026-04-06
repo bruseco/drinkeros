@@ -1,11 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useExclusivePostsPaginated, refreshPostsSeed } from '@/hooks/useExclusivePosts';
-import { Loader2, Search, Wine } from 'lucide-react';
+import { Loader2, Search, Wine, GlassWater, Users, Citrus, Cup, Martini, IceCream, Snowflake } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useDebounce } from '@/hooks/useDebounce';
 import { refreshRecipeSeed } from '@/hooks/useUserRecipesPaginated';
+import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
+
+const CATEGORY_FILTERS = [
+  { label: 'Xaropes Artesanais', value: 'Xaropes Artesanais', icon: GlassWater },
+  { label: 'Drinks de Galera', value: 'Drinks de Galera', icon: Users },
+  { label: 'Caipirinhas', value: 'Caipirinhas', icon: Citrus },
+  { label: 'Batidas', value: 'Batidas', icon: Cup },
+  { label: 'Clássicos e Variações', value: 'Clássicos e Variações', icon: Martini },
+  { label: 'Sobremesas', value: 'Sobremesas', icon: IceCream },
+  { label: 'Frozens', value: 'Frozens', icon: Snowflake },
+];
 
 const SEARCH_PLACEHOLDERS = [
   'Drinks com vodka',
