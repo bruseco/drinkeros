@@ -12,11 +12,11 @@ import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 const CATEGORY_FILTERS = [
   { label: 'Xaropes Artesanais', value: 'Xaropes Artesanais', icon: GlassWater },
   { label: 'Drinks de Galera', value: 'Drinks de Galera', icon: Users },
-  { label: 'Caipirinhas', value: 'Caipirinhas', icon: Citrus },
+  { label: 'Caipirinhas', value: 'Caipirinha', icon: Citrus },
   { label: 'Batidas', value: 'Batidas', icon: CupSoda },
-  { label: 'Clássicos e Variações', value: 'Clássicos e Variações', icon: Martini },
+  { label: 'Clássicos e Variações', value: 'Clássicos', icon: Martini },
   { label: 'Sobremesas', value: 'Sobremesas', icon: IceCream },
-  { label: 'Frozens', value: 'Frozens', icon: Snowflake },
+  { label: 'Frozens', value: 'Frozen', icon: Snowflake },
 ];
 
 const SEARCH_PLACEHOLDERS = [
@@ -156,8 +156,8 @@ const UserRecipes: React.FC = () => {
     <div className="container mx-auto px-4 py-6 pb-24">
       <div className="space-y-3">
         {/* Category filter chips */}
-        <ScrollArea className="w-full whitespace-nowrap -mx-4 px-4">
-          <div className="flex gap-2 pb-1">
+        <ScrollArea className="w-[100vw] -ml-4 whitespace-nowrap">
+          <div className="flex gap-2 pb-1 px-4">
             {CATEGORY_FILTERS.map((cat) => {
               const active = selectedCategory === cat.value;
               return (
