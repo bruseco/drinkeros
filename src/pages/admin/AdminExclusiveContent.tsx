@@ -45,8 +45,13 @@ const AdminExclusiveContent: React.FC = () => {
   const total = data?.pages[0]?.total ?? 0;
 
   const deletePost = useDeleteExclusivePost();
+  const updatePost = useUpdateExclusivePost();
   const bulkCreate = useBulkCreateExclusivePosts();
   const { toast } = useToast();
+
+  const handleUpdateTags = (postId: string, field: 'ingredients' | 'characteristics', tags: string[]) => {
+    updatePost.mutate({ id: postId, data: { [field]: tags } });
+  };
 
   const handleSelect = useCallback((id: string, index: number, shiftKey: boolean) => {
     setSelected(prev => {
