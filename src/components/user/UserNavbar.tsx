@@ -58,8 +58,8 @@ export const UserNavbar: React.FC = () => {
                 to={item.href}
                 className={cn(
                   'relative flex flex-col items-center gap-1 px-5 py-2 transition-all duration-300',
-                  isActive 
-                    ? 'text-primary' 
+                isActive 
+                    ? 'text-accent' 
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
