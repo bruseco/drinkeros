@@ -1,4 +1,4 @@
-// Cache version: v2026-02-13d
+// Cache version: v2026-04-06a
 /// <reference lib="webworker" />
 import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
 import { registerRoute, NavigationRoute, setCatchHandler } from 'workbox-routing';
