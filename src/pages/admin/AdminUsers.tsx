@@ -135,6 +135,7 @@ const AdminUsers: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
   const [selectedAccess, setSelectedAccess] = useState<Set<string>>(new Set());
   const [receitasAccess, setReceitasAccess] = useState(false);
+  const [accessSearch, setAccessSearch] = useState('');
   const [accessType, setAccessType] = useState<AccessType>('all');
 
   const [resetPasswordUser, setResetPasswordUser] = useState<UserWithRole | null>(null);
@@ -151,6 +152,7 @@ const AdminUsers: React.FC = () => {
   const [newUserAccess, setNewUserAccess] = useState<Set<string>>(new Set());
   const [newReceitasAccess, setNewReceitasAccess] = useState(false);
   const [newAccessSearch, setNewAccessSearch] = useState('');
+  const [newAccessType, setNewAccessType] = useState<AccessType>('all');
 
   const debouncedSearch = useDebounce(search, 300);
   
