@@ -67,7 +67,7 @@ const typeLabel: Record<string, string> = {
 const AccessItemList: React.FC<{
   items: AccessItem[];
   selectedIds: Set<string>;
-  onToggle: (id: string, type: 'course' | 'module' | 'ebook') => void;
+  onToggle: (id: string, type: 'course' | 'ebook') => void;
   searchFilter: string;
   typeFilter: AccessType;
   onSearchChange: (v: string) => void;
@@ -102,7 +102,6 @@ const AccessItemList: React.FC<{
           <TabsTrigger value="all" className="flex-1">Todos</TabsTrigger>
           <TabsTrigger value="course" className="flex-1">Cursos</TabsTrigger>
           <TabsTrigger value="ebook" className="flex-1">E-books</TabsTrigger>
-          <TabsTrigger value="module" className="flex-1">Conteúdo Exclusivo</TabsTrigger>
         </TabsList>
       </Tabs>
       <div className={`space-y-2 overflow-y-auto pr-1`} style={{ maxHeight }}>
