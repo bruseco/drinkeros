@@ -109,6 +109,7 @@ export interface UserWithRole {
   combo_ids: string[];
   course_ids: string[];
   ebook_ids: string[];
+  has_receitas: boolean;
 }
 
 export interface AdminUsersResult {
@@ -143,12 +144,13 @@ export const useAdminUsers = (page: number = 0, pageSize: number = 50, search: s
 
       const userIds = profiles.map((p) => p.user_id);
 
-      const [rolesResult, packagesResult, combosResult, coursesResult, ebooksResult] = await Promise.all([
+      const [rolesResult, packagesResult, combosResult, coursesResult, ebooksResult, exclusiveResult] = await Promise.all([
         supabase.from('user_roles').select('id, user_id, role').in('user_id', userIds),
         supabase.from('user_packages').select('user_id, package_id').in('user_id', userIds),
         supabase.from('user_combos').select('user_id, combo_id').in('user_id', userIds),
         supabase.from('user_courses').select('user_id, course_id').in('user_id', userIds),
         supabase.from('user_ebooks').select('user_id, ebook_id').in('user_id', userIds),
+        supabase.from('user_exclusive_access').select('user_id, feature').eq('feature', 'receitas').in('user_id', userIds),
       ]);
 
       if (rolesResult.error) throw rolesResult.error;
@@ -156,9 +158,12 @@ export const useAdminUsers = (page: number = 0, pageSize: number = 50, search: s
       if (combosResult.error) throw combosResult.error;
       if (coursesResult.error) throw coursesResult.error;
       if (ebooksResult.error) throw ebooksResult.error;
+      if (exclusiveResult.error) throw exclusiveResult.error;
 
       const rolesMap = new Map(rolesResult.data?.map((r) => [r.user_id, { role: r.role, id: r.id }]));
       
+      const exclusiveSet = new Set((exclusiveResult.data || []).map((e) => e.user_id));
+
       const packagesMap = new Map<string, string[]>();
       packagesResult.data?.forEach((up) => {
         const existing = packagesMap.get(up.user_id) || [];
@@ -193,6 +198,7 @@ export const useAdminUsers = (page: number = 0, pageSize: number = 50, search: s
         const comboIds = combosMap.get(profile.user_id) || [];
         const courseIds = coursesMap.get(profile.user_id) || [];
         const ebookIds = ebooksMap.get(profile.user_id) || [];
+        const hasReceitas = exclusiveSet.has(profile.user_id);
         return {
           id: profile.id,
           user_id: profile.user_id,
@@ -202,11 +208,12 @@ export const useAdminUsers = (page: number = 0, pageSize: number = 50, search: s
           created_at: profile.created_at,
           role: roleData?.role || null,
           role_id: roleData?.id || null,
-          packages_count: packageIds.length + comboIds.length + courseIds.length + ebookIds.length,
+          packages_count: courseIds.length + ebookIds.length + (hasReceitas ? 1 : 0),
           package_ids: packageIds,
           combo_ids: comboIds,
           course_ids: courseIds,
           ebook_ids: ebookIds,
+          has_receitas: hasReceitas,
         };
       });
 

@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useAdminUsers, useUpdateUserRole, useUpdateUserAccess, useCreateUser, useResendWelcomeEmail, useResetUserPassword, useUpdateUserProfile, UserWithRole } from '@/hooks/useAdminUsers';
-import { usePackages } from '@/hooks/usePackages';
-import { useCombos } from '@/hooks/useCombos';
 import { useCourses } from '@/hooks/useCourses';
 import { useEbooks } from '@/hooks/useEbooks';
+import { useToggleExclusiveAccess } from '@/hooks/useExclusiveAccess';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useToast } from '@/hooks/use-toast';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
@@ -25,17 +25,17 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Users, Shield, Package, Loader2, Edit, Plus, Mail, MoreHorizontal, Send, ChevronLeft, ChevronRight, Key, Pencil } from 'lucide-react';
+import { Search, Users, Shield, Package, Loader2, Edit, Plus, Mail, MoreHorizontal, Send, ChevronLeft, ChevronRight, Key, Pencil, Wine } from 'lucide-react';
 import { Database } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
 
 type AppRole = Database['public']['Enums']['app_role'];
-type AccessType = 'all' | 'course' | 'module' | 'ebook';
+type AccessType = 'all' | 'course' | 'ebook';
 
 interface AccessItem {
   id: string;
   name: string;
-  type: 'course' | 'module' | 'ebook';
+  type: 'course' | 'ebook';
 }
 
 const PAGE_SIZE = 50;
@@ -55,13 +55,11 @@ const roleBadgeVariant: Record<AppRole | 'student', 'default' | 'secondary' | 'o
 
 const typeBadgeVariant: Record<string, 'default' | 'secondary' | 'outline'> = {
   course: 'secondary',
-  module: 'default',
   ebook: 'outline',
 };
 
 const typeLabel: Record<string, string> = {
   course: 'Curso',
-  module: 'Conteúdo Exclusivo',
   ebook: 'E-book',
 };
 
@@ -69,7 +67,7 @@ const typeLabel: Record<string, string> = {
 const AccessItemList: React.FC<{
   items: AccessItem[];
   selectedIds: Set<string>;
-  onToggle: (id: string, type: 'course' | 'module' | 'ebook') => void;
+  onToggle: (id: string, type: 'course' | 'ebook') => void;
   searchFilter: string;
   typeFilter: AccessType;
   onSearchChange: (v: string) => void;
@@ -104,7 +102,6 @@ const AccessItemList: React.FC<{
           <TabsTrigger value="all" className="flex-1">Todos</TabsTrigger>
           <TabsTrigger value="course" className="flex-1">Cursos</TabsTrigger>
           <TabsTrigger value="ebook" className="flex-1">E-books</TabsTrigger>
-          <TabsTrigger value="module" className="flex-1">Conteúdo Exclusivo</TabsTrigger>
         </TabsList>
       </Tabs>
       <div className={`space-y-2 overflow-y-auto pr-1`} style={{ maxHeight }}>
@@ -137,6 +134,7 @@ const AdminUsers: React.FC = () => {
   const [page, setPage] = useState(0);
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
   const [selectedAccess, setSelectedAccess] = useState<Set<string>>(new Set());
+  const [receitasAccess, setReceitasAccess] = useState(false);
   const [accessSearch, setAccessSearch] = useState('');
   const [accessType, setAccessType] = useState<AccessType>('all');
 
@@ -152,6 +150,7 @@ const AdminUsers: React.FC = () => {
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserName, setNewUserName] = useState('');
   const [newUserAccess, setNewUserAccess] = useState<Set<string>>(new Set());
+  const [newReceitasAccess, setNewReceitasAccess] = useState(false);
   const [newAccessSearch, setNewAccessSearch] = useState('');
   const [newAccessType, setNewAccessType] = useState<AccessType>('all');
 
@@ -166,29 +165,27 @@ const AdminUsers: React.FC = () => {
   const totalCount = data?.totalCount ?? 0;
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
-  const { data: allPackages = [] } = usePackages();
-  const { data: allCombos = [] } = useCombos();
   const { data: allCourses = [] } = useCourses();
   const { data: allEbooks = [] } = useEbooks();
   const updateRole = useUpdateUserRole();
   const updateAccess = useUpdateUserAccess();
+  const toggleExclusive = useToggleExclusiveAccess();
   const createUser = useCreateUser();
   const resendEmail = useResendWelcomeEmail();
   const resetPassword = useResetUserPassword();
   const updateProfile = useUpdateUserProfile();
   const { user: currentUser } = useAuth();
+  const { toast } = useToast();
 
-  // Build unified sorted list (Cursos, E-books, Conteúdo Exclusivo via packages)
+  // Build unified sorted list (Cursos and E-books only)
   const accessItems: AccessItem[] = useMemo(() => {
     const courses = allCourses.map((c) => ({ id: c.id, name: c.name, type: 'course' as const }));
-    const modules = allPackages.map((p) => ({ id: p.id, name: p.name, type: 'module' as const }));
     const ebooks = allEbooks.map((e) => ({ id: e.id, name: e.name, type: 'ebook' as const }));
     return [
       ...courses.sort((a, b) => a.name.localeCompare(b.name)),
       ...ebooks.sort((a, b) => a.name.localeCompare(b.name)),
-      ...modules.sort((a, b) => a.name.localeCompare(b.name)),
     ];
-  }, [allCourses, allPackages, allEbooks]);
+  }, [allCourses, allEbooks]);
 
   const handleResendEmail = (user: UserWithRole) => {
     resendEmail.mutate(user.user_id);
@@ -211,7 +208,6 @@ const AdminUsers: React.FC = () => {
   const buildAccessSet = (user: UserWithRole): Set<string> => {
     const s = new Set<string>();
     user.course_ids.forEach((id) => s.add(`course:${id}`));
-    user.package_ids.forEach((id) => s.add(`module:${id}`));
     user.ebook_ids.forEach((id) => s.add(`ebook:${id}`));
     return s;
   };
@@ -229,6 +225,7 @@ const AdminUsers: React.FC = () => {
   const openAccessDialog = (user: UserWithRole) => {
     setSelectedUser(user);
     setSelectedAccess(buildAccessSet(user));
+    setReceitasAccess(user.has_receitas);
     setAccessSearch('');
     setAccessType('all');
   };
@@ -238,13 +235,15 @@ const AdminUsers: React.FC = () => {
     setSelectedAccess(new Set());
   };
 
-  const saveAccess = () => {
+  const saveAccess = async () => {
     if (!selectedUser) return;
+    
+    // Save course/ebook access
     updateAccess.mutate(
       {
         userId: selectedUser.user_id,
         currentPackageIds: selectedUser.package_ids,
-        newPackageIds: idsFromSet(selectedAccess, 'module'),
+        newPackageIds: selectedUser.package_ids, // preserve existing packages
         currentComboIds: selectedUser.combo_ids,
         newComboIds: selectedUser.combo_ids, // preserve existing combos
         currentCourseIds: selectedUser.course_ids,
@@ -252,8 +251,21 @@ const AdminUsers: React.FC = () => {
         currentEbookIds: selectedUser.ebook_ids,
         newEbookIds: idsFromSet(selectedAccess, 'ebook'),
       },
-      { onSuccess: () => closeAccessDialog() }
     );
+
+    // Toggle receitas access if changed
+    if (receitasAccess !== selectedUser.has_receitas) {
+      toggleExclusive.mutate(
+        { userId: selectedUser.user_id, feature: 'receitas', grant: receitasAccess },
+        {
+          onSuccess: () => {
+            toast({ title: receitasAccess ? 'Acesso às Receitas concedido' : 'Acesso às Receitas removido' });
+          },
+        },
+      );
+    }
+    
+    closeAccessDialog();
   };
 
   // --- Create dialog ---
@@ -261,6 +273,7 @@ const AdminUsers: React.FC = () => {
     setNewUserEmail('');
     setNewUserName('');
     setNewUserAccess(new Set());
+    setNewReceitasAccess(false);
     setNewAccessSearch('');
     setNewAccessType('all');
     setIsCreateDialogOpen(true);
@@ -270,18 +283,24 @@ const AdminUsers: React.FC = () => {
 
   const handleCreateUser = () => {
     if (!newUserEmail) return;
-    const packageIds = idsFromSet(newUserAccess, 'module');
     const courseIds = idsFromSet(newUserAccess, 'course');
     const ebookIds = idsFromSet(newUserAccess, 'ebook');
     createUser.mutate(
       {
         email: newUserEmail,
         fullName: newUserName || undefined,
-        packageIds: packageIds.length > 0 ? packageIds : undefined,
         courseIds: courseIds.length > 0 ? courseIds : undefined,
         ebookIds: ebookIds.length > 0 ? ebookIds : undefined,
       },
-      { onSuccess: () => closeCreateDialog() }
+      {
+        onSuccess: (result) => {
+          // Grant receitas access if toggled
+          if (newReceitasAccess && result?.user?.id) {
+            toggleExclusive.mutate({ userId: result.user.id, feature: 'receitas', grant: true });
+          }
+          closeCreateDialog();
+        },
+      }
     );
   };
 
@@ -496,9 +515,20 @@ const AdminUsers: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Gerenciar Acessos</DialogTitle>
             <DialogDescription>
-              Selecione os combos, cursos e módulos que {selectedUser?.full_name || selectedUser?.email} terá acesso.
+              Selecione os cursos, e-books e receitas que {selectedUser?.full_name || selectedUser?.email} terá acesso.
             </DialogDescription>
           </DialogHeader>
+          {/* Receitas toggle */}
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <div className="flex items-center gap-2">
+              <Wine className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">Receitas</span>
+            </div>
+            <Checkbox
+              checked={receitasAccess}
+              onCheckedChange={(checked) => setReceitasAccess(!!checked)}
+            />
+          </div>
           <AccessItemList
             items={accessItems}
             selectedIds={selectedAccess}
@@ -507,12 +537,12 @@ const AdminUsers: React.FC = () => {
             typeFilter={accessType}
             onSearchChange={setAccessSearch}
             onTypeChange={setAccessType}
-            maxHeight="50vh"
+            maxHeight="40vh"
           />
           <DialogFooter>
             <Button variant="outline" onClick={closeAccessDialog}>Cancelar</Button>
-            <Button onClick={saveAccess} disabled={updateAccess.isPending}>
-              {updateAccess.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            <Button onClick={saveAccess} disabled={updateAccess.isPending || toggleExclusive.isPending}>
+              {(updateAccess.isPending || toggleExclusive.isPending) && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Salvar
             </Button>
           </DialogFooter>
@@ -542,6 +572,17 @@ const AdminUsers: React.FC = () => {
             </div>
             <div className="space-y-2">
               <Label>Acessos (opcional)</Label>
+              {/* Receitas toggle */}
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <div className="flex items-center gap-2">
+                  <Wine className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">Receitas</span>
+                </div>
+                <Checkbox
+                  checked={newReceitasAccess}
+                  onCheckedChange={(checked) => setNewReceitasAccess(!!checked)}
+                />
+              </div>
               <AccessItemList
                 items={accessItems}
                 selectedIds={newUserAccess}
@@ -550,7 +591,7 @@ const AdminUsers: React.FC = () => {
                 typeFilter={newAccessType}
                 onSearchChange={setNewAccessSearch}
                 onTypeChange={setNewAccessType}
-                maxHeight="30vh"
+                maxHeight="25vh"
               />
             </div>
           </div>

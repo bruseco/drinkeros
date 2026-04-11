@@ -3,15 +3,17 @@ import { FullscreenVideo } from '@/components/user/FullscreenVideo';
 import { useParams, Link } from 'react-router-dom';
 import { useExclusivePost } from '@/hooks/useExclusivePosts';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
+import { useHasExclusiveAccess } from '@/hooks/useExclusiveAccess';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, ArrowLeft, Heart, Share2, Wine } from 'lucide-react';
+import { Loader2, ArrowLeft, Heart, Share2, Wine, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import FavoriteDialog from '@/components/user/FavoriteDialog';
 
 const UserRecipeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { data: recipe, isLoading } = useExclusivePost(id || '');
+  const { data: hasAccess, isLoading: accessLoading } = useHasExclusiveAccess('receitas');
   const { data: favorites = [] } = useFavorites();
   const toggleFavorite = useToggleFavorite();
   const { toast } = useToast();
@@ -53,7 +55,7 @@ const UserRecipeDetail: React.FC = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || accessLoading) {
     return (
       <div className="flex justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -68,6 +70,42 @@ const UserRecipeDetail: React.FC = () => {
         <Link to="/app/receitas">
           <Button variant="link" className="mt-2">Voltar</Button>
         </Link>
+      </div>
+    );
+  }
+
+  // Paywall: user without exclusive access
+  if (!hasAccess) {
+    return (
+      <div className="pb-24">
+        {/* Show cover image blurred */}
+        {recipe.cover_image_url && (
+          <div className="w-full aspect-video bg-black relative overflow-hidden">
+            <img src={recipe.cover_image_url} alt={recipe.title} className="w-full h-full object-cover blur-sm opacity-50" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Lock className="h-12 w-12 text-primary" />
+            </div>
+          </div>
+        )}
+        <div className="container mx-auto px-4 py-8 text-center space-y-4">
+          <h1 className="text-2xl font-bold text-foreground">{recipe.title}</h1>
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-6 space-y-3">
+            <Wine className="h-8 w-8 text-primary mx-auto" />
+            <h2 className="text-lg font-semibold text-foreground">Conteúdo Exclusivo para Assinantes</h2>
+            <p className="text-muted-foreground text-sm">
+              Esta receita faz parte do nosso conteúdo exclusivo. Assine para ter acesso a todas as receitas e muito mais!
+            </p>
+            <a href="https://wa.me/5548991601025?text=Ol%C3%A1!%20Gostaria%20de%20saber%20mais%20sobre%20a%20assinatura%20Drinkeros" target="_blank" rel="noopener noreferrer">
+              <Button className="mt-2">Saiba mais</Button>
+            </a>
+          </div>
+          <Link to="/app/receitas">
+            <Button variant="ghost" className="mt-4 gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Voltar às Receitas
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }
