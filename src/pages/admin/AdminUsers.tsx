@@ -273,6 +273,7 @@ const AdminUsers: React.FC = () => {
     setNewUserEmail('');
     setNewUserName('');
     setNewUserAccess(new Set());
+    setNewReceitasAccess(false);
     setNewAccessSearch('');
     setNewAccessType('all');
     setIsCreateDialogOpen(true);
@@ -282,18 +283,24 @@ const AdminUsers: React.FC = () => {
 
   const handleCreateUser = () => {
     if (!newUserEmail) return;
-    const packageIds = idsFromSet(newUserAccess, 'module');
     const courseIds = idsFromSet(newUserAccess, 'course');
     const ebookIds = idsFromSet(newUserAccess, 'ebook');
     createUser.mutate(
       {
         email: newUserEmail,
         fullName: newUserName || undefined,
-        packageIds: packageIds.length > 0 ? packageIds : undefined,
         courseIds: courseIds.length > 0 ? courseIds : undefined,
         ebookIds: ebookIds.length > 0 ? ebookIds : undefined,
       },
-      { onSuccess: () => closeCreateDialog() }
+      {
+        onSuccess: (result) => {
+          // Grant receitas access if toggled
+          if (newReceitasAccess && result?.user?.id) {
+            toggleExclusive.mutate({ userId: result.user.id, feature: 'receitas', grant: true });
+          }
+          closeCreateDialog();
+        },
+      }
     );
   };
 
