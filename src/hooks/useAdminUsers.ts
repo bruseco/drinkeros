@@ -109,6 +109,7 @@ export interface UserWithRole {
   combo_ids: string[];
   course_ids: string[];
   ebook_ids: string[];
+  has_receitas: boolean;
 }
 
 export interface AdminUsersResult {
