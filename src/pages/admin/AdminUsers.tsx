@@ -134,7 +134,7 @@ const AdminUsers: React.FC = () => {
   const [page, setPage] = useState(0);
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
   const [selectedAccess, setSelectedAccess] = useState<Set<string>>(new Set());
-  const [accessSearch, setAccessSearch] = useState('');
+  const [receitasAccess, setReceitasAccess] = useState(false);
   const [accessType, setAccessType] = useState<AccessType>('all');
 
   const [resetPasswordUser, setResetPasswordUser] = useState<UserWithRole | null>(null);
@@ -149,8 +149,8 @@ const AdminUsers: React.FC = () => {
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserName, setNewUserName] = useState('');
   const [newUserAccess, setNewUserAccess] = useState<Set<string>>(new Set());
+  const [newReceitasAccess, setNewReceitasAccess] = useState(false);
   const [newAccessSearch, setNewAccessSearch] = useState('');
-  const [newAccessType, setNewAccessType] = useState<AccessType>('all');
 
   const debouncedSearch = useDebounce(search, 300);
   
@@ -163,29 +163,27 @@ const AdminUsers: React.FC = () => {
   const totalCount = data?.totalCount ?? 0;
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
-  const { data: allPackages = [] } = usePackages();
-  const { data: allCombos = [] } = useCombos();
   const { data: allCourses = [] } = useCourses();
   const { data: allEbooks = [] } = useEbooks();
   const updateRole = useUpdateUserRole();
   const updateAccess = useUpdateUserAccess();
+  const toggleExclusive = useToggleExclusiveAccess();
   const createUser = useCreateUser();
   const resendEmail = useResendWelcomeEmail();
   const resetPassword = useResetUserPassword();
   const updateProfile = useUpdateUserProfile();
   const { user: currentUser } = useAuth();
+  const { toast } = useToast();
 
-  // Build unified sorted list (Cursos, E-books, Conteúdo Exclusivo via packages)
+  // Build unified sorted list (Cursos and E-books only)
   const accessItems: AccessItem[] = useMemo(() => {
     const courses = allCourses.map((c) => ({ id: c.id, name: c.name, type: 'course' as const }));
-    const modules = allPackages.map((p) => ({ id: p.id, name: p.name, type: 'module' as const }));
     const ebooks = allEbooks.map((e) => ({ id: e.id, name: e.name, type: 'ebook' as const }));
     return [
       ...courses.sort((a, b) => a.name.localeCompare(b.name)),
       ...ebooks.sort((a, b) => a.name.localeCompare(b.name)),
-      ...modules.sort((a, b) => a.name.localeCompare(b.name)),
     ];
-  }, [allCourses, allPackages, allEbooks]);
+  }, [allCourses, allEbooks]);
 
   const handleResendEmail = (user: UserWithRole) => {
     resendEmail.mutate(user.user_id);
@@ -208,7 +206,6 @@ const AdminUsers: React.FC = () => {
   const buildAccessSet = (user: UserWithRole): Set<string> => {
     const s = new Set<string>();
     user.course_ids.forEach((id) => s.add(`course:${id}`));
-    user.package_ids.forEach((id) => s.add(`module:${id}`));
     user.ebook_ids.forEach((id) => s.add(`ebook:${id}`));
     return s;
   };
@@ -226,6 +223,7 @@ const AdminUsers: React.FC = () => {
   const openAccessDialog = (user: UserWithRole) => {
     setSelectedUser(user);
     setSelectedAccess(buildAccessSet(user));
+    setReceitasAccess(user.has_receitas);
     setAccessSearch('');
     setAccessType('all');
   };
@@ -235,13 +233,15 @@ const AdminUsers: React.FC = () => {
     setSelectedAccess(new Set());
   };
 
-  const saveAccess = () => {
+  const saveAccess = async () => {
     if (!selectedUser) return;
+    
+    // Save course/ebook access
     updateAccess.mutate(
       {
         userId: selectedUser.user_id,
         currentPackageIds: selectedUser.package_ids,
-        newPackageIds: idsFromSet(selectedAccess, 'module'),
+        newPackageIds: selectedUser.package_ids, // preserve existing packages
         currentComboIds: selectedUser.combo_ids,
         newComboIds: selectedUser.combo_ids, // preserve existing combos
         currentCourseIds: selectedUser.course_ids,
@@ -249,8 +249,21 @@ const AdminUsers: React.FC = () => {
         currentEbookIds: selectedUser.ebook_ids,
         newEbookIds: idsFromSet(selectedAccess, 'ebook'),
       },
-      { onSuccess: () => closeAccessDialog() }
     );
+
+    // Toggle receitas access if changed
+    if (receitasAccess !== selectedUser.has_receitas) {
+      toggleExclusive.mutate(
+        { userId: selectedUser.user_id, feature: 'receitas', grant: receitasAccess },
+        {
+          onSuccess: () => {
+            toast({ title: receitasAccess ? 'Acesso às Receitas concedido' : 'Acesso às Receitas removido' });
+          },
+        },
+      );
+    }
+    
+    closeAccessDialog();
   };
 
   // --- Create dialog ---
