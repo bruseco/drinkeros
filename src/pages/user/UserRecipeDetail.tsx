@@ -3,15 +3,17 @@ import { FullscreenVideo } from '@/components/user/FullscreenVideo';
 import { useParams, Link } from 'react-router-dom';
 import { useExclusivePost } from '@/hooks/useExclusivePosts';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
+import { useHasExclusiveAccess } from '@/hooks/useExclusiveAccess';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, ArrowLeft, Heart, Share2, Wine } from 'lucide-react';
+import { Loader2, ArrowLeft, Heart, Share2, Wine, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import FavoriteDialog from '@/components/user/FavoriteDialog';
 
 const UserRecipeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { data: recipe, isLoading } = useExclusivePost(id || '');
+  const { data: hasAccess, isLoading: accessLoading } = useHasExclusiveAccess('receitas');
   const { data: favorites = [] } = useFavorites();
   const toggleFavorite = useToggleFavorite();
   const { toast } = useToast();
