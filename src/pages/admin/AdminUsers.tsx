@@ -30,12 +30,12 @@ import { Database } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
 
 type AppRole = Database['public']['Enums']['app_role'];
-type AccessType = 'all' | 'course' | 'module' | 'ebook';
+type AccessType = 'all' | 'course' | 'ebook';
 
 interface AccessItem {
   id: string;
   name: string;
-  type: 'course' | 'module' | 'ebook';
+  type: 'course' | 'ebook';
 }
 
 const PAGE_SIZE = 50;
@@ -55,13 +55,11 @@ const roleBadgeVariant: Record<AppRole | 'student', 'default' | 'secondary' | 'o
 
 const typeBadgeVariant: Record<string, 'default' | 'secondary' | 'outline'> = {
   course: 'secondary',
-  module: 'default',
   ebook: 'outline',
 };
 
 const typeLabel: Record<string, string> = {
   course: 'Curso',
-  module: 'Conteúdo Exclusivo',
   ebook: 'E-book',
 };
 
