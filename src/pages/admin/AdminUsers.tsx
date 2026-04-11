@@ -594,6 +594,7 @@ const AdminUsers: React.FC = () => {
                 maxHeight="25vh"
               />
             </div>
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={closeCreateDialog}>Cancelar</Button>
             <Button onClick={handleCreateUser} disabled={!newUserEmail || createUser.isPending}>
