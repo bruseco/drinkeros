@@ -572,6 +572,17 @@ const AdminUsers: React.FC = () => {
             </div>
             <div className="space-y-2">
               <Label>Acessos (opcional)</Label>
+              {/* Receitas toggle */}
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <div className="flex items-center gap-2">
+                  <Wine className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">Receitas</span>
+                </div>
+                <Checkbox
+                  checked={newReceitasAccess}
+                  onCheckedChange={(checked) => setNewReceitasAccess(!!checked)}
+                />
+              </div>
               <AccessItemList
                 items={accessItems}
                 selectedIds={newUserAccess}
@@ -580,10 +591,9 @@ const AdminUsers: React.FC = () => {
                 typeFilter={newAccessType}
                 onSearchChange={setNewAccessSearch}
                 onTypeChange={setNewAccessType}
-                maxHeight="30vh"
+                maxHeight="25vh"
               />
             </div>
-          </div>
           <DialogFooter>
             <Button variant="outline" onClick={closeCreateDialog}>Cancelar</Button>
             <Button onClick={handleCreateUser} disabled={!newUserEmail || createUser.isPending}>
