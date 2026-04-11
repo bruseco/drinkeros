@@ -1506,6 +1506,27 @@ export type Database = {
           },
         ]
       }
+      user_exclusive_access: {
+        Row: {
+          created_at: string
+          feature: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feature?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feature?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_packages: {
         Row: {
           hotmart_transaction_id: string | null
@@ -2150,6 +2171,10 @@ export type Database = {
           security_token: string
           token: string
         }[]
+      }
+      has_exclusive_access: {
+        Args: { _feature?: string; _user_id: string }
+        Returns: boolean
       }
       has_package_access: {
         Args: { _package_id: string; _user_id: string }
