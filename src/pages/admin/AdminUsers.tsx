@@ -31,12 +31,12 @@ import { Database } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
 
 type AppRole = Database['public']['Enums']['app_role'];
-type AccessType = 'all' | 'course' | 'ebook' | 'combo';
+type AccessType = 'course' | 'ebook' | 'exclusive' | 'combo';
 
 interface AccessItem {
   id: string;
   name: string;
-  type: 'course' | 'ebook' | 'combo';
+  type: 'course' | 'ebook' | 'combo' | 'exclusive';
 }
 
 const PAGE_SIZE = 50;
@@ -58,19 +58,21 @@ const typeBadgeVariant: Record<string, 'default' | 'secondary' | 'outline'> = {
   course: 'secondary',
   ebook: 'outline',
   combo: 'default',
+  exclusive: 'default',
 };
 
 const typeLabel: Record<string, string> = {
   course: 'Curso',
   ebook: 'E-book',
   combo: 'Pacote',
+  exclusive: 'Exclusivo',
 };
 
 // Reusable access list component
 const AccessItemList: React.FC<{
   items: AccessItem[];
   selectedIds: Set<string>;
-  onToggle: (id: string, type: 'course' | 'ebook' | 'combo') => void;
+  onToggle: (id: string, type: 'course' | 'ebook' | 'combo' | 'exclusive') => void;
   searchFilter: string;
   typeFilter: AccessType;
   onSearchChange: (v: string) => void;
@@ -78,10 +80,7 @@ const AccessItemList: React.FC<{
   maxHeight?: string;
 }> = ({ items, selectedIds, onToggle, searchFilter, typeFilter, onSearchChange, onTypeChange, maxHeight = '60vh' }) => {
   const filtered = useMemo(() => {
-    let list = items;
-    if (typeFilter !== 'all') {
-      list = list.filter((i) => i.type === typeFilter);
-    }
+    let list = items.filter((i) => i.type === typeFilter);
     if (searchFilter) {
       const q = searchFilter.toLowerCase();
       list = list.filter((i) => i.name.toLowerCase().includes(q));
@@ -102,9 +101,9 @@ const AccessItemList: React.FC<{
       </div>
       <Tabs value={typeFilter} onValueChange={(v) => onTypeChange(v as AccessType)}>
          <TabsList className="w-full">
-          <TabsTrigger value="all" className="flex-1">Todos</TabsTrigger>
           <TabsTrigger value="course" className="flex-1">Cursos</TabsTrigger>
           <TabsTrigger value="ebook" className="flex-1">E-books</TabsTrigger>
+          <TabsTrigger value="exclusive" className="flex-1">Exclusivo</TabsTrigger>
           <TabsTrigger value="combo" className="flex-1">Pacotes</TabsTrigger>
         </TabsList>
       </Tabs>
@@ -138,9 +137,8 @@ const AdminUsers: React.FC = () => {
   const [page, setPage] = useState(0);
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
   const [selectedAccess, setSelectedAccess] = useState<Set<string>>(new Set());
-  const [receitasAccess, setReceitasAccess] = useState(false);
   const [accessSearch, setAccessSearch] = useState('');
-  const [accessType, setAccessType] = useState<AccessType>('all');
+  const [accessType, setAccessType] = useState<AccessType>('course');
 
   const [resetPasswordUser, setResetPasswordUser] = useState<UserWithRole | null>(null);
   const [newPassword, setNewPassword] = useState('');
@@ -154,9 +152,8 @@ const AdminUsers: React.FC = () => {
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserName, setNewUserName] = useState('');
   const [newUserAccess, setNewUserAccess] = useState<Set<string>>(new Set());
-  const [newReceitasAccess, setNewReceitasAccess] = useState(false);
   const [newAccessSearch, setNewAccessSearch] = useState('');
-  const [newAccessType, setNewAccessType] = useState<AccessType>('all');
+  const [newAccessType, setNewAccessType] = useState<AccessType>('course');
 
   const debouncedSearch = useDebounce(search, 300);
   
@@ -187,9 +184,13 @@ const AdminUsers: React.FC = () => {
     const courses = allCourses.map((c) => ({ id: c.id, name: c.name, type: 'course' as const }));
     const ebooks = allEbooks.map((e) => ({ id: e.id, name: e.name, type: 'ebook' as const }));
     const combos = allCombos.map((c) => ({ id: c.id, name: c.name, type: 'combo' as const }));
+    const exclusiveItems: AccessItem[] = [
+      { id: 'receitas', name: 'Receitas', type: 'exclusive' as const },
+    ];
     return [
       ...courses.sort((a, b) => a.name.localeCompare(b.name)),
       ...ebooks.sort((a, b) => a.name.localeCompare(b.name)),
+      ...exclusiveItems,
       ...combos.sort((a, b) => a.name.localeCompare(b.name)),
     ];
   }, [allCourses, allEbooks, allCombos]);
