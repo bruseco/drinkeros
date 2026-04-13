@@ -26,17 +26,17 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Users, Shield, Package, Loader2, Edit, Plus, Mail, MoreHorizontal, Send, ChevronLeft, ChevronRight, Key, Pencil, Wine } from 'lucide-react';
+import { Search, Users, Shield, Package, Loader2, Edit, Plus, Mail, MoreHorizontal, Send, ChevronLeft, ChevronRight, Key, Pencil } from 'lucide-react';
 import { Database } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
 
 type AppRole = Database['public']['Enums']['app_role'];
-type AccessType = 'all' | 'course' | 'ebook' | 'combo';
+type AccessType = 'course' | 'ebook' | 'exclusive' | 'combo';
 
 interface AccessItem {
   id: string;
   name: string;
-  type: 'course' | 'ebook' | 'combo';
+  type: 'course' | 'ebook' | 'combo' | 'exclusive';
 }
 
 const PAGE_SIZE = 50;
@@ -58,19 +58,21 @@ const typeBadgeVariant: Record<string, 'default' | 'secondary' | 'outline'> = {
   course: 'secondary',
   ebook: 'outline',
   combo: 'default',
+  exclusive: 'default',
 };
 
 const typeLabel: Record<string, string> = {
   course: 'Curso',
   ebook: 'E-book',
   combo: 'Pacote',
+  exclusive: 'Exclusivo',
 };
 
 // Reusable access list component
 const AccessItemList: React.FC<{
   items: AccessItem[];
   selectedIds: Set<string>;
-  onToggle: (id: string, type: 'course' | 'ebook' | 'combo') => void;
+  onToggle: (id: string, type: 'course' | 'ebook' | 'combo' | 'exclusive') => void;
   searchFilter: string;
   typeFilter: AccessType;
   onSearchChange: (v: string) => void;
@@ -78,10 +80,7 @@ const AccessItemList: React.FC<{
   maxHeight?: string;
 }> = ({ items, selectedIds, onToggle, searchFilter, typeFilter, onSearchChange, onTypeChange, maxHeight = '60vh' }) => {
   const filtered = useMemo(() => {
-    let list = items;
-    if (typeFilter !== 'all') {
-      list = list.filter((i) => i.type === typeFilter);
-    }
+    let list = items.filter((i) => i.type === typeFilter);
     if (searchFilter) {
       const q = searchFilter.toLowerCase();
       list = list.filter((i) => i.name.toLowerCase().includes(q));
@@ -102,9 +101,9 @@ const AccessItemList: React.FC<{
       </div>
       <Tabs value={typeFilter} onValueChange={(v) => onTypeChange(v as AccessType)}>
          <TabsList className="w-full">
-          <TabsTrigger value="all" className="flex-1">Todos</TabsTrigger>
           <TabsTrigger value="course" className="flex-1">Cursos</TabsTrigger>
           <TabsTrigger value="ebook" className="flex-1">E-books</TabsTrigger>
+          <TabsTrigger value="exclusive" className="flex-1">Exclusivo</TabsTrigger>
           <TabsTrigger value="combo" className="flex-1">Pacotes</TabsTrigger>
         </TabsList>
       </Tabs>
@@ -138,9 +137,8 @@ const AdminUsers: React.FC = () => {
   const [page, setPage] = useState(0);
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
   const [selectedAccess, setSelectedAccess] = useState<Set<string>>(new Set());
-  const [receitasAccess, setReceitasAccess] = useState(false);
   const [accessSearch, setAccessSearch] = useState('');
-  const [accessType, setAccessType] = useState<AccessType>('all');
+  const [accessType, setAccessType] = useState<AccessType>('course');
 
   const [resetPasswordUser, setResetPasswordUser] = useState<UserWithRole | null>(null);
   const [newPassword, setNewPassword] = useState('');
@@ -154,9 +152,8 @@ const AdminUsers: React.FC = () => {
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserName, setNewUserName] = useState('');
   const [newUserAccess, setNewUserAccess] = useState<Set<string>>(new Set());
-  const [newReceitasAccess, setNewReceitasAccess] = useState(false);
   const [newAccessSearch, setNewAccessSearch] = useState('');
-  const [newAccessType, setNewAccessType] = useState<AccessType>('all');
+  const [newAccessType, setNewAccessType] = useState<AccessType>('course');
 
   const debouncedSearch = useDebounce(search, 300);
   
@@ -187,9 +184,13 @@ const AdminUsers: React.FC = () => {
     const courses = allCourses.map((c) => ({ id: c.id, name: c.name, type: 'course' as const }));
     const ebooks = allEbooks.map((e) => ({ id: e.id, name: e.name, type: 'ebook' as const }));
     const combos = allCombos.map((c) => ({ id: c.id, name: c.name, type: 'combo' as const }));
+    const exclusiveItems: AccessItem[] = [
+      { id: 'receitas', name: 'Receitas', type: 'exclusive' as const },
+    ];
     return [
       ...courses.sort((a, b) => a.name.localeCompare(b.name)),
       ...ebooks.sort((a, b) => a.name.localeCompare(b.name)),
+      ...exclusiveItems,
       ...combos.sort((a, b) => a.name.localeCompare(b.name)),
     ];
   }, [allCourses, allEbooks, allCombos]);
@@ -217,6 +218,7 @@ const AdminUsers: React.FC = () => {
     user.course_ids.forEach((id) => s.add(`course:${id}`));
     user.ebook_ids.forEach((id) => s.add(`ebook:${id}`));
     user.combo_ids.forEach((id) => s.add(`combo:${id}`));
+    if (user.has_receitas) s.add('exclusive:receitas');
     return s;
   };
 
@@ -233,9 +235,8 @@ const AdminUsers: React.FC = () => {
   const openAccessDialog = (user: UserWithRole) => {
     setSelectedUser(user);
     setSelectedAccess(buildAccessSet(user));
-    setReceitasAccess(user.has_receitas);
     setAccessSearch('');
-    setAccessType('all');
+    setAccessType('course');
   };
 
   const closeAccessDialog = () => {
@@ -246,12 +247,14 @@ const AdminUsers: React.FC = () => {
   const saveAccess = async () => {
     if (!selectedUser) return;
     
+    const newReceitasAccess = selectedAccess.has('exclusive:receitas');
+
     // Save course/ebook/combo access
     updateAccess.mutate(
       {
         userId: selectedUser.user_id,
         currentPackageIds: selectedUser.package_ids,
-        newPackageIds: selectedUser.package_ids, // preserve existing packages
+        newPackageIds: selectedUser.package_ids,
         currentComboIds: selectedUser.combo_ids,
         newComboIds: idsFromSet(selectedAccess, 'combo'),
         currentCourseIds: selectedUser.course_ids,
@@ -262,12 +265,12 @@ const AdminUsers: React.FC = () => {
     );
 
     // Toggle receitas access if changed
-    if (receitasAccess !== selectedUser.has_receitas) {
+    if (newReceitasAccess !== selectedUser.has_receitas) {
       toggleExclusive.mutate(
-        { userId: selectedUser.user_id, feature: 'receitas', grant: receitasAccess },
+        { userId: selectedUser.user_id, feature: 'receitas', grant: newReceitasAccess },
         {
           onSuccess: () => {
-            toast({ title: receitasAccess ? 'Acesso às Receitas concedido' : 'Acesso às Receitas removido' });
+            toast({ title: newReceitasAccess ? 'Acesso às Receitas concedido' : 'Acesso às Receitas removido' });
           },
         },
       );
@@ -281,9 +284,8 @@ const AdminUsers: React.FC = () => {
     setNewUserEmail('');
     setNewUserName('');
     setNewUserAccess(new Set());
-    setNewReceitasAccess(false);
     setNewAccessSearch('');
-    setNewAccessType('all');
+    setNewAccessType('course');
     setIsCreateDialogOpen(true);
   };
 
@@ -294,6 +296,7 @@ const AdminUsers: React.FC = () => {
     const courseIds = idsFromSet(newUserAccess, 'course');
     const ebookIds = idsFromSet(newUserAccess, 'ebook');
     const comboIds = idsFromSet(newUserAccess, 'combo');
+    const grantReceitas = newUserAccess.has('exclusive:receitas');
     createUser.mutate(
       {
         email: newUserEmail,
@@ -304,8 +307,7 @@ const AdminUsers: React.FC = () => {
       },
       {
         onSuccess: (result) => {
-          // Grant receitas access if toggled
-          if (newReceitasAccess && result?.user?.id) {
+          if (grantReceitas && result?.user?.id) {
             toggleExclusive.mutate({ userId: result.user.id, feature: 'receitas', grant: true });
           }
           closeCreateDialog();
@@ -525,20 +527,9 @@ const AdminUsers: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Gerenciar Acessos</DialogTitle>
             <DialogDescription>
-              Selecione os cursos, e-books e receitas que {selectedUser?.full_name || selectedUser?.email} terá acesso.
+              Selecione os cursos, e-books, conteúdo exclusivo e pacotes que {selectedUser?.full_name || selectedUser?.email} terá acesso.
             </DialogDescription>
           </DialogHeader>
-          {/* Receitas toggle */}
-          <div className="flex items-center justify-between rounded-lg border p-3">
-            <div className="flex items-center gap-2">
-              <Wine className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">Receitas</span>
-            </div>
-            <Checkbox
-              checked={receitasAccess}
-              onCheckedChange={(checked) => setReceitasAccess(!!checked)}
-            />
-          </div>
           <AccessItemList
             items={accessItems}
             selectedIds={selectedAccess}
@@ -582,17 +573,6 @@ const AdminUsers: React.FC = () => {
             </div>
             <div className="space-y-2">
               <Label>Acessos (opcional)</Label>
-              {/* Receitas toggle */}
-              <div className="flex items-center justify-between rounded-lg border p-3">
-                <div className="flex items-center gap-2">
-                  <Wine className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium">Receitas</span>
-                </div>
-                <Checkbox
-                  checked={newReceitasAccess}
-                  onCheckedChange={(checked) => setNewReceitasAccess(!!checked)}
-                />
-              </div>
               <AccessItemList
                 items={accessItems}
                 selectedIds={newUserAccess}
