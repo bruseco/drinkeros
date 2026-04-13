@@ -160,6 +160,8 @@ const ProdutoForm: React.FC = () => {
       display_order: formData.display_order,
       workload_hours: formData.workload_hours,
       price: formData.price ? parseFloat(formData.price) : null,
+      is_lifetime: formData.is_lifetime,
+      includes_exclusive_access: formData.includes_exclusive_access,
     } as any;
 
     let comboId: string;
