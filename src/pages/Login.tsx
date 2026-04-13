@@ -34,69 +34,11 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [oauthBlocked, setOauthBlocked] = useState(false);
-
   useEffect(() => {
-    if (oauthBlocked) return;
-
-    const checkNewOAuthUser = async (currentUser: typeof user) => {
-      if (!currentUser) return;
-
-      // Check if profile was created less than 2 minutes ago
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('created_at')
-        .eq('user_id', currentUser.id)
-        .single();
-
-      if (!profile) {
-        navigate('/app');
-        return;
-      }
-
-      const createdAt = new Date(profile.created_at);
-      const now = new Date();
-      const diffMs = now.getTime() - createdAt.getTime();
-      const isNewProfile = diffMs < 2 * 60 * 1000; // 2 minutes
-
-      if (!isNewProfile) {
-        navigate('/app');
-        return;
-      }
-
-      // New profile — check if user has any access
-      const [packagesRes, combosRes, coursesRes, rolesRes] = await Promise.all([
-        supabase.from('user_packages').select('id').eq('user_id', currentUser.id).limit(1),
-        supabase.from('user_combos').select('id').eq('user_id', currentUser.id).limit(1),
-        supabase.from('user_courses').select('id').eq('user_id', currentUser.id).limit(1),
-        supabase.from('user_roles').select('id').eq('user_id', currentUser.id).limit(1),
-      ]);
-
-      const hasAccess =
-        (packagesRes.data && packagesRes.data.length > 0) ||
-        (combosRes.data && combosRes.data.length > 0) ||
-        (coursesRes.data && coursesRes.data.length > 0) ||
-        (rolesRes.data && rolesRes.data.length > 0);
-
-      if (hasAccess) {
-        navigate('/app');
-      } else {
-        // Block: new user with no access
-        setOauthBlocked(true);
-        await supabase.auth.signOut();
-        toast({
-          title: 'Acesso negado',
-          description: 'Você precisa ser cadastrado por um administrador para acessar a plataforma.',
-          variant: 'destructive',
-          duration: 8000,
-        });
-      }
-    };
-
     if (user && !authLoading) {
-      checkNewOAuthUser(user);
+      navigate('/app');
     }
-  }, [user, authLoading, navigate, oauthBlocked]);
+  }, [user, authLoading, navigate]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
