@@ -171,6 +171,7 @@ const AdminUsers: React.FC = () => {
   const { data: allCourses = [] } = useCourses();
   const { data: allEbooks = [] } = useEbooks();
   const { data: allCombos = [] } = useCombos();
+  const { data: allExclusiveCategories = [] } = useExclusiveCategories();
   const updateRole = useUpdateUserRole();
   const updateAccess = useUpdateUserAccess();
   const toggleExclusive = useToggleExclusiveAccess();
