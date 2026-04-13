@@ -3,6 +3,7 @@ import { useAdminUsers, useUpdateUserRole, useUpdateUserAccess, useCreateUser, u
 import { useCourses } from '@/hooks/useCourses';
 import { useEbooks } from '@/hooks/useEbooks';
 import { useCombos } from '@/hooks/useCombos';
+import { useExclusiveCategories } from '@/hooks/useExclusiveCategories';
 import { useToggleExclusiveAccess } from '@/hooks/useExclusiveAccess';
 import { useLifetimeAccessUsers, useToggleLifetimeAccess } from '@/hooks/useLifetimeAccess';
 import { useAuth } from '@/contexts/AuthContext';
