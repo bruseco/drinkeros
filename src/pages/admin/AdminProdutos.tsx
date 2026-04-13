@@ -31,13 +31,13 @@ const AdminProdutos: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Produtos</h1>
-          <p className="text-muted-foreground">Gerencie seus produtos (bundles de cursos e e-books)</p>
+          <h1 className="text-3xl font-bold text-foreground">Pacotes</h1>
+          <p className="text-muted-foreground">Monte combos de cursos e e-books para liberar acesso em conjunto</p>
         </div>
         <Button asChild>
           <Link to="/admin/produtos/novo">
             <Plus className="mr-2 h-4 w-4" />
-            Novo Produto
+            Novo Pacote
           </Link>
         </Button>
       </div>
@@ -48,11 +48,11 @@ const AdminProdutos: React.FC = () => {
         </div>
       ) : produtos.length === 0 ? (
         <div className="rounded-lg border border-dashed p-12 text-center">
-          <p className="text-muted-foreground">Nenhum produto encontrado</p>
+          <p className="text-muted-foreground">Nenhum pacote encontrado</p>
           <Button asChild className="mt-4">
             <Link to="/admin/produtos/novo">
               <Plus className="mr-2 h-4 w-4" />
-              Criar primeiro produto
+              Criar primeiro pacote
             </Link>
           </Button>
         </div>
@@ -61,7 +61,7 @@ const AdminProdutos: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Produto</TableHead>
+                <TableHead>Pacote</TableHead>
                 <TableHead>Preço</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-12"></TableHead>
@@ -131,8 +131,8 @@ const AdminProdutos: React.FC = () => {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Excluir produto?</AlertDialogTitle>
-            <AlertDialogDescription>Esta ação não pode ser desfeita. O produto será removido permanentemente.</AlertDialogDescription>
+            <AlertDialogTitle>Excluir pacote?</AlertDialogTitle>
+            <AlertDialogDescription>Esta ação não pode ser desfeita. O pacote será removido permanentemente.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>

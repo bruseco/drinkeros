@@ -22,7 +22,7 @@ const menuItems = [
   { title: 'Cursos', icon: BookOpen, href: '/admin/cursos' },
   { title: 'E-books', icon: FileText, href: '/admin/ebooks' },
   { title: 'Receitas', icon: Wine, href: '/admin/receitas' },
-  { title: 'Produtos', icon: ShoppingBag, href: '/admin/produtos' },
+  { title: 'Pacotes', icon: ShoppingBag, href: '/admin/produtos' },
 ];
 
 const adminItems = [

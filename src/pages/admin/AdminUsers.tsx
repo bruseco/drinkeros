@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useAdminUsers, useUpdateUserRole, useUpdateUserAccess, useCreateUser, useResendWelcomeEmail, useResetUserPassword, useUpdateUserProfile, UserWithRole } from '@/hooks/useAdminUsers';
 import { useCourses } from '@/hooks/useCourses';
 import { useEbooks } from '@/hooks/useEbooks';
+import { useCombos } from '@/hooks/useCombos';
 import { useToggleExclusiveAccess } from '@/hooks/useExclusiveAccess';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -30,12 +31,12 @@ import { Database } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
 
 type AppRole = Database['public']['Enums']['app_role'];
-type AccessType = 'all' | 'course' | 'ebook';
+type AccessType = 'all' | 'course' | 'ebook' | 'combo';
 
 interface AccessItem {
   id: string;
   name: string;
-  type: 'course' | 'ebook';
+  type: 'course' | 'ebook' | 'combo';
 }
 
 const PAGE_SIZE = 50;
@@ -56,18 +57,20 @@ const roleBadgeVariant: Record<AppRole | 'student', 'default' | 'secondary' | 'o
 const typeBadgeVariant: Record<string, 'default' | 'secondary' | 'outline'> = {
   course: 'secondary',
   ebook: 'outline',
+  combo: 'default',
 };
 
 const typeLabel: Record<string, string> = {
   course: 'Curso',
   ebook: 'E-book',
+  combo: 'Pacote',
 };
 
 // Reusable access list component
 const AccessItemList: React.FC<{
   items: AccessItem[];
   selectedIds: Set<string>;
-  onToggle: (id: string, type: 'course' | 'ebook') => void;
+  onToggle: (id: string, type: 'course' | 'ebook' | 'combo') => void;
   searchFilter: string;
   typeFilter: AccessType;
   onSearchChange: (v: string) => void;
@@ -102,6 +105,7 @@ const AccessItemList: React.FC<{
           <TabsTrigger value="all" className="flex-1">Todos</TabsTrigger>
           <TabsTrigger value="course" className="flex-1">Cursos</TabsTrigger>
           <TabsTrigger value="ebook" className="flex-1">E-books</TabsTrigger>
+          <TabsTrigger value="combo" className="flex-1">Pacotes</TabsTrigger>
         </TabsList>
       </Tabs>
       <div className={`space-y-2 overflow-y-auto pr-1`} style={{ maxHeight }}>
@@ -167,6 +171,7 @@ const AdminUsers: React.FC = () => {
 
   const { data: allCourses = [] } = useCourses();
   const { data: allEbooks = [] } = useEbooks();
+  const { data: allCombos = [] } = useCombos();
   const updateRole = useUpdateUserRole();
   const updateAccess = useUpdateUserAccess();
   const toggleExclusive = useToggleExclusiveAccess();
@@ -177,15 +182,17 @@ const AdminUsers: React.FC = () => {
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
 
-  // Build unified sorted list (Cursos and E-books only)
+  // Build unified sorted list
   const accessItems: AccessItem[] = useMemo(() => {
     const courses = allCourses.map((c) => ({ id: c.id, name: c.name, type: 'course' as const }));
     const ebooks = allEbooks.map((e) => ({ id: e.id, name: e.name, type: 'ebook' as const }));
+    const combos = allCombos.map((c) => ({ id: c.id, name: c.name, type: 'combo' as const }));
     return [
       ...courses.sort((a, b) => a.name.localeCompare(b.name)),
       ...ebooks.sort((a, b) => a.name.localeCompare(b.name)),
+      ...combos.sort((a, b) => a.name.localeCompare(b.name)),
     ];
-  }, [allCourses, allEbooks]);
+  }, [allCourses, allEbooks, allCombos]);
 
   const handleResendEmail = (user: UserWithRole) => {
     resendEmail.mutate(user.user_id);
@@ -209,6 +216,7 @@ const AdminUsers: React.FC = () => {
     const s = new Set<string>();
     user.course_ids.forEach((id) => s.add(`course:${id}`));
     user.ebook_ids.forEach((id) => s.add(`ebook:${id}`));
+    user.combo_ids.forEach((id) => s.add(`combo:${id}`));
     return s;
   };
 
@@ -238,14 +246,14 @@ const AdminUsers: React.FC = () => {
   const saveAccess = async () => {
     if (!selectedUser) return;
     
-    // Save course/ebook access
+    // Save course/ebook/combo access
     updateAccess.mutate(
       {
         userId: selectedUser.user_id,
         currentPackageIds: selectedUser.package_ids,
         newPackageIds: selectedUser.package_ids, // preserve existing packages
         currentComboIds: selectedUser.combo_ids,
-        newComboIds: selectedUser.combo_ids, // preserve existing combos
+        newComboIds: idsFromSet(selectedAccess, 'combo'),
         currentCourseIds: selectedUser.course_ids,
         newCourseIds: idsFromSet(selectedAccess, 'course'),
         currentEbookIds: selectedUser.ebook_ids,
@@ -285,12 +293,14 @@ const AdminUsers: React.FC = () => {
     if (!newUserEmail) return;
     const courseIds = idsFromSet(newUserAccess, 'course');
     const ebookIds = idsFromSet(newUserAccess, 'ebook');
+    const comboIds = idsFromSet(newUserAccess, 'combo');
     createUser.mutate(
       {
         email: newUserEmail,
         fullName: newUserName || undefined,
         courseIds: courseIds.length > 0 ? courseIds : undefined,
         ebookIds: ebookIds.length > 0 ? ebookIds : undefined,
+        comboIds: comboIds.length > 0 ? comboIds : undefined,
       },
       {
         onSuccess: (result) => {
