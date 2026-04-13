@@ -216,6 +216,7 @@ const AdminUsers: React.FC = () => {
     const s = new Set<string>();
     user.course_ids.forEach((id) => s.add(`course:${id}`));
     user.ebook_ids.forEach((id) => s.add(`ebook:${id}`));
+    user.combo_ids.forEach((id) => s.add(`combo:${id}`));
     return s;
   };
 
@@ -245,14 +246,14 @@ const AdminUsers: React.FC = () => {
   const saveAccess = async () => {
     if (!selectedUser) return;
     
-    // Save course/ebook access
+    // Save course/ebook/combo access
     updateAccess.mutate(
       {
         userId: selectedUser.user_id,
         currentPackageIds: selectedUser.package_ids,
         newPackageIds: selectedUser.package_ids, // preserve existing packages
         currentComboIds: selectedUser.combo_ids,
-        newComboIds: selectedUser.combo_ids, // preserve existing combos
+        newComboIds: idsFromSet(selectedAccess, 'combo'),
         currentCourseIds: selectedUser.course_ids,
         newCourseIds: idsFromSet(selectedAccess, 'course'),
         currentEbookIds: selectedUser.ebook_ids,
