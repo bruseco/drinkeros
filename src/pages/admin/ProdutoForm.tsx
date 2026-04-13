@@ -66,6 +66,8 @@ const ProdutoForm: React.FC = () => {
         display_order: combo.display_order ?? 0,
         workload_hours: (combo as any).workload_hours ?? 0,
         price: (combo as any).price ? String((combo as any).price) : '',
+        is_lifetime: (combo as any).is_lifetime ?? false,
+        includes_exclusive_access: (combo as any).includes_exclusive_access ?? false,
       });
     }
   }, [combo]);
