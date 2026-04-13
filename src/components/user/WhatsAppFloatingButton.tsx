@@ -3,7 +3,7 @@ import React from 'react';
 export const WhatsAppFloatingButton: React.FC = () => {
   return (
     <a
-      href="https://wa.me/558137880180?text=Ol%C3%A1!%20Preciso%20de%20ajuda."
+      href="https://wa.me/5548991601025?text=Ol%C3%A1!%20Preciso%20de%20ajuda."
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-110 md:bottom-6 md:right-6 md:h-16 md:w-16"
