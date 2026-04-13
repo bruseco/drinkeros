@@ -527,20 +527,9 @@ const AdminUsers: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Gerenciar Acessos</DialogTitle>
             <DialogDescription>
-              Selecione os cursos, e-books e receitas que {selectedUser?.full_name || selectedUser?.email} terá acesso.
+              Selecione os cursos, e-books, conteúdo exclusivo e pacotes que {selectedUser?.full_name || selectedUser?.email} terá acesso.
             </DialogDescription>
           </DialogHeader>
-          {/* Receitas toggle */}
-          <div className="flex items-center justify-between rounded-lg border p-3">
-            <div className="flex items-center gap-2">
-              <Wine className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">Receitas</span>
-            </div>
-            <Checkbox
-              checked={receitasAccess}
-              onCheckedChange={(checked) => setReceitasAccess(!!checked)}
-            />
-          </div>
           <AccessItemList
             items={accessItems}
             selectedIds={selectedAccess}
@@ -584,17 +573,6 @@ const AdminUsers: React.FC = () => {
             </div>
             <div className="space-y-2">
               <Label>Acessos (opcional)</Label>
-              {/* Receitas toggle */}
-              <div className="flex items-center justify-between rounded-lg border p-3">
-                <div className="flex items-center gap-2">
-                  <Wine className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium">Receitas</span>
-                </div>
-                <Checkbox
-                  checked={newReceitasAccess}
-                  onCheckedChange={(checked) => setNewReceitasAccess(!!checked)}
-                />
-              </div>
               <AccessItemList
                 items={accessItems}
                 selectedIds={newUserAccess}
