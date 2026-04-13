@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, Loader2, Upload, X, BookOpen, FileText } from 'lucide-react';
+import { ArrowLeft, Loader2, Upload, X, BookOpen, FileText, Crown, Star } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 
 const ProdutoForm: React.FC = () => {
