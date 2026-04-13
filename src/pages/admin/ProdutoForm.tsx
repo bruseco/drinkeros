@@ -317,6 +317,24 @@ const ProdutoForm: React.FC = () => {
                 )}
               </CardContent>
             </Card>
+            <Card>
+              <CardHeader><CardTitle>Conteúdo Exclusivo</CardTitle></CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="flex items-center gap-2">
+                    <Star className="h-4 w-4 text-primary" />
+                    <div>
+                      <p className="text-sm font-medium">Receitas Exclusivas</p>
+                      <p className="text-xs text-muted-foreground">Incluir acesso às receitas exclusivas</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={formData.includes_exclusive_access}
+                    onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, includes_exclusive_access: checked }))}
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           <div className="space-y-6">
@@ -367,6 +385,16 @@ const ProdutoForm: React.FC = () => {
                     <Switch id="is_available_for_sale" checked={formData.is_available_for_sale} onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, is_available_for_sale: checked }))} />
                   </div>
                 )}
+                <div className="flex items-center justify-between border-t pt-4">
+                  <div className="flex items-center gap-2">
+                    <Crown className="h-4 w-4 text-primary" />
+                    <div>
+                      <Label htmlFor="is_lifetime">Acesso Vitalício</Label>
+                      <p className="text-xs text-muted-foreground mt-0.5">Comprador recebe acesso vitalício</p>
+                    </div>
+                  </div>
+                  <Switch id="is_lifetime" checked={formData.is_lifetime} onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, is_lifetime: checked }))} />
+                </div>
               </CardContent>
             </Card>
           </div>
