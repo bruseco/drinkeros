@@ -536,9 +536,9 @@ const AdminUsers: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
           {/* Lifetime access toggle */}
-          <div className="flex items-center justify-between rounded-lg border p-3 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800">
+          <div className="flex items-center justify-between rounded-lg border p-3 bg-card border-border">
             <div className="flex items-center gap-2">
-              <Crown className="h-4 w-4 text-amber-600" />
+              <Crown className="h-4 w-4 text-primary" />
               <div>
                 <p className="text-sm font-medium">Acesso Vitalício</p>
                 <p className="text-xs text-muted-foreground">Remove expiração de todos os acessos</p>
