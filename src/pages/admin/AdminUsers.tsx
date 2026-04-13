@@ -534,6 +534,24 @@ const AdminUsers: React.FC = () => {
               Selecione os cursos, e-books, conteúdo exclusivo e pacotes que {selectedUser?.full_name || selectedUser?.email} terá acesso.
             </DialogDescription>
           </DialogHeader>
+          {/* Lifetime access toggle */}
+          <div className="flex items-center justify-between rounded-lg border p-3 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800">
+            <div className="flex items-center gap-2">
+              <Crown className="h-4 w-4 text-amber-600" />
+              <div>
+                <p className="text-sm font-medium">Acesso Vitalício</p>
+                <p className="text-xs text-muted-foreground">Remove expiração de todos os acessos</p>
+              </div>
+            </div>
+            <Checkbox
+              checked={selectedUser ? lifetimeSet.has(selectedUser.user_id) : false}
+              onCheckedChange={(checked) => {
+                if (selectedUser) {
+                  toggleLifetime.mutate({ userId: selectedUser.user_id, grant: !!checked });
+                }
+              }}
+            />
+          </div>
           <AccessItemList
             items={accessItems}
             selectedIds={selectedAccess}
@@ -542,7 +560,7 @@ const AdminUsers: React.FC = () => {
             typeFilter={accessType}
             onSearchChange={setAccessSearch}
             onTypeChange={setAccessType}
-            maxHeight="40vh"
+            maxHeight="35vh"
           />
           <DialogFooter>
             <Button variant="outline" onClick={closeAccessDialog}>Cancelar</Button>
