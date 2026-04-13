@@ -192,9 +192,11 @@ export type Database = {
           display_order: number | null
           hotmart_product_code: string | null
           id: string
+          includes_exclusive_access: boolean
           is_active: boolean
           is_available_for_sale: boolean
           is_free: boolean
+          is_lifetime: boolean
           name: string
           price: number | null
           slug: string
@@ -209,9 +211,11 @@ export type Database = {
           display_order?: number | null
           hotmart_product_code?: string | null
           id?: string
+          includes_exclusive_access?: boolean
           is_active?: boolean
           is_available_for_sale?: boolean
           is_free?: boolean
+          is_lifetime?: boolean
           name: string
           price?: number | null
           slug: string
@@ -226,9 +230,11 @@ export type Database = {
           display_order?: number | null
           hotmart_product_code?: string | null
           id?: string
+          includes_exclusive_access?: boolean
           is_active?: boolean
           is_available_for_sale?: boolean
           is_free?: boolean
+          is_lifetime?: boolean
           name?: string
           price?: number | null
           slug?: string
