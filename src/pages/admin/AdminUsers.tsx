@@ -171,6 +171,7 @@ const AdminUsers: React.FC = () => {
 
   const { data: allCourses = [] } = useCourses();
   const { data: allEbooks = [] } = useEbooks();
+  const { data: allCombos = [] } = useCombos();
   const updateRole = useUpdateUserRole();
   const updateAccess = useUpdateUserAccess();
   const toggleExclusive = useToggleExclusiveAccess();
@@ -181,13 +182,15 @@ const AdminUsers: React.FC = () => {
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
 
-  // Build unified sorted list (Cursos and E-books only)
+  // Build unified sorted list
   const accessItems: AccessItem[] = useMemo(() => {
     const courses = allCourses.map((c) => ({ id: c.id, name: c.name, type: 'course' as const }));
     const ebooks = allEbooks.map((e) => ({ id: e.id, name: e.name, type: 'ebook' as const }));
+    const combos = allCombos.map((c) => ({ id: c.id, name: c.name, type: 'combo' as const }));
     return [
       ...courses.sort((a, b) => a.name.localeCompare(b.name)),
       ...ebooks.sort((a, b) => a.name.localeCompare(b.name)),
+      ...combos.sort((a, b) => a.name.localeCompare(b.name)),
     ];
   }, [allCourses, allEbooks]);
 
