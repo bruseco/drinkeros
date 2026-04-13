@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useAdminUsers, useUpdateUserRole, useUpdateUserAccess, useCreateUser, useResendWelcomeEmail, useResetUserPassword, useUpdateUserProfile, UserWithRole } from '@/hooks/useAdminUsers';
 import { useCourses } from '@/hooks/useCourses';
 import { useEbooks } from '@/hooks/useEbooks';
+import { useCombos } from '@/hooks/useCombos';
 import { useToggleExclusiveAccess } from '@/hooks/useExclusiveAccess';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -30,12 +31,12 @@ import { Database } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
 
 type AppRole = Database['public']['Enums']['app_role'];
-type AccessType = 'all' | 'course' | 'ebook';
+type AccessType = 'all' | 'course' | 'ebook' | 'combo';
 
 interface AccessItem {
   id: string;
   name: string;
-  type: 'course' | 'ebook';
+  type: 'course' | 'ebook' | 'combo';
 }
 
 const PAGE_SIZE = 50;
@@ -56,18 +57,20 @@ const roleBadgeVariant: Record<AppRole | 'student', 'default' | 'secondary' | 'o
 const typeBadgeVariant: Record<string, 'default' | 'secondary' | 'outline'> = {
   course: 'secondary',
   ebook: 'outline',
+  combo: 'default',
 };
 
 const typeLabel: Record<string, string> = {
   course: 'Curso',
   ebook: 'E-book',
+  combo: 'Pacote',
 };
 
 // Reusable access list component
 const AccessItemList: React.FC<{
   items: AccessItem[];
   selectedIds: Set<string>;
-  onToggle: (id: string, type: 'course' | 'ebook') => void;
+  onToggle: (id: string, type: 'course' | 'ebook' | 'combo') => void;
   searchFilter: string;
   typeFilter: AccessType;
   onSearchChange: (v: string) => void;
@@ -102,6 +105,7 @@ const AccessItemList: React.FC<{
           <TabsTrigger value="all" className="flex-1">Todos</TabsTrigger>
           <TabsTrigger value="course" className="flex-1">Cursos</TabsTrigger>
           <TabsTrigger value="ebook" className="flex-1">E-books</TabsTrigger>
+          <TabsTrigger value="combo" className="flex-1">Pacotes</TabsTrigger>
         </TabsList>
       </Tabs>
       <div className={`space-y-2 overflow-y-auto pr-1`} style={{ maxHeight }}>
