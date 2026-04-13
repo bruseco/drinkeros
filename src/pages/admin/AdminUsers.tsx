@@ -293,12 +293,14 @@ const AdminUsers: React.FC = () => {
     if (!newUserEmail) return;
     const courseIds = idsFromSet(newUserAccess, 'course');
     const ebookIds = idsFromSet(newUserAccess, 'ebook');
+    const comboIds = idsFromSet(newUserAccess, 'combo');
     createUser.mutate(
       {
         email: newUserEmail,
         fullName: newUserName || undefined,
         courseIds: courseIds.length > 0 ? courseIds : undefined,
         ebookIds: ebookIds.length > 0 ? ebookIds : undefined,
+        comboIds: comboIds.length > 0 ? comboIds : undefined,
       },
       {
         onSuccess: (result) => {
