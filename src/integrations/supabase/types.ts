@@ -665,48 +665,8 @@ export type Database = {
         }
         Relationships: []
       }
-      exclusive_categories: {
-        Row: {
-          cover_image_url: string | null
-          created_at: string
-          description: string | null
-          display_order: number | null
-          feature_key: string
-          id: string
-          is_active: boolean
-          name: string
-          slug: string
-          updated_at: string
-        }
-        Insert: {
-          cover_image_url?: string | null
-          created_at?: string
-          description?: string | null
-          display_order?: number | null
-          feature_key?: string
-          id?: string
-          is_active?: boolean
-          name: string
-          slug: string
-          updated_at?: string
-        }
-        Update: {
-          cover_image_url?: string | null
-          created_at?: string
-          description?: string | null
-          display_order?: number | null
-          feature_key?: string
-          id?: string
-          is_active?: boolean
-          name?: string
-          slug?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       exclusive_posts: {
         Row: {
-          category_id: string | null
           characteristics: string[] | null
           cover_image_url: string | null
           created_at: string
@@ -721,7 +681,6 @@ export type Database = {
           youtube_url: string | null
         }
         Insert: {
-          category_id?: string | null
           characteristics?: string[] | null
           cover_image_url?: string | null
           created_at?: string
@@ -736,7 +695,6 @@ export type Database = {
           youtube_url?: string | null
         }
         Update: {
-          category_id?: string | null
           characteristics?: string[] | null
           cover_image_url?: string | null
           created_at?: string
@@ -750,15 +708,7 @@ export type Database = {
           updated_at?: string
           youtube_url?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "exclusive_posts_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "exclusive_categories"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       favorites: {
         Row: {
