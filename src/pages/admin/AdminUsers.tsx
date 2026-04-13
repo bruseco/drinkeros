@@ -173,6 +173,9 @@ const AdminUsers: React.FC = () => {
   const updateRole = useUpdateUserRole();
   const updateAccess = useUpdateUserAccess();
   const toggleExclusive = useToggleExclusiveAccess();
+  const toggleLifetime = useToggleLifetimeAccess();
+  const userIds = useMemo(() => users.map(u => u.user_id), [users]);
+  const { data: lifetimeSet = new Set<string>() } = useLifetimeAccessUsers(userIds);
   const createUser = useCreateUser();
   const resendEmail = useResendWelcomeEmail();
   const resetPassword = useResetUserPassword();
