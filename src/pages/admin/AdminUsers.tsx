@@ -450,6 +450,7 @@ const AdminUsers: React.FC = () => {
                       <TableCell>
                         <Button variant="ghost" size="sm" className="gap-2" onClick={() => openAccessDialog(user)}>
                           <Badge variant="secondary">{user.packages_count}</Badge>
+                          {lifetimeSet.has(user.user_id) && <Crown className="h-3.5 w-3.5 text-amber-500" />}
                           <Edit className="h-3.5 w-3.5 text-muted-foreground" />
                         </Button>
                       </TableCell>
