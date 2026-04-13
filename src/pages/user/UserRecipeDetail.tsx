@@ -9,6 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, ArrowLeft, Heart, Share2, Wine, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import FavoriteDialog from '@/components/user/FavoriteDialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 
 const UserRecipeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,7 +26,6 @@ const UserRecipeDetail: React.FC = () => {
   const { toast } = useToast();
   const [showFavoriteDialog, setShowFavoriteDialog] = useState(false);
 
-  // Check if this recipe is already in favorites
   const isFavorite = favorites.some((f) => f.recipe_id === id);
 
   const getYouTubeEmbedUrl = (url: string) => {
@@ -44,10 +50,7 @@ const UserRecipeDetail: React.FC = () => {
   const handleShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: recipe?.title,
-          url: window.location.href,
-        });
+        await navigator.share({ title: recipe?.title, url: window.location.href });
       } catch {}
     } else {
       await navigator.clipboard.writeText(window.location.href);
@@ -74,52 +77,49 @@ const UserRecipeDetail: React.FC = () => {
     );
   }
 
-  // Paywall: user without exclusive access
-  if (!hasAccess) {
-    return (
-      <div className="pb-24">
-        {/* Show cover image blurred */}
-        {recipe.cover_image_url && (
-          <div className="w-full aspect-video bg-black relative overflow-hidden">
-            <img src={recipe.cover_image_url} alt={recipe.title} className="w-full h-full object-cover blur-sm opacity-50" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Lock className="h-12 w-12 text-primary" />
-            </div>
-          </div>
-        )}
-        <div className="container mx-auto px-4 py-8 text-center space-y-4">
-          <h1 className="text-2xl font-bold text-foreground">{recipe.title}</h1>
-          <div className="rounded-xl border border-primary/20 bg-primary/5 p-6 space-y-3">
-            <Wine className="h-8 w-8 text-primary mx-auto" />
-            <h2 className="text-lg font-semibold text-foreground">Conteúdo Exclusivo para Assinantes</h2>
-            <p className="text-muted-foreground text-sm">
-              Esta receita faz parte do nosso conteúdo exclusivo. Assine para ter acesso a todas as receitas e muito mais!
-            </p>
-            <a href="https://wa.me/5548991601025?text=Ol%C3%A1!%20Gostaria%20de%20saber%20mais%20sobre%20a%20assinatura%20Drinkeros" target="_blank" rel="noopener noreferrer">
-              <Button className="mt-2">Saiba mais</Button>
-            </a>
-          </div>
-          <Link to="/app/receitas">
-            <Button variant="ghost" className="mt-4 gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Voltar às Receitas
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   const embedUrl = recipe.youtube_url ? getYouTubeEmbedUrl(recipe.youtube_url) : null;
 
-  // Parse instructions into numbered steps
   const instructionLines = recipe.instructions
     ? recipe.instructions.split('\n').filter(l => l.trim())
     : [];
 
   return (
     <div className="pb-24">
-      {/* YouTube Video */}
+      {/* Paywall Dialog */}
+      <Dialog open={!hasAccess} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
+          <DialogHeader className="text-center items-center">
+            <div className="mx-auto mb-2 rounded-full bg-primary/10 p-4">
+              <Lock className="h-8 w-8 text-primary" />
+            </div>
+            <DialogTitle className="text-xl">Conteúdo Exclusivo</DialogTitle>
+            <DialogDescription className="text-center">
+              Esta receita faz parte do nosso conteúdo exclusivo para assinantes. Assine para ter acesso a todas as receitas e muito mais!
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 mt-2">
+            <a
+              href="https://wa.me/5548991601025?text=Ol%C3%A1!%20Gostaria%20de%20saber%20mais%20sobre%20a%20assinatura%20Drinkeros"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full"
+            >
+              <Button className="w-full gap-2">
+                <Wine className="h-4 w-4" />
+                Saiba mais
+              </Button>
+            </a>
+            <Link to="/app/receitas" className="w-full">
+              <Button variant="ghost" className="w-full gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Voltar às Receitas
+              </Button>
+            </Link>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Video / Cover */}
       {embedUrl ? (
         <FullscreenVideo
           embedUrl={embedUrl}
@@ -132,7 +132,7 @@ const UserRecipeDetail: React.FC = () => {
         </div>
       ) : null}
 
-      {/* Action buttons row */}
+      {/* Action buttons */}
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
           <Link to="/app/receitas">
@@ -144,7 +144,6 @@ const UserRecipeDetail: React.FC = () => {
             <Share2 className="h-5 w-5" />
           </Button>
         </div>
-        {/* Heart / favorite button */}
         <Button
           variant="ghost"
           size="icon"
@@ -163,20 +162,14 @@ const UserRecipeDetail: React.FC = () => {
 
       {/* Content */}
       <div className="container mx-auto px-4 space-y-6">
-        {/* Title */}
         <h1 className="text-3xl font-bold text-foreground">{recipe.title}</h1>
 
-        {/* Ingredients */}
         {recipe.ingredients && recipe.ingredients.length > 0 && (
           <div>
             <h2 className="text-lg font-bold text-foreground mb-2">Ingredientes:</h2>
             <div className="flex flex-wrap gap-1.5">
               {recipe.ingredients.map((ing, i) => (
-                <Badge
-                  key={i}
-                  variant="outline"
-                  className="text-sm text-amber-500 border-amber-500/40"
-                >
+                <Badge key={i} variant="outline" className="text-sm text-amber-500 border-amber-500/40">
                   {ing}
                 </Badge>
               ))}
@@ -184,13 +177,11 @@ const UserRecipeDetail: React.FC = () => {
           </div>
         )}
 
-        {/* Modo de preparo */}
         {instructionLines.length > 0 && (
           <div>
             <h2 className="text-lg font-bold text-foreground mb-3">Modo de preparo:</h2>
             <ol className="space-y-2">
               {instructionLines.map((line, i) => {
-                // Remove leading number/dot if present
                 const cleaned = line.replace(/^\d+[\.\)]\s*/, '').trim();
                 return (
                   <li key={i} className="flex gap-3 items-start text-muted-foreground">
@@ -203,17 +194,12 @@ const UserRecipeDetail: React.FC = () => {
           </div>
         )}
 
-        {/* Características */}
         {recipe.characteristics && recipe.characteristics.length > 0 && (
           <div>
             <h2 className="text-lg font-bold text-foreground mb-2">Características:</h2>
             <div className="flex flex-wrap gap-1.5">
               {recipe.characteristics.map((c, i) => (
-                <Badge
-                  key={i}
-                  variant="outline"
-                  className="text-sm text-amber-500 border-amber-500/40"
-                >
+                <Badge key={i} variant="outline" className="text-sm text-amber-500 border-amber-500/40">
                   {c}
                 </Badge>
               ))}
@@ -221,7 +207,6 @@ const UserRecipeDetail: React.FC = () => {
           </div>
         )}
 
-        {/* Description */}
         {recipe.description && (
           <div>
             <h2 className="text-lg font-bold text-foreground mb-2">Descrição:</h2>
@@ -229,7 +214,7 @@ const UserRecipeDetail: React.FC = () => {
           </div>
         )}
       </div>
-      {/* Favorite Dialog */}
+
       {id && (
         <FavoriteDialog
           open={showFavoriteDialog}
