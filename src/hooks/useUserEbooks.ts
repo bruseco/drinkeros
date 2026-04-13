@@ -10,8 +10,9 @@ export const useUserEbooks = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('user_ebooks')
-        .select('ebook_id')
-        .eq('user_id', user!.id);
+        .select('ebook_id, expires_at')
+        .eq('user_id', user!.id)
+        .or('expires_at.is.null,expires_at.gt.' + new Date().toISOString());
 
       if (error) throw error;
       return data.map((d) => d.ebook_id);

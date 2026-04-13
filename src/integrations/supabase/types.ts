@@ -1422,18 +1422,21 @@ export type Database = {
       user_combos: {
         Row: {
           combo_id: string
+          expires_at: string | null
           id: string
           purchased_at: string
           user_id: string
         }
         Insert: {
           combo_id: string
+          expires_at?: string | null
           id?: string
           purchased_at?: string
           user_id: string
         }
         Update: {
           combo_id?: string
+          expires_at?: string | null
           id?: string
           purchased_at?: string
           user_id?: string
@@ -1451,18 +1454,21 @@ export type Database = {
       user_courses: {
         Row: {
           course_id: string
+          expires_at: string | null
           id: string
           purchased_at: string
           user_id: string
         }
         Insert: {
           course_id: string
+          expires_at?: string | null
           id?: string
           purchased_at?: string
           user_id: string
         }
         Update: {
           course_id?: string
+          expires_at?: string | null
           id?: string
           purchased_at?: string
           user_id?: string
@@ -1480,18 +1486,21 @@ export type Database = {
       user_ebooks: {
         Row: {
           ebook_id: string
+          expires_at: string | null
           id: string
           purchased_at: string
           user_id: string
         }
         Insert: {
           ebook_id: string
+          expires_at?: string | null
           id?: string
           purchased_at?: string
           user_id: string
         }
         Update: {
           ebook_id?: string
+          expires_at?: string | null
           id?: string
           purchased_at?: string
           user_id?: string
@@ -1527,8 +1536,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_lifetime_access: {
+        Row: {
+          granted_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          granted_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_packages: {
         Row: {
+          expires_at: string | null
           hotmart_transaction_id: string | null
           id: string
           package_id: string
@@ -1536,6 +1564,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          expires_at?: string | null
           hotmart_transaction_id?: string | null
           id?: string
           package_id: string
@@ -1543,6 +1572,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          expires_at?: string | null
           hotmart_transaction_id?: string | null
           id?: string
           package_id?: string

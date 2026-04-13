@@ -235,9 +235,11 @@ export const useUserCourses = () => {
           id,
           course_id,
           purchased_at,
+          expires_at,
           course:courses(*)
         `)
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .or('expires_at.is.null,expires_at.gt.' + new Date().toISOString());
 
       if (ucError) throw ucError;
 

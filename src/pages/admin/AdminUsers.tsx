@@ -4,6 +4,7 @@ import { useCourses } from '@/hooks/useCourses';
 import { useEbooks } from '@/hooks/useEbooks';
 import { useCombos } from '@/hooks/useCombos';
 import { useToggleExclusiveAccess } from '@/hooks/useExclusiveAccess';
+import { useLifetimeAccessUsers, useToggleLifetimeAccess } from '@/hooks/useLifetimeAccess';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/use-toast';
@@ -26,7 +27,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Users, Shield, Package, Loader2, Edit, Plus, Mail, MoreHorizontal, Send, ChevronLeft, ChevronRight, Key, Pencil } from 'lucide-react';
+import { Search, Users, Shield, Package, Loader2, Edit, Plus, Mail, MoreHorizontal, Send, ChevronLeft, ChevronRight, Key, Pencil, Crown } from 'lucide-react';
 import { Database } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
 
@@ -172,6 +173,9 @@ const AdminUsers: React.FC = () => {
   const updateRole = useUpdateUserRole();
   const updateAccess = useUpdateUserAccess();
   const toggleExclusive = useToggleExclusiveAccess();
+  const toggleLifetime = useToggleLifetimeAccess();
+  const userIds = useMemo(() => users.map(u => u.user_id), [users]);
+  const { data: lifetimeSet = new Set<string>() } = useLifetimeAccessUsers(userIds);
   const createUser = useCreateUser();
   const resendEmail = useResendWelcomeEmail();
   const resetPassword = useResetUserPassword();
@@ -446,6 +450,7 @@ const AdminUsers: React.FC = () => {
                       <TableCell>
                         <Button variant="ghost" size="sm" className="gap-2" onClick={() => openAccessDialog(user)}>
                           <Badge variant="secondary">{user.packages_count}</Badge>
+                          {lifetimeSet.has(user.user_id) && <Crown className="h-3.5 w-3.5 text-amber-500" />}
                           <Edit className="h-3.5 w-3.5 text-muted-foreground" />
                         </Button>
                       </TableCell>
@@ -530,6 +535,24 @@ const AdminUsers: React.FC = () => {
               Selecione os cursos, e-books, conteúdo exclusivo e pacotes que {selectedUser?.full_name || selectedUser?.email} terá acesso.
             </DialogDescription>
           </DialogHeader>
+          {/* Lifetime access toggle */}
+          <div className="flex items-center justify-between rounded-lg border p-3 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800">
+            <div className="flex items-center gap-2">
+              <Crown className="h-4 w-4 text-amber-600" />
+              <div>
+                <p className="text-sm font-medium">Acesso Vitalício</p>
+                <p className="text-xs text-muted-foreground">Remove expiração de todos os acessos</p>
+              </div>
+            </div>
+            <Checkbox
+              checked={selectedUser ? lifetimeSet.has(selectedUser.user_id) : false}
+              onCheckedChange={(checked) => {
+                if (selectedUser) {
+                  toggleLifetime.mutate({ userId: selectedUser.user_id, grant: !!checked });
+                }
+              }}
+            />
+          </div>
           <AccessItemList
             items={accessItems}
             selectedIds={selectedAccess}
@@ -538,7 +561,7 @@ const AdminUsers: React.FC = () => {
             typeFilter={accessType}
             onSearchChange={setAccessSearch}
             onTypeChange={setAccessType}
-            maxHeight="40vh"
+            maxHeight="35vh"
           />
           <DialogFooter>
             <Button variant="outline" onClick={closeAccessDialog}>Cancelar</Button>
