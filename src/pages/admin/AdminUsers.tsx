@@ -218,6 +218,7 @@ const AdminUsers: React.FC = () => {
     user.course_ids.forEach((id) => s.add(`course:${id}`));
     user.ebook_ids.forEach((id) => s.add(`ebook:${id}`));
     user.combo_ids.forEach((id) => s.add(`combo:${id}`));
+    if (user.has_receitas) s.add('exclusive:receitas');
     return s;
   };
 
@@ -234,9 +235,8 @@ const AdminUsers: React.FC = () => {
   const openAccessDialog = (user: UserWithRole) => {
     setSelectedUser(user);
     setSelectedAccess(buildAccessSet(user));
-    setReceitasAccess(user.has_receitas);
     setAccessSearch('');
-    setAccessType('all');
+    setAccessType('course');
   };
 
   const closeAccessDialog = () => {
@@ -247,12 +247,14 @@ const AdminUsers: React.FC = () => {
   const saveAccess = async () => {
     if (!selectedUser) return;
     
+    const newReceitasAccess = selectedAccess.has('exclusive:receitas');
+
     // Save course/ebook/combo access
     updateAccess.mutate(
       {
         userId: selectedUser.user_id,
         currentPackageIds: selectedUser.package_ids,
-        newPackageIds: selectedUser.package_ids, // preserve existing packages
+        newPackageIds: selectedUser.package_ids,
         currentComboIds: selectedUser.combo_ids,
         newComboIds: idsFromSet(selectedAccess, 'combo'),
         currentCourseIds: selectedUser.course_ids,
@@ -263,12 +265,12 @@ const AdminUsers: React.FC = () => {
     );
 
     // Toggle receitas access if changed
-    if (receitasAccess !== selectedUser.has_receitas) {
+    if (newReceitasAccess !== selectedUser.has_receitas) {
       toggleExclusive.mutate(
-        { userId: selectedUser.user_id, feature: 'receitas', grant: receitasAccess },
+        { userId: selectedUser.user_id, feature: 'receitas', grant: newReceitasAccess },
         {
           onSuccess: () => {
-            toast({ title: receitasAccess ? 'Acesso às Receitas concedido' : 'Acesso às Receitas removido' });
+            toast({ title: newReceitasAccess ? 'Acesso às Receitas concedido' : 'Acesso às Receitas removido' });
           },
         },
       );
@@ -282,9 +284,8 @@ const AdminUsers: React.FC = () => {
     setNewUserEmail('');
     setNewUserName('');
     setNewUserAccess(new Set());
-    setNewReceitasAccess(false);
     setNewAccessSearch('');
-    setNewAccessType('all');
+    setNewAccessType('course');
     setIsCreateDialogOpen(true);
   };
 
@@ -295,6 +296,7 @@ const AdminUsers: React.FC = () => {
     const courseIds = idsFromSet(newUserAccess, 'course');
     const ebookIds = idsFromSet(newUserAccess, 'ebook');
     const comboIds = idsFromSet(newUserAccess, 'combo');
+    const grantReceitas = newUserAccess.has('exclusive:receitas');
     createUser.mutate(
       {
         email: newUserEmail,
@@ -305,8 +307,7 @@ const AdminUsers: React.FC = () => {
       },
       {
         onSuccess: (result) => {
-          // Grant receitas access if toggled
-          if (newReceitasAccess && result?.user?.id) {
+          if (grantReceitas && result?.user?.id) {
             toggleExclusive.mutate({ userId: result.user.id, feature: 'receitas', grant: true });
           }
           closeCreateDialog();
