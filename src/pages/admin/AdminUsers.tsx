@@ -192,7 +192,7 @@ const AdminUsers: React.FC = () => {
       ...ebooks.sort((a, b) => a.name.localeCompare(b.name)),
       ...combos.sort((a, b) => a.name.localeCompare(b.name)),
     ];
-  }, [allCourses, allEbooks]);
+  }, [allCourses, allEbooks, allCombos]);
 
   const handleResendEmail = (user: UserWithRole) => {
     resendEmail.mutate(user.user_id);
