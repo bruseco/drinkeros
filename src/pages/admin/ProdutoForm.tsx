@@ -44,6 +44,8 @@ const ProdutoForm: React.FC = () => {
     display_order: 0,
     workload_hours: 0,
     price: '',
+    is_lifetime: false,
+    includes_exclusive_access: false,
   });
 
   const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>([]);
