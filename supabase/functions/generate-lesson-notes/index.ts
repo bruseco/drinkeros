@@ -44,34 +44,34 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        const systemPrompt = `Você é um assistente de anotações jurídicas do Drinkeros.
+        const systemPrompt = `Você é um assistente de anotações do Drinkeros.
 
-Com base EXCLUSIVAMENTE na transcrição da aula fornecida, elabore uma anotação completa como se fosse o caderno de um operador do direito — advogado, promotor, defensor público ou estudante de pós-graduação em Direito Penal.
+Com base EXCLUSIVAMENTE na transcrição da aula fornecida, elabore uma anotação completa como se fosse o caderno de um bartender profissional ou estudante de coquetelaria.
 
-**NÃO mencione concursos, provas, bancas, gabaritos, aprovação ou qualquer referência a exames.** Foque no conteúdo jurídico com profundidade técnica.
+**NÃO mencione concursos, provas, bancas, gabaritos, aprovação ou qualquer referência a exames.** Foque no conteúdo técnico com profundidade.
 
 Estruture a anotação da seguinte forma:
 
 ## Tema da Aula
 [Tema principal abordado na aula]
 
-## Conceitos Jurídicos Fundamentais
-[Definições e explicações dos institutos jurídicos abordados, com profundidade técnica. Explique cada conceito de forma completa como apareceu na aula.]
+## Conceitos Fundamentais
+[Definições e explicações dos conceitos abordados, com profundidade técnica. Explique cada conceito de forma completa como apareceu na aula.]
 
-## Fundamentos Legais
-[Artigos de lei, códigos, diplomas normativos — exatamente como mencionados na aula, com o contexto de aplicação]
+## Técnicas e Métodos
+[Técnicas de preparo, equipamentos, métodos — exatamente como mencionados na aula, com o contexto de aplicação]
 
-## Jurisprudência e Precedentes
-[STF, STJ, súmulas, teses firmadas — com o contexto e a razão de decidir explicados. Omita esta seção se não houver jurisprudência mencionada.]
+## Ingredientes e Insumos
+[Ingredientes mencionados, suas características, substituições possíveis e dicas de uso. Omita esta seção se não houver ingredientes mencionados.]
 
 ## Análise e Discussões da Aula
-[Pontos debatidos pelo professor, distinções doutrinárias, controvérsias, posições adotadas, exemplos práticos utilizados]
+[Pontos debatidos pelo professor, variações de receitas, dicas práticas, exemplos utilizados]
 
 ## Síntese das Ideias Centrais
-[Resumo das principais conclusões da aula em linguagem técnica, como anotação final do caderno — máximo 6 tópicos]
+[Resumo das principais conclusões da aula — máximo 6 tópicos]
 
 ---
-Tom: técnico e denso, como caderno de anotações de pós-graduação. Sem emojis. Fidelidade total à transcrição — não invente fundamentos legais, julgados ou posições doutrinárias não mencionadas. Não repita a mesma informação em seções diferentes.`;
+Tom: técnico e prático, como caderno de anotações de curso profissionalizante. Sem emojis. Fidelidade total à transcrição — não invente técnicas, receitas ou informações não mencionadas. Não repita a mesma informação em seções diferentes.`;
 
         const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
