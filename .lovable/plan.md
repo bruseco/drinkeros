@@ -1,40 +1,51 @@
 
-Objetivo: corrigir a vitrine de e-books no painel do usuário para que a capa não fique “zoomada” nem cortada, aparecendo inteira e limitada à largura típica de uma tela de celular.
 
-Plano
-1. Ajustar o card de e-book em `src/pages/user/UserEbooks.tsx`
-- Remover a configuração que hoje força corte da imagem (`objectFit: 'cover'` + `aspectRatio: '1/1'` no próprio `<img>`).
-- Fazer a capa usar a proporção original do arquivo, com `w-full h-auto object-contain`.
-- Limitar a largura máxima do card para algo próximo de mobile real, centralizando na tela (`max-w` fixo e `mx-auto`).
+## Plano: Migrar sistema de e-mail de Amazon SES para Lovable Cloud
 
-2. Redimensionar a apresentação para “largura de celular”
-- Em vez de deixar a imagem ocupar toda a largura disponível do layout no desktop/tablet, o bloco do e-book ficará com largura máxima parecida com um celular (ex.: ~360–420px).
-- Em telas menores, continua ocupando 100% da largura disponível; em telas maiores, para de crescer.
+### Contexto
+O projeto usa Amazon SES em ~10 Edge Functions para enviar e-mails transacionais (boas-vindas, magic link, reset de senha, onboarding, upsell, etc.). Vamos migrar para o sistema de e-mail integrado do Lovable Cloud, que não requer conta externa ou API keys.
 
-3. Preservar o layout visual já aprovado
-- Manter badge de “Bloqueado” / “Adquirido” no topo direito da capa.
-- Manter o título menor, centralizado, em negrito, com sombra preta e sobreposição por cima da imagem usando margem negativa.
-- Manter o botão menor abaixo da capa, com texto condicional:
-  - `Saiba Mais` quando bloqueado
-  - `Baixar E-book` quando adquirido
+O projeto tem o domínio customizado `www.drinkeros.com`, que pode ser usado para o envio.
 
-4. Ajustar o estado sem capa
-- Garantir que o placeholder sem imagem siga a mesma largura máxima do card para não quebrar a consistência visual.
+### Etapas
 
-Resultado esperado
-- A capa deixa de ser cortada.
-- O e-book passa a aparecer inteiro.
-- A largura visual fica compatível com uma tela de celular, mesmo quando o app estiver aberto em uma viewport maior.
-- O restante do visual (badge, título sobreposto e botão) continua igual.
+**1. Configurar domínio de e-mail**
+- Abrir o diálogo de configuração de domínio de e-mail para configurar o envio pelo domínio `drinkeros.com`
+- Você precisará adicionar registros DNS (NS records) no seu provedor de domínio para verificação
 
-Detalhes técnicos
-- Arquivo principal: `src/pages/user/UserEbooks.tsx`
-- Troca principal:
-  - de imagem “quadrada e cortada”
-  - para imagem “proporcional e inteira”
-- Estratégia de layout:
-```text
-container do item: w-full max-w-[390px] mx-auto
-imagem: w-full h-auto object-contain
-```
-- Se necessário, o ajuste fino do `max-w` pode ser feito rapidamente depois de validar visualmente no preview mobile.
+**2. Configurar infraestrutura de e-mail**
+- Criar toda a infraestrutura necessária (filas, tabelas, cron jobs) automaticamente
+
+**3. Criar templates de e-mail transacional**
+- Migrar os templates existentes (welcome, magic-link, reset-password) para o novo sistema usando React Email components
+- Registrar cada template no sistema
+
+**4. Configurar templates de e-mail de autenticação**
+- Configurar os e-mails de autenticação (verificação, reset de senha, magic link) com a identidade visual da Drinkeros
+
+**5. Atualizar Edge Functions existentes**
+- Remover dependências do Amazon SES (`@aws-sdk/client-ses`) das Edge Functions
+- Substituir chamadas SES por chamadas ao `send-transactional-email` nas seguintes funções:
+  - `send-welcome-email` → template transacional "welcome"
+  - `send-magic-link` → template auth (magic link nativo)
+  - `send-reset-password-email` → template auth (recovery nativo)
+  - `resend-welcome-email` → usar novo template "welcome"
+  - `bootstrap-admin` → usar novo template "welcome"
+  - `send-onboarding-reminders` → template transacional "onboarding-reminder"
+  - `send-onboarding-followup` → template transacional "onboarding-followup"
+  - `send-onboarding-followup-batch` → template transacional "onboarding-followup"
+  - `send-study-reminders` → template transacional "study-reminder"
+  - `process-upsell` → template transacional "upsell"
+  - `woocommerce-webhook` → template transacional "module-access"
+
+**6. Deploy de todas as funções atualizadas**
+
+### Resultado
+- Todos os e-mails enviados pelo domínio `drinkeros.com`
+- Sem dependência de conta AWS/SES
+- Sistema com retry automático, fila de envio, e log de entregas
+- Templates customizáveis com a identidade visual da Drinkeros
+
+### Primeiro passo obrigatório
+Antes de tudo, precisamos configurar o domínio de e-mail. Vou abrir o diálogo de configuração para você.
+
