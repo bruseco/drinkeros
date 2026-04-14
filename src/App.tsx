@@ -13,7 +13,7 @@ import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 import PackageLanding from "./pages/PackageLanding";
 import SSO from "./pages/SSO";
-
+import Migracao from "./pages/Migracao";
 
 // Admin pages
 import { AdminLayout } from "./components/admin/AdminLayout";
