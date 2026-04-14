@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const systemPrompt = `Você é o agente de SUPORTE da Drinkeros, plataforma de cursos de Direito Criminal.
+    const systemPrompt = `Você é o agente de SUPORTE da Drinkeros, plataforma de drinks e coquetéis.
 
 Seu papel é EXCLUSIVAMENTE prestar atendimento técnico e resolver dúvidas sobre a plataforma.
 

@@ -8,7 +8,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const CS_SYSTEM_PROMPT = `Você é o gerente de Customer Success da Drinkeros, uma plataforma de cursos online de Direito Criminal.
+const CS_SYSTEM_PROMPT = `Você é o gerente de Customer Success da Drinkeros, uma plataforma online de drinks e coquetéis.
 
 Sua tarefa é analisar as métricas operacionais fornecidas e gerar um relatório diário conciso e acionável.
 

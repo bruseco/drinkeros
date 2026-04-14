@@ -134,7 +134,7 @@ HISTÓRICO DE ATIVIDADES:
 ${activitiesText || "  Nenhuma atividade"}`;
     }
 
-    const systemPrompt = `Você é o agente de RECUPERAÇÃO DE VENDAS da Drinkeros, plataforma de cursos de Direito Criminal.
+    const systemPrompt = `Você é o agente de RECUPERAÇÃO DE VENDAS da Drinkeros, plataforma de drinks e coquetéis.
 
 Seu papel é recuperar vendas perdidas: carrinho abandonado, PIX não pago, cartão recusado.
 

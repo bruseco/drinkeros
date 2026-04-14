@@ -409,7 +409,7 @@ REGRAS OBRIGATÓRIAS:
 10. NÃO inclua o link de descadastramento no corpo - ele será adicionado automaticamente no rodapé do template.`;
 
     const contextLine = triggerType === "time"
-      ? `- Contexto: o aluno adquiriu "${completedModuleName}" há alguns dias. Apresente esta oferta como uma oportunidade de ampliar o conhecimento em Direito Criminal. NÃO mencione progresso, módulos completados ou estudos anteriores — apenas ofereça o produto diretamente com tom consultivo.`
+      ? `- Contexto: o aluno adquiriu "${completedModuleName}" há alguns dias. Apresente esta oferta como uma oportunidade de ampliar o conhecimento no mundo dos drinks. NÃO mencione progresso, módulos completados ou estudos anteriores — apenas ofereça o produto diretamente com tom consultivo.`
       : `- Contexto: o aluno completou mais de 60% do módulo "${completedModuleName}". Celebre o progresso e apresente o próximo passo natural como evolução dos estudos.`;
 
     const userPrompt = `Adapte o template de email abaixo para o produto específico.
