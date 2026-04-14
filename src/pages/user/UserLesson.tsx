@@ -25,6 +25,7 @@ import {
   Circle,
   Download,
   File,
+  ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import jsPDF from 'jspdf';
