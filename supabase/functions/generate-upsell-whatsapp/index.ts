@@ -123,7 +123,7 @@ const STEP_STRATEGIES_PROGRESS: Record<number, string> = {
 
 const STEP_STRATEGIES_TIME: Record<number, string> = {
   1: `ESTRATÉGIA DO DIA 1 - OFERTA DIRETA:
-- Apresente a oferta como uma oportunidade nova de aprofundamento em Direito Criminal
+- Apresente a oferta como uma oportunidade nova de aprofundamento no mundo dos drinks
 - NÃO mencione progresso, módulos completados ou histórico de estudos
 - Seja direto na oferta, mas com tom consultivo e humano
 - Destaque os principais benefícios do produto ofertado
@@ -133,7 +133,7 @@ const STEP_STRATEGIES_TIME: Record<number, string> = {
 - Aprofunde nos benefícios específicos do produto ofertado
 - Use argumentos reais da página de vendas
 - Se o lead respondeu anteriormente com dúvidas, RESPONDA antes de avançar
-- Reforce como este produto pode expandir o conhecimento em Direito Criminal
+- Reforce como este produto pode expandir o conhecimento no mundo dos drinks
 - NÃO mencione progresso ou conclusão de conteúdo anterior
 - Inclua o link de checkout de forma natural`,
 
@@ -242,7 +242,7 @@ CONTEXTO:
 - Nome do aluno: ${studentName}
 - ${contextLine}
 - Produto a ofertar: ${productLabel} "${productName}"
-- Descrição: ${productDescription || "Conteúdo exclusivo para aprofundamento em direito penal"}
+- Descrição: ${productDescription || "Conteúdo exclusivo para aprofundamento no mundo dos drinks"}
 - Link de checkout: ${checkoutUrl}
 - Mensagem ${step} de 4 da sequência
 ${salesPageContext}

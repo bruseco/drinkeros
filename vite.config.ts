@@ -28,7 +28,7 @@ export default defineConfig(({ mode }) => ({
       manifest: {
         name: "Drinkeros - Área de Membros",
         short_name: "Drinkeros",
-        description: "Sua plataforma de estudos de Direito Criminal",
+        description: "O mundo dos drinks é aqui!",
         theme_color: "#dc2626",
         background_color: "#0a0a0a",
         display: "standalone",

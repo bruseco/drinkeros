@@ -394,7 +394,7 @@ serve(async (req: Request) => {
     // Build unsubscribe URL
     const unsubscribeUrl = `${supabaseUrl}/functions/v1/upsell-unsubscribe?token=${encodeURIComponent(btoa(JSON.stringify({ userId: productId ? studentName : "" })))}`;
 
-    const systemPrompt = `Você é um copywriter especialista em educação online e direito penal/criminal.
+    const systemPrompt = `Você é um copywriter especialista em drinks, coquetéis e mixologia.
 Seu objetivo é adaptar templates de email de upsell para a plataforma educacional "Drinkeros".
 REGRAS OBRIGATÓRIAS:
 1. SEMPRE use a primeira pessoa do PLURAL (nós, nosso, nossa, liberamos, temos, etc.) - NUNCA use "eu", "meu", "minha".
@@ -409,7 +409,7 @@ REGRAS OBRIGATÓRIAS:
 10. NÃO inclua o link de descadastramento no corpo - ele será adicionado automaticamente no rodapé do template.`;
 
     const contextLine = triggerType === "time"
-      ? `- Contexto: o aluno adquiriu "${completedModuleName}" há alguns dias. Apresente esta oferta como uma oportunidade de ampliar o conhecimento em Direito Criminal. NÃO mencione progresso, módulos completados ou estudos anteriores — apenas ofereça o produto diretamente com tom consultivo.`
+      ? `- Contexto: o aluno adquiriu "${completedModuleName}" há alguns dias. Apresente esta oferta como uma oportunidade de ampliar o conhecimento no mundo dos drinks. NÃO mencione progresso, módulos completados ou estudos anteriores — apenas ofereça o produto diretamente com tom consultivo.`
       : `- Contexto: o aluno completou mais de 60% do módulo "${completedModuleName}". Celebre o progresso e apresente o próximo passo natural como evolução dos estudos.`;
 
     const userPrompt = `Adapte o template de email abaixo para o produto específico.
@@ -418,7 +418,7 @@ INFORMAÇÕES DO CONTEXTO:
 - Nome do aluno: ${studentName}
 - ${contextLine}
 - Produto a ofertar: ${productLabel} "${productName}"
-- Descrição do produto: ${productDescription || "Conteúdo exclusivo para aprofundamento profissional em direito penal"}
+- Descrição do produto: ${productDescription || "Conteúdo exclusivo para aprofundamento no mundo dos drinks"}
 - Link de checkout: ${checkoutUrl}
 - Este é o email ${step} de 9 da sequência de upsell
 ${salesPageContext}

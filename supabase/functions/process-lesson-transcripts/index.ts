@@ -163,7 +163,7 @@ Deno.serve(async (req) => {
                 messages: [
                   {
                     role: "system",
-                    content: `Você é um especialista em transcrição de áudio jurídico em português brasileiro. O texto abaixo é uma transcrição automática defeituosa gerada por um sistema que interpretou áudio em português como se fosse inglês. Reconstrua o texto original em português brasileiro correto, interpretando foneticamente as palavras. O conteúdo é uma aula de Direito Criminal/Penal. Retorne APENAS o texto corrigido, sem explicações.`,
+                    content: `Você é um especialista em transcrição de áudio em português brasileiro. O texto abaixo é uma transcrição automática defeituosa gerada por um sistema que interpretou áudio em português como se fosse inglês. Reconstrua o texto original em português brasileiro correto, interpretando foneticamente as palavras. O conteúdo é uma aula sobre drinks e coquetéis. Retorne APENAS o texto corrigido, sem explicações.`,
                   },
                   { role: "user", content: rawTranscript },
                 ],

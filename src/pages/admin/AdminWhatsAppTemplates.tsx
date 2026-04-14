@@ -72,7 +72,7 @@ const NURTURING_OFERTA_BODY = `Oi, {{1}}! Vimos que voce se interessou por um do
 
 const NURTURING_OFERTA_EXAMPLES: Record<string, string> = {
   '1': 'Bruno',
-  '2': 'Combo Direito Penal',
+  '2': 'Combo Drinks Premium',
   '3': 'https://loja.com/checkout/xyz',
 };
 

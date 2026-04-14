@@ -88,7 +88,7 @@ const Install: React.FC = () => {
             <img src={drinkrosLogo} alt="Drinkeros" className="h-20 mx-auto" />
           </div>
           <h2 className="text-2xl font-bold mb-2">Drinkeros</h2>
-          <p className="text-muted-foreground">Sua plataforma de estudos de Direito Criminal</p>
+          <p className="text-muted-foreground">O mundo dos drinks é aqui!</p>
         </div>
 
         {/* Already Installed */}

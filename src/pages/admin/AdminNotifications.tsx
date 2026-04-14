@@ -200,7 +200,7 @@ const AdminNotifications: React.FC = () => {
             <Textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              placeholder="Confira a nova aula sobre Direito Penal..."
+              placeholder="Confira a nova aula sobre drinks clássicos..."
               maxLength={300}
               rows={3}
             />

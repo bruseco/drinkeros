@@ -143,7 +143,7 @@ ${available.length > 0 ? available.join("\n") : "Nenhum"}`;
     }
 
     // First LLM call
-    const systemPrompt = `Você é o agente de ASCENSÃO (Upsell) da Drinkeros, plataforma de cursos de Direito Criminal.
+    const systemPrompt = `Você é o agente de ASCENSÃO (Upsell) da Drinkeros, plataforma de drinks e coquetéis.
 
 Seu papel é recomendar NOVOS cursos e produtos ao aluno de forma natural e consultiva.
 

@@ -299,7 +299,7 @@ const CourseForm: React.FC = () => {
                     id="name"
                     value={formData.name}
                     onChange={(e) => handleNameChange(e.target.value)}
-                    placeholder="Ex: Formação Completa em Direito Penal"
+                    placeholder="Ex: Formação Completa em Mixologia"
                     required
                   />
                 </div>
