@@ -9,6 +9,7 @@ import { useCourses, useUserCourses } from '@/hooks/useCourses';
 import { useCombos, useUserCombos } from '@/hooks/useCombos';
 import { useRecentlyViewedRecipes } from '@/hooks/useRecipeViews';
 import { useModuleProgress } from '@/hooks/useModuleProgress';
+import { useCourseProgress } from '@/hooks/useCourseProgress';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUpsellPlacement } from '@/hooks/useUpsellPlacement';
@@ -18,6 +19,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Search, Loader2, Play, Sparkles, Clock, BookOpen, ChevronRight, Lock, CheckCircle2 } from 'lucide-react';
 import { InstallBanner } from '@/components/user/InstallBanner';
+import { Progress } from '@/components/ui/progress';
 import { LessonGrid } from '@/components/user/LessonGrid';
 import { LessonCarousel, LessonCarouselSkeleton } from '@/components/user/LessonCarousel';
 import { UpsellSection } from '@/components/user/UpsellCardCompact';
@@ -73,6 +75,7 @@ const UserHome: React.FC = () => {
   const { prefetchNextPage } = usePrefetchNextPage();
 
   const { inProgressModules } = useModuleProgress(packageSections, completedRecipeIds);
+  const { getCourseProgress } = useCourseProgress();
 
   const { position: upsellPosition } = useUpsellPlacement(inProgressModules.length);
   const { upsellRef, trackUpsellClick } = useUxTracking(upsellPosition, inProgressModules.length);
@@ -373,8 +376,14 @@ const UserHome: React.FC = () => {
                 >
                   <CarouselContent className="-ml-3">
                     {consolidatedItems.map((item) => {
+                      const courseProgress = item.type === 'course' && item.enrolled ? getCourseProgress(item.id) : null;
+                      const hasStarted = courseProgress && courseProgress.progress > 0;
+
                       const linkTo = item.enrolled
-                        ? (item.type === 'combo' ? `/app/combo/${item.id}` : item.type === 'course' ? `/app/curso/${item.id}` : `/app/modulo/${item.id}`)
+                        ? (item.type === 'combo' ? `/app/combo/${item.id}` 
+                          : item.type === 'course' 
+                            ? (hasStarted && courseProgress.nextLessonId ? `/app/aula/${courseProgress.nextLessonId}` : `/app/curso/${item.id}`)
+                            : `/app/modulo/${item.id}`)
                         : (item.type === 'combo' ? `/app/combo/${item.id}?locked=true` : item.type === 'course' ? `/app/curso/${item.id}?locked=true` : `/app/modulo/${item.id}?locked=true`);
 
                       return (
@@ -413,9 +422,23 @@ const UserHome: React.FC = () => {
                                 <h3 className="font-semibold text-white text-sm line-clamp-2">
                                   {item.name}
                                 </h3>
+                                {hasStarted && (
+                                  <div>
+                                    <div className="flex items-center justify-between text-white/80 text-xs mb-1">
+                                      <span>{courseProgress.progress}% concluído</span>
+                                      {courseProgress.nextLessonId && (
+                                        <span className="flex items-center gap-0.5">
+                                          <Play className="h-2.5 w-2.5 fill-current" />
+                                          Continuar
+                                        </span>
+                                      )}
+                                    </div>
+                                    <Progress value={courseProgress.progress} className="h-1 bg-white/20 [&>div]:bg-white" />
+                                  </div>
+                                )}
                                 <div className="flex items-center gap-1 text-white/80 text-xs">
                                   <span>{item.enrolled 
-                                    ? (item.type === 'combo' ? 'Ver cursos' : item.type === 'course' ? 'Ver módulos' : 'Ver aulas')
+                                    ? (item.type === 'combo' ? 'Ver cursos' : item.type === 'course' ? (hasStarted && courseProgress?.nextLessonId ? 'Próxima aula' : 'Ver módulos') : 'Ver aulas')
                                     : 'Saiba mais'
                                   }</span>
                                   <ChevronRight className="h-3 w-3" />

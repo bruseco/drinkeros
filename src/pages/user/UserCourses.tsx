@@ -2,13 +2,16 @@ import React from 'react';
 import defaultCover from '@/assets/default-cover.png';
 import { Link } from 'react-router-dom';
 import { useUserCourses, useCourses } from '@/hooks/useCourses';
+import { useCourseProgress } from '@/hooks/useCourseProgress';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { Loader2, BookOpen, ChevronRight, Play, Lock } from 'lucide-react';
 
 const UserCourses: React.FC = () => {
   const { data: userCourses = [], isLoading: userLoading } = useUserCourses();
   const { data: allCourses = [], isLoading: coursesLoading } = useCourses(true);
+  const { getCourseProgress } = useCourseProgress();
 
   const isLoading = userLoading || coursesLoading;
   const userCourseIds = new Set(userCourses.map((uc) => uc.course_id));
@@ -40,7 +43,7 @@ const UserCourses: React.FC = () => {
           {allCourses.map((course) => {
             const owned = userCourseIds.has(course.id) || course.is_free;
             return (
-              <CourseCard key={course.id} course={course} owned={owned} />
+              <CourseCard key={course.id} course={course} owned={owned} getCourseProgress={getCourseProgress} />
             );
           })}
         </div>
@@ -58,12 +61,18 @@ interface CourseCardProps {
     hotmart_product_code: string | null;
   };
   owned: boolean;
+  getCourseProgress: (courseId: string) => { progress: number; nextLessonId: string | null };
 }
 
-const CourseCard: React.FC<CourseCardProps> = ({ course, owned }) => {
-  const linkTo = owned
-    ? `/app/curso/${course.id}`
-    : `/app/curso/${course.id}?locked=true`;
+const CourseCard: React.FC<CourseCardProps> = ({ course, owned, getCourseProgress }) => {
+  const { progress, nextLessonId } = owned ? getCourseProgress(course.id) : { progress: 0, nextLessonId: null };
+  const hasStarted = owned && progress > 0;
+
+  const linkTo = owned && hasStarted && nextLessonId
+    ? `/app/aula/${nextLessonId}`
+    : owned
+      ? `/app/curso/${course.id}`
+      : `/app/curso/${course.id}?locked=true`;
 
   return (
     <Link to={linkTo}>
@@ -90,10 +99,24 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, owned }) => {
           )}
         </div>
 
-        {/* Top label */}
+        {/* Top label with progress */}
         <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/70 to-transparent p-3 pb-8 z-10">
+          {hasStarted && (
+            <div className="mb-2">
+              <div className="flex items-center justify-between text-white text-xs mb-1">
+                <span className="font-medium">{progress}% concluído</span>
+                {nextLessonId && (
+                  <span className="flex items-center gap-0.5 text-white/80">
+                    <Play className="h-3 w-3 fill-current" />
+                    Continuar
+                  </span>
+                )}
+              </div>
+              <Progress value={progress} className="h-1.5 bg-white/20 [&>div]:bg-white" />
+            </div>
+          )}
           <div className="flex items-center gap-1 text-white/90 text-xs">
-            <span>{owned ? 'Ver módulos' : 'Saiba mais'}</span>
+            <span>{owned ? (hasStarted && nextLessonId ? 'Ir para próxima aula' : 'Ver módulos') : 'Saiba mais'}</span>
             <ChevronRight className="h-3 w-3" />
           </div>
         </div>
