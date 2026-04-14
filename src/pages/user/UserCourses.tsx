@@ -112,7 +112,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, owned, getCourseProgres
                   </span>
                 )}
               </div>
-              <Progress value={progress} className="h-1.5 bg-white/20 [&>div]:bg-white" />
+              <Progress value={progress} className="h-1.5 w-1/3 bg-white/20 [&>div]:bg-white" />
             </div>
           )}
           <div className="flex items-center gap-1 text-white/90 text-xs">
