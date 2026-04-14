@@ -75,6 +75,7 @@ const UserHome: React.FC = () => {
   const { prefetchNextPage } = usePrefetchNextPage();
 
   const { inProgressModules } = useModuleProgress(packageSections, completedRecipeIds);
+  const { getCourseProgress } = useCourseProgress();
 
   const { position: upsellPosition } = useUpsellPlacement(inProgressModules.length);
   const { upsellRef, trackUpsellClick } = useUxTracking(upsellPosition, inProgressModules.length);
