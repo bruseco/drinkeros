@@ -97,7 +97,7 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/install" element={<Install />} />
             <Route path="/sso" element={<SSO />} />
-            
+            <Route path="/migracao" element={<Migracao />} />
             
             {/* Dynamic package landing pages - must be after static routes */}
             <Route path="/:packageSlug" element={<PackageLanding />} />
