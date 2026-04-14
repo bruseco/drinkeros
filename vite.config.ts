@@ -32,6 +32,7 @@ export default defineConfig(({ mode }) => ({
         theme_color: "#dc2626",
         background_color: "#0a0a0a",
         display: "standalone",
+        display_override: ["standalone", "fullscreen"],
         orientation: "portrait",
         scope: "/",
         start_url: "/",
