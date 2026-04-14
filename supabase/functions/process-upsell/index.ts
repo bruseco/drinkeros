@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SESClient, SendEmailCommand } from "npm:@aws-sdk/client-ses@3.485.0";
+import { enqueueEmail } from "../_shared/enqueue-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -90,33 +90,6 @@ function shouldSendNow(sequenceCreatedAt: string, nextStep: number): boolean {
   return adjustedHour >= window.start && adjustedHour < window.end;
 }
 
-const sesClient = new SESClient({
-  region: Deno.env.get("AWS_REGION") || "us-east-1",
-  credentials: {
-    accessKeyId: Deno.env.get("AWS_ACCESS_KEY_ID") || "",
-    secretAccessKey: Deno.env.get("AWS_SECRET_ACCESS_KEY") || "",
-  },
-});
-
-async function sendEmailViaSES(params: {
-  from: string;
-  to: string[];
-  subject: string;
-  html: string;
-  replyTo?: string;
-}) {
-  const command = new SendEmailCommand({
-    Source: params.from,
-    Destination: { ToAddresses: params.to },
-    Message: {
-      Subject: { Data: params.subject, Charset: "UTF-8" },
-      Body: { Html: { Data: params.html, Charset: "UTF-8" } },
-    },
-    ReplyToAddresses: params.replyTo ? [params.replyTo] : undefined,
-    Tags: [{ Name: "email_type", Value: "transactional" }],
-  });
-  return sesClient.send(command);
-}
 
 // ===== Era Cloud helper functions =====
 interface EraCloudConnection {
@@ -766,13 +739,14 @@ serve(async (req: Request) => {
           .replaceAll("{{ai_personalized_content}}", aiResult.body)
           .replaceAll("{{unsubscribe_url}}", unsubscribeUrl);
 
-        await sendEmailViaSES({
-          from: `${senderName} <${senderEmail}>`,
-          to: [student.email],
+        const emailResult = await enqueueEmail(supabase, {
+          to: student.email,
           subject: aiResult.subject,
           html: finalHtml,
-          replyTo,
+          label: "upsell-offer",
+          idempotencyKey: `upsell-${seq.id}-step${nextStep}`,
         });
+        if (!emailResult.success) throw new Error(emailResult.error || "enqueue failed");
 
         // Update AI content and final status after successful send
         const newStatus = nextStep >= TOTAL_SEQUENCE_EMAILS ? "completed" : "active";
