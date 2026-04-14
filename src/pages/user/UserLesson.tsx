@@ -174,19 +174,6 @@ const UserLesson: React.FC = () => {
     <div className="container mx-auto px-4 py-6">
       {/* Header */}
       <div className="mb-4 flex items-center gap-4">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => {
-            if (location.key !== 'default') {
-              navigate(-1);
-            } else {
-              navigate('/app');
-            }
-          }}
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
         <h1 className="flex-1 text-lg font-bold line-clamp-1">{lesson.name}</h1>
         <Button
           variant="ghost"
