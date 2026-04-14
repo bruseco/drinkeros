@@ -24,7 +24,7 @@ const Index: React.FC = () => {
 
           {/* Subtitle */}
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-md mx-auto">
-            Sua plataforma de estudos de Direito Criminal
+            O mundo dos drinks é aqui!
           </p>
 
           {/* Install Banner */}
