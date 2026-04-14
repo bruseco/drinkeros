@@ -15,6 +15,8 @@ export interface Course {
   is_free: boolean;
   is_available_for_sale: boolean;
   display_order: number | null;
+  certificate_enabled: boolean;
+  certificate_bg_url: string | null;
   created_at: string;
   updated_at: string;
 }
