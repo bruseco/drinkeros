@@ -12,7 +12,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { Lock, ShoppingCart, ChevronDown, CheckCircle2, PlayCircle } from 'lucide-react';
+import { Lock, ShoppingCart, ChevronDown, CheckCircle2, PlayCircle, Award } from 'lucide-react';
+import CertificateDownloadButton from '@/components/user/CertificateDownloadButton';
 
 const UserCourseModules: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -26,6 +27,14 @@ const UserCourseModules: React.FC = () => {
   const sections = recipesByPackage?.sections ?? [];
   const viewedIds = recipesByPackage?.viewedIds ?? new Set<string>();
   const { getModuleProgress } = useModuleProgress(sections, viewedIds);
+
+  // Check if ALL modules in this course are complete
+  const allModulesComplete = coursePackages.length > 0 && coursePackages.every((cp) => {
+    if (!cp.package) return false;
+    return getModuleProgress(cp.package.id) === 100;
+  });
+
+  const courseHasCertificate = (course as any)?.certificate_enabled && (course as any)?.certificate_bg_url;
 
   const userModuleIds = new Set(sections.map(s => s.package.id));
   const hasAccess = !isLockedParam && coursePackages.some(cp => cp.package && userModuleIds.has(cp.package.id));
@@ -188,6 +197,26 @@ const UserCourseModules: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Certificate Banner */}
+      {allModulesComplete && courseHasCertificate && (
+        <div className="rounded-2xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 p-5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
+              <Award className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">Certificado disponível! 🎉</p>
+              <p className="text-sm text-muted-foreground">Você concluiu todas as aulas deste curso</p>
+            </div>
+          </div>
+          <CertificateDownloadButton
+            referenceId={course!.id}
+            referenceName={course!.name}
+            certificateBgUrl={(course as any).certificate_bg_url}
+          />
+        </div>
+      )}
     </div>
   );
 };
