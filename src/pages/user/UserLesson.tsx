@@ -25,6 +25,7 @@ import {
   Circle,
   Download,
   File,
+  ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import jsPDF from 'jspdf';
@@ -235,29 +236,43 @@ const UserLesson: React.FC = () => {
               </div>
             )}
             
-            {/* Mark Complete Button */}
+            {/* Mark Complete Button + Next Lesson */}
             {(() => {
               const isCompleted = viewedLessons.includes(lesson.id);
+              const currentIndex = lessons.findIndex((l: any) => l.id === lesson.id);
+              const nextLesson = currentIndex >= 0 && currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null;
               return (
-                <Button
-                  variant={isCompleted ? "outline" : "default"}
-                  size="sm"
-                  onClick={() => toggleComplete.mutate({ lessonId: lesson.id, isCompleted })}
-                  disabled={toggleComplete.isPending}
-                  className={cn(
-                    "gap-2 transition-all",
-                    isCompleted && "border-primary/50 text-primary bg-primary/10 hover:bg-primary/20"
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant={isCompleted ? "outline" : "default"}
+                    size="sm"
+                    onClick={() => toggleComplete.mutate({ lessonId: lesson.id, isCompleted })}
+                    disabled={toggleComplete.isPending}
+                    className={cn(
+                      "gap-2 transition-all",
+                      isCompleted && "border-primary/50 text-primary bg-primary/10 hover:bg-primary/20"
+                    )}
+                  >
+                    {toggleComplete.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isCompleted ? (
+                      <CheckCircle2 className="h-4 w-4" />
+                    ) : (
+                      <Circle className="h-4 w-4" />
+                    )}
+                    {isCompleted ? 'Concluída' : 'Marcar como Concluída'}
+                  </Button>
+                  {isCompleted && nextLesson && (
+                    <Button
+                      size="sm"
+                      onClick={() => navigate(`/app/aula/${nextLesson.id}`)}
+                      className="gap-1.5 animate-in fade-in slide-in-from-left-2"
+                    >
+                      Próxima
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
                   )}
-                >
-                  {toggleComplete.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : isCompleted ? (
-                    <CheckCircle2 className="h-4 w-4" />
-                  ) : (
-                    <Circle className="h-4 w-4" />
-                  )}
-                  {isCompleted ? 'Concluída' : 'Marcar como Concluída'}
-                </Button>
+                </div>
               );
             })()}
           </div>
