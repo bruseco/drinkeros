@@ -394,7 +394,7 @@ serve(async (req: Request) => {
     // Build unsubscribe URL
     const unsubscribeUrl = `${supabaseUrl}/functions/v1/upsell-unsubscribe?token=${encodeURIComponent(btoa(JSON.stringify({ userId: productId ? studentName : "" })))}`;
 
-    const systemPrompt = `Você é um copywriter especialista em educação online e direito penal/criminal.
+    const systemPrompt = `Você é um copywriter especialista em drinks, coquetéis e mixologia.
 Seu objetivo é adaptar templates de email de upsell para a plataforma educacional "Drinkeros".
 REGRAS OBRIGATÓRIAS:
 1. SEMPRE use a primeira pessoa do PLURAL (nós, nosso, nossa, liberamos, temos, etc.) - NUNCA use "eu", "meu", "minha".
@@ -418,7 +418,7 @@ INFORMAÇÕES DO CONTEXTO:
 - Nome do aluno: ${studentName}
 - ${contextLine}
 - Produto a ofertar: ${productLabel} "${productName}"
-- Descrição do produto: ${productDescription || "Conteúdo exclusivo para aprofundamento profissional em direito penal"}
+- Descrição do produto: ${productDescription || "Conteúdo exclusivo para aprofundamento no mundo dos drinks"}
 - Link de checkout: ${checkoutUrl}
 - Este é o email ${step} de 9 da sequência de upsell
 ${salesPageContext}

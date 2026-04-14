@@ -242,7 +242,7 @@ CONTEXTO:
 - Nome do aluno: ${studentName}
 - ${contextLine}
 - Produto a ofertar: ${productLabel} "${productName}"
-- Descrição: ${productDescription || "Conteúdo exclusivo para aprofundamento em direito penal"}
+- Descrição: ${productDescription || "Conteúdo exclusivo para aprofundamento no mundo dos drinks"}
 - Link de checkout: ${checkoutUrl}
 - Mensagem ${step} de 4 da sequência
 ${salesPageContext}

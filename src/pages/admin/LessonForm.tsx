@@ -553,7 +553,7 @@ const LessonForm: React.FC = () => {
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                    placeholder="Ex: Introdução ao Direito Penal"
+                    placeholder="Ex: Introdução aos Drinks Clássicos"
                     required
                   />
                 </div>

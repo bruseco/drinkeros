@@ -154,7 +154,7 @@ const PackageForm: React.FC = () => {
                     id="name"
                     value={formData.name}
                     onChange={(e) => handleNameChange(e.target.value)}
-                    placeholder="Ex: Direito Penal - Parte Geral"
+                    placeholder="Ex: Drinks Clássicos - Módulo Básico"
                     required
                   />
                 </div>

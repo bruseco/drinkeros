@@ -140,7 +140,7 @@ const EbookForm: React.FC = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Nome *</Label>
-                  <Input id="name" value={formData.name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Ex: Manual de Direito Penal" required />
+                  <Input id="name" value={formData.name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Ex: Manual de Coquetéis Clássicos" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="slug">Slug *</Label>
