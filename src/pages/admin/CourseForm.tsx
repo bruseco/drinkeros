@@ -48,6 +48,7 @@ const CourseForm: React.FC = () => {
   const deletePackageMut = useDeletePackage();
   const deleteLesson = useDeleteRecipe();
   const { upload, isUploading } = useImageUpload('package-covers', { skipOptimize: true });
+  const { upload: uploadCertBg, isUploading: isUploadingCertBg } = useImageUpload('package-covers', { skipOptimize: true });
   const [deleteLessonId, setDeleteLessonId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
@@ -62,6 +63,8 @@ const CourseForm: React.FC = () => {
     is_available_for_sale: true,
     display_order: 0,
     workload_hours: 0,
+    certificate_enabled: false,
+    certificate_bg_url: '',
   });
 
   const [modules, setModules] = useState<InlineModule[]>([]);
@@ -84,6 +87,8 @@ const CourseForm: React.FC = () => {
         is_available_for_sale: course.is_available_for_sale ?? true,
         display_order: course.display_order ?? 0,
         workload_hours: (course as any).workload_hours ?? 0,
+        certificate_enabled: (course as any).certificate_enabled ?? false,
+        certificate_bg_url: (course as any).certificate_bg_url || '',
       });
     }
   }, [course]);
@@ -194,6 +199,8 @@ const CourseForm: React.FC = () => {
         is_available_for_sale: formData.is_free ? false : formData.is_available_for_sale,
         display_order: formData.display_order,
         workload_hours: formData.workload_hours,
+        certificate_enabled: formData.certificate_enabled,
+        certificate_bg_url: formData.certificate_bg_url || null,
       } as any;
 
       let courseId: string;
