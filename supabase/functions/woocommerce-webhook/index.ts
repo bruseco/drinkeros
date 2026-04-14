@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SESClient, SendEmailCommand } from "npm:@aws-sdk/client-ses@3.485.0";
+import { enqueueEmail } from "../_shared/enqueue-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,35 +8,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const sesClient = new SESClient({
-  region: Deno.env.get("AWS_REGION") || "us-east-1",
-  credentials: {
-    accessKeyId: Deno.env.get("AWS_ACCESS_KEY_ID")!,
-    secretAccessKey: Deno.env.get("AWS_SECRET_ACCESS_KEY")!,
-  },
-});
-
-async function sendEmailViaSES(params: {
-  from: string;
-  to: string[];
-  subject: string;
-  html: string;
-  replyTo?: string;
-}) {
-  const command = new SendEmailCommand({
-    Source: params.from,
-    Destination: { ToAddresses: params.to },
-    Message: {
-      Subject: { Data: params.subject, Charset: "UTF-8" },
-      Body: { Html: { Data: params.html, Charset: "UTF-8" } },
-    },
-    ReplyToAddresses: params.replyTo ? [params.replyTo] : undefined,
-    Tags: [
-      { Name: "email_type", Value: "transactional" },
-    ],
-  });
-  return sesClient.send(command);
-}
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -476,15 +447,18 @@ const handler = async (req: Request): Promise<Response> => {
       if (recentEmail) {
         console.log(`Email já enviado para ${trimmedEmail} nos últimos 30 min. Pulando envio duplicado.`);
       } else {
-        await sendEmailViaSES({
-          from: `${senderName} <${senderEmail}>`,
-          to: [trimmedEmail],
+        const emailResult = await enqueueEmail(supabase, {
+          to: trimmedEmail,
           subject,
           html: htmlBody,
-          replyTo,
+          label: "module-access",
+          idempotencyKey: `module-access-${userId}-${trimmedId}-${new Date().toISOString().slice(0, 10)}`,
         });
-
-        console.log(`Access email sent to ${trimmedEmail} for ${productName}`);
+        if (!emailResult.success) {
+          console.warn("Failed to enqueue module access email:", emailResult.error);
+        } else {
+          console.log(`Access email enqueued for ${trimmedEmail} for ${productName}`);
+        }
       }
     } catch (emailError) {
       console.error("Failed to send module access email:", emailError);

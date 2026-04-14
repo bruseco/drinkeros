@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SESClient, SendEmailCommand } from "npm:@aws-sdk/client-ses@3.485.0";
+import { enqueueEmail } from "../_shared/enqueue-email.ts";
 
 function normalizePhone(phone: string): string {
   const digits = phone.replace(/\D/g, "");
@@ -19,33 +19,6 @@ const LOGIN_URL = "https://alunos.criminallab.com.br/login";
 const FOLLOWUP_PROCESS = "onboarding_followup";
 const ENROLLMENT_CUTOFF = "2026-02-15T23:59:59+00:00";
 
-const sesClient = new SESClient({
-  region: Deno.env.get("AWS_REGION") || "us-east-1",
-  credentials: {
-    accessKeyId: Deno.env.get("AWS_ACCESS_KEY_ID")!,
-    secretAccessKey: Deno.env.get("AWS_SECRET_ACCESS_KEY")!,
-  },
-});
-
-async function sendEmailViaSES(params: {
-  from: string;
-  to: string[];
-  subject: string;
-  html: string;
-  replyTo?: string;
-}) {
-  const command = new SendEmailCommand({
-    Source: params.from,
-    Destination: { ToAddresses: params.to },
-    Message: {
-      Subject: { Data: params.subject, Charset: "UTF-8" },
-      Body: { Html: { Data: params.html, Charset: "UTF-8" } },
-    },
-    ReplyToAddresses: params.replyTo ? [params.replyTo] : undefined,
-    Tags: [{ Name: "email_type", Value: "transactional" }],
-  });
-  return sesClient.send(command);
-}
 
 const DEFAULT_EMAIL_HTML = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"></head>
@@ -367,13 +340,14 @@ Deno.serve(async (req) => {
           .replaceAll("{{email}}", profile.email || "")
           .replaceAll("{{login_url}}", LOGIN_URL);
 
-        await sendEmailViaSES({
-          from: `${senderName} <${senderEmail}>`,
-          to: [profile.email],
+        const emailResult = await enqueueEmail(supabase, {
+          to: profile.email,
           subject: emailSubject,
           html,
-          replyTo,
+          label: "onboarding-followup-batch",
+          idempotencyKey: `onboarding-followup-batch-${profile.user_id}-${new Date().toISOString().slice(0, 10)}`,
         });
+        if (!emailResult.success) throw new Error(emailResult.error);
 
         emailSuccess = true;
         emailSent++;

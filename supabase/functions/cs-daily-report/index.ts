@@ -1,14 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SESClient, SendEmailCommand } from "npm:@aws-sdk/client-ses@3.485.0";
+import { enqueueEmail } from "../_shared/enqueue-email.ts";
 
-const sesClient = new SESClient({
-  region: Deno.env.get("AWS_REGION") || "us-east-1",
-  credentials: {
-    accessKeyId: Deno.env.get("AWS_ACCESS_KEY_ID")!,
-    secretAccessKey: Deno.env.get("AWS_SECRET_ACCESS_KEY")!,
-  },
-});
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -407,19 +400,16 @@ serve(async (req) => {
 </body>
 </html>`;
 
-            const command = new SendEmailCommand({
-              Source: `${senderName} <${senderEmail}>`,
-              Destination: { ToAddresses: adminEmails },
-              Message: {
-                Subject: { Data: `⚠️ ALERTA CRÍTICO - Relatório CS ${reportDate}`, Charset: "UTF-8" },
-                Body: { Html: { Data: htmlBody, Charset: "UTF-8" } },
-              },
-              ReplyToAddresses: replyTo ? [replyTo] : undefined,
-              Tags: [{ Name: "email_type", Value: "transactional" }],
-            });
-
-            const sesResult = await sesClient.send(command);
-            console.log(`Critical alert email sent to ${adminEmails.length} admin(s):`, adminEmails, "MessageId:", sesResult.MessageId);
+            for (const adminEmail of adminEmails) {
+              await enqueueEmail(supabase, {
+                to: adminEmail,
+                subject: `⚠️ ALERTA CRÍTICO - Relatório CS ${reportDate}`,
+                html: htmlBody,
+                label: "cs-daily-report-critical",
+                idempotencyKey: `cs-critical-${reportDate}-${adminEmail}`,
+              });
+            }
+            console.log(`Critical alert email enqueued for ${adminEmails.length} admin(s):`, adminEmails);
           } else {
             console.log("No admin emails found for critical alert");
           }

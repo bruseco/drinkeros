@@ -1,40 +1,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SESClient, SendEmailCommand } from "npm:@aws-sdk/client-ses@3.485.0";
 import webpush from "npm:web-push@3.6.7";
+import { enqueueEmail } from "../_shared/enqueue-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
-
-const sesClient = new SESClient({
-  region: Deno.env.get("AWS_REGION") || "us-east-1",
-  credentials: {
-    accessKeyId: Deno.env.get("AWS_ACCESS_KEY_ID")!,
-    secretAccessKey: Deno.env.get("AWS_SECRET_ACCESS_KEY")!,
-  },
-});
-
-async function sendEmailViaSES(params: {
-  from: string;
-  to: string[];
-  subject: string;
-  html: string;
-  replyTo?: string;
-}) {
-  const command = new SendEmailCommand({
-    Source: params.from,
-    Destination: { ToAddresses: params.to },
-    Message: {
-      Subject: { Data: params.subject, Charset: "UTF-8" },
-      Body: { Html: { Data: params.html, Charset: "UTF-8" } },
-    },
-    ReplyToAddresses: params.replyTo ? [params.replyTo] : undefined,
-  });
-  return sesClient.send(command);
-}
 
 // Helper: batch an array into chunks
 function chunk<T>(arr: T[], size: number): T[][] {
@@ -281,14 +254,18 @@ serve(async (req: Request) => {
           .replaceAll("{{login_url}}", loginUrl);
 
         try {
-          await sendEmailViaSES({
-            from: `${senderName} <${senderEmail}>`,
-            to: [profile.email],
+          const result = await enqueueEmail(supabase, {
+            to: profile.email,
             subject,
             html,
-            replyTo,
+            label: "study-reminder",
+            idempotencyKey: `study-reminder-${profile.user_id}-${new Date().toISOString().slice(0, 10)}`,
           });
-          emailsSent++;
+          if (result.success) {
+            emailsSent++;
+          } else {
+            emailErrors.push({ email: profile.email, error: result.error || "enqueue failed" });
+          }
         } catch (err: any) {
           emailErrors.push({ email: profile.email, error: err.message || String(err) });
         }
