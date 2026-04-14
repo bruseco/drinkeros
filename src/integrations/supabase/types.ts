@@ -285,6 +285,8 @@ export type Database = {
       }
       courses: {
         Row: {
+          certificate_bg_url: string | null
+          certificate_enabled: boolean
           cover_image_url: string | null
           created_at: string
           description: string | null
@@ -301,6 +303,8 @@ export type Database = {
           workload_hours: number | null
         }
         Insert: {
+          certificate_bg_url?: string | null
+          certificate_enabled?: boolean
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
@@ -317,6 +321,8 @@ export type Database = {
           workload_hours?: number | null
         }
         Update: {
+          certificate_bg_url?: string | null
+          certificate_enabled?: boolean
           cover_image_url?: string | null
           created_at?: string
           description?: string | null

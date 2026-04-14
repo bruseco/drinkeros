@@ -13,7 +13,7 @@ import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 import PackageLanding from "./pages/PackageLanding";
 import SSO from "./pages/SSO";
-import ValidateCertificate from "./pages/ValidateCertificate";
+
 
 // Admin pages
 import { AdminLayout } from "./components/admin/AdminLayout";
@@ -97,7 +97,7 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/install" element={<Install />} />
             <Route path="/sso" element={<SSO />} />
-            <Route path="/validar-certificado" element={<ValidateCertificate />} />
+            
             
             {/* Dynamic package landing pages - must be after static routes */}
             <Route path="/:packageSlug" element={<PackageLanding />} />

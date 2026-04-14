@@ -48,6 +48,7 @@ const CourseForm: React.FC = () => {
   const deletePackageMut = useDeletePackage();
   const deleteLesson = useDeleteRecipe();
   const { upload, isUploading } = useImageUpload('package-covers', { skipOptimize: true });
+  const { upload: uploadCertBg, isUploading: isUploadingCertBg } = useImageUpload('package-covers', { skipOptimize: true });
   const [deleteLessonId, setDeleteLessonId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
@@ -62,6 +63,8 @@ const CourseForm: React.FC = () => {
     is_available_for_sale: true,
     display_order: 0,
     workload_hours: 0,
+    certificate_enabled: false,
+    certificate_bg_url: '',
   });
 
   const [modules, setModules] = useState<InlineModule[]>([]);
@@ -84,6 +87,8 @@ const CourseForm: React.FC = () => {
         is_available_for_sale: course.is_available_for_sale ?? true,
         display_order: course.display_order ?? 0,
         workload_hours: (course as any).workload_hours ?? 0,
+        certificate_enabled: (course as any).certificate_enabled ?? false,
+        certificate_bg_url: (course as any).certificate_bg_url || '',
       });
     }
   }, [course]);
@@ -194,6 +199,8 @@ const CourseForm: React.FC = () => {
         is_available_for_sale: formData.is_free ? false : formData.is_available_for_sale,
         display_order: formData.display_order,
         workload_hours: formData.workload_hours,
+        certificate_enabled: formData.certificate_enabled,
+        certificate_bg_url: formData.certificate_bg_url || null,
       } as any;
 
       let courseId: string;
@@ -667,6 +674,82 @@ const CourseForm: React.FC = () => {
                         setFormData((prev) => ({ ...prev, is_available_for_sale: checked }))
                       }
                     />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Certificate */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Certificado</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="certificate_enabled">Emitir Certificado</Label>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Gera certificado ao concluir o curso
+                    </p>
+                  </div>
+                  <Switch
+                    id="certificate_enabled"
+                    checked={formData.certificate_enabled}
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({ ...prev, certificate_enabled: checked }))
+                    }
+                  />
+                </div>
+
+                {formData.certificate_enabled && (
+                  <div className="space-y-2">
+                    <Label>Imagem de Fundo (3347×2447)</Label>
+                    {formData.certificate_bg_url ? (
+                      <div className="relative">
+                        <img
+                          src={formData.certificate_bg_url}
+                          alt="Fundo do certificado"
+                          className="w-full rounded-lg object-contain border"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute right-2 top-2"
+                          onClick={() => setFormData((prev) => ({ ...prev, certificate_bg_url: '' }))}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <label className="flex aspect-video cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 transition-colors hover:bg-muted">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const url = await uploadCertBg(file);
+                              if (url) {
+                                setFormData((prev) => ({ ...prev, certificate_bg_url: url }));
+                              }
+                            }
+                          }}
+                          className="hidden"
+                          disabled={isUploadingCertBg}
+                        />
+                        {isUploadingCertBg ? (
+                          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                        ) : (
+                          <>
+                            <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground text-center px-2">
+                              Upload da imagem de fundo do certificado
+                            </span>
+                          </>
+                        )}
+                      </label>
+                    )}
                   </div>
                 )}
               </CardContent>

@@ -9,13 +9,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LessonCarousel } from '@/components/user/LessonCarousel';
 import CertificateDownloadButton from '@/components/user/CertificateDownloadButton';
 
-/* ── Course / Combo completion hooks ── */
+/* ── Types ── */
 
 interface CourseProgress {
   id: string;
   name: string;
   completed: boolean;
   packageIds: string[];
+  certificate_enabled: boolean;
+  certificate_bg_url: string | null;
 }
 
 interface ComboProgress {
@@ -25,9 +27,9 @@ interface ComboProgress {
   courseIds: string[];
 }
 
-const useCourseCompletion = (
-  completedModuleIds: Set<string>,
-) => {
+/* ── Course / Combo completion hooks ── */
+
+const useCourseCompletion = (completedModuleIds: Set<string>) => {
   const { user } = useAuth();
 
   return useQuery({
@@ -35,7 +37,6 @@ const useCourseCompletion = (
     queryFn: async (): Promise<CourseProgress[]> => {
       if (!user || completedModuleIds.size === 0) return [];
 
-      // Get user's courses
       const { data: userCourses } = await supabase
         .from('user_courses')
         .select('course_id')
@@ -45,10 +46,9 @@ const useCourseCompletion = (
 
       const courseIds = userCourses.map((uc) => uc.course_id);
 
-      // Get courses with their packages
       const { data: courses } = await supabase
         .from('courses')
-        .select('id, name')
+        .select('id, name, certificate_enabled, certificate_bg_url')
         .in('id', courseIds);
 
       const { data: coursePackages } = await supabase
@@ -63,7 +63,14 @@ const useCourseCompletion = (
           .filter((cp) => cp.course_id === course.id)
           .map((cp) => cp.package_id);
         const completed = pkgIds.length > 0 && pkgIds.every((id) => completedModuleIds.has(id));
-        return { id: course.id, name: course.name, completed, packageIds: pkgIds };
+        return {
+          id: course.id,
+          name: course.name,
+          completed,
+          packageIds: pkgIds,
+          certificate_enabled: (course as any).certificate_enabled ?? false,
+          certificate_bg_url: (course as any).certificate_bg_url ?? null,
+        };
       });
     },
     enabled: !!user && completedModuleIds.size > 0,
@@ -192,20 +199,13 @@ const UserCompleted: React.FC = () => {
           ) : (
             <div className="space-y-10 md:space-y-12">
               {completedModules.map((section) => (
-                <div key={section.package.id} className="space-y-2">
+                <div key={section.package.id}>
                   <LessonCarousel
                     moduleId={section.package.id}
                     moduleName={section.package.name}
                     lessons={section.recipes}
                     badge="✓ Concluído"
                   />
-                  <div className="px-1">
-                    <CertificateDownloadButton
-                      certificateType="module"
-                      referenceId={section.package.id}
-                      referenceName={section.package.name}
-                    />
-                  </div>
                 </div>
               ))}
             </div>
@@ -235,11 +235,13 @@ const UserCompleted: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  <CertificateDownloadButton
-                    certificateType="course"
-                    referenceId={course.id}
-                    referenceName={course.name}
-                  />
+                  {course.certificate_enabled && course.certificate_bg_url && (
+                    <CertificateDownloadButton
+                      referenceId={course.id}
+                      referenceName={course.name}
+                      certificateBgUrl={course.certificate_bg_url}
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -269,11 +271,6 @@ const UserCompleted: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  <CertificateDownloadButton
-                    certificateType="combo"
-                    referenceId={combo.id}
-                    referenceName={combo.name}
-                  />
                 </div>
               ))}
             </div>
