@@ -1,23 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
-import { 
-  Download, 
-  Share, 
-  Plus, 
-  MoreVertical, 
-  Smartphone,
-  CheckCircle2,
-  ArrowLeft,
-  Apple,
-  Chrome
-} from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import drinkrosLogo from "@/assets/logotipo-drinkeros.png";
+import { Download, Share, Plus, MoreVertical, Smartphone, CheckCircle2, ArrowLeft, Apple, Chrome } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
 const Install: React.FC = () => {
@@ -28,7 +18,7 @@ const Install: React.FC = () => {
 
   useEffect(() => {
     // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    if (window.matchMedia("(display-mode: standalone)").matches) {
       setIsInstalled(true);
     }
 
@@ -43,10 +33,10 @@ const Install: React.FC = () => {
       setDeferredPrompt(e as BeforeInstallPromptEvent);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     };
   }, []);
 
@@ -55,18 +45,18 @@ const Install: React.FC = () => {
 
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    
-    if (outcome === 'accepted') {
+
+    if (outcome === "accepted") {
       setIsInstalled(true);
     }
     setDeferredPrompt(null);
   };
 
   const features = [
-    'Acesse suas aulas mesmo offline',
-    'Receba notificações de novos conteúdos',
-    'Experiência de app nativo',
-    'Inicie rapidamente da tela inicial',
+    "Acesse suas aulas mesmo offline",
+    "Receba notificações de novos conteúdos",
+    "Experiência de app nativo",
+    "Inicie rapidamente da tela inicial",
   ];
 
   return (
@@ -87,8 +77,7 @@ const Install: React.FC = () => {
           <div className="mb-4">
             <img src={drinkrosLogo} alt="Drinkeros" className="h-20 mx-auto" />
           </div>
-          <h2 className="text-2xl font-bold mb-2">​</h2>
-          <p className="text-muted-foreground">O mundo dos drinks é aqui!</p>
+          <p className="text-muted-foreground">Sua plataforma de estudos de Direito Criminal</p>
         </div>
 
         {/* Already Installed */}
@@ -96,12 +85,8 @@ const Install: React.FC = () => {
           <Card className="border-success/30 bg-success/5 mb-8">
             <CardContent className="p-6 text-center">
               <CheckCircle2 className="h-12 w-12 text-success mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-success mb-2">
-                App já instalado!
-              </h3>
-              <p className="text-muted-foreground text-sm">
-                Você já pode acessar o app direto da sua tela inicial.
-              </p>
+              <h3 className="text-lg font-semibold text-success mb-2">App já instalado!</h3>
+              <p className="text-muted-foreground text-sm">Você já pode acessar o app direto da sua tela inicial.</p>
             </CardContent>
           </Card>
         ) : (
@@ -126,7 +111,7 @@ const Install: React.FC = () => {
 
             {/* Install Button (Android/Chrome) */}
             {deferredPrompt && (
-              <Button 
+              <Button
                 onClick={handleInstallClick}
                 className="w-full h-14 text-lg rounded-2xl shadow-lg shadow-primary/30 mb-6"
               >
@@ -156,7 +141,7 @@ const Install: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-4">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-sm">
                       2
@@ -168,16 +153,14 @@ const Install: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-4">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-sm">
                       3
                     </div>
                     <div>
                       <p className="font-medium">Confirme tocando em "Adicionar"</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        O app aparecerá na sua tela inicial
-                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">O app aparecerá na sua tela inicial</p>
                     </div>
                   </div>
                 </CardContent>
@@ -205,28 +188,24 @@ const Install: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-4">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-sm">
                       2
                     </div>
                     <div>
                       <p className="font-medium">Selecione "Instalar app" ou "Adicionar à tela inicial"</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        A opção pode variar conforme o navegador
-                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">A opção pode variar conforme o navegador</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-4">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-sm">
                       3
                     </div>
                     <div>
                       <p className="font-medium">Confirme a instalação</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        O app aparecerá na sua tela inicial
-                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">O app aparecerá na sua tela inicial</p>
                     </div>
                   </div>
                 </CardContent>
@@ -254,16 +233,14 @@ const Install: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-4">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-sm">
                       2
                     </div>
                     <div>
                       <p className="font-medium">Clique em "Instalar"</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        O app será instalado no seu computador
-                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">O app será instalado no seu computador</p>
                     </div>
                   </div>
                 </CardContent>
