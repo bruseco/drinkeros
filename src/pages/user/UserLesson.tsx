@@ -106,7 +106,7 @@ const UserLesson: React.FC = () => {
     // Fetch course info for celebration
     const { data: course } = await supabase
       .from('courses')
-      .select('id, name, certificate_enabled, certificate_bg_url')
+      .select('id, name, certificate_enabled, certificate_bg_url, certificate_text_color')
       .eq('id', courseId)
       .single();
     if (!course) return;
@@ -117,6 +117,7 @@ const UserLesson: React.FC = () => {
       name: course.name,
       certificateBgUrl: course.certificate_bg_url || '',
       hasCertificate: !!course.certificate_enabled && !!course.certificate_bg_url,
+      textColor: (course as any).certificate_text_color || '#FFFFFF',
     });
     setShowCelebration(true);
   }, [user]);

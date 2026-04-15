@@ -18,6 +18,7 @@ interface CourseProgress {
   packageIds: string[];
   certificate_enabled: boolean;
   certificate_bg_url: string | null;
+  certificate_text_color: string | null;
 }
 
 interface ComboProgress {
@@ -48,7 +49,7 @@ const useCourseCompletion = (completedModuleIds: Set<string>) => {
 
       const { data: courses } = await supabase
         .from('courses')
-        .select('id, name, certificate_enabled, certificate_bg_url')
+        .select('id, name, certificate_enabled, certificate_bg_url, certificate_text_color')
         .in('id', courseIds);
 
       const { data: coursePackages } = await supabase
@@ -70,6 +71,7 @@ const useCourseCompletion = (completedModuleIds: Set<string>) => {
           packageIds: pkgIds,
           certificate_enabled: (course as any).certificate_enabled ?? false,
           certificate_bg_url: (course as any).certificate_bg_url ?? null,
+          certificate_text_color: (course as any).certificate_text_color ?? null,
         };
       });
     },
@@ -240,6 +242,7 @@ const UserCompleted: React.FC = () => {
                       referenceId={course.id}
                       referenceName={course.name}
                       certificateBgUrl={course.certificate_bg_url}
+                      textColor={course.certificate_text_color || undefined}
                     />
                   )}
                 </div>

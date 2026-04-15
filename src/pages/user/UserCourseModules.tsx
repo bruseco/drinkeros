@@ -107,6 +107,7 @@ const UserCourseModules: React.FC = () => {
           courseName={course.name}
           certificateBgUrl={(course as any).certificate_bg_url}
           hasCertificate={courseHasCertificate}
+          textColor={(course as any).certificate_text_color}
         />
       )}
 
@@ -177,6 +178,7 @@ const UserCourseModules: React.FC = () => {
               referenceId={course.id}
               referenceName={course.name}
               certificateBgUrl={(course as any).certificate_bg_url}
+              textColor={(course as any).certificate_text_color}
             />
           )}
         </div>
