@@ -216,7 +216,7 @@ const UserRecipes: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
               {recipes.map((recipe) => (
                 <Link key={recipe.id} to={`/app/receita/${recipe.id}`}>
                   <div className="group overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
