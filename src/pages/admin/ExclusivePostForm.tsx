@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Loader2, Upload, X } from 'lucide-react';
+import { useExistingTags } from '@/hooks/useExistingTags';
+import AutocompleteTagInput from '@/components/admin/AutocompleteTagInput';
 
 const ExclusivePostForm: React.FC = () => {
   const { id } = useParams();
@@ -20,6 +22,7 @@ const ExclusivePostForm: React.FC = () => {
   const createPost = useCreateExclusivePost();
   const updatePost = useUpdateExclusivePost();
   const { upload, isUploading } = useImageUpload('package-covers');
+  const { data: existingTags } = useExistingTags();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -153,11 +156,13 @@ const ExclusivePostForm: React.FC = () => {
                       </Badge>
                     ))}
                   </div>
-                  <Input
+                  <AutocompleteTagInput
                     value={ingredientInput}
-                    onChange={(e) => setIngredientInput(e.target.value)}
+                    onChange={setIngredientInput}
+                    onAdd={(v) => { addTag('ingredients', v); setIngredientInput(''); }}
                     onKeyDown={(e) => handleTagKeyDown('ingredients', e, ingredientInput, setIngredientInput)}
-                    onBlur={() => { if (ingredientInput.trim()) { addTag('ingredients', ingredientInput); setIngredientInput(''); } }}
+                    suggestions={existingTags?.ingredients || []}
+                    existingTags={formData.ingredients}
                     placeholder="Digite e pressione Enter para adicionar..."
                   />
                 </div>
@@ -185,11 +190,13 @@ const ExclusivePostForm: React.FC = () => {
                       </Badge>
                     ))}
                   </div>
-                  <Input
+                  <AutocompleteTagInput
                     value={characteristicInput}
-                    onChange={(e) => setCharacteristicInput(e.target.value)}
+                    onChange={setCharacteristicInput}
+                    onAdd={(v) => { addTag('characteristics', v); setCharacteristicInput(''); }}
                     onKeyDown={(e) => handleTagKeyDown('characteristics', e, characteristicInput, setCharacteristicInput)}
-                    onBlur={() => { if (characteristicInput.trim()) { addTag('characteristics', characteristicInput); setCharacteristicInput(''); } }}
+                    suggestions={existingTags?.characteristics || []}
+                    existingTags={formData.characteristics}
                     placeholder="Ex: Refrescante, Alcoólico, Tropical..."
                   />
                 </div>
