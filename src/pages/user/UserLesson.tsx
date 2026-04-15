@@ -838,6 +838,18 @@ const UserLesson: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Course completion celebration */}
+      {celebrationCourse && (
+        <CourseCompletionCelebration
+          open={showCelebration}
+          onClose={() => setShowCelebration(false)}
+          courseId={celebrationCourse.id}
+          courseName={celebrationCourse.name}
+          certificateBgUrl={celebrationCourse.certificateBgUrl}
+          hasCertificate={celebrationCourse.hasCertificate}
+        />
+      )}
     </div>
   );
 };
