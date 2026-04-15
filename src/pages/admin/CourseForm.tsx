@@ -65,6 +65,7 @@ const CourseForm: React.FC = () => {
     workload_hours: 0,
     certificate_enabled: false,
     certificate_bg_url: '',
+    certificate_text_color: '#FFFFFF',
   });
 
   const [modules, setModules] = useState<InlineModule[]>([]);
@@ -89,6 +90,7 @@ const CourseForm: React.FC = () => {
         workload_hours: (course as any).workload_hours ?? 0,
         certificate_enabled: (course as any).certificate_enabled ?? false,
         certificate_bg_url: (course as any).certificate_bg_url || '',
+        certificate_text_color: (course as any).certificate_text_color || '#FFFFFF',
       });
     }
   }, [course]);
@@ -201,6 +203,7 @@ const CourseForm: React.FC = () => {
         workload_hours: formData.workload_hours,
         certificate_enabled: formData.certificate_enabled,
         certificate_bg_url: formData.certificate_bg_url || null,
+        certificate_text_color: formData.certificate_text_color || '#FFFFFF',
       } as any;
 
       let courseId: string;

@@ -1,0 +1,1 @@
+ALTER TABLE public.courses ADD COLUMN certificate_text_color text DEFAULT '#FFFFFF';
