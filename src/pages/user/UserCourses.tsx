@@ -68,14 +68,12 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, owned, getCourseProgres
   const { progress, nextLessonId } = owned ? getCourseProgress(course.id) : { progress: 0, nextLessonId: null };
   const hasStarted = owned && progress > 0;
 
-  const linkTo = owned && hasStarted && nextLessonId
-    ? `/app/aula/${nextLessonId}`
-    : owned
-      ? `/app/curso/${course.id}`
-      : `/app/curso/${course.id}?locked=true`;
+  const cardLink = owned
+    ? `/app/curso/${course.id}`
+    : `/app/curso/${course.id}?locked=true`;
 
   return (
-    <Link to={linkTo}>
+    <Link to={cardLink}>
       <div className="group rounded-2xl shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative">
         <img
           src={course.cover_image_url || defaultCover}
@@ -105,20 +103,25 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, owned, getCourseProgres
             <div className="mb-2">
               <div className="flex items-center justify-between text-white text-xs mb-1">
                 <span className="font-medium">{progress}% concluído</span>
-                {nextLessonId && (
-                  <span className="flex items-center gap-0.5 text-white/80">
-                    <Play className="h-3 w-3 fill-current" />
-                    Continuar
-                  </span>
-                )}
               </div>
               <Progress value={progress} className="h-1.5 w-1/3 bg-white/20 [&>div]:bg-white" />
             </div>
           )}
-          <div className="flex items-center gap-1 text-white/90 text-xs">
-            <span>{owned ? (hasStarted && nextLessonId ? 'Ir para próxima aula' : 'Ver módulos') : 'Saiba mais'}</span>
-            <ChevronRight className="h-3 w-3" />
-          </div>
+          {hasStarted && nextLessonId ? (
+            <Link
+              to={`/app/aula/${nextLessonId}`}
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center gap-1 text-white/90 text-xs hover:text-white transition-colors"
+            >
+              <span>Ir para próxima aula</span>
+              <ChevronRight className="h-3 w-3" />
+            </Link>
+          ) : (
+            <div className="flex items-center gap-1 text-white/90 text-xs">
+              <span>{owned ? 'Ver módulos' : 'Saiba mais'}</span>
+              <ChevronRight className="h-3 w-3" />
+            </div>
+          )}
         </div>
       </div>
     </Link>
