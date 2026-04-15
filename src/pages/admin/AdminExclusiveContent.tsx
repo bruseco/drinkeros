@@ -35,6 +35,7 @@ const AdminExclusiveContent: React.FC = () => {
   const lastSelectedIndex = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: existingTags } = useExistingTags();
+  const [tagManagerField, setTagManagerField] = useState<'ingredients' | 'characteristics' | null>(null);
 
   const {
     data,
