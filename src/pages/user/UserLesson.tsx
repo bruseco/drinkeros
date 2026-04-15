@@ -44,6 +44,27 @@ const UserLesson: React.FC = () => {
 
   const isFavorite = favorites.some((f) => f.recipe_id === id);
 
+  // Check if this lesson belongs to a course (via course_packages)
+  const { data: isCourseLesson = false } = useQuery({
+    queryKey: ['is-course-lesson', id],
+    queryFn: async () => {
+      if (!id) return false;
+      const { data: rps } = await supabase
+        .from('recipe_packages')
+        .select('package_id')
+        .eq('recipe_id', id);
+      if (!rps || rps.length === 0) return false;
+      const packageIds = rps.map(rp => rp.package_id);
+      const { data: cps } = await supabase
+        .from('course_packages')
+        .select('id')
+        .in('package_id', packageIds)
+        .limit(1);
+      return (cps && cps.length > 0) || false;
+    },
+    enabled: !!id,
+  });
+
   // Fetch module lessons (lessons in same package as current lesson)
   const { data: moduleLessons = [] } = useQuery({
     queryKey: ['module-lessons', id],
