@@ -6,7 +6,7 @@ import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { Button } from '@/components/ui/button';
 
 // Main tab routes (no back button needed)
-const mainRoutes = ['/app', '/app/receitas', '/app/cursos', '/app/ebooks', '/app/favoritos', '/app/perfil'];
+const mainRoutes = ['/app/receitas', '/app/cursos', '/app/ebooks', '/app/favoritos', '/app/perfil'];
 
 export const UserNavbar: React.FC = () => {
   const location = useLocation();
@@ -41,7 +41,7 @@ export const UserNavbar: React.FC = () => {
               <ArrowLeft className="h-5 w-5" />
             </Button>
           )}
-          <Link to="/app">
+          <Link to="/app/receitas">
             <img src={drinkrosLogo} alt="Drinkeros" className="h-10 object-contain" />
           </Link>
         </div>

@@ -143,7 +143,7 @@ const App = () => (
 
             {/* User app routes */}
             <Route path="/app" element={<UserLayout />}>
-              <Route index element={<UserHome />} />
+              <Route index element={<Navigate to="/app/receitas" replace />} />
               <Route path="aula/:id" element={<UserLesson />} />
               <Route path="receitas" element={<UserRecipes />} />
               <Route path="receita/:id" element={<UserRecipeDetail />} />
