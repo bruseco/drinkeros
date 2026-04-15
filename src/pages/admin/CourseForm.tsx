@@ -705,6 +705,7 @@ const CourseForm: React.FC = () => {
                 </div>
 
                 {formData.certificate_enabled && (
+                  <>
                   <div className="space-y-2">
                     <Label>Imagem de Fundo (3347×2447)</Label>
                     {formData.certificate_bg_url ? (
@@ -780,6 +781,7 @@ const CourseForm: React.FC = () => {
                       Cor do nome e da data no certificado
                     </p>
                   </div>
+                  </>
                 )}
               </CardContent>
             </Card>
