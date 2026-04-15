@@ -1,51 +1,25 @@
 
 
-## Plano: Migrar sistema de e-mail de Amazon SES para Lovable Cloud
+# Plano: Importar Capas de Receitas do CSV
 
-### Contexto
-O projeto usa Amazon SES em ~10 Edge Functions para enviar e-mails transacionais (boas-vindas, magic link, reset de senha, onboarding, upsell, etc.). Vamos migrar para o sistema de e-mail integrado do Lovable Cloud, que não requer conta externa ou API keys.
+## Resumo
+Das 116 receitas no CSV, 104 estão sem capa na tabela `exclusive_posts`. Vamos baixar as imagens dos URLs fornecidos, fazer upload para o storage, e atualizar o campo `cover_image_url` de cada receita.
 
-O projeto tem o domínio customizado `www.drinkeros.com`, que pode ser usado para o envio.
+## Etapas
 
-### Etapas
+1. **Script Python de importação** — Para cada linha do CSV:
+   - Buscar o `id` da receita na tabela `exclusive_posts` pelo título exato
+   - Pular receitas que já possuem capa
+   - Baixar a imagem do URL do WordPress (`vip.drinkeros.com`)
+   - Fazer upload para o bucket `package-covers` no storage
+   - Atualizar o campo `cover_image_url` da receita com o novo URL público
 
-**1. Configurar domínio de e-mail**
-- Abrir o diálogo de configuração de domínio de e-mail para configurar o envio pelo domínio `drinkeros.com`
-- Você precisará adicionar registros DNS (NS records) no seu provedor de domínio para verificação
+2. **Execução e relatório** — Gerar um log com receitas atualizadas e eventuais falhas (URLs quebrados, títulos não encontrados).
 
-**2. Configurar infraestrutura de e-mail**
-- Criar toda a infraestrutura necessária (filas, tabelas, cron jobs) automaticamente
-
-**3. Criar templates de e-mail transacional**
-- Migrar os templates existentes (welcome, magic-link, reset-password) para o novo sistema usando React Email components
-- Registrar cada template no sistema
-
-**4. Configurar templates de e-mail de autenticação**
-- Configurar os e-mails de autenticação (verificação, reset de senha, magic link) com a identidade visual da Drinkeros
-
-**5. Atualizar Edge Functions existentes**
-- Remover dependências do Amazon SES (`@aws-sdk/client-ses`) das Edge Functions
-- Substituir chamadas SES por chamadas ao `send-transactional-email` nas seguintes funções:
-  - `send-welcome-email` → template transacional "welcome"
-  - `send-magic-link` → template auth (magic link nativo)
-  - `send-reset-password-email` → template auth (recovery nativo)
-  - `resend-welcome-email` → usar novo template "welcome"
-  - `bootstrap-admin` → usar novo template "welcome"
-  - `send-onboarding-reminders` → template transacional "onboarding-reminder"
-  - `send-onboarding-followup` → template transacional "onboarding-followup"
-  - `send-onboarding-followup-batch` → template transacional "onboarding-followup"
-  - `send-study-reminders` → template transacional "study-reminder"
-  - `process-upsell` → template transacional "upsell"
-  - `woocommerce-webhook` → template transacional "module-access"
-
-**6. Deploy de todas as funções atualizadas**
-
-### Resultado
-- Todos os e-mails enviados pelo domínio `drinkeros.com`
-- Sem dependência de conta AWS/SES
-- Sistema com retry automático, fila de envio, e log de entregas
-- Templates customizáveis com a identidade visual da Drinkeros
-
-### Primeiro passo obrigatório
-Antes de tudo, precisamos configurar o domínio de e-mail. Vou abrir o diálogo de configuração para você.
+## Detalhes técnicos
+- Tabela: `exclusive_posts` (não `recipes`)
+- Bucket de destino: `package-covers` (já usado pelas capas existentes)
+- Match: comparação exata pelo campo `title`
+- Apenas receitas com `cover_image_url IS NULL` serão atualizadas
+- Total estimado: 104 receitas
 
