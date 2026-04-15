@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { FullscreenVideo } from '@/components/user/FullscreenVideo';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import logoUrl from '@/assets/logotipo-drinkeros.png';
@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
 import { useAddToCursosCollection } from '@/hooks/useCollections';
 import { useTrackRecipeView, useToggleLessonComplete } from '@/hooks/useRecipeViews';
+import CourseCompletionCelebration from '@/components/user/CourseCompletionCelebration';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,6 +42,84 @@ const UserLesson: React.FC = () => {
   const addToCursos = useAddToCursosCollection();
   const trackLessonView = useTrackRecipeView();
   const toggleComplete = useToggleLessonComplete();
+
+  // Course completion celebration state
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationCourse, setCelebrationCourse] = useState<{
+    id: string; name: string; certificateBgUrl: string; hasCertificate: boolean;
+  } | null>(null);
+
+  const checkCourseCompletion = useCallback(async (lessonId: string) => {
+    if (!user) return;
+    // Find which package this lesson belongs to
+    const { data: rps } = await supabase
+      .from('recipe_packages')
+      .select('package_id')
+      .eq('recipe_id', lessonId);
+    if (!rps || rps.length === 0) return;
+
+    // Find which course this package belongs to
+    const { data: cp } = await supabase
+      .from('course_packages')
+      .select('course_id')
+      .in('package_id', rps.map(r => r.package_id))
+      .limit(1)
+      .maybeSingle();
+    if (!cp) return;
+
+    const courseId = cp.course_id;
+
+    // Get ALL lesson IDs across ALL modules in this course
+    const { data: allCoursePackages } = await supabase
+      .from('course_packages')
+      .select('package_id')
+      .eq('course_id', courseId);
+    if (!allCoursePackages) return;
+
+    const allPackageIds = allCoursePackages.map(p => p.package_id);
+    const { data: allRecipePackages } = await supabase
+      .from('recipe_packages')
+      .select('recipe_id, recipe:recipes!inner(id, status)')
+      .in('package_id', allPackageIds);
+    
+    const allLessonIds = (allRecipePackages || [])
+      .filter(rp => (rp.recipe as any)?.status === 'published')
+      .map(rp => rp.recipe_id);
+
+    if (allLessonIds.length === 0) return;
+
+    // Check how many are completed
+    const { data: completedViews } = await supabase
+      .from('recipe_views')
+      .select('recipe_id')
+      .eq('user_id', user.id)
+      .eq('completed', true)
+      .in('recipe_id', allLessonIds);
+
+    const completedCount = completedViews?.length || 0;
+    if (completedCount < allLessonIds.length) return;
+
+    // ALL lessons complete! Check if already celebrated
+    const storageKey = `course_completion_state_${user.id}_${courseId}`;
+    if (localStorage.getItem(storageKey) === 'complete') return;
+
+    // Fetch course info for celebration
+    const { data: course } = await supabase
+      .from('courses')
+      .select('id, name, certificate_enabled, certificate_bg_url')
+      .eq('id', courseId)
+      .single();
+    if (!course) return;
+
+    localStorage.setItem(storageKey, 'complete');
+    setCelebrationCourse({
+      id: course.id,
+      name: course.name,
+      certificateBgUrl: course.certificate_bg_url || '',
+      hasCertificate: !!course.certificate_enabled && !!course.certificate_bg_url,
+    });
+    setShowCelebration(true);
+  }, [user]);
 
   const isFavorite = favorites.some((f) => f.recipe_id === id);
 
@@ -334,7 +413,18 @@ const UserLesson: React.FC = () => {
                   <Button
                     variant={isCompleted ? "outline" : "default"}
                     size="sm"
-                    onClick={() => toggleComplete.mutate({ lessonId: lesson.id, isCompleted })}
+                    onClick={() => {
+                      toggleComplete.mutate(
+                        { lessonId: lesson.id, isCompleted },
+                        {
+                          onSuccess: () => {
+                            if (!isCompleted) {
+                              checkCourseCompletion(lesson.id);
+                            }
+                          },
+                        }
+                      );
+                    }}
                     disabled={toggleComplete.isPending}
                     className={cn(
                       "gap-2 transition-all",
@@ -748,6 +838,18 @@ const UserLesson: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Course completion celebration */}
+      {celebrationCourse && (
+        <CourseCompletionCelebration
+          open={showCelebration}
+          onClose={() => setShowCelebration(false)}
+          courseId={celebrationCourse.id}
+          courseName={celebrationCourse.name}
+          certificateBgUrl={celebrationCourse.certificateBgUrl}
+          hasCertificate={celebrationCourse.hasCertificate}
+        />
+      )}
     </div>
   );
 };
