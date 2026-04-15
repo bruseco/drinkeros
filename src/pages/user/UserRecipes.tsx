@@ -11,7 +11,7 @@ import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
 const CATEGORY_FILTERS = [
   { label: 'Xaropes Artesanais', value: 'Xaropes Artesanais', icon: GlassWater },
-  { label: 'Sem Álcool', value: 'Sem Álcool', icon: Wine },
+  { label: 'Sem Álcool', value: 'Sem Álcool', icon: Droplets },
   { label: 'Drinks de Galera', value: 'Drinks de Galera', icon: Users },
   { label: 'Caipirinhas', value: 'Caipirinha', icon: Citrus },
   { label: 'Batidas', value: 'Batida', icon: CupSoda },
