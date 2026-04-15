@@ -43,6 +43,84 @@ const UserLesson: React.FC = () => {
   const trackLessonView = useTrackRecipeView();
   const toggleComplete = useToggleLessonComplete();
 
+  // Course completion celebration state
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationCourse, setCelebrationCourse] = useState<{
+    id: string; name: string; certificateBgUrl: string; hasCertificate: boolean;
+  } | null>(null);
+
+  const checkCourseCompletion = useCallback(async (lessonId: string) => {
+    if (!user) return;
+    // Find which package this lesson belongs to
+    const { data: rps } = await supabase
+      .from('recipe_packages')
+      .select('package_id')
+      .eq('recipe_id', lessonId);
+    if (!rps || rps.length === 0) return;
+
+    // Find which course this package belongs to
+    const { data: cp } = await supabase
+      .from('course_packages')
+      .select('course_id')
+      .in('package_id', rps.map(r => r.package_id))
+      .limit(1)
+      .maybeSingle();
+    if (!cp) return;
+
+    const courseId = cp.course_id;
+
+    // Get ALL lesson IDs across ALL modules in this course
+    const { data: allCoursePackages } = await supabase
+      .from('course_packages')
+      .select('package_id')
+      .eq('course_id', courseId);
+    if (!allCoursePackages) return;
+
+    const allPackageIds = allCoursePackages.map(p => p.package_id);
+    const { data: allRecipePackages } = await supabase
+      .from('recipe_packages')
+      .select('recipe_id, recipe:recipes!inner(id, status)')
+      .in('package_id', allPackageIds);
+    
+    const allLessonIds = (allRecipePackages || [])
+      .filter(rp => (rp.recipe as any)?.status === 'published')
+      .map(rp => rp.recipe_id);
+
+    if (allLessonIds.length === 0) return;
+
+    // Check how many are completed
+    const { data: completedViews } = await supabase
+      .from('recipe_views')
+      .select('recipe_id')
+      .eq('user_id', user.id)
+      .eq('completed', true)
+      .in('recipe_id', allLessonIds);
+
+    const completedCount = completedViews?.length || 0;
+    if (completedCount < allLessonIds.length) return;
+
+    // ALL lessons complete! Check if already celebrated
+    const storageKey = `course_completion_state_${user.id}_${courseId}`;
+    if (localStorage.getItem(storageKey) === 'complete') return;
+
+    // Fetch course info for celebration
+    const { data: course } = await supabase
+      .from('courses')
+      .select('id, name, certificate_enabled, certificate_bg_url')
+      .eq('id', courseId)
+      .single();
+    if (!course) return;
+
+    localStorage.setItem(storageKey, 'complete');
+    setCelebrationCourse({
+      id: course.id,
+      name: course.name,
+      certificateBgUrl: course.certificate_bg_url || '',
+      hasCertificate: !!course.certificate_enabled && !!course.certificate_bg_url,
+    });
+    setShowCelebration(true);
+  }, [user]);
+
   const isFavorite = favorites.some((f) => f.recipe_id === id);
 
   // Check if this lesson belongs to a course (via course_packages)
