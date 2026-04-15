@@ -75,11 +75,13 @@ export const useGenerateCertificate = () => {
       referenceName,
       completedAt,
       certificateBgUrl,
+      textColor = '#FFFFFF',
     }: {
       referenceId: string;
       referenceName: string;
       completedAt?: string;
       certificateBgUrl: string;
+      textColor?: string;
     }) => {
       if (!user) throw new Error('Não autenticado');
 
@@ -116,7 +118,7 @@ export const useGenerateCertificate = () => {
       }
 
       // Generate PDF with background image
-      await generatePDF(cert, studentName, certificateBgUrl);
+      await generatePDF(cert, studentName, certificateBgUrl, textColor);
 
       return cert;
     },
@@ -134,7 +136,7 @@ export const useGenerateCertificate = () => {
   });
 };
 
-async function generatePDF(cert: Certificate, studentName: string, bgUrl: string) {
+async function generatePDF(cert: Certificate, studentName: string, bgUrl: string, textColor: string = '#FFFFFF') {
   // Background image is 3347x2447 → landscape ratio
   const imgWidth = 3347;
   const imgHeight = 2447;
@@ -174,7 +176,7 @@ async function generatePDF(cert: Certificate, studentName: string, bgUrl: string
   const dateX = pdfWidth * 0.221;
   doc.setFontSize(14);
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(255, 255, 255);
+  doc.setTextColor(color.r, color.g, color.b);
   doc.text(formatDatePtBr(cert.completed_at), dateX, dateY, { align: 'center' });
 
   doc.save(`Certificado - ${cert.reference_name}.pdf`);
