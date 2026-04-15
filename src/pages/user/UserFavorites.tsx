@@ -109,7 +109,7 @@ const UserFavorites: React.FC = () => {
   const ungroupedFavorites = favorites.filter((f) => !recipesInCollections.has(f.recipe_id));
 
   // Other collections (not "Cursos")
-  const otherCollections = collections.filter((c) => c.name !== 'Cursos');
+  const otherCollections = collections.filter((c) => c.name !== 'Cursos' && c.name !== 'Aulas');
 
   if (isLoading) {
     return (
