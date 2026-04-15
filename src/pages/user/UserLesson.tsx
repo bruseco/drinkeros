@@ -255,12 +255,24 @@ const UserLesson: React.FC = () => {
     return url;
   };
 
-  const lessonsData = moduleLessons as { packageName: string; lessons: any[] } | [];
+  const lessonsData = moduleLessons as { packageName: string; courseId: string | null; courseName: string | null; lessons: any[] } | [];
   const packageName = Array.isArray(lessonsData) ? 'Módulo' : lessonsData.packageName;
   const lessons = Array.isArray(lessonsData) ? [] : lessonsData.lessons;
+  const courseId = Array.isArray(lessonsData) ? null : lessonsData.courseId;
+  const courseName = Array.isArray(lessonsData) ? null : lessonsData.courseName;
 
   return (
     <div className="container mx-auto px-4 py-6">
+      {/* Course breadcrumb */}
+      {courseName && courseId && (
+        <button
+          onClick={() => navigate(`/app/curso/${courseId}/modulos`)}
+          className="mb-1 flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-lime-400 hover:text-lime-300 transition-colors"
+        >
+          <ArrowLeft className="h-3 w-3" />
+          {courseName}
+        </button>
+      )}
       {/* Header */}
       <div className="mb-4 flex items-center gap-4">
         <h1 className="flex-1 text-lg font-bold line-clamp-1">{lesson.name}</h1>
