@@ -1,16 +1,17 @@
 import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { X, Plus } from 'lucide-react';
+import AutocompleteTagInput from '@/components/admin/AutocompleteTagInput';
 
 interface InlineTagEditorProps {
   tags: string[];
   onSave: (tags: string[]) => void;
   placeholder?: string;
+  suggestions?: string[];
 }
 
-const InlineTagEditor: React.FC<InlineTagEditorProps> = ({ tags, onSave, placeholder = 'Adicionar...' }) => {
+const InlineTagEditor: React.FC<InlineTagEditorProps> = ({ tags, onSave, placeholder = 'Adicionar...', suggestions = [] }) => {
   const [editing, setEditing] = useState(false);
   const [localTags, setLocalTags] = useState<string[]>(tags);
   const [input, setInput] = useState('');
@@ -77,17 +78,19 @@ const InlineTagEditor: React.FC<InlineTagEditorProps> = ({ tags, onSave, placeho
           </Badge>
         ))}
       </div>
-      <Input
-        ref={inputRef}
+      <AutocompleteTagInput
+        inputRef={inputRef}
         value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onBlur={() => {
-          if (input.trim()) addTag(input);
-          setTimeout(() => setEditing(false), 150);
+        onChange={setInput}
+        onAdd={(v) => addTag(v)}
+        onKeyDown={(e) => {
+          handleKeyDown(e);
         }}
+        suggestions={suggestions}
+        existingTags={localTags}
         placeholder={placeholder}
         className="h-7 text-xs"
+        onBlurExtra={() => setEditing(false)}
       />
     </div>
   );

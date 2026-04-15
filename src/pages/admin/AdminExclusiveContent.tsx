@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useExclusivePostsPaginated, useDeleteExclusivePost, useBulkCreateExclusivePosts, useUpdateExclusivePost } from '@/hooks/useExclusivePosts';
 import InlineTagEditor from '@/components/admin/InlineTagEditor';
+import { useExistingTags } from '@/hooks/useExistingTags';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -32,6 +33,7 @@ const AdminExclusiveContent: React.FC = () => {
   const debouncedSearch = useDebounce(search, 300);
   const lastSelectedIndex = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { data: existingTags } = useExistingTags();
 
   const {
     data,
@@ -264,6 +266,7 @@ const AdminExclusiveContent: React.FC = () => {
                         tags={post.ingredients || []}
                         onSave={(tags) => handleUpdateTags(post.id, 'ingredients', tags)}
                         placeholder="Adicionar ingrediente..."
+                        suggestions={existingTags?.ingredients || []}
                       />
                     </TableCell>
                     <TableCell>
@@ -271,6 +274,7 @@ const AdminExclusiveContent: React.FC = () => {
                         tags={post.characteristics || []}
                         onSave={(tags) => handleUpdateTags(post.id, 'characteristics', tags)}
                         placeholder="Adicionar característica..."
+                        suggestions={existingTags?.characteristics || []}
                       />
                     </TableCell>
                     <TableCell>
