@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
 import { useAddToCursosCollection } from '@/hooks/useCollections';
 import { useTrackRecipeView, useToggleLessonComplete } from '@/hooks/useRecipeViews';
+import CourseCompletionCelebration from '@/components/user/CourseCompletionCelebration';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
