@@ -15,7 +15,7 @@ const UserEbooks: React.FC = () => {
       const aOwned = ownedSet.has(a.id);
       const bOwned = ownedSet.has(b.id);
       if (aOwned !== bOwned) return aOwned ? -1 : 1;
-      return a.name.localeCompare(b.name);
+      return (a.display_order ?? 0) - (b.display_order ?? 0);
     });
 
   if (isLoading || userLoading) {
