@@ -105,6 +105,7 @@ const UserLesson: React.FC = () => {
         .order('display_order', { ascending: true });
 
       return {
+        packageId,
         packageName: packageInfo?.name || 'Módulo',
         lessons: packageLessons
           ?.filter(pl => pl.recipe && pl.recipe.status === 'published')
@@ -118,6 +119,56 @@ const UserLesson: React.FC = () => {
       };
     },
     enabled: !!id,
+  });
+
+  // Fetch next module's first lesson (when current lesson is the last in its module)
+  const currentPackageId = (!Array.isArray(moduleLessons) && moduleLessons?.packageId) || null;
+  const { data: nextModuleData } = useQuery({
+    queryKey: ['next-module-first-lesson', currentPackageId],
+    queryFn: async () => {
+      if (!currentPackageId) return null;
+
+      // Find which course this package belongs to
+      const { data: coursePackage } = await supabase
+        .from('course_packages')
+        .select('course_id, display_order')
+        .eq('package_id', currentPackageId)
+        .limit(1)
+        .single();
+
+      if (!coursePackage) return null;
+
+      // Get the next module in the same course
+      const { data: nextModule } = await supabase
+        .from('course_packages')
+        .select('package_id, package:packages(id, name)')
+        .eq('course_id', coursePackage.course_id)
+        .gt('display_order', coursePackage.display_order)
+        .order('display_order', { ascending: true })
+        .limit(1)
+        .single();
+
+      if (!nextModule) return null;
+
+      // Get the first published lesson in the next module
+      const { data: firstLesson } = await supabase
+        .from('recipe_packages')
+        .select('recipe:recipes(id, name)')
+        .eq('package_id', nextModule.package_id)
+        .eq('recipe.status', 'published')
+        .order('display_order', { ascending: true })
+        .limit(1)
+        .single();
+
+      if (!firstLesson?.recipe) return null;
+
+      const pkg = nextModule.package as any;
+      return {
+        moduleName: pkg?.name || 'Próximo Módulo',
+        lessonId: (firstLesson.recipe as any).id as string,
+      };
+    },
+    enabled: !!currentPackageId,
   });
 
   // Get completed lessons (only those explicitly marked as completed)
