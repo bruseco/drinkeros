@@ -33,6 +33,7 @@ const AdminExclusiveContent: React.FC = () => {
   const debouncedSearch = useDebounce(search, 300);
   const lastSelectedIndex = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { data: existingTags } = useExistingTags();
 
   const {
     data,
