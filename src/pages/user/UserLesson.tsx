@@ -413,7 +413,18 @@ const UserLesson: React.FC = () => {
                   <Button
                     variant={isCompleted ? "outline" : "default"}
                     size="sm"
-                    onClick={() => toggleComplete.mutate({ lessonId: lesson.id, isCompleted })}
+                    onClick={() => {
+                      toggleComplete.mutate(
+                        { lessonId: lesson.id, isCompleted },
+                        {
+                          onSuccess: () => {
+                            if (!isCompleted) {
+                              checkCourseCompletion(lesson.id);
+                            }
+                          },
+                        }
+                      );
+                    }}
                     disabled={toggleComplete.isPending}
                     className={cn(
                       "gap-2 transition-all",
