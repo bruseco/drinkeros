@@ -104,9 +104,26 @@ const UserLesson: React.FC = () => {
         .eq('package_id', packageId)
         .order('display_order', { ascending: true });
 
+      // Get the course this package belongs to
+      let courseId: string | null = null;
+      let courseName: string | null = null;
+      const { data: coursePackage } = await supabase
+        .from('course_packages')
+        .select('course_id, course:courses(id, name)')
+        .eq('package_id', packageId)
+        .limit(1)
+        .single();
+      if (coursePackage) {
+        const course = coursePackage.course as any;
+        courseId = course?.id || coursePackage.course_id;
+        courseName = course?.name || null;
+      }
+
       return {
         packageId,
         packageName: packageInfo?.name || 'Módulo',
+        courseId,
+        courseName,
         lessons: packageLessons
           ?.filter(pl => pl.recipe && pl.recipe.status === 'published')
           .map(pl => ({
