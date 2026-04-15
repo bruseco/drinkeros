@@ -331,6 +331,16 @@ const UserLesson: React.FC = () => {
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   )}
+                  {isCompleted && !nextLesson && nextModuleData && (
+                    <Button
+                      size="sm"
+                      onClick={() => navigate(`/app/aula/${nextModuleData.lessonId}`)}
+                      className="gap-1.5 animate-in fade-in slide-in-from-left-2"
+                    >
+                      Próximo Módulo
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               );
             })()}
