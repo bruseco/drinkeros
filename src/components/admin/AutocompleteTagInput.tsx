@@ -11,6 +11,7 @@ interface AutocompleteTagInputProps {
   placeholder?: string;
   className?: string;
   inputRef?: React.Ref<HTMLInputElement>;
+  onBlurExtra?: () => void;
 }
 
 const AutocompleteTagInput: React.FC<AutocompleteTagInputProps> = ({
