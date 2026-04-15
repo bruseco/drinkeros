@@ -163,7 +163,7 @@ async function generatePDF(cert: Certificate, studentName: string, bgUrl: string
   const centerX = pdfWidth / 2;
 
   // Student name
-  const nameY = pdfHeight * 0.52;
+  const nameY = pdfHeight * 0.515;
   doc.setFontSize(28);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(255, 255, 255);
@@ -171,7 +171,7 @@ async function generatePDF(cert: Certificate, studentName: string, bgUrl: string
 
   // Date — centered above the "Data" line at bottom left
   const dateY = pdfHeight * 0.775;
-  const dateX = pdfWidth * 0.18;
+  const dateX = pdfWidth * 0.21;
   doc.setFontSize(14);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(255, 255, 255);
