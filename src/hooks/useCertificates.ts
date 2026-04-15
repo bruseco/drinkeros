@@ -162,16 +162,15 @@ async function generatePDF(cert: Certificate, studentName: string, bgUrl: string
 
   const centerX = pdfWidth / 2;
 
-  // Student name — positioned where the line is in the reference image
-  // Approximately 58% from top
-  const nameY = pdfHeight * 0.54;
+  // Student name — positioned just above the horizontal line (~48% from top)
+  const nameY = pdfHeight * 0.48;
   doc.setFontSize(28);
-  doc.setFont('helvetica', 'bold');
+  doc.setFont('helvetica', 'normal');
   doc.setTextColor(255, 255, 255);
-  doc.text(studentName.toUpperCase(), centerX, nameY, { align: 'center' });
+  doc.text(studentName, centerX, nameY, { align: 'center' });
 
-  // Date — positioned at bottom left area (~88% from top, ~18% from left)
-  const dateY = pdfHeight * 0.88;
+  // Date — positioned above the "Data" line at bottom left (~82% from top, ~18% from left)
+  const dateY = pdfHeight * 0.82;
   const dateX = pdfWidth * 0.18;
   doc.setFontSize(14);
   doc.setFont('helvetica', 'normal');
