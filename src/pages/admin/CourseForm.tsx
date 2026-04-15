@@ -754,6 +754,32 @@ const CourseForm: React.FC = () => {
                       </label>
                     )}
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="certificate_text_color">Cor da Tipografia (Hex)</Label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="color"
+                        value={formData.certificate_text_color}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, certificate_text_color: e.target.value }))
+                        }
+                        className="h-10 w-10 cursor-pointer rounded border border-border bg-transparent p-0.5"
+                      />
+                      <Input
+                        id="certificate_text_color"
+                        value={formData.certificate_text_color}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, certificate_text_color: e.target.value }))
+                        }
+                        placeholder="#FFFFFF"
+                        className="max-w-[140px] font-mono"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Cor do nome e da data no certificado
+                    </p>
+                  </div>
                 )}
               </CardContent>
             </Card>
