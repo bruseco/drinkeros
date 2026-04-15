@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import defaultCover from '@/assets/default-cover.png';
 import { Link } from 'react-router-dom';
 import { useUserCourses, useCourses } from '@/hooks/useCourses';
@@ -7,14 +7,118 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Loader2, BookOpen, ChevronRight, Play, Lock } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 const UserCourses: React.FC = () => {
+  const { user } = useAuth();
   const { data: userCourses = [], isLoading: userLoading } = useUserCourses();
   const { data: allCourses = [], isLoading: coursesLoading } = useCourses(true);
   const { getCourseProgress } = useCourseProgress();
 
-  const isLoading = userLoading || coursesLoading;
   const userCourseIds = new Set(userCourses.map((uc) => uc.course_id));
+
+  // Fetch last viewed timestamp per course for sorting
+  const { data: lastViewedMap = new Map<string, string>() } = useQuery({
+    queryKey: ['course-last-viewed', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return new Map<string, string>();
+      const { data, error } = await supabase
+        .from('recipe_views')
+        .select('recipe_id, viewed_at')
+        .eq('user_id', user.id)
+        .order('viewed_at', { ascending: false });
+      if (error) throw error;
+
+      // Map recipe_id -> viewed_at (most recent)
+      const recipeViewedAt = new Map<string, string>();
+      for (const rv of data || []) {
+        if (!recipeViewedAt.has(rv.recipe_id)) {
+          recipeViewedAt.set(rv.recipe_id, rv.viewed_at);
+        }
+      }
+      return recipeViewedAt;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Fetch all course_packages to map recipes to courses
+  const courseIds = useMemo(() => allCourses.map(c => c.id), [allCourses]);
+  const { data: allCoursePackages = [] } = useQuery({
+    queryKey: ['all-course-packages-sort', courseIds],
+    queryFn: async () => {
+      if (courseIds.length === 0) return [];
+      const { data, error } = await supabase
+        .from('course_packages')
+        .select('course_id, package_id')
+        .in('course_id', courseIds);
+      if (error) throw error;
+      return data;
+    },
+    enabled: courseIds.length > 0,
+  });
+
+  const { data: allRecipePackages = [] } = useQuery({
+    queryKey: ['all-recipe-packages-sort'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('recipe_packages')
+        .select('recipe_id, package_id');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const sortedCourses = useMemo(() => {
+    // Build course -> last viewed timestamp
+    const packageToCourses = new Map<string, string[]>();
+    for (const cp of allCoursePackages) {
+      const list = packageToCourses.get(cp.package_id) || [];
+      list.push(cp.course_id);
+      packageToCourses.set(cp.package_id, list);
+    }
+
+    const courseLastViewed = new Map<string, string>();
+    for (const rp of allRecipePackages) {
+      const viewedAt = lastViewedMap.get(rp.recipe_id);
+      if (!viewedAt) continue;
+      const courses = packageToCourses.get(rp.package_id) || [];
+      for (const courseId of courses) {
+        const existing = courseLastViewed.get(courseId);
+        if (!existing || viewedAt > existing) {
+          courseLastViewed.set(courseId, viewedAt);
+        }
+      }
+    }
+
+    return [...allCourses].sort((a, b) => {
+      const aOwned = userCourseIds.has(a.id) || a.is_free;
+      const bOwned = userCourseIds.has(b.id) || b.is_free;
+
+      // Owned first
+      if (aOwned && !bOwned) return -1;
+      if (!aOwned && bOwned) return 1;
+
+      if (aOwned && bOwned) {
+        const aLastView = courseLastViewed.get(a.id);
+        const bLastView = courseLastViewed.get(b.id);
+
+        // Started courses first, most recent on top
+        if (aLastView && bLastView) return bLastView.localeCompare(aLastView);
+        if (aLastView && !bLastView) return -1;
+        if (!aLastView && bLastView) return 1;
+
+        // Both not started: alphabetical
+        return a.name.localeCompare(b.name);
+      }
+
+      // Both unowned: alphabetical
+      return a.name.localeCompare(b.name);
+    });
+  }, [allCourses, userCourseIds, lastViewedMap, allCoursePackages, allRecipePackages]);
+
+  const isLoading = userLoading || coursesLoading;
 
   if (isLoading) {
     return (
@@ -31,7 +135,7 @@ const UserCourses: React.FC = () => {
         <p className="text-muted-foreground">Explore todos os cursos disponíveis</p>
       </section>
 
-      {allCourses.length === 0 ? (
+      {sortedCourses.length === 0 ? (
         <div className="rounded-3xl border-2 border-dashed border-muted p-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
             <BookOpen className="h-8 w-8 text-muted-foreground" />
@@ -40,7 +144,7 @@ const UserCourses: React.FC = () => {
         </div>
       ) : (
         <div className="grid gap-4 grid-cols-1">
-          {allCourses.map((course) => {
+          {sortedCourses.map((course) => {
             const owned = userCourseIds.has(course.id) || course.is_free;
             return (
               <CourseCard key={course.id} course={course} owned={owned} getCourseProgress={getCourseProgress} />
@@ -51,7 +155,6 @@ const UserCourses: React.FC = () => {
     </div>
   );
 };
-
 interface CourseCardProps {
   course: {
     id: string;

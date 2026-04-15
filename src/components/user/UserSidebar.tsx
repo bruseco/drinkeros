@@ -1,11 +1,10 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Wine, Heart, GraduationCap, UserCircle, BookOpen, Home } from 'lucide-react';
+import { Wine, Heart, GraduationCap, UserCircle, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
 const navItems = [
-  { icon: Home, label: 'Início', href: '/app' },
   { icon: Wine, label: 'Receitas', href: '/app/receitas' },
   { icon: GraduationCap, label: 'Cursos', href: '/app/cursos' },
   { icon: BookOpen, label: 'Ebooks', href: '/app/ebooks' },
@@ -19,7 +18,7 @@ export const UserSidebar: React.FC = () => {
   return (
     <aside className="hidden lg:flex flex-col w-60 border-r border-border bg-card min-h-screen sticky top-0">
       <div className="flex items-center justify-center p-6 border-b border-border">
-        <Link to="/app">
+        <Link to="/app/receitas">
           <img src={drinkrosLogo} alt="Drinkeros" className="h-10 object-contain" />
         </Link>
       </div>
@@ -27,9 +26,7 @@ export const UserSidebar: React.FC = () => {
       <nav className="flex-1 py-4 px-3 space-y-1">
         {navItems.map((item) => {
           const isActive =
-            item.href === '/app'
-              ? location.pathname === '/app'
-              : location.pathname === item.href || location.pathname.startsWith(item.href + '/');
+            location.pathname === item.href || location.pathname.startsWith(item.href + '/');
 
           return (
             <Link
