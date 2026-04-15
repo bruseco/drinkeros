@@ -46,7 +46,7 @@ const UserLesson: React.FC = () => {
   // Course completion celebration state
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationCourse, setCelebrationCourse] = useState<{
-    id: string; name: string; certificateBgUrl: string; hasCertificate: boolean;
+    id: string; name: string; certificateBgUrl: string; hasCertificate: boolean; textColor?: string;
   } | null>(null);
 
   const checkCourseCompletion = useCallback(async (lessonId: string) => {
@@ -849,6 +849,7 @@ const UserLesson: React.FC = () => {
           courseName={celebrationCourse.name}
           certificateBgUrl={celebrationCourse.certificateBgUrl}
           hasCertificate={celebrationCourse.hasCertificate}
+          textColor={celebrationCourse.textColor}
         />
       )}
     </div>
