@@ -8,6 +8,7 @@ interface CertificateDownloadButtonProps {
   referenceName: string;
   completedAt?: string;
   certificateBgUrl: string;
+  textColor?: string;
 }
 
 const CertificateDownloadButton: React.FC<CertificateDownloadButtonProps> = ({
@@ -15,11 +16,12 @@ const CertificateDownloadButton: React.FC<CertificateDownloadButtonProps> = ({
   referenceName,
   completedAt,
   certificateBgUrl,
+  textColor,
 }) => {
   const { mutate, isPending } = useGenerateCertificate();
 
   const handleClick = () => {
-    mutate({ referenceId, referenceName, completedAt, certificateBgUrl });
+    mutate({ referenceId, referenceName, completedAt, certificateBgUrl, textColor });
   };
 
   return (
