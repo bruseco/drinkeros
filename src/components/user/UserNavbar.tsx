@@ -56,6 +56,12 @@ export const UserNavbar: React.FC = () => {
               <Link
                 key={item.href}
                 to={item.href}
+                onClick={(e) => {
+                  if (isActive) {
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                }}
                 className={cn(
                   'relative flex flex-col items-center gap-1 px-5 py-2 transition-all duration-300',
                 isActive 
