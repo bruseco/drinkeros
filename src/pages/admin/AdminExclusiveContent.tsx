@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useExclusivePostsPaginated, useDeleteExclusivePost, useBulkCreateExclusivePosts, useUpdateExclusivePost } from '@/hooks/useExclusivePosts';
 import InlineTagEditor from '@/components/admin/InlineTagEditor';
+import TagManagerDialog from '@/components/admin/TagManagerDialog';
 import { useExistingTags } from '@/hooks/useExistingTags';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -34,6 +35,7 @@ const AdminExclusiveContent: React.FC = () => {
   const lastSelectedIndex = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: existingTags } = useExistingTags();
+  const [tagManagerField, setTagManagerField] = useState<'ingredients' | 'characteristics' | null>(null);
 
   const {
     data,
@@ -192,6 +194,24 @@ const AdminExclusiveContent: React.FC = () => {
           className="pl-9"
         />
       </div>
+
+      {/* Tag management buttons */}
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm" onClick={() => setTagManagerField('ingredients')}>
+          🧪 Ingredientes ({existingTags?.ingredients.length ?? 0})
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => setTagManagerField('characteristics')}>
+          🏷️ Características ({existingTags?.characteristics.length ?? 0})
+        </Button>
+      </div>
+
+      {/* Tag Manager Dialog */}
+      <TagManagerDialog
+        open={tagManagerField !== null}
+        onClose={() => setTagManagerField(null)}
+        field={tagManagerField ?? 'ingredients'}
+        tags={tagManagerField === 'characteristics' ? (existingTags?.characteristics ?? []) : (existingTags?.ingredients ?? [])}
+      />
 
       {selected.size > 0 && (
         <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3">
