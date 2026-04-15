@@ -90,6 +90,7 @@ const InlineTagEditor: React.FC<InlineTagEditorProps> = ({ tags, onSave, placeho
         existingTags={localTags}
         placeholder={placeholder}
         className="h-7 text-xs"
+        onBlurExtra={() => setEditing(false)}
       />
     </div>
   );
