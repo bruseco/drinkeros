@@ -37,7 +37,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="grid gap-3 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 8 }).map((_, i) => (
           <LessonCardSkeleton key={i} compact />
         ))}
@@ -58,7 +58,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-3 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3">
         {lessons.map((lesson) => (
           <LessonCard key={lesson.id} lesson={lesson} compact />
         ))}
