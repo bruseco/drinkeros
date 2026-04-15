@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useExclusivePostsPaginated, useDeleteExclusivePost, useBulkCreateExclusivePosts, useUpdateExclusivePost } from '@/hooks/useExclusivePosts';
 import InlineTagEditor from '@/components/admin/InlineTagEditor';
+import { useExistingTags } from '@/hooks/useExistingTags';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
