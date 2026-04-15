@@ -144,7 +144,7 @@ export const useRemoveFromCollection = () => {
 
 /**
  * Auto-add a lesson (recipe) to the "Aulas" collection when favorited from a course.
- * Finds or creates the "Aulas" collection, then inserts the recipe (idempotent).
+ * Finds or creates the "Aulas Favoritas" collection, then inserts the recipe (idempotent).
  */
 export const useAddToCursosCollection = () => {
   const { user } = useAuth();
@@ -154,27 +154,28 @@ export const useAddToCursosCollection = () => {
     mutationFn: async (recipeId: string) => {
       if (!user) throw new Error('Not authenticated');
 
-      // Find or create "Aulas" collection (migrate from old "Cursos" name)
+      // Find or create "Aulas Favoritas" collection (migrate from old names)
       let { data: existing } = await supabase
         .from('collections')
         .select('id')
         .eq('user_id', user.id)
-        .eq('name', 'Aulas')
+        .eq('name', 'Aulas Favoritas')
         .maybeSingle();
 
-      // Migrate old "Cursos" collection to "Aulas"
+      // Migrate old "Cursos" or "Aulas" collection
       if (!existing) {
         const { data: oldCollection } = await supabase
           .from('collections')
           .select('id')
           .eq('user_id', user.id)
-          .eq('name', 'Cursos')
+          .or('name.eq.Cursos,name.eq.Aulas')
+          .limit(1)
           .maybeSingle();
 
         if (oldCollection) {
           await supabase
             .from('collections')
-            .update({ name: 'Aulas' })
+            .update({ name: 'Aulas Favoritas' })
             .eq('id', oldCollection.id);
           existing = oldCollection;
         }
@@ -186,7 +187,7 @@ export const useAddToCursosCollection = () => {
       } else {
         const { data: created, error } = await supabase
           .from('collections')
-          .insert({ name: 'Aulas', user_id: user.id })
+          .insert({ name: 'Aulas Favoritas', user_id: user.id })
           .select('id')
           .single();
         if (error) throw error;
