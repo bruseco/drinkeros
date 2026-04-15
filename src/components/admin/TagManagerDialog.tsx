@@ -44,16 +44,17 @@ const TagManagerDialog: React.FC<TagManagerDialogProps> = ({ open, onClose, fiel
     setSaving(true);
     try {
       // Find all posts that have this tag and remove it
-      const { data: posts, error } = await supabase
+      const query = supabase
         .from('exclusive_posts')
-        .select('id, ' + field)
+        .select('id, ingredients, characteristics')
         .contains(field, [tag]);
 
+      const { data: posts, error } = await query;
       if (error) throw error;
 
       for (const post of posts || []) {
-        const currentTags = (post as any)[field] as string[] || [];
-        const updated = currentTags.filter(t => t !== tag);
+        const currentTags = (field === 'ingredients' ? post.ingredients : post.characteristics) || [];
+        const updated = currentTags.filter((t: string) => t !== tag);
         await supabase.from('exclusive_posts').update({ [field]: updated }).eq('id', post.id);
       }
 
@@ -77,16 +78,17 @@ const TagManagerDialog: React.FC<TagManagerDialogProps> = ({ open, onClose, fiel
 
     setSaving(true);
     try {
-      const { data: posts, error } = await supabase
+      const query = supabase
         .from('exclusive_posts')
-        .select('id, ' + field)
+        .select('id, ingredients, characteristics')
         .contains(field, [oldTag]);
 
+      const { data: posts, error } = await query;
       if (error) throw error;
 
       for (const post of posts || []) {
-        const currentTags = (post as any)[field] as string[] || [];
-        const updated = currentTags.map(t => t === oldTag ? trimmed : t);
+        const currentTags = (field === 'ingredients' ? post.ingredients : post.characteristics) || [];
+        const updated = currentTags.map((t: string) => t === oldTag ? trimmed : t);
         await supabase.from('exclusive_posts').update({ [field]: updated }).eq('id', post.id);
       }
 
