@@ -266,7 +266,7 @@ const UserLesson: React.FC = () => {
       {/* Course breadcrumb */}
       {courseName && courseId && (
         <button
-          onClick={() => navigate(`/app/curso/${courseId}/modulos`)}
+          onClick={() => navigate(`/app/curso/${courseId}`)}
           className="mb-1 flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-lime-400 hover:text-lime-300 transition-colors"
         >
           <ArrowLeft className="h-3 w-3" />
