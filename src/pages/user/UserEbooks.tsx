@@ -8,8 +8,15 @@ import { Badge } from '@/components/ui/badge';
 const UserEbooks: React.FC = () => {
   const { data: ebooks = [], isLoading } = useEbooks();
   const { data: userEbookIds = [], isLoading: userLoading } = useUserEbooks();
-  const activeEbooks = ebooks.filter(e => e.is_active);
   const ownedSet = new Set(userEbookIds);
+  const activeEbooks = ebooks
+    .filter(e => e.is_active)
+    .sort((a, b) => {
+      const aOwned = ownedSet.has(a.id);
+      const bOwned = ownedSet.has(b.id);
+      if (aOwned !== bOwned) return aOwned ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
 
   if (isLoading || userLoading) {
     return (
