@@ -89,7 +89,10 @@ const AutocompleteTagInput: React.FC<AutocompleteTagInputProps> = ({
         onKeyDown={handleKeyDown}
         onFocus={() => { if (filtered.length > 0) setShowSuggestions(true); }}
         onBlur={() => {
-          setTimeout(() => setShowSuggestions(false), 150);
+          setTimeout(() => {
+            setShowSuggestions(false);
+            onBlurExtra?.();
+          }, 150);
           if (value.trim()) {
             onAdd(value.trim());
             onChange('');
