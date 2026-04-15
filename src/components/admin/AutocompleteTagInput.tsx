@@ -24,6 +24,7 @@ const AutocompleteTagInput: React.FC<AutocompleteTagInputProps> = ({
   placeholder,
   className,
   inputRef,
+  onBlurExtra,
 }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
