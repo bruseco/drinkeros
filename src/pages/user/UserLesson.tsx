@@ -180,7 +180,9 @@ const UserLesson: React.FC = () => {
           size="icon"
           onClick={() => {
             toggleFavorite.mutate({ recipeId: lesson.id, isFavorite });
-            if (!isFavorite) {
+            // Only add to "Aulas" collection if this lesson belongs to a course module
+            const hasModule = moduleLessons && (moduleLessons as any).lessons?.length > 0;
+            if (!isFavorite && hasModule) {
               addToCursos.mutate(lesson.id);
             }
           }}
