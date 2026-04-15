@@ -213,6 +213,7 @@ const AdminExclusiveContent: React.FC = () => {
         tags={tagManagerField === 'characteristics' ? (existingTags?.characteristics ?? []) : (existingTags?.ingredients ?? [])}
       />
 
+      {selected.size > 0 && (
         <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3">
           <span className="text-sm font-medium">{selected.size} selecionada(s)</span>
           <Button variant="destructive" size="sm" onClick={() => setBulkDeleteOpen(true)} disabled={isDeleting}>
