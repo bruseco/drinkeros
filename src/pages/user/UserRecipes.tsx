@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useExclusivePostsPaginated, refreshPostsSeed } from '@/hooks/useExclusivePosts';
 import { Loader2, Search, Wine, GlassWater, Users, Citrus, CupSoda, Martini, IceCream, Snowflake, Droplets } from 'lucide-react';
@@ -99,7 +100,8 @@ const useTypingPlaceholder = (texts: string[], typingSpeed = 80, pauseMs = 2000)
 const UserRecipes: React.FC = () => {
   // Refresh seed on every mount so drinks appear in a new order
   useEffect(() => { refreshRecipeSeed(); refreshPostsSeed(); }, []);
-  const [search, setSearch] = useState('');
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get('q') || '');
   const [isStuck, setIsStuck] = useState(false);
   const { display: typingPlaceholder, isFocused, setIsFocused } = useTypingPlaceholder(SEARCH_PLACEHOLDERS);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);

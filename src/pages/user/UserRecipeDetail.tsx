@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FullscreenVideo } from '@/components/user/FullscreenVideo';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useExclusivePost } from '@/hooks/useExclusivePosts';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
 import { useHasExclusiveAccess } from '@/hooks/useExclusiveAccess';
@@ -24,6 +24,7 @@ const UserRecipeDetail: React.FC = () => {
   const { data: favorites = [] } = useFavorites();
   const toggleFavorite = useToggleFavorite();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [showFavoriteDialog, setShowFavoriteDialog] = useState(false);
 
   const isFavorite = favorites.some((f) => f.recipe_id === id);
@@ -169,7 +170,12 @@ const UserRecipeDetail: React.FC = () => {
             <h2 className="text-lg font-bold text-foreground mb-2">Ingredientes:</h2>
             <div className="flex flex-wrap gap-1.5">
               {recipe.ingredients.map((ing, i) => (
-                <Badge key={i} variant="outline" className="text-sm text-amber-500 border-amber-500/40">
+                <Badge
+                  key={i}
+                  variant="outline"
+                  className="text-sm text-amber-500 border-amber-500/40 cursor-pointer hover:bg-amber-500/10 transition-colors"
+                  onClick={() => navigate(`/app/receitas?q=${encodeURIComponent(ing)}`)}
+                >
                   {ing}
                 </Badge>
               ))}
@@ -199,7 +205,12 @@ const UserRecipeDetail: React.FC = () => {
             <h2 className="text-lg font-bold text-foreground mb-2">Características:</h2>
             <div className="flex flex-wrap gap-1.5">
               {recipe.characteristics.map((c, i) => (
-                <Badge key={i} variant="outline" className="text-sm text-amber-500 border-amber-500/40">
+                <Badge
+                  key={i}
+                  variant="outline"
+                  className="text-sm text-amber-500 border-amber-500/40 cursor-pointer hover:bg-amber-500/10 transition-colors"
+                  onClick={() => navigate(`/app/receitas?q=${encodeURIComponent(c)}`)}
+                >
                   {c}
                 </Badge>
               ))}
