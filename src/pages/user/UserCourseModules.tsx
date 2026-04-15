@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import defaultCover from '@/assets/default-cover.png';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useCourse, useCoursePackages } from '@/hooks/useCourses';
 import { useModuleProgress } from '@/hooks/useModuleProgress';
 import { useUserRecipesByPackage } from '@/hooks/useUserData';
+import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,6 +20,7 @@ import CourseCompletionCelebration from '@/components/user/CourseCompletionCeleb
 const UserCourseModules: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const [searchParams] = useSearchParams();
+  const { user } = useAuth();
   const isLockedParam = searchParams.get('locked') === 'true';
 
   const { data: course, isLoading: courseLoading } = useCourse(courseId || '');
@@ -37,20 +39,26 @@ const UserCourseModules: React.FC = () => {
 
   const courseHasCertificate = (course as any)?.certificate_enabled && (course as any)?.certificate_bg_url;
 
-  // Celebration popup logic - show once per course completion
+  // Celebration popup logic - show only when the course transitions from incomplete to complete
   const [showCelebration, setShowCelebration] = useState(false);
-  const celebrationShownRef = useRef(false);
+  const completionStorageKey = user?.id && courseId ? `course_completion_state_${user.id}_${courseId}` : null;
 
   useEffect(() => {
-    if (allModulesComplete && courseHasCertificate && !celebrationShownRef.current) {
-      const storageKey = `celebration_shown_${courseId}`;
-      if (!sessionStorage.getItem(storageKey)) {
-        sessionStorage.setItem(storageKey, '1');
-        celebrationShownRef.current = true;
+    if (isLoading || !completionStorageKey) return;
+
+    const currentState = localStorage.getItem(completionStorageKey);
+
+    if (allModulesComplete) {
+      if (currentState === 'incomplete') {
         setShowCelebration(true);
       }
+
+      localStorage.setItem(completionStorageKey, 'complete');
+      return;
     }
-  }, [allModulesComplete, courseHasCertificate, courseId]);
+
+    localStorage.setItem(completionStorageKey, 'incomplete');
+  }, [allModulesComplete, completionStorageKey, isLoading]);
 
   const userModuleIds = new Set(sections.map(s => s.package.id));
   const hasAccess = !isLockedParam && coursePackages.some(cp => cp.package && userModuleIds.has(cp.package.id));
@@ -91,13 +99,14 @@ const UserCourseModules: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-6 pb-24 space-y-4">
       {/* Celebration popup */}
-      {courseHasCertificate && (
+      {course && (
         <CourseCompletionCelebration
           open={showCelebration}
           onClose={() => setShowCelebration(false)}
           courseId={course.id}
           courseName={course.name}
           certificateBgUrl={(course as any).certificate_bg_url}
+          hasCertificate={courseHasCertificate}
         />
       )}
 
@@ -146,22 +155,30 @@ const UserCourseModules: React.FC = () => {
       </div>
 
       {/* Certificate Banner - ABOVE modules */}
-      {allModulesComplete && courseHasCertificate && (
+      {allModulesComplete && (
         <div className="rounded-2xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 p-5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
               <Award className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <p className="font-semibold text-foreground">Certificado disponível! 🎉</p>
-              <p className="text-sm text-muted-foreground">Você concluiu todas as aulas deste curso</p>
+              <p className="font-semibold text-foreground">
+                {courseHasCertificate ? 'Certificado disponível! 🎉' : 'Parabéns! 🎉'}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {courseHasCertificate
+                  ? 'Você concluiu todas as aulas deste curso'
+                  : 'Você concluiu todas as aulas deste curso.'}
+              </p>
             </div>
           </div>
-          <CertificateDownloadButton
-            referenceId={course.id}
-            referenceName={course.name}
-            certificateBgUrl={(course as any).certificate_bg_url}
-          />
+          {courseHasCertificate && (
+            <CertificateDownloadButton
+              referenceId={course.id}
+              referenceName={course.name}
+              certificateBgUrl={(course as any).certificate_bg_url}
+            />
+          )}
         </div>
       )}
 
