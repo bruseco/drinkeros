@@ -25,6 +25,7 @@ const UserCourseModules: React.FC = () => {
 
   const { data: course, isLoading: courseLoading } = useCourse(courseId || '');
   const { data: coursePackages = [], isLoading: packagesLoading } = useCoursePackages(courseId || '');
+  const isLoading = courseLoading || packagesLoading;
 
   const { data: recipesByPackage } = useUserRecipesByPackage();
   const sections = recipesByPackage?.sections ?? [];
@@ -65,7 +66,6 @@ const UserCourseModules: React.FC = () => {
   const isLocked = isLockedParam || (!courseLoading && !packagesLoading && !hasAccess);
 
   const checkoutUrl = course?.hotmart_product_code || '';
-  const isLoading = courseLoading || packagesLoading;
 
   const handleCheckout = () => {
     if (checkoutUrl) window.open(checkoutUrl, '_blank');
