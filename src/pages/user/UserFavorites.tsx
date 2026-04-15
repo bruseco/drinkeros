@@ -30,7 +30,7 @@ const UserFavorites: React.FC = () => {
   const isLoading = loadingFavs || loadingCols || loadingCR;
 
   // Find the "Cursos" collection
-  const cursosCollection = collections.find((c) => c.name === 'Cursos');
+  const cursosCollection = collections.find((c) => c.name === 'Aulas' || c.name === 'Cursos');
   const cursosRecipeIds = cursosCollection
     ? collectionRecipes.filter((cr) => cr.collection_id === cursosCollection.id).map((cr) => cr.recipe_id)
     : [];
@@ -109,7 +109,7 @@ const UserFavorites: React.FC = () => {
   const ungroupedFavorites = favorites.filter((f) => !recipesInCollections.has(f.recipe_id));
 
   // Other collections (not "Cursos")
-  const otherCollections = collections.filter((c) => c.name !== 'Cursos');
+  const otherCollections = collections.filter((c) => c.name !== 'Cursos' && c.name !== 'Aulas');
 
   if (isLoading) {
     return (
@@ -171,7 +171,7 @@ const UserFavorites: React.FC = () => {
                   className="flex items-center gap-2 text-left"
                 >
                   <GraduationCap className="h-5 w-5 text-primary" />
-                  <span className="font-semibold text-foreground">Cursos</span>
+                  <span className="font-semibold text-foreground">Aulas</span>
                   <span className="text-sm text-muted-foreground">({cursosRecipes.length})</span>
                   {expandedLists.has(cursosCollection.id) ? (
                     <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -214,7 +214,6 @@ const UserFavorites: React.FC = () => {
                                     servings: (cr.recipe as any).servings,
                                   }}
                                   compact
-                                  hideTitle
                                 />
                               ) : null
                             )}
@@ -286,7 +285,6 @@ const UserFavorites: React.FC = () => {
                             servings: (cr.recipe as any).servings,
                           }}
                           compact
-                          hideTitle
                         />
                       ) : null
                     )}
@@ -323,7 +321,6 @@ const UserFavorites: React.FC = () => {
                         servings: fav.recipe.servings,
                       }}
                       compact
-                      hideTitle
                     />
                   ) : null
                 )}
