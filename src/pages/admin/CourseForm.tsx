@@ -65,6 +65,7 @@ const CourseForm: React.FC = () => {
     workload_hours: 0,
     certificate_enabled: false,
     certificate_bg_url: '',
+    certificate_text_color: '#FFFFFF',
   });
 
   const [modules, setModules] = useState<InlineModule[]>([]);
@@ -89,6 +90,7 @@ const CourseForm: React.FC = () => {
         workload_hours: (course as any).workload_hours ?? 0,
         certificate_enabled: (course as any).certificate_enabled ?? false,
         certificate_bg_url: (course as any).certificate_bg_url || '',
+        certificate_text_color: (course as any).certificate_text_color || '#FFFFFF',
       });
     }
   }, [course]);
@@ -201,6 +203,7 @@ const CourseForm: React.FC = () => {
         workload_hours: formData.workload_hours,
         certificate_enabled: formData.certificate_enabled,
         certificate_bg_url: formData.certificate_bg_url || null,
+        certificate_text_color: formData.certificate_text_color || '#FFFFFF',
       } as any;
 
       let courseId: string;
@@ -702,6 +705,7 @@ const CourseForm: React.FC = () => {
                 </div>
 
                 {formData.certificate_enabled && (
+                  <>
                   <div className="space-y-2">
                     <Label>Imagem de Fundo (3347×2447)</Label>
                     {formData.certificate_bg_url ? (
@@ -751,6 +755,33 @@ const CourseForm: React.FC = () => {
                       </label>
                     )}
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="certificate_text_color">Cor da Tipografia (Hex)</Label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="color"
+                        value={formData.certificate_text_color}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, certificate_text_color: e.target.value }))
+                        }
+                        className="h-10 w-10 cursor-pointer rounded border border-border bg-transparent p-0.5"
+                      />
+                      <Input
+                        id="certificate_text_color"
+                        value={formData.certificate_text_color}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, certificate_text_color: e.target.value }))
+                        }
+                        placeholder="#FFFFFF"
+                        className="max-w-[140px] font-mono"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Cor do nome e da data no certificado
+                    </p>
+                  </div>
+                  </>
                 )}
               </CardContent>
             </Card>

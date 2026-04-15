@@ -287,6 +287,7 @@ export type Database = {
         Row: {
           certificate_bg_url: string | null
           certificate_enabled: boolean
+          certificate_text_color: string | null
           cover_image_url: string | null
           created_at: string
           description: string | null
@@ -305,6 +306,7 @@ export type Database = {
         Insert: {
           certificate_bg_url?: string | null
           certificate_enabled?: boolean
+          certificate_text_color?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
@@ -323,6 +325,7 @@ export type Database = {
         Update: {
           certificate_bg_url?: string | null
           certificate_enabled?: boolean
+          certificate_text_color?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null

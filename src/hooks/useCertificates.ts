@@ -75,11 +75,13 @@ export const useGenerateCertificate = () => {
       referenceName,
       completedAt,
       certificateBgUrl,
+      textColor = '#FFFFFF',
     }: {
       referenceId: string;
       referenceName: string;
       completedAt?: string;
       certificateBgUrl: string;
+      textColor?: string;
     }) => {
       if (!user) throw new Error('Não autenticado');
 
@@ -116,7 +118,7 @@ export const useGenerateCertificate = () => {
       }
 
       // Generate PDF with background image
-      await generatePDF(cert, studentName, certificateBgUrl);
+      await generatePDF(cert, studentName, certificateBgUrl, textColor);
 
       return cert;
     },
@@ -134,7 +136,7 @@ export const useGenerateCertificate = () => {
   });
 };
 
-async function generatePDF(cert: Certificate, studentName: string, bgUrl: string) {
+async function generatePDF(cert: Certificate, studentName: string, bgUrl: string, textColor: string = '#FFFFFF') {
   // Background image is 3347x2447 → landscape ratio
   const imgWidth = 3347;
   const imgHeight = 2447;
@@ -162,11 +164,17 @@ async function generatePDF(cert: Certificate, studentName: string, bgUrl: string
 
   const centerX = pdfWidth / 2;
 
+  // Parse hex color
+  const h = textColor.replace('#', '');
+  const cr = parseInt(h.substring(0, 2), 16);
+  const cg = parseInt(h.substring(2, 4), 16);
+  const cb = parseInt(h.substring(4, 6), 16);
+
   // Student name
-  const nameY = pdfHeight * 0.515;
+  const nameY = pdfHeight * 0.505;
   doc.setFontSize(28);
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(255, 255, 255);
+  doc.setTextColor(cr, cg, cb);
   doc.text(studentName, centerX, nameY, { align: 'center' });
 
   // Date — centered above the "Data" line at bottom left
@@ -174,7 +182,7 @@ async function generatePDF(cert: Certificate, studentName: string, bgUrl: string
   const dateX = pdfWidth * 0.221;
   doc.setFontSize(14);
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(255, 255, 255);
+  doc.setTextColor(cr, cg, cb);
   doc.text(formatDatePtBr(cert.completed_at), dateX, dateY, { align: 'center' });
 
   doc.save(`Certificado - ${cert.reference_name}.pdf`);
