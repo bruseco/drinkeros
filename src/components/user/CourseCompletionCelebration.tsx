@@ -23,6 +23,7 @@ interface Props {
   courseName: string;
   certificateBgUrl: string;
   hasCertificate: boolean;
+  textColor?: string;
 }
 
 const GOLD_COLORS = [
@@ -59,6 +60,7 @@ const CourseCompletionCelebration: React.FC<Props> = ({
   courseName,
   certificateBgUrl,
   hasCertificate,
+  textColor,
 }) => {
   const [particles, setParticles] = useState<Particle[]>([]);
   const [visible, setVisible] = useState(false);
@@ -149,6 +151,7 @@ const CourseCompletionCelebration: React.FC<Props> = ({
               referenceId={courseId}
               referenceName={courseName}
               certificateBgUrl={certificateBgUrl}
+              textColor={textColor}
             />
           )}
         </div>
