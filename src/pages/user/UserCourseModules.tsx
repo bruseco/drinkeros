@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import defaultCover from '@/assets/default-cover.png';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useCourse, useCoursePackages } from '@/hooks/useCourses';
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/collapsible';
 import { Lock, ShoppingCart, ChevronDown, CheckCircle2, PlayCircle, Award } from 'lucide-react';
 import CertificateDownloadButton from '@/components/user/CertificateDownloadButton';
+import CourseCompletionCelebration from '@/components/user/CourseCompletionCelebration';
 
 const UserCourseModules: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -35,6 +36,21 @@ const UserCourseModules: React.FC = () => {
   });
 
   const courseHasCertificate = (course as any)?.certificate_enabled && (course as any)?.certificate_bg_url;
+
+  // Celebration popup logic - show once per course completion
+  const [showCelebration, setShowCelebration] = useState(false);
+  const celebrationShownRef = useRef(false);
+
+  useEffect(() => {
+    if (allModulesComplete && courseHasCertificate && !celebrationShownRef.current) {
+      const storageKey = `celebration_shown_${courseId}`;
+      if (!sessionStorage.getItem(storageKey)) {
+        sessionStorage.setItem(storageKey, '1');
+        celebrationShownRef.current = true;
+        setShowCelebration(true);
+      }
+    }
+  }, [allModulesComplete, courseHasCertificate, courseId]);
 
   const userModuleIds = new Set(sections.map(s => s.package.id));
   const hasAccess = !isLockedParam && coursePackages.some(cp => cp.package && userModuleIds.has(cp.package.id));
@@ -74,6 +90,17 @@ const UserCourseModules: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 pb-24 space-y-4">
+      {/* Celebration popup */}
+      {courseHasCertificate && (
+        <CourseCompletionCelebration
+          open={showCelebration}
+          onClose={() => setShowCelebration(false)}
+          courseId={course.id}
+          courseName={course.name}
+          certificateBgUrl={(course as any).certificate_bg_url}
+        />
+      )}
+
       {/* Checkout CTA for locked courses */}
       {isLocked && checkoutUrl && (
         <div className="rounded-2xl bg-gradient-to-r from-primary to-accent p-4 flex items-center justify-between gap-4 shadow-lg">
@@ -117,6 +144,26 @@ const UserCourseModules: React.FC = () => {
           {coursePackages.length} {coursePackages.length === 1 ? 'módulo' : 'módulos'}
         </p>
       </div>
+
+      {/* Certificate Banner - ABOVE modules */}
+      {allModulesComplete && courseHasCertificate && (
+        <div className="rounded-2xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 p-5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
+              <Award className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">Certificado disponível! 🎉</p>
+              <p className="text-sm text-muted-foreground">Você concluiu todas as aulas deste curso</p>
+            </div>
+          </div>
+          <CertificateDownloadButton
+            referenceId={course.id}
+            referenceName={course.name}
+            certificateBgUrl={(course as any).certificate_bg_url}
+          />
+        </div>
+      )}
 
       {/* Modules as collapsible dropdowns */}
       <div className="space-y-2">
@@ -197,26 +244,6 @@ const UserCourseModules: React.FC = () => {
           );
         })}
       </div>
-
-      {/* Certificate Banner */}
-      {allModulesComplete && courseHasCertificate && (
-        <div className="rounded-2xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 p-5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
-              <Award className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <p className="font-semibold text-foreground">Certificado disponível! 🎉</p>
-              <p className="text-sm text-muted-foreground">Você concluiu todas as aulas deste curso</p>
-            </div>
-          </div>
-          <CertificateDownloadButton
-            referenceId={course!.id}
-            referenceName={course!.name}
-            certificateBgUrl={(course as any).certificate_bg_url}
-          />
-        </div>
-      )}
     </div>
   );
 };
