@@ -783,6 +783,23 @@ const CourseForm: React.FC = () => {
                       Cor do nome e da data no certificado
                     </p>
                   </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setLayoutDialogOpen(true)}
+                  >
+                    <Settings2 className="mr-2 h-4 w-4" />
+                    Ajustar Posição Global (Nome e Data)
+                  </Button>
+
+                  <CertificateLayoutDialog
+                    open={layoutDialogOpen}
+                    onOpenChange={setLayoutDialogOpen}
+                    bgUrl={formData.certificate_bg_url}
+                    textColor={formData.certificate_text_color}
+                  />
                   </>
                 )}
               </CardContent>
