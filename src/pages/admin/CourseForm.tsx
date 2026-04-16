@@ -51,6 +51,7 @@ const CourseForm: React.FC = () => {
   const { upload, isUploading } = useImageUpload('package-covers', { skipOptimize: true });
   const { upload: uploadCertBg, isUploading: isUploadingCertBg } = useImageUpload('package-covers', { skipOptimize: true });
   const [deleteLessonId, setDeleteLessonId] = useState<string | null>(null);
+  const [layoutDialogOpen, setLayoutDialogOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
