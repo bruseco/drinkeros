@@ -1,45 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle } from 'lucide-react';
+import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, ChevronRight } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { cn } from '@/lib/utils';
 
-const UserProfile: React.FC = () => {
-  const { user, profile, signOut } = useAuth();
-
+const ProfileDataSection: React.FC = () => {
+  const { user, profile } = useAuth();
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [cpf, setCpf] = useState('');
   const [cpfLocked, setCpfLocked] = useState(false);
-  const [savingProfile, setSavingProfile] = useState(false);
-
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [savingPassword, setSavingPassword] = useState(false);
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (profile) {
-      setFullName(profile.full_name || '');
-    }
+    if (profile) setFullName(profile.full_name || '');
   }, [profile]);
 
   useEffect(() => {
-    const fetchProfileExtra = async () => {
+    const fetchExtra = async () => {
       if (!user) return;
-      const { data } = await supabase
-        .from('profiles')
-        .select('phone, cpf')
-        .eq('user_id', user.id)
-        .single();
+      const { data } = await supabase.from('profiles').select('phone, cpf').eq('user_id', user.id).single();
       if (data?.phone) setPhone(data.phone);
       if (data?.cpf) {
         const d = data.cpf;
@@ -47,261 +33,193 @@ const UserProfile: React.FC = () => {
         setCpfLocked(true);
       }
     };
-    fetchProfileExtra();
+    fetchExtra();
   }, [user]);
 
-  const handleSaveProfile = async () => {
+  const handleSave = async () => {
     if (!user) return;
-    setSavingProfile(true);
+    setSaving(true);
     try {
       const updateData: Record<string, any> = { full_name: fullName.trim(), phone: phone.trim() || null };
-      // Only save CPF if not already locked
-      if (!cpfLocked && cpf.replace(/\D/g, '').length === 11) {
-        updateData.cpf = cpf.replace(/\D/g, '');
-      }
-      const { error } = await supabase
-        .from('profiles')
-        .update(updateData)
-        .eq('user_id', user.id);
-
+      if (!cpfLocked && cpf.replace(/\D/g, '').length === 11) updateData.cpf = cpf.replace(/\D/g, '');
+      const { error } = await supabase.from('profiles').update(updateData).eq('user_id', user.id);
       if (error) throw error;
       toast.success('Perfil atualizado com sucesso!');
     } catch (err: any) {
       toast.error('Erro ao salvar perfil: ' + err.message);
     } finally {
-      setSavingProfile(false);
-    }
-  };
-
-  const handleChangePassword = async () => {
-    if (!newPassword || !confirmPassword) {
-      toast.error('Preencha todos os campos de senha.');
-      return;
-    }
-    if (newPassword.length < 6) {
-      toast.error('A nova senha deve ter pelo menos 6 caracteres.');
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast.error('As senhas não coincidem.');
-      return;
-    }
-    if (!currentPassword) {
-      toast.error('Informe a senha atual.');
-      return;
-    }
-
-    setSavingPassword(true);
-    try {
-      // Verify current password by re-signing in
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user?.email || '',
-        password: currentPassword,
-      });
-
-      if (signInError) {
-        toast.error('Senha atual incorreta.');
-        return;
-      }
-
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
-
-      toast.success('Senha alterada com sucesso!');
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (err: any) {
-      toast.error('Erro ao alterar senha: ' + err.message);
-    } finally {
-      setSavingPassword(false);
+      setSaving(false);
     }
   };
 
   return (
-    <div className="container mx-auto max-w-2xl py-6 px-4 pb-24 md:pb-6 space-y-6">
-      <div>
+    <div className="space-y-4 p-4">
+      <div className="space-y-2">
+        <Label htmlFor="fullName">Nome completo</Label>
+        <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome completo" />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="phone">Telefone</Label>
+        <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(00) 00000-0000" />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="cpf">CPF</Label>
+        <Input
+          id="cpf"
+          value={cpf}
+          onChange={(e) => {
+            if (cpfLocked) return;
+            const digits = e.target.value.replace(/\D/g, '').slice(0, 11);
+            let formatted = digits;
+            if (digits.length > 3) formatted = `${digits.slice(0,3)}.${digits.slice(3)}`;
+            if (digits.length > 6) formatted = `${digits.slice(0,3)}.${digits.slice(3,6)}.${digits.slice(6)}`;
+            if (digits.length > 9) formatted = `${digits.slice(0,3)}.${digits.slice(3,6)}.${digits.slice(6,9)}-${digits.slice(9)}`;
+            setCpf(formatted);
+          }}
+          placeholder="000.000.000-00"
+          maxLength={14}
+          disabled={cpfLocked}
+          className={cpfLocked ? 'opacity-60' : ''}
+        />
+        {cpfLocked && <p className="text-xs text-muted-foreground">O CPF não pode ser alterado após o cadastro.</p>}
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="email">E-mail</Label>
+        <Input id="email" value={user?.email || ''} disabled className="opacity-60" />
+        <p className="text-xs text-muted-foreground">O e-mail está vinculado ao seu login e não pode ser alterado.</p>
+      </div>
+      <Button onClick={handleSave} disabled={saving} className="w-full">
+        <Save className="mr-2 h-4 w-4" />
+        {saving ? 'Salvando...' : 'Salvar Dados'}
+      </Button>
+    </div>
+  );
+};
+
+const ChangePasswordSection: React.FC = () => {
+  const { user } = useAuth();
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleChange = async () => {
+    if (!newPassword || !confirmPassword) { toast.error('Preencha todos os campos de senha.'); return; }
+    if (newPassword.length < 6) { toast.error('A nova senha deve ter pelo menos 6 caracteres.'); return; }
+    if (newPassword !== confirmPassword) { toast.error('As senhas não coincidem.'); return; }
+    if (!currentPassword) { toast.error('Informe a senha atual.'); return; }
+
+    setSaving(true);
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email: user?.email || '', password: currentPassword });
+      if (signInError) { toast.error('Senha atual incorreta.'); return; }
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      toast.success('Senha alterada com sucesso!');
+      setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
+    } catch (err: any) {
+      toast.error('Erro ao alterar senha: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const PasswordInput = ({ id, value, onChange, show, toggleShow, placeholder }: any) => (
+    <div className="relative">
+      <Input id={id} type={show ? 'text' : 'password'} value={value} onChange={onChange} placeholder={placeholder} />
+      <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3" onClick={toggleShow}>
+        {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      </Button>
+    </div>
+  );
+
+  return (
+    <div className="space-y-4 p-4">
+      <div className="space-y-2">
+        <Label>Senha atual</Label>
+        <PasswordInput id="cur" value={currentPassword} onChange={(e: any) => setCurrentPassword(e.target.value)} show={showCurrent} toggleShow={() => setShowCurrent(!showCurrent)} placeholder="••••••••" />
+      </div>
+      <Separator />
+      <div className="space-y-2">
+        <Label>Nova senha</Label>
+        <PasswordInput id="new" value={newPassword} onChange={(e: any) => setNewPassword(e.target.value)} show={showNew} toggleShow={() => setShowNew(!showNew)} placeholder="Mínimo 6 caracteres" />
+      </div>
+      <div className="space-y-2">
+        <Label>Confirmar nova senha</Label>
+        <PasswordInput id="conf" value={confirmPassword} onChange={(e: any) => setConfirmPassword(e.target.value)} show={showConfirm} toggleShow={() => setShowConfirm(!showConfirm)} placeholder="Repita a nova senha" />
+      </div>
+      <Button onClick={handleChange} disabled={saving} className="w-full">
+        <Lock className="mr-2 h-4 w-4" />
+        {saving ? 'Alterando...' : 'Alterar Senha'}
+      </Button>
+    </div>
+  );
+};
+
+const UserProfile: React.FC = () => {
+  const { signOut } = useAuth();
+  const [openSection, setOpenSection] = useState<string | null>(null);
+
+  const toggle = (key: string) => setOpenSection(prev => prev === key ? null : key);
+
+  return (
+    <div className="container mx-auto max-w-2xl py-6 px-4 pb-24 md:pb-6 space-y-2">
+      <div className="mb-4">
         <h1 className="text-2xl font-bold">Meu Perfil</h1>
         <p className="text-muted-foreground">Gerencie seus dados pessoais e senha.</p>
       </div>
 
-      {/* Profile Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
+      {/* Dados Pessoais - collapsible */}
+      <Collapsible open={openSection === 'dados'} onOpenChange={() => toggle('dados')}>
+        <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 h-14 hover:bg-accent/50 transition-colors">
+          <span className="flex items-center gap-3 text-sm font-medium">
+            <User className="h-5 w-5 text-muted-foreground" />
             Dados Pessoais
-          </CardTitle>
-          <CardDescription>Atualize seu nome e telefone.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="fullName">Nome completo</Label>
-            <Input
-              id="fullName"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Seu nome completo"
-            />
-          </div>
+          </span>
+          <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-200", openSection === 'dados' && "rotate-180")} />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="rounded-b-lg border border-t-0 border-border bg-card overflow-hidden">
+          <ProfileDataSection />
+        </CollapsibleContent>
+      </Collapsible>
 
-          <div className="space-y-2">
-            <Label htmlFor="phone">Telefone</Label>
-            <Input
-              id="phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="(00) 00000-0000"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="cpf">CPF</Label>
-            <Input
-              id="cpf"
-              value={cpf}
-              onChange={(e) => {
-                if (cpfLocked) return;
-                const digits = e.target.value.replace(/\D/g, '').slice(0, 11);
-                let formatted = digits;
-                if (digits.length > 3) formatted = `${digits.slice(0,3)}.${digits.slice(3)}`;
-                if (digits.length > 6) formatted = `${digits.slice(0,3)}.${digits.slice(3,6)}.${digits.slice(6)}`;
-                if (digits.length > 9) formatted = `${digits.slice(0,3)}.${digits.slice(3,6)}.${digits.slice(6,9)}-${digits.slice(9)}`;
-                setCpf(formatted);
-              }}
-              placeholder="000.000.000-00"
-              maxLength={14}
-              disabled={cpfLocked}
-              className={cpfLocked ? 'opacity-60' : ''}
-            />
-            {cpfLocked && (
-              <p className="text-xs text-muted-foreground">O CPF não pode ser alterado após o cadastro.</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">E-mail</Label>
-            <Input
-              id="email"
-              value={user?.email || ''}
-              disabled
-              className="opacity-60"
-            />
-            <p className="text-xs text-muted-foreground">O e-mail está vinculado ao seu login e não pode ser alterado.</p>
-          </div>
-
-          <Button onClick={handleSaveProfile} disabled={savingProfile}>
-            <Save className="mr-2 h-4 w-4" />
-            {savingProfile ? 'Salvando...' : 'Salvar Dados'}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Change Password */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Lock className="h-5 w-5" />
+      {/* Alterar Senha - collapsible */}
+      <Collapsible open={openSection === 'senha'} onOpenChange={() => toggle('senha')}>
+        <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 h-14 hover:bg-accent/50 transition-colors">
+          <span className="flex items-center gap-3 text-sm font-medium">
+            <Lock className="h-5 w-5 text-muted-foreground" />
             Alterar Senha
-          </CardTitle>
-          <CardDescription>Informe a senha atual e defina uma nova senha.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="currentPassword">Senha atual</Label>
-            <div className="relative">
-              <Input
-                id="currentPassword"
-                type={showCurrentPassword ? 'text' : 'password'}
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="••••••••"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-0 top-0 h-full px-3"
-                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-              >
-                {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
+          </span>
+          <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-200", openSection === 'senha' && "rotate-180")} />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="rounded-b-lg border border-t-0 border-border bg-card overflow-hidden">
+          <ChangePasswordSection />
+        </CollapsibleContent>
+      </Collapsible>
 
-          <Separator />
-
-          <div className="space-y-2">
-            <Label htmlFor="newPassword">Nova senha</Label>
-            <div className="relative">
-              <Input
-                id="newPassword"
-                type={showNewPassword ? 'text' : 'password'}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-0 top-0 h-full px-3"
-                onClick={() => setShowNewPassword(!showNewPassword)}
-              >
-                {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirmar nova senha</Label>
-            <div className="relative">
-              <Input
-                id="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Repita a nova senha"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-0 top-0 h-full px-3"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
-
-          <Button onClick={handleChangePassword} disabled={savingPassword}>
-            <Lock className="mr-2 h-4 w-4" />
-            {savingPassword ? 'Alterando...' : 'Alterar Senha'}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Support & Logout */}
-      <div className="space-y-3">
-        <Button
-          variant="outline"
-          className="w-full justify-start"
-          onClick={() => window.open('https://wa.me/5548991601025', '_blank')}
-        >
-          <MessageCircle className="mr-2 h-4 w-4" />
+      {/* Suporte WhatsApp - action button */}
+      <button
+        onClick={() => window.open('https://wa.me/5548991601025', '_blank')}
+        className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 h-14 hover:bg-accent/50 transition-colors"
+      >
+        <span className="flex items-center gap-3 text-sm font-medium">
+          <MessageCircle className="h-5 w-5 text-muted-foreground" />
           Suporte via WhatsApp
-        </Button>
+        </span>
+        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+      </button>
 
-        <Button
-          variant="destructive"
-          className="w-full justify-start"
-          onClick={signOut}
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          Sair da Conta
-        </Button>
-      </div>
+      {/* Sair */}
+      <button
+        onClick={signOut}
+        className="flex w-full items-center justify-center gap-2 rounded-lg border border-destructive/50 bg-card px-4 h-14 text-destructive hover:bg-destructive/10 transition-colors text-sm font-medium"
+      >
+        <LogOut className="h-5 w-5" />
+        Sair da Conta
+      </button>
     </div>
   );
 };
