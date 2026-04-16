@@ -11,7 +11,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Loader2, Upload, X, GraduationCap, ChevronDown, ChevronRight, Plus, Pencil, Play, Trash2, GripVertical } from 'lucide-react';
+import { ArrowLeft, Loader2, Upload, X, GraduationCap, ChevronDown, ChevronRight, Plus, Pencil, Play, Trash2, GripVertical, Settings2 } from 'lucide-react';
+import CertificateLayoutDialog from '@/components/admin/CertificateLayoutDialog';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -50,6 +51,7 @@ const CourseForm: React.FC = () => {
   const { upload, isUploading } = useImageUpload('package-covers', { skipOptimize: true });
   const { upload: uploadCertBg, isUploading: isUploadingCertBg } = useImageUpload('package-covers', { skipOptimize: true });
   const [deleteLessonId, setDeleteLessonId] = useState<string | null>(null);
+  const [layoutDialogOpen, setLayoutDialogOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -781,6 +783,23 @@ const CourseForm: React.FC = () => {
                       Cor do nome e da data no certificado
                     </p>
                   </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setLayoutDialogOpen(true)}
+                  >
+                    <Settings2 className="mr-2 h-4 w-4" />
+                    Ajustar Posição Global (Nome e Data)
+                  </Button>
+
+                  <CertificateLayoutDialog
+                    open={layoutDialogOpen}
+                    onOpenChange={setLayoutDialogOpen}
+                    bgUrl={formData.certificate_bg_url}
+                    textColor={formData.certificate_text_color}
+                  />
                   </>
                 )}
               </CardContent>

@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      certificate_layout_settings: {
+        Row: {
+          date_font_size: number
+          date_x: number
+          date_y: number
+          id: string
+          name_font_size: number
+          name_x: number
+          name_y: number
+          updated_at: string
+        }
+        Insert: {
+          date_font_size?: number
+          date_x?: number
+          date_y?: number
+          id?: string
+          name_font_size?: number
+          name_x?: number
+          name_y?: number
+          updated_at?: string
+        }
+        Update: {
+          date_font_size?: number
+          date_x?: number
+          date_y?: number
+          id?: string
+          name_font_size?: number
+          name_x?: number
+          name_y?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       certificates: {
         Row: {
           certificate_type: string
