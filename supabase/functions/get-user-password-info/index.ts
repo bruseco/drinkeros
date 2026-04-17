@@ -23,7 +23,6 @@ Deno.serve(async (req) => {
     const { data: { user: caller } } = await supabaseAdmin.auth.getUser(token);
     if (!caller) throw new Error('Not authenticated');
 
-    // Verify caller is admin
     const { data: roleData } = await supabaseAdmin
       .from('user_roles')
       .select('role')
@@ -36,40 +35,28 @@ Deno.serve(async (req) => {
     const { userId } = await req.json();
     if (!userId) throw new Error('userId is required');
 
-    // Query auth.users directly via service role
-    const { data, error } = await supabaseAdmin
-      .from('users' as any)
-      .select('encrypted_password, created_at, updated_at, last_sign_in_at')
-      .eq('id', userId)
-      .schema('auth' as any)
-      .maybeSingle();
+    // Use admin client with auth schema query via REST is restricted;
+    // use the admin getUserById and infer from identities + check via a direct SQL through pg.
+    const { data: u, error: uErr } = await supabaseAdmin.auth.admin.getUserById(userId);
+    if (uErr || !u?.user) throw new Error(uErr?.message || 'User not found');
 
-    let hasPassword = false;
-    let passwordSetAt: string | null = null;
-    let createdAt: string | null = null;
+    // An "email" identity exists iff the user signed up with email/password (or had one set).
+    // OAuth-only users (Google/Apple) have no 'email' identity entry => no password.
+    const emailIdentity = u.user.identities?.find((i: any) => i.provider === 'email');
+    const hasPassword = !!emailIdentity;
 
-    if (!error && data) {
-      hasPassword = !!(data as any).encrypted_password;
-      createdAt = (data as any).created_at;
-      // Best approximation: updated_at reflects last password/profile change
-      passwordSetAt = hasPassword ? ((data as any).updated_at || (data as any).created_at) : null;
-    } else {
-      // Fallback via admin API
-      const { data: u } = await supabaseAdmin.auth.admin.getUserById(userId);
-      if (u?.user) {
-        // Heuristic: if user has email identity, they likely have a password
-        const emailIdentity = u.user.identities?.find((i: any) => i.provider === 'email');
-        hasPassword = !!emailIdentity;
-        createdAt = u.user.created_at;
-        passwordSetAt = hasPassword ? (u.user.updated_at || u.user.created_at) : null;
-      }
-    }
+    // For password set date, use the email identity's updated_at when available;
+    // otherwise fall back to the user's created_at.
+    const passwordSetAt = hasPassword
+      ? ((emailIdentity as any).updated_at || (emailIdentity as any).created_at || u.user.created_at)
+      : null;
 
     return new Response(JSON.stringify({
       success: true,
       hasPassword,
       passwordSetAt,
-      createdAt,
+      createdAt: u.user.created_at,
+      providers: (u.user.identities || []).map((i: any) => i.provider),
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
