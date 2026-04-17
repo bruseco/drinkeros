@@ -1,5 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useAdminUsers, useUpdateUserRole, useUpdateUserAccess, useCreateUser, useResendWelcomeEmail, useResetUserPassword, useUpdateUserProfile, useDeleteUser, UserWithRole } from '@/hooks/useAdminUsers';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { KeyRound } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useCourses } from '@/hooks/useCourses';
 import { useEbooks } from '@/hooks/useEbooks';
@@ -149,6 +152,19 @@ const AdminUsers: React.FC = () => {
   const [editName, setEditName] = useState('');
   const [editEmail, setEditEmail] = useState('');
   const [editPhone, setEditPhone] = useState('');
+
+  const { data: passwordInfo, isLoading: passwordInfoLoading } = useQuery({
+    queryKey: ['user-password-info', editUser?.user_id],
+    enabled: !!editUser?.user_id,
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('get-user-password-info', {
+        body: { userId: editUser!.user_id },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Erro ao buscar informações');
+      return data as { hasPassword: boolean; passwordSetAt: string | null; createdAt: string | null; providers: string[] };
+    },
+  });
 
   const [deleteUser, setDeleteUser] = useState<UserWithRole | null>(null);
 
@@ -686,6 +702,37 @@ const AdminUsers: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            <div className="rounded-md border border-border bg-muted/40 p-3 text-sm">
+              {passwordInfoLoading ? (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Verificando senha...
+                </div>
+              ) : passwordInfo?.hasPassword ? (
+                <div className="flex items-start gap-2">
+                  <KeyRound className="h-4 w-4 mt-0.5 text-primary" />
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground">Senha definida</p>
+                    {passwordInfo.passwordSetAt && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Criada em {format(new Date(passwordInfo.passwordSetAt), 'dd/MM/yyyy HH:mm')}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start gap-2">
+                  <Key className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground">Sem senha definida</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      O usuário entra apenas via {(passwordInfo?.providers || []).filter((p) => p !== 'email').join(', ') || 'login social'}.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="editName">Nome completo</Label>
               <Input
