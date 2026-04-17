@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { useAdminUsers, useUpdateUserRole, useUpdateUserAccess, useCreateUser, useResendWelcomeEmail, useResetUserPassword, useUpdateUserProfile, UserWithRole } from '@/hooks/useAdminUsers';
+import { useAdminUsers, useUpdateUserRole, useUpdateUserAccess, useCreateUser, useResendWelcomeEmail, useResetUserPassword, useUpdateUserProfile, useDeleteUser, UserWithRole } from '@/hooks/useAdminUsers';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useCourses } from '@/hooks/useCourses';
 import { useEbooks } from '@/hooks/useEbooks';
 import { useCombos } from '@/hooks/useCombos';
@@ -27,7 +28,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Users, Shield, Package, Loader2, Edit, Plus, Mail, MoreHorizontal, Send, ChevronLeft, ChevronRight, Key, Pencil, Crown } from 'lucide-react';
+import { Search, Users, Shield, Package, Loader2, Edit, Plus, Mail, MoreHorizontal, Send, ChevronLeft, ChevronRight, Key, Pencil, Crown, Trash2 } from 'lucide-react';
 import { Database } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
 
@@ -149,6 +150,8 @@ const AdminUsers: React.FC = () => {
   const [editEmail, setEditEmail] = useState('');
   const [editPhone, setEditPhone] = useState('');
 
+  const [deleteUser, setDeleteUser] = useState<UserWithRole | null>(null);
+
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserName, setNewUserName] = useState('');
@@ -180,6 +183,7 @@ const AdminUsers: React.FC = () => {
   const resendEmail = useResendWelcomeEmail();
   const resetPassword = useResetUserPassword();
   const updateProfile = useUpdateUserProfile();
+  const deleteUserMutation = useDeleteUser();
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
 
@@ -482,6 +486,15 @@ const AdminUsers: React.FC = () => {
                               <Key className="h-4 w-4 mr-2" />
                               Redefinir senha
                             </DropdownMenuItem>
+                            {!isCurrentUser && (
+                              <DropdownMenuItem
+                                onClick={() => setDeleteUser(user)}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Deletar usuário
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -726,6 +739,34 @@ const AdminUsers: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* Delete User Confirmation */}
+      <AlertDialog open={!!deleteUser} onOpenChange={(open) => { if (!open) setDeleteUser(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deletar usuário?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação é permanente e irá remover <strong>{deleteUser?.full_name || deleteUser?.email}</strong> e todos os seus dados (acessos, favoritos, progresso). Não é possível desfazer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteUserMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (!deleteUser) return;
+                deleteUserMutation.mutate(deleteUser.user_id, {
+                  onSuccess: () => setDeleteUser(null),
+                });
+              }}
+              disabled={deleteUserMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteUserMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Deletar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
