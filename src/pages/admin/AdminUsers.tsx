@@ -153,6 +153,19 @@ const AdminUsers: React.FC = () => {
   const [editEmail, setEditEmail] = useState('');
   const [editPhone, setEditPhone] = useState('');
 
+  const { data: passwordInfo, isLoading: passwordInfoLoading } = useQuery({
+    queryKey: ['user-password-info', editUser?.user_id],
+    enabled: !!editUser?.user_id,
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('get-user-password-info', {
+        body: { userId: editUser!.user_id },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Erro ao buscar informações');
+      return data as { hasPassword: boolean; passwordSetAt: string | null; createdAt: string | null; providers: string[] };
+    },
+  });
+
   const [deleteUser, setDeleteUser] = useState<UserWithRole | null>(null);
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
