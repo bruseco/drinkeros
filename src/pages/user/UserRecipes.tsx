@@ -221,7 +221,7 @@ const UserRecipes: React.FC = () => {
           <>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
               {recipes.map((recipe) => (
-                <Link key={recipe.id} to={`/app/receita/${recipe.id}`}>
+                <Link key={recipe.id} to={`/app/receita/${(recipe as any).slug || recipe.id}`}>
                   <div className="group overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                     {recipe.cover_image_url ? (
                       <div className="aspect-video overflow-hidden rounded-2xl">
