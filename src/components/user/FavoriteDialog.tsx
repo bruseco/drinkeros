@@ -80,8 +80,8 @@ const FavoriteDialog: React.FC<FavoriteDialogProps> = ({
             <span>Apenas nos favoritos</span>
           </Button>
 
-          {/* Existing collections */}
-          {collections.map((col) => (
+          {/* Existing collections (exclude auto-managed "Aulas Favoritas") */}
+          {collections.filter((col) => col.name !== 'Aulas Favoritas' && col.name !== 'Aulas' && col.name !== 'Cursos').map((col) => (
             <Button
               key={col.id}
               variant="outline"
