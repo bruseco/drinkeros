@@ -68,6 +68,33 @@ export const useResendWelcomeEmail = () => {
   });
 };
 
+export const useDeleteUser = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const { data: result, error } = await supabase.functions.invoke('delete-auth-user', {
+        body: { userId },
+      });
+      if (error) throw error;
+      if (!result?.success) throw new Error(result?.error || 'Erro ao deletar usuário');
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      toast({ title: 'Usuário deletado com sucesso!' });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro ao deletar usuário',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+};
+
 export const useResetUserPassword = () => {
   const { toast } = useToast();
 
