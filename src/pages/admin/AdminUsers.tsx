@@ -150,6 +150,8 @@ const AdminUsers: React.FC = () => {
   const [editEmail, setEditEmail] = useState('');
   const [editPhone, setEditPhone] = useState('');
 
+  const [deleteUser, setDeleteUser] = useState<UserWithRole | null>(null);
+
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserName, setNewUserName] = useState('');
