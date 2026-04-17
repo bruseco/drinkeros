@@ -58,9 +58,9 @@ setCatchHandler(async ({ request }) => {
   }
 });
 
-// Cache Supabase API calls (network-first)
+// Cache Supabase API calls (network-first) — but NEVER intercept auth endpoints
 registerRoute(
-  ({ url }) => url.hostname.endsWith('.supabase.co'),
+  ({ url }) => url.hostname.endsWith('.supabase.co') && !url.pathname.startsWith('/auth/v1'),
   new NetworkFirst({
     cacheName: 'supabase-cache',
     plugins: [
