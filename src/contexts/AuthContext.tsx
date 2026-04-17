@@ -130,8 +130,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        const msg = error.message === 'Failed to fetch'
+          ? 'Não foi possível conectar. Verifique sua conexão com a internet e tente novamente.'
+          : error.message;
+        return { error: new Error(msg) };
+      }
+      return { error: null };
+    } catch (err: any) {
+      const raw = err?.message || '';
+      const msg = raw === 'Failed to fetch' || raw.toLowerCase().includes('network')
+        ? 'Não foi possível conectar. Verifique sua conexão com a internet e tente novamente.'
+        : (raw || 'Erro inesperado ao entrar. Tente novamente.');
+      return { error: new Error(msg) };
+    }
   };
 
   const signOut = async () => {

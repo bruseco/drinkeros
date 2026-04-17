@@ -47,7 +47,12 @@ const Login: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    const { error } = await signIn(email, password);
+    let { error } = await signIn(email, password);
+
+    if (error && /conectar|network|failed to fetch/i.test(error.message)) {
+      await new Promise((r) => setTimeout(r, 1500));
+      ({ error } = await signIn(email, password));
+    }
 
     if (error) {
       toast({
