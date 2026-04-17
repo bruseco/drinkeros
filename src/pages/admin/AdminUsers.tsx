@@ -183,6 +183,7 @@ const AdminUsers: React.FC = () => {
   const resendEmail = useResendWelcomeEmail();
   const resetPassword = useResetUserPassword();
   const updateProfile = useUpdateUserProfile();
+  const deleteUserMutation = useDeleteUser();
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
 
