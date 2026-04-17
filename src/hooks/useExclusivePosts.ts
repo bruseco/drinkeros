@@ -173,20 +173,23 @@ export const useExclusivePostsPaginated = ({
   });
 };
 
-export const useExclusivePost = (id: string) => {
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export const useExclusivePost = (idOrSlug: string) => {
   return useQuery({
-    queryKey: ['exclusive-posts', id],
+    queryKey: ['exclusive-posts', idOrSlug],
     queryFn: async () => {
+      const isUuid = UUID_REGEX.test(idOrSlug);
       const { data, error } = await supabase
         .from('exclusive_posts')
         .select('*')
-        .eq('id', id)
-        .single();
+        .eq(isUuid ? 'id' : 'slug', idOrSlug)
+        .maybeSingle();
 
       if (error) throw error;
       return data as ExclusivePost;
     },
-    enabled: !!id,
+    enabled: !!idOrSlug,
   });
 };
 
