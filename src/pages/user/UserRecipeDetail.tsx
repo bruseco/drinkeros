@@ -18,8 +18,8 @@ import {
 } from '@/components/ui/dialog';
 
 const UserRecipeDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const { data: recipe, isLoading } = useExclusivePost(id || '');
+  const { id: idOrSlug } = useParams<{ id: string }>();
+  const { data: recipe, isLoading } = useExclusivePost(idOrSlug || '');
   const { data: hasAccess, isLoading: accessLoading } = useHasExclusiveAccess('receitas');
   const { data: favorites = [] } = useFavorites();
   const toggleFavorite = useToggleFavorite();
@@ -27,7 +27,8 @@ const UserRecipeDetail: React.FC = () => {
   const navigate = useNavigate();
   const [showFavoriteDialog, setShowFavoriteDialog] = useState(false);
 
-  const isFavorite = favorites.some((f) => f.recipe_id === id);
+  const recipeId = recipe?.id;
+  const isFavorite = favorites.some((f) => f.recipe_id === recipeId);
 
   const getYouTubeEmbedUrl = (url: string) => {
     try {
