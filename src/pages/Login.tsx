@@ -208,46 +208,6 @@ const Login: React.FC = () => {
             </div>
           </div>
 
-          {/* Magic Link */}
-          {magicLinkSent ? (
-            <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-center space-y-2">
-              <Mail className="mx-auto h-8 w-8 text-primary" />
-              <p className="text-sm font-medium">Link enviado para {magicLinkEmail}</p>
-              <p className="text-xs text-muted-foreground">Verifique sua caixa de entrada e clique no link para entrar.</p>
-              <Button variant="link" size="sm" onClick={() => setMagicLinkSent(false)}>
-                Enviar novamente
-              </Button>
-            </div>
-          ) : (
-            <form onSubmit={handleMagicLink} className="space-y-2">
-              <Label htmlFor="magic-email">Entrar sem senha</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="magic-email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={magicLinkEmail}
-                  onChange={(e) => setMagicLinkEmail(e.target.value)}
-                  required
-                />
-                <Button type="submit" variant="secondary" disabled={isMagicLink} className="shrink-0">
-                  {isMagicLink ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">Receba um link de acesso no seu e-mail.</p>
-            </form>
-          )}
-
-          {/* Separator */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">ou entre com senha</span>
-            </div>
-          </div>
-
           {/* Password Login */}
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
