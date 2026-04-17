@@ -739,6 +739,34 @@ const AdminUsers: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* Delete User Confirmation */}
+      <AlertDialog open={!!deleteUser} onOpenChange={(open) => { if (!open) setDeleteUser(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deletar usuário?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação é permanente e irá remover <strong>{deleteUser?.full_name || deleteUser?.email}</strong> e todos os seus dados (acessos, favoritos, progresso). Não é possível desfazer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteUserMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (!deleteUser) return;
+                deleteUserMutation.mutate(deleteUser.user_id, {
+                  onSuccess: () => setDeleteUser(null),
+                });
+              }}
+              disabled={deleteUserMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteUserMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Deletar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
