@@ -21,13 +21,14 @@ import {
 
 const UserFavorites: React.FC = () => {
   const { data: favorites = [], isLoading: loadingFavs } = useFavorites();
-  const { data: collections = [], isLoading: loadingCols } = useCollections();
-  const { data: collectionRecipes = [], isLoading: loadingCR } = useCollectionRecipes();
+  const { data: collections = [] } = useCollections();
+  const { data: collectionRecipes = [] } = useCollectionRecipes();
   const deleteCollection = useDeleteCollection();
   const [expandedLists, setExpandedLists] = useState<Set<string>>(new Set());
   const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
 
-  const isLoading = loadingFavs || loadingCols || loadingCR;
+  // Only block on favorites — collections render progressively as they arrive
+  const isLoading = loadingFavs;
 
   // Find the "Cursos" collection
   const cursosCollection = collections.find((c) => c.name === 'Aulas Favoritas' || c.name === 'Aulas' || c.name === 'Cursos');
@@ -84,6 +85,7 @@ const UserFavorites: React.FC = () => {
       return result;
     },
     enabled: cursosRecipeIds.length > 0,
+    staleTime: 5 * 60 * 1000,
   });
 
   const toggleExpand = (id: string) => {

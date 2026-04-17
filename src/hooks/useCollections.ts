@@ -31,26 +31,48 @@ export const useCollectionRecipes = () => {
     queryKey: ['collection-recipes', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      // First check if user has any collections to avoid unnecessary join query
+
+      // Fetch user's collection ids first (RLS-friendly, fast)
       const { data: cols } = await supabase
         .from('collections')
         .select('id')
-        .eq('user_id', user.id)
-        .limit(1);
-      
+        .eq('user_id', user.id);
+
       if (!cols || cols.length === 0) return [];
 
-      const { data, error } = await supabase
+      const collectionIds = cols.map((c) => c.id);
+
+      const { data: crs, error } = await supabase
         .from('collection_recipes')
-        .select(`
-          id,
-          collection_id,
-          recipe_id,
-          recipe:recipes(id, name, image_url, servings)
-        `)
+        .select('id, collection_id, recipe_id, created_at')
+        .in('collection_id', collectionIds)
         .order('created_at', { ascending: true });
       if (error) throw error;
-      return data;
+      if (!crs || crs.length === 0) return [];
+
+      const recipeIds = [...new Set(crs.map((cr) => cr.recipe_id))];
+
+      // Recipes can live in either `recipes` (aulas) or `exclusive_posts` (drinks)
+      const [recipesRes, postsRes] = await Promise.all([
+        supabase.from('recipes').select('id, name, image_url, servings').in('id', recipeIds),
+        supabase.from('exclusive_posts').select('id, title, cover_image_url').in('id', recipeIds),
+      ]);
+
+      const recipesMap = new Map((recipesRes.data || []).map((r) => [r.id, r]));
+      const postsMap = new Map((postsRes.data || []).map((p) => [p.id, p]));
+
+      return crs.map((cr) => {
+        const r = recipesMap.get(cr.recipe_id);
+        const p = postsMap.get(cr.recipe_id);
+        return {
+          ...cr,
+          recipe: r
+            ? { id: r.id, name: r.name, image_url: r.image_url, servings: r.servings }
+            : p
+            ? { id: p.id, name: p.title, image_url: p.cover_image_url, servings: null as string | null }
+            : null,
+        };
+      });
     },
     enabled: !!user,
     staleTime: 2 * 60 * 1000,
