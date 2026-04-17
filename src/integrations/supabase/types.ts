@@ -851,6 +851,7 @@ export type Database = {
           ingredients: string[] | null
           instructions: string | null
           is_published: boolean
+          slug: string | null
           title: string
           updated_at: string
           youtube_url: string | null
@@ -866,6 +867,7 @@ export type Database = {
           ingredients?: string[] | null
           instructions?: string | null
           is_published?: boolean
+          slug?: string | null
           title: string
           updated_at?: string
           youtube_url?: string | null
@@ -881,6 +883,7 @@ export type Database = {
           ingredients?: string[] | null
           instructions?: string | null
           is_published?: boolean
+          slug?: string | null
           title?: string
           updated_at?: string
           youtube_url?: string | null
@@ -2483,6 +2486,8 @@ export type Database = {
         Args: { p_conversation_id?: string; p_is_new_contact?: boolean }
         Returns: string
       }
+      slugify: { Args: { v: string }; Returns: string }
+      unaccent: { Args: { "": string }; Returns: string }
     }
     Enums: {
       app_role: "super_admin" | "editor" | "viewer"
