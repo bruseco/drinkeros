@@ -28,7 +28,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Users, Shield, Package, Loader2, Edit, Plus, Mail, MoreHorizontal, Send, ChevronLeft, ChevronRight, Key, Pencil, Crown } from 'lucide-react';
+import { Search, Users, Shield, Package, Loader2, Edit, Plus, Mail, MoreHorizontal, Send, ChevronLeft, ChevronRight, Key, Pencil, Crown, Trash2 } from 'lucide-react';
 import { Database } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
 
