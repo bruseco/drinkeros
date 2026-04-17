@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useAdminUsers, useUpdateUserRole, useUpdateUserAccess, useCreateUser, useResendWelcomeEmail, useResetUserPassword, useUpdateUserProfile, useDeleteUser, UserWithRole } from '@/hooks/useAdminUsers';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { KeyRound, KeyOff } from 'lucide-react';
+import { KeyRound } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useCourses } from '@/hooks/useCourses';
 import { useEbooks } from '@/hooks/useEbooks';
