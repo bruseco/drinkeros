@@ -702,6 +702,37 @@ const AdminUsers: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            <div className="rounded-md border border-border bg-muted/40 p-3 text-sm">
+              {passwordInfoLoading ? (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Verificando senha...
+                </div>
+              ) : passwordInfo?.hasPassword ? (
+                <div className="flex items-start gap-2">
+                  <KeyRound className="h-4 w-4 mt-0.5 text-primary" />
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground">Senha definida</p>
+                    {passwordInfo.passwordSetAt && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Criada em {format(new Date(passwordInfo.passwordSetAt), 'dd/MM/yyyy HH:mm')}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start gap-2">
+                  <Key className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground">Sem senha definida</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      O usuário entra apenas via {(passwordInfo?.providers || []).filter((p) => p !== 'email').join(', ') || 'login social'}.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="editName">Nome completo</Label>
               <Input
