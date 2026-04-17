@@ -143,7 +143,7 @@ const UserCourses: React.FC = () => {
           <p className="text-muted-foreground font-medium">Nenhum curso disponível</p>
         </div>
       ) : (
-        <div className="grid gap-4 grid-cols-1">
+        <div className="grid gap-8 grid-cols-1">
           {sortedCourses.map((course) => {
             const owned = userCourseIds.has(course.id) || course.is_free;
             return (
