@@ -1,54 +1,36 @@
 
 
-## Problema raiz
+## Plano: Melhorar tratamento do erro "Failed to fetch" no login
 
-O posicionamento usava multiplicadores relativos (ex: `pdfHeight * 0.545`). Quando você pedia "X pixels", eu estimava a mudança no multiplicador e errava. A imagem de fundo tem 3347×2447px, mas 1 pixel = ~0.089mm no PDF — e eu ignorava essa conversão.
+### Causa raiz
+"Failed to fetch" é a mensagem padrão do navegador quando a requisição HTTP falha antes de receber resposta — geralmente por:
+- Reinício momentâneo do serviço de auth (visto nos logs às 20:37 UTC hoje)
+- Conexão instável do usuário (Wi-Fi/4G caindo)
+- Service Worker do PWA com cache desatualizado interceptando a chamada
+- Bloqueio por extensão/adblock/VPN
 
-## Solução: Preview visual + controles editáveis no admin
+Não dá para eliminar 100% — mas dá para **deixar a mensagem clara** e **adicionar retry automático**.
 
-### 1. Tabela global `certificate_layout_settings` (singleton)
+### Mudanças
 
-Campos armazenados em **pixels reais** da imagem 3347×2447:
+**1. `src/pages/Login.tsx` e `src/pages/admin/AdminLogin.tsx`**
+- Detectar `error.message === 'Failed to fetch'` e trocar por mensagem amigável em PT:
+  > "Não foi possível conectar. Verifique sua conexão com a internet e tente novamente."
+- Adicionar retry automático silencioso (1 tentativa após 1.5s) antes de mostrar o erro ao usuário — cobre o caso do reinício momentâneo do servidor.
 
-| Campo | Tipo | Default (posição atual aproximada) |
-|-------|------|------------------------------------|
-| `name_x` | integer | 1674 (centro horizontal) |
-| `name_y` | integer | 1334 (~54.5% da altura) |
-| `date_x` | integer | 897 (~26.8% da largura) |
-| `date_y` | integer | 1886 (~77% da altura) |
-| `name_font_size` | integer | 28 |
-| `date_font_size` | integer | 14 |
+**2. `src/contexts/AuthContext.tsx`**
+- Envolver `signIn` com try/catch para capturar erros de rede (que hoje podem virar exception não-tratada).
+- Retornar erro normalizado no formato `{ error: { message: 'mensagem amigável' } }`.
 
-RLS: somente super_admin pode ler/editar.
+**3. `src/sw.ts` (Service Worker)**
+- Garantir que rotas de auth (`/auth/v1/*` do Supabase) estejam na **denylist do Service Worker**, para nunca serem cacheadas/interceptadas.
+- Isso elimina a causa #3 de forma definitiva.
 
-### 2. Seção visual no admin (dentro de CourseForm, seção Certificado)
+### Resultado para o usuário
+- Em vez de "Failed to fetch" (técnico, em inglês), vê: *"Não foi possível conectar. Verifique sua internet."*
+- Falhas momentâneas do servidor (sub-segundo) são resolvidas automaticamente sem ele perceber.
+- PWAs antigos param de interceptar chamadas de auth.
 
-- Botão "Ajustar posição global" abre um painel/dialog
-- Mostra a imagem de fundo do certificado com dois textos sobrepostos ("Nome do Aluno" e "dd de mês de yyyy")
-- 4 campos numéricos (name_x, name_y, date_x, date_y) em pixels
-- **Preview ao vivo**: ao mudar qualquer valor, o texto se move instantaneamente sobre a imagem
-- Botões +/- de 1px para ajuste fino
-- Botão "Salvar posições"
-
-### 3. Geração do PDF atualizada
-
-`useCertificates.ts` busca as posições globais da tabela `certificate_layout_settings` e converte de pixels para mm:
-
-```
-mmX = pixelX * (pdfWidth / 3347)
-mmY = pixelY * (pdfHeight / 2447)
-```
-
-Isso garante que 1 pixel pedido = 1 pixel real movido.
-
-### 4. Arquivos afetados
-
-- **Nova migration**: cria tabela `certificate_layout_settings` com RLS
-- **`src/hooks/useCertificates.ts`**: busca posições da tabela, converte px→mm
-- **`src/pages/admin/CourseForm.tsx`**: adiciona dialog de preview visual com controles de posição
-- **Novo hook**: `useCertificateLayout.ts` para CRUD das posições globais
-
-### Resultado
-
-Você ajusta nome e data diretamente no painel com preview visual e precisão de 1 pixel, sem depender do chat.
+### Nota
+Não consigo identificar **qual usuário específico** teve o erro nem o horário exato sem mais info (e-mail + horário). Se você quiser investigar um caso pontual, me passe esses dados que eu consulto os logs de auth.
 
