@@ -151,8 +151,9 @@ const UserRecipeDetail: React.FC = () => {
           size="icon"
           className="rounded-full"
           onClick={() => {
+            if (!recipeId) return;
             if (isFavorite) {
-              toggleFavorite.mutate({ recipeId: id!, isFavorite: true });
+              toggleFavorite.mutate({ recipeId, isFavorite: true });
             } else {
               setShowFavoriteDialog(true);
             }
@@ -227,11 +228,11 @@ const UserRecipeDetail: React.FC = () => {
         )}
       </div>
 
-      {id && (
+      {recipeId && (
         <FavoriteDialog
           open={showFavoriteDialog}
           onOpenChange={setShowFavoriteDialog}
-          recipeId={id}
+          recipeId={recipeId}
           isFavorite={isFavorite}
         />
       )}
