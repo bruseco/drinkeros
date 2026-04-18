@@ -761,8 +761,27 @@ const AdminUsers: React.FC = () => {
                     <p className="text-xs text-muted-foreground mt-0.5">
                       O usuário entra apenas via {(passwordInfo?.providers || []).filter((p) => p !== 'email').join(', ') || 'login social'}.
                     </p>
-                  </div>
+            </div>
+
+            <div className="rounded-md border border-border bg-muted/40 p-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Crown className={isVipActive ? 'h-4 w-4 text-purple-500' : 'h-4 w-4 text-muted-foreground'} />
+                <div>
+                  <p className="text-sm font-medium">
+                    {isVipActive ? 'Plano VIP ativo' : 'Plano Grátis'}
+                  </p>
+                  {isVipActive && userPlan?.expires_at && (
+                    <p className="text-xs text-muted-foreground">
+                      Expira em {format(new Date(userPlan.expires_at), 'dd/MM/yyyy')}
+                    </p>
+                  )}
                 </div>
+              </div>
+              <Button size="sm" variant={isVipActive ? 'outline' : 'default'} onClick={handleToggleVip}>
+                {isVipActive ? 'Remover VIP' : 'Ativar VIP (1 ano)'}
+              </Button>
+            </div>
+          </div>
               )}
             </div>
 
