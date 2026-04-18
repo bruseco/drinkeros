@@ -340,6 +340,33 @@ const CourseForm: React.FC = () => {
                   />
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="price">Preço (R$)</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.price}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="discount_price">Preço com Desconto (R$)</Label>
+                    <Input
+                      id="discount_price"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.discount_price}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, discount_price: e.target.value }))}
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+
                 {!formData.is_free && (
                   <>
                     <div className="space-y-2">
