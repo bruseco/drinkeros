@@ -92,6 +92,8 @@ const CourseForm: React.FC = () => {
         is_available_for_sale: course.is_available_for_sale ?? true,
         display_order: course.display_order ?? 0,
         workload_hours: (course as any).workload_hours ?? 0,
+        price: (course as any).price ? String((course as any).price) : '',
+        discount_price: (course as any).discount_price ? String((course as any).discount_price) : '',
         certificate_enabled: (course as any).certificate_enabled ?? false,
         certificate_bg_url: (course as any).certificate_bg_url || '',
         certificate_text_color: (course as any).certificate_text_color || '#FFFFFF',
