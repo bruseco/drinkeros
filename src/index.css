@@ -176,3 +176,47 @@ All colors MUST be HSL.
     opacity: 0;
   }
 }
+
+/* react-phone-number-input - tema escuro Drinkeros */
+.phone-input-custom {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.5rem;
+  padding: 0 0.75rem;
+  background-color: hsl(var(--background));
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius) - 2px);
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+}
+.phone-input-custom:focus-within {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--ring));
+}
+.phone-input-custom .PhoneInputCountry {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.phone-input-custom .PhoneInputCountrySelect {
+  background: transparent;
+  color: hsl(var(--foreground));
+  border: none;
+  outline: none;
+}
+.phone-input-custom .PhoneInputCountrySelect option {
+  background-color: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+}
+.phone-input-custom .PhoneInputInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+}
+.phone-input-custom .PhoneInputInput::placeholder {
+  color: hsl(var(--muted-foreground));
+}
