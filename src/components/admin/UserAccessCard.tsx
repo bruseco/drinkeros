@@ -84,7 +84,7 @@ export const UserAccessCard: React.FC<Props> = ({ title, table, items, onAdd }) 
                         {isExpired(item.expires_at) ? 'Expirou' : 'Expira'} {format(new Date(item.expires_at), 'dd/MM/yyyy')}
                       </Badge>
                     ) : (
-                      <Badge variant="default" className="text-xs gap-1 bg-green-600 hover:bg-green-600">
+                      <Badge variant="default" className="text-xs gap-1">
                         <InfinityIcon className="h-3 w-3" /> Vitalício
                       </Badge>
                     )}
