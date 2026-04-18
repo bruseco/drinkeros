@@ -481,7 +481,7 @@ const AdminUsers: React.FC = () => {
                           <span className="text-sm text-muted-foreground">{user.email}</span>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
                         <Select
                           value={currentRole}
                           onValueChange={(value) => handleRoleChange(user, value)}
@@ -502,7 +502,7 @@ const AdminUsers: React.FC = () => {
                           </SelectContent>
                         </Select>
                       </TableCell>
-                      <TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
                         <Button variant="ghost" size="sm" className="gap-2" onClick={() => openAccessDialog(user)}>
                           <Badge variant="secondary">{user.packages_count}</Badge>
                           {lifetimeSet.has(user.user_id) && <Crown className="h-3.5 w-3.5 text-amber-500" />}
@@ -512,7 +512,7 @@ const AdminUsers: React.FC = () => {
                       <TableCell className="text-muted-foreground">
                         {format(new Date(user.created_at), 'dd/MM/yyyy')}
                       </TableCell>
-                      <TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8">
