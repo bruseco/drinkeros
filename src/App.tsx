@@ -8,6 +8,8 @@ import { useTriggerRedirect } from "@/components/TriggerRedirect";
 
 // Public pages
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import VipLanding from "./pages/VipLanding";
 import ResetPassword from "./pages/ResetPassword";
 import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
@@ -94,6 +96,8 @@ const App = () => (
             {/* Public routes */}
             <Route path="/" element={<RootRedirect />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/vip" element={<VipLanding />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/install" element={<Install />} />
             <Route path="/sso" element={<SSO />} />

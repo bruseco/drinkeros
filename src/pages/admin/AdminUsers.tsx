@@ -166,6 +166,39 @@ const AdminUsers: React.FC = () => {
     },
   });
 
+  const { data: userPlan, refetch: refetchUserPlan } = useQuery({
+    queryKey: ['admin-user-plan', editUser?.user_id],
+    enabled: !!editUser?.user_id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('user_plans')
+        .select('plan, expires_at, activated_at')
+        .eq('user_id', editUser!.user_id)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  const isVipActive = !!userPlan && userPlan.plan === 'vip' && (!userPlan.expires_at || new Date(userPlan.expires_at) > new Date());
+
+  const handleToggleVip = async () => {
+    if (!editUser) return;
+    const update = isVipActive
+      ? { user_id: editUser.user_id, plan: 'free', expires_at: null, activated_at: new Date().toISOString() }
+      : { user_id: editUser.user_id, plan: 'vip', activated_at: new Date().toISOString(), expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() };
+
+    const { error } = await supabase
+      .from('user_plans')
+      .upsert(update, { onConflict: 'user_id' });
+
+    if (error) {
+      toast({ title: 'Erro ao atualizar plano', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: isVipActive ? 'VIP removido' : 'VIP ativado por 1 ano' });
+      refetchUserPlan();
+    }
+  };
+
   const [deleteUser, setDeleteUser] = useState<UserWithRole | null>(null);
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -728,8 +761,27 @@ const AdminUsers: React.FC = () => {
                     <p className="text-xs text-muted-foreground mt-0.5">
                       O usuário entra apenas via {(passwordInfo?.providers || []).filter((p) => p !== 'email').join(', ') || 'login social'}.
                     </p>
-                  </div>
+            </div>
+
+            <div className="rounded-md border border-border bg-muted/40 p-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Crown className={isVipActive ? 'h-4 w-4 text-purple-500' : 'h-4 w-4 text-muted-foreground'} />
+                <div>
+                  <p className="text-sm font-medium">
+                    {isVipActive ? 'Plano VIP ativo' : 'Plano Grátis'}
+                  </p>
+                  {isVipActive && userPlan?.expires_at && (
+                    <p className="text-xs text-muted-foreground">
+                      Expira em {format(new Date(userPlan.expires_at), 'dd/MM/yyyy')}
+                    </p>
+                  )}
                 </div>
+              </div>
+              <Button size="sm" variant={isVipActive ? 'outline' : 'default'} onClick={handleToggleVip}>
+                {isVipActive ? 'Remover VIP' : 'Ativar VIP (1 ano)'}
+              </Button>
+            </div>
+          </div>
               )}
             </div>
 

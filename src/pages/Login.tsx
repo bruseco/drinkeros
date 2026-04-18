@@ -244,6 +244,13 @@ const Login: React.FC = () => {
             </Button>
           </form>
 
+          <div className="text-center text-sm text-muted-foreground border-t pt-4">
+            Não tem conta?{' '}
+            <Link to="/signup" className="font-semibold text-foreground underline">
+              Crie agora mesmo!
+            </Link>
+          </div>
+
           <div className="text-center">
             <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
               <DialogTrigger asChild>

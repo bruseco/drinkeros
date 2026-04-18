@@ -2,11 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useExclusivePostsPaginated, refreshPostsSeed } from '@/hooks/useExclusivePosts';
-import { Loader2, Search, Wine, GlassWater, Users, Citrus, CupSoda, Martini, IceCream, Snowflake, Droplets } from 'lucide-react';
+import { Loader2, Search, Wine, GlassWater, Users, Citrus, CupSoda, Martini, IceCream, Snowflake, Droplets, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useDebounce } from '@/hooks/useDebounce';
 import { refreshRecipeSeed } from '@/hooks/useUserRecipesPaginated';
+import { useUserPlan } from '@/hooks/useUserPlan';
+import { isVipOnlyCharacteristic } from '@/hooks/useRecipeAccessGuard';
 import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
@@ -108,6 +110,8 @@ const UserRecipes: React.FC = () => {
   const debouncedSearch = useDebounce(search, 300);
   const stickyRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const { data: planData } = useUserPlan();
+  const isFree = planData ? !planData.isVip : false;
 
 
   useEffect(() => {
@@ -220,26 +224,43 @@ const UserRecipes: React.FC = () => {
         ) : (
           <>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-              {recipes.map((recipe) => (
-                <Link key={recipe.id} to={`/app/receita/${(recipe as any).slug || recipe.id}`}>
-                  <div className="group overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-                    {recipe.cover_image_url ? (
-                      <div className="aspect-video overflow-hidden rounded-2xl">
-                        <img
-                          src={recipe.cover_image_url}
-                          alt={recipe.title}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex aspect-video items-center justify-center rounded-2xl bg-muted">
-                        <Wine className="h-10 w-10 text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              ))}
+              {recipes.map((recipe) => {
+                const isLocked = isFree && isVipOnlyCharacteristic((recipe as any).characteristics);
+                const target = isLocked ? '/vip' : `/app/receita/${(recipe as any).slug || recipe.id}`;
+                return (
+                  <Link key={recipe.id} to={target}>
+                    <div className="group overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative">
+                      {recipe.cover_image_url ? (
+                        <div className="aspect-video overflow-hidden rounded-2xl relative">
+                          <img
+                            src={recipe.cover_image_url}
+                            alt={recipe.title}
+                            className={cn(
+                              'h-full w-full object-cover transition-transform duration-500 group-hover:scale-105',
+                              isLocked && 'brightness-50 saturate-50'
+                            )}
+                            loading="lazy"
+                          />
+                          {isLocked && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                              <div className="rounded-full bg-purple-600/90 p-3 shadow-lg shadow-purple-500/50">
+                                <Lock className="h-5 w-5 text-white" />
+                              </div>
+                              <span className="rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white shadow-lg">
+                                Exclusivo VIP
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex aspect-video items-center justify-center rounded-2xl bg-muted">
+                          <Wine className="h-10 w-10 text-muted-foreground" />
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
 
             {hasNextPage && (

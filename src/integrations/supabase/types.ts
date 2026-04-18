@@ -611,6 +611,30 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_recipe_views: {
+        Row: {
+          created_at: string
+          id: string
+          recipe_id: string
+          user_id: string
+          view_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recipe_id: string
+          user_id: string
+          view_date?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recipe_id?: string
+          user_id?: string
+          view_date?: string
+        }
+        Relationships: []
+      }
       ebooks: {
         Row: {
           cover_image_url: string | null
@@ -1801,6 +1825,36 @@ export type Database = {
           },
         ]
       }
+      user_plans: {
+        Row: {
+          activated_at: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          plan: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activated_at?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activated_at?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2387,6 +2441,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      count_daily_views: { Args: { _user_id: string }; Returns: number }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -2409,6 +2464,7 @@ export type Database = {
         Returns: Json
       }
       get_study_reminder_stats: { Args: never; Returns: Json }
+      get_user_plan: { Args: { _user_id: string }; Returns: string }
       get_ux_metrics: { Args: never; Returns: Json }
       get_zapi_credentials: {
         Args: { p_connection_id: string }

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FullscreenVideo } from '@/components/user/FullscreenVideo';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useExclusivePost } from '@/hooks/useExclusivePosts';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
 import { useHasExclusiveAccess } from '@/hooks/useExclusiveAccess';
+import { useRecipeAccessGuard } from '@/hooks/useRecipeAccessGuard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, ArrowLeft, Heart, Share2, Wine, Lock } from 'lucide-react';
@@ -26,9 +27,19 @@ const UserRecipeDetail: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [showFavoriteDialog, setShowFavoriteDialog] = useState(false);
+  const { check: checkAccess } = useRecipeAccessGuard();
 
   const recipeId = recipe?.id;
   const isFavorite = favorites.some((f) => f.recipe_id === recipeId);
+
+  // Plan access guard (Free users: 3/day limit + Xaropes block)
+  useEffect(() => {
+    if (recipe?.id) {
+      checkAccess(recipe.id, recipe.characteristics as string[] | null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recipe?.id]);
+
 
   const getYouTubeEmbedUrl = (url: string) => {
     try {
