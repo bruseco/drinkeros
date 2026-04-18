@@ -236,6 +236,7 @@ const AdminUsers: React.FC = () => {
   const deleteUserMutation = useDeleteUser();
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Build unified sorted list
   const accessItems: AccessItem[] = useMemo(() => {
