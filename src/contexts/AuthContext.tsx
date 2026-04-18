@@ -101,6 +101,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
 
         if (session?.user) {
+          // Save last used auth method for "Último acesso" badge
+          if (event === 'SIGNED_IN') {
+            const provider = (session.user.app_metadata as any)?.provider || 'email';
+            try {
+              localStorage.setItem('drinkeros:last_auth_method', provider);
+            } catch { /* ignore */ }
+          }
+
           // Use setTimeout to avoid Supabase deadlock
           setTimeout(() => {
             fetchProfile(session.user.id, session.user);
