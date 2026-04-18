@@ -3,25 +3,16 @@ import { FullscreenVideo } from '@/components/user/FullscreenVideo';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useExclusivePost } from '@/hooks/useExclusivePosts';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
-import { useHasExclusiveAccess } from '@/hooks/useExclusiveAccess';
 import { useRecipeAccessGuard } from '@/hooks/useRecipeAccessGuard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, ArrowLeft, Heart, Share2, Wine, Lock } from 'lucide-react';
+import { Loader2, ArrowLeft, Heart, Share2, Wine } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import FavoriteDialog from '@/components/user/FavoriteDialog';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
 
 const UserRecipeDetail: React.FC = () => {
   const { id: idOrSlug } = useParams<{ id: string }>();
   const { data: recipe, isLoading } = useExclusivePost(idOrSlug || '');
-  const { data: hasAccess, isLoading: accessLoading } = useHasExclusiveAccess('receitas');
   const { data: favorites = [] } = useFavorites();
   const toggleFavorite = useToggleFavorite();
   const { toast } = useToast();
@@ -71,7 +62,7 @@ const UserRecipeDetail: React.FC = () => {
     }
   };
 
-  if (isLoading || accessLoading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -98,39 +89,6 @@ const UserRecipeDetail: React.FC = () => {
 
   return (
     <div className="pb-24">
-      {/* Paywall Dialog */}
-      <Dialog open={!hasAccess} onOpenChange={() => {}}>
-        <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
-          <DialogHeader className="text-center items-center">
-            <div className="mx-auto mb-2 rounded-full bg-primary/10 p-4">
-              <Lock className="h-8 w-8 text-primary" />
-            </div>
-            <DialogTitle className="text-xl">Conteúdo Exclusivo</DialogTitle>
-            <DialogDescription className="text-center">
-              Esta receita faz parte do nosso conteúdo exclusivo para assinantes. Assine para ter acesso a todas as receitas e muito mais!
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-3 mt-2">
-            <a
-              href="https://wa.me/5548991601025?text=Ol%C3%A1!%20Gostaria%20de%20saber%20mais%20sobre%20a%20assinatura%20Drinkeros"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full"
-            >
-              <Button className="w-full gap-2">
-                <Wine className="h-4 w-4" />
-                Saiba mais
-              </Button>
-            </a>
-            <Link to="/app/receitas" className="w-full">
-              <Button variant="ghost" className="w-full gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Voltar às Receitas
-              </Button>
-            </Link>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Video / Cover */}
       {embedUrl ? (
