@@ -13,7 +13,6 @@ import FavoriteDialog from '@/components/user/FavoriteDialog';
 const UserRecipeDetail: React.FC = () => {
   const { id: idOrSlug } = useParams<{ id: string }>();
   const { data: recipe, isLoading } = useExclusivePost(idOrSlug || '');
-  const { data: hasAccess, isLoading: accessLoading } = useHasExclusiveAccess('receitas');
   const { data: favorites = [] } = useFavorites();
   const toggleFavorite = useToggleFavorite();
   const { toast } = useToast();
