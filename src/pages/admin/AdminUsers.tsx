@@ -166,6 +166,39 @@ const AdminUsers: React.FC = () => {
     },
   });
 
+  const { data: userPlan, refetch: refetchUserPlan } = useQuery({
+    queryKey: ['admin-user-plan', editUser?.user_id],
+    enabled: !!editUser?.user_id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('user_plans')
+        .select('plan, expires_at, activated_at')
+        .eq('user_id', editUser!.user_id)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  const isVipActive = !!userPlan && userPlan.plan === 'vip' && (!userPlan.expires_at || new Date(userPlan.expires_at) > new Date());
+
+  const handleToggleVip = async () => {
+    if (!editUser) return;
+    const update = isVipActive
+      ? { user_id: editUser.user_id, plan: 'free', expires_at: null, activated_at: new Date().toISOString() }
+      : { user_id: editUser.user_id, plan: 'vip', activated_at: new Date().toISOString(), expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() };
+
+    const { error } = await supabase
+      .from('user_plans')
+      .upsert(update, { onConflict: 'user_id' });
+
+    if (error) {
+      toast({ title: 'Erro ao atualizar plano', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: isVipActive ? 'VIP removido' : 'VIP ativado por 1 ano' });
+      refetchUserPlan();
+    }
+  };
+
   const [deleteUser, setDeleteUser] = useState<UserWithRole | null>(null);
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
