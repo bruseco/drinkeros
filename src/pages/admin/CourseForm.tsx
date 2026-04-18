@@ -65,6 +65,8 @@ const CourseForm: React.FC = () => {
     is_available_for_sale: true,
     display_order: 0,
     workload_hours: 0,
+    price: '',
+    discount_price: '',
     certificate_enabled: false,
     certificate_bg_url: '',
     certificate_text_color: '#FFFFFF',
@@ -90,6 +92,8 @@ const CourseForm: React.FC = () => {
         is_available_for_sale: course.is_available_for_sale ?? true,
         display_order: course.display_order ?? 0,
         workload_hours: (course as any).workload_hours ?? 0,
+        price: (course as any).price ? String((course as any).price) : '',
+        discount_price: (course as any).discount_price ? String((course as any).discount_price) : '',
         certificate_enabled: (course as any).certificate_enabled ?? false,
         certificate_bg_url: (course as any).certificate_bg_url || '',
         certificate_text_color: (course as any).certificate_text_color || '#FFFFFF',
@@ -203,6 +207,8 @@ const CourseForm: React.FC = () => {
         is_available_for_sale: formData.is_free ? false : formData.is_available_for_sale,
         display_order: formData.display_order,
         workload_hours: formData.workload_hours,
+        price: formData.price ? parseFloat(formData.price) : null,
+        discount_price: formData.discount_price ? parseFloat(formData.discount_price) : null,
         certificate_enabled: formData.certificate_enabled,
         certificate_bg_url: formData.certificate_bg_url || null,
         certificate_text_color: formData.certificate_text_color || '#FFFFFF',
@@ -332,6 +338,33 @@ const CourseForm: React.FC = () => {
                     placeholder="Descreva o curso..."
                     rows={3}
                   />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="price">Preço (R$)</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.price}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="discount_price">Preço com Desconto (R$)</Label>
+                    <Input
+                      id="discount_price"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.discount_price}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, discount_price: e.target.value }))}
+                      placeholder="0.00"
+                    />
+                  </div>
                 </div>
 
                 {!formData.is_free && (

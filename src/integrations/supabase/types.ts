@@ -324,6 +324,7 @@ export type Database = {
           cover_image_url: string | null
           created_at: string
           description: string | null
+          discount_price: number | null
           display_order: number | null
           hotmart_product_code: string | null
           id: string
@@ -331,6 +332,7 @@ export type Database = {
           is_available_for_sale: boolean
           is_free: boolean
           name: string
+          price: number | null
           slug: string
           updated_at: string
           woocommerce_product_id: string | null
@@ -343,6 +345,7 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
+          discount_price?: number | null
           display_order?: number | null
           hotmart_product_code?: string | null
           id?: string
@@ -350,6 +353,7 @@ export type Database = {
           is_available_for_sale?: boolean
           is_free?: boolean
           name: string
+          price?: number | null
           slug: string
           updated_at?: string
           woocommerce_product_id?: string | null
@@ -362,6 +366,7 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
+          discount_price?: number | null
           display_order?: number | null
           hotmart_product_code?: string | null
           id?: string
@@ -369,6 +374,7 @@ export type Database = {
           is_available_for_sale?: boolean
           is_free?: boolean
           name?: string
+          price?: number | null
           slug?: string
           updated_at?: string
           woocommerce_product_id?: string | null
