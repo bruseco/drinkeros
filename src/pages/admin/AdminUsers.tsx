@@ -469,7 +469,7 @@ const AdminUsers: React.FC = () => {
                   const currentRole = getRoleDisplay(user);
 
                   return (
-                    <TableRow key={user.id}>
+                    <TableRow key={user.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/users/${user.user_id}`)}>
                       <TableCell>
                         <div className="flex flex-col">
                           <span className="font-medium">
