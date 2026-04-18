@@ -1113,6 +1113,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_admin: boolean | null
+          last_sign_in_provider: string | null
           phone: string | null
           updated_at: string
           user_id: string
@@ -1125,6 +1126,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_admin?: boolean | null
+          last_sign_in_provider?: string | null
           phone?: string | null
           updated_at?: string
           user_id: string
@@ -1137,6 +1139,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_admin?: boolean | null
+          last_sign_in_provider?: string | null
           phone?: string | null
           updated_at?: string
           user_id?: string
@@ -1832,6 +1835,7 @@ export type Database = {
           expires_at: string | null
           id: string
           plan: string
+          source: string
           updated_at: string
           user_id: string
         }
@@ -1841,6 +1845,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           plan?: string
+          source?: string
           updated_at?: string
           user_id: string
         }
@@ -1850,6 +1855,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           plan?: string
+          source?: string
           updated_at?: string
           user_id?: string
         }
@@ -1896,6 +1902,72 @@ export type Database = {
           event_type?: string
           id?: string
           metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vip_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          metadata: Json | null
+          notes: string | null
+          paid_at: string | null
+          payment_method: string
+          period_end: string | null
+          period_start: string | null
+          status: string
+          stripe_charge_id: string | null
+          stripe_customer_id: string | null
+          stripe_invoice_id: string | null
+          stripe_payment_intent_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: string
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+          stripe_charge_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: string
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+          stripe_charge_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
