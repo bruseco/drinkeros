@@ -131,6 +131,7 @@ const App = () => (
               <Route path="receitas/:id" element={<ExclusivePostForm />} />
               <Route path="team" element={<AdminTeam />} />
               <Route path="users" element={<AdminUsers />} />
+              <Route path="users/:userId" element={<AdminUserDetail />} />
               <Route path="configuracoes" element={<AdminEmailSettings />} />
               <Route path="notificacoes" element={<AdminNotifications />} />
               <Route path="upsell" element={<AdminUpsell />} />
