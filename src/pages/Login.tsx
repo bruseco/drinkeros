@@ -30,9 +30,16 @@ const Login: React.FC = () => {
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [magicLinkEmail, setMagicLinkEmail] = useState('');
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [lastMethod, setLastMethod] = useState<string | null>(null);
   const { signIn, user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    try {
+      setLastMethod(localStorage.getItem('drinkeros:last_auth_method'));
+    } catch { /* ignore */ }
+  }, []);
 
   useEffect(() => {
     if (user && !authLoading) {
