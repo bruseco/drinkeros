@@ -35,6 +35,7 @@ import AdminExclusiveContent from "./pages/admin/AdminExclusiveContent";
 import ExclusivePostForm from "./pages/admin/ExclusivePostForm";
 import AdminTeam from "./pages/admin/AdminTeam";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminUserDetail from "./pages/admin/AdminUserDetail";
 import AdminEmailSettings from "./pages/admin/AdminEmailSettings";
 import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminUpsell from "./pages/admin/AdminUpsell";
