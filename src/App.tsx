@@ -35,6 +35,7 @@ import AdminExclusiveContent from "./pages/admin/AdminExclusiveContent";
 import ExclusivePostForm from "./pages/admin/ExclusivePostForm";
 import AdminTeam from "./pages/admin/AdminTeam";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminUserDetail from "./pages/admin/AdminUserDetail";
 import AdminEmailSettings from "./pages/admin/AdminEmailSettings";
 import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminUpsell from "./pages/admin/AdminUpsell";
@@ -130,6 +131,7 @@ const App = () => (
               <Route path="receitas/:id" element={<ExclusivePostForm />} />
               <Route path="team" element={<AdminTeam />} />
               <Route path="users" element={<AdminUsers />} />
+              <Route path="users/:userId" element={<AdminUserDetail />} />
               <Route path="configuracoes" element={<AdminEmailSettings />} />
               <Route path="notificacoes" element={<AdminNotifications />} />
               <Route path="upsell" element={<AdminUpsell />} />

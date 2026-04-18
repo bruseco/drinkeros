@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAdminUsers, useUpdateUserRole, useUpdateUserAccess, useCreateUser, useResendWelcomeEmail, useResetUserPassword, useUpdateUserProfile, useDeleteUser, UserWithRole } from '@/hooks/useAdminUsers';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -235,6 +236,7 @@ const AdminUsers: React.FC = () => {
   const deleteUserMutation = useDeleteUser();
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Build unified sorted list
   const accessItems: AccessItem[] = useMemo(() => {
@@ -467,7 +469,7 @@ const AdminUsers: React.FC = () => {
                   const currentRole = getRoleDisplay(user);
 
                   return (
-                    <TableRow key={user.id}>
+                    <TableRow key={user.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/users/${user.user_id}`)}>
                       <TableCell>
                         <div className="flex flex-col">
                           <span className="font-medium">
@@ -479,7 +481,7 @@ const AdminUsers: React.FC = () => {
                           <span className="text-sm text-muted-foreground">{user.email}</span>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
                         <Select
                           value={currentRole}
                           onValueChange={(value) => handleRoleChange(user, value)}
@@ -500,7 +502,7 @@ const AdminUsers: React.FC = () => {
                           </SelectContent>
                         </Select>
                       </TableCell>
-                      <TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
                         <Button variant="ghost" size="sm" className="gap-2" onClick={() => openAccessDialog(user)}>
                           <Badge variant="secondary">{user.packages_count}</Badge>
                           {lifetimeSet.has(user.user_id) && <Crown className="h-3.5 w-3.5 text-amber-500" />}
@@ -510,7 +512,7 @@ const AdminUsers: React.FC = () => {
                       <TableCell className="text-muted-foreground">
                         {format(new Date(user.created_at), 'dd/MM/yyyy')}
                       </TableCell>
-                      <TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8">
