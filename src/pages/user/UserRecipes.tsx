@@ -9,7 +9,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { refreshRecipeSeed } from '@/hooks/useUserRecipesPaginated';
 import { useUserPlan } from '@/hooks/useUserPlan';
 import { useHasExclusiveAccess } from '@/hooks/useExclusiveAccess';
-import { isVipOnlyCharacteristic } from '@/hooks/useRecipeAccessGuard';
+import { useRecipeAccessGuard, isVipOnlyCharacteristic } from '@/hooks/useRecipeAccessGuard';
 import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
@@ -113,7 +113,8 @@ const UserRecipes: React.FC = () => {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { data: planData } = useUserPlan();
   const { data: hasExclusive } = useHasExclusiveAccess('receitas');
-  const isLockedForUser = planData ? !(planData.isVip && hasExclusive) : false;
+  const { isVip: hasFullPlan } = useRecipeAccessGuard();
+  const isLockedForUser = planData ? !(hasFullPlan && hasExclusive) : false;
 
 
   useEffect(() => {
