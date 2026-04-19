@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Crown, Check, X, GlassWater, Sparkles, Zap, BookOpen, GraduationCap, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,19 +20,10 @@ const VipLanding: React.FC = () => {
     alert('Pagamento será habilitado em breve! 💜');
   };
 
-  if (planData?.isVip) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-950 via-black to-black text-white flex items-center justify-center p-4">
-        <div className="text-center space-y-4">
-          <Crown className="h-16 w-16 mx-auto text-yellow-400" />
-          <h1 className="text-3xl font-bold">Você já é VIP! 🎉</h1>
-          <p className="text-purple-200">Aproveite todos os drinks sem limites.</p>
-          <Button onClick={() => navigate('/app/receitas')} className="bg-yellow-400 text-black hover:bg-yellow-300">
-            Voltar para os drinks
-          </Button>
-        </div>
-      </div>
-    );
+  // Página VIP é exclusiva para usuários do plano Free.
+  // Quem já é VIP é redirecionado direto pras receitas.
+  if (user && planData?.isVip) {
+    return <Navigate to="/app/receitas" replace />;
   }
 
   return (
