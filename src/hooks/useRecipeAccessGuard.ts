@@ -97,5 +97,5 @@ export const useRecipeAccessGuard = () => {
     [user?.id, planData?.isVip, hasExclusive, hasLifetime, planLoading, exclusiveLoading, lifetimeLoading, navigate, qc]
   );
 
-  return { check, isVip: !!planData?.isVip || !!hasLifetime, dailyLimit: DAILY_LIMIT };
+  return { check, isVip: !!planData?.isVip || !!hasLifetime || !!hasExclusive, dailyLimit: DAILY_LIMIT };
 };
