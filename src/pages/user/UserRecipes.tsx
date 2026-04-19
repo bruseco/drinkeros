@@ -8,7 +8,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useDebounce } from '@/hooks/useDebounce';
 import { refreshRecipeSeed } from '@/hooks/useUserRecipesPaginated';
 import { useUserPlan } from '@/hooks/useUserPlan';
-import { useHasExclusiveAccess } from '@/hooks/useExclusiveAccess';
+
 import { useRecipeAccessGuard, isVipOnlyCharacteristic } from '@/hooks/useRecipeAccessGuard';
 import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
