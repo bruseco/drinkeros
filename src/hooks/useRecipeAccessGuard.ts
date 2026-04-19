@@ -25,19 +25,22 @@ export const isVipOnlyCharacteristic = (chars?: string[] | null) => {
 export const useRecipeAccessGuard = () => {
   const { user } = useAuth();
   const { data: planData } = useUserPlan();
+  const { data: hasExclusive } = useHasExclusiveAccess('receitas');
   const navigate = useNavigate();
   const qc = useQueryClient();
 
   const check = useCallback(
     async (recipeId: string, characteristics?: string[] | null): Promise<boolean> => {
       if (!user?.id) return true; // sem user, deixa o fluxo padrão decidir
-      if (planData?.isVip) return true;
 
-      // Bloqueio de característica
+      // Bloqueio Xaropes: precisa ser VIP **E** ter acesso exclusivo a "receitas"
       if (isVipOnlyCharacteristic(characteristics)) {
+        if (planData?.isVip && hasExclusive) return true;
         navigate('/vip');
         return false;
       }
+
+      if (planData?.isVip) return true;
 
       // Já viu hoje? Permite re-acesso sem contar de novo
       const today = new Date().toISOString().split('T')[0];
