@@ -1,102 +1,35 @@
-## Plano: Página de Perfil completo do Aluno (Admin) + Pagamentos VIP via Stripe BYOK
 
-### Acesso
-- Em `AdminUsers.tsx`, a linha inteira do usuário vira clicável → navega para `/admin/usuarios/:userId`.
-- O menu "..." de ações rápidas continua funcionando (stopPropagation no clique).
+Plano: conectar Stripe BYOK (sua conta) e ativar pagamento VIP de verdade
 
-### Nova página: `src/pages/admin/AdminUserDetail.tsx`
-Layout em seções (cards), tudo editável inline pelo admin.
+## 1. Conectar sua conta Stripe
+- Habilito a integração Stripe BYOK (você cola sua `STRIPE_SECRET_KEY` da conta Drinkeros).
+- Você também me fornece depois: `STRIPE_WEBHOOK_SECRET` e `STRIPE_VIP_PRICE_ID` (price recorrente anual de R$69 que você cria no painel Stripe).
 
-**1. Cabeçalho**
-- Avatar, nome, email, telefone, CPF, data de cadastro, último login, provider (Google/Apple/email).
-- Badge do plano atual (FREE / VIP / Vitalício / Admin).
-- Botões: Redefinir senha · Enviar email de boas-vindas · Excluir usuário.
+## 2. Edge functions
+- **`create-vip-checkout`** — cria Checkout Session do Stripe (mode subscription, price = `STRIPE_VIP_PRICE_ID`), passa `client_reference_id = user.id` e `customer_email`. Retorna URL de checkout.
+- **`stripe-webhook`** (verify_jwt = false) — valida assinatura via `STRIPE_WEBHOOK_SECRET` e processa:
+  - `checkout.session.completed` → upsert em `vip_payments` (status `paid`, source `stripe`), atualiza `user_plans` (plan=`vip`, `expires_at = now + 1 year`, `source = 'stripe'`). O trigger `extend_accesses_on_vip_activation` já estende cursos/ebooks/pacotes/combos automaticamente.
+  - `invoice.paid` → renovação anual: nova linha em `vip_payments`, estende `expires_at` em +1 ano.
+  - `invoice.payment_failed` → registra falha em `vip_payments`.
+  - `customer.subscription.deleted` → marca cancelamento (mantém acesso até `expires_at`).
+- Salvo `stripe_customer_id`, `stripe_subscription_id`, `stripe_invoice_id`, `stripe_payment_intent_id`, `stripe_charge_id` em cada linha.
 
-**2. Dados pessoais (edição inline)**
-- Nome, telefone, CPF — salva direto em `profiles`.
+## 3. Front-end (`src/pages/VipLanding.tsx`)
+- Substituo o `alert(...)` por chamada real a `create-vip-checkout` → redireciona pro Stripe Checkout.
+- Trato retorno: `?vip=success` (toast + invalidate `user-plan`) e `?vip=cancel` (toast neutro).
 
-**3. Plano & Acesso Vitalício**
-- Toggle "Acesso Vitalício" (grava em `user_lifetime_access`).
-- Toggle "Plano VIP" + campo de data de expiração editável (grava em `user_plans`).
-- Mostra se VIP veio de pagamento (Stripe) ou foi concedido manualmente.
+## 4. Migração mínima
+- Adiciono coluna `source` em `user_plans` (default `manual`) caso ainda não exista, pra distinguir VIPs vindos do Stripe vs manual.
 
-**4. Conteúdos liberados** (3 abas: Cursos · E-books · Pacotes · Combos)
-Cada aba mostra:
-- Lista do que o aluno tem acesso, com:
-  - Nome do conteúdo
-  - **Data da compra** (`purchased_at`)
-  - **Data de expiração** (`expires_at`) — destaque vermelho se expirado, verde se vitalício
-  - Origem (compra, importação, manual, combo, etc — vem de `metadata`/triggers)
-  - Botões: editar expiração · revogar acesso · marcar como vitalício
-- Botão "+ Adicionar acesso" abre seletor com busca para conceder novo conteúdo.
+## 5. O que você precisa fazer no painel Stripe (te passo o passo-a-passo na execução)
+1. Criar Product "VIP Drinkeros Anual" + Price recorrente R$ 69/ano → me passa o `price_id`.
+2. Criar Webhook endpoint apontando pra URL da função `stripe-webhook` (eu te dou a URL exata) com os 4 eventos listados → me passa o `whsec_...`.
+3. Me passar a `STRIPE_SECRET_KEY` (sk_live ou sk_test).
 
-**5. Acesso a Conteúdo Exclusivo (Receitas/Xaropes)**
-- Toggle por feature (`receitas`, `xaropes`) — grava em `user_exclusive_access`.
-- Mostra se foi concedido manualmente ou herdado do VIP/admin.
+## Ordem de execução
+1. Habilitar Stripe BYOK + você cola a `STRIPE_SECRET_KEY`.
+2. Eu crio as edge functions (deploy automático) e te entrego a URL do webhook.
+3. Você cria Product/Price e Webhook no Stripe → me passa `STRIPE_VIP_PRICE_ID` e `STRIPE_WEBHOOK_SECRET`.
+4. Eu atualizo o botão da `VipLanding` e testamos com cartão de teste (`4242 4242 4242 4242`).
 
-**6. Histórico de pagamentos VIP** (nova tabela `vip_payments`)
-- Tabela: data · valor · método (cartão/PIX) · status (pago/pendente/falhou/reembolsado) · ID Stripe · ações.
-- Botão "Registrar pagamento manual" (admin pode lançar venda offline).
-- Cada linha tem link para o Stripe Dashboard (charge ID).
-
-**7. Atividade**
-- Últimas 10 receitas/aulas vistas, total de visualizações, certificados emitidos.
-
----
-
-### Banco de dados (1 migração)
-
-**Nova tabela `vip_payments`:**
-- `user_id`, `amount` (numeric), `currency` (default BRL), `status` (paid/pending/failed/refunded), `payment_method` (card/pix/boleto/manual), `stripe_payment_intent_id`, `stripe_charge_id`, `stripe_invoice_id`, `paid_at`, `metadata` (jsonb), `created_by` (admin uuid se manual), `notes`.
-- RLS: admin gerencia tudo; usuário só lê os próprios.
-
-**Nova coluna em `user_plans`:**
-- `source` (text, default `manual`): `stripe` | `manual` | `webhook` — pra distinguir origem do VIP.
-
-**Nova coluna em `profiles`:**
-- `last_sign_in_provider` (text, nullable) — populada automaticamente via trigger em `auth.users`.
-
----
-
-### Pagamento VIP via Stripe (BYOK — você conecta sua conta)
-
-**Fluxo:**
-1. Você ativa a integração Stripe BYOK e cola sua `STRIPE_SECRET_KEY`.
-2. Eu crio:
-   - Edge function `create-vip-checkout`: gera Checkout Session da Stripe (modo subscription anual R$69) e retorna URL.
-   - Edge function `stripe-webhook`: recebe eventos `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted` → grava em `vip_payments` + atualiza `user_plans` (extende +1 ano, dispara trigger que estende cursos/ebooks/pacotes).
-   - Botão "Assinar VIP R$69/ano" na página `/vip` chamando `create-vip-checkout`.
-3. Você precisa configurar no painel da Stripe:
-   - Criar um Product + Price recorrente anual de R$69.
-   - Adicionar webhook apontando para a URL da edge function `stripe-webhook`.
-   - Eu te passo a URL e o evento list.
-
-**Secrets necessários:**
-- `STRIPE_SECRET_KEY` (sk_live_... ou sk_test_...)
-- `STRIPE_WEBHOOK_SECRET` (whsec_...)
-- `STRIPE_VIP_PRICE_ID` (price_... do produto VIP anual)
-
----
-
-### Componentes reutilizáveis a criar
-- `src/components/admin/UserAccessCard.tsx` — exibe lista de acessos com expiração editável
-- `src/components/admin/UserPaymentHistory.tsx` — tabela de pagamentos VIP
-- `src/components/admin/AddAccessDialog.tsx` — seletor com busca para conceder acesso
-- `src/components/admin/VipToggleCard.tsx` — gerencia VIP + vitalício
-
-### Hooks novos
-- `useUserDetail(userId)` — busca tudo do usuário em uma query
-- `useVipPayments(userId)` — lista pagamentos
-- `useUpdateUserAccess()` — mutação genérica para editar expires_at
-
-### Rotas
-- Adicionar em `App.tsx`: `<Route path="/admin/usuarios/:userId" element={<AdminUserDetail />} />`
-
----
-
-### Ordem de execução sugerida
-1. Migração (tabela + colunas).
-2. Página de perfil com tudo **menos** Stripe (funciona com pagamento manual já).
-3. Você conecta Stripe BYOK → eu crio edge functions e checkout VIP.
-
-Posso começar pela migração? Confirme ou ajuste o plano.
+Confirma que pode prosseguir?
