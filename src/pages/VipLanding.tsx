@@ -4,11 +4,27 @@ import { Crown, Check, X, GlassWater, Sparkles, Zap, BookOpen, GraduationCap, Lo
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserPlan } from '@/hooks/useUserPlan';
+import { useHasExclusiveAccess } from '@/hooks/useExclusiveAccess';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
 const VipLanding: React.FC = () => {
   const { user } = useAuth();
   const { data: planData } = useUserPlan();
+  const { data: hasExclusive } = useHasExclusiveAccess('receitas');
+  const { data: hasLifetime } = useQuery({
+    queryKey: ['lifetime-access-self', user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('user_lifetime_access')
+        .select('id')
+        .eq('user_id', user!.id)
+        .maybeSingle();
+      return !!data;
+    },
+  });
   const navigate = useNavigate();
 
   const handleSubscribe = () => {
@@ -20,9 +36,9 @@ const VipLanding: React.FC = () => {
     alert('Pagamento será habilitado em breve! 💜');
   };
 
-  // Página VIP é exclusiva para usuários do plano Free.
-  // Quem já é VIP é redirecionado direto pras receitas.
-  if (user && planData?.isVip) {
+  // Esconde a página VIP de quem já é VIP, tem acesso vitalício
+  // ou tem o conteúdo exclusivo "receitas" liberado.
+  if (user && (planData?.isVip || hasLifetime || hasExclusive)) {
     return <Navigate to="/app/receitas" replace />;
   }
 
