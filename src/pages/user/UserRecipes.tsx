@@ -8,7 +8,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useDebounce } from '@/hooks/useDebounce';
 import { refreshRecipeSeed } from '@/hooks/useUserRecipesPaginated';
 import { useUserPlan } from '@/hooks/useUserPlan';
-import { useHasExclusiveAccess } from '@/hooks/useExclusiveAccess';
+
 import { useRecipeAccessGuard, isVipOnlyCharacteristic } from '@/hooks/useRecipeAccessGuard';
 import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
@@ -112,9 +112,8 @@ const UserRecipes: React.FC = () => {
   const stickyRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { data: planData } = useUserPlan();
-  const { data: hasExclusive } = useHasExclusiveAccess('receitas');
-  const { isVip: hasFullPlan } = useRecipeAccessGuard();
-  const isLockedForUser = planData ? !(hasFullPlan && hasExclusive) : false;
+  const { isVip: hasFullRecipeAccess } = useRecipeAccessGuard();
+  const isLockedForUser = planData ? !hasFullRecipeAccess : false;
 
 
   useEffect(() => {

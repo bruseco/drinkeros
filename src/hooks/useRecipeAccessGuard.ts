@@ -51,16 +51,17 @@ export const useRecipeAccessGuard = () => {
       // Enquanto qualquer flag de acesso ainda está carregando, não bloqueia (evita redirect indevido)
       if (planLoading || exclusiveLoading || lifetimeLoading) return true;
 
-      const hasFullPlan = !!planData?.isVip || !!hasLifetime;
+      // Acesso pleno às receitas: VIP, Vitalício OU acesso exclusivo "receitas" liberado manualmente
+      const hasFullRecipeAccess = !!planData?.isVip || !!hasLifetime || !!hasExclusive;
 
-      // Bloqueio Xaropes: precisa ter plano pleno (VIP ou Vitalício) **E** acesso exclusivo a "receitas"
+      // Xaropes: liberado para qualquer um com acesso pleno (inclui usuários importados com acesso manual)
       if (isVipOnlyCharacteristic(characteristics)) {
-        if (hasFullPlan && hasExclusive) return true;
+        if (hasFullRecipeAccess) return true;
         navigate('/vip');
         return false;
       }
 
-      if (hasFullPlan) return true;
+      if (hasFullRecipeAccess) return true;
 
       // Já viu hoje? Permite re-acesso sem contar de novo
       const today = new Date().toISOString().split('T')[0];
@@ -96,5 +97,5 @@ export const useRecipeAccessGuard = () => {
     [user?.id, planData?.isVip, hasExclusive, hasLifetime, planLoading, exclusiveLoading, lifetimeLoading, navigate, qc]
   );
 
-  return { check, isVip: !!planData?.isVip || !!hasLifetime, dailyLimit: DAILY_LIMIT };
+  return { check, isVip: !!planData?.isVip || !!hasLifetime || !!hasExclusive, dailyLimit: DAILY_LIMIT };
 };
