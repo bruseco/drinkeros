@@ -73,7 +73,7 @@ export const useRecipeAccessGuard = () => {
       qc.invalidateQueries({ queryKey: ['daily-view-count', user.id] });
       return true;
     },
-    [user?.id, planData?.isVip, navigate, qc]
+    [user?.id, planData?.isVip, hasExclusive, navigate, qc]
   );
 
   return { check, isVip: !!planData?.isVip, dailyLimit: DAILY_LIMIT };
