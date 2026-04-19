@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserPlan } from './useUserPlan';
@@ -24,23 +24,43 @@ export const isVipOnlyCharacteristic = (chars?: string[] | null) => {
  */
 export const useRecipeAccessGuard = () => {
   const { user } = useAuth();
-  const { data: planData } = useUserPlan();
-  const { data: hasExclusive } = useHasExclusiveAccess('receitas');
+  const { data: planData, isLoading: planLoading } = useUserPlan();
+  const { data: hasExclusive, isLoading: exclusiveLoading } = useHasExclusiveAccess('receitas');
   const navigate = useNavigate();
   const qc = useQueryClient();
+
+  // Lifetime access conta como acesso pleno (equivalente a VIP para fins de receitas)
+  const { data: hasLifetime, isLoading: lifetimeLoading } = useQuery({
+    queryKey: ['lifetime-access-self', user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      if (!user?.id) return false;
+      const { data } = await supabase
+        .from('user_lifetime_access')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      return !!data;
+    },
+  });
 
   const check = useCallback(
     async (recipeId: string, characteristics?: string[] | null): Promise<boolean> => {
       if (!user?.id) return true; // sem user, deixa o fluxo padrão decidir
 
-      // Bloqueio Xaropes: precisa ser VIP **E** ter acesso exclusivo a "receitas"
+      // Enquanto qualquer flag de acesso ainda está carregando, não bloqueia (evita redirect indevido)
+      if (planLoading || exclusiveLoading || lifetimeLoading) return true;
+
+      const hasFullPlan = !!planData?.isVip || !!hasLifetime;
+
+      // Bloqueio Xaropes: precisa ter plano pleno (VIP ou Vitalício) **E** acesso exclusivo a "receitas"
       if (isVipOnlyCharacteristic(characteristics)) {
-        if (planData?.isVip && hasExclusive) return true;
+        if (hasFullPlan && hasExclusive) return true;
         navigate('/vip');
         return false;
       }
 
-      if (planData?.isVip) return true;
+      if (hasFullPlan) return true;
 
       // Já viu hoje? Permite re-acesso sem contar de novo
       const today = new Date().toISOString().split('T')[0];
@@ -73,8 +93,8 @@ export const useRecipeAccessGuard = () => {
       qc.invalidateQueries({ queryKey: ['daily-view-count', user.id] });
       return true;
     },
-    [user?.id, planData?.isVip, hasExclusive, navigate, qc]
+    [user?.id, planData?.isVip, hasExclusive, hasLifetime, planLoading, exclusiveLoading, lifetimeLoading, navigate, qc]
   );
 
-  return { check, isVip: !!planData?.isVip, dailyLimit: DAILY_LIMIT };
+  return { check, isVip: !!planData?.isVip || !!hasLifetime, dailyLimit: DAILY_LIMIT };
 };
