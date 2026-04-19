@@ -112,7 +112,8 @@ const UserRecipes: React.FC = () => {
   const stickyRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { data: planData } = useUserPlan();
-  const isFree = planData ? !planData.isVip : false;
+  const { data: hasExclusive } = useHasExclusiveAccess('receitas');
+  const isLockedForUser = planData ? !(planData.isVip && hasExclusive) : false;
 
 
   useEffect(() => {
