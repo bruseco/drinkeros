@@ -8,6 +8,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useDebounce } from '@/hooks/useDebounce';
 import { refreshRecipeSeed } from '@/hooks/useUserRecipesPaginated';
 import { useUserPlan } from '@/hooks/useUserPlan';
+import { useHasExclusiveAccess } from '@/hooks/useExclusiveAccess';
 import { isVipOnlyCharacteristic } from '@/hooks/useRecipeAccessGuard';
 import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
@@ -111,7 +112,8 @@ const UserRecipes: React.FC = () => {
   const stickyRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { data: planData } = useUserPlan();
-  const isFree = planData ? !planData.isVip : false;
+  const { data: hasExclusive } = useHasExclusiveAccess('receitas');
+  const isLockedForUser = planData ? !(planData.isVip && hasExclusive) : false;
 
 
   useEffect(() => {
@@ -225,7 +227,7 @@ const UserRecipes: React.FC = () => {
           <>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
               {recipes.map((recipe) => {
-                const isLocked = isFree && isVipOnlyCharacteristic((recipe as any).characteristics);
+                const isLocked = isLockedForUser && isVipOnlyCharacteristic((recipe as any).characteristics);
                 const target = isLocked ? '/vip' : `/app/receita/${(recipe as any).slug || recipe.id}`;
                 return (
                   <Link key={recipe.id} to={target}>
