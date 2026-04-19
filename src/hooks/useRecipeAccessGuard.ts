@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserPlan } from './useUserPlan';
+import { useHasExclusiveAccess } from './useExclusiveAccess';
 
 const DAILY_LIMIT = 3;
 const VIP_ONLY_CHARACTERISTICS = ['Xaropes Artesanais'];
