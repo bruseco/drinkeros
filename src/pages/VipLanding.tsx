@@ -1,12 +1,13 @@
-import React from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { Crown, Check, X, GlassWater, Sparkles, Zap, BookOpen, GraduationCap, Lock } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { Crown, Check, X, GlassWater, Sparkles, Zap, BookOpen, GraduationCap, Lock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserPlan } from '@/hooks/useUserPlan';
 import { useHasExclusiveAccess } from '@/hooks/useExclusiveAccess';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
 const VipLanding: React.FC = () => {
@@ -26,14 +27,41 @@ const VipLanding: React.FC = () => {
     },
   });
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [loading, setLoading] = useState(false);
 
-  const handleSubscribe = () => {
+  // Trata retorno do Stripe Checkout
+  useEffect(() => {
+    const vipStatus = searchParams.get('vip');
+    if (vipStatus === 'success') {
+      toast.success('🎉 Bem-vindo ao VIP! Seu acesso já está liberado.');
+      queryClient.invalidateQueries({ queryKey: ['user-plan'] });
+      searchParams.delete('vip');
+      setSearchParams(searchParams, { replace: true });
+    } else if (vipStatus === 'cancel') {
+      toast.info('Pagamento cancelado. Quando quiser, é só voltar 💜');
+      searchParams.delete('vip');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams, queryClient]);
+
+  const handleSubscribe = async () => {
     if (!user) {
-      navigate('/signup');
+      navigate('/signup?redirect=/vip');
       return;
     }
-    // Placeholder — vai virar Stripe na Entrega 2
-    alert('Pagamento será habilitado em breve! 💜');
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-vip-checkout');
+      if (error) throw error;
+      if (!data?.url) throw new Error('URL de checkout não recebida');
+      window.location.href = data.url;
+    } catch (err) {
+      console.error('[vip-checkout]', err);
+      toast.error('Não consegui abrir o checkout. Tenta de novo em instantes.');
+      setLoading(false);
+    }
   };
 
   // Esconde a página VIP de quem já é VIP, tem acesso vitalício
@@ -103,10 +131,14 @@ const VipLanding: React.FC = () => {
 
             <Button
               onClick={handleSubscribe}
+              disabled={loading}
               className="w-full h-14 text-base font-bold bg-gradient-to-r from-yellow-400 to-yellow-300 hover:from-yellow-300 hover:to-yellow-200 text-black shadow-lg shadow-yellow-500/40"
             >
-              <Zap className="mr-2 h-5 w-5" />
-              Quero ser VIP agora
+              {loading ? (
+                <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Abrindo checkout...</>
+              ) : (
+                <><Zap className="mr-2 h-5 w-5" /> Quero ser VIP agora</>
+              )}
             </Button>
             <p className="text-center text-xs text-purple-300 mt-3">
               💳 Pagamento seguro · cancele quando quiser
@@ -155,11 +187,15 @@ const VipLanding: React.FC = () => {
         <div className="text-center mb-16">
           <Button
             onClick={handleSubscribe}
+            disabled={loading}
             size="lg"
             className="h-14 px-12 text-base font-bold bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:from-purple-500 hover:to-fuchsia-400 shadow-lg shadow-purple-500/40"
           >
-            <Crown className="mr-2 h-5 w-5" />
-            Garantir minha vaga VIP por R$ 69
+            {loading ? (
+              <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Abrindo checkout...</>
+            ) : (
+              <><Crown className="mr-2 h-5 w-5" /> Garantir minha vaga VIP por R$ 69</>
+            )}
           </Button>
           <p className="text-sm text-purple-300 mt-4">
             Você merece beber sem limites 🍹
