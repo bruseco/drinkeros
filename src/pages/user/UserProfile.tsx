@@ -6,9 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, ChevronRight } from 'lucide-react';
+import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, ChevronRight, Package } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
+import { MyProductsSection } from '@/components/user/MyProductsSection';
 
 const ProfileDataSection: React.FC = () => {
   const { user, profile } = useAuth();
@@ -183,6 +184,20 @@ const UserProfile: React.FC = () => {
         </CollapsibleTrigger>
         <CollapsibleContent className="rounded-b-lg border border-t-0 border-border bg-card overflow-hidden">
           <ProfileDataSection />
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Produtos adquiridos - collapsible */}
+      <Collapsible open={openSection === 'produtos'} onOpenChange={() => toggle('produtos')}>
+        <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 h-14 hover:bg-accent/50 transition-colors">
+          <span className="flex items-center gap-3 text-sm font-medium">
+            <Package className="h-5 w-5 text-muted-foreground" />
+            Produtos Adquiridos
+          </span>
+          <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-200", openSection === 'produtos' && "rotate-180")} />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="rounded-b-lg border border-t-0 border-border bg-card overflow-hidden">
+          <MyProductsSection />
         </CollapsibleContent>
       </Collapsible>
 
