@@ -1670,6 +1670,7 @@ export type Database = {
           expires_at: string | null
           id: string
           purchased_at: string
+          source: string
           user_id: string
         }
         Insert: {
@@ -1677,6 +1678,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           purchased_at?: string
+          source?: string
           user_id: string
         }
         Update: {
@@ -1684,6 +1686,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           purchased_at?: string
+          source?: string
           user_id?: string
         }
         Relationships: [
@@ -1702,6 +1705,7 @@ export type Database = {
           expires_at: string | null
           id: string
           purchased_at: string
+          source: string
           user_id: string
         }
         Insert: {
@@ -1709,6 +1713,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           purchased_at?: string
+          source?: string
           user_id: string
         }
         Update: {
@@ -1716,6 +1721,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           purchased_at?: string
+          source?: string
           user_id?: string
         }
         Relationships: [
@@ -1734,6 +1740,7 @@ export type Database = {
           expires_at: string | null
           id: string
           purchased_at: string
+          source: string
           user_id: string
         }
         Insert: {
@@ -1741,6 +1748,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           purchased_at?: string
+          source?: string
           user_id: string
         }
         Update: {
@@ -1748,6 +1756,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           purchased_at?: string
+          source?: string
           user_id?: string
         }
         Relationships: [
@@ -1763,18 +1772,21 @@ export type Database = {
       user_exclusive_access: {
         Row: {
           created_at: string
+          expires_at: string | null
           feature: string
           id: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          expires_at?: string | null
           feature?: string
           id?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          expires_at?: string | null
           feature?: string
           id?: string
           user_id?: string
@@ -1806,6 +1818,7 @@ export type Database = {
           id: string
           package_id: string
           purchased_at: string
+          source: string
           user_id: string
         }
         Insert: {
@@ -1814,6 +1827,7 @@ export type Database = {
           id?: string
           package_id: string
           purchased_at?: string
+          source?: string
           user_id: string
         }
         Update: {
@@ -1822,6 +1836,7 @@ export type Database = {
           id?: string
           package_id?: string
           purchased_at?: string
+          source?: string
           user_id?: string
         }
         Relationships: [
