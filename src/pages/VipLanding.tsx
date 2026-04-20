@@ -187,11 +187,15 @@ const VipLanding: React.FC = () => {
         <div className="text-center mb-16">
           <Button
             onClick={handleSubscribe}
+            disabled={loading}
             size="lg"
             className="h-14 px-12 text-base font-bold bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:from-purple-500 hover:to-fuchsia-400 shadow-lg shadow-purple-500/40"
           >
-            <Crown className="mr-2 h-5 w-5" />
-            Garantir minha vaga VIP por R$ 69
+            {loading ? (
+              <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Abrindo checkout...</>
+            ) : (
+              <><Crown className="mr-2 h-5 w-5" /> Garantir minha vaga VIP por R$ 69</>
+            )}
           </Button>
           <p className="text-sm text-purple-300 mt-4">
             Você merece beber sem limites 🍹
