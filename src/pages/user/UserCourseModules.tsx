@@ -4,6 +4,7 @@ import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useCourse, useCoursePackages } from '@/hooks/useCourses';
 import { useModuleProgress } from '@/hooks/useModuleProgress';
 import { useUserRecipesByPackage } from '@/hooks/useUserData';
+import { useExpiredAccess } from '@/hooks/useExpiredAccess';
 import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { Lock, ShoppingCart, ChevronDown, CheckCircle2, PlayCircle, Award } from 'lucide-react';
+import { Lock, ShoppingCart, ChevronDown, CheckCircle2, PlayCircle, Award, Crown } from 'lucide-react';
 import CertificateDownloadButton from '@/components/user/CertificateDownloadButton';
 import CourseCompletionCelebration from '@/components/user/CourseCompletionCelebration';
 
@@ -63,7 +64,9 @@ const UserCourseModules: React.FC = () => {
 
   const userModuleIds = new Set(sections.map(s => s.package.id));
   const hasAccess = !isLockedParam && coursePackages.some(cp => cp.package && userModuleIds.has(cp.package.id));
-  const isLocked = isLockedParam || (!courseLoading && !packagesLoading && !hasAccess);
+  const { data: expiredAccess } = useExpiredAccess();
+  const isExpired = !!courseId && (expiredAccess?.course_ids?.has(courseId) ?? false);
+  const isLocked = isLockedParam || (!courseLoading && !packagesLoading && !hasAccess) || isExpired;
 
   const checkoutUrl = course?.hotmart_product_code || '';
 
@@ -111,8 +114,24 @@ const UserCourseModules: React.FC = () => {
         />
       )}
 
-      {/* Checkout CTA for locked courses */}
-      {isLocked && checkoutUrl && (
+      {/* CTA: prioriza VIP quando expirado, senão checkout normal */}
+      {isExpired ? (
+        <div className="rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-500 p-4 flex items-center justify-between gap-4 shadow-lg">
+          <div className="flex items-center gap-3 text-white">
+            <Crown className="h-5 w-5 flex-shrink-0" />
+            <div>
+              <p className="font-semibold text-sm">Seu acesso a este curso expirou</p>
+              <p className="text-xs opacity-90">Reative todos os seus produtos com a assinatura VIP</p>
+            </div>
+          </div>
+          <Button asChild size="sm" className="bg-white text-purple-700 hover:bg-white/90 font-semibold gap-1.5 flex-shrink-0">
+            <Link to="/vip">
+              <Crown className="h-4 w-4" />
+              Virar VIP
+            </Link>
+          </Button>
+        </div>
+      ) : isLocked && checkoutUrl && (
         <div className="rounded-2xl bg-gradient-to-r from-primary to-accent p-4 flex items-center justify-between gap-4 shadow-lg">
           <div className="flex items-center gap-3 text-primary-foreground">
             <Lock className="h-5 w-5 flex-shrink-0" />
