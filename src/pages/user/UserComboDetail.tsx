@@ -2,11 +2,12 @@ import React from 'react';
 import defaultCover from '@/assets/default-cover.png';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useCombo, useComboCourses, useUserCombos } from '@/hooks/useCombos';
+import { useExpiredAccess } from '@/hooks/useExpiredAccess';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, BookOpen, Play, ChevronRight, Lock, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, BookOpen, Play, ChevronRight, Lock, ShoppingCart, Crown } from 'lucide-react';
 
 const UserComboDetail: React.FC = () => {
   const { comboId } = useParams<{ comboId: string }>();
@@ -16,9 +17,11 @@ const UserComboDetail: React.FC = () => {
   const { data: combo, isLoading: comboLoading } = useCombo(comboId || '');
   const { data: comboCourses = [], isLoading: coursesLoading } = useComboCourses(comboId || '');
   const { data: userCombos = [] } = useUserCombos();
+  const { data: expiredAccess } = useExpiredAccess();
 
+  const isExpired = !!comboId && (expiredAccess?.combo_ids?.has(comboId) ?? false);
   const isEnrolled = userCombos.some(uc => uc.combo_id === comboId);
-  const isLocked = isLockedParam || !isEnrolled;
+  const isLocked = isLockedParam || !isEnrolled || isExpired;
 
   const isLoading = comboLoading || coursesLoading;
 
@@ -75,8 +78,28 @@ const UserComboDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* Locked CTA Banner */}
-      {isLocked && checkoutUrl && (
+      {/* CTA: VIP quando expirado, checkout normal quando bloqueado */}
+      {isExpired ? (
+        <div className="rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-500 p-5 text-white shadow-lg">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                <Crown className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h3 className="font-bold text-base">Acesso expirado</h3>
+                <p className="text-white/90 text-sm">Reative todos os seus produtos com o VIP</p>
+              </div>
+            </div>
+            <Button asChild className="bg-white text-purple-700 hover:bg-white/90 font-bold gap-2 rounded-xl shadow-md">
+              <Link to="/vip">
+                <Crown className="h-4 w-4" />
+                Virar VIP
+              </Link>
+            </Button>
+          </div>
+        </div>
+      ) : isLocked && checkoutUrl && (
         <div className="rounded-2xl bg-gradient-to-r from-primary/90 to-accent/80 p-5 text-white shadow-lg">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-3">

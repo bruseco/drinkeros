@@ -3,10 +3,11 @@ import defaultCover from '@/assets/default-cover.png';
 import { Link } from 'react-router-dom';
 import { useUserCourses, useCourses } from '@/hooks/useCourses';
 import { useCourseProgress } from '@/hooks/useCourseProgress';
+import { useExpiredAccess } from '@/hooks/useExpiredAccess';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Loader2, BookOpen, ChevronRight, Play, Lock } from 'lucide-react';
+import { Loader2, BookOpen, ChevronRight, Play, Lock, Crown } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,6 +17,8 @@ const UserCourses: React.FC = () => {
   const { data: userCourses = [], isLoading: userLoading } = useUserCourses();
   const { data: allCourses = [], isLoading: coursesLoading } = useCourses(true);
   const { getCourseProgress } = useCourseProgress();
+  const { data: expiredAccess } = useExpiredAccess();
+  const expiredCourseIds = expiredAccess?.course_ids ?? new Set<string>();
 
   const userCourseIds = new Set(userCourses.map((uc) => uc.course_id));
 
@@ -146,8 +149,9 @@ const UserCourses: React.FC = () => {
         <div className="grid gap-8 grid-cols-1">
           {sortedCourses.map((course) => {
             const owned = userCourseIds.has(course.id) || course.is_free;
+            const expired = expiredCourseIds.has(course.id);
             return (
-              <CourseCard key={course.id} course={course} owned={owned} getCourseProgress={getCourseProgress} />
+              <CourseCard key={course.id} course={course} owned={owned} expired={expired} getCourseProgress={getCourseProgress} />
             );
           })}
         </div>
@@ -164,14 +168,18 @@ interface CourseCardProps {
     hotmart_product_code: string | null;
   };
   owned: boolean;
+  expired?: boolean;
   getCourseProgress: (courseId: string) => { progress: number; nextLessonId: string | null };
 }
 
-const CourseCard: React.FC<CourseCardProps> = ({ course, owned, getCourseProgress }) => {
-  const { progress, nextLessonId } = owned ? getCourseProgress(course.id) : { progress: 0, nextLessonId: null };
-  const hasStarted = owned && progress > 0;
+const CourseCard: React.FC<CourseCardProps> = ({ course, owned, expired = false, getCourseProgress }) => {
+  const { progress, nextLessonId } = owned && !expired ? getCourseProgress(course.id) : { progress: 0, nextLessonId: null };
+  const hasStarted = owned && !expired && progress > 0;
 
-  const cardLink = owned
+  // Expirado tem prioridade visual: leva pra /vip pra renovar
+  const cardLink = expired
+    ? '/vip'
+    : owned
     ? `/app/curso/${course.id}`
     : `/app/curso/${course.id}?locked=true`;
 
@@ -182,13 +190,18 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, owned, getCourseProgres
           src={course.cover_image_url || defaultCover}
           alt={course.name}
           className={`w-full h-auto rounded-2xl transition-transform duration-500 ${
-            !owned ? 'opacity-50 grayscale-[30%]' : ''
+            expired ? 'opacity-40 grayscale' : !owned ? 'opacity-50 grayscale-[30%]' : ''
           }`}
         />
 
         {/* Badge */}
         <div className="absolute top-3 right-3 z-20">
-          {owned ? (
+          {expired ? (
+            <Badge className="bg-destructive text-destructive-foreground border-0 shadow-md text-xs gap-1">
+              <Crown className="h-3 w-3" />
+              Expirado · Renovar
+            </Badge>
+          ) : owned ? (
             <Badge className="bg-success text-success-foreground border-0 shadow-md text-xs">
               ✓ Adquirido
             </Badge>
@@ -221,7 +234,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, owned, getCourseProgres
             </Link>
           ) : (
             <div className="flex items-center gap-1 text-white/90 text-xs">
-              <span>{owned ? 'Ver módulos' : 'Saiba mais'}</span>
+              <span>{expired ? 'Reativar com VIP' : owned ? 'Ver módulos' : 'Saiba mais'}</span>
               <ChevronRight className="h-3 w-3" />
             </div>
           )}
