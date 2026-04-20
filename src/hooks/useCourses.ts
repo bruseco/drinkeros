@@ -230,7 +230,20 @@ export const useUserCourses = () => {
     queryFn: async () => {
       if (!user) return [];
 
-      // Get user's purchased courses
+      // Busca VIP plan + lifetime em paralelo (sem filtrar por expiração ainda)
+      const [{ data: planRow }, { data: lifetime }] = await Promise.all([
+        supabase.from('user_plans').select('plan, expires_at').eq('user_id', user.id).maybeSingle(),
+        supabase.from('user_lifetime_access').select('id').eq('user_id', user.id).maybeSingle(),
+      ]);
+
+      const now = new Date();
+      const vipActive =
+        planRow?.plan === 'vip' &&
+        (!planRow?.expires_at || new Date(planRow.expires_at) > now);
+      const vipExpiresAt = vipActive ? planRow?.expires_at ?? null : null;
+      const isLifetime = !!lifetime;
+
+      // Get user's purchased courses (todos)
       const { data: userCourses, error: ucError } = await supabase
         .from('user_courses')
         .select(`
@@ -240,8 +253,7 @@ export const useUserCourses = () => {
           expires_at,
           course:courses(*)
         `)
-        .eq('user_id', user.id)
-        .or('expires_at.is.null,expires_at.gt.' + new Date().toISOString());
+        .eq('user_id', user.id);
 
       if (ucError) throw ucError;
 
@@ -254,10 +266,19 @@ export const useUserCourses = () => {
 
       if (fcError) throw fcError;
 
-      // Combine purchased + free avoiding duplicates
-      const purchasedCourseIds = new Set((userCourses || []).map(uc => uc.course_id));
+      // Filtra: ativo se vitalício, sem expires_at, dentro do prazo, ou VIP cobrindo
+      const activeUserCourses = (userCourses || []).filter((uc) => {
+        if (isLifetime) return true;
+        if (!uc.expires_at) return true;
+        if (new Date(uc.expires_at) > now) return true;
+        if (vipExpiresAt && new Date(vipExpiresAt) > now) return true;
+        return false;
+      });
 
-      const purchased = (userCourses || []).map(uc => ({
+      // Combine purchased + free avoiding duplicates
+      const purchasedCourseIds = new Set(activeUserCourses.map(uc => uc.course_id));
+
+      const purchased = activeUserCourses.map(uc => ({
         id: uc.id,
         course_id: uc.course_id,
         purchased_at: uc.purchased_at,
