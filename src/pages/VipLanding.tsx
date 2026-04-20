@@ -131,10 +131,14 @@ const VipLanding: React.FC = () => {
 
             <Button
               onClick={handleSubscribe}
+              disabled={loading}
               className="w-full h-14 text-base font-bold bg-gradient-to-r from-yellow-400 to-yellow-300 hover:from-yellow-300 hover:to-yellow-200 text-black shadow-lg shadow-yellow-500/40"
             >
-              <Zap className="mr-2 h-5 w-5" />
-              Quero ser VIP agora
+              {loading ? (
+                <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Abrindo checkout...</>
+              ) : (
+                <><Zap className="mr-2 h-5 w-5" /> Quero ser VIP agora</>
+              )}
             </Button>
             <p className="text-center text-xs text-purple-300 mt-3">
               💳 Pagamento seguro · cancele quando quiser
