@@ -212,13 +212,23 @@ export const useUserCombos = () => {
     queryFn: async () => {
       if (!user) return [];
 
-      // Get user's purchased combos
+      const [{ data: planRow }, { data: lifetime }] = await Promise.all([
+        supabase.from('user_plans').select('plan, expires_at').eq('user_id', user.id).maybeSingle(),
+        supabase.from('user_lifetime_access').select('id').eq('user_id', user.id).maybeSingle(),
+      ]);
+      const now = new Date();
+      const vipActive = planRow?.plan === 'vip' && (!planRow?.expires_at || new Date(planRow.expires_at) > now);
+      const vipExpiresAt = vipActive ? planRow?.expires_at ?? null : null;
+      const isLifetime = !!lifetime;
+
+      // Get user's purchased combos (todos)
       const { data: userCombos, error: ucError } = await supabase
         .from('user_combos')
         .select(`
           id,
           combo_id,
           purchased_at,
+          expires_at,
           combo:combos(*)
         `)
         .eq('user_id', user.id);
@@ -234,10 +244,18 @@ export const useUserCombos = () => {
 
       if (fcError) throw fcError;
 
-      // Combine purchased + free avoiding duplicates
-      const purchasedComboIds = new Set((userCombos || []).map(uc => uc.combo_id));
+      const activeUserCombos = (userCombos || []).filter((uc) => {
+        if (isLifetime) return true;
+        if (!uc.expires_at) return true;
+        if (new Date(uc.expires_at) > now) return true;
+        if (vipExpiresAt && new Date(vipExpiresAt) > now) return true;
+        return false;
+      });
 
-      const purchased = (userCombos || []).map(uc => ({
+      // Combine purchased + free avoiding duplicates
+      const purchasedComboIds = new Set(activeUserCombos.map(uc => uc.combo_id));
+
+      const purchased = activeUserCombos.map(uc => ({
         id: uc.id,
         combo_id: uc.combo_id,
         purchased_at: uc.purchased_at,
