@@ -18,3 +18,9 @@ project_id = "pvjlcfhqueibjnkuzzna"
 
   [functions.handle-email-suppression]
     verify_jwt = false
+
+  [functions.stripe-webhook]
+    verify_jwt = false
+
+  [functions.create-vip-checkout]
+    verify_jwt = true
