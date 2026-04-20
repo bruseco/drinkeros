@@ -1,14 +1,19 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useEbooks } from '@/hooks/useEbooks';
 import { useUserEbooks } from '@/hooks/useUserEbooks';
-import { Loader2, FileText, Download, Lock } from 'lucide-react';
+import { useExpiredAccess } from '@/hooks/useExpiredAccess';
+import { Loader2, FileText, Download, Lock, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 const UserEbooks: React.FC = () => {
   const { data: ebooks = [], isLoading } = useEbooks();
   const { data: userEbookIds = [], isLoading: userLoading } = useUserEbooks();
+  const { data: expiredAccess } = useExpiredAccess();
   const ownedSet = new Set(userEbookIds);
+  const expiredSet = expiredAccess?.ebook_ids ?? new Set<string>();
+
   const activeEbooks = ebooks
     .filter(e => e.is_active)
     .sort((a, b) => {
@@ -42,11 +47,12 @@ const UserEbooks: React.FC = () => {
         <div className="grid gap-8 grid-cols-1">
           {activeEbooks.map((ebook) => {
             const owned = ownedSet.has(ebook.id);
+            const expired = expiredSet.has(ebook.id);
             return (
               <div key={ebook.id} className="flex flex-col items-center w-full max-w-[390px] mx-auto">
                 <div className="relative w-full">
                   {ebook.cover_image_url ? (
-                    <div className={`w-full rounded-2xl overflow-hidden flex items-center justify-center ${!owned ? 'opacity-60 grayscale-[30%]' : ''}`}>
+                    <div className={`w-full rounded-2xl overflow-hidden flex items-center justify-center ${expired ? 'opacity-40 grayscale' : !owned ? 'opacity-60 grayscale-[30%]' : ''}`}>
                       <img
                         src={ebook.cover_image_url}
                         alt={ebook.name}
@@ -59,7 +65,12 @@ const UserEbooks: React.FC = () => {
                     </div>
                   )}
                   <div className="absolute top-[22%] right-[52px] z-10">
-                    {owned ? (
+                    {expired ? (
+                      <Badge className="bg-destructive text-destructive-foreground border-0 shadow-md text-xs gap-1">
+                        <Crown className="h-3 w-3" />
+                        Expirado
+                      </Badge>
+                    ) : owned ? (
                       <Badge className="bg-success text-success-foreground border-0 shadow-md text-xs">
                         ✓ Adquirido
                       </Badge>
@@ -80,7 +91,14 @@ const UserEbooks: React.FC = () => {
                 </h3>
 
                 <div className="mt-2">
-                  {owned && ebook.file_url ? (
+                  {expired ? (
+                    <Button asChild size="sm" className="bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:from-purple-500 hover:to-fuchsia-400 text-white">
+                      <Link to="/vip">
+                        <Crown className="mr-2 h-4 w-4" />
+                        Renovar com VIP
+                      </Link>
+                    </Button>
+                  ) : owned && ebook.file_url ? (
                     <Button asChild size="sm">
                       <a href={ebook.file_url} target="_blank" rel="noopener noreferrer">
                         <Download className="mr-2 h-4 w-4" />
