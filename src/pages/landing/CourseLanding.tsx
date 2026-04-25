@@ -581,6 +581,44 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
         </section>
       )}
 
+      {/* DEPOIMENTOS */}
+      {testimonials.length > 0 && (
+        <section className="py-16 sm:py-24 bg-[#0b0b0d]">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-center mb-4">
+              O que dizem{' '}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})` }}
+              >
+                nossos alunos
+              </span>
+            </h2>
+            <p className="text-center text-white/70 max-w-2xl mx-auto mb-12 text-sm sm:text-base">
+              Depoimentos reais de quem já transformou sua relação com a coquetelaria.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {testimonials.map((t, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/30 transition-all duration-300 hover:scale-[1.02]"
+                >
+                  <img
+                    src={t.src}
+                    alt={t.alt ?? `Depoimento ${i + 1}`}
+                    loading="lazy"
+                    className="w-full h-auto block"
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-center mt-12">
+              <CTAButton>{ctaHero}</CTAButton>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* GARANTIA */}
       <section className="py-16 sm:py-20 bg-gradient-to-b from-[#0b0b0d] to-[#14070f]">
         <div className="container mx-auto px-4">
