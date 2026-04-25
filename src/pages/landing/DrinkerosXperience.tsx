@@ -179,7 +179,7 @@ const DrinkerosXperience: React.FC = () => {
           <img
             src={logo}
             alt="Curso Drinkeros Xperience"
-            className="h-16 sm:h-24 lg:h-28 mx-auto mb-4 drop-shadow-[0_4px_24px_rgba(236,72,153,0.55)]"
+            className="h-32 sm:h-48 lg:h-60 mx-auto mb-4 drop-shadow-[0_4px_24px_rgba(236,72,153,0.55)]"
           />
           <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold uppercase tracking-tight mb-3 leading-[1.05] max-w-4xl mx-auto">
             Descubra os segredos<br />por trás dos drinks.
