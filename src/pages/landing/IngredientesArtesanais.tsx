@@ -76,6 +76,7 @@ const IngredientesArtesanais: React.FC = () => (
     logoSrc={logo}
     instructorSrc={instructor}
     instructorName="Bruno Abreu"
+    heroVideoUrl="https://www.youtube.com/embed/YWZRA7NsL48?rel=0&playsinline=1"
     heroBadge="Com Bruno Abreu · Drinkeros"
     tagline="Economize no dia a dia produzindo seus próprios ingredientes artesanais."
     subheadline="Eleve o nível dos seus drinks com xaropes artesanais, gelo translúcido, espumas saborizadas, bitter artesanal e tudo o que você precisa para deixar seu drink ainda mais valioso."
