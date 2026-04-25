@@ -82,6 +82,8 @@ export interface CourseLandingProps {
 
   /** Logo do curso (PNG transparente) — exibido no topo do hero. */
   logoSrc?: string;
+  /** Imagem de fundo (faixa) atrás do logo no hero. */
+  logoBgSrc?: string;
   /** Foto do professor — exibida no hero abaixo do CTA. */
   instructorSrc?: string;
   /** Nome do professor — legenda abaixo da foto. */
@@ -135,6 +137,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   faq,
   whatsappPhone = '5548991601025',
   logoSrc,
+  logoBgSrc,
   instructorSrc,
   instructorName,
 }) => {
@@ -317,11 +320,29 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       <section className="relative cl-aurora min-h-screen flex items-start">
         <div className="container mx-auto px-4 pt-10 pb-8 sm:pt-14 sm:pb-12 text-center relative z-10">
           {logoSrc ? (
-            <img
-              src={logoSrc}
-              alt={brand}
-              className="mx-auto mb-6 h-20 sm:h-28 w-auto object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
-            />
+            logoBgSrc ? (
+              <div
+                className="relative -mx-4 sm:-mx-8 mb-6 flex items-center justify-center py-6 sm:py-10 overflow-hidden"
+                style={{
+                  backgroundImage: `url(${logoBgSrc})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'repeat-x',
+                }}
+              >
+                <img
+                  src={logoSrc}
+                  alt={brand}
+                  className="relative h-20 sm:h-28 w-auto object-contain"
+                />
+              </div>
+            ) : (
+              <img
+                src={logoSrc}
+                alt={brand}
+                className="mx-auto mb-6 h-20 sm:h-28 w-auto object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
+              />
+            )
           ) : null}
           {heroBadge && (
             <p className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase text-white/70 mb-4">
