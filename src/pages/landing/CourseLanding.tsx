@@ -64,6 +64,11 @@ export interface FaqItem {
   a: string;
 }
 
+export interface TestimonialItem {
+  src: string;
+  alt?: string;
+}
+
 export interface CourseLandingProps {
   slug: string;
   brand: string;            // logo/título do curso (texto)
@@ -74,6 +79,13 @@ export interface CourseLandingProps {
   ctaHero: string;          // texto do botão do hero
   ctaCheckout?: string;     // texto botão final, default: 'MATRICULE-SE! ACESSO INSTANTÂNEO'
   theme: CourseTheme;
+
+  /** Logo do curso (PNG transparente) — exibido no topo do hero. */
+  logoSrc?: string;
+  /** Foto do professor — exibida no hero abaixo do CTA. */
+  instructorSrc?: string;
+  /** Nome do professor — legenda abaixo da foto. */
+  instructorName?: string;
 
   fallbackPrice: number;    // preço default caso DB ainda não tenha
   oldPriceLabel?: string;   // 'De R$ 1.439,00'
@@ -87,6 +99,9 @@ export interface CourseLandingProps {
 
   bonusTitle?: string;
   bonus?: BonusItem[];
+
+  /** Prints/depoimentos de alunos. Renderizado em grid antes da garantia. */
+  testimonials?: TestimonialItem[];
 
   guaranteeDays?: number;
   guaranteeText?: string;
