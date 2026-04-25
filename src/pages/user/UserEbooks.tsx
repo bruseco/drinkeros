@@ -106,8 +106,8 @@ const UserEbooks: React.FC = () => {
                       </a>
                     </Button>
                   ) : (
-                    <Button size="sm" variant="secondary">
-                      Saiba Mais
+                    <Button asChild size="sm" variant="secondary">
+                      <Link to={`/ebook/${ebook.slug}`}>Saiba Mais</Link>
                     </Button>
                   )}
                 </div>
