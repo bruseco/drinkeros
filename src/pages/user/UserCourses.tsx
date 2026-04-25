@@ -181,6 +181,7 @@ const COURSE_LANDING_ROUTES: Record<string, string> = {
   'drinkdelivery-engarrafados': '/drinkdelivery-engarrafados',
   'producao-de-ingredientes-artesanais': '/ingredientes-artesanais',
   'drinkeros-xperience': '/drinkeros-xperience',
+  'classicos-destilados': '/classicos-destilados',
 };
 
 const CourseCard: React.FC<CourseCardProps> = ({ course, owned, expired = false, getCourseProgress }) => {
