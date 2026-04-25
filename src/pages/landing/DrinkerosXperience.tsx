@@ -145,9 +145,11 @@ const DrinkerosXperience: React.FC = () => {
   const CTAButton: React.FC<{ children: React.ReactNode; size?: 'lg' | 'xl' }> = ({ children, size = 'lg' }) => (
     <button
       onClick={scrollToOffer}
-      className={`group relative inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 font-extrabold text-white shadow-[0_8px_30px_rgba(251,146,60,0.45)] hover:shadow-[0_12px_40px_rgba(251,146,60,0.65)] transition-all duration-300 hover:scale-[1.03] ${size === 'xl' ? 'px-10 py-6 text-xl' : 'px-8 py-5 text-base sm:text-lg'}`}
+      className={`dx-cta group relative inline-flex items-center justify-center gap-2 rounded-full font-extrabold text-white transition-transform duration-300 hover:scale-[1.03] overflow-hidden isolate ${size === 'xl' ? 'px-10 py-6 text-xl' : 'px-8 py-5 text-base sm:text-lg'}`}
     >
-      {children}
+      <span className="dx-cta-liquid" aria-hidden="true" />
+      <span className="dx-cta-shine" aria-hidden="true" />
+      <span className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">{children}</span>
     </button>
   );
 
