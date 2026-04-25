@@ -88,23 +88,25 @@ export function useRelatedRecipes(recipe: ExclusivePost | undefined) {
       }
       const familyIds = new Set(family.map((p) => p.id));
 
-      // SIMILAR: Jaccard >= 50% nas chaves de ingredientes
-      const baseKeys = ingredientKeys(recipe.ingredients);
+      // SIMILAR: drinks que compartilham características (tags) com o atual
+      const baseChars = new Set(
+        (recipe.characteristics || []).map((c) => normalize(c)).filter(Boolean)
+      );
       const similar: Array<{ post: ExclusivePost; score: number }> = [];
-      if (baseKeys.size > 0) {
+      if (baseChars.size > 0) {
         for (const post of all) {
           if (familyIds.has(post.id)) continue;
-          const postKeys = ingredientKeys(post.ingredients);
-          if (postKeys.size === 0) continue;
+          const postChars = new Set(
+            (post.characteristics || []).map((c) => normalize(c)).filter(Boolean)
+          );
+          if (postChars.size === 0) continue;
 
           let intersection = 0;
-          for (const k of postKeys) {
-            if (baseKeys.has(k)) intersection++;
+          for (const c of postChars) {
+            if (baseChars.has(c)) intersection++;
           }
-          const union = baseKeys.size + postKeys.size - intersection;
-          const jaccard = union > 0 ? intersection / union : 0;
-          if (jaccard >= 0.5 && intersection >= 2) {
-            similar.push({ post, score: jaccard });
+          if (intersection >= 1) {
+            similar.push({ post, score: intersection });
           }
         }
       }
