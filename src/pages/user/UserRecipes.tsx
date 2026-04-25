@@ -101,8 +101,8 @@ const useTypingPlaceholder = (texts: string[], typingSpeed = 80, pauseMs = 2000)
 };
 
 const UserRecipes: React.FC = () => {
-  // Refresh seed on every mount so drinks appear in a new order
-  useEffect(() => { refreshRecipeSeed(); refreshPostsSeed(); }, []);
+  // Seed persists across navigation within the session — only re-shuffles on full page refresh
+  // so users can return to a recipe they had eyed without losing their place.
   const [searchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('q') || '');
   const [isStuck, setIsStuck] = useState(false);
