@@ -15,6 +15,7 @@ import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 import PackageLanding from "./pages/PackageLanding";
 import DrinkerosXperience from "./pages/landing/DrinkerosXperience";
+import EbookLanding from "./pages/landing/EbookLanding";
 import SSO from "./pages/SSO";
 import Migracao from "./pages/Migracao";
 
@@ -108,6 +109,7 @@ const App = () => (
             
             {/* Custom landing pages (must come before the catch-all :packageSlug) */}
             <Route path="/drinkeros-xperience" element={<DrinkerosXperience />} />
+            <Route path="/ebook/:slug" element={<EbookLanding />} />
 
             {/* Dynamic package landing pages - must be after static routes */}
             <Route path="/:packageSlug" element={<PackageLanding />} />
