@@ -409,7 +409,7 @@ const DrinkerosXperience: React.FC = () => {
       </section>
 
       {/* OFERTA — frase resumo + preço + CTA */}
-      <section id="oferta" className="py-16 sm:py-24 bg-gradient-to-br from-[#1a0612] via-[#0b0b0d] to-[#0a0a14]">
+      <section id="oferta" className="scroll-mt-4 pt-6 pb-16 sm:pt-8 sm:pb-24 bg-gradient-to-br from-[#1a0612] via-[#0b0b0d] to-[#0a0a14]">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto rounded-3xl bg-gradient-to-b from-white/5 to-white/[0.02] border border-white/10 shadow-2xl p-6 sm:p-10 backdrop-blur">
             <h2 className="text-3xl sm:text-4xl font-extrabold text-center mb-6">
