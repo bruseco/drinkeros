@@ -204,20 +204,23 @@ const DrinkerosXperience: React.FC = () => {
         .dx-cta {
           background: linear-gradient(90deg, #fbbf24, #f97316, #ec4899);
           animation: dxGlowPulse 3.2s ease-in-out infinite;
+          -webkit-mask-image: -webkit-radial-gradient(white, black);
+          transform: translateZ(0);
         }
         .dx-cta-liquid {
           position: absolute;
-          inset: -2px;
-          border-radius: 9999px;
+          inset: 0;
+          border-radius: inherit;
           background:
             radial-gradient(60% 120% at 20% 40%, rgba(255, 220, 130, 0.85), transparent 60%),
             radial-gradient(70% 130% at 60% 70%, rgba(244, 114, 182, 0.75), transparent 65%),
             radial-gradient(80% 140% at 90% 30%, rgba(249, 115, 22, 0.85), transparent 60%);
           background-size: 220% 220%, 220% 220%, 220% 220%;
           animation: dxLiquidFlow 8s ease-in-out infinite;
-          filter: blur(6px) saturate(1.1);
+          filter: saturate(1.15);
           z-index: 0;
           pointer-events: none;
+          transform: translateZ(0);
         }
         .dx-cta-shine {
           position: absolute;
