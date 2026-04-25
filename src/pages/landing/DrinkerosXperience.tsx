@@ -459,12 +459,17 @@ const DrinkerosXperience: React.FC = () => {
               <button
                 onClick={handleBuy}
                 disabled={checkoutLoading}
-                className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 px-8 sm:px-12 py-5 sm:py-6 font-extrabold text-white text-lg sm:text-xl shadow-[0_10px_40px_rgba(251,146,60,0.5)] hover:shadow-[0_14px_50px_rgba(251,146,60,0.7)] transition-all duration-300 hover:scale-[1.03] disabled:opacity-70 disabled:cursor-not-allowed"
+                className="dx-cta dx-cta-green group relative inline-flex items-center justify-center gap-3 rounded-full px-8 sm:px-12 py-5 sm:py-6 font-extrabold text-white text-lg sm:text-xl overflow-hidden isolate transition-transform duration-300 hover:scale-[1.03] disabled:opacity-70 disabled:cursor-not-allowed"
               >
+                <span className="dx-cta-liquid" aria-hidden="true" />
                 {checkoutLoading ? (
-                  <><Loader2 className="h-6 w-6 animate-spin" /> Abrindo checkout...</>
+                  <span className="relative z-10 inline-flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+                    <Loader2 className="h-6 w-6 animate-spin" /> Abrindo checkout...
+                  </span>
                 ) : (
-                  <><ShoppingCart className="h-6 w-6" /> MATRICULE-SE! ACESSO INSTANTÂNEO</>
+                  <span className="relative z-10 inline-flex items-center gap-3 drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+                    <Check className="h-16 w-16 sm:h-20 sm:w-20" strokeWidth={3} /> MATRICULE-SE! ACESSO INSTANTÂNEO
+                  </span>
                 )}
               </button>
             </div>
