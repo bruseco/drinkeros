@@ -48,8 +48,16 @@ const UserEbooks: React.FC = () => {
           {activeEbooks.map((ebook) => {
             const owned = ownedSet.has(ebook.id);
             const expired = expiredSet.has(ebook.id);
-            return (
-              <div key={ebook.id} className="flex flex-col items-center w-full max-w-[390px] mx-auto">
+
+            // Define a ação única do card
+            const canDownload = owned && !expired && !!ebook.file_url;
+            const cardHref = canDownload
+              ? ebook.file_url!
+              : `/ebook/${ebook.slug}`;
+            const isExternal = canDownload;
+
+            const cardInner = (
+              <>
                 <div className="relative w-full">
                   {ebook.cover_image_url ? (
                     <div className={`w-full rounded-2xl overflow-hidden flex items-center justify-center ${expired ? 'opacity-40 grayscale' : !owned ? 'opacity-60 grayscale-[30%]' : ''}`}>
@@ -90,28 +98,60 @@ const UserEbooks: React.FC = () => {
                   {ebook.name}
                 </h3>
 
-                <div className="mt-2">
+                <div className="mt-2 pointer-events-none">
                   {expired ? (
-                    <Button asChild size="sm" className="bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:from-purple-500 hover:to-fuchsia-400 text-white">
-                      <Link to="/vip">
-                        <Crown className="mr-2 h-4 w-4" />
-                        Renovar com VIP
-                      </Link>
+                    <Button size="sm" className="bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:from-purple-500 hover:to-fuchsia-400 text-white">
+                      <Crown className="mr-2 h-4 w-4" />
+                      Renovar com VIP
                     </Button>
-                  ) : owned && ebook.file_url ? (
-                    <Button asChild size="sm">
-                      <a href={ebook.file_url} target="_blank" rel="noopener noreferrer">
-                        <Download className="mr-2 h-4 w-4" />
-                        Abrir e-book
-                      </a>
+                  ) : canDownload ? (
+                    <Button size="sm">
+                      <Download className="mr-2 h-4 w-4" />
+                      Abrir e-book
                     </Button>
                   ) : (
-                    <Button asChild size="sm" variant="secondary">
-                      <Link to={`/ebook/${ebook.slug}`}>Saiba Mais</Link>
-                    </Button>
+                    <Button size="sm" variant="secondary">Saiba Mais</Button>
                   )}
                 </div>
-              </div>
+              </>
+            );
+
+            const wrapperClass =
+              'flex flex-col items-center w-full max-w-[390px] mx-auto cursor-pointer transition-transform active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl';
+
+            // Para expirados, sempre vai para o /vip
+            if (expired) {
+              return (
+                <Link key={ebook.id} to="/vip" className={wrapperClass} aria-label={`${ebook.name} — Renovar com VIP`}>
+                  {cardInner}
+                </Link>
+              );
+            }
+
+            if (isExternal) {
+              return (
+                <a
+                  key={ebook.id}
+                  href={cardHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={wrapperClass}
+                  aria-label={`Abrir e-book ${ebook.name}`}
+                >
+                  {cardInner}
+                </a>
+              );
+            }
+
+            return (
+              <Link
+                key={ebook.id}
+                to={cardHref}
+                className={wrapperClass}
+                aria-label={`Saiba mais sobre ${ebook.name}`}
+              >
+                {cardInner}
+              </Link>
             );
           })}
         </div>
