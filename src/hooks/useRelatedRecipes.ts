@@ -52,9 +52,20 @@ function ingredientKeys(ings: string[] | null | undefined): Set<string> {
   return set;
 }
 
+function isXarope(post: Pick<ExclusivePost, 'title' | 'characteristics'>): boolean {
+  const t = normalize(post.title);
+  if (t.includes('xarope')) return true;
+  for (const c of post.characteristics || []) {
+    if (normalize(c).includes('xarope')) return true;
+  }
+  return false;
+}
+
 export interface RelatedRecipesResult {
   family: ExclusivePost[];
   similar: ExclusivePost[];
+  otherSyrups: ExclusivePost[];
+  isSyrup: boolean;
 }
 
 export function useRelatedRecipes(recipe: ExclusivePost | undefined) {
@@ -63,7 +74,7 @@ export function useRelatedRecipes(recipe: ExclusivePost | undefined) {
     enabled: !!recipe?.id,
     staleTime: 5 * 60 * 1000,
     queryFn: async (): Promise<RelatedRecipesResult> => {
-      if (!recipe) return { family: [], similar: [] };
+      if (!recipe) return { family: [], similar: [], otherSyrups: [], isSyrup: false };
 
       const { data, error } = await supabase
         .from('exclusive_posts')
@@ -74,12 +85,22 @@ export function useRelatedRecipes(recipe: ExclusivePost | undefined) {
       if (error) throw error;
 
       const all = (data || []) as ExclusivePost[];
+      const recipeIsSyrup = isXarope(recipe);
+
+      // If current recipe is a syrup, only return other syrups
+      if (recipeIsSyrup) {
+        const otherSyrups = all.filter((p) => isXarope(p));
+        return { family: [], similar: [], otherSyrups, isSyrup: true };
+      }
+
+      // Exclude syrups from candidate pool for non-syrup recipes
+      const candidates = all.filter((p) => !isXarope(p));
 
       // FAMILY: matching name token (e.g. "Caipirinha", "Mojito")
       const familyTokens = getFamilyTokens(recipe.title);
       const family: ExclusivePost[] = [];
       if (familyTokens.length > 0) {
-        for (const post of all) {
+        for (const post of candidates) {
           const postTokens = new Set(getFamilyTokens(post.title));
           if (familyTokens.some((t) => postTokens.has(t))) {
             family.push(post);
@@ -94,7 +115,7 @@ export function useRelatedRecipes(recipe: ExclusivePost | undefined) {
       );
       const similar: Array<{ post: ExclusivePost; score: number }> = [];
       if (baseChars.size > 0) {
-        for (const post of all) {
+        for (const post of candidates) {
           if (familyIds.has(post.id)) continue;
           const postChars = new Set(
             (post.characteristics || []).map((c) => normalize(c)).filter(Boolean)
@@ -112,7 +133,12 @@ export function useRelatedRecipes(recipe: ExclusivePost | undefined) {
       }
       similar.sort((a, b) => b.score - a.score);
 
-      return { family, similar: similar.map((s) => s.post) };
+      return {
+        family,
+        similar: similar.map((s) => s.post),
+        otherSyrups: [],
+        isSyrup: false,
+      };
     },
   });
 }
