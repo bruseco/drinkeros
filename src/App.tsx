@@ -14,6 +14,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 import PackageLanding from "./pages/PackageLanding";
+import DrinkerosXperience from "./pages/landing/DrinkerosXperience";
 import SSO from "./pages/SSO";
 import Migracao from "./pages/Migracao";
 
@@ -105,6 +106,9 @@ const App = () => (
             <Route path="/sso" element={<SSO />} />
             <Route path="/migracao" element={<Migracao />} />
             
+            {/* Custom landing pages (must come before the catch-all :packageSlug) */}
+            <Route path="/drinkeros-xperience" element={<DrinkerosXperience />} />
+
             {/* Dynamic package landing pages - must be after static routes */}
             <Route path="/:packageSlug" element={<PackageLanding />} />
 
