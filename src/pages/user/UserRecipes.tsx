@@ -21,6 +21,8 @@ const CATEGORY_FILTERS = [
   { label: 'Clássicos e Variações', value: 'Clássico', icon: Martini },
   { label: 'Sobremesas', value: 'Sobremesa', icon: IceCream },
   { label: 'Frozens', value: 'Frozen', icon: Snowflake },
+  { label: 'Amargos', value: 'Amargo', icon: Coffee },
+  { label: 'Salgados', value: 'Salgado', icon: Utensils },
 ];
 
 const SEARCH_PLACEHOLDERS = [
