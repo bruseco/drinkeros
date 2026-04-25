@@ -334,6 +334,8 @@ export type Database = {
           name: string
           price: number | null
           slug: string
+          stripe_price_id: string | null
+          stripe_product_id: string | null
           updated_at: string
           woocommerce_product_id: string | null
           workload_hours: number | null
@@ -355,6 +357,8 @@ export type Database = {
           name: string
           price?: number | null
           slug: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           updated_at?: string
           woocommerce_product_id?: string | null
           workload_hours?: number | null
@@ -376,6 +380,8 @@ export type Database = {
           name?: string
           price?: number | null
           slug?: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           updated_at?: string
           woocommerce_product_id?: string | null
           workload_hours?: number | null
@@ -653,6 +659,8 @@ export type Database = {
           name: string
           price: number | null
           slug: string
+          stripe_price_id: string | null
+          stripe_product_id: string | null
           updated_at: string
         }
         Insert: {
@@ -666,6 +674,8 @@ export type Database = {
           name: string
           price?: number | null
           slug: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -679,6 +689,8 @@ export type Database = {
           name?: string
           price?: number | null
           slug?: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           updated_at?: string
         }
         Relationships: []
