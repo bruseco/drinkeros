@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { useExclusivePostsPaginated, refreshPostsSeed } from '@/hooks/useExclusivePosts';
+import { useExclusivePostsPaginated } from '@/hooks/useExclusivePosts';
 import { Loader2, Search, Wine, GlassWater, Users, Citrus, CupSoda, Martini, IceCream, Snowflake, Droplets, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useDebounce } from '@/hooks/useDebounce';
-import { refreshRecipeSeed } from '@/hooks/useUserRecipesPaginated';
 import { useUserPlan } from '@/hooks/useUserPlan';
 
 import { useRecipeAccessGuard, isVipOnlyCharacteristic } from '@/hooks/useRecipeAccessGuard';
@@ -101,8 +100,8 @@ const useTypingPlaceholder = (texts: string[], typingSpeed = 80, pauseMs = 2000)
 };
 
 const UserRecipes: React.FC = () => {
-  // Refresh seed on every mount so drinks appear in a new order
-  useEffect(() => { refreshRecipeSeed(); refreshPostsSeed(); }, []);
+  // Seed persists across navigation within the session — only re-shuffles on full page refresh
+  // so users can return to a recipe they had eyed without losing their place.
   const [searchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('q') || '');
   const [isStuck, setIsStuck] = useState(false);
