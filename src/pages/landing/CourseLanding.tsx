@@ -1,0 +1,741 @@
+import React, { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import {
+  Loader2,
+  CheckCircle2,
+  ShieldCheck,
+  MessageCircle,
+  Crown,
+  Check,
+  type LucideIcon,
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useUserPlan } from '@/hooks/useUserPlan';
+import { useCourseBySlug } from '@/hooks/useCourses';
+import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
+
+/**
+ * Tema (paleta) por curso. Sempre 3 cores em HSL/HEX para gerar
+ * gradientes do hero + CTA (laranja-rosa) e variantes (verde) para o checkout.
+ */
+export interface CourseTheme {
+  primary: string;       // ex: '#a855f7'
+  secondary: string;     // ex: '#ec4899'
+  accent: string;        // ex: '#f59e0b'
+  // Cor base do fundo escuro adicional (radiais sutis no hero/aurora)
+  glow1: string;         // rgba(...) usada nos radiais do hero
+  glow2: string;
+  glow3: string;
+}
+
+export interface LearnItem {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+}
+
+export interface ModuleItem {
+  number: string; // '01'
+  title: string;
+  topics: string[];
+}
+
+export interface ProfileItem {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+}
+
+export interface BonusItem {
+  title: string;
+  description: string;
+  originalPrice?: string; // 'R$ 247,00'
+}
+
+export interface FaqItem {
+  q: string;
+  a: string;
+}
+
+export interface CourseLandingProps {
+  slug: string;
+  brand: string;            // logo/título do curso (texto)
+  tagline: string;          // headline do hero
+  subheadline: string;      // texto secundário
+  heroBadge?: string;       // ex: 'COM TOM OLIVEIRA'
+  heroVideoUrl?: string;    // YouTube embed ou mp4
+  ctaHero: string;          // texto do botão do hero
+  ctaCheckout?: string;     // texto botão final, default: 'MATRICULE-SE! ACESSO INSTANTÂNEO'
+  theme: CourseTheme;
+
+  fallbackPrice: number;    // preço default caso DB ainda não tenha
+  oldPriceLabel?: string;   // 'De R$ 1.439,00'
+
+  learnItems: LearnItem[];
+  whatYouLearnTitle?: string;
+
+  modules?: ModuleItem[];
+
+  profiles?: ProfileItem[];
+
+  bonusTitle?: string;
+  bonus?: BonusItem[];
+
+  guaranteeDays?: number;
+  guaranteeText?: string;
+
+  faq: FaqItem[];
+
+  whatsappPhone?: string; // default: 5548991601025
+}
+
+const CourseLanding: React.FC<CourseLandingProps> = ({
+  slug,
+  brand,
+  tagline,
+  subheadline,
+  heroBadge,
+  heroVideoUrl,
+  ctaHero,
+  ctaCheckout = 'MATRICULE-SE! ACESSO INSTANTÂNEO',
+  theme,
+  fallbackPrice,
+  oldPriceLabel,
+  learnItems,
+  whatYouLearnTitle = 'O que você vai aprender',
+  modules = [],
+  profiles = [],
+  bonusTitle = 'Calma que ainda não acabou!',
+  bonus = [],
+  guaranteeDays = 15,
+  guaranteeText,
+  faq,
+  whatsappPhone = '5548991601025',
+}) => {
+  const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const { data: course } = useCourseBySlug(slug);
+  const { data: userPlan } = useUserPlan();
+  const isVip = !!userPlan?.isVip;
+
+  useEffect(() => {
+    const status = searchParams.get('checkout');
+    if (status === 'success') {
+      toast({
+        title: 'Compra realizada com sucesso! 🎉',
+        description: 'Acesse seu e-mail para ativar sua conta e começar.',
+      });
+    } else if (status === 'cancel') {
+      toast({
+        title: 'Compra cancelada',
+        description: 'Você pode tentar novamente quando quiser.',
+        variant: 'destructive',
+      });
+    }
+  }, [searchParams, toast]);
+
+  const dbPrice = (course as any)?.price ? Number((course as any).price) : null;
+  const basePrice = dbPrice ?? fallbackPrice;
+  const finalPrice = isVip ? applyVipDiscount(basePrice) : basePrice;
+  const installments = (finalPrice / 12).toFixed(2).replace('.', ',');
+
+  const handleBuy = async () => {
+    setCheckoutLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-product-checkout', {
+        body: { product_type: 'course', slug },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data?.error || 'Não foi possível iniciar o checkout');
+      }
+    } catch (err: any) {
+      toast({
+        title: 'Erro ao iniciar compra',
+        description: err.message || 'Tente novamente em instantes.',
+        variant: 'destructive',
+      });
+      setCheckoutLoading(false);
+    }
+  };
+
+  const scrollToOffer = () => {
+    document.getElementById('oferta')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const CTAButton: React.FC<{ children: React.ReactNode; size?: 'lg' | 'xl' }> = ({ children, size = 'lg' }) => (
+    <button
+      onClick={scrollToOffer}
+      className={`cl-cta group relative inline-flex items-center justify-center gap-2 rounded-full font-extrabold text-white transition-transform duration-300 hover:scale-[1.03] overflow-hidden isolate ${
+        size === 'xl' ? 'px-10 py-6 text-xl' : 'px-8 py-5 text-base sm:text-lg'
+      }`}
+    >
+      <span className="cl-cta-liquid" aria-hidden="true" />
+      <span className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">{children}</span>
+    </button>
+  );
+
+  // CSS dinâmico baseado no tema
+  const themeStyles = `
+    :root {
+      --cl-primary: ${theme.primary};
+      --cl-secondary: ${theme.secondary};
+      --cl-accent: ${theme.accent};
+    }
+    @keyframes clAuroraDrift {
+      0%   { background-position: 0% 50%, 100% 50%, 50% 0%, 0 0; }
+      50%  { background-position: 100% 50%, 0% 50%, 50% 100%, 0 0; }
+      100% { background-position: 0% 50%, 100% 50%, 50% 0%, 0 0; }
+    }
+    .cl-aurora {
+      background:
+        radial-gradient(60% 60% at 25% 30%, ${theme.glow1}, transparent 60%),
+        radial-gradient(55% 55% at 75% 65%, ${theme.glow2}, transparent 60%),
+        radial-gradient(70% 70% at 50% 100%, ${theme.glow3}, transparent 60%),
+        linear-gradient(180deg, #07030a 0%, #050507 100%);
+      background-size: 200% 200%, 200% 200%, 200% 200%, 100% 100%;
+      animation: clAuroraDrift 18s ease-in-out infinite;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .cl-aurora { animation: none; }
+      .cl-cta-liquid, .cl-cta { animation: none !important; }
+    }
+
+    @keyframes clLiquidFlow {
+      0%   { background-position: 0% 50%, 50% 0%, 100% 100%, -140% 50%; }
+      50%  { background-position: 100% 50%, 50% 100%, 0% 0%, 220% 50%; }
+      100% { background-position: 0% 50%, 50% 0%, 100% 100%, 220% 50%; }
+    }
+    @keyframes clGlowPulse {
+      0%, 100% {
+        box-shadow:
+          0 8px 30px ${theme.primary}73,
+          0 0 40px ${theme.secondary}40,
+          0 0 0 0 ${theme.primary}00;
+      }
+      50% {
+        box-shadow:
+          0 14px 50px ${theme.primary}b3,
+          0 0 80px ${theme.secondary}8c,
+          0 0 0 6px ${theme.primary}0d;
+      }
+    }
+    .cl-cta {
+      background: linear-gradient(90deg, ${theme.accent}, ${theme.primary}, ${theme.secondary});
+      animation: clGlowPulse 3.2s ease-in-out infinite;
+      transform: translate3d(0, 0, 0);
+      will-change: transform, box-shadow;
+    }
+    .cl-cta-liquid {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      overflow: hidden;
+      background:
+        radial-gradient(60% 120% at 20% 40%, ${theme.accent}d9, transparent 60%),
+        radial-gradient(70% 130% at 60% 70%, ${theme.secondary}c0, transparent 65%),
+        radial-gradient(80% 140% at 90% 30%, ${theme.primary}d9, transparent 60%),
+        linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 45%, transparent 70%);
+      background-size: 220% 220%, 220% 220%, 220% 220%, 45% 100%;
+      background-repeat: no-repeat;
+      animation: clLiquidFlow 8s ease-in-out infinite;
+      filter: saturate(1.15);
+      z-index: 0;
+      pointer-events: none;
+      transform: translate3d(0, 0, 0);
+    }
+
+    /* CTA verde do checkout (mantemos identidade visual do Xperience) */
+    .cl-cta-green {
+      background: linear-gradient(90deg, #84cc16, #16a34a, #15803d);
+      animation: clGlowPulseGreen 3.2s ease-in-out infinite;
+    }
+    @keyframes clGlowPulseGreen {
+      0%, 100% {
+        box-shadow:
+          0 8px 30px rgba(22,163,74,0.45),
+          0 0 40px rgba(132,204,22,0.25),
+          0 0 0 0 rgba(22,163,74,0);
+      }
+      50% {
+        box-shadow:
+          0 14px 50px rgba(22,163,74,0.7),
+          0 0 80px rgba(132,204,22,0.55),
+          0 0 0 6px rgba(22,163,74,0.05);
+      }
+    }
+    .cl-cta-green .cl-cta-liquid {
+      background:
+        radial-gradient(60% 120% at 20% 40%, rgba(163, 230, 53, 0.9), transparent 60%),
+        radial-gradient(70% 130% at 60% 70%, rgba(34, 139, 34, 0.85), transparent 65%),
+        radial-gradient(80% 140% at 90% 30%, rgba(21, 128, 61, 0.95), transparent 60%),
+        linear-gradient(90deg, transparent 0%, rgba(190,242,100,0.35) 45%, transparent 70%);
+      background-size: 220% 220%, 220% 220%, 220% 220%, 45% 100%;
+      background-repeat: no-repeat;
+    }
+  `;
+
+  const isYoutube = heroVideoUrl?.includes('youtube.com') || heroVideoUrl?.includes('youtu.be');
+  const guarantee =
+    guaranteeText ??
+    `Se em até ${guaranteeDays} dias você não ficar satisfeito com o curso, nos mande um e-mail e iremos te reembolsar completamente. Sem enganação e sem enrolação — garantia 100%.`;
+
+  return (
+    <div className="min-h-screen bg-[#0b0b0d] text-white overflow-x-hidden">
+      <style>{themeStyles}</style>
+
+      {/* HERO */}
+      <section className="relative cl-aurora min-h-screen flex items-start">
+        <div className="container mx-auto px-4 pt-10 pb-8 sm:pt-14 sm:pb-12 text-center relative z-10">
+          {heroBadge && (
+            <p className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase text-white/70 mb-4">
+              {heroBadge}
+            </p>
+          )}
+          <h1
+            className="text-3xl sm:text-5xl lg:text-6xl font-extrabold uppercase tracking-tight mb-4 leading-[1.05] max-w-4xl mx-auto bg-clip-text text-transparent"
+            style={{
+              backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})`,
+            }}
+          >
+            {brand}
+          </h1>
+          <p className="text-xl sm:text-2xl font-bold text-white mb-3 max-w-3xl mx-auto leading-snug">
+            {tagline}
+          </p>
+          <p className="text-sm sm:text-base text-white/80 mb-6 max-w-3xl mx-auto">
+            {subheadline}
+          </p>
+
+          {heroVideoUrl && (
+            <div className="w-full max-w-xl mx-auto aspect-video rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-6 bg-black">
+              {isYoutube ? (
+                <iframe
+                  src={heroVideoUrl}
+                  className="w-full h-full"
+                  title={brand}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <video
+                  src={heroVideoUrl}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
+          )}
+
+          <div className="flex justify-center">
+            <CTAButton size="lg">{ctaHero}</CTAButton>
+          </div>
+        </div>
+      </section>
+
+      {/* O QUE VAI APRENDER */}
+      {learnItems.length > 0 && (
+        <section className="py-16 sm:py-24 bg-gradient-to-b from-[#0b0b0d] via-[#150810] to-[#0b0b0d]">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-center mb-16">
+              {whatYouLearnTitle}{' '}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})` }}
+              >
+                no curso?
+              </span>
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {learnItems.map((item, i) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={i}
+                    className="group rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 transition-all duration-300 hover:scale-[1.02] p-6"
+                    style={{ borderColor: undefined }}
+                  >
+                    <div
+                      className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
+                      style={{
+                        background: `linear-gradient(135deg, ${theme.primary}40, ${theme.secondary}40)`,
+                      }}
+                    >
+                      <Icon className="h-7 w-7" style={{ color: theme.accent }} />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">{item.title}</h3>
+                    <p className="text-sm text-white/75 leading-relaxed">{item.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex justify-center mt-12">
+              <CTAButton>{ctaHero}</CTAButton>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* MÓDULOS */}
+      {modules.length > 0 && (
+        <section className="py-16 sm:py-24 bg-[#0b0b0d]">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-center mb-12">
+              Grade do{' '}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})` }}
+              >
+                curso
+              </span>
+            </h2>
+            <div className="max-w-3xl mx-auto">
+              <Accordion type="multiple" className="space-y-3">
+                {modules.map((m, i) => (
+                  <AccordionItem
+                    key={i}
+                    value={`m-${i}`}
+                    className="rounded-xl bg-white/5 border border-white/10 px-5"
+                  >
+                    <AccordionTrigger className="text-left font-semibold text-white hover:no-underline">
+                      <span className="flex items-baseline gap-3">
+                        <span
+                          className="text-sm font-extrabold tabular-nums"
+                          style={{ color: theme.accent }}
+                        >
+                          {m.number}
+                        </span>
+                        <span>{m.title}</span>
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-1.5 text-sm text-white/80 pt-2">
+                        {m.topics.map((t, j) => (
+                          <li key={j} className="flex items-start gap-2">
+                            <span style={{ color: theme.accent }} className="mt-1">•</span>
+                            <span>{t}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* PARA QUEM É */}
+      {profiles.length > 0 && (
+        <section className="py-16 sm:py-24 bg-gradient-to-b from-[#0b0b0d] to-[#150810]">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-center mb-16">
+              Para quem é{' '}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})` }}
+              >
+                esse curso?
+              </span>
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {profiles.map((p, i) => {
+                const Icon = p.icon;
+                return (
+                  <div
+                    key={i}
+                    className="text-center flex flex-col items-center p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 transition-all"
+                  >
+                    <div
+                      className="w-20 h-20 rounded-full flex items-center justify-center mb-5"
+                      style={{
+                        background: `linear-gradient(135deg, ${theme.primary}40, ${theme.secondary}40)`,
+                      }}
+                    >
+                      <Icon className="h-10 w-10" style={{ color: theme.accent }} />
+                    </div>
+                    <h3
+                      className="text-xl sm:text-2xl font-extrabold mb-3 bg-clip-text text-transparent"
+                      style={{
+                        backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})`,
+                      }}
+                    >
+                      {p.title}
+                    </h3>
+                    <p className="text-white/80 text-base">{p.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* BÔNUS */}
+      {bonus.length > 0 && (
+        <section className="py-16 sm:py-24 bg-[#0b0b0d]">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-center mb-4">
+              {bonusTitle.split(' ').slice(0, -2).join(' ')}{' '}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})` }}
+              >
+                {bonusTitle.split(' ').slice(-2).join(' ')}
+              </span>
+            </h2>
+            <p className="text-center text-lg sm:text-xl text-white/80 max-w-3xl mx-auto mb-16">
+              Veja os <strong style={{ color: theme.accent }}>{bonus.length} BÔNUS</strong> que você ganha ao adquirir esse curso:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-5xl mx-auto">
+              {bonus.map((b, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl bg-white/5 border border-white/10 p-6 hover:border-white/30 transition-all hover:scale-[1.02]"
+                >
+                  <div className="flex items-start gap-3 mb-3">
+                    <div
+                      className="px-3 py-1 rounded-full text-xs font-extrabold tracking-wider uppercase"
+                      style={{
+                        background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`,
+                      }}
+                    >
+                      Bônus {i + 1}
+                    </div>
+                    {b.originalPrice && (
+                      <span className="text-xs text-white/50 line-through ml-auto pt-1">
+                        {b.originalPrice}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-extrabold text-lg sm:text-xl mb-2">{b.title}</h3>
+                  <p className="text-sm sm:text-base text-white/75">{b.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* GARANTIA */}
+      <section className="py-16 sm:py-20 bg-gradient-to-b from-[#0b0b0d] to-[#14070f]">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <div
+              className="inline-flex items-center justify-center w-24 h-24 rounded-full mb-6"
+              style={{
+                background: `linear-gradient(135deg, ${theme.primary}30, ${theme.secondary}30)`,
+                border: `2px solid ${theme.accent}`,
+              }}
+            >
+              <ShieldCheck className="h-12 w-12" style={{ color: theme.accent }} />
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
+              Garantia de{' '}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})` }}
+              >
+                {guaranteeDays} dias
+              </span>
+            </h2>
+            <p className="text-base sm:text-lg text-white/85 max-w-2xl mx-auto">
+              {guarantee}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* OFERTA */}
+      <section
+        id="oferta"
+        className="scroll-mt-4 pt-6 pb-16 sm:pt-8 sm:pb-24 bg-gradient-to-br from-[#1a0612] via-[#0b0b0d] to-[#0a0a14]"
+      >
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto rounded-3xl bg-gradient-to-b from-white/5 to-white/[0.02] border border-white/10 shadow-2xl p-6 sm:p-10 backdrop-blur">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-center mb-6">
+              Garanta sua{' '}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})` }}
+              >
+                vaga agora
+              </span>
+            </h2>
+
+            <div className="text-center mb-6">
+              {isVip ? (
+                <>
+                  <div
+                    className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-3"
+                    style={{
+                      background: `linear-gradient(90deg, ${theme.primary}33, ${theme.secondary}33)`,
+                      border: `1px solid ${theme.accent}66`,
+                    }}
+                  >
+                    <Crown className="h-4 w-4" style={{ color: theme.accent }} />
+                    <span className="text-sm font-bold uppercase tracking-wide" style={{ color: theme.accent }}>
+                      Preço exclusivo VIP · {VIP_DISCOUNT_PERCENT}% OFF
+                    </span>
+                  </div>
+                  <p className="text-lg text-white/60 line-through">{formatBRL(basePrice)}</p>
+                  <p className="text-sm uppercase tracking-wider text-white/70 mt-2">por apenas</p>
+                  <p
+                    className="text-5xl sm:text-6xl font-black bg-clip-text text-transparent my-2"
+                    style={{
+                      backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.primary}, ${theme.secondary})`,
+                    }}
+                  >
+                    {formatBRL(finalPrice)}
+                  </p>
+                  <p className="text-base text-white/80">
+                    em até{' '}
+                    <strong style={{ color: theme.accent }}>
+                      12x R$ {installments}
+                    </strong>
+                  </p>
+                  <p className="text-xs mt-2" style={{ color: theme.accent }}>
+                    Esse valor especial é só para você que já é assinante VIP. 💜
+                  </p>
+                </>
+              ) : (
+                <>
+                  {oldPriceLabel && (
+                    <p className="text-lg text-white/60 line-through">{oldPriceLabel}</p>
+                  )}
+                  <p className="text-sm uppercase tracking-wider text-white/70 mt-2">por apenas</p>
+                  <p
+                    className="text-5xl sm:text-6xl font-black bg-clip-text text-transparent my-2"
+                    style={{
+                      backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.primary}, ${theme.secondary})`,
+                    }}
+                  >
+                    {formatBRL(finalPrice)}
+                  </p>
+                  <p className="text-base text-white/80">
+                    em até <strong style={{ color: theme.accent }}>12x R$ {installments}</strong>
+                  </p>
+                </>
+              )}
+            </div>
+
+            <div className="flex justify-center mb-6">
+              <button
+                onClick={handleBuy}
+                disabled={checkoutLoading}
+                className="cl-cta cl-cta-green group relative inline-flex items-center justify-center gap-3 rounded-full px-8 sm:px-12 py-5 sm:py-6 font-extrabold text-white text-lg sm:text-xl overflow-hidden isolate transition-transform duration-300 hover:scale-[1.03] disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                <span className="cl-cta-liquid" aria-hidden="true" />
+                {checkoutLoading ? (
+                  <span className="relative z-10 inline-flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+                    <Loader2 className="h-6 w-6 animate-spin" /> Abrindo checkout...
+                  </span>
+                ) : (
+                  <span className="relative z-10 inline-flex items-center gap-3 drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+                    <Check className="h-16 w-16 sm:h-20 sm:w-20" strokeWidth={3} /> {ctaCheckout}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            <div className="mt-2 flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-white/70">
+              <span className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-lime-400" /> Garantia de {guaranteeDays} dias
+              </span>
+              <span className="hidden sm:inline text-white/30">•</span>
+              <span className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-lime-400" /> Acesso de 1 ano
+              </span>
+              <span className="hidden sm:inline text-white/30">•</span>
+              <span className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-lime-400" /> Pagamento seguro
+              </span>
+            </div>
+
+            <div className="mt-8 text-center text-sm text-white/60">
+              Já é aluno?{' '}
+              <Link to="/login" className="underline" style={{ color: theme.accent }}>
+                Acesse aqui
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      {faq.length > 0 && (
+        <section className="py-16 sm:py-24 bg-gradient-to-b from-[#0b0b0d] to-[#14070f]">
+          <div className="container mx-auto px-4 max-w-3xl">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-center mb-4">
+              Tire todas suas{' '}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})` }}
+              >
+                dúvidas!
+              </span>
+            </h2>
+            <p className="text-center text-white/70 mb-10">
+              Caso ainda tenha alguma dúvida, fale com a gente pelo WhatsApp.
+            </p>
+            <Accordion type="single" collapsible className="space-y-3">
+              {faq.map((item, i) => (
+                <AccordionItem
+                  key={i}
+                  value={`q-${i}`}
+                  className="rounded-xl bg-white/5 border border-white/10 px-5"
+                >
+                  <AccordionTrigger className="text-left font-semibold text-white hover:no-underline">
+                    {item.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-white/80">{item.a}</AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+            <div className="flex justify-center mt-12">
+              <CTAButton size="xl">{ctaHero}</CTAButton>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* SUPORTE WHATSAPP */}
+      <section className="py-16 bg-[#0b0b0d]">
+        <div className="container mx-auto px-4 text-center">
+          <h3 className="text-2xl sm:text-3xl font-extrabold mb-3">Ainda possui dúvidas?</h3>
+          <p className="text-white/70 mb-6">Fale conosco imediatamente através do WhatsApp</p>
+          <a
+            href={`https://wa.me/${whatsappPhone}?text=Ol%C3%A1!%20Preciso%20de%20ajuda.`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-green-500 hover:bg-green-600 text-white font-bold shadow-lg transition-all hover:scale-[1.03]"
+          >
+            <MessageCircle className="h-5 w-5" /> Falar com o Suporte
+          </a>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="py-10 bg-black text-center border-t border-white/5">
+        <p className="text-sm text-white/50">
+          © {new Date().getFullYear()} Drinkeros — Todos os direitos reservados
+        </p>
+      </footer>
+    </div>
+  );
+};
+
+export default CourseLanding;
