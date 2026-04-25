@@ -186,15 +186,17 @@ const DrinkerosXperience: React.FC = () => {
           </h1>
 
           {/* VÍDEO logo abaixo do headline */}
-          <div className="w-[240px] sm:w-[280px] mx-auto aspect-square rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(236,72,153,0.35)] ring-1 ring-white/10 mb-4">
-            <iframe
-              src="https://www.youtube-nocookie.com/embed/fJC8vOcQ5DU?playsinline=1&rel=0"
-              title="Drinkeros Xperience"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="w-full h-full"
-            />
-          </div>
+          <a
+            href="https://youtube.com/shorts/fJC8vOcQ5DU"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group mx-auto mb-4 flex aspect-square w-[240px] items-center justify-center rounded-2xl border border-border bg-card/80 shadow-[0_20px_60px_rgba(236,72,153,0.35)] transition-transform hover:scale-[1.02] sm:w-[280px]"
+            aria-label="Assistir vídeo do Drinkeros Xperience no YouTube"
+          >
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform group-hover:scale-110">
+              <span className="ml-1 text-4xl leading-none">▶</span>
+            </div>
+          </a>
 
           <p className="text-base sm:text-xl font-bold text-yellow-300 mb-3 max-w-3xl mx-auto">
             Aprenda as proporções de destilado, dulçor, acidez e amargor e CRIE SEUS PRÓPRIOS DRINKS.
