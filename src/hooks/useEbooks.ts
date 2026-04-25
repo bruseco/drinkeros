@@ -56,6 +56,24 @@ export const useEbook = (id: string) => {
   });
 };
 
+export const useEbookBySlug = (slug: string) => {
+  return useQuery({
+    queryKey: ['ebooks', 'slug', slug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('ebooks')
+        .select('*')
+        .eq('slug', slug)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data as Ebook | null;
+    },
+    enabled: !!slug,
+  });
+};
+
 export const useCreateEbook = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
