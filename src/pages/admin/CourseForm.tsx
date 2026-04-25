@@ -54,6 +54,40 @@ const CourseForm: React.FC = () => {
   const { upload: uploadCertBg, isUploading: isUploadingCertBg } = useImageUpload('package-covers', { skipOptimize: true });
   const [deleteLessonId, setDeleteLessonId] = useState<string | null>(null);
   const [layoutDialogOpen, setLayoutDialogOpen] = useState(false);
+  const [isSyncingStripe, setIsSyncingStripe] = useState(false);
+  const queryClient = useQueryClient();
+
+  const handleSyncStripe = async () => {
+    if (!id) return;
+    const priceNum = parseFloat(formData.price);
+    if (!priceNum || priceNum <= 0) {
+      toast({
+        title: 'Defina o preço primeiro',
+        description: 'Cadastre um preço maior que zero e salve antes de sincronizar.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setIsSyncingStripe(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-stripe-product', {
+        body: { product_type: 'course', product_id: id },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast({ title: 'Sincronizado com Stripe!', description: 'Pronto para receber pagamentos.' });
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      queryClient.invalidateQueries({ queryKey: ['course', id] });
+    } catch (err: any) {
+      toast({
+        title: 'Erro ao sincronizar',
+        description: err.message || 'Tente novamente em instantes.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSyncingStripe(false);
+    }
+  };
 
   const [formData, setFormData] = useState({
     name: '',
