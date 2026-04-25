@@ -176,7 +176,7 @@ const DrinkerosXperience: React.FC = () => {
 
       {/* HERO — apenas logo + headline + vídeo + CTA na primeira dobra */}
       <section className="relative dx-aurora min-h-screen flex items-center">
-        <div className="container mx-auto px-4 pt-2 pb-6 sm:pb-10 text-center relative z-10">
+        <div className="container mx-auto px-4 pt-0 pb-6 sm:pb-10 text-center relative z-10">
           <img
             src={logo}
             alt="Curso Drinkeros Xperience"
