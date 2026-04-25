@@ -23,8 +23,33 @@ function getFamilyTokens(title: string): string[] {
     .filter((w) => w.length >= 4 && !STOPWORDS.has(w));
 }
 
-function normalizeIngredient(ing: string): string {
-  return normalize(ing);
+const ING_STOPWORDS = new Set([
+  'de', 'da', 'do', 'das', 'dos', 'com', 'sem', 'e', 'a', 'o', 'as', 'os',
+  'em', 'no', 'na', 'para', 'por', 'um', 'uma', 'ml', 'g', 'kg', 'l',
+  'gelo', 'cubos', 'cubo', 'pedras', 'pedra', 'gosto', 'qb',
+  'colher', 'colheres', 'xicara', 'xicaras', 'dose', 'doses',
+]);
+
+/**
+ * Reduz um ingrediente à(s) sua(s) palavra(s)-chave principais.
+ * Ex: "50ml de Gin Tanqueray" -> "gin tanqueray" -> token "gin"
+ */
+function ingredientKey(ing: string): string | null {
+  const tokens = normalize(ing)
+    .split(' ')
+    .filter((w) => w.length >= 3 && !ING_STOPWORDS.has(w) && !/^\d+$/.test(w));
+  if (tokens.length === 0) return null;
+  // usa a primeira palavra significativa como chave (geralmente o nome do ingrediente)
+  return tokens[0];
+}
+
+function ingredientKeys(ings: string[] | null | undefined): Set<string> {
+  const set = new Set<string>();
+  for (const i of ings || []) {
+    const k = ingredientKey(i);
+    if (k) set.add(k);
+  }
+  return set;
 }
 
 export interface RelatedRecipesResult {
