@@ -46,14 +46,37 @@ const AnimatedStudentCount: React.FC<Props> = ({ target, duration = 2500, classN
     return () => cancelAnimationFrame(raf);
   }, [started, target, duration]);
 
-  // Após chegar no target, incrementa 1-2 a cada 3s
+  // Após chegar no target, incrementa 1-5 a cada 3-10s passando por cada número
   useEffect(() => {
     if (!started) return;
-    const interval = setInterval(() => {
-      setValue((v) => (v >= target ? v + (Math.random() < 0.5 ? 1 : 2) : v));
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [started, target]);
+    let scheduleTimer: ReturnType<typeof setTimeout>;
+    let stepTimer: ReturnType<typeof setTimeout>;
+
+    const scheduleNext = () => {
+      const delay = 3000 + Math.random() * 7000; // 3s a 10s
+      scheduleTimer = setTimeout(() => {
+        const burst = 1 + Math.floor(Math.random() * 5); // 1 a 5
+        let count = 0;
+        const stepDelay = 90; // ms entre cada incremento (rápido)
+        const tickStep = () => {
+          setValue((v) => v + 1);
+          count += 1;
+          if (count < burst) {
+            stepTimer = setTimeout(tickStep, stepDelay);
+          } else {
+            scheduleNext();
+          }
+        };
+        tickStep();
+      }, delay);
+    };
+
+    scheduleNext();
+    return () => {
+      clearTimeout(scheduleTimer);
+      clearTimeout(stepTimer);
+    };
+  }, [started]);
 
   return (
     <span ref={ref} className={className}>
