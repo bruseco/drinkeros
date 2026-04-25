@@ -119,7 +119,7 @@ const DrinkerosXperience: React.FC = () => {
   }, [searchParams, toast]);
 
   // Preço (com fallback para o valor da página antiga: R$ 497)
-  const dbPrice = course?.price ? Number(course.price) : null;
+  const dbPrice = (course as any)?.price ? Number((course as any).price) : null;
   const basePrice = dbPrice ?? 497;
   const finalPrice = isVip ? applyVipDiscount(basePrice) : basePrice;
   const installments = (finalPrice / 12).toFixed(2).replace('.', ',');
