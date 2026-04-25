@@ -22,6 +22,12 @@ import CourseLanding, {
   type FaqItem,
 } from './CourseLanding';
 
+import logo from '@/assets/landing/mix/logo.png';
+import instructor from '@/assets/landing/mix/instructor.jpg';
+import dep1 from '@/assets/landing/mix/dep-1.jpg';
+import dep2 from '@/assets/landing/mix/dep-2.jpg';
+import dep3 from '@/assets/landing/mix/dep-3.jpg';
+
 // Paleta: roxo elegante + dourado (alta coquetelaria)
 const theme: CourseTheme = {
   primary: '#8b5cf6',
