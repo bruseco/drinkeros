@@ -15,6 +15,10 @@ import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 import PackageLanding from "./pages/PackageLanding";
 import DrinkerosXperience from "./pages/landing/DrinkerosXperience";
+import MixologiaAvancada from "./pages/landing/MixologiaAvancada";
+import BarParaEventos from "./pages/landing/BarParaEventos";
+import DrinkDeliveryEngarrafados from "./pages/landing/DrinkDeliveryEngarrafados";
+import IngredientesArtesanais from "./pages/landing/IngredientesArtesanais";
 import EbookLanding from "./pages/landing/EbookLanding";
 import SSO from "./pages/SSO";
 import Migracao from "./pages/Migracao";
@@ -109,6 +113,10 @@ const App = () => (
             
             {/* Custom landing pages (must come before the catch-all :packageSlug) */}
             <Route path="/drinkeros-xperience" element={<DrinkerosXperience />} />
+            <Route path="/mixologia-avancada" element={<MixologiaAvancada />} />
+            <Route path="/bar-p-eventos" element={<BarParaEventos />} />
+            <Route path="/drinkdelivery-engarrafados" element={<DrinkDeliveryEngarrafados />} />
+            <Route path="/ingredientes-artesanais" element={<IngredientesArtesanais />} />
             <Route path="/ebook/:slug" element={<EbookLanding />} />
 
             {/* Dynamic package landing pages - must be after static routes */}
