@@ -161,10 +161,10 @@ const DrinkerosXperience: React.FC = () => {
         }
         .dx-aurora {
           background:
-            radial-gradient(60% 60% at 25% 30%, rgba(168, 85, 247, 0.45), transparent 60%),
-            radial-gradient(55% 55% at 75% 65%, rgba(236, 72, 153, 0.40), transparent 60%),
-            radial-gradient(70% 70% at 50% 100%, rgba(251, 146, 60, 0.25), transparent 60%),
-            linear-gradient(180deg, #120612 0%, #0b0b0d 100%);
+            radial-gradient(60% 60% at 25% 30%, rgba(88, 28, 135, 0.55), transparent 60%),
+            radial-gradient(55% 55% at 75% 65%, rgba(131, 24, 67, 0.55), transparent 60%),
+            radial-gradient(70% 70% at 50% 100%, rgba(120, 53, 15, 0.35), transparent 60%),
+            linear-gradient(180deg, #07030a 0%, #050507 100%);
           background-size: 200% 200%, 200% 200%, 200% 200%, 100% 100%;
           animation: dxAuroraDrift 18s ease-in-out infinite;
         }
