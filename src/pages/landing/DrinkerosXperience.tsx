@@ -390,9 +390,6 @@ const DrinkerosXperience: React.FC = () => {
             <p className="text-center text-base sm:text-lg text-white/85 leading-relaxed mb-4 max-w-2xl mx-auto">
               <strong>Caipirinhas perfeitas</strong>, <strong>drinks clássicos</strong> do mundo todo, <strong>drinks gigantes</strong> em jarras e suqueiras, <strong>shots</strong> para curtir com a galera, batidas, frozens, drinks em camadas — além de proporções, utensílios, taças, ingredientes essenciais e tudo o que faz um drink ser memorável.
             </p>
-            <p className="text-center text-base sm:text-lg text-white/85 mb-8 max-w-2xl mx-auto">
-              E ainda leva <strong className="text-amber-300">4 bônus exclusivos</strong>: drinks sem álcool, decorações, fotografia com celular e hortinha automatizada.
-            </p>
 
             <div className="text-center mb-6">
               {isVip ? (
