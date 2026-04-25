@@ -188,7 +188,7 @@ const DrinkerosXperience: React.FC = () => {
           {/* VÍDEO logo abaixo do headline */}
           <div className="w-[240px] sm:w-[280px] mx-auto aspect-square rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(236,72,153,0.35)] ring-1 ring-white/10 mb-4">
             <iframe
-              src="https://www.youtube.com/embed/fJC8vOcQ5DU"
+              src="https://www.youtube-nocookie.com/embed/fJC8vOcQ5DU?playsinline=1&rel=0"
               title="Drinkeros Xperience"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
