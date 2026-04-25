@@ -7,8 +7,10 @@ import { InstallBanner } from '@/components/user/InstallBanner';
 import { usePackageBySlug } from '@/hooks/usePackages';
 import { useCourseBySlug, useCoursePackages } from '@/hooks/useCourses';
 import { useEbookBySlug } from '@/hooks/useEbooks';
+import { useUserPlan } from '@/hooks/useUserPlan';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
 
 const PackageLanding: React.FC = () => {
   const { packageSlug } = useParams<{ packageSlug: string }>();
@@ -20,6 +22,8 @@ const PackageLanding: React.FC = () => {
   const { data: course, isLoading: courseLoading } = useCourseBySlug(packageSlug || '');
   const { data: ebook, isLoading: ebookLoading } = useEbookBySlug(packageSlug || '');
   const { data: courseModules = [] } = useCoursePackages(course?.id || '');
+  const { data: userPlan } = useUserPlan();
+  const isVip = !!userPlan?.isVip;
 
   const isLoading = pkgLoading || courseLoading || ebookLoading;
   const item = pkg || course || ebook;
@@ -85,9 +89,9 @@ const PackageLanding: React.FC = () => {
   const sellable = (isCourse || isEbook) && (item as any).is_available_for_sale && (item as any).price;
   const hasStripePrice = (isCourse || isEbook) && !!(item as any).stripe_price_id;
   const price = (item as any).price ? Number((item as any).price) : null;
-  const formattedPrice = price !== null
-    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price)
-    : null;
+  const finalPrice = price !== null && isVip ? applyVipDiscount(price) : price;
+  const formattedPrice = finalPrice !== null ? formatBRL(finalPrice) : null;
+  const formattedOriginalPrice = price !== null && isVip ? formatBRL(price) : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-950/20 dark:via-background dark:to-orange-950/20 flex flex-col">
@@ -153,8 +157,18 @@ const PackageLanding: React.FC = () => {
           {/* Preço + CTA de compra */}
           {sellable && hasStripePrice && (
             <div className="mb-8">
+              {isVip && formattedOriginalPrice && (
+                <div className="mb-2 flex items-center justify-center gap-2">
+                  <span className="text-lg text-muted-foreground line-through">{formattedOriginalPrice}</span>
+                  <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
+                    VIP · {VIP_DISCOUNT_PERCENT}% OFF
+                  </Badge>
+                </div>
+              )}
               <div className="text-4xl font-extrabold text-foreground mb-1">{formattedPrice}</div>
-              <p className="text-sm text-muted-foreground mb-6">Acesso por 1 ano · Pagamento único</p>
+              <p className="text-sm text-muted-foreground mb-6">
+                {isVip ? 'Preço exclusivo para assinantes VIP · ' : ''}Acesso por 1 ano · Pagamento único
+              </p>
               <Button
                 size="lg"
                 onClick={handleBuy}

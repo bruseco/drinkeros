@@ -30,11 +30,11 @@ serve(async (req) => {
     const table = product_type === "course" ? "courses" : "ebooks";
     const { data: product, error: productErr } = await supabase
       .from(table)
-      .select("id, name, slug, stripe_price_id, is_available_for_sale")
+      .select("id, name, slug, price, stripe_price_id, stripe_product_id, is_available_for_sale, cover_image_url, description")
       .eq("slug", slug)
       .maybeSingle();
     if (productErr || !product) throw new Error("Produto não encontrado");
-    if (!product.is_available_for_sale) throw new Error("Produto não está disponível para venda");
+    if (!(product as any).is_available_for_sale) throw new Error("Produto não está disponível para venda");
     if (!(product as any).stripe_price_id) {
       throw new Error("Produto ainda não foi sincronizado com Stripe");
     }
@@ -42,6 +42,7 @@ serve(async (req) => {
     // Tenta identificar usuário logado (opcional)
     let userId: string | null = null;
     let userEmail: string | null = null;
+    let isVip = false;
     const authHeader = req.headers.get("Authorization");
     if (authHeader) {
       try {
@@ -54,6 +55,9 @@ serve(async (req) => {
         if (data.user) {
           userId = data.user.id;
           userEmail = data.user.email ?? null;
+          // Verifica se é VIP via função SECURITY DEFINER
+          const { data: planData } = await supabase.rpc("get_user_plan", { _user_id: userId });
+          isVip = planData === "vip";
         }
       } catch (_) { /* visitante */ }
     }
@@ -68,13 +72,38 @@ serve(async (req) => {
 
     const origin = req.headers.get("origin") || "https://drinkeros.com";
 
+    // Regra universal: assinantes VIP recebem 80% OFF (cursos e ebooks).
+    // Mantém sincronia com src/lib/vipDiscount.ts.
+    const VIP_DISCOUNT_PERCENT = 80;
+    const basePrice = Number((product as any).price ?? 0);
+    const applyDiscount = isVip && basePrice > 0;
+    const discountedAmount = applyDiscount
+      ? Math.round(basePrice * (1 - VIP_DISCOUNT_PERCENT / 100) * 100)
+      : null;
+
+    const lineItem = applyDiscount
+      ? {
+          quantity: 1,
+          price_data: {
+            currency: "brl",
+            unit_amount: discountedAmount!,
+            product_data: {
+              name: `${(product as any).name} (VIP -${VIP_DISCOUNT_PERCENT}%)`,
+              description: (product as any).description ?? undefined,
+              images: (product as any).cover_image_url ? [(product as any).cover_image_url] : undefined,
+              metadata: { source_product_id: (product as any).id },
+            },
+          },
+        }
+      : { price: (product as any).stripe_price_id, quantity: 1 };
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer: customerId,
       customer_email: customerId ? undefined : userEmail || undefined,
       client_reference_id: userId || undefined,
-      line_items: [{ price: (product as any).stripe_price_id, quantity: 1 }],
-      allow_promotion_codes: true,
+      line_items: [lineItem as any],
+      allow_promotion_codes: !applyDiscount, // evita stack de cupom + desconto VIP
       success_url: `${origin}/${product.slug}?checkout=success`,
       cancel_url: `${origin}/${product.slug}?checkout=cancel`,
       metadata: {
@@ -82,6 +111,8 @@ serve(async (req) => {
         product_id: product.id,
         product_slug: product.slug,
         user_id: userId || "",
+        vip_discount_applied: applyDiscount ? "true" : "false",
+        vip_discount_percent: applyDiscount ? String(VIP_DISCOUNT_PERCENT) : "0",
       },
     });
 
