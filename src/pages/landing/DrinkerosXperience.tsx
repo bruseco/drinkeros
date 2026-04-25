@@ -559,7 +559,7 @@ const DrinkerosXperience: React.FC = () => {
           <h3 className="text-2xl sm:text-3xl font-extrabold mb-3">Ainda possui dúvidas?</h3>
           <p className="text-white/70 mb-6">Fale conosco imediatamente através do WhatsApp</p>
           <a
-            href="https://wa.me/5548988501985"
+            href="https://wa.me/5548991601025?text=Ol%C3%A1!%20Preciso%20de%20ajuda."
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-green-500 hover:bg-green-600 text-white font-bold shadow-lg transition-all hover:scale-[1.03]"
