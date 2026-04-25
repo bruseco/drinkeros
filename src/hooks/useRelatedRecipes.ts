@@ -1,0 +1,94 @@
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import type { ExclusivePost } from './useExclusivePosts';
+
+const STOPWORDS = new Set([
+  'de', 'da', 'do', 'das', 'dos', 'com', 'sem', 'e', 'a', 'o', 'as', 'os',
+  'em', 'no', 'na', 'nos', 'nas', 'para', 'por', 'um', 'uma',
+]);
+
+function normalize(str: string): string {
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function getFamilyTokens(title: string): string[] {
+  return normalize(title)
+    .split(' ')
+    .filter((w) => w.length >= 4 && !STOPWORDS.has(w));
+}
+
+function normalizeIngredient(ing: string): string {
+  return normalize(ing);
+}
+
+export interface RelatedRecipesResult {
+  family: ExclusivePost[];
+  similar: ExclusivePost[];
+}
+
+export function useRelatedRecipes(recipe: ExclusivePost | undefined) {
+  return useQuery({
+    queryKey: ['related-recipes', recipe?.id],
+    enabled: !!recipe?.id,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async (): Promise<RelatedRecipesResult> => {
+      if (!recipe) return { family: [], similar: [] };
+
+      const { data, error } = await supabase
+        .from('exclusive_posts')
+        .select('*')
+        .eq('is_published', true)
+        .neq('id', recipe.id);
+
+      if (error) throw error;
+
+      const all = (data || []) as ExclusivePost[];
+
+      // FAMILY: matching name token (e.g. "Caipirinha", "Mojito")
+      const familyTokens = getFamilyTokens(recipe.title);
+      const family: ExclusivePost[] = [];
+      if (familyTokens.length > 0) {
+        for (const post of all) {
+          const postTokens = new Set(getFamilyTokens(post.title));
+          if (familyTokens.some((t) => postTokens.has(t))) {
+            family.push(post);
+          }
+        }
+      }
+      const familyIds = new Set(family.map((p) => p.id));
+
+      // SIMILAR: >=80% ingredient overlap (Jaccard-like, against current recipe)
+      const baseIngredients = new Set(
+        (recipe.ingredients || []).map(normalizeIngredient).filter(Boolean)
+      );
+      const similar: ExclusivePost[] = [];
+      if (baseIngredients.size > 0) {
+        for (const post of all) {
+          if (familyIds.has(post.id)) continue;
+          const postIngs = new Set(
+            (post.ingredients || []).map(normalizeIngredient).filter(Boolean)
+          );
+          if (postIngs.size === 0) continue;
+
+          let matches = 0;
+          for (const ing of postIngs) {
+            if (baseIngredients.has(ing)) matches++;
+          }
+          // 80% of post ingredients are in base recipe
+          const ratio = matches / postIngs.size;
+          if (ratio >= 0.8) {
+            similar.push(post);
+          }
+        }
+      }
+
+      return { family, similar };
+    },
+  });
+}
