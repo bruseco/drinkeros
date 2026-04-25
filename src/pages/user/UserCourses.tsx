@@ -163,6 +163,7 @@ interface CourseCardProps {
   course: {
     id: string;
     name: string;
+    slug?: string | null;
     description: string | null;
     cover_image_url: string | null;
     hotmart_product_code: string | null;
@@ -172,16 +173,28 @@ interface CourseCardProps {
   getCourseProgress: (courseId: string) => { progress: number; nextLessonId: string | null };
 }
 
+// Slugs do DB que possuem landing page pública dedicada.
+// Mapeia slug do curso → rota da landing.
+const COURSE_LANDING_ROUTES: Record<string, string> = {
+  'mixologia-avancada': '/mixologia-avancada',
+  'bar-p-eventos': '/bar-p-eventos',
+  'drinkdelivery-engarrafados': '/drinkdelivery-engarrafados',
+  'producao-de-ingredientes-artesanais': '/ingredientes-artesanais',
+  'drinkeros-xperience': '/drinkeros-xperience',
+};
+
 const CourseCard: React.FC<CourseCardProps> = ({ course, owned, expired = false, getCourseProgress }) => {
   const { progress, nextLessonId } = owned && !expired ? getCourseProgress(course.id) : { progress: 0, nextLessonId: null };
   const hasStarted = owned && !expired && progress > 0;
 
   // Expirado tem prioridade visual: leva pra /vip pra renovar
+  // Bloqueado: leva pra landing/página de venda do curso (se houver)
+  const landingRoute = course.slug ? COURSE_LANDING_ROUTES[course.slug] : undefined;
   const cardLink = expired
     ? '/vip'
     : owned
     ? `/app/curso/${course.id}`
-    : `/app/curso/${course.id}?locked=true`;
+    : landingRoute ?? `/app/curso/${course.id}?locked=true`;
 
   return (
     <Link to={cardLink}>
