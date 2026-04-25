@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useUserPlan } from '@/hooks/useUserPlan';
 import { useCourseBySlug } from '@/hooks/useCourses';
 import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
+import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
 
 // Imagens
 import logo from '@/assets/landing/dx/logo.png';
