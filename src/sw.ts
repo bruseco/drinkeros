@@ -1,4 +1,4 @@
-// Cache version: v2026-04-06a
+// Cache version: v2026-04-25-oauth-fix
 /// <reference lib="webworker" />
 import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
 import { registerRoute, NavigationRoute, setCatchHandler } from 'workbox-routing';
