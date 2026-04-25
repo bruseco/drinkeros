@@ -11,7 +11,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Loader2, Upload, X, GraduationCap, ChevronDown, ChevronRight, Plus, Pencil, Play, Trash2, GripVertical, Settings2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Upload, X, GraduationCap, ChevronDown, ChevronRight, Plus, Pencil, Play, Trash2, GripVertical, Settings2, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 import CertificateLayoutDialog from '@/components/admin/CertificateLayoutDialog';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -52,6 +54,40 @@ const CourseForm: React.FC = () => {
   const { upload: uploadCertBg, isUploading: isUploadingCertBg } = useImageUpload('package-covers', { skipOptimize: true });
   const [deleteLessonId, setDeleteLessonId] = useState<string | null>(null);
   const [layoutDialogOpen, setLayoutDialogOpen] = useState(false);
+  const [isSyncingStripe, setIsSyncingStripe] = useState(false);
+  const queryClient = useQueryClient();
+
+  const handleSyncStripe = async () => {
+    if (!id) return;
+    const priceNum = parseFloat(formData.price);
+    if (!priceNum || priceNum <= 0) {
+      toast({
+        title: 'Defina o preço primeiro',
+        description: 'Cadastre um preço maior que zero e salve antes de sincronizar.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setIsSyncingStripe(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-stripe-product', {
+        body: { product_type: 'course', product_id: id },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast({ title: 'Sincronizado com Stripe!', description: 'Pronto para receber pagamentos.' });
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      queryClient.invalidateQueries({ queryKey: ['course', id] });
+    } catch (err: any) {
+      toast({
+        title: 'Erro ao sincronizar',
+        description: err.message || 'Tente novamente em instantes.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSyncingStripe(false);
+    }
+  };
 
   const [formData, setFormData] = useState({
     name: '',
@@ -366,6 +402,44 @@ const CourseForm: React.FC = () => {
                     />
                   </div>
                 </div>
+
+                {isEditing && !formData.is_free && (
+                  <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Label className="text-sm">Checkout Stripe</Label>
+                          {(course as any)?.stripe_price_id ? (
+                            <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20 hover:bg-green-500/15">
+                              <CheckCircle2 className="h-3 w-3 mr-1" /> Sincronizado
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-amber-700 border-amber-500/40">
+                              <AlertCircle className="h-3 w-3 mr-1" /> Pendente
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Sincronize para criar o produto e o preço no Stripe e habilitar a venda.
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleSyncStripe}
+                        disabled={isSyncingStripe}
+                      >
+                        {isSyncingStripe ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="h-4 w-4" />
+                        )}
+                        {(course as any)?.stripe_price_id ? 'Re-sincronizar' : 'Sincronizar com Stripe'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
                 {!formData.is_free && (
                   <>
