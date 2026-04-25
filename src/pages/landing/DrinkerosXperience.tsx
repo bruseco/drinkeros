@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Accordion,
@@ -8,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Loader2, ShoppingCart, CheckCircle2, ShieldCheck, Plus, MessageCircle } from 'lucide-react';
+import { Loader2, ShoppingCart, CheckCircle2, ShieldCheck, MessageCircle, Crown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUserPlan } from '@/hooks/useUserPlan';
@@ -18,8 +17,6 @@ import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDisc
 // Imagens
 import logo from '@/assets/landing/dx/logo.png';
 import brunoHero from '@/assets/landing/dx/bruno-hero.png';
-import brunoBio from '@/assets/landing/dx/bruno-bio.jpg';
-import arrow from '@/assets/landing/dx/arrow.png';
 import garantia from '@/assets/landing/dx/garantia.png';
 import pagamentos from '@/assets/landing/dx/pagamentos.png';
 
@@ -42,13 +39,10 @@ import perfilHobbie from '@/assets/landing/dx/perfil-hobbie.jpg';
 import perfilBartender from '@/assets/landing/dx/perfil-bartender.jpg';
 import perfilEmpresario from '@/assets/landing/dx/perfil-empresario.jpg';
 
-import bonus1 from '@/assets/landing/dx/bonus-1.png';
-import bonus2 from '@/assets/landing/dx/bonus-2.png';
-import bonus3 from '@/assets/landing/dx/bonus-3.png';
-import bonus4 from '@/assets/landing/dx/bonus-4.png';
-import bonus5 from '@/assets/landing/dx/bonus-5.png';
-import bonus6 from '@/assets/landing/dx/bonus-6.png';
-import bonus7 from '@/assets/landing/dx/bonus-7.png';
+import bonusNew1 from '@/assets/landing/dx/bonus-new-1.jpg';
+import bonusNew2 from '@/assets/landing/dx/bonus-new-2.jpg';
+import bonusNew3 from '@/assets/landing/dx/bonus-new-3.jpg';
+import bonusNew4 from '@/assets/landing/dx/bonus-new-4.jpg';
 
 const SLUG = 'drinkeros-xperience';
 
@@ -71,13 +65,10 @@ const perfilItems = [
 ];
 
 const bonusItems = [
-  { img: bonus1, title: 'BÔNUS 1 — CLUBE DOS DRINKEROS', desc: 'Tenha acesso exclusivo a todas as nossas receitas no APP. Explore por ingredientes, salve suas favoritas em listas personalizadas e organize tudo de forma prática e intuitiva.', price: 'R$ 247,00' },
-  { img: bonus2, title: 'BÔNUS 2 — 40 RECEITAS DE XAROPES ARTESANAIS', desc: 'Tenha acesso exclusivo a todas as nossas receitas de xaropes artesanais, que vão elevar o nível dos seus drinks e ainda proporcionar uma baita economia.', price: 'R$ 97,00' },
-  { img: bonus3, title: 'BÔNUS 3 — DRINKS SEM ÁLCOOL', desc: 'Nessa divertida aula, eu te ensino o método para você criar qualquer drink sem álcool, sem a necessidade de ficar pesquisando receitas na internet.', price: 'R$ 97,00' },
-  { img: bonus4, title: 'BÔNUS 4 — DECORAÇÕES', desc: 'Fiz uma aula especial explicando tudo que você precisa saber sobre as decorações. Falo sobre as técnicas e também os estilos para você aplicar nos seus drinks.', price: 'R$ 97,00' },
-  { img: bonus5, title: 'BÔNUS 5 — COLEÇÃO DE DRINKS DE VERÃO', desc: 'Separei um pacotão completo com 35 receitas de drinks perfeitos para curtir seu verão. Aqui você vai aprender drinks como caipirinhas, mojitos, gin tônicas, drinks com rosé e muito mais.', price: 'R$ 89,00' },
-  { img: bonus6, title: 'BÔNUS 6 — TÉCNICAS DE FOTOGRAFIA', desc: 'Aprenda a tirar fotos dos seus drinks com seu próprio celular utilizando técnicas que vão deixar suas fotos lindas e profissionais.', price: 'R$ 99,00' },
-  { img: bonus7, title: 'BÔNUS 7 — HORTINHA AUTOMATIZADA', desc: 'Você vai aprender a montar uma hortinha suspensa na sua casa com irrigação automatizada, pra você nunca deixar suas ervas morrerem e sempre ter elas a sua disposição na hora de criar seus drinks.', price: 'R$ 97,00' },
+  { img: bonusNew1, title: 'BÔNUS 1 — DRINKS SEM ÁLCOOL', desc: 'Aula divertida com o método para criar qualquer drink sem álcool, sem precisar ficar pesquisando receitas na internet.' },
+  { img: bonusNew2, title: 'BÔNUS 2 — DECORAÇÕES', desc: 'Aula especial com tudo que você precisa saber sobre decorações: técnicas e estilos para deixar seus drinks visualmente incríveis.' },
+  { img: bonusNew3, title: 'BÔNUS 3 — FOTOGRAFIA DE DRINKS COM CELULAR', desc: 'Aprenda a fotografar seus drinks usando apenas o seu celular, com técnicas que deixam suas fotos profissionais e prontas para as redes.' },
+  { img: bonusNew4, title: 'BÔNUS 4 — HORTINHA AUTOMATIZADA', desc: 'Monte uma hortinha suspensa em casa com irrigação automatizada e tenha sempre ervas frescas à mão para criar drinks de outro nível.' },
 ];
 
 const faqItems = [
@@ -161,45 +152,48 @@ const DrinkerosXperience: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0b0b0d] text-white overflow-x-hidden">
-      {/* HERO */}
-      <section
-        className="relative min-h-[100vh] flex items-center"
-        style={{
-          backgroundImage:
-            'radial-gradient(ellipse at 30% 40%, rgba(168, 85, 247, 0.25), transparent 60%), radial-gradient(ellipse at 70% 60%, rgba(236, 72, 153, 0.15), transparent 60%), linear-gradient(180deg, #0b0b0d 0%, #14070f 100%)',
-        }}
-      >
-        <div className="container mx-auto px-4 py-12 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center relative z-10">
-          <div className="text-center lg:text-left order-2 lg:order-1">
-            <img src={logo} alt="Curso Drinkeros Xperience" className="h-32 sm:h-40 mx-auto lg:mx-0 mb-6 drop-shadow-[0_4px_20px_rgba(236,72,153,0.4)]" />
-            <p className="text-sm sm:text-base text-white/70 mb-4">com Bruno Abreu</p>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold uppercase tracking-tight mb-4 leading-tight">
-              Descubra os segredos<br />por trás dos drinks.
-            </h1>
-            <p className="text-lg sm:text-xl font-bold text-lime-300 mb-4">
-              Aprenda as proporções de destilado, dulçor, acidez e amargor e CRIE SEUS PRÓPRIOS DRINKS.
-            </p>
-            <p className="text-base text-white/80 mb-8 max-w-xl mx-auto lg:mx-0">
-              Vou te levar do zero ao avançado em uma divertida jornada onde você aprende a caipirinha perfeita, capifrutas, caipirinhas gourmet, clássicos, batidas, frozens, drinks em camadas, drinks em jarras, suqueiras e muito mais.
-            </p>
-            <CTAButton size="xl">SAIBA MAIS <Plus className="h-5 w-5" /></CTAButton>
-          </div>
-          <div className="order-1 lg:order-2 flex justify-center">
-            <img src={brunoHero} alt="Bruno Abreu" className="max-h-[60vh] lg:max-h-[80vh] w-auto object-contain drop-shadow-2xl" />
-          </div>
-        </div>
-      </section>
+      {/* Animação do gradiente do hero */}
+      <style>{`
+        @keyframes dxAuroraDrift {
+          0%   { background-position: 0% 50%, 100% 50%, 50% 0%, 0 0; }
+          50%  { background-position: 100% 50%, 0% 50%, 50% 100%, 0 0; }
+          100% { background-position: 0% 50%, 100% 50%, 50% 0%, 0 0; }
+        }
+        .dx-aurora {
+          background:
+            radial-gradient(60% 60% at 25% 30%, rgba(168, 85, 247, 0.45), transparent 60%),
+            radial-gradient(55% 55% at 75% 65%, rgba(236, 72, 153, 0.40), transparent 60%),
+            radial-gradient(70% 70% at 50% 100%, rgba(251, 146, 60, 0.25), transparent 60%),
+            linear-gradient(180deg, #120612 0%, #0b0b0d 100%);
+          background-size: 200% 200%, 200% 200%, 200% 200%, 100% 100%;
+          animation: dxAuroraDrift 18s ease-in-out infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .dx-aurora { animation: none; }
+        }
+      `}</style>
 
-      {/* VÍDEO */}
-      <section className="py-16 sm:py-24 bg-[#0b0b0d]">
-        <div className="container mx-auto px-4">
-          <h2 className="text-2xl sm:text-4xl font-extrabold uppercase text-center mb-4 leading-tight">
-            Veja tudo que você vai aprender<br />assistindo o vídeo abaixo:
-          </h2>
-          <div className="flex justify-center mb-8">
-            <img src={arrow} alt="" className="h-16 sm:h-24 animate-bounce" />
-          </div>
-          <div className="max-w-4xl mx-auto aspect-video rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(236,72,153,0.3)] ring-1 ring-white/10">
+      {/* HERO — apenas logo + headline + vídeo */}
+      <section className="relative dx-aurora">
+        <div className="container mx-auto px-4 pt-12 sm:pt-16 pb-10 text-center relative z-10">
+          <img
+            src={logo}
+            alt="Curso Drinkeros Xperience"
+            className="h-24 sm:h-32 lg:h-40 mx-auto mb-8 drop-shadow-[0_4px_24px_rgba(236,72,153,0.55)]"
+          />
+          <p className="text-sm sm:text-base text-white/70 mb-3">com Bruno Abreu</p>
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold uppercase tracking-tight mb-5 leading-[1.05] max-w-4xl mx-auto">
+            Descubra os segredos<br />por trás dos drinks.
+          </h1>
+          <p className="text-lg sm:text-2xl font-bold text-lime-300 mb-4 max-w-3xl mx-auto">
+            Aprenda as proporções de destilado, dulçor, acidez e amargor e CRIE SEUS PRÓPRIOS DRINKS.
+          </p>
+          <p className="text-base sm:text-lg text-white/80 mb-10 max-w-2xl mx-auto">
+            Do zero ao avançado: caipirinha perfeita, capifrutas, gourmet, clássicos, batidas, frozens, drinks em camadas, jarras e muito mais.
+          </p>
+
+          {/* VÍDEO logo abaixo do headline */}
+          <div className="max-w-4xl mx-auto aspect-video rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(236,72,153,0.35)] ring-1 ring-white/10">
             <iframe
               src="https://www.youtube.com/embed/1Zu2kDN6SPk"
               title="Drinkeros Xperience"
@@ -208,8 +202,9 @@ const DrinkerosXperience: React.FC = () => {
               className="w-full h-full"
             />
           </div>
-          <div className="flex justify-center mt-10">
-            <CTAButton size="xl">QUERO VIRAR DRINKERO(A)<br />CLIQUE AQUI!</CTAButton>
+
+          <div className="flex justify-center mt-10 pb-4">
+            <CTAButton size="xl">QUERO VIRAR DRINKERO(A)</CTAButton>
           </div>
         </div>
       </section>
@@ -224,7 +219,7 @@ const DrinkerosXperience: React.FC = () => {
             {learnItems.map((item, i) => (
               <div key={i} className="group rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-pink-500/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_40px_rgba(236,72,153,0.2)]">
                 <div className="aspect-video overflow-hidden">
-                  <img src={item.img} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <img src={item.img} alt="" loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                 </div>
                 <div className="p-5">
                   <p className="text-sm sm:text-base text-white/85" dangerouslySetInnerHTML={{ __html: item.html }} />
@@ -256,7 +251,7 @@ const DrinkerosXperience: React.FC = () => {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
             {[dep1, dep2, dep3, dep4].map((src, i) => (
               <div key={i} className="rounded-xl overflow-hidden ring-1 ring-white/10 hover:ring-pink-500/50 transition-all hover:scale-[1.02]">
-                <img src={src} alt={`Depoimento ${i + 1}`} className="w-full h-auto" />
+                <img src={src} alt={`Depoimento ${i + 1}`} loading="lazy" className="w-full h-auto" />
               </div>
             ))}
           </div>
@@ -276,7 +271,7 @@ const DrinkerosXperience: React.FC = () => {
             {perfilItems.map((item, i) => (
               <div key={i} className="text-center">
                 <div className="aspect-square rounded-2xl overflow-hidden mb-6 ring-2 ring-white/10 hover:ring-pink-500/60 transition-all hover:scale-[1.02]">
-                  <img src={item.img} alt={item.title} className="w-full h-full object-cover" />
+                  <img src={item.img} alt={item.title} loading="lazy" className="w-full h-full object-cover" />
                 </div>
                 <h3 className="text-2xl font-extrabold mb-3 bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-transparent">
                   {item.title}
@@ -288,27 +283,24 @@ const DrinkerosXperience: React.FC = () => {
         </div>
       </section>
 
-      {/* BÔNUS */}
+      {/* BÔNUS — agora com 4 */}
       <section className="py-16 sm:py-24 bg-[#0b0b0d]">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl sm:text-5xl font-extrabold text-center mb-4">
             Calma que <span className="bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-transparent">ainda não acabou!</span>
           </h2>
           <p className="text-center text-lg sm:text-xl text-white/80 max-w-3xl mx-auto mb-16">
-            Se liga nos <strong className="text-amber-400">7 BÔNUS</strong> que você ganhará ao adquirir o <strong>curso Drinkeros Xperience</strong>:
+            Se liga nos <strong className="text-amber-400">4 BÔNUS</strong> que você ganhará ao adquirir o <strong>curso Drinkeros Xperience</strong>:
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-5xl mx-auto">
             {bonusItems.map((b, i) => (
-              <div key={i} className="rounded-2xl bg-white/5 border border-white/10 p-6 hover:border-pink-500/50 transition-all hover:scale-[1.02] hover:shadow-[0_10px_40px_rgba(236,72,153,0.15)]">
-                <div className="flex justify-center mb-4">
-                  <img src={b.img} alt={b.title} className="h-32 w-auto object-contain" />
+              <div key={i} className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden hover:border-pink-500/50 transition-all hover:scale-[1.02] hover:shadow-[0_10px_40px_rgba(236,72,153,0.18)]">
+                <div className="aspect-video overflow-hidden">
+                  <img src={b.img} alt={b.title} loading="lazy" className="w-full h-full object-cover" />
                 </div>
-                <h3 className="font-extrabold text-lg mb-3 text-center">{b.title}</h3>
-                <p className="text-sm text-white/75 mb-4 text-center">{b.desc}</p>
-                <div className="text-center">
-                  <span className="inline-block px-4 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-pink-500/20 border border-amber-400/40 text-amber-300 font-bold">
-                    {b.price}
-                  </span>
+                <div className="p-6">
+                  <h3 className="font-extrabold text-lg sm:text-xl mb-3">{b.title}</h3>
+                  <p className="text-sm sm:text-base text-white/75">{b.desc}</p>
                 </div>
               </div>
             ))}
@@ -319,68 +311,70 @@ const DrinkerosXperience: React.FC = () => {
       {/* GARANTIA */}
       <section className="py-16 sm:py-20 bg-gradient-to-b from-[#0b0b0d] to-[#14070f]">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-[auto,1fr] gap-8 items-center text-center md:text-left">
-            <img src={garantia} alt="Garantia 15 dias" className="h-40 w-40 mx-auto" />
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold mb-3">Confiamos em nosso <span className="bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-transparent">MÉTODO</span></h2>
-              <p className="text-lg text-white/80 flex items-start gap-2">
-                <ShieldCheck className="h-6 w-6 text-lime-400 mt-1 flex-shrink-0" />
-                Se em até <strong>15 dias</strong> você não ficar satisfeito com o curso, nos mande um e-mail e iremos te reembolsar completamente! Sem enganação e enrolação, garantia 100%.
-              </p>
+          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-[auto,1fr] gap-8 items-center">
+            <img src={garantia} alt="Garantia 15 dias" loading="lazy" className="h-40 w-40 mx-auto" />
+            <div className="text-center md:text-left">
+              <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
+                Confiamos em nosso <span className="bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-transparent">MÉTODO</span>
+              </h2>
+              <div className="flex items-start gap-3 text-base sm:text-lg text-white/85">
+                <ShieldCheck className="h-7 w-7 text-lime-400 mt-0.5 flex-shrink-0" />
+                <p>
+                  Se em até <strong className="text-lime-300">15 dias</strong> você não ficar satisfeito com o curso, nos mande um e-mail e iremos te reembolsar completamente. Sem enganação e sem enrolação — <strong>garantia 100%</strong>.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* OFERTA */}
+      {/* OFERTA — frase resumo + preço + CTA */}
       <section id="oferta" className="py-16 sm:py-24 bg-gradient-to-br from-[#1a0612] via-[#0b0b0d] to-[#0a0a14]">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto rounded-3xl bg-gradient-to-b from-white/5 to-white/[0.02] border border-white/10 shadow-2xl p-6 sm:p-10 backdrop-blur">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-center mb-8">
-              Você vai <span className="bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-transparent">levar:</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-center mb-6">
+              Você vai <span className="bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-transparent">aprender:</span>
             </h2>
-            <ul className="space-y-3 mb-8">
-              {[
-                ['Curso DRINKEROS XPERIENCE', 'R$ 697'],
-                ['BÔNUS 1: CLUBE DOS DRINKEROS', 'R$ 247'],
-                ['BÔNUS 2: 40 receitas XAROPES CASEIROS', 'R$ 97'],
-                ['BÔNUS 3: Aula DRINKS SEM ÁLCOOL', 'R$ 97'],
-                ['BÔNUS 4: Aula especial de DECORAÇÕES', 'R$ 50'],
-                ['BÔNUS 5: Coleção de DRINKS DE VERÃO', 'R$ 87'],
-                ['BÔNUS 6: Aula Técnicas de FOTOGRAFIA', 'R$ 97'],
-                ['BÔNUS 7: Faça uma Horta Automatizada', 'R$ 67'],
-              ].map(([label, price]) => (
-                <li key={label} className="flex items-center justify-between gap-3 border-b border-white/10 pb-2">
-                  <span className="flex items-center gap-2 text-sm sm:text-base">
-                    <CheckCircle2 className="h-5 w-5 text-lime-400 flex-shrink-0" />
-                    {label}
-                  </span>
-                  <span className="text-sm text-white/50 line-through">{price}</span>
-                </li>
-              ))}
-            </ul>
+
+            <p className="text-center text-base sm:text-lg text-white/85 leading-relaxed mb-4 max-w-2xl mx-auto">
+              <strong>Caipirinhas perfeitas</strong>, <strong>drinks clássicos</strong> do mundo todo, <strong>drinks gigantes</strong> em jarras e suqueiras, <strong>shots</strong> para curtir com a galera, batidas, frozens, drinks em camadas — além de proporções, utensílios, taças, ingredientes essenciais e tudo o que faz um drink ser memorável.
+            </p>
+            <p className="text-center text-base sm:text-lg text-white/85 mb-8 max-w-2xl mx-auto">
+              E ainda leva <strong className="text-amber-300">4 bônus exclusivos</strong>: drinks sem álcool, decorações, fotografia com celular e hortinha automatizada.
+            </p>
 
             <div className="text-center mb-6">
-              <p className="text-lg text-white/60 line-through">De R$ 1.439,00</p>
-              <p className="text-sm uppercase tracking-wider text-white/70 mt-2">por apenas</p>
-
-              {isVip && (
-                <div className="my-2 flex items-center justify-center gap-2">
-                  <span className="text-xl text-white/50 line-through">{formatBRL(basePrice)}</span>
-                  <Badge className="bg-gradient-to-r from-amber-500 to-pink-500 text-white border-0">
-                    VIP · {VIP_DISCOUNT_PERCENT}% OFF
-                  </Badge>
-                </div>
-              )}
-
-              <p className="text-5xl sm:text-6xl font-black bg-gradient-to-r from-amber-300 via-orange-400 to-pink-500 bg-clip-text text-transparent my-2">
-                {formatBRL(finalPrice)}
-              </p>
-              <p className="text-base text-white/80">
-                em até <strong className="text-amber-300">12x R$ {installments}</strong>
-              </p>
-              {isVip && (
-                <p className="text-xs text-amber-300/80 mt-1">Preço exclusivo para assinantes VIP</p>
+              {isVip ? (
+                <>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-pink-500/20 border border-amber-400/40 mb-3">
+                    <Crown className="h-4 w-4 text-amber-300" />
+                    <span className="text-sm font-bold text-amber-200 uppercase tracking-wide">
+                      Preço exclusivo VIP · {VIP_DISCOUNT_PERCENT}% OFF
+                    </span>
+                  </div>
+                  <p className="text-lg text-white/60 line-through">{formatBRL(basePrice)}</p>
+                  <p className="text-sm uppercase tracking-wider text-white/70 mt-2">por apenas</p>
+                  <p className="text-5xl sm:text-6xl font-black bg-gradient-to-r from-amber-300 via-orange-400 to-pink-500 bg-clip-text text-transparent my-2">
+                    {formatBRL(finalPrice)}
+                  </p>
+                  <p className="text-base text-white/80">
+                    em até <strong className="text-amber-300">12x R$ {installments}</strong>
+                  </p>
+                  <p className="text-xs text-amber-300/90 mt-2">
+                    Esse valor especial é só para você que já é assinante VIP. 💜
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-lg text-white/60 line-through">De R$ 1.439,00</p>
+                  <p className="text-sm uppercase tracking-wider text-white/70 mt-2">por apenas</p>
+                  <p className="text-5xl sm:text-6xl font-black bg-gradient-to-r from-amber-300 via-orange-400 to-pink-500 bg-clip-text text-transparent my-2">
+                    {formatBRL(finalPrice)}
+                  </p>
+                  <p className="text-base text-white/80">
+                    em até <strong className="text-amber-300">12x R$ {installments}</strong>
+                  </p>
+                </>
               )}
             </div>
 
@@ -398,7 +392,7 @@ const DrinkerosXperience: React.FC = () => {
               </button>
             </div>
 
-            <img src={pagamentos} alt="Formas de pagamento" className="w-full max-w-md mx-auto opacity-90" />
+            <img src={pagamentos} alt="Formas de pagamento" loading="lazy" className="w-full max-w-md mx-auto opacity-90" />
 
             <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-white/70">
               <span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-lime-400" /> Garantia de 15 dias</span>
@@ -415,22 +409,34 @@ const DrinkerosXperience: React.FC = () => {
         </div>
       </section>
 
-      {/* SOBRE BRUNO */}
-      <section className="py-16 sm:py-24 bg-[#0b0b0d]">
-        <div className="container mx-auto px-4">
+      {/* SOBRE BRUNO — agora com a foto transparente do hero */}
+      <section className="relative py-16 sm:py-24 overflow-hidden bg-gradient-to-b from-[#0b0b0d] via-[#150810] to-[#0b0b0d]">
+        <div
+          className="absolute inset-0 opacity-60 pointer-events-none"
+          style={{
+            backgroundImage:
+              'radial-gradient(50% 50% at 20% 50%, rgba(168,85,247,0.18), transparent 60%), radial-gradient(50% 50% at 80% 50%, rgba(236,72,153,0.18), transparent 60%)',
+          }}
+        />
+        <div className="container mx-auto px-4 relative z-10">
           <h2 className="text-3xl sm:text-5xl font-extrabold text-center mb-12">
             Quem é <span className="bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-transparent">Bruno Abreu?</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center max-w-5xl mx-auto">
-            <div className="rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl">
-              <img src={brunoBio} alt="Bruno Abreu" className="w-full h-auto" />
+            <div className="flex justify-center">
+              <img
+                src={brunoHero}
+                alt="Bruno Abreu"
+                loading="lazy"
+                className="max-h-[60vh] w-auto object-contain drop-shadow-[0_20px_50px_rgba(236,72,153,0.35)]"
+              />
             </div>
             <div className="space-y-4 text-base sm:text-lg text-white/85">
               <p>Fundador da Drinkeros, <strong className="text-amber-300">o maior canal de receitas de drinks</strong> em vídeo da América Latina.</p>
               <p>Bruno trabalha com desenvolvimento de projetos para internet desde seus 12 anos de idade, é web-designer, editor de vídeo, roteirista, humorista e drinkero.</p>
               <p><strong>Um completo apaixonado por drinks</strong>, que transformou seu aprendizado com drinks em uma experiência online única e inovadora.</p>
               <p>O canal Drinkeros possui <strong className="text-amber-300">mais de 6 milhões de seguidores</strong> em toda América Latina e já conta com <strong>mais de 2 mil receitas criadas</strong> utilizando seu Método Áureo das proporções dos drinks.</p>
-              <p>Em 2020, Bruno aproveitou todo seu conhecimento e criou o curso de drinks mais divertido da internet. O <strong className="text-amber-300">Drinkeros Xperience</strong>, que hoje já certificou <strong>mais de 11.000 alunos</strong> pelo mundo.</p>
+              <p>Em 2020, Bruno criou o curso de drinks mais divertido da internet. O <strong className="text-amber-300">Drinkeros Xperience</strong>, que hoje já certificou <strong>mais de 11.000 alunos</strong> pelo mundo.</p>
             </div>
           </div>
         </div>
