@@ -99,7 +99,58 @@ serve(async (req) => {
         const session = event.data.object as Stripe.Checkout.Session;
         const customerId = (session.customer as string) || null;
         const subscriptionId = (session.subscription as string) || null;
+        const meta = (session.metadata || {}) as Record<string, string>;
 
+        // Caso: compra de curso ou ebook (mode=payment, metadata.product_type)
+        if (session.mode === "payment" && (meta.product_type === "course" || meta.product_type === "ebook")) {
+          const productType = meta.product_type;
+          const productId = meta.product_id;
+          if (!productId) { log("missing-product-id", { sessionId: session.id }); break; }
+
+          const email = session.customer_details?.email ?? session.customer_email ?? null;
+
+          // Resolve user_id (logged-in via client_reference_id, ou via email, ou cria conta)
+          let userId: string | null = await resolveUserId({
+            customerId,
+            email,
+            clientReferenceId: session.client_reference_id,
+          });
+
+          if (!userId && email) {
+            // Cria conta automaticamente
+            const { data: created, error: createErr } = await supabase.auth.admin.createUser({
+              email: email.toLowerCase(),
+              email_confirm: true,
+              user_metadata: { full_name: session.customer_details?.name || "" },
+            });
+            if (createErr) {
+              log("auto-create-user-error", { error: createErr.message, email });
+            } else if (created.user) {
+              userId = created.user.id;
+              log("auto-created-user", { userId, email });
+            }
+          }
+
+          if (!userId) {
+            log("user-not-found-product-purchase", { sessionId: session.id, email });
+            break;
+          }
+
+          const targetTable = productType === "course" ? "user_courses" : "user_ebooks";
+          const idCol = productType === "course" ? "course_id" : "ebook_id";
+
+          const { error: grantErr } = await supabase
+            .from(targetTable)
+            .upsert(
+              { user_id: userId, [idCol]: productId, source: "stripe", purchased_at: new Date().toISOString() },
+              { onConflict: `user_id,${idCol}` },
+            );
+          if (grantErr) log("grant-access-error", { error: grantErr.message, productType, productId });
+
+          break;
+        }
+
+        // Caso original: assinatura VIP
         const userId = await resolveUserId({
           customerId,
           email: session.customer_details?.email ?? session.customer_email,
