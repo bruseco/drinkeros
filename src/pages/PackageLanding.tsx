@@ -89,9 +89,9 @@ const PackageLanding: React.FC = () => {
   const sellable = (isCourse || isEbook) && (item as any).is_available_for_sale && (item as any).price;
   const hasStripePrice = (isCourse || isEbook) && !!(item as any).stripe_price_id;
   const price = (item as any).price ? Number((item as any).price) : null;
-  const formattedPrice = price !== null
-    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price)
-    : null;
+  const finalPrice = price !== null && isVip ? applyVipDiscount(price) : price;
+  const formattedPrice = finalPrice !== null ? formatBRL(finalPrice) : null;
+  const formattedOriginalPrice = price !== null && isVip ? formatBRL(price) : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-950/20 dark:via-background dark:to-orange-950/20 flex flex-col">
