@@ -392,17 +392,15 @@ const DrinkerosXperience: React.FC = () => {
       <section className="py-16 sm:py-20 bg-gradient-to-b from-[#0b0b0d] to-[#14070f]">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-[auto,1fr] gap-8 items-center">
-            <img src={garantia} alt="Garantia 15 dias" loading="lazy" className="h-40 w-40 mx-auto" />
+            <img src={garantia} alt="Garantia 15 dias" loading="lazy" className="h-44 w-44 mx-auto" />
             <div className="text-center md:text-left">
               <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
                 Confiamos em nosso <span className="bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-transparent">MÉTODO</span>
               </h2>
-              <div className="flex items-start gap-3 text-base sm:text-lg text-white/85">
-                <ShieldCheck className="h-7 w-7 text-lime-400 mt-0.5 flex-shrink-0" />
-                <p>
-                  Se em até <strong className="text-lime-300">15 dias</strong> você não ficar satisfeito com o curso, nos mande um e-mail e iremos te reembolsar completamente. Sem enganação e sem enrolação — <strong>garantia 100%</strong>.
-                </p>
-              </div>
+              <ShieldCheck className="h-8 w-8 text-lime-400 mx-auto md:mx-0 mb-3" />
+              <p className="text-base sm:text-lg text-white/85">
+                Se em até <strong className="text-lime-300">15 dias</strong> você não ficar satisfeito com o curso, nos mande um e-mail e iremos te reembolsar completamente. Sem enganação e sem enrolação — <strong>garantia 100%</strong>.
+              </p>
             </div>
           </div>
         </div>
