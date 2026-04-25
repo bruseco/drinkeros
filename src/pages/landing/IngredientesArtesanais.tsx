@@ -21,6 +21,7 @@ import CourseLanding, {
 } from './CourseLanding';
 
 import logo from '@/assets/landing/ingredientes/logo.png';
+import logoBg from '@/assets/landing/ingredientes/logo-bg.jpg';
 import instructor from '@/assets/landing/ingredientes/instructor.jpg';
 import dep1 from '@/assets/landing/ingredientes/dep-1.jpg';
 import dep2 from '@/assets/landing/ingredientes/dep-2.jpg';
@@ -74,6 +75,7 @@ const IngredientesArtesanais: React.FC = () => (
     slug="ingredientes-artesanais"
     brand="Ingredientes Artesanais"
     logoSrc={logo}
+    logoBgSrc={logoBg}
     instructorSrc={instructor}
     instructorName="Bruno Abreu"
     heroVideoUrl="https://www.youtube.com/embed/YWZRA7NsL48?rel=0&playsinline=1"
