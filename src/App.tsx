@@ -50,6 +50,7 @@ import AdminCSTimeline from "./pages/admin/AdminCSTimeline";
 import AdminCRM from "./pages/admin/AdminCRM";
 
 import AdminUXMetrics from "./pages/admin/AdminUXMetrics";
+import AdminSalesPages from "./pages/admin/AdminSalesPages";
 
 // User pages
 import { UserLayout } from "./components/user/UserLayout";
@@ -145,6 +146,7 @@ const App = () => (
               <Route path="cs-timeline" element={<AdminCSTimeline />} />
               <Route path="crm" element={<AdminCRM />} />
               <Route path="ux-metrics" element={<AdminUXMetrics />} />
+              <Route path="paginas-venda" element={<AdminSalesPages />} />
             </Route>
 
             {/* User app routes */}

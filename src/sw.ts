@@ -1,12 +1,17 @@
 // Cache version: v2026-04-25-oauth-fix
 /// <reference lib="webworker" />
+// @ts-ignore - resolved by vite-plugin-pwa at build time
 import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
+// @ts-ignore - resolved by vite-plugin-pwa at build time
 import { registerRoute, NavigationRoute, setCatchHandler } from 'workbox-routing';
+// @ts-ignore - resolved by vite-plugin-pwa at build time
 import { NetworkFirst, CacheFirst } from 'workbox-strategies';
+// @ts-ignore - resolved by vite-plugin-pwa at build time
 import { ExpirationPlugin } from 'workbox-expiration';
+// @ts-ignore - resolved by vite-plugin-pwa at build time
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 
-declare let self: ServiceWorkerGlobalScope;
+declare let self: ServiceWorkerGlobalScope & { __WB_MANIFEST: any };
 
 // Force new service worker to activate immediately
 self.addEventListener('install', () => {
