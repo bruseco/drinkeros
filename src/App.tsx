@@ -106,6 +106,9 @@ const App = () => (
             <Route path="/sso" element={<SSO />} />
             <Route path="/migracao" element={<Migracao />} />
             
+            {/* Custom landing pages (must come before the catch-all :packageSlug) */}
+            <Route path="/drinkeros-xperience" element={<DrinkerosXperience />} />
+
             {/* Dynamic package landing pages - must be after static routes */}
             <Route path="/:packageSlug" element={<PackageLanding />} />
 
