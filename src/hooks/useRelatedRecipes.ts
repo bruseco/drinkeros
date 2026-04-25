@@ -88,32 +88,29 @@ export function useRelatedRecipes(recipe: ExclusivePost | undefined) {
       }
       const familyIds = new Set(family.map((p) => p.id));
 
-      // SIMILAR: >=80% ingredient overlap (Jaccard-like, against current recipe)
-      const baseIngredients = new Set(
-        (recipe.ingredients || []).map(normalizeIngredient).filter(Boolean)
-      );
-      const similar: ExclusivePost[] = [];
-      if (baseIngredients.size > 0) {
+      // SIMILAR: Jaccard >= 50% nas chaves de ingredientes
+      const baseKeys = ingredientKeys(recipe.ingredients);
+      const similar: Array<{ post: ExclusivePost; score: number }> = [];
+      if (baseKeys.size > 0) {
         for (const post of all) {
           if (familyIds.has(post.id)) continue;
-          const postIngs = new Set(
-            (post.ingredients || []).map(normalizeIngredient).filter(Boolean)
-          );
-          if (postIngs.size === 0) continue;
+          const postKeys = ingredientKeys(post.ingredients);
+          if (postKeys.size === 0) continue;
 
-          let matches = 0;
-          for (const ing of postIngs) {
-            if (baseIngredients.has(ing)) matches++;
+          let intersection = 0;
+          for (const k of postKeys) {
+            if (baseKeys.has(k)) intersection++;
           }
-          // 80% of post ingredients are in base recipe
-          const ratio = matches / postIngs.size;
-          if (ratio >= 0.8) {
-            similar.push(post);
+          const union = baseKeys.size + postKeys.size - intersection;
+          const jaccard = union > 0 ? intersection / union : 0;
+          if (jaccard >= 0.5 && intersection >= 2) {
+            similar.push({ post, score: jaccard });
           }
         }
       }
+      similar.sort((a, b) => b.score - a.score);
 
-      return { family, similar };
+      return { family, similar: similar.map((s) => s.post) };
     },
   });
 }
