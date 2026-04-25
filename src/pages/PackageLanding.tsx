@@ -7,8 +7,10 @@ import { InstallBanner } from '@/components/user/InstallBanner';
 import { usePackageBySlug } from '@/hooks/usePackages';
 import { useCourseBySlug, useCoursePackages } from '@/hooks/useCourses';
 import { useEbookBySlug } from '@/hooks/useEbooks';
+import { useUserPlan } from '@/hooks/useUserPlan';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
 
 const PackageLanding: React.FC = () => {
   const { packageSlug } = useParams<{ packageSlug: string }>();
