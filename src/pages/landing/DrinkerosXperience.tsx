@@ -7,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Loader2, ShoppingCart, CheckCircle2, ShieldCheck, MessageCircle, Crown } from 'lucide-react';
+import { Loader2, ShoppingCart, CheckCircle2, ShieldCheck, MessageCircle, Crown, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUserPlan } from '@/hooks/useUserPlan';
