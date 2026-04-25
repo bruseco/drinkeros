@@ -129,10 +129,14 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   profiles = [],
   bonusTitle = 'Calma que ainda não acabou!',
   bonus = [],
+  testimonials = [],
   guaranteeDays = 15,
   guaranteeText,
   faq,
   whatsappPhone = '5548991601025',
+  logoSrc,
+  instructorSrc,
+  instructorName,
 }) => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
