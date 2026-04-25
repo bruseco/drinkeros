@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useUserPlan } from '@/hooks/useUserPlan';
 import { useCourseBySlug } from '@/hooks/useCourses';
 import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
+import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
 
 // Imagens
 import logo from '@/assets/landing/dx/logo.png';
@@ -237,7 +238,9 @@ const DrinkerosXperience: React.FC = () => {
       <section className="py-12 sm:py-16 bg-gradient-to-r from-amber-500 via-orange-500 to-pink-500">
         <div className="container mx-auto px-4 text-center">
           <p className="text-lg sm:text-xl font-semibold uppercase tracking-wider opacity-90">Já certificamos</p>
-          <p className="text-6xl sm:text-7xl lg:text-8xl font-black my-2 drop-shadow-lg">7.539</p>
+          <p className="text-6xl sm:text-7xl lg:text-8xl font-black my-2 drop-shadow-lg tabular-nums">
+            <AnimatedStudentCount target={12341} />
+          </p>
           <p className="text-lg sm:text-xl font-semibold uppercase tracking-wider opacity-90">alunos até o momento</p>
         </div>
       </section>
