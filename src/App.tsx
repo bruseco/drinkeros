@@ -19,6 +19,7 @@ import MixologiaAvancada from "./pages/landing/MixologiaAvancada";
 import BarParaEventos from "./pages/landing/BarParaEventos";
 import DrinkDeliveryEngarrafados from "./pages/landing/DrinkDeliveryEngarrafados";
 import IngredientesArtesanais from "./pages/landing/IngredientesArtesanais";
+import ClassicosDestilados from "./pages/landing/ClassicosDestilados";
 import EbookLanding from "./pages/landing/EbookLanding";
 import SSO from "./pages/SSO";
 import Migracao from "./pages/Migracao";
@@ -117,6 +118,7 @@ const App = () => (
             <Route path="/bar-p-eventos" element={<BarParaEventos />} />
             <Route path="/drinkdelivery-engarrafados" element={<DrinkDeliveryEngarrafados />} />
             <Route path="/ingredientes-artesanais" element={<IngredientesArtesanais />} />
+            <Route path="/classicos-destilados" element={<ClassicosDestilados />} />
             <Route path="/ebook/:slug" element={<EbookLanding />} />
 
             {/* Dynamic package landing pages - must be after static routes */}
