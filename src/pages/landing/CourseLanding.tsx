@@ -318,7 +318,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
 
       {/* HERO */}
       <section className="relative cl-aurora min-h-screen flex items-start">
-        <div className="container mx-auto px-4 pt-10 pb-8 sm:pt-14 sm:pb-12 text-center relative z-10">
+        <div className={`container mx-auto px-4 pb-8 sm:pb-12 text-center relative z-10 ${logoBgSrc ? 'pt-0' : 'pt-10 sm:pt-14'}`}>
           {logoSrc ? (
             logoBgSrc ? (
               <div
