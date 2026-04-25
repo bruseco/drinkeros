@@ -25,6 +25,10 @@ const UserRecipeDetail: React.FC = () => {
 
   const recipeId = recipe?.id;
   const isFavorite = favorites.some((f) => f.recipe_id === recipeId);
+  const { data: planData } = useUserPlan();
+  const { isVip: hasFullRecipeAccess } = useRecipeAccessGuard();
+  const isLockedForUser = planData ? !hasFullRecipeAccess : false;
+  const { data: related } = useRelatedRecipes(recipe);
 
   // Plan access guard (Free users: 3/day limit + Xaropes block)
   useEffect(() => {
