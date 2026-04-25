@@ -220,6 +220,35 @@ const DrinkerosXperience: React.FC = () => {
           pointer-events: none;
           transform: translate3d(0, 0, 0);
         }
+
+        /* Variante verde */
+        .dx-cta-green {
+          background: linear-gradient(90deg, #4ade80, #22c55e, #16a34a);
+          animation: dxGlowPulseGreen 3.2s ease-in-out infinite;
+        }
+        @keyframes dxGlowPulseGreen {
+          0%, 100% {
+            box-shadow:
+              0 8px 30px rgba(34,197,94,0.45),
+              0 0 40px rgba(74,222,128,0.25),
+              0 0 0 0 rgba(34,197,94,0);
+          }
+          50% {
+            box-shadow:
+              0 14px 50px rgba(34,197,94,0.7),
+              0 0 80px rgba(74,222,128,0.55),
+              0 0 0 6px rgba(34,197,94,0.05);
+          }
+        }
+        .dx-cta-green .dx-cta-liquid {
+          background:
+            radial-gradient(60% 120% at 20% 40%, rgba(187, 247, 208, 0.85), transparent 60%),
+            radial-gradient(70% 130% at 60% 70%, rgba(74, 222, 128, 0.75), transparent 65%),
+            radial-gradient(80% 140% at 90% 30%, rgba(22, 163, 74, 0.85), transparent 60%),
+            linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 45%, transparent 70%);
+          background-size: 220% 220%, 220% 220%, 220% 220%, 45% 100%;
+          background-repeat: no-repeat;
+        }
       `}</style>
 
       {/* HERO — apenas logo + headline + vídeo + CTA na primeira dobra */}
