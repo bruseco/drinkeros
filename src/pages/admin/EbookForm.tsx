@@ -25,6 +25,41 @@ const EbookForm: React.FC = () => {
   const updateEbook = useUpdateEbook();
   const { upload: uploadImage, isUploading: isUploadingImage } = useImageUpload('package-covers', { skipOptimize: true });
   const { upload: uploadFile, isUploading: isUploadingFile } = useFileUpload('ebook-files');
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isSyncingStripe, setIsSyncingStripe] = useState(false);
+
+  const handleSyncStripe = async () => {
+    if (!id) return;
+    const priceNum = parseFloat(String((ebook as any)?.price ?? ''));
+    if (!priceNum || priceNum <= 0) {
+      toast({
+        title: 'Defina o preço primeiro',
+        description: 'Cadastre um preço maior que zero e salve antes de sincronizar.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setIsSyncingStripe(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-stripe-product', {
+        body: { product_type: 'ebook', product_id: id },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast({ title: 'Sincronizado com Stripe!', description: 'Pronto para receber pagamentos.' });
+      queryClient.invalidateQueries({ queryKey: ['ebooks'] });
+      queryClient.invalidateQueries({ queryKey: ['ebook', id] });
+    } catch (err: any) {
+      toast({
+        title: 'Erro ao sincronizar',
+        description: err.message || 'Tente novamente em instantes.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSyncingStripe(false);
+    }
+  };
 
   const [formData, setFormData] = useState({
     name: '',
