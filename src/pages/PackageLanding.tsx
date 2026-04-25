@@ -22,6 +22,8 @@ const PackageLanding: React.FC = () => {
   const { data: course, isLoading: courseLoading } = useCourseBySlug(packageSlug || '');
   const { data: ebook, isLoading: ebookLoading } = useEbookBySlug(packageSlug || '');
   const { data: courseModules = [] } = useCoursePackages(course?.id || '');
+  const { data: userPlan } = useUserPlan();
+  const isVip = !!userPlan?.isVip;
 
   const isLoading = pkgLoading || courseLoading || ebookLoading;
   const item = pkg || course || ebook;
