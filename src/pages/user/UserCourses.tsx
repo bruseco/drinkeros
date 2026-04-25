@@ -182,6 +182,9 @@ const COURSE_LANDING_ROUTES: Record<string, string> = {
   'producao-de-ingredientes-artesanais': '/ingredientes-artesanais',
   'drinkeros-xperience': '/drinkeros-xperience',
   'classicos-destilados': '/classicos-destilados',
+  'workshop-alem-dos-classicos': '/workshop-alem-dos-classicos',
+  'bartender-a-bordo': '/bartender-a-bordo',
+  'bebida-decifrada': '/bebida-decifrada',
 };
 
 const CourseCard: React.FC<CourseCardProps> = ({ course, owned, expired = false, getCourseProgress }) => {
