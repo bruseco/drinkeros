@@ -173,27 +173,20 @@ const DrinkerosXperience: React.FC = () => {
         }
       `}</style>
 
-      {/* HERO — apenas logo + headline + vídeo */}
-      <section className="relative dx-aurora">
-        <div className="container mx-auto px-4 pt-12 sm:pt-16 pb-10 text-center relative z-10">
+      {/* HERO — apenas logo + headline + vídeo + CTA na primeira dobra */}
+      <section className="relative dx-aurora min-h-screen flex items-center">
+        <div className="container mx-auto px-4 py-6 sm:py-10 text-center relative z-10">
           <img
             src={logo}
             alt="Curso Drinkeros Xperience"
-            className="h-24 sm:h-32 lg:h-40 mx-auto mb-8 drop-shadow-[0_4px_24px_rgba(236,72,153,0.55)]"
+            className="h-16 sm:h-24 lg:h-28 mx-auto mb-4 drop-shadow-[0_4px_24px_rgba(236,72,153,0.55)]"
           />
-          <p className="text-sm sm:text-base text-white/70 mb-3">com Bruno Abreu</p>
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold uppercase tracking-tight mb-5 leading-[1.05] max-w-4xl mx-auto">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold uppercase tracking-tight mb-3 leading-[1.05] max-w-4xl mx-auto">
             Descubra os segredos<br />por trás dos drinks.
           </h1>
-          <p className="text-lg sm:text-2xl font-bold text-lime-300 mb-4 max-w-3xl mx-auto">
-            Aprenda as proporções de destilado, dulçor, acidez e amargor e CRIE SEUS PRÓPRIOS DRINKS.
-          </p>
-          <p className="text-base sm:text-lg text-white/80 mb-10 max-w-2xl mx-auto">
-            Do zero ao avançado: caipirinha perfeita, capifrutas, gourmet, clássicos, batidas, frozens, drinks em camadas, jarras e muito mais.
-          </p>
 
           {/* VÍDEO logo abaixo do headline */}
-          <div className="max-w-4xl mx-auto aspect-video rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(236,72,153,0.35)] ring-1 ring-white/10">
+          <div className="max-w-2xl mx-auto aspect-video rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(236,72,153,0.35)] ring-1 ring-white/10 mb-4">
             <iframe
               src="https://www.youtube.com/embed/1Zu2kDN6SPk"
               title="Drinkeros Xperience"
@@ -203,8 +196,15 @@ const DrinkerosXperience: React.FC = () => {
             />
           </div>
 
-          <div className="flex justify-center mt-10 pb-4">
-            <CTAButton size="xl">QUERO VIRAR DRINKERO(A)</CTAButton>
+          <p className="text-base sm:text-xl font-bold text-yellow-300 mb-2 max-w-3xl mx-auto">
+            Aprenda as proporções de destilado, dulçor, acidez e amargor e CRIE SEUS PRÓPRIOS DRINKS.
+          </p>
+          <p className="hidden sm:block text-sm sm:text-base text-white/75 mb-5 max-w-2xl mx-auto">
+            Do zero ao avançado: caipirinha perfeita, capifrutas, gourmet, clássicos, batidas, frozens, drinks em camadas, jarras e muito mais.
+          </p>
+
+          <div className="flex justify-center mt-4">
+            <CTAButton size="lg">QUERO VIRAR DRINKERO(A)</CTAButton>
           </div>
         </div>
       </section>
