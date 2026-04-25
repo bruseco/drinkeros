@@ -93,6 +93,9 @@ const MixologiaAvancada: React.FC = () => (
   <CourseLanding
     slug="mixologia-avancada"
     brand="Mixologia Avançada"
+    logoSrc={logo}
+    instructorSrc={instructor}
+    instructorName="Tom Oliveira"
     heroBadge="Com Tom Oliveira · 20+ anos de experiência"
     tagline="Domine os segredos da mixologia e aumente em até 70% o faturamento do seu bar."
     subheadline="Aprenda técnicas avançadas, famílias de coquetéis, produção e hospitalidade com quem já conquistou prêmios nacionais e formou milhares de profissionais."
@@ -106,6 +109,7 @@ const MixologiaAvancada: React.FC = () => (
     profiles={profiles}
     bonusTitle="6 BÔNUS exclusivos"
     bonus={bonus}
+    testimonials={[{ src: dep1 }, { src: dep2 }, { src: dep3 }]}
     guaranteeDays={15}
     faq={faq}
   />
