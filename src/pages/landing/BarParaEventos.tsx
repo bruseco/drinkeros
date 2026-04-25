@@ -24,6 +24,12 @@ import CourseLanding, {
   type FaqItem,
 } from './CourseLanding';
 
+import logo from '@/assets/landing/bar/logo.png';
+import instructor from '@/assets/landing/bar/instructor.jpg';
+import dep1 from '@/assets/landing/bar/dep-1.png';
+import dep2 from '@/assets/landing/bar/dep-2.png';
+import dep3 from '@/assets/landing/bar/dep-3.png';
+
 // Paleta: azul executivo + dourado (empreendedorismo / eventos premium)
 const theme: CourseTheme = {
   primary: '#3b82f6',
@@ -89,6 +95,9 @@ const BarParaEventos: React.FC = () => (
   <CourseLanding
     slug="bar-p-eventos"
     brand="Bar para Eventos"
+    logoSrc={logo}
+    instructorSrc={instructor}
+    instructorName="Henrique Todeschini"
     heroBadge="Com Henrique Todeschini · La Mafia Drinkeros"
     tagline="Monte sua empresa de bar para eventos do zero, na sua casa, e comece a faturar alto."
     subheadline="O primeiro e único curso online do Brasil que ensina o passo a passo para abrir e escalar uma empresa de bar para eventos — investindo muito pouco."
@@ -102,6 +111,7 @@ const BarParaEventos: React.FC = () => (
     profiles={profiles}
     bonusTitle="4 BÔNUS exclusivos"
     bonus={bonus}
+    testimonials={[{ src: dep1 }, { src: dep2 }, { src: dep3 }]}
     guaranteeDays={15}
     faq={faq}
   />

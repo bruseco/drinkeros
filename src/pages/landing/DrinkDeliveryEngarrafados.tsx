@@ -22,6 +22,12 @@ import CourseLanding, {
   type FaqItem,
 } from './CourseLanding';
 
+import logo from '@/assets/landing/delivery/logo.png';
+import instructor from '@/assets/landing/delivery/instructor.jpg';
+import dep1 from '@/assets/landing/delivery/dep-1.jpg';
+import dep2 from '@/assets/landing/delivery/dep-2.jpg';
+import dep3 from '@/assets/landing/delivery/dep-3.jpg';
+
 // Paleta: vermelho coral + laranja (delivery / urgência / energia)
 const theme: CourseTheme = {
   primary: '#ef4444',
@@ -77,6 +83,9 @@ const DrinkDeliveryEngarrafados: React.FC = () => (
   <CourseLanding
     slug="drinkdelivery-engarrafados"
     brand="Drink Delivery & Engarrafados"
+    logoSrc={logo}
+    instructorSrc={instructor}
+    instructorName="Tom Oliveira"
     heroBadge="Com Tom Oliveira"
     tagline="Aprenda a engarrafar seus drinks, venda no delivery e ganhe uma renda extra."
     subheadline="Higiene, vedação, validade, identidade visual, precificação e logística — tudo o que você precisa para transformar drinks em uma fonte de renda escalável."
@@ -90,6 +99,7 @@ const DrinkDeliveryEngarrafados: React.FC = () => (
     profiles={profiles}
     bonusTitle="Super BÔNUS exclusivo"
     bonus={bonus}
+    testimonials={[{ src: dep1 }, { src: dep2 }, { src: dep3 }]}
     guaranteeDays={15}
     faq={faq}
   />
