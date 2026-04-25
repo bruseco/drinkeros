@@ -7,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Loader2, ShoppingCart, CheckCircle2, ShieldCheck, MessageCircle, Crown } from 'lucide-react';
+import { Loader2, ShoppingCart, CheckCircle2, ShieldCheck, MessageCircle, Crown, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUserPlan } from '@/hooks/useUserPlan';
@@ -220,6 +220,35 @@ const DrinkerosXperience: React.FC = () => {
           pointer-events: none;
           transform: translate3d(0, 0, 0);
         }
+
+        /* Variante verde */
+        .dx-cta-green {
+          background: linear-gradient(90deg, #4ade80, #22c55e, #16a34a);
+          animation: dxGlowPulseGreen 3.2s ease-in-out infinite;
+        }
+        @keyframes dxGlowPulseGreen {
+          0%, 100% {
+            box-shadow:
+              0 8px 30px rgba(34,197,94,0.45),
+              0 0 40px rgba(74,222,128,0.25),
+              0 0 0 0 rgba(34,197,94,0);
+          }
+          50% {
+            box-shadow:
+              0 14px 50px rgba(34,197,94,0.7),
+              0 0 80px rgba(74,222,128,0.55),
+              0 0 0 6px rgba(34,197,94,0.05);
+          }
+        }
+        .dx-cta-green .dx-cta-liquid {
+          background:
+            radial-gradient(60% 120% at 20% 40%, rgba(187, 247, 208, 0.85), transparent 60%),
+            radial-gradient(70% 130% at 60% 70%, rgba(74, 222, 128, 0.75), transparent 65%),
+            radial-gradient(80% 140% at 90% 30%, rgba(22, 163, 74, 0.85), transparent 60%),
+            linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 45%, transparent 70%);
+          background-size: 220% 220%, 220% 220%, 220% 220%, 45% 100%;
+          background-repeat: no-repeat;
+        }
       `}</style>
 
       {/* HERO — apenas logo + headline + vídeo + CTA na primeira dobra */}
@@ -390,9 +419,6 @@ const DrinkerosXperience: React.FC = () => {
             <p className="text-center text-base sm:text-lg text-white/85 leading-relaxed mb-4 max-w-2xl mx-auto">
               <strong>Caipirinhas perfeitas</strong>, <strong>drinks clássicos</strong> do mundo todo, <strong>drinks gigantes</strong> em jarras e suqueiras, <strong>shots</strong> para curtir com a galera, batidas, frozens, drinks em camadas — além de proporções, utensílios, taças, ingredientes essenciais e tudo o que faz um drink ser memorável.
             </p>
-            <p className="text-center text-base sm:text-lg text-white/85 mb-8 max-w-2xl mx-auto">
-              E ainda leva <strong className="text-amber-300">4 bônus exclusivos</strong>: drinks sem álcool, decorações, fotografia com celular e hortinha automatizada.
-            </p>
 
             <div className="text-center mb-6">
               {isVip ? (
@@ -433,12 +459,17 @@ const DrinkerosXperience: React.FC = () => {
               <button
                 onClick={handleBuy}
                 disabled={checkoutLoading}
-                className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 px-8 sm:px-12 py-5 sm:py-6 font-extrabold text-white text-lg sm:text-xl shadow-[0_10px_40px_rgba(251,146,60,0.5)] hover:shadow-[0_14px_50px_rgba(251,146,60,0.7)] transition-all duration-300 hover:scale-[1.03] disabled:opacity-70 disabled:cursor-not-allowed"
+                className="dx-cta dx-cta-green group relative inline-flex items-center justify-center gap-3 rounded-full px-8 sm:px-12 py-5 sm:py-6 font-extrabold text-white text-lg sm:text-xl overflow-hidden isolate transition-transform duration-300 hover:scale-[1.03] disabled:opacity-70 disabled:cursor-not-allowed"
               >
+                <span className="dx-cta-liquid" aria-hidden="true" />
                 {checkoutLoading ? (
-                  <><Loader2 className="h-6 w-6 animate-spin" /> Abrindo checkout...</>
+                  <span className="relative z-10 inline-flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+                    <Loader2 className="h-6 w-6 animate-spin" /> Abrindo checkout...
+                  </span>
                 ) : (
-                  <><ShoppingCart className="h-6 w-6" /> MATRICULE-SE! ACESSO INSTANTÂNEO</>
+                  <span className="relative z-10 inline-flex items-center gap-3 drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+                    <Check className="h-16 w-16 sm:h-20 sm:w-20" strokeWidth={3} /> MATRICULE-SE! ACESSO INSTANTÂNEO
+                  </span>
                 )}
               </button>
             </div>
