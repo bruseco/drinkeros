@@ -193,6 +193,33 @@ const EbookForm: React.FC = () => {
                   <Label htmlFor="price">Preço (R$)</Label>
                   <Input id="price" type="number" step="0.01" min="0" value={formData.price} onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))} placeholder="0.00" />
                 </div>
+                {isEditing && (
+                  <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Label className="text-sm">Checkout Stripe</Label>
+                          {(ebook as any)?.stripe_price_id ? (
+                            <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20 hover:bg-green-500/15">
+                              <CheckCircle2 className="h-3 w-3 mr-1" /> Sincronizado
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-amber-700 border-amber-500/40">
+                              <AlertCircle className="h-3 w-3 mr-1" /> Pendente
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Sincronize para criar o produto e o preço no Stripe e habilitar a venda.
+                        </p>
+                      </div>
+                      <Button type="button" variant="outline" size="sm" onClick={handleSyncStripe} disabled={isSyncingStripe}>
+                        {isSyncingStripe ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                        {(ebook as any)?.stripe_price_id ? 'Re-sincronizar' : 'Sincronizar com Stripe'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="display_order">Ordem de Exibição</Label>
                   <Input id="display_order" type="number" min="0" value={formData.display_order} onChange={(e) => setFormData((prev) => ({ ...prev, display_order: parseInt(e.target.value) || 0 }))} />
