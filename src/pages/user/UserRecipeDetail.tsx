@@ -203,7 +203,15 @@ const UserRecipeDetail: React.FC = () => {
           </div>
         )}
 
-        {related && related.family.length > 0 && (
+        {related?.isSyrup && related.otherSyrups.length > 0 && (
+          <RelatedRecipesSection
+            title="Veja mais xaropes"
+            recipes={related.otherSyrups}
+            isLockedForUser={isLockedForUser}
+          />
+        )}
+
+        {!related?.isSyrup && related && related.family.length > 0 && (
           <RelatedRecipesSection
             title="Drinks da mesma família"
             recipes={related.family}
@@ -211,7 +219,7 @@ const UserRecipeDetail: React.FC = () => {
           />
         )}
 
-        {related && related.similar.length > 0 && (
+        {!related?.isSyrup && related && related.similar.length > 0 && (
           <RelatedRecipesSection
             title="Drinks similares"
             recipes={related.similar}
