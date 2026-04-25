@@ -316,19 +316,28 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       {/* HERO */}
       <section className="relative cl-aurora min-h-screen flex items-start">
         <div className="container mx-auto px-4 pt-10 pb-8 sm:pt-14 sm:pb-12 text-center relative z-10">
+          {logoSrc ? (
+            <img
+              src={logoSrc}
+              alt={brand}
+              className="mx-auto mb-6 h-20 sm:h-28 w-auto object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
+            />
+          ) : null}
           {heroBadge && (
             <p className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase text-white/70 mb-4">
               {heroBadge}
             </p>
           )}
-          <h1
-            className="text-3xl sm:text-5xl lg:text-6xl font-extrabold uppercase tracking-tight mb-4 leading-[1.05] max-w-4xl mx-auto bg-clip-text text-transparent"
-            style={{
-              backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})`,
-            }}
-          >
-            {brand}
-          </h1>
+          {!logoSrc && (
+            <h1
+              className="text-3xl sm:text-5xl lg:text-6xl font-extrabold uppercase tracking-tight mb-4 leading-[1.05] max-w-4xl mx-auto bg-clip-text text-transparent"
+              style={{
+                backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})`,
+              }}
+            >
+              {brand}
+            </h1>
+          )}
           <p className="text-xl sm:text-2xl font-bold text-white mb-3 max-w-3xl mx-auto leading-snug">
             {tagline}
           </p>
@@ -361,6 +370,29 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
           <div className="flex justify-center">
             <CTAButton size="lg">{ctaHero}</CTAButton>
           </div>
+
+          {instructorSrc && (
+            <div className="mt-12 flex flex-col items-center">
+              <div
+                className="rounded-full p-1"
+                style={{
+                  background: `linear-gradient(135deg, ${theme.accent}, ${theme.secondary})`,
+                }}
+              >
+                <img
+                  src={instructorSrc}
+                  alt={instructorName ?? 'Instrutor'}
+                  loading="lazy"
+                  className="h-32 w-32 sm:h-40 sm:w-40 rounded-full object-cover bg-black"
+                />
+              </div>
+              {instructorName && (
+                <p className="mt-3 text-sm uppercase tracking-[0.2em] text-white/80">
+                  com <strong className="text-white">{instructorName}</strong>
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
