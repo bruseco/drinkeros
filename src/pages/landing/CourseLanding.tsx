@@ -64,6 +64,11 @@ export interface FaqItem {
   a: string;
 }
 
+export interface TestimonialItem {
+  src: string;
+  alt?: string;
+}
+
 export interface CourseLandingProps {
   slug: string;
   brand: string;            // logo/título do curso (texto)
@@ -74,6 +79,13 @@ export interface CourseLandingProps {
   ctaHero: string;          // texto do botão do hero
   ctaCheckout?: string;     // texto botão final, default: 'MATRICULE-SE! ACESSO INSTANTÂNEO'
   theme: CourseTheme;
+
+  /** Logo do curso (PNG transparente) — exibido no topo do hero. */
+  logoSrc?: string;
+  /** Foto do professor — exibida no hero abaixo do CTA. */
+  instructorSrc?: string;
+  /** Nome do professor — legenda abaixo da foto. */
+  instructorName?: string;
 
   fallbackPrice: number;    // preço default caso DB ainda não tenha
   oldPriceLabel?: string;   // 'De R$ 1.439,00'
@@ -87,6 +99,9 @@ export interface CourseLandingProps {
 
   bonusTitle?: string;
   bonus?: BonusItem[];
+
+  /** Prints/depoimentos de alunos. Renderizado em grid antes da garantia. */
+  testimonials?: TestimonialItem[];
 
   guaranteeDays?: number;
   guaranteeText?: string;
@@ -114,10 +129,14 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   profiles = [],
   bonusTitle = 'Calma que ainda não acabou!',
   bonus = [],
+  testimonials = [],
   guaranteeDays = 15,
   guaranteeText,
   faq,
   whatsappPhone = '5548991601025',
+  logoSrc,
+  instructorSrc,
+  instructorName,
 }) => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -297,19 +316,28 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       {/* HERO */}
       <section className="relative cl-aurora min-h-screen flex items-start">
         <div className="container mx-auto px-4 pt-10 pb-8 sm:pt-14 sm:pb-12 text-center relative z-10">
+          {logoSrc ? (
+            <img
+              src={logoSrc}
+              alt={brand}
+              className="mx-auto mb-6 h-20 sm:h-28 w-auto object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
+            />
+          ) : null}
           {heroBadge && (
             <p className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase text-white/70 mb-4">
               {heroBadge}
             </p>
           )}
-          <h1
-            className="text-3xl sm:text-5xl lg:text-6xl font-extrabold uppercase tracking-tight mb-4 leading-[1.05] max-w-4xl mx-auto bg-clip-text text-transparent"
-            style={{
-              backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})`,
-            }}
-          >
-            {brand}
-          </h1>
+          {!logoSrc && (
+            <h1
+              className="text-3xl sm:text-5xl lg:text-6xl font-extrabold uppercase tracking-tight mb-4 leading-[1.05] max-w-4xl mx-auto bg-clip-text text-transparent"
+              style={{
+                backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})`,
+              }}
+            >
+              {brand}
+            </h1>
+          )}
           <p className="text-xl sm:text-2xl font-bold text-white mb-3 max-w-3xl mx-auto leading-snug">
             {tagline}
           </p>
@@ -342,6 +370,29 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
           <div className="flex justify-center">
             <CTAButton size="lg">{ctaHero}</CTAButton>
           </div>
+
+          {instructorSrc && (
+            <div className="mt-12 flex flex-col items-center">
+              <div
+                className="rounded-full p-1"
+                style={{
+                  background: `linear-gradient(135deg, ${theme.accent}, ${theme.secondary})`,
+                }}
+              >
+                <img
+                  src={instructorSrc}
+                  alt={instructorName ?? 'Instrutor'}
+                  loading="lazy"
+                  className="h-32 w-32 sm:h-40 sm:w-40 rounded-full object-cover bg-black"
+                />
+              </div>
+              {instructorName && (
+                <p className="mt-3 text-sm uppercase tracking-[0.2em] text-white/80">
+                  com <strong className="text-white">{instructorName}</strong>
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
@@ -525,6 +576,44 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                   <p className="text-sm sm:text-base text-white/75">{b.description}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* DEPOIMENTOS */}
+      {testimonials.length > 0 && (
+        <section className="py-16 sm:py-24 bg-[#0b0b0d]">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-center mb-4">
+              O que dizem{' '}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})` }}
+              >
+                nossos alunos
+              </span>
+            </h2>
+            <p className="text-center text-white/70 max-w-2xl mx-auto mb-12 text-sm sm:text-base">
+              Depoimentos reais de quem já transformou sua relação com a coquetelaria.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {testimonials.map((t, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/30 transition-all duration-300 hover:scale-[1.02]"
+                >
+                  <img
+                    src={t.src}
+                    alt={t.alt ?? `Depoimento ${i + 1}`}
+                    loading="lazy"
+                    className="w-full h-auto block"
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-center mt-12">
+              <CTAButton>{ctaHero}</CTAButton>
             </div>
           </div>
         </section>

@@ -20,6 +20,12 @@ import CourseLanding, {
   type FaqItem,
 } from './CourseLanding';
 
+import logo from '@/assets/landing/ingredientes/logo.png';
+import instructor from '@/assets/landing/ingredientes/instructor.jpg';
+import dep1 from '@/assets/landing/ingredientes/dep-1.jpg';
+import dep2 from '@/assets/landing/ingredientes/dep-2.jpg';
+import dep3 from '@/assets/landing/ingredientes/dep-3.jpg';
+
 // Paleta: verde esmeralda + âmbar (artesanal / natural / orgânico)
 const theme: CourseTheme = {
   primary: '#10b981',
@@ -67,6 +73,9 @@ const IngredientesArtesanais: React.FC = () => (
   <CourseLanding
     slug="ingredientes-artesanais"
     brand="Ingredientes Artesanais"
+    logoSrc={logo}
+    instructorSrc={instructor}
+    instructorName="Bruno Abreu"
     heroBadge="Com Bruno Abreu · Drinkeros"
     tagline="Economize no dia a dia produzindo seus próprios ingredientes artesanais."
     subheadline="Eleve o nível dos seus drinks com xaropes artesanais, gelo translúcido, espumas saborizadas, bitter artesanal e tudo o que você precisa para deixar seu drink ainda mais valioso."
@@ -79,6 +88,7 @@ const IngredientesArtesanais: React.FC = () => (
     profiles={profiles}
     bonusTitle="BÔNUS exclusivo"
     bonus={bonus}
+    testimonials={[{ src: dep1 }, { src: dep2 }, { src: dep3 }]}
     guaranteeDays={15}
     faq={faq}
   />
