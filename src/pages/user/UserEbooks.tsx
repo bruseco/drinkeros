@@ -102,7 +102,7 @@ const UserEbooks: React.FC = () => {
                     <Button asChild size="sm">
                       <a href={ebook.file_url} target="_blank" rel="noopener noreferrer">
                         <Download className="mr-2 h-4 w-4" />
-                        Baixar E-book
+                        Abrir e-book
                       </a>
                     </Button>
                   ) : (
