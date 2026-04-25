@@ -12,7 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Loader2, Upload, X, GraduationCap, ChevronDown, ChevronRight, Plus, Pencil, Play, Trash2, GripVertical, Settings2, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import CertificateLayoutDialog from '@/components/admin/CertificateLayoutDialog';
