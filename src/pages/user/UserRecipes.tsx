@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { useExclusivePostsPaginated, refreshPostsSeed } from '@/hooks/useExclusivePosts';
+import { useExclusivePostsPaginated } from '@/hooks/useExclusivePosts';
 import { Loader2, Search, Wine, GlassWater, Users, Citrus, CupSoda, Martini, IceCream, Snowflake, Droplets, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useDebounce } from '@/hooks/useDebounce';
-import { refreshRecipeSeed } from '@/hooks/useUserRecipesPaginated';
 import { useUserPlan } from '@/hooks/useUserPlan';
 
 import { useRecipeAccessGuard, isVipOnlyCharacteristic } from '@/hooks/useRecipeAccessGuard';
