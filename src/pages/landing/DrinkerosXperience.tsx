@@ -196,11 +196,11 @@ const DrinkerosXperience: React.FC = () => {
             />
           </div>
 
-          <p className="text-base sm:text-xl font-bold text-yellow-300 mb-2 max-w-3xl mx-auto">
+          <p className="text-base sm:text-xl font-bold text-yellow-300 mb-3 max-w-3xl mx-auto">
             Aprenda as proporções de destilado, dulçor, acidez e amargor e CRIE SEUS PRÓPRIOS DRINKS.
           </p>
-          <p className="hidden sm:block text-sm sm:text-base text-white/75 mb-5 max-w-2xl mx-auto">
-            Do zero ao avançado: caipirinha perfeita, capifrutas, gourmet, clássicos, batidas, frozens, drinks em camadas, jarras e muito mais.
+          <p className="text-sm sm:text-base text-white mb-5 max-w-3xl mx-auto">
+            Caipirinha perfeita, capifrutas, caipirinhas gourmets, drinks clássicos, batidas, frozens, drinks em camadas, jarras, suqueiras, shots e muito mais.
           </p>
 
           <div className="flex justify-center mt-4">
