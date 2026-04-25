@@ -179,7 +179,7 @@ const DrinkerosXperience: React.FC = () => {
           <img
             src={logo}
             alt="Curso Drinkeros Xperience"
-            className="h-16 sm:h-24 lg:h-28 mx-auto mb-4 drop-shadow-[0_4px_24px_rgba(236,72,153,0.55)]"
+            className="h-32 sm:h-48 lg:h-60 mx-auto mb-4 drop-shadow-[0_4px_24px_rgba(236,72,153,0.55)]"
           />
           <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold uppercase tracking-tight mb-3 leading-[1.05] max-w-4xl mx-auto">
             Descubra os segredos<br />por trás dos drinks.
@@ -196,11 +196,11 @@ const DrinkerosXperience: React.FC = () => {
             />
           </div>
 
-          <p className="text-base sm:text-xl font-bold text-yellow-300 mb-2 max-w-3xl mx-auto">
+          <p className="text-base sm:text-xl font-bold text-yellow-300 mb-3 max-w-3xl mx-auto">
             Aprenda as proporções de destilado, dulçor, acidez e amargor e CRIE SEUS PRÓPRIOS DRINKS.
           </p>
-          <p className="hidden sm:block text-sm sm:text-base text-white/75 mb-5 max-w-2xl mx-auto">
-            Do zero ao avançado: caipirinha perfeita, capifrutas, gourmet, clássicos, batidas, frozens, drinks em camadas, jarras e muito mais.
+          <p className="text-sm sm:text-base text-white mb-5 max-w-3xl mx-auto">
+            Caipirinha perfeita, capifrutas, caipirinhas gourmets, drinks clássicos, batidas, frozens, drinks em camadas, jarras, suqueiras, shots e muito mais.
           </p>
 
           <div className="flex justify-center mt-4">
