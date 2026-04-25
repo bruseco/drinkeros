@@ -31,11 +31,9 @@ self.addEventListener('activate', (event) => {
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
 
-// OAuth routes: always bypass cache and go to network
-registerRoute(
-  ({ url }) => url.pathname.startsWith('/~oauth'),
-  new NetworkFirst({ cacheName: 'oauth-bypass', networkTimeoutSeconds: 10 })
-);
+// OAuth routes (/~oauth/*): MUST never be intercepted by the SW.
+// Do NOT register any route for them — let the browser hit the network directly.
+// The NavigationRoute below also excludes them via denylist.
 
 // Navigation requests: network-first with fallback (fixes blank page after cache clear)
 const navigationStrategy = new NetworkFirst({
