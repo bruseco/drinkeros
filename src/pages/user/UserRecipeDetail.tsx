@@ -4,11 +4,14 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useExclusivePost } from '@/hooks/useExclusivePosts';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
 import { useRecipeAccessGuard } from '@/hooks/useRecipeAccessGuard';
+import { useRelatedRecipes } from '@/hooks/useRelatedRecipes';
+import { useUserPlan } from '@/hooks/useUserPlan';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, ArrowLeft, Heart, Share2, Wine } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import FavoriteDialog from '@/components/user/FavoriteDialog';
+import RelatedRecipesSection from '@/components/user/RelatedRecipesSection';
 
 const UserRecipeDetail: React.FC = () => {
   const { id: idOrSlug } = useParams<{ id: string }>();
@@ -22,6 +25,10 @@ const UserRecipeDetail: React.FC = () => {
 
   const recipeId = recipe?.id;
   const isFavorite = favorites.some((f) => f.recipe_id === recipeId);
+  const { data: planData } = useUserPlan();
+  const { isVip: hasFullRecipeAccess } = useRecipeAccessGuard();
+  const isLockedForUser = planData ? !hasFullRecipeAccess : false;
+  const { data: related } = useRelatedRecipes(recipe);
 
   // Plan access guard (Free users: 3/day limit + Xaropes block)
   useEffect(() => {
@@ -194,6 +201,22 @@ const UserRecipeDetail: React.FC = () => {
             <h2 className="text-lg font-bold text-foreground mb-2">Descrição:</h2>
             <p className="text-muted-foreground whitespace-pre-line">{recipe.description}</p>
           </div>
+        )}
+
+        {related && related.family.length > 0 && (
+          <RelatedRecipesSection
+            title="Drinks da mesma família"
+            recipes={related.family}
+            isLockedForUser={isLockedForUser}
+          />
+        )}
+
+        {related && related.similar.length > 0 && (
+          <RelatedRecipesSection
+            title="Drinks similares"
+            recipes={related.similar}
+            isLockedForUser={isLockedForUser}
+          />
         )}
       </div>
 
