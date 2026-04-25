@@ -18,7 +18,7 @@ import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
 // Imagens
 import logo from '@/assets/landing/dx/logo.png';
 import brunoHero from '@/assets/landing/dx/bruno-hero.png';
-import garantia from '@/assets/landing/dx/garantia.png';
+import garantia from '@/assets/landing/dx/garantia-15dias.png';
 import pagamentos from '@/assets/landing/dx/pagamentos.png';
 
 import learn1 from '@/assets/landing/dx/learn-1.jpg';
