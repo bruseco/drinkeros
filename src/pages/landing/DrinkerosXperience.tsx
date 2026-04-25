@@ -148,7 +148,6 @@ const DrinkerosXperience: React.FC = () => {
       className={`dx-cta group relative inline-flex items-center justify-center gap-2 rounded-full font-extrabold text-white transition-transform duration-300 hover:scale-[1.03] overflow-hidden isolate ${size === 'xl' ? 'px-10 py-6 text-xl' : 'px-8 py-5 text-base sm:text-lg'}`}
     >
       <span className="dx-cta-liquid" aria-hidden="true" />
-      <span className="dx-cta-shine" aria-hidden="true" />
       <span className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">{children}</span>
     </button>
   );
@@ -173,14 +172,14 @@ const DrinkerosXperience: React.FC = () => {
         }
         @media (prefers-reduced-motion: reduce) {
           .dx-aurora { animation: none; }
-          .dx-cta-liquid, .dx-cta, .dx-cta-shine { animation: none !important; }
+          .dx-cta-liquid, .dx-cta { animation: none !important; }
         }
 
         /* CTA líquido animado */
         @keyframes dxLiquidFlow {
-          0%   { background-position: 0% 50%, 50% 0%, 100% 100%; }
-          50%  { background-position: 100% 50%, 50% 100%, 0% 0%; }
-          100% { background-position: 0% 50%, 50% 0%, 100% 100%; }
+          0%   { background-position: 0% 50%, 50% 0%, 100% 100%, -140% 50%; }
+          50%  { background-position: 100% 50%, 50% 100%, 0% 0%, 220% 50%; }
+          100% { background-position: 0% 50%, 50% 0%, 100% 100%, 220% 50%; }
         }
         @keyframes dxGlowPulse {
           0%, 100% {
@@ -196,43 +195,30 @@ const DrinkerosXperience: React.FC = () => {
               0 0 0 6px rgba(251,146,60,0.05);
           }
         }
-        @keyframes dxShine {
-          0%   { transform: translateX(-120%) skewX(-20deg); }
-          60%  { transform: translateX(220%) skewX(-20deg); }
-          100% { transform: translateX(220%) skewX(-20deg); }
-        }
         .dx-cta {
           background: linear-gradient(90deg, #fbbf24, #f97316, #ec4899);
           animation: dxGlowPulse 3.2s ease-in-out infinite;
           -webkit-mask-image: -webkit-radial-gradient(white, black);
-          transform: translateZ(0);
+          transform: translate3d(0, 0, 0);
+          will-change: transform, box-shadow;
         }
         .dx-cta-liquid {
           position: absolute;
           inset: 0;
           border-radius: inherit;
+          overflow: hidden;
           background:
             radial-gradient(60% 120% at 20% 40%, rgba(255, 220, 130, 0.85), transparent 60%),
             radial-gradient(70% 130% at 60% 70%, rgba(244, 114, 182, 0.75), transparent 65%),
-            radial-gradient(80% 140% at 90% 30%, rgba(249, 115, 22, 0.85), transparent 60%);
-          background-size: 220% 220%, 220% 220%, 220% 220%;
+            radial-gradient(80% 140% at 90% 30%, rgba(249, 115, 22, 0.85), transparent 60%),
+            linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 45%, transparent 70%);
+          background-size: 220% 220%, 220% 220%, 220% 220%, 45% 100%;
+          background-repeat: no-repeat;
           animation: dxLiquidFlow 8s ease-in-out infinite;
           filter: saturate(1.15);
           z-index: 0;
           pointer-events: none;
-          transform: translateZ(0);
-        }
-        .dx-cta-shine {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 40%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
-          animation: dxShine 4.5s ease-in-out infinite;
-          z-index: 1;
-          pointer-events: none;
-          mix-blend-mode: overlay;
+          transform: translate3d(0, 0, 0);
         }
       `}</style>
 
