@@ -202,6 +202,22 @@ const UserRecipeDetail: React.FC = () => {
             <p className="text-muted-foreground whitespace-pre-line">{recipe.description}</p>
           </div>
         )}
+
+        {related && related.family.length > 0 && (
+          <RelatedRecipesSection
+            title="Drinks da mesma família"
+            recipes={related.family}
+            isLockedForUser={isLockedForUser}
+          />
+        )}
+
+        {related && related.similar.length > 0 && (
+          <RelatedRecipesSection
+            title="Drinks similares"
+            recipes={related.similar}
+            isLockedForUser={isLockedForUser}
+          />
+        )}
       </div>
 
       {recipeId && (
