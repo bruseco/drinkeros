@@ -176,7 +176,7 @@ const AdminUserDetail: React.FC = () => {
   ) : is_lifetime ? (
     <Badge className="gap-1 bg-amber-500 hover:bg-amber-500 text-white"><Crown className="h-3 w-3" /> Vitalício</Badge>
   ) : isVipActive ? (
-    <Badge className="gap-1 bg-purple-600 hover:bg-purple-600 text-white"><Sparkles className="h-3 w-3" /> Sócio do Clube</Badge>
+    <Badge className="gap-1 bg-purple-600 hover:bg-purple-600 text-white"><Sparkles className="h-3 w-3" /> Clube dos Drinkeros</Badge>
   ) : (
     <Badge variant="outline">Free</Badge>
   );
