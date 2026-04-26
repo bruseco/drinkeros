@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useClubFeed, useClubMyPoints, tierColor } from '@/hooks/useClub';
+import { BatalhaIntro, hasSeenBatalhaIntro } from '@/components/user/BatalhaIntro';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Star, Plus, Trophy, Loader2 } from 'lucide-react';
@@ -9,6 +10,11 @@ import { Card } from '@/components/ui/card';
 const UserClub: React.FC = () => {
   const { data: feed, isLoading } = useClubFeed();
   const { data: myPoints } = useClubMyPoints();
+  const [showIntro, setShowIntro] = useState(() => !hasSeenBatalhaIntro());
+
+  if (showIntro) {
+    return <BatalhaIntro onFinish={() => setShowIntro(false)} />;
+  }
 
   return (
     <div className="container mx-auto max-w-3xl py-6 px-4 pb-24 md:pb-6 space-y-4">
