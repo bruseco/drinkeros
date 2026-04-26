@@ -21,6 +21,7 @@ import { useUserPlan } from '@/hooks/useUserPlan';
 import { useCourseBySlug } from '@/hooks/useCourses';
 import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
 import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
+import VipFloatingBanner from '@/components/landing/VipFloatingBanner';
 
 /** Total padrão de alunos certificados — usado em todas as landings de curso. */
 export const TOTAL_STUDENTS_CERTIFIED = 22341;
@@ -347,6 +348,14 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   return (
     <div className="min-h-screen bg-[#0b0b0d] text-white overflow-x-hidden">
       <style>{themeStyles}</style>
+
+      {!isVip && (
+        <VipFloatingBanner
+          watchTargetId="cl-matricule-cta"
+          basePrice={basePrice}
+          delayMs={5000}
+        />
+      )}
 
       {/* HERO */}
       <section className="relative cl-aurora min-h-screen flex items-start">
@@ -911,41 +920,11 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
               )}
             </div>
 
-            {!isVip && (
-              <Link
-                to="/vip"
-                className="block mb-6 rounded-2xl p-5 sm:p-6 text-left transition-transform duration-300 hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
-                style={{
-                  background:
-                    'linear-gradient(135deg, #4c1d95 0%, #7e22ce 50%, #a21caf 100%)',
-                  border: '1px solid rgba(232, 121, 249, 0.55)',
-                  boxShadow:
-                    '0 10px 40px rgba(126, 34, 206, 0.45), inset 0 1px 0 rgba(255,255,255,0.12)',
-                }}
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <Crown className="h-5 w-5 text-yellow-300" />
-                  <span className="text-xs sm:text-sm font-extrabold tracking-[0.2em] uppercase text-yellow-300">
-                    Oferta Assinante VIP · {VIP_DISCOUNT_PERCENT}% OFF
-                  </span>
-                </div>
-                <p className="text-white text-base sm:text-lg leading-snug">
-                  Como <strong>Assinante VIP</strong> você leva esse curso por apenas{' '}
-                  <strong className="text-yellow-300 text-xl sm:text-2xl">
-                    {formatBRL(applyVipDiscount(basePrice))}
-                  </strong>{' '}
-                  <span className="text-white/80">
-                    (de <span className="line-through">{formatBRL(basePrice)}</span>)
-                  </span>
-                </p>
-                <p className="mt-2 text-sm text-white/85">
-                  Toque aqui e veja a oferta do plano VIP →
-                </p>
-              </Link>
-            )}
+            {/* Oferta VIP agora aparece como banner flutuante (VipFloatingBanner) */}
 
             <div className="flex justify-center mb-6">
               <button
+                id="cl-matricule-cta"
                 onClick={handleBuy}
                 disabled={checkoutLoading}
                 className="cl-cta cl-cta-green group relative inline-flex items-center justify-center gap-3 rounded-full px-8 sm:px-12 py-5 sm:py-6 font-extrabold text-white text-lg sm:text-xl overflow-hidden isolate transition-transform duration-300 hover:scale-[1.03] disabled:opacity-70 disabled:cursor-not-allowed"
