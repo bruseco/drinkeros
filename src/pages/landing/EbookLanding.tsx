@@ -186,10 +186,10 @@ const EbookLanding: React.FC = () => {
                   <img
                     src={ebook.cover_image_url}
                     alt={ebook.name}
-                    className="relative w-full max-w-sm rounded-lg shadow-[0_25px_80px_rgba(0,0,0,0.8)] ring-1 ring-amber-500/20"
+                    className="relative w-[80vw] max-w-[80vw] sm:w-full sm:max-w-sm rounded-lg shadow-[0_25px_80px_rgba(0,0,0,0.8)] ring-1 ring-amber-500/20"
                   />
                 ) : (
-                  <div className="relative w-full max-w-sm aspect-[3/4] rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center ring-1 ring-amber-500/20">
+                  <div className="relative w-[80vw] max-w-[80vw] sm:w-full sm:max-w-sm aspect-[3/4] rounded-lg bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center ring-1 ring-amber-500/20">
                     <BookOpen className="h-24 w-24 text-amber-500/40" />
                   </div>
                 )}
