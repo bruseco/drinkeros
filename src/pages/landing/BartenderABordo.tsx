@@ -24,6 +24,12 @@ import heroVideo from '@/assets/landing/bartender-bordo/intro.mp4';
 import bonus1Img from '@/assets/landing/bartender-bordo/bonus-1-curriculo.jpg';
 import bonus2Img from '@/assets/landing/bartender-bordo/bonus-2-companhias.jpg';
 import bonus3Img from '@/assets/landing/bartender-bordo/bonus-3-mentoria.jpg';
+import learn1 from '@/assets/landing/bartender-bordo/learn-1-contratado.jpg';
+import learn2 from '@/assets/landing/bartender-bordo/learn-2-documentacao.jpg';
+import learn3 from '@/assets/landing/bartender-bordo/learn-3-treinamento.jpg';
+import learn4 from '@/assets/landing/bartender-bordo/learn-4-salario.jpg';
+import learn5 from '@/assets/landing/bartender-bordo/learn-5-mundo.jpg';
+import learn6 from '@/assets/landing/bartender-bordo/learn-6-networking.jpg';
 
 const theme: CourseTheme = {
   primary: '#ef4444',
@@ -35,12 +41,12 @@ const theme: CourseTheme = {
 };
 
 const learnItems: LearnItem[] = [
-  { icon: Ship, title: 'Como ser contratado', description: 'O passo a passo completo para ser aprovado nas grandes companhias de cruzeiros internacionais.' },
-  { icon: ClipboardCheck, title: 'Documentação', description: 'Vistos, contratos, exames médicos e tudo que você precisa para embarcar legalmente.' },
-  { icon: GraduationCap, title: 'Treinamento de bordo', description: 'O que esperar do treinamento, da rotina e da hierarquia a bordo de um navio.' },
-  { icon: DollarSign, title: 'Salário em dólar', description: 'Como funcionam as gorjetas, comissões e a estrutura salarial em moeda forte.' },
-  { icon: Globe, title: 'Viajando o mundo', description: 'Conheça portos, países e culturas trabalhando no que você ama.' },
-  { icon: Users, title: 'Networking internacional', description: 'Crie conexões com profissionais do mundo inteiro e abra portas para sua carreira.' },
+  { imageSrc: learn1, title: 'Como ser contratado', description: 'O passo a passo completo para ser aprovado nas grandes companhias de cruzeiros internacionais.' },
+  { imageSrc: learn2, title: 'Documentação', description: 'Vistos, contratos, exames médicos e tudo que você precisa para embarcar legalmente.' },
+  { imageSrc: learn3, title: 'Treinamento de bordo', description: 'O que esperar do treinamento, da rotina e da hierarquia a bordo de um navio.' },
+  { imageSrc: learn4, title: 'Salário em dólar', description: 'Como funcionam as gorjetas, comissões e a estrutura salarial em moeda forte.' },
+  { imageSrc: learn5, title: 'Viajando o mundo', description: 'Conheça portos, países e culturas trabalhando no que você ama.' },
+  { imageSrc: learn6, title: 'Networking internacional', description: 'Crie conexões com profissionais do mundo inteiro e abra portas para sua carreira.' },
 ];
 
 const profiles: ProfileItem[] = [
