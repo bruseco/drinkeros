@@ -391,7 +391,7 @@ const VipLanding: React.FC = () => {
             {loading ? (
               <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Abrindo checkout...</>
             ) : (
-              <><Crown className="mr-2 h-5 w-5" /> Garantir minha vaga no Clube por R$ 69</>
+              <><Crown className="mr-2 h-5 w-5" /> Quero ser sócio do Clube</>
             )}
           </Button>
           <p className="text-sm text-purple-300 mt-4">
