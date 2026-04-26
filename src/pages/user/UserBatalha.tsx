@@ -27,24 +27,19 @@ const UserBatalha: React.FC = () => {
           onFinish={() => setShowExplainer(false)}
         />
       )}
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">Batalha dos Drinkeros</h1>
-            <button
-              type="button"
-              onClick={() => setShowExplainer(true)}
-              aria-label="Como funciona a Batalha"
-              className="h-7 w-7 rounded-full bg-muted hover:bg-muted/70 text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors shrink-0"
-            >
-              <HelpCircle className="h-4 w-4" />
-            </button>
-          </div>
-          <p className="text-muted-foreground text-sm">Compartilhe receitas e vote nas favoritas.</p>
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold">Batalha dos Drinkeros</h1>
+          <button
+            type="button"
+            onClick={() => setShowExplainer(true)}
+            aria-label="Como funciona a Batalha"
+            className="h-7 w-7 rounded-full bg-muted hover:bg-muted/70 text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors shrink-0"
+          >
+            <HelpCircle className="h-4 w-4" />
+          </button>
         </div>
-        <Button asChild size="sm">
-          <Link to="/app/batalha/nova"><Plus className="h-4 w-4 mr-1" /> Postar</Link>
-        </Button>
+        <p className="text-muted-foreground text-sm">Compartilhe receitas e vote nas favoritas.</p>
       </div>
 
       {myPoints && (
@@ -64,6 +59,10 @@ const UserBatalha: React.FC = () => {
           </div>
         </Card>
       )}
+
+      <Button asChild className="w-full">
+        <Link to="/app/batalha/nova"><Plus className="h-4 w-4 mr-1" /> Postar receita</Link>
+      </Button>
 
       {isLoading ? (
         <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>
