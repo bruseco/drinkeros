@@ -13,6 +13,7 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stage, setStage] = useState<'loading' | 'video' | 'explainer'>('loading');
   const [showSkip, setShowSkip] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -22,19 +23,23 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish }) => {
       if (started) return;
       started = true;
       setStage('video');
-      v.muted = false;
-      v.volume = 1;
-      v.play().catch(() => {
-        // Browser bloqueou autoplay com som — tenta mudo
-        v.muted = true;
-        v.play().catch(() => {});
-      });
+      // Mobile bloqueia autoplay com som — começamos mudo (garantido) e oferecemos botão pra ativar áudio
+      v.muted = true;
+      v.play()
+        .then(() => {
+          // Tenta ativar o som — se o browser permitir (desktop), perfeito
+          v.muted = false;
+          v.volume = 1;
+          setIsMuted(false);
+        })
+        .catch(() => {
+          // Mantém mudo; usuário ativa pelo botão
+        });
     };
     const onEnded = () => setStage('explainer');
     v.addEventListener('loadeddata', start);
     v.addEventListener('canplay', start);
     v.addEventListener('ended', onEnded);
-    // Fallback: se em 2.5s nada disparou, tenta dar play mesmo assim
     const fallback = setTimeout(start, 2500);
     return () => {
       v.removeEventListener('loadeddata', start);
@@ -43,6 +48,15 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish }) => {
       clearTimeout(fallback);
     };
   }, []);
+
+  const enableSound = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = false;
+    v.volume = 1;
+    setIsMuted(false);
+    v.play().catch(() => {});
+  };
 
   useEffect(() => {
     if (stage !== 'video') return;
