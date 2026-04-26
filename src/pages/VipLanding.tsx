@@ -235,12 +235,12 @@ const VipLanding: React.FC = () => {
           </div>
 
           {/* Sócio */}
-          <div className="relative rounded-2xl bg-gradient-to-br from-purple-900/60 to-fuchsia-900/40 border border-purple-400/40 p-6 shadow-2xl shadow-purple-500/20">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white px-2.5 py-1 text-xs font-bold uppercase">
+          <div className="relative rounded-2xl bg-gradient-to-br from-purple-900/60 to-fuchsia-900/40 border border-purple-400/40 p-4 md:p-6 shadow-2xl shadow-purple-500/20">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 mb-4">
+              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white px-2.5 py-1 text-xs font-bold uppercase w-fit">
                 <Crown className="h-3 w-3" /> Sócio
               </span>
-              <span className="text-yellow-300 text-sm font-medium">o que você merece</span>
+              <span className="text-yellow-300 text-xs sm:text-sm font-medium">o que você merece</span>
             </div>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><strong className="text-white">Drinks ilimitados</strong>, todo dia</span></li>
