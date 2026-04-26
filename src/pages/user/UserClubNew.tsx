@@ -6,20 +6,30 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Loader2, Upload } from 'lucide-react';
+import { Loader2, Upload, X } from 'lucide-react';
+import AutocompleteTagInput from '@/components/admin/AutocompleteTagInput';
+import { useExistingTags } from '@/hooks/useExistingTags';
+import { findCanonicalTag } from '@/lib/normalizeTag';
 
 const UserClubNew: React.FC = () => {
   const { user } = useAuth();
   const nav = useNavigate();
+  const { data: existingTags } = useExistingTags();
   const [name, setName] = useState('');
-  const [ingredients, setIngredients] = useState('');
+  const [ingredients, setIngredients] = useState<string[]>([]);
+  const [ingredientInput, setIngredientInput] = useState('');
   const [instructions, setInstructions] = useState('');
-  const [characteristics, setCharacteristics] = useState('');
+  const [characteristics, setCharacteristics] = useState<string[]>([]);
+  const [characteristicInput, setCharacteristicInput] = useState('');
   const [description, setDescription] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const ingredientSuggestions = existingTags?.ingredients ?? [];
+  const characteristicSuggestions = existingTags?.characteristics ?? [];
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -28,9 +38,29 @@ const UserClubNew: React.FC = () => {
     setPreview(URL.createObjectURL(f));
   };
 
+  const addTag = (
+    raw: string,
+    pool: string[],
+    current: string[],
+    setter: (v: string[]) => void,
+  ) => {
+    const canonical = findCanonicalTag(raw, pool);
+    if (!canonical) return;
+    if (current.some((t) => t.toLowerCase() === canonical.toLowerCase())) return;
+    // Avisa se foi normalizada/corrigida
+    if (canonical.toLowerCase() !== raw.trim().toLowerCase()) {
+      toast.info(`Tag ajustada para "${canonical}"`);
+    }
+    setter([...current, canonical]);
+  };
+
+  const removeTag = (tag: string, current: string[], setter: (v: string[]) => void) => {
+    setter(current.filter((t) => t !== tag));
+  };
+
   const handleSubmit = async () => {
     if (!user) return;
-    if (!name.trim() || !ingredients.trim() || !instructions.trim()) {
+    if (!name.trim() || ingredients.length === 0 || !instructions.trim()) {
       toast.error('Preencha nome, ingredientes e passo a passo.');
       return;
     }
@@ -44,14 +74,13 @@ const UserClubNew: React.FC = () => {
         if (upErr) throw upErr;
         image_url = supabase.storage.from('club-recipes').getPublicUrl(path).data.publicUrl;
       }
-      const chars = characteristics.split(',').map(c => c.trim()).filter(Boolean);
       const { error } = await supabase.from('club_recipes').insert({
         user_id: user.id,
         name: name.trim(),
         image_url,
-        ingredients: ingredients.trim(),
+        ingredients: ingredients.join(', '),
         instructions: instructions.trim(),
-        characteristics: chars,
+        characteristics,
         description: description.trim() || null,
       });
       if (error) throw error;
@@ -87,17 +116,89 @@ const UserClubNew: React.FC = () => {
 
       <div className="space-y-2">
         <Label>Ingredientes *</Label>
-        <Textarea value={ingredients} onChange={e => setIngredients(e.target.value)} placeholder="50ml de gin&#10;30ml de suco de limão&#10;..." rows={5} />
+        <p className="text-xs text-muted-foreground">Adicione apenas o nome do ingrediente (sem quantidade). A quantidade vai no passo a passo.</p>
+        {ingredients.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {ingredients.map((tag) => (
+              <Badge key={tag} variant="secondary" className="gap-1 pr-1">
+                {tag}
+                <button
+                  type="button"
+                  onClick={() => removeTag(tag, ingredients, setIngredients)}
+                  className="hover:bg-destructive/20 rounded-sm p-0.5"
+                  aria-label={`Remover ${tag}`}
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        )}
+        <AutocompleteTagInput
+          value={ingredientInput}
+          onChange={setIngredientInput}
+          onAdd={(v) => addTag(v, ingredientSuggestions, ingredients, setIngredients)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ',') {
+              e.preventDefault();
+              if (ingredientInput.trim()) {
+                addTag(ingredientInput, ingredientSuggestions, ingredients, setIngredients);
+                setIngredientInput('');
+              }
+            }
+          }}
+          suggestions={ingredientSuggestions}
+          existingTags={ingredients}
+          placeholder="Ex: gin, suco de limão, açúcar..."
+        />
       </div>
 
       <div className="space-y-2">
         <Label>Passo a passo *</Label>
-        <Textarea value={instructions} onChange={e => setInstructions(e.target.value)} placeholder="1. Adicione gelo no copo...&#10;2. ..." rows={6} />
+        <Textarea
+          value={instructions}
+          onChange={e => setInstructions(e.target.value)}
+          placeholder="1. Adicione 50ml de gin no copo com gelo...&#10;2. Complete com 30ml de suco de limão..."
+          rows={6}
+        />
       </div>
 
       <div className="space-y-2">
-        <Label>Características (separe por vírgula)</Label>
-        <Input value={characteristics} onChange={e => setCharacteristics(e.target.value)} placeholder="cítrico, refrescante, alcoólico" />
+        <Label>Características</Label>
+        {characteristics.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {characteristics.map((tag) => (
+              <Badge key={tag} variant="secondary" className="gap-1 pr-1">
+                {tag}
+                <button
+                  type="button"
+                  onClick={() => removeTag(tag, characteristics, setCharacteristics)}
+                  className="hover:bg-destructive/20 rounded-sm p-0.5"
+                  aria-label={`Remover ${tag}`}
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        )}
+        <AutocompleteTagInput
+          value={characteristicInput}
+          onChange={setCharacteristicInput}
+          onAdd={(v) => addTag(v, characteristicSuggestions, characteristics, setCharacteristics)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ',') {
+              e.preventDefault();
+              if (characteristicInput.trim()) {
+                addTag(characteristicInput, characteristicSuggestions, characteristics, setCharacteristics);
+                setCharacteristicInput('');
+              }
+            }
+          }}
+          suggestions={characteristicSuggestions}
+          existingTags={characteristics}
+          placeholder="Ex: cítrico, refrescante, alcoólico..."
+        />
       </div>
 
       <div className="space-y-2">
