@@ -114,20 +114,20 @@ const UserCourseModules: React.FC = () => {
         />
       )}
 
-      {/* CTA: prioriza VIP quando expirado, senão checkout normal */}
+      {/* CTA: Clube quando expirado, senão checkout normal */}
       {isExpired ? (
         <div className="rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-500 p-4 flex items-center justify-between gap-4 shadow-lg">
           <div className="flex items-center gap-3 text-white">
             <Crown className="h-5 w-5 flex-shrink-0" />
             <div>
               <p className="font-semibold text-sm">Seu acesso a este curso expirou</p>
-              <p className="text-xs opacity-90">Reative todos os seus produtos com a assinatura VIP</p>
+              <p className="text-xs opacity-90">Reative todos os seus produtos virando sócio do Clube</p>
             </div>
           </div>
           <Button asChild size="sm" className="bg-white text-purple-700 hover:bg-white/90 font-semibold gap-1.5 flex-shrink-0">
-            <Link to="/vip">
+            <Link to="/clube">
               <Crown className="h-4 w-4" />
-              Virar VIP
+              Virar sócio
             </Link>
           </Button>
         </div>

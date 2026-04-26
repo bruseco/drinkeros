@@ -78,7 +78,7 @@ const UserComboDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* CTA: VIP quando expirado, checkout normal quando bloqueado */}
+      {/* CTA: Clube quando expirado, checkout normal quando bloqueado */}
       {isExpired ? (
         <div className="rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-500 p-5 text-white shadow-lg">
           <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -88,13 +88,13 @@ const UserComboDetail: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-bold text-base">Acesso expirado</h3>
-                <p className="text-white/90 text-sm">Reative todos os seus produtos com o VIP</p>
+                <p className="text-white/90 text-sm">Reative todos os seus produtos virando sócio do Clube</p>
               </div>
             </div>
             <Button asChild className="bg-white text-purple-700 hover:bg-white/90 font-bold gap-2 rounded-xl shadow-md">
-              <Link to="/vip">
+              <Link to="/clube">
                 <Crown className="h-4 w-4" />
-                Virar VIP
+                Virar sócio
               </Link>
             </Button>
           </div>

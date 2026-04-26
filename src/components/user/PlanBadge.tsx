@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 interface PlanBadgeProps {
   className?: string;
-  /** se true, vira link pra /vip quando free */
+  /** se true, vira link pra /clube quando free */
   linkOnFree?: boolean;
 }
 
@@ -24,7 +24,7 @@ export const PlanBadge: React.FC<PlanBadgeProps> = ({ className, linkOnFree = tr
         )}
       >
         <Crown className="h-3 w-3" />
-        VIP
+        Sócio
       </span>
     );
   }
@@ -42,5 +42,5 @@ export const PlanBadge: React.FC<PlanBadgeProps> = ({ className, linkOnFree = tr
     </span>
   );
 
-  return linkOnFree ? <Link to="/vip">{content}</Link> : content;
+  return linkOnFree ? <Link to="/clube">{content}</Link> : content;
 };

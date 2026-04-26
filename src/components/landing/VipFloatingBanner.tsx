@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
-import vipLogo from '@/assets/logotipo-assinante-vip.png';
+import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
 
 interface VipFloatingBannerProps {
   /** ID do elemento "Matricule-se" que dispara a contagem */
@@ -68,7 +68,7 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
   return (
     <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[60] w-[calc(100%-1.5rem)] max-w-md animate-bounce-in pointer-events-auto">
       <Link
-        to="/vip"
+        to="/clube"
         className="relative block rounded-2xl p-4 pr-10 text-left shadow-2xl"
         style={{
           background: 'linear-gradient(90deg, #000000 0%, #6b21a8 55%, #ec4899 100%)',
@@ -80,7 +80,7 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
         <button
           type="button"
           onClick={handleClose}
-          aria-label="Fechar oferta VIP"
+          aria-label="Fechar oferta do Clube"
           className="absolute top-2 right-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors"
         >
           <X className="h-4 w-4" />
@@ -89,18 +89,18 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
         <div className="flex items-center gap-3">
           <div className="relative shrink-0 flex items-center justify-center">
             <img
-              src={vipLogo}
-              alt="Assinante VIP"
+              src={clubeLogo}
+              alt="Clube dos Drinkeros"
               className="relative h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(232,121,249,0.6)]"
             />
           </div>
           <div className="min-w-0 flex-1">
             <span className="block text-[10px] font-extrabold tracking-[0.18em] uppercase text-yellow-300 mb-0.5">
-              Oferta VIP · {VIP_DISCOUNT_PERCENT}% OFF
+              Sócios do Clube · {VIP_DISCOUNT_PERCENT}% OFF
             </span>
             {productName && (
               <p className="text-white/95 text-[11px] leading-tight mb-0.5">
-                Assinantes VIP pagam no <strong className="text-white">{productName}</strong>
+                Sócios do Clube pagam no <strong className="text-white">{productName}</strong>
               </p>
             )}
             <p className="text-white text-sm leading-snug">

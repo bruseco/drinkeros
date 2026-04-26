@@ -161,13 +161,13 @@ const PackageLanding: React.FC = () => {
                 <div className="mb-2 flex items-center justify-center gap-2">
                   <span className="text-lg text-muted-foreground line-through">{formattedOriginalPrice}</span>
                   <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
-                    VIP · {VIP_DISCOUNT_PERCENT}% OFF
+                    Sócio do Clube · {VIP_DISCOUNT_PERCENT}% OFF
                   </Badge>
                 </div>
               )}
               <div className="text-4xl font-extrabold text-foreground mb-1">{formattedPrice}</div>
               <p className="text-sm text-muted-foreground mb-6">
-                {isVip ? 'Preço exclusivo para assinantes VIP · ' : ''}Acesso por 1 ano · Pagamento único
+                {isVip ? 'Preço exclusivo para sócios do Clube · ' : ''}Acesso por 1 ano · Pagamento único
               </p>
               <Button
                 size="lg"

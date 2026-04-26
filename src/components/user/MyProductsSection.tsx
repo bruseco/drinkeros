@@ -69,7 +69,7 @@ const ProductRow: React.FC<{ p: MyProduct }> = ({ p }) => {
           ) : p.extended_by_vip ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-purple-500/20 to-fuchsia-500/20 px-2 py-0.5 text-purple-600 dark:text-purple-300 font-medium">
               <Crown className="h-3 w-3" />
-              Ativo via VIP até {expiryLabel}
+              Ativo via Clube até {expiryLabel}
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5">
@@ -108,13 +108,13 @@ export const MyProductsSection: React.FC = () => {
     <div className="space-y-2 p-3">
       {hasExpired && (
         <Link
-          to="/vip"
+          to="/clube"
           className="block rounded-lg bg-gradient-to-r from-purple-600 to-fuchsia-500 p-3 text-white shadow-sm hover:shadow-md transition-shadow"
         >
           <div className="flex items-center gap-2">
             <Crown className="h-4 w-4 flex-shrink-0" />
             <p className="text-xs leading-tight">
-              <strong>Reative seus produtos expirados</strong> com a assinatura VIP.
+              <strong>Reative seus produtos expirados</strong> virando sócio do Clube.
             </p>
           </div>
         </Link>

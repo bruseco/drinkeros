@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserPlan } from '@/hooks/useUserPlan';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,6 +16,7 @@ import { findCanonicalTag } from '@/lib/normalizeTag';
 
 const UserBatalhaNew: React.FC = () => {
   const { user } = useAuth();
+  const { data: planData, isLoading: planLoading } = useUserPlan();
   const nav = useNavigate();
   const { data: existingTags } = useExistingTags();
   const [name, setName] = useState('');
@@ -27,6 +29,14 @@ const UserBatalhaNew: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Bloqueio: somente sócios do Clube podem postar
+  useEffect(() => {
+    if (!planLoading && planData && !planData.isVip) {
+      toast.info('Para postar na Batalha você precisa ser sócio do Clube dos Drinkeros.');
+      nav('/clube', { replace: true });
+    }
+  }, [planLoading, planData, nav]);
 
   const ingredientSuggestions = existingTags?.ingredients ?? [];
   const characteristicSuggestions = existingTags?.characteristics ?? [];
