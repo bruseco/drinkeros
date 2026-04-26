@@ -8,7 +8,6 @@ import {
   Crown,
   BookOpen,
   Sparkles,
-  ArrowLeft,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -22,6 +21,7 @@ import {
   formatBRL,
 } from '@/lib/vipDiscount';
 import { EBOOK_CONTENT } from './ebookContent';
+import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
 const EbookLanding: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -164,13 +164,10 @@ const EbookLanding: React.FC = () => {
 
       {/* Top nav minimalista */}
       <header className="border-b border-white/5 bg-black/40 backdrop-blur sticky top-0 z-30">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <Link to="/login" className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition">
-            <ArrowLeft className="h-4 w-4" />
-            <span>Voltar</span>
+        <div className="container mx-auto px-4 h-14 flex items-center justify-center">
+          <Link to="/app" className="flex items-center">
+            <img src={drinkrosLogo} alt="Drinkeros" className="h-7 w-auto" />
           </Link>
-          <div className="text-xs uppercase tracking-[0.3em] text-amber-200/70">Drinkeros</div>
-          <div className="w-16" />
         </div>
       </header>
 
