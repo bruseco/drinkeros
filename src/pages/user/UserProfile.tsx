@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { MyProductsSection } from '@/components/user/MyProductsSection';
 import { AvatarCropDialog } from '@/components/user/AvatarCropDialog';
 
-const ProfileDataSection: React.FC = () => {
+const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) => void }> = ({ onCompletenessChange }) => {
   const { user, profile } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
   const [fullName, setFullName] = useState('');
@@ -48,6 +48,18 @@ const ProfileDataSection: React.FC = () => {
     };
     fetchExtra();
   }, [user]);
+
+  useEffect(() => {
+    if (!onCompletenessChange) return;
+    const complete = Boolean(
+      fullName.trim() &&
+      phone.trim() &&
+      bio.trim() &&
+      cpf.replace(/\D/g, '').length === 11 &&
+      avatarUrl
+    );
+    onCompletenessChange(complete);
+  }, [fullName, phone, bio, cpf, avatarUrl, onCompletenessChange]);
 
   const handleFilePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -239,6 +251,7 @@ const ChangePasswordSection: React.FC = () => {
 const UserProfile: React.FC = () => {
   const { signOut } = useAuth();
   const [openSection, setOpenSection] = useState<string | null>(null);
+  const [profileComplete, setProfileComplete] = useState(true);
 
   const toggle = (key: string) => setOpenSection(prev => prev === key ? null : key);
 
@@ -255,11 +268,16 @@ const UserProfile: React.FC = () => {
           <span className="flex items-center gap-3 text-sm font-medium">
             <User className="h-5 w-5 text-muted-foreground" />
             Dados Pessoais
+            {!profileComplete && (
+              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-destructive/15 text-destructive border border-destructive/30">
+                Incompleto
+              </span>
+            )}
           </span>
           <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-200", openSection === 'dados' && "rotate-180")} />
         </CollapsibleTrigger>
         <CollapsibleContent className="rounded-b-lg border border-t-0 border-border bg-card overflow-hidden">
-          <ProfileDataSection />
+          <ProfileDataSection onCompletenessChange={setProfileComplete} />
         </CollapsibleContent>
       </Collapsible>
 
