@@ -22,14 +22,7 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
   const [dismissed, setDismissed] = useState(false);
   const timerRef = useRef<number | null>(null);
 
-  // Sessão: se fechou, não reabre nessa sessão
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (sessionStorage.getItem(STORAGE_KEY_PREFIX + watchTargetId) === '1') {
-      setDismissed(true);
-    }
-  }, [watchTargetId]);
-
+  // Dismiss apenas em memória — refresh ou troca de página reativa o banner
   useEffect(() => {
     if (dismissed || visible) return;
     const target = document.getElementById(watchTargetId);
@@ -62,9 +55,6 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
     e.stopPropagation();
     setVisible(false);
     setDismissed(true);
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem(STORAGE_KEY_PREFIX + watchTargetId, '1');
-    }
   };
 
   if (!visible || dismissed) return null;
