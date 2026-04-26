@@ -111,6 +111,28 @@ const DrinkerosXperience: React.FC = () => {
     }
   }, [searchParams, toast]);
 
+  // Hero video: autoplay muted + unmute na primeira interação
+  const heroVideoRef = useRef<HTMLVideoElement | null>(null);
+  useEffect(() => {
+    let unmuted = false;
+    const unmute = () => {
+      if (unmuted) return;
+      unmuted = true;
+      const v = heroVideoRef.current;
+      if (v) {
+        v.muted = false;
+        v.volume = 1;
+        const p = v.play();
+        if (p && typeof p.catch === 'function') p.catch(() => {});
+      }
+      cleanup();
+    };
+    const events: Array<keyof WindowEventMap> = ['pointerdown', 'touchstart', 'keydown', 'scroll', 'wheel'];
+    const cleanup = () => events.forEach(e => window.removeEventListener(e, unmute));
+    events.forEach(e => window.addEventListener(e, unmute, { passive: true }));
+    return cleanup;
+  }, []);
+
   // Preço (com fallback para o valor da página antiga: R$ 497)
   const dbPrice = (course as any)?.price ? Number((course as any).price) : null;
   const basePrice = dbPrice ?? 497;
