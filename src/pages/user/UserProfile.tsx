@@ -25,6 +25,7 @@ const ProfileDataSection: React.FC = () => {
   const [cpfLocked, setCpfLocked] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile) {
@@ -48,19 +49,28 @@ const ProfileDataSection: React.FC = () => {
     fetchExtra();
   }, [user]);
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFilePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setCropSrc(reader.result as string);
+    reader.readAsDataURL(file);
+    // reset input so the same file can be picked again later
+    e.target.value = '';
+  };
+
+  const handleCroppedUpload = async (blob: Blob) => {
+    if (!user) return;
     setUploadingAvatar(true);
     try {
-      const ext = file.name.split('.').pop() || 'jpg';
-      const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from('avatars').upload(path, file);
+      const path = `${user.id}/${crypto.randomUUID()}.jpg`;
+      const { error: upErr } = await supabase.storage.from('avatars').upload(path, blob, { contentType: 'image/jpeg' });
       if (upErr) throw upErr;
       const url = supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl;
       const { error } = await supabase.from('profiles').update({ avatar_url: url }).eq('user_id', user.id);
       if (error) throw error;
       setAvatarUrl(url);
+      setCropSrc(null);
       toast.success('Foto atualizada!');
       window.location.reload();
     } catch (err: any) {
