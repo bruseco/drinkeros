@@ -8,11 +8,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, ChevronRight, Package, Camera } from 'lucide-react';
+import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, ChevronRight, Package, Camera, Crown } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import { MyProductsSection } from '@/components/user/MyProductsSection';
 import { AvatarCropDialog } from '@/components/user/AvatarCropDialog';
+import { useUserPlan } from '@/hooks/useUserPlan';
+import { useNavigate } from 'react-router-dom';
 
 const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) => void }> = ({ onCompletenessChange }) => {
   const { user, profile } = useAuth();
@@ -248,20 +250,65 @@ const ChangePasswordSection: React.FC = () => {
   );
 };
 
+const PlanSection: React.FC = () => {
+  const { data: planData, isLoading } = useUserPlan();
+  const navigate = useNavigate();
+  const isVip = !!planData?.isVip;
+  const expiresAt = planData?.expires_at ? new Date(planData.expires_at) : null;
+
+  return (
+    <div className="space-y-3 p-4">
+      {isLoading ? (
+        <p className="text-sm text-muted-foreground">Carregando...</p>
+      ) : isVip ? (
+        <>
+          <div className="flex items-center gap-2">
+            <Crown className="h-5 w-5 text-yellow-500" />
+            <p className="font-semibold">Sócio do Clube dos Drinkeros</p>
+          </div>
+          {expiresAt && (
+            <p className="text-xs text-muted-foreground">
+              Renova / expira em {expiresAt.toLocaleDateString('pt-BR')}
+            </p>
+          )}
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => window.open('https://wa.me/5548991601025?text=Olá! Quero gerenciar/cancelar minha assinatura do Clube.', '_blank')}
+          >
+            Gerenciar / Cancelar assinatura
+          </Button>
+        </>
+      ) : (
+        <>
+          <p className="font-semibold">Plano Gratuito</p>
+          <p className="text-sm text-muted-foreground">
+            Faça upgrade para o Clube dos Drinkeros e desbloqueie receitas exclusivas, Batalha e muito mais.
+          </p>
+          <Button
+            className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:opacity-95 text-white border-0"
+            onClick={() => navigate('/clube')}
+          >
+            <Crown className="mr-2 h-4 w-4" />
+            Fazer upgrade para o Clube
+          </Button>
+        </>
+      )}
+    </div>
+  );
+};
+
 const UserProfile: React.FC = () => {
   const { signOut } = useAuth();
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [profileComplete, setProfileComplete] = useState(true);
+  const { data: planData } = useUserPlan();
+  const isVip = !!planData?.isVip;
 
   const toggle = (key: string) => setOpenSection(prev => prev === key ? null : key);
 
   return (
     <div className="container mx-auto max-w-2xl py-6 px-4 pb-24 md:pb-6 space-y-2">
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold">Meu Perfil</h1>
-        <p className="text-muted-foreground">Gerencie seus dados pessoais e senha.</p>
-      </div>
-
       {/* Dados Pessoais - collapsible */}
       <Collapsible open={openSection === 'dados'} onOpenChange={() => toggle('dados')}>
         <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 h-14 hover:bg-accent/50 transition-colors">
@@ -278,6 +325,28 @@ const UserProfile: React.FC = () => {
         </CollapsibleTrigger>
         <CollapsibleContent className="rounded-b-lg border border-t-0 border-border bg-card overflow-hidden">
           <ProfileDataSection onCompletenessChange={setProfileComplete} />
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Plano Atual - collapsible */}
+      <Collapsible open={openSection === 'plano'} onOpenChange={() => toggle('plano')}>
+        <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 h-14 hover:bg-accent/50 transition-colors">
+          <span className="flex items-center gap-3 text-sm font-medium">
+            <Crown className={cn("h-5 w-5", isVip ? "text-yellow-500" : "text-muted-foreground")} />
+            Plano Atual
+            <span className={cn(
+              "text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border",
+              isVip
+                ? "bg-yellow-500/15 text-yellow-600 border-yellow-500/30"
+                : "bg-muted-foreground/15 text-muted-foreground border-muted-foreground/30"
+            )}>
+              {isVip ? 'Clube' : 'Gratuito'}
+            </span>
+          </span>
+          <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-200", openSection === 'plano' && "rotate-180")} />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="rounded-b-lg border border-t-0 border-border bg-card overflow-hidden">
+          <PlanSection />
         </CollapsibleContent>
       </Collapsible>
 
