@@ -85,6 +85,10 @@ export interface CourseLandingProps {
   logoSrc?: string;
   /** Imagem de fundo (faixa) atrás do logo no hero. */
   logoBgSrc?: string;
+  /** Classe Tailwind para o tamanho do logo (sobrescreve default). */
+  logoClassName?: string;
+  /** Classe extra para a tagline (ex: cor customizada). */
+  taglineClassName?: string;
   /** Foto do professor — exibida no hero abaixo do CTA. */
   instructorSrc?: string;
   /** Nome do professor — legenda abaixo da foto. */
