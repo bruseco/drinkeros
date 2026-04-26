@@ -114,7 +114,7 @@ const ProfileDataSection: React.FC = () => {
           >
             <Camera className="h-4 w-4" />
           </button>
-          <input ref={fileRef} type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
+          <input ref={fileRef} type="file" accept="image/*" onChange={handleFilePicked} className="hidden" />
         </div>
         {uploadingAvatar && <p className="text-xs text-muted-foreground">Enviando foto...</p>}
       </div>
@@ -126,10 +126,6 @@ const ProfileDataSection: React.FC = () => {
       <div className="space-y-2">
         <Label htmlFor="bio">Sobre você</Label>
         <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Fale um pouco sobre você (aparece no Clube)" rows={3} />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="fullName">Nome completo</Label>
-        <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome completo" />
       </div>
       <div className="space-y-2">
         <Label htmlFor="phone">Telefone</Label>
