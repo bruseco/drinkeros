@@ -98,7 +98,7 @@ const BartenderABordo: React.FC = () => (
     instructorName="Rick Souza"
     logoSrc={logo}
     logoClassName="h-52 sm:h-72"
-    logoWrapperClassName="-mt-16 sm:-mt-24 mb-0 overflow-hidden max-h-[180px] sm:max-h-[240px]"
+    logoWrapperClassName="-mt-10 sm:-mt-16 mb-0"
     heroBadge="Com Rick Souza · 15+ anos em cruzeiros"
     heroVideoUrl={heroVideo}
     heroVideoAspect="square"
