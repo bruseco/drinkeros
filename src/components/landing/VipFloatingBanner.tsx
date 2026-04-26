@@ -8,6 +8,8 @@ interface VipFloatingBannerProps {
   /** ID do elemento "Matricule-se" que dispara a contagem */
   watchTargetId: string;
   basePrice: number;
+  /** Nome do curso/produto exibido no banner para dar contexto ao desconto. */
+  productName?: string;
   /** Delay em ms após visualização do CTA. Default 5000. */
   delayMs?: number;
 }
@@ -17,6 +19,7 @@ const STORAGE_KEY_PREFIX = 'vipFloatingDismissed:';
 const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
   watchTargetId,
   basePrice,
+  productName,
   delayMs = 5000,
 }) => {
   const [visible, setVisible] = useState(false);
