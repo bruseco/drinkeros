@@ -79,6 +79,10 @@ import UserCombos from "./pages/user/UserCombos";
 import UserComboDetail from "./pages/user/UserComboDetail";
 import UserProfile from "./pages/user/UserProfile";
 import UserRecipeDetail from "./pages/user/UserRecipeDetail";
+import UserClub from "./pages/user/UserClub";
+import UserClubNew from "./pages/user/UserClubNew";
+import UserClubRanking from "./pages/user/UserClubRanking";
+import UserClubRecipeDetail from "./pages/user/UserClubRecipeDetail";
 
 const queryClient = new QueryClient();
 
@@ -189,6 +193,10 @@ const App = () => (
               <Route path="combos" element={<UserCombos />} />
               <Route path="combo/:comboId" element={<UserComboDetail />} />
               <Route path="perfil" element={<UserProfile />} />
+              <Route path="clube" element={<UserClub />} />
+              <Route path="clube/nova" element={<UserClubNew />} />
+              <Route path="clube/ranking" element={<UserClubRanking />} />
+              <Route path="clube/receita/:id" element={<UserClubRecipeDetail />} />
             </Route>
 
             {/* Catch all */}
