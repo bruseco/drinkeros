@@ -1,17 +1,30 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useBatalhaFeed, useBatalhaMyPoints, tierColor } from '@/hooks/useBatalha';
 import { BatalhaIntro, hasSeenBatalhaIntro } from '@/components/user/BatalhaIntro';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Star, Plus, Trophy, Loader2, HelpCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { useUserPlan } from '@/hooks/useUserPlan';
+import { toast } from 'sonner';
 
 const UserBatalha: React.FC = () => {
   const { data: feed, isLoading } = useBatalhaFeed();
   const { data: myPoints } = useBatalhaMyPoints();
+  const { data: planData } = useUserPlan();
+  const navigate = useNavigate();
   const [showIntro, setShowIntro] = useState(() => !hasSeenBatalhaIntro());
   const [showExplainer, setShowExplainer] = useState(false);
+
+  const handlePostClick = (e: React.MouseEvent) => {
+    if (!planData?.isVip) {
+      e.preventDefault();
+      toast.info('Para postar na Batalha você precisa ser sócio do Clube dos Drinkeros.');
+      navigate('/clube');
+    }
+  };
+
 
   if (showIntro) {
     return <BatalhaIntro onFinish={() => setShowIntro(false)} />;
@@ -61,7 +74,7 @@ const UserBatalha: React.FC = () => {
       )}
 
       <Button asChild className="w-full">
-        <Link to="/app/batalha/nova"><Plus className="h-4 w-4 mr-1" /> Postar receita</Link>
+        <Link to="/app/batalha/nova" onClick={handlePostClick}><Plus className="h-4 w-4 mr-1" /> Postar receita</Link>
       </Button>
 
       {isLoading ? (
