@@ -208,7 +208,7 @@ const VipLanding: React.FC = () => {
         className="relative"
         style={{
           backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.7) 60%, #000 100%), url(${bgTijolos})`,
-          backgroundSize: 'cover',
+          backgroundSize: '200% auto',
           backgroundPosition: 'center top',
           backgroundRepeat: 'no-repeat',
         }}
