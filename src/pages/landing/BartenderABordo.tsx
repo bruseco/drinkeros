@@ -50,9 +50,9 @@ const profiles: ProfileItem[] = [
 ];
 
 const bonus: BonusItem[] = [
-  { title: 'BÔNUS 1 — Modelos de currículo', description: 'Templates prontos no padrão internacional usado pelas companhias.' },
-  { title: 'BÔNUS 2 — Lista de companhias', description: 'Lista atualizada das principais companhias contratantes e como aplicar.' },
-  { title: 'BÔNUS 3 — Mentoria em grupo', description: 'Acesso a sessões em grupo para tirar dúvidas e acelerar sua contratação.' },
+  { title: 'BÔNUS 1 — Modelos de currículo', description: 'Templates prontos no padrão internacional usado pelas companhias.', imageSrc: bonus1Img },
+  { title: 'BÔNUS 2 — Lista de companhias', description: 'Lista atualizada das principais companhias contratantes e como aplicar.', imageSrc: bonus2Img },
+  { title: 'BÔNUS 3 — Mentoria em grupo', description: 'Acesso a sessões em grupo para tirar dúvidas e acelerar sua contratação.', imageSrc: bonus3Img },
 ];
 
 const aboutInstructor = {
