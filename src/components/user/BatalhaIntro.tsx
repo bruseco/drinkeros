@@ -87,7 +87,7 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish, initialStage = 'loadin
           </button>
         )}
         <div className="min-h-full flex flex-col items-center justify-center px-6 py-10 text-white max-w-xl mx-auto">
-          <img src={logo} alt="Batalha dos Drinkeros" className="w-64 max-w-full mb-6 drop-shadow-2xl" />
+          <img src={logo} alt="Batalha dos Drinkeros" className="w-32 max-w-full mb-6 drop-shadow-2xl" />
 
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/20 border border-yellow-400/40 text-yellow-300 text-xs font-bold uppercase tracking-wider mb-4">
             <Crown className="h-3 w-3" /> Exclusivo Assinante VIP
