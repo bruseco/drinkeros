@@ -11,7 +11,7 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
   const [displayChildren, setDisplayChildren] = useState(children);
   const [transitionClass, setTransitionClass] = useState('page-enter');
   const prevKeyRef = useRef(location.key);
-  const disableWrapper = location.pathname === '/app/receitas' || location.pathname.startsWith('/app/batalha');
+  const disableWrapper = location.pathname === '/app/receitas' || location.pathname.startsWith('/app/batalha') || location.pathname === '/clube';
 
   useEffect(() => {
     if (disableWrapper || location.key === prevKeyRef.current) return;
