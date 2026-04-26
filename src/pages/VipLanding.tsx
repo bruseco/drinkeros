@@ -198,9 +198,6 @@ const VipLanding: React.FC = () => {
               </span>{' '}
               <span className="text-white">do clube</span>
             </h1>
-            <p className="text-lg md:text-xl text-purple-200 max-w-2xl mx-auto">
-              Pare de contar drinks. Beba conhecimento sem limites e participe da Batalha dos Drinkeros.
-            </p>
           </div>
         </div>
       </div>
@@ -217,50 +214,15 @@ const VipLanding: React.FC = () => {
 
         <div className="relative z-10 container mx-auto max-w-4xl">
 
-        {/* Pricing Card */}
-        <div className="relative max-w-md mx-auto mb-16">
-          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-yellow-400 rounded-3xl blur opacity-60" />
-          <div className="relative bg-black rounded-3xl p-8 border border-purple-500/30">
-            <h2 className="text-center text-3xl md:text-4xl font-black mb-3 viplanding-gold-text">
-              Sócio do Clube · Anual
-            </h2>
-            <div className="text-center mb-6">
-              <div className="text-purple-300 line-through text-sm">de R$ 297</div>
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-2xl font-light text-purple-300">R$</span>
-                <span className="text-7xl font-black viplanding-gold-text">
-                  69
-                </span>
-              </div>
-              <div className="text-sm text-purple-300">por ano · menos de R$ 6/mês</div>
-            </div>
-
-            <Button
-              onClick={handleSubscribe}
-              disabled={loading}
-              className="viplanding-gold-btn w-full h-14 text-base font-bold border-0 hover:text-black"
-            >
-              {loading ? (
-                <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Abrindo checkout...</>
-              ) : (
-                <><Zap className="mr-2 h-5 w-5" /> Quero ser sócio do Clube</>
-              )}
-            </Button>
-            <p className="text-center text-xs text-purple-300 mt-3">
-              💳 Pagamento seguro · cancele quando quiser
-            </p>
-          </div>
-        </div>
-
         {/* Comparison */}
-        <div className="grid md:grid-cols-2 gap-4 mb-16">
+        <div className="grid grid-cols-2 gap-3 md:gap-4 mb-16 mt-4">
           {/* Free */}
-          <div className="rounded-2xl bg-white/5 border border-white/10 p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="inline-flex items-center gap-1 rounded-full bg-lime-400 text-lime-950 px-2.5 py-1 text-xs font-bold uppercase">
+          <div className="rounded-2xl bg-white/5 border border-white/10 p-4 md:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 mb-4">
+              <span className="inline-flex items-center gap-1 rounded-full bg-lime-400 text-lime-950 px-2.5 py-1 text-xs font-bold uppercase w-fit">
                 <Sparkles className="h-3 w-3" /> Grátis
               </span>
-              <span className="text-purple-300 text-sm">o que você tem hoje</span>
+              <span className="text-purple-300 text-xs sm:text-sm">o que você tem hoje</span>
             </div>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> Apenas <strong>3 drinks por dia</strong></li>
@@ -273,12 +235,12 @@ const VipLanding: React.FC = () => {
           </div>
 
           {/* Sócio */}
-          <div className="relative rounded-2xl bg-gradient-to-br from-purple-900/60 to-fuchsia-900/40 border border-purple-400/40 p-6 shadow-2xl shadow-purple-500/20">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white px-2.5 py-1 text-xs font-bold uppercase">
+          <div className="relative rounded-2xl bg-gradient-to-br from-purple-900/60 to-fuchsia-900/40 border border-purple-400/40 p-4 md:p-6 shadow-2xl shadow-purple-500/20">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 mb-4">
+              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white px-2.5 py-1 text-xs font-bold uppercase w-fit">
                 <Crown className="h-3 w-3" /> Sócio
               </span>
-              <span className="text-yellow-300 text-sm font-medium">o que você merece</span>
+              <span className="text-yellow-300 text-xs sm:text-sm font-medium">o que você merece</span>
             </div>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><strong className="text-white">Drinks ilimitados</strong>, todo dia</span></li>
@@ -380,23 +342,39 @@ const VipLanding: React.FC = () => {
           </div>
         </div>
 
-        {/* CTA final */}
-        <div className="text-center mb-16">
-          <Button
-            onClick={handleSubscribe}
-            disabled={loading}
-            size="lg"
-            className="h-14 px-12 text-base font-bold bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:from-purple-500 hover:to-fuchsia-400 shadow-lg shadow-purple-500/40"
-          >
-            {loading ? (
-              <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Abrindo checkout...</>
-            ) : (
-              <><Crown className="mr-2 h-5 w-5" /> Quero ser sócio do Clube</>
-            )}
-          </Button>
-          <p className="text-sm text-purple-300 mt-4">
-            Você merece beber sem limites 🍹
-          </p>
+        {/* Pricing Card — fechamento da página */}
+        <div className="relative max-w-md mx-auto mb-16">
+          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-yellow-400 rounded-3xl blur opacity-60" />
+          <div className="relative bg-black rounded-3xl p-8 border border-purple-500/30">
+            <h2 className="text-center text-3xl md:text-4xl font-black mb-3 viplanding-gold-text">
+              Sócio do Clube · Anual
+            </h2>
+            <div className="text-center mb-6">
+              <div className="text-purple-300 line-through text-sm">de R$ 297</div>
+              <div className="flex items-baseline justify-center gap-1">
+                <span className="text-2xl font-light text-purple-300">R$</span>
+                <span className="text-7xl font-black viplanding-gold-text">
+                  69
+                </span>
+              </div>
+              <div className="text-sm text-purple-300">por ano · menos de R$ 6/mês</div>
+            </div>
+
+            <Button
+              onClick={handleSubscribe}
+              disabled={loading}
+              className="viplanding-gold-btn w-full h-14 text-base font-bold border-0 hover:text-black"
+            >
+              {loading ? (
+                <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Abrindo checkout...</>
+              ) : (
+                <><Zap className="mr-2 h-5 w-5" /> Quero ser sócio do Clube</>
+              )}
+            </Button>
+            <p className="text-center text-xs text-purple-300 mt-3">
+              💳 Pagamento seguro · cancele quando quiser
+            </p>
+          </div>
         </div>
         </div>
       </div>
