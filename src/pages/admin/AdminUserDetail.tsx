@@ -108,7 +108,7 @@ const AdminUserDetail: React.FC = () => {
     const { error } = await supabase.from('user_plans').upsert(update, { onConflict: 'user_id' });
     if (error) toast({ title: 'Erro', description: error.message, variant: 'destructive' });
     else {
-      toast({ title: enable ? 'VIP ativado por 1 ano' : 'VIP removido' });
+      toast({ title: enable ? 'Sócio do Clube ativado por 1 ano' : 'Sócio do Clube removido' });
       queryClient.invalidateQueries({ queryKey: ['admin-user-detail'] });
     }
   };
