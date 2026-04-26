@@ -179,7 +179,7 @@ const VipLanding: React.FC = () => {
           <img
             src={clubeLogo}
             alt="Clube dos Drinkeros"
-            className="mx-auto h-40 md:h-56 object-contain drop-shadow-[0_0_30px_rgba(168,85,247,0.55)]"
+            className="mx-auto h-40 md:h-56 object-contain [filter:drop-shadow(0_10px_25px_rgba(0,0,0,0.85))_drop-shadow(0_0_40px_rgba(0,0,0,0.7))]"
           />
           <h1 className="text-4xl md:text-6xl font-black leading-none">
             <span className="text-white">Seja</span>{' '}
