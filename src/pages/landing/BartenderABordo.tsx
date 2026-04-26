@@ -22,6 +22,7 @@ import CourseLanding, {
 } from './CourseLanding';
 
 import instructor from '@/assets/landing/bartender-bordo/instructor.jpg';
+import heroVideo from '@/assets/landing/bartender-bordo/intro.mp4';
 
 // Paleta: azul oceano/náutico
 const theme: CourseTheme = {
@@ -74,6 +75,7 @@ const BartenderABordo: React.FC = () => (
     instructorSrc={instructor}
     instructorName="Rick Souza"
     heroBadge="Com Rick Souza · 15+ anos em cruzeiros"
+    heroVideoUrl={heroVideo}
     tagline="Viaje o mundo, ganhe em dólar e viva momentos incríveis."
     subheadline="Saiba todos os detalhes para ser contratado em cruzeiros internacionais com quem viveu isso por mais de 15 anos."
     ctaHero="QUERO TRABALHAR EM CRUZEIROS"
