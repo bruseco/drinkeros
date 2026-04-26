@@ -30,6 +30,14 @@ const UserBatalhaNew: React.FC = () => {
   const [preview, setPreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // Bloqueio: somente sócios do Clube podem postar
+  useEffect(() => {
+    if (!planLoading && planData && !planData.isVip) {
+      toast.info('Para postar na Batalha você precisa ser sócio do Clube dos Drinkeros.');
+      nav('/clube', { replace: true });
+    }
+  }, [planLoading, planData, nav]);
+
   const ingredientSuggestions = existingTags?.ingredients ?? [];
   const characteristicSuggestions = existingTags?.characteristics ?? [];
 
