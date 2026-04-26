@@ -338,6 +338,74 @@ const PlanSection: React.FC = () => {
   );
 };
 
+const NotificationsSection: React.FC = () => {
+  const { permission, isSubscribed, isLoading, isConfigured, isSupported, subscribe, unsubscribe } = usePushNotifications();
+  const [busy, setBusy] = useState(false);
+
+  if (!isSupported) {
+    return (
+      <div className="space-y-2 p-4">
+        <p className="text-sm text-muted-foreground">
+          Seu navegador não suporta notificações push. Tente abrir no Chrome, Edge ou instale o app na tela inicial.
+        </p>
+      </div>
+    );
+  }
+
+  if (!isConfigured) {
+    return (
+      <div className="space-y-2 p-4">
+        <p className="text-sm text-muted-foreground">As notificações push ainda não estão disponíveis.</p>
+      </div>
+    );
+  }
+
+  const blocked = permission === 'denied';
+
+  const handleToggle = async (checked: boolean) => {
+    setBusy(true);
+    try {
+      if (checked) {
+        const ok = await subscribe();
+        if (ok) toast.success('Notificações ativadas!');
+        else if (Notification.permission === 'denied') {
+          toast.error('Permissão bloqueada', {
+            description: 'Libere as notificações nas configurações do navegador.',
+          });
+        } else toast.error('Não foi possível ativar as notificações.');
+      } else {
+        await unsubscribe();
+        toast.success('Notificações desativadas.');
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4 p-4">
+      <div className="flex items-center justify-between gap-4">
+        <div className="space-y-1">
+          <p className="text-sm font-medium">Notificações push</p>
+          <p className="text-xs text-muted-foreground">
+            Receba avisos sobre novas aulas, receitas e novidades do Drinkeros.
+          </p>
+        </div>
+        <Switch
+          checked={isSubscribed}
+          onCheckedChange={handleToggle}
+          disabled={isLoading || busy || blocked}
+        />
+      </div>
+      {blocked && (
+        <p className="text-xs text-destructive">
+          As notificações estão bloqueadas neste navegador. Libere a permissão nas configurações do site para ativar.
+        </p>
+      )}
+    </div>
+  );
+};
+
 const UserProfile: React.FC = () => {
   const { signOut } = useAuth();
   const [openSection, setOpenSection] = useState<string | null>(null);
