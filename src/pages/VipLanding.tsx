@@ -323,7 +323,7 @@ const VipLanding: React.FC = () => {
               Bônus exclusivos do Clube
             </div>
             <h2 className="text-3xl md:text-4xl font-black">
-              E ainda leva <span className="bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">esses presentes</span>
+              Saiba mais sobre <span className="bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">cada bônus</span>
             </h2>
           </div>
 
