@@ -52,7 +52,7 @@ const profiles: ProfileItem[] = [
 const bonus: BonusItem[] = [
   { title: '7 receitas exclusivas', description: 'Um drink autoral para cada bebida estudada (Jack Daniel\'s, Amarula, Tanqueray, Frangelico, Absolut, José Cuervo).' },
   { title: 'Material complementar PDF', description: 'Resumo de todas as curiosidades para consulta rápida no dia a dia do bar.' },
-  { title: 'Comunidade Drinkeros', description: 'Acesso ao grupo VIP para trocar experiências com outros alunos e bartenders.' },
+  { title: 'Comunidade Drinkeros', description: 'Acesso ao grupo exclusivo para trocar experiências com outros alunos e bartenders.' },
 ];
 
 const faq: FaqItem[] = [

@@ -195,7 +195,7 @@ const AdminUsers: React.FC = () => {
     if (error) {
       toast({ title: 'Erro ao atualizar plano', description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: isVipActive ? 'VIP removido' : 'VIP ativado por 1 ano' });
+      toast({ title: isVipActive ? 'Sócio do Clube removido' : 'Sócio do Clube ativado por 1 ano' });
       refetchUserPlan();
     }
   };
@@ -770,7 +770,7 @@ const AdminUsers: React.FC = () => {
                 <Crown className={isVipActive ? 'h-4 w-4 text-purple-500' : 'h-4 w-4 text-muted-foreground'} />
                 <div>
                   <p className="text-sm font-medium">
-                    {isVipActive ? 'Plano VIP ativo' : 'Plano Grátis'}
+                    {isVipActive ? 'Sócio do Clube ativo' : 'Plano Grátis'}
                   </p>
                   {isVipActive && userPlan?.expires_at && (
                     <p className="text-xs text-muted-foreground">
@@ -780,7 +780,7 @@ const AdminUsers: React.FC = () => {
                 </div>
               </div>
               <Button size="sm" variant={isVipActive ? 'outline' : 'default'} onClick={handleToggleVip}>
-                {isVipActive ? 'Remover VIP' : 'Ativar VIP (1 ano)'}
+                {isVipActive ? 'Remover Sócio' : 'Tornar Sócio (1 ano)'}
               </Button>
             </div>
           </div>

@@ -55,7 +55,7 @@ export const UserPaymentHistory: React.FC<{ userId: string }> = ({ userId }) => 
     <Card>
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold flex items-center gap-2"><CreditCard className="h-4 w-4" /> Histórico VIP</h3>
+          <h3 className="font-semibold flex items-center gap-2"><CreditCard className="h-4 w-4" /> Histórico Sócio do Clube</h3>
           <Button size="sm" variant="outline" onClick={() => setOpen(true)}><Plus className="h-3.5 w-3.5 mr-1" /> Registrar pagamento</Button>
         </div>
         {isLoading ? (

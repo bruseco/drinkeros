@@ -939,7 +939,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                   >
                     <Crown className="h-4 w-4" style={{ color: theme.accent }} />
                     <span className="text-sm font-bold uppercase tracking-wide" style={{ color: theme.accent }}>
-                      Preço exclusivo VIP · {VIP_DISCOUNT_PERCENT}% OFF
+                      Preço exclusivo Sócio do Clube · {VIP_DISCOUNT_PERCENT}% OFF
                     </span>
                   </div>
                   <p className="text-lg text-white/60 line-through">{formatBRL(basePrice)}</p>
@@ -959,7 +959,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                     </strong>
                   </p>
                   <p className="text-xs mt-2" style={{ color: theme.accent }}>
-                    Esse valor especial é só para você que já é assinante VIP. 💜
+                    Esse valor especial é só para você que já é Sócio do Clube. 💜
                   </p>
                 </>
               ) : (

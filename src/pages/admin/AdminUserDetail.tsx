@@ -108,7 +108,7 @@ const AdminUserDetail: React.FC = () => {
     const { error } = await supabase.from('user_plans').upsert(update, { onConflict: 'user_id' });
     if (error) toast({ title: 'Erro', description: error.message, variant: 'destructive' });
     else {
-      toast({ title: enable ? 'VIP ativado por 1 ano' : 'VIP removido' });
+      toast({ title: enable ? 'Sócio do Clube ativado por 1 ano' : 'Sócio do Clube removido' });
       queryClient.invalidateQueries({ queryKey: ['admin-user-detail'] });
     }
   };
@@ -119,7 +119,7 @@ const AdminUserDetail: React.FC = () => {
     const { error } = await supabase.from('user_plans').update({ expires_at }).eq('user_id', userId!);
     if (error) toast({ title: 'Erro', description: error.message, variant: 'destructive' });
     else {
-      toast({ title: 'Validade VIP atualizada' });
+      toast({ title: 'Validade do Sócio atualizada' });
       queryClient.invalidateQueries({ queryKey: ['admin-user-detail'] });
       setEditVipOpen(false);
     }
@@ -164,7 +164,7 @@ const AdminUserDetail: React.FC = () => {
   ) : is_lifetime ? (
     <Badge className="gap-1 bg-amber-500 hover:bg-amber-500 text-white"><Crown className="h-3 w-3" /> Vitalício</Badge>
   ) : isVipActive ? (
-    <Badge className="gap-1 bg-purple-600 hover:bg-purple-600 text-white"><Sparkles className="h-3 w-3" /> VIP</Badge>
+    <Badge className="gap-1 bg-purple-600 hover:bg-purple-600 text-white"><Sparkles className="h-3 w-3" /> Sócio do Clube</Badge>
   ) : (
     <Badge variant="outline">Free</Badge>
   );
@@ -257,7 +257,7 @@ const AdminUserDetail: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Sparkles className={isVipActive ? 'h-4 w-4 text-purple-500' : 'h-4 w-4 text-muted-foreground'} />
                   <div>
-                    <p className="text-sm font-medium">{isVipActive ? 'Plano VIP ativo' : 'Plano Free'}</p>
+                    <p className="text-sm font-medium">{isVipActive ? 'Sócio do Clube ativo' : 'Plano Free'}</p>
                     {isVipActive && plan?.expires_at && (
                       <p className="text-xs text-muted-foreground">Expira em {format(new Date(plan.expires_at), 'dd/MM/yyyy')}</p>
                     )}
@@ -366,7 +366,7 @@ const AdminUserDetail: React.FC = () => {
       <Dialog open={editVipOpen} onOpenChange={setEditVipOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Alterar validade do VIP</DialogTitle>
+            <DialogTitle>Alterar validade do Sócio do Clube</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 py-2">
             <Label>Nova data de expiração</Label>

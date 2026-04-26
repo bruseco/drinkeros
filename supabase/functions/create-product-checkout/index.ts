@@ -88,7 +88,7 @@ serve(async (req) => {
             currency: "brl",
             unit_amount: discountedAmount!,
             product_data: {
-              name: `${(product as any).name} (VIP -${VIP_DISCOUNT_PERCENT}%)`,
+              name: `${(product as any).name} (Sócio do Clube -${VIP_DISCOUNT_PERCENT}%)`,
               description: (product as any).description ?? undefined,
               images: (product as any).cover_image_url ? [(product as any).cover_image_url] : undefined,
               metadata: { source_product_id: (product as any).id },
