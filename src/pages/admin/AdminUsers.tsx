@@ -770,7 +770,7 @@ const AdminUsers: React.FC = () => {
                 <Crown className={isVipActive ? 'h-4 w-4 text-purple-500' : 'h-4 w-4 text-muted-foreground'} />
                 <div>
                   <p className="text-sm font-medium">
-                    {isVipActive ? 'Plano VIP ativo' : 'Plano Grátis'}
+                    {isVipActive ? 'Sócio do Clube ativo' : 'Plano Grátis'}
                   </p>
                   {isVipActive && userPlan?.expires_at && (
                     <p className="text-xs text-muted-foreground">
