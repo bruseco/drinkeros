@@ -252,8 +252,10 @@ const UserRecipes: React.FC = () => {
                 const isVipOnly = isLockedForUser && isVipOnlyCharacteristic((recipe as any).characteristics);
                 const alreadyViewedToday = dailyViews?.ids.has(recipe.id) ?? false;
                 const blockedByLimit = limitReached && !alreadyViewedToday;
-                const isLocked = isVipOnly || blockedByLimit;
-                const target = isLocked ? '/clube' : `/app/receita/${(recipe as any).slug || recipe.id}`;
+                // Visual de bloqueio (cadeado/overlay) somente para Xaropes exclusivos.
+                // Quando o limite diário estourar, o card continua igual — só o link já vai pro /clube.
+                const showLockOverlay = isVipOnly;
+                const target = (isVipOnly || blockedByLimit) ? '/clube' : `/app/receita/${(recipe as any).slug || recipe.id}`;
                 return (
                   <Link key={recipe.id} to={target}>
                     <div className="group overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative">
@@ -264,11 +266,11 @@ const UserRecipes: React.FC = () => {
                             alt={recipe.title}
                             className={cn(
                               'h-full w-full object-cover transition-transform duration-500 group-hover:scale-105',
-                              isLocked && 'brightness-50 saturate-50'
+                              showLockOverlay && 'brightness-50 saturate-50'
                             )}
                             loading="lazy"
                           />
-                          {isLocked && (
+                          {showLockOverlay && (
                             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
                               <div className="rounded-full bg-purple-600/90 p-3 shadow-lg shadow-purple-500/50">
                                 <Lock className="h-5 w-5 text-white" />
