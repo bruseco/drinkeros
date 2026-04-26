@@ -583,25 +583,37 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
               {bonus.map((b, i) => (
                 <div
                   key={i}
-                  className="rounded-2xl bg-white/5 border border-white/10 p-6 hover:border-white/30 transition-all hover:scale-[1.02]"
+                  className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden hover:border-white/30 transition-all hover:scale-[1.02] flex flex-col"
                 >
-                  <div className="flex items-start gap-3 mb-3">
-                    <div
-                      className="px-3 py-1 rounded-full text-xs font-extrabold tracking-wider uppercase"
-                      style={{
-                        background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`,
-                      }}
-                    >
-                      Bônus {i + 1}
+                  {b.imageSrc && (
+                    <div className="aspect-[16/10] w-full overflow-hidden bg-black/40">
+                      <img
+                        src={b.imageSrc}
+                        alt={b.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                    {b.originalPrice && (
-                      <span className="text-xs text-white/50 line-through ml-auto pt-1">
-                        {b.originalPrice}
-                      </span>
-                    )}
+                  )}
+                  <div className="p-6 flex-1 flex flex-col">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div
+                        className="px-3 py-1 rounded-full text-xs font-extrabold tracking-wider uppercase"
+                        style={{
+                          background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`,
+                        }}
+                      >
+                        Bônus {i + 1}
+                      </div>
+                      {b.originalPrice && (
+                        <span className="text-xs text-white/50 line-through ml-auto pt-1">
+                          {b.originalPrice}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-extrabold text-lg sm:text-xl mb-2">{b.title}</h3>
+                    <p className="text-sm sm:text-base text-white/75">{b.description}</p>
                   </div>
-                  <h3 className="font-extrabold text-lg sm:text-xl mb-2">{b.title}</h3>
-                  <p className="text-sm sm:text-base text-white/75">{b.description}</p>
                 </div>
               ))}
             </div>
