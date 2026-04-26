@@ -290,7 +290,7 @@ const DrinkerosXperience: React.FC = () => {
           </h1>
 
           {/* VÍDEO logo abaixo do headline */}
-          <div className="w-[70vw] sm:w-[280px] max-w-[70vw] sm:max-w-none mx-auto aspect-square rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(236,72,153,0.35)] ring-1 ring-white/10 mb-4 bg-black">
+          <div className="w-[70%] sm:w-full max-w-md mx-auto aspect-square rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(236,72,153,0.35)] ring-1 ring-white/10 mb-4 bg-black">
             <video
               ref={heroVideoRef}
               src="https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/landing-assets/drinkeros-xperience/clipe.mp4"
