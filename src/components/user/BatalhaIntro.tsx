@@ -68,13 +68,24 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish, initialStage = 'loadin
   }, [stage]);
 
   const handleFinish = () => {
-    try { localStorage.setItem(STORAGE_KEY, '1'); } catch {}
+    if (persistOnFinish) {
+      try { localStorage.setItem(STORAGE_KEY, '1'); } catch {}
+    }
     onFinish();
   };
 
   if (stage === 'explainer') {
     return (
       <div className="fixed inset-0 z-[100] overflow-y-auto bg-gradient-to-br from-neutral-950 via-orange-950 to-neutral-950">
+        {showCloseButton && (
+          <button
+            onClick={handleFinish}
+            aria-label="Fechar"
+            className="fixed top-4 right-4 z-[110] h-10 w-10 rounded-full bg-white/15 hover:bg-white/25 border border-white/30 text-white flex items-center justify-center shadow-xl transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
         <div className="min-h-full flex flex-col items-center justify-center px-6 py-10 text-white max-w-xl mx-auto">
           <img src={logo} alt="Batalha dos Drinkeros" className="w-64 max-w-full mb-6 drop-shadow-2xl" />
 
