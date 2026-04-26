@@ -15,7 +15,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useUserDetail } from '@/hooks/useUserDetail';
 import { useUpdateUserProfile, useDeleteUser, useResetUserPassword, useResendWelcomeEmail } from '@/hooks/useAdminUsers';
 import { useToggleLifetimeAccess } from '@/hooks/useLifetimeAccess';
-import { useToggleExclusiveAccess } from '@/hooks/useExclusiveAccess';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -25,11 +24,16 @@ import { AddAccessDialog } from '@/components/admin/AddAccessDialog';
 
 const sourceLabel: Record<string, string> = {
   manual: 'Manual',
-  stripe: 'Stripe',
+  stripe: 'Stripe (renova sozinho)',
   webhook: 'Webhook',
   hotmart: 'Hotmart',
   woocommerce: 'WooCommerce',
+  pix: 'PIX',
+  legacy_exclusive: 'Acesso legado',
+  import: 'Importado',
 };
+
+const isAutoRenew = (source?: string) => source === 'stripe';
 
 const AdminUserDetail: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -43,7 +47,6 @@ const AdminUserDetail: React.FC = () => {
   const resetPassword = useResetUserPassword();
   const resendEmail = useResendWelcomeEmail();
   const toggleLifetime = useToggleLifetimeAccess();
-  const toggleExclusive = useToggleExclusiveAccess();
 
   const [editingField, setEditingField] = useState<null | 'name' | 'email' | 'phone' | 'cpf'>(null);
   const [draftValue, setDraftValue] = useState('');
@@ -53,6 +56,7 @@ const AdminUserDetail: React.FC = () => {
   const [newPassword, setNewPassword] = useState('');
   const [editVipOpen, setEditVipOpen] = useState(false);
   const [vipExpiresAt, setVipExpiresAt] = useState('');
+  const [vipActivatedAt, setVipActivatedAt] = useState('');
 
   if (isLoading || !data) {
     return (
@@ -62,9 +66,12 @@ const AdminUserDetail: React.FC = () => {
     );
   }
 
-  const { profile, role, plan, is_lifetime, has_receitas, courses, ebooks, combos, packages, last_sign_in_at, certificates_count, recipe_views_count } = data;
+  const { profile, role, plan, is_lifetime, courses, ebooks, combos, packages, last_sign_in_at, certificates_count, recipe_views_count } = data;
 
   const isVipActive = !!plan && plan.plan === 'vip' && (!plan.expires_at || new Date(plan.expires_at) > new Date());
+  const daysToExpire = plan?.expires_at
+    ? Math.ceil((new Date(plan.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null;
 
   const startEdit = (field: 'name' | 'email' | 'phone' | 'cpf', current: string | null) => {
     setEditingField(field);
@@ -108,18 +115,22 @@ const AdminUserDetail: React.FC = () => {
     const { error } = await supabase.from('user_plans').upsert(update, { onConflict: 'user_id' });
     if (error) toast({ title: 'Erro', description: error.message, variant: 'destructive' });
     else {
-      toast({ title: enable ? 'Sócio do Clube ativado por 1 ano' : 'Sócio do Clube removido' });
+      toast({ title: enable ? 'Clube dos Drinkeros ativado por 1 ano' : 'Clube dos Drinkeros removido' });
       queryClient.invalidateQueries({ queryKey: ['admin-user-detail'] });
     }
   };
 
-  const saveVipExpiration = async () => {
-    if (!vipExpiresAt) return;
+  const saveVipPeriod = async () => {
+    if (!vipExpiresAt || !vipActivatedAt) return;
     const expires_at = new Date(vipExpiresAt + 'T23:59:59').toISOString();
-    const { error } = await supabase.from('user_plans').update({ expires_at }).eq('user_id', userId!);
+    const activated_at = new Date(vipActivatedAt + 'T00:00:00').toISOString();
+    const { error } = await supabase
+      .from('user_plans')
+      .update({ expires_at, activated_at })
+      .eq('user_id', userId!);
     if (error) toast({ title: 'Erro', description: error.message, variant: 'destructive' });
     else {
-      toast({ title: 'Validade do Sócio atualizada' });
+      toast({ title: 'Período do Clube atualizado' });
       queryClient.invalidateQueries({ queryKey: ['admin-user-detail'] });
       setEditVipOpen(false);
     }
@@ -164,7 +175,7 @@ const AdminUserDetail: React.FC = () => {
   ) : is_lifetime ? (
     <Badge className="gap-1 bg-amber-500 hover:bg-amber-500 text-white"><Crown className="h-3 w-3" /> Vitalício</Badge>
   ) : isVipActive ? (
-    <Badge className="gap-1 bg-purple-600 hover:bg-purple-600 text-white"><Sparkles className="h-3 w-3" /> Sócio do Clube</Badge>
+    <Badge className="gap-1 bg-purple-600 hover:bg-purple-600 text-white"><Sparkles className="h-3 w-3" /> Clube dos Drinkeros</Badge>
   ) : (
     <Badge variant="outline">Free</Badge>
   );
@@ -257,33 +268,44 @@ const AdminUserDetail: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Sparkles className={isVipActive ? 'h-4 w-4 text-purple-500' : 'h-4 w-4 text-muted-foreground'} />
                   <div>
-                    <p className="text-sm font-medium">{isVipActive ? 'Sócio do Clube ativo' : 'Plano Free'}</p>
+                    <p className="text-sm font-medium">{isVipActive ? 'Clube dos Drinkeros ativo' : 'Plano Free'}</p>
+                    {isVipActive && plan?.activated_at && (
+                      <p className="text-xs text-muted-foreground">Início: {format(new Date(plan.activated_at), 'dd/MM/yyyy')}</p>
+                    )}
                     {isVipActive && plan?.expires_at && (
-                      <p className="text-xs text-muted-foreground">Expira em {format(new Date(plan.expires_at), 'dd/MM/yyyy')}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Expira em {format(new Date(plan.expires_at), 'dd/MM/yyyy')}
+                        {daysToExpire !== null && daysToExpire >= 0 && (
+                          <span className={daysToExpire <= 30 ? ' text-amber-600 font-medium' : ''}>
+                            {' '}({daysToExpire} {daysToExpire === 1 ? 'dia' : 'dias'})
+                          </span>
+                        )}
+                        {daysToExpire !== null && daysToExpire < 0 && (
+                          <span className="text-destructive font-medium"> (vencida)</span>
+                        )}
+                      </p>
                     )}
                     {isVipActive && plan?.source && (
-                      <p className="text-xs text-muted-foreground">Origem: {sourceLabel[plan.source] || plan.source}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Origem: {sourceLabel[plan.source] || plan.source}
+                        {!isAutoRenew(plan.source) && (
+                          <span className="ml-1 text-amber-600">• Renovação manual</span>
+                        )}
+                      </p>
                     )}
                   </div>
                 </div>
                 <Switch checked={isVipActive} onCheckedChange={handleToggleVip} />
               </div>
               {isVipActive && (
-                <Button size="sm" variant="outline" className="w-full" onClick={() => { setVipExpiresAt(plan?.expires_at?.slice(0, 10) || ''); setEditVipOpen(true); }}>
-                  <Calendar className="h-3.5 w-3.5 mr-1" /> Alterar data de expiração
+                <Button size="sm" variant="outline" className="w-full" onClick={() => {
+                  setVipExpiresAt(plan?.expires_at?.slice(0, 10) || '');
+                  setVipActivatedAt(plan?.activated_at?.slice(0, 10) || '');
+                  setEditVipOpen(true);
+                }}>
+                  <Calendar className="h-3.5 w-3.5 mr-1" /> Editar período do Clube
                 </Button>
               )}
-            </div>
-
-            <div className="flex items-center justify-between rounded-lg border p-3">
-              <div className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4 text-primary" />
-                <div>
-                  <p className="text-sm font-medium">Acesso a Receitas (Conteúdo Exclusivo)</p>
-                  <p className="text-xs text-muted-foreground">Libera a área de receitas e xaropes</p>
-                </div>
-              </div>
-              <Switch checked={has_receitas} onCheckedChange={(c) => toggleExclusive.mutate({ userId: userId!, feature: 'receitas', grant: c })} />
             </div>
           </CardContent>
         </Card>
@@ -366,15 +388,24 @@ const AdminUserDetail: React.FC = () => {
       <Dialog open={editVipOpen} onOpenChange={setEditVipOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Alterar validade do Sócio do Clube</DialogTitle>
+            <DialogTitle>Editar período do Clube dos Drinkeros</DialogTitle>
+            <DialogDescription>
+              Ajuste o início e a expiração da assinatura. A régua de avisos de renovação será reiniciada automaticamente para a nova data.
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-2 py-2">
-            <Label>Nova data de expiração</Label>
-            <Input type="date" value={vipExpiresAt} onChange={(e) => setVipExpiresAt(e.target.value)} />
+          <div className="space-y-3 py-2">
+            <div className="space-y-1.5">
+              <Label>Data de início</Label>
+              <Input type="date" value={vipActivatedAt} onChange={(e) => setVipActivatedAt(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Data de expiração</Label>
+              <Input type="date" value={vipExpiresAt} onChange={(e) => setVipExpiresAt(e.target.value)} />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditVipOpen(false)}>Cancelar</Button>
-            <Button onClick={saveVipExpiration} disabled={!vipExpiresAt}>Salvar</Button>
+            <Button onClick={saveVipPeriod} disabled={!vipExpiresAt || !vipActivatedAt}>Salvar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

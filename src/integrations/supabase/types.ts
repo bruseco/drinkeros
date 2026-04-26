@@ -2274,6 +2274,36 @@ export type Database = {
         }
         Relationships: []
       }
+      vip_renewal_reminders: {
+        Row: {
+          channel: string
+          coupon_code: string | null
+          id: string
+          sent_at: string
+          step: string
+          user_id: string
+          user_plan_expires_at: string
+        }
+        Insert: {
+          channel: string
+          coupon_code?: string | null
+          id?: string
+          sent_at?: string
+          step: string
+          user_id: string
+          user_plan_expires_at: string
+        }
+        Update: {
+          channel?: string
+          coupon_code?: string | null
+          id?: string
+          sent_at?: string
+          step?: string
+          user_id?: string
+          user_plan_expires_at?: string
+        }
+        Relationships: []
+      }
       webhook_logs: {
         Row: {
           already_had_access: boolean | null
