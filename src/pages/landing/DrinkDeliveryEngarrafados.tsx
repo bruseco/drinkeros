@@ -101,6 +101,16 @@ const DrinkDeliveryEngarrafados: React.FC = () => (
     bonus={bonus}
     testimonials={[{ src: dep1 }, { src: dep2 }, { src: dep3 }]}
     guaranteeDays={15}
+    aboutInstructor={{
+      name: 'Tom Oliveira',
+      photoSrc: instructor,
+      title: 'Quem é Tom Oliveira?',
+      paragraphs: [
+        'Natural de São Paulo, trabalha com coquetelaria desde 2005, tendo passado por alguns dos principais bares de São Paulo.',
+        'Participou de concursos de coquetelaria, sendo vice-campeão por duas vezes na etapa nacional do Gin Bombay e campeão nacional do Bacardi Legacy em 2018.',
+        'Residindo em Florianópolis desde 2017, hoje presta serviços de consultoria e mentoria pela Gipsy Cocktails.',
+      ],
+    }}
     faq={faq}
   />
 );
