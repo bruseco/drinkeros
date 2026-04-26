@@ -57,6 +57,7 @@ export interface BonusItem {
   title: string;
   description: string;
   originalPrice?: string; // 'R$ 247,00'
+  imageSrc?: string;      // imagem ilustrativa do bônus
 }
 
 export interface FaqItem {
