@@ -780,7 +780,7 @@ const AdminUsers: React.FC = () => {
                 </div>
               </div>
               <Button size="sm" variant={isVipActive ? 'outline' : 'default'} onClick={handleToggleVip}>
-                {isVipActive ? 'Remover VIP' : 'Ativar VIP (1 ano)'}
+                {isVipActive ? 'Remover Sócio' : 'Tornar Sócio (1 ano)'}
               </Button>
             </div>
           </div>
