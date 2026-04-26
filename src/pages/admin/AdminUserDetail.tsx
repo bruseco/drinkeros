@@ -389,15 +389,24 @@ const AdminUserDetail: React.FC = () => {
       <Dialog open={editVipOpen} onOpenChange={setEditVipOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Alterar validade do Sócio do Clube</DialogTitle>
+            <DialogTitle>Editar período do Clube dos Drinkeros</DialogTitle>
+            <DialogDescription>
+              Ajuste o início e a expiração da assinatura. A régua de avisos de renovação será reiniciada automaticamente para a nova data.
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-2 py-2">
-            <Label>Nova data de expiração</Label>
-            <Input type="date" value={vipExpiresAt} onChange={(e) => setVipExpiresAt(e.target.value)} />
+          <div className="space-y-3 py-2">
+            <div className="space-y-1.5">
+              <Label>Data de início</Label>
+              <Input type="date" value={vipActivatedAt} onChange={(e) => setVipActivatedAt(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Data de expiração</Label>
+              <Input type="date" value={vipExpiresAt} onChange={(e) => setVipExpiresAt(e.target.value)} />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditVipOpen(false)}>Cancelar</Button>
-            <Button onClick={saveVipExpiration} disabled={!vipExpiresAt}>Salvar</Button>
+            <Button onClick={saveVipPeriod} disabled={!vipExpiresAt || !vipActivatedAt}>Salvar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
