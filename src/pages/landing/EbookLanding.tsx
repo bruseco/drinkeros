@@ -343,7 +343,7 @@ const EbookLanding: React.FC = () => {
             {isVip && basePrice > 0 && (
               <div className="inline-flex items-center gap-1.5 mb-4 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white text-xs font-bold uppercase tracking-wider px-3 py-1.5 shadow-lg">
                 <Crown className="h-3.5 w-3.5" />
-                VIP · {VIP_DISCOUNT_PERCENT}% OFF
+                Sócio do Clube · {VIP_DISCOUNT_PERCENT}% OFF
               </div>
             )}
 
