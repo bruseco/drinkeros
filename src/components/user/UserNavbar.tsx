@@ -8,7 +8,7 @@ import batalhaIconAtivo from '@/assets/ico-batalha-ativo.png';
 import { Button } from '@/components/ui/button';
 import { UserAvatarMenu } from '@/components/user/UserAvatarMenu';
 
-const mainRoutes = ['/app/receitas', '/app/cursos', '/app/clube', '/app/ebooks', '/app/favoritos', '/app/perfil'];
+const mainRoutes = ['/app/receitas', '/app/cursos', '/app/batalha', '/app/ebooks', '/app/favoritos', '/app/perfil'];
 
 export const UserNavbar: React.FC = () => {
   const location = useLocation();
@@ -20,7 +20,7 @@ export const UserNavbar: React.FC = () => {
   const navItems = [
     { icon: Wine, label: 'Receitas', href: '/app/receitas' },
     { icon: GraduationCap, label: 'Cursos', href: '/app/cursos' },
-    { label: 'Batalha', href: '/app/clube', img: batalhaIcon, imgActive: batalhaIconAtivo },
+    { label: 'Batalha', href: '/app/batalha', img: batalhaIcon, imgActive: batalhaIconAtivo },
     { icon: BookOpen, label: 'Ebooks', href: '/app/ebooks' },
     { icon: Heart, label: 'Favoritos', href: '/app/favoritos' },
   ];

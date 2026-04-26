@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/card';
 import { Star, Loader2, Flag, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const UserClubRecipeDetail: React.FC = () => {
+const UserBatalhaRecipeDetail: React.FC = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -143,4 +143,4 @@ const UserClubRecipeDetail: React.FC = () => {
   );
 };
 
-export default UserClubRecipeDetail;
+export default UserBatalhaRecipeDetail;

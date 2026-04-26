@@ -11,7 +11,7 @@ import batalhaIconAtivo from '@/assets/ico-batalha-ativo.png';
 const navItems = [
   { icon: Wine, label: 'Receitas', href: '/app/receitas' },
   { icon: GraduationCap, label: 'Cursos', href: '/app/cursos' },
-  { label: 'Batalha', href: '/app/clube', img: batalhaIcon, imgActive: batalhaIconAtivo },
+  { label: 'Batalha', href: '/app/batalha', img: batalhaIcon, imgActive: batalhaIconAtivo },
   { icon: BookOpen, label: 'Ebooks', href: '/app/ebooks' },
   { icon: Heart, label: 'Favoritos', href: '/app/favoritos' },
 ];
