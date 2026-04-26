@@ -249,7 +249,10 @@ const UserRecipes: React.FC = () => {
           <>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
               {recipes.map((recipe) => {
-                const isLocked = isLockedForUser && isVipOnlyCharacteristic((recipe as any).characteristics);
+                const isVipOnly = isLockedForUser && isVipOnlyCharacteristic((recipe as any).characteristics);
+                const alreadyViewedToday = dailyViews?.ids.has(recipe.id) ?? false;
+                const blockedByLimit = limitReached && !alreadyViewedToday;
+                const isLocked = isVipOnly || blockedByLimit;
                 const target = isLocked ? '/clube' : `/app/receita/${(recipe as any).slug || recipe.id}`;
                 return (
                   <Link key={recipe.id} to={target}>
