@@ -12,6 +12,7 @@ import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, Chev
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import { MyProductsSection } from '@/components/user/MyProductsSection';
+import { AvatarCropDialog } from '@/components/user/AvatarCropDialog';
 
 const ProfileDataSection: React.FC = () => {
   const { user, profile } = useAuth();
@@ -24,6 +25,7 @@ const ProfileDataSection: React.FC = () => {
   const [cpfLocked, setCpfLocked] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile) {
@@ -47,19 +49,28 @@ const ProfileDataSection: React.FC = () => {
     fetchExtra();
   }, [user]);
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFilePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setCropSrc(reader.result as string);
+    reader.readAsDataURL(file);
+    // reset input so the same file can be picked again later
+    e.target.value = '';
+  };
+
+  const handleCroppedUpload = async (blob: Blob) => {
+    if (!user) return;
     setUploadingAvatar(true);
     try {
-      const ext = file.name.split('.').pop() || 'jpg';
-      const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from('avatars').upload(path, file);
+      const path = `${user.id}/${crypto.randomUUID()}.jpg`;
+      const { error: upErr } = await supabase.storage.from('avatars').upload(path, blob, { contentType: 'image/jpeg' });
       if (upErr) throw upErr;
       const url = supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl;
       const { error } = await supabase.from('profiles').update({ avatar_url: url }).eq('user_id', user.id);
       if (error) throw error;
       setAvatarUrl(url);
+      setCropSrc(null);
       toast.success('Foto atualizada!');
       window.location.reload();
     } catch (err: any) {
@@ -103,7 +114,7 @@ const ProfileDataSection: React.FC = () => {
           >
             <Camera className="h-4 w-4" />
           </button>
-          <input ref={fileRef} type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
+          <input ref={fileRef} type="file" accept="image/*" onChange={handleFilePicked} className="hidden" />
         </div>
         {uploadingAvatar && <p className="text-xs text-muted-foreground">Enviando foto...</p>}
       </div>
@@ -115,10 +126,6 @@ const ProfileDataSection: React.FC = () => {
       <div className="space-y-2">
         <Label htmlFor="bio">Sobre você</Label>
         <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Fale um pouco sobre você (aparece no Clube)" rows={3} />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="fullName">Nome completo</Label>
-        <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome completo" />
       </div>
       <div className="space-y-2">
         <Label htmlFor="phone">Telefone</Label>
@@ -154,6 +161,14 @@ const ProfileDataSection: React.FC = () => {
         <Save className="mr-2 h-4 w-4" />
         {saving ? 'Salvando...' : 'Salvar Dados'}
       </Button>
+
+      <AvatarCropDialog
+        open={!!cropSrc}
+        imageSrc={cropSrc}
+        onClose={() => setCropSrc(null)}
+        onConfirm={handleCroppedUpload}
+        saving={uploadingAvatar}
+      />
     </div>
   );
 };
