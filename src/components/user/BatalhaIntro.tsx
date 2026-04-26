@@ -144,7 +144,7 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish }) => {
 
       <video
         ref={videoRef}
-        src="/vinheta-batalha-dos-drinkeros.mp4"
+        src="/vinheta-batalha-dos-drinkeros-web.mp4"
         className="w-full h-full object-contain"
         playsInline
         muted
