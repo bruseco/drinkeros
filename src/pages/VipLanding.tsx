@@ -376,10 +376,9 @@ const VipLanding: React.FC = () => {
                   Na primeira aula, você aprende os xaropes que serão utilizados nos drinks.
                 </p>
               </div>
+            </div>
+          </div>
         </div>
-        </div>
-      </div>
-    </div>
 
         {/* CTA final */}
         <div className="text-center mb-16">
@@ -398,6 +397,7 @@ const VipLanding: React.FC = () => {
           <p className="text-sm text-purple-300 mt-4">
             Você merece beber sem limites 🍹
           </p>
+        </div>
         </div>
       </div>
     </div>
