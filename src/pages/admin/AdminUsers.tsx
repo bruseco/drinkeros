@@ -195,7 +195,7 @@ const AdminUsers: React.FC = () => {
     if (error) {
       toast({ title: 'Erro ao atualizar plano', description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: isVipActive ? 'VIP removido' : 'VIP ativado por 1 ano' });
+      toast({ title: isVipActive ? 'Sócio do Clube removido' : 'Sócio do Clube ativado por 1 ano' });
       refetchUserPlan();
     }
   };
