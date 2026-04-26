@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   Accordion,
@@ -196,6 +196,36 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       });
     }
   }, [searchParams, toast]);
+
+  // Hero video: starts muted (autoplay policy), unmute on first user interaction
+  const heroVideoRef = useRef<HTMLVideoElement | null>(null);
+  const heroIframeRef = useRef<HTMLIFrameElement | null>(null);
+  useEffect(() => {
+    if (!heroVideoUrl) return;
+    let unmuted = false;
+    const unmute = () => {
+      if (unmuted) return;
+      unmuted = true;
+      const v = heroVideoRef.current;
+      if (v) {
+        v.muted = false;
+        v.volume = 1;
+        const p = v.play();
+        if (p && typeof p.catch === 'function') p.catch(() => {});
+      }
+      const iframe = heroIframeRef.current;
+      if (iframe?.contentWindow) {
+        // YouTube IFrame API postMessage to unmute
+        iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+        iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      }
+      cleanup();
+    };
+    const events: Array<keyof WindowEventMap> = ['pointerdown', 'touchstart', 'keydown', 'scroll', 'wheel'];
+    const cleanup = () => events.forEach(e => window.removeEventListener(e, unmute));
+    events.forEach(e => window.addEventListener(e, unmute, { passive: true, once: false }));
+    return cleanup;
+  }, [heroVideoUrl]);
 
   const dbPrice = (course as any)?.price ? Number((course as any).price) : null;
   const basePrice = dbPrice ?? fallbackPrice;
@@ -423,7 +453,8 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
             <div className={`w-[70%] sm:w-full ${heroVideoAspect === 'square' ? 'max-w-md aspect-square' : 'max-w-xl aspect-video'} mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-6 bg-black`}>
               {isYoutube ? (
                 <iframe
-                  src={`${heroVideoUrl}${heroVideoUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1&playsinline=1`}
+                  ref={heroIframeRef}
+                  src={`${heroVideoUrl}${heroVideoUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1&playsinline=1&enablejsapi=1`}
                   className="w-full h-full"
                   title={brand}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -431,6 +462,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                 />
               ) : (
                 <video
+                  ref={heroVideoRef}
                   src={heroVideoUrl}
                   controls
                   autoPlay
