@@ -24,6 +24,7 @@ import CourseLanding, {
 import instructor from '@/assets/landing/bartender-bordo/instructor.jpg';
 import instructorAbout from '@/assets/landing/bartender-bordo/rick-sousa.jpg';
 import heroVideo from '@/assets/landing/bartender-bordo/intro.mp4';
+import logo from '@/assets/landing/bartender-bordo/logo.png';
 
 // Paleta: vermelho Virgin + azul oceano
 const theme: CourseTheme = {
@@ -95,6 +96,8 @@ const BartenderABordo: React.FC = () => (
     brand="Bartender a Bordo"
     instructorSrc={instructor}
     instructorName="Rick Souza"
+    logoSrc={logo}
+    logoClassName="h-40 sm:h-56"
     heroBadge="Com Rick Souza · 15+ anos em cruzeiros"
     heroVideoUrl={heroVideo}
     tagline="Viaje o mundo, ganhe em dólar e viva momentos incríveis."
