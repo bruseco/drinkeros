@@ -27,15 +27,19 @@ import instructor from '@/assets/landing/mix/instructor.jpg';
 import dep1 from '@/assets/landing/mix/dep-1.jpg';
 import dep2 from '@/assets/landing/mix/dep-2.jpg';
 import dep3 from '@/assets/landing/mix/dep-3.jpg';
+import bonusFilmes from '@/assets/landing/mix/bonus-filmes.jpg';
+import bonusHarmonizacao from '@/assets/landing/mix/bonus-harmonizacao.jpg';
+import bonusBitter from '@/assets/landing/mix/bonus-bitter.jpg';
+import bonusFatWash from '@/assets/landing/mix/bonus-fatwash.jpg';
 
-// Paleta: roxo elegante + dourado (alta coquetelaria)
+// Paleta: roxo + azul (cores do logotipo Mixologia Avançada)
 const theme: CourseTheme = {
-  primary: '#8b5cf6',
-  secondary: '#c026d3',
-  accent: '#fbbf24',
-  glow1: 'rgba(139, 92, 246, 0.55)',
-  glow2: 'rgba(192, 38, 211, 0.55)',
-  glow3: 'rgba(251, 191, 36, 0.30)',
+  primary: '#7c3aed',     // roxo do logo
+  secondary: '#2563eb',   // azul do logo
+  accent: '#06b6d4',      // azul piscina (cyan vivo)
+  glow1: 'rgba(124, 58, 237, 0.55)',
+  glow2: 'rgba(37, 99, 235, 0.55)',
+  glow3: 'rgba(6, 182, 212, 0.30)',
 };
 
 const learnItems: LearnItem[] = [
@@ -69,12 +73,10 @@ const profiles: ProfileItem[] = [
 ];
 
 const bonus: BonusItem[] = [
-  { title: 'Clube dos Drinkeros', description: 'Acesso de 1 ano ao app com mais de 1.000 receitas para pesquisar e salvar nos seus favoritos.', originalPrice: 'R$ 247,00' },
-  { title: '40 receitas de xaropes artesanais', description: 'Eleve o nível dos seus drinks com xaropes artesanais que dão identidade às suas receitas.', originalPrice: 'R$ 97,00' },
-  { title: 'Filmes & seriados', description: 'Encontre vivências e inspirações através de filmes, livros e seriados sobre o mundo da coquetelaria.', originalPrice: 'R$ 57,00' },
-  { title: 'Harmonização entre comida e drinks', description: 'Entenda com o que cada drink será servido para se destacar na hora de elaborar a carta.', originalPrice: 'R$ 87,00' },
-  { title: 'Bitter artesanal', description: 'Receita exclusiva de bitter para economizar e elevar o nível dos seus coquetéis com mais valor agregado.', originalPrice: 'R$ 57,00' },
-  { title: '3 receitas de fat washes', description: 'Whisky com bacon, rum com óleo de coco e tequila com azeite — três receitas exclusivas e inovadoras.', originalPrice: 'R$ 67,00' },
+  { title: 'Filmes & seriados', description: 'Encontre vivências e inspirações através de filmes, livros e seriados sobre o mundo da coquetelaria.', originalPrice: 'R$ 57,00', imageSrc: bonusFilmes },
+  { title: 'Harmonização entre comida e drinks', description: 'Entenda com o que cada drink será servido para se destacar na hora de elaborar a carta.', originalPrice: 'R$ 87,00', imageSrc: bonusHarmonizacao },
+  { title: 'Bitter artesanal', description: 'Receita exclusiva de bitter para economizar e elevar o nível dos seus coquetéis com mais valor agregado.', originalPrice: 'R$ 57,00', imageSrc: bonusBitter },
+  { title: 'Fat Wash', description: 'Domine a técnica avançada do fat wash com receitas exclusivas — whisky com bacon, rum com óleo de coco e tequila com azeite.', originalPrice: 'R$ 67,00', imageSrc: bonusFatWash },
 ];
 
 const faq: FaqItem[] = [
@@ -94,11 +96,13 @@ const MixologiaAvancada: React.FC = () => (
     slug="mixologia-avancada"
     brand="Mixologia Avançada"
     logoSrc={logo}
+    logoClassName="h-40 sm:h-56"
     instructorSrc={instructor}
     instructorName="Tom Oliveira"
     heroVideoUrl="https://www.youtube.com/embed/QFvnDgPX9jc?rel=0&playsinline=1"
     heroBadge="Com Tom Oliveira · 20+ anos de experiência"
     tagline="Domine os segredos da mixologia e aumente em até 70% o faturamento do seu bar."
+    taglineClassName="text-[#06b6d4]"
     subheadline="Aprenda técnicas avançadas, famílias de coquetéis, produção e hospitalidade com quem já conquistou prêmios nacionais e formou milhares de profissionais."
     ctaHero="QUERO ELEVAR MEU NÍVEL"
     theme={theme}
@@ -108,7 +112,7 @@ const MixologiaAvancada: React.FC = () => (
     whatYouLearnTitle="O que você vai dominar"
     modules={modules}
     profiles={profiles}
-    bonusTitle="6 BÔNUS exclusivos"
+    bonusTitle="4 BÔNUS exclusivos"
     bonus={bonus}
     testimonials={[{ src: dep1 }, { src: dep2 }, { src: dep3 }]}
     guaranteeDays={15}

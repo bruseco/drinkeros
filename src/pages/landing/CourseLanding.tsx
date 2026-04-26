@@ -57,6 +57,7 @@ export interface BonusItem {
   title: string;
   description: string;
   originalPrice?: string; // 'R$ 247,00'
+  imageSrc?: string;      // imagem ilustrativa do bônus
 }
 
 export interface FaqItem {
@@ -84,6 +85,10 @@ export interface CourseLandingProps {
   logoSrc?: string;
   /** Imagem de fundo (faixa) atrás do logo no hero. */
   logoBgSrc?: string;
+  /** Classe Tailwind para o tamanho do logo (sobrescreve default). */
+  logoClassName?: string;
+  /** Classe extra para a tagline (ex: cor customizada). */
+  taglineClassName?: string;
   /** Foto do professor — exibida no hero abaixo do CTA. */
   instructorSrc?: string;
   /** Nome do professor — legenda abaixo da foto. */
@@ -138,6 +143,8 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   whatsappPhone = '5548991601025',
   logoSrc,
   logoBgSrc,
+  logoClassName,
+  taglineClassName,
   instructorSrc,
   instructorName,
 }) => {
@@ -333,14 +340,14 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                 <img
                   src={logoSrc}
                   alt={brand}
-                  className="relative h-20 sm:h-28 w-auto object-contain"
+                  className={`relative w-auto object-contain ${logoClassName ?? 'h-20 sm:h-28'}`}
                 />
               </div>
             ) : (
               <img
                 src={logoSrc}
                 alt={brand}
-                className="mx-auto mb-6 h-20 sm:h-28 w-auto object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
+                className={`mx-auto mb-6 w-auto object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)] ${logoClassName ?? 'h-20 sm:h-28'}`}
               />
             )
           ) : null}
@@ -359,7 +366,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
               {brand}
             </h1>
           )}
-          <p className="text-xl sm:text-2xl font-bold text-white mb-3 max-w-3xl mx-auto leading-snug">
+          <p className={`text-xl sm:text-2xl font-bold mb-3 max-w-3xl mx-auto leading-snug ${taglineClassName ?? 'text-white'}`}>
             {tagline}
           </p>
           <p className="text-sm sm:text-base text-white/80 mb-6 max-w-3xl mx-auto">
@@ -576,25 +583,37 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
               {bonus.map((b, i) => (
                 <div
                   key={i}
-                  className="rounded-2xl bg-white/5 border border-white/10 p-6 hover:border-white/30 transition-all hover:scale-[1.02]"
+                  className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden hover:border-white/30 transition-all hover:scale-[1.02] flex flex-col"
                 >
-                  <div className="flex items-start gap-3 mb-3">
-                    <div
-                      className="px-3 py-1 rounded-full text-xs font-extrabold tracking-wider uppercase"
-                      style={{
-                        background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`,
-                      }}
-                    >
-                      Bônus {i + 1}
+                  {b.imageSrc && (
+                    <div className="aspect-[16/10] w-full overflow-hidden bg-black/40">
+                      <img
+                        src={b.imageSrc}
+                        alt={b.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                    {b.originalPrice && (
-                      <span className="text-xs text-white/50 line-through ml-auto pt-1">
-                        {b.originalPrice}
-                      </span>
-                    )}
+                  )}
+                  <div className="p-6 flex-1 flex flex-col">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div
+                        className="px-3 py-1 rounded-full text-xs font-extrabold tracking-wider uppercase"
+                        style={{
+                          background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`,
+                        }}
+                      >
+                        Bônus {i + 1}
+                      </div>
+                      {b.originalPrice && (
+                        <span className="text-xs text-white/50 line-through ml-auto pt-1">
+                          {b.originalPrice}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-extrabold text-lg sm:text-xl mb-2">{b.title}</h3>
+                    <p className="text-sm sm:text-base text-white/75">{b.description}</p>
                   </div>
-                  <h3 className="font-extrabold text-lg sm:text-xl mb-2">{b.title}</h3>
-                  <p className="text-sm sm:text-base text-white/75">{b.description}</p>
                 </div>
               ))}
             </div>
