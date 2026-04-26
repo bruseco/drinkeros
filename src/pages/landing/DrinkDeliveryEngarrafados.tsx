@@ -90,6 +90,7 @@ const DrinkDeliveryEngarrafados: React.FC = () => (
     tagline="Aprenda a engarrafar seus drinks, venda no delivery e ganhe uma renda extra."
     taglineClassName="text-[#00e4ff]"
     subheadline="Higiene, vedação, validade, identidade visual, precificação e logística — tudo o que você precisa para transformar drinks em uma fonte de renda escalável."
+    subheadlineBelowVideo
     heroVideoUrl="/landing/drinkdelivery.mp4"
     heroVideoAspect="square"
     ctaHero="QUERO ADQUIRIR ESSE CURSO"
