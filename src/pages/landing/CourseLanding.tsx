@@ -21,6 +21,7 @@ import { useUserPlan } from '@/hooks/useUserPlan';
 import { useCourseBySlug } from '@/hooks/useCourses';
 import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
 import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
+import VipFloatingBanner from '@/components/landing/VipFloatingBanner';
 
 /** Total padrão de alunos certificados — usado em todas as landings de curso. */
 export const TOTAL_STUDENTS_CERTIFIED = 22341;
