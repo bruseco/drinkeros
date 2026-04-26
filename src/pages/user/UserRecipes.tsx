@@ -116,8 +116,26 @@ const UserRecipes: React.FC = () => {
   const stickyRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { data: planData } = useUserPlan();
-  const { isVip: hasFullRecipeAccess } = useRecipeAccessGuard();
+  const { isVip: hasFullRecipeAccess, dailyLimit } = useRecipeAccessGuard();
   const isLockedForUser = planData ? !hasFullRecipeAccess : false;
+  const { user } = useAuth();
+
+  // Para usuários free: busca quais receitas já foram vistas hoje + total para saber se o limite estourou
+  const { data: dailyViews } = useQuery({
+    queryKey: ['daily-views-today', user?.id],
+    enabled: !!user?.id && isLockedForUser,
+    queryFn: async () => {
+      const today = new Date().toISOString().split('T')[0];
+      const { data } = await supabase
+        .from('daily_recipe_views')
+        .select('recipe_id')
+        .eq('user_id', user!.id)
+        .eq('view_date', today);
+      const ids = new Set((data ?? []).map((r) => r.recipe_id as string));
+      return { ids, count: ids.size };
+    },
+  });
+  const limitReached = isLockedForUser && (dailyViews?.count ?? 0) >= dailyLimit;
 
 
   useEffect(() => {
