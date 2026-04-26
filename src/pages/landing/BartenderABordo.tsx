@@ -21,6 +21,9 @@ import CourseLanding, {
 import logo from '@/assets/landing/bartender-bordo/logo.png';
 import instructor from '@/assets/landing/bartender-bordo/rick-sousa.jpg';
 import heroVideo from '@/assets/landing/bartender-bordo/intro.mp4';
+import bonus1Img from '@/assets/landing/bartender-bordo/bonus-1-curriculo.jpg';
+import bonus2Img from '@/assets/landing/bartender-bordo/bonus-2-companhias.jpg';
+import bonus3Img from '@/assets/landing/bartender-bordo/bonus-3-mentoria.jpg';
 
 const theme: CourseTheme = {
   primary: '#ef4444',
@@ -47,9 +50,9 @@ const profiles: ProfileItem[] = [
 ];
 
 const bonus: BonusItem[] = [
-  { title: 'BÔNUS 1 — Modelos de currículo', description: 'Templates prontos no padrão internacional usado pelas companhias.' },
-  { title: 'BÔNUS 2 — Lista de companhias', description: 'Lista atualizada das principais companhias contratantes e como aplicar.' },
-  { title: 'BÔNUS 3 — Mentoria em grupo', description: 'Acesso a sessões em grupo para tirar dúvidas e acelerar sua contratação.' },
+  { title: 'BÔNUS 1 — Modelos de currículo', description: 'Templates prontos no padrão internacional usado pelas companhias.', imageSrc: bonus1Img },
+  { title: 'BÔNUS 2 — Lista de companhias', description: 'Lista atualizada das principais companhias contratantes e como aplicar.', imageSrc: bonus2Img },
+  { title: 'BÔNUS 3 — Mentoria em grupo', description: 'Acesso a sessões em grupo para tirar dúvidas e acelerar sua contratação.', imageSrc: bonus3Img },
 ];
 
 const aboutInstructor = {
