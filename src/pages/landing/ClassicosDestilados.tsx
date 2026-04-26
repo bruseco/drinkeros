@@ -23,6 +23,15 @@ import CourseLanding, {
 
 import instructor from '@/assets/landing/classicos/instructor.jpg';
 import logo from '@/assets/landing/classicos/logo.png';
+import learnHistoria from '@/assets/landing/classicos/learn-historia.jpg';
+import learnTacas from '@/assets/landing/classicos/learn-tacas.jpg';
+import learnXaropes from '@/assets/landing/classicos/learn-xaropes.jpg';
+import learnMexidos from '@/assets/landing/classicos/learn-mexidos.jpg';
+import learnGelo from '@/assets/landing/classicos/learn-gelo.jpg';
+import learnDecoracoes from '@/assets/landing/classicos/learn-decoracoes.jpg';
+import learnBebidas from '@/assets/landing/classicos/learn-bebidas.jpg';
+import learnCuriosidades from '@/assets/landing/classicos/learn-curiosidades.jpg';
+import learnClassicos from '@/assets/landing/classicos/learn-classicos.jpg';
 
 // Paleta: verde musgo → verde bandeira (estrutura) + dourado profundo (amarelo + marrom) nos CTAs/ícones
 const theme: CourseTheme = {
@@ -35,15 +44,15 @@ const theme: CourseTheme = {
 };
 
 const learnItems: LearnItem[] = [
-  { icon: BookOpen, title: 'História da coquetelaria', description: 'Conheça os tipos de bares e a diferença entre os cargos dentro de um bar.' },
-  { icon: GlassWater, title: 'Mise en place, taças e copos', description: 'Aprenda a organizar a estação, mexer nos utensílios e usar cada taça e copo.' },
-  { icon: Droplets, title: 'Xaropes artesanais', description: 'Diferentes técnicas para produzir seus próprios xaropes em casa.' },
-  { icon: Martini, title: 'Drinks mexidos, montados e batidos', description: 'Domine as três grandes técnicas de preparo da coquetelaria.' },
-  { icon: Snowflake, title: 'Tudo sobre o gelo', description: 'O ingrediente mais primordial — e mais subestimado — da coquetelaria.' },
-  { icon: Leaf, title: 'Decorações elegantes', description: 'Tipos de decorações para elevar o nível visual dos seus drinks.' },
-  { icon: Wine, title: 'Tipos de bebidas', description: 'Fermentados, destilados e bebidas compostas explicados de forma clara.' },
-  { icon: Lightbulb, title: 'Curiosidades dos destilados', description: 'Origem, produção, armazenamento e tipos de cada destilado clássico.' },
-  { icon: Sparkles, title: 'Os clássicos mais importantes', description: 'Os principais coquetéis derivados de cada destilado, do Mojito ao Negroni.' },
+  { icon: BookOpen, imageSrc: learnHistoria, title: 'História da coquetelaria', description: 'Conheça os tipos de bares e a diferença entre os cargos dentro de um bar.' },
+  { icon: GlassWater, imageSrc: learnTacas, title: 'Mise en place, taças e copos', description: 'Aprenda a organizar a estação, mexer nos utensílios e usar cada taça e copo.' },
+  { icon: Droplets, imageSrc: learnXaropes, title: 'Xaropes artesanais', description: 'Diferentes técnicas para produzir seus próprios xaropes em casa.' },
+  { icon: Martini, imageSrc: learnMexidos, title: 'Drinks mexidos, montados e batidos', description: 'Domine as três grandes técnicas de preparo da coquetelaria.' },
+  { icon: Snowflake, imageSrc: learnGelo, title: 'Tudo sobre o gelo', description: 'O ingrediente mais primordial — e mais subestimado — da coquetelaria.' },
+  { icon: Leaf, imageSrc: learnDecoracoes, title: 'Decorações elegantes', description: 'Tipos de decorações para elevar o nível visual dos seus drinks.' },
+  { icon: Wine, imageSrc: learnBebidas, title: 'Tipos de bebidas', description: 'Fermentados, destilados e bebidas compostas explicados de forma clara.' },
+  { icon: Lightbulb, imageSrc: learnCuriosidades, title: 'Curiosidades dos destilados', description: 'Origem, produção, armazenamento e tipos de cada destilado clássico.' },
+  { icon: Sparkles, imageSrc: learnClassicos, title: 'Os clássicos mais importantes', description: 'Os principais coquetéis derivados de cada destilado, do Mojito ao Negroni.' },
 ];
 
 const profiles: ProfileItem[] = [
