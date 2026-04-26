@@ -466,7 +466,7 @@ const DrinkerosXperience: React.FC = () => {
                     em até <strong className="text-amber-300">12x R$ {installments}</strong>
                   </p>
                   <p className="text-xs text-amber-300/90 mt-2">
-                    Esse valor especial é só para você que já é assinante VIP. 💜
+                    Esse valor especial é só para você que já é Sócio do Clube. 💜
                   </p>
                 </>
               ) : (
