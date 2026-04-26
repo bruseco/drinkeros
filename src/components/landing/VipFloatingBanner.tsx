@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Crown, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
+import vipLogo from '@/assets/logotipo-assinante-vip.png';
 
 interface VipFloatingBannerProps {
   /** ID do elemento "Matricule-se" que dispara a contagem */
@@ -82,20 +83,26 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
           <X className="h-4 w-4" />
         </button>
 
-        <div className="flex items-center gap-2 mb-1">
-          <Crown className="h-4 w-4 text-yellow-300" />
-          <span className="text-[11px] font-extrabold tracking-[0.18em] uppercase text-yellow-300">
-            Oferta VIP · {VIP_DISCOUNT_PERCENT}% OFF
-          </span>
+        <div className="flex items-center gap-3">
+          <img
+            src={vipLogo}
+            alt="Assinante VIP"
+            className="h-12 w-auto object-contain shrink-0 drop-shadow-[0_0_10px_rgba(232,121,249,0.6)]"
+          />
+          <div className="min-w-0 flex-1">
+            <span className="block text-[10px] font-extrabold tracking-[0.18em] uppercase text-yellow-300 mb-0.5">
+              Oferta VIP · {VIP_DISCOUNT_PERCENT}% OFF
+            </span>
+            <p className="text-white text-sm leading-snug">
+              Por apenas{' '}
+              <strong className="text-yellow-300 text-base">{formatBRL(vipPrice)}</strong>{' '}
+              <span className="text-white/80 text-xs">
+                (de <span className="line-through">{formatBRL(basePrice)}</span>)
+              </span>
+            </p>
+            <p className="mt-0.5 text-[11px] text-white/85">Toque e veja a oferta →</p>
+          </div>
         </div>
-        <p className="text-white text-sm leading-snug">
-          Como <strong>Assinante VIP</strong> por apenas{' '}
-          <strong className="text-yellow-300 text-base">{formatBRL(vipPrice)}</strong>{' '}
-          <span className="text-white/80 text-xs">
-            (de <span className="line-through">{formatBRL(basePrice)}</span>)
-          </span>
-        </p>
-        <p className="mt-1 text-xs text-white/85">Toque e veja a oferta do plano VIP →</p>
       </Link>
     </div>
   );
