@@ -103,7 +103,7 @@ const BarParaEventos: React.FC = () => (
     instructorName="Henrique Todeschini"
     heroBadge="Com Henrique Todeschini · La Mafia Drinkeros"
     tagline="Monte sua empresa de bar para eventos do zero, na sua casa, e comece a faturar alto."
-    taglineClassName="bg-gradient-to-r from-[#fff3a8] via-[#ffd58a] to-[#ff9a8a] bg-clip-text text-transparent [text-shadow:_0_0_24px_rgba(255,180,140,0.35)]"
+    taglineClassName="bg-gradient-to-r from-[#fff3a8] via-[#ffd58a] to-[#ff9a8a] bg-clip-text text-transparent [text-shadow:_0_0_24px_rgba(255,180,140,0.35)] !mb-8"
     subheadline="O primeiro e único curso online do Brasil que ensina o passo a passo para abrir e escalar uma empresa de bar para eventos — investindo muito pouco."
     subheadlineBelowVideo
     heroVideoUrl={heroVideo}
