@@ -71,7 +71,7 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
         to="/vip"
         className="relative block rounded-2xl p-4 pr-10 text-left shadow-2xl"
         style={{
-          background: 'linear-gradient(135deg, #4c1d95 0%, #7e22ce 50%, #a21caf 100%)',
+          background: 'linear-gradient(90deg, #000000 0%, #6b21a8 55%, #ec4899 100%)',
           border: '1px solid rgba(232, 121, 249, 0.55)',
           boxShadow:
             '0 10px 40px rgba(126, 34, 206, 0.55), inset 0 1px 0 rgba(255,255,255,0.12)',
