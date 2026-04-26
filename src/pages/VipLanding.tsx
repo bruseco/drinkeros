@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
+import bgTijolos from '@/assets/bg-tijolos-pretos.jpg';
 
 
 const VipLanding: React.FC = () => {
@@ -161,38 +162,60 @@ const VipLanding: React.FC = () => {
 
       {/* Botão de fechar removido — usuário volta pelo browser */}
 
-      <div className="relative z-30 container mx-auto max-w-4xl">
-        {/* Header — logo Drinkeros centralizado (h-16, logo h-10) */}
-        <div className="relative flex h-16 items-center justify-center px-4 mb-8">
-          <button type="button" onClick={handleClose} aria-label="Drinkeros">
-            <img src={drinkrosLogo} alt="Drinkeros" className="h-10 object-contain brightness-0 invert" />
-          </button>
-        </div>
-
-        {/* Content */}
-
-        {/* Hero */}
-        <div className="text-center mb-16 space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full bg-yellow-400/10 border border-yellow-400/30 px-4 py-1.5 text-yellow-300 text-xs font-bold uppercase tracking-widest">
-            <Sparkles className="h-3.5 w-3.5" />
-            Oferta especial
+      {/* Topo com fundo de tijolo */}
+      <div
+        className="relative"
+        style={{
+          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.7) 60%, #000 100%), url(${bgTijolos})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center top',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        <div className="relative z-30 container mx-auto max-w-4xl">
+          {/* Header — logo Drinkeros centralizado */}
+          <div className="relative flex h-16 items-center justify-center px-4 mb-8">
+            <button type="button" onClick={handleClose} aria-label="Drinkeros">
+              <img src={drinkrosLogo} alt="Drinkeros" className="h-10 object-contain brightness-0 invert" />
+            </button>
           </div>
-          <img
-            src={clubeLogo}
-            alt="Clube dos Drinkeros"
-            className="mx-auto h-40 md:h-56 object-contain [filter:drop-shadow(0_10px_25px_rgba(0,0,0,0.85))_drop-shadow(0_0_40px_rgba(0,0,0,0.7))]"
-          />
-          <h1 className="text-4xl md:text-6xl font-black leading-none">
-            <span className="text-white">Seja</span>{' '}
-            <span className="bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">
-              sócio
-            </span>{' '}
-            <span className="text-white">do clube</span>
-          </h1>
-          <p className="text-lg md:text-xl text-purple-200 max-w-2xl mx-auto">
-            Pare de contar drinks. Beba conhecimento sem limites e participe da Batalha dos Drinkeros.
-          </p>
+
+          {/* Hero */}
+          <div className="text-center mb-16 space-y-6 px-4">
+            <div className="inline-flex items-center gap-2 rounded-full bg-yellow-400/10 border border-yellow-400/30 px-4 py-1.5 text-yellow-300 text-xs font-bold uppercase tracking-widest">
+              <Sparkles className="h-3.5 w-3.5" />
+              Oferta especial
+            </div>
+            <img
+              src={clubeLogo}
+              alt="Clube dos Drinkeros"
+              className="mx-auto h-40 md:h-56 object-contain [filter:drop-shadow(0_10px_25px_rgba(0,0,0,0.85))_drop-shadow(0_0_40px_rgba(0,0,0,0.7))]"
+            />
+            <h1 className="text-4xl md:text-6xl font-black leading-none">
+              <span className="text-white">Seja</span>{' '}
+              <span className="bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">
+                sócio
+              </span>{' '}
+              <span className="text-white">do clube</span>
+            </h1>
+            <p className="text-lg md:text-xl text-purple-200 max-w-2xl mx-auto">
+              Pare de contar drinks. Beba conhecimento sem limites e participe da Batalha dos Drinkeros.
+            </p>
+          </div>
         </div>
+      </div>
+
+      {/* Parte de baixo com degradês roxo/pink */}
+      <div className="relative overflow-hidden">
+        {/* Blobs decorativos */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-0">
+          <div className="absolute top-[5%] -left-32 w-[480px] h-[480px] rounded-full bg-purple-700/30 blur-[120px]" />
+          <div className="absolute top-[25%] -right-40 w-[520px] h-[520px] rounded-full bg-fuchsia-600/25 blur-[130px]" />
+          <div className="absolute top-[55%] -left-24 w-[420px] h-[420px] rounded-full bg-pink-600/25 blur-[120px]" />
+          <div className="absolute bottom-[5%] -right-32 w-[460px] h-[460px] rounded-full bg-purple-600/30 blur-[130px]" />
+        </div>
+
+        <div className="relative z-10 container mx-auto max-w-4xl">
 
         {/* Pricing Card */}
         <div className="relative max-w-md mx-auto mb-16">
@@ -374,6 +397,7 @@ const VipLanding: React.FC = () => {
           <p className="text-sm text-purple-300 mt-4">
             Você merece beber sem limites 🍹
           </p>
+        </div>
         </div>
       </div>
     </div>
