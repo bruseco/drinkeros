@@ -45,12 +45,20 @@ const getGreeting = () => {
 type CatalogItem = {
   type: 'combo' | 'course' | 'module';
   id: string;
+  slug?: string | null;
   name: string;
   cover_image_url: string | null;
   enrolled: boolean;
   courseCount?: number;
   moduleCount?: number;
 };
+
+// Cursos disponíveis APENAS para Assinantes VIP — quando bloqueados,
+// o "Saiba mais" leva direto para a página de assinatura VIP.
+const VIP_ONLY_COURSE_SLUGS = new Set<string>([
+  'bebida-decifrada',
+  'workshop-alem-dos-classicos',
+]);
 
 const UserHome: React.FC = () => {
   const [search, setSearch] = useState('');
@@ -220,6 +228,7 @@ const UserHome: React.FC = () => {
         items.push({
           type: 'course',
           id: course.id,
+          slug: (course as any).slug ?? null,
           name: course.name,
           cover_image_url: course.cover_image_url,
           enrolled: false,
@@ -379,12 +388,20 @@ const UserHome: React.FC = () => {
                       const courseProgress = item.type === 'course' && item.enrolled ? getCourseProgress(item.id) : null;
                       const hasStarted = courseProgress && courseProgress.progress > 0;
 
+                      const isVipOnlyLocked =
+                        !item.enrolled &&
+                        item.type === 'course' &&
+                        item.slug &&
+                        VIP_ONLY_COURSE_SLUGS.has(item.slug);
+
                       const linkTo = item.enrolled
                         ? (item.type === 'combo' ? `/app/combo/${item.id}` 
                           : item.type === 'course' 
                             ? (hasStarted && courseProgress.nextLessonId ? `/app/aula/${courseProgress.nextLessonId}` : `/app/curso/${item.id}`)
                             : `/app/modulo/${item.id}`)
-                        : (item.type === 'combo' ? `/app/combo/${item.id}?locked=true` : item.type === 'course' ? `/app/curso/${item.id}?locked=true` : `/app/modulo/${item.id}?locked=true`);
+                        : isVipOnlyLocked
+                          ? '/vip'
+                          : (item.type === 'combo' ? `/app/combo/${item.id}?locked=true` : item.type === 'course' ? `/app/curso/${item.id}?locked=true` : `/app/modulo/${item.id}?locked=true`);
 
                       return (
                         <CarouselItem
