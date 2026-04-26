@@ -363,7 +363,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
               <div className="relative mx-auto mb-6 w-fit">
                 <div
                   aria-hidden
-                  className="absolute inset-0 -m-8 rounded-full pointer-events-none"
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] sm:w-[560px] sm:h-[560px] rounded-full pointer-events-none -z-10"
                   style={{
                     background:
                       'radial-gradient(circle, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0) 75%)',
