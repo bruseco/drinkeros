@@ -43,7 +43,7 @@ export const UserSidebar: React.FC = () => {
               )}
               <span>{item.label}</span>
               {item.comingSoon && (
-                <span className="ml-auto text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-lime-400 text-lime-950">
+                <span className="ml-auto text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-muted-foreground/20 text-muted-foreground">
                   Em breve
                 </span>
               )}
