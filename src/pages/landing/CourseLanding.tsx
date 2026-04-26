@@ -445,17 +445,17 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
               {brand}
             </h1>
           )}
-          <p className={`text-xl sm:text-2xl font-bold mb-2 max-w-3xl mx-auto leading-snug ${taglineClassName ?? 'text-white'}`}>
+          <p className={`text-lg sm:text-2xl font-bold mb-1 max-w-3xl mx-auto leading-tight ${taglineClassName ?? 'text-white'}`}>
             {tagline}
           </p>
           {!subheadlineBelowVideo && (
-            <p className="text-sm sm:text-base text-white/80 mb-4 max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base text-white/80 mb-3 max-w-3xl mx-auto leading-snug">
               {subheadline}
             </p>
           )}
 
           {heroVideoUrl && (
-            <div className={`w-[70%] sm:w-full ${heroVideoAspect === 'square' ? 'max-w-md aspect-square' : 'max-w-xl aspect-video'} mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-4 bg-black`}>
+            <div className={`w-[70%] sm:w-full ${heroVideoAspect === 'square' ? 'max-w-md aspect-square' : 'max-w-xl aspect-video'} mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-3 bg-black`}>
               {isYoutube ? (
                 <iframe
                   ref={heroIframeRef}
