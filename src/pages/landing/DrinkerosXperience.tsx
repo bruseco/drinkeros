@@ -328,9 +328,9 @@ const DrinkerosXperience: React.FC = () => {
           <h2 className="text-3xl sm:text-4xl font-extrabold text-center mb-12">
             Veja alguns <span className="bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-transparent">depoimentos</span> de nossos alunos
           </h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
+          <div className="flex flex-col gap-6 max-w-2xl mx-auto">
             {[dep1, dep2, dep3, dep4].map((src, i) => (
-              <div key={i} className="rounded-xl overflow-hidden ring-1 ring-white/10 hover:ring-pink-500/50 transition-all hover:scale-[1.02]">
+              <div key={i} className="rounded-xl overflow-hidden ring-1 ring-white/10 hover:ring-pink-500/50 transition-all hover:scale-[1.01]">
                 <img src={src} alt={`Depoimento ${i + 1}`} loading="lazy" className="w-full h-auto" />
               </div>
             ))}
