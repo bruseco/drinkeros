@@ -423,7 +423,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
             <div className={`w-[70%] sm:w-full ${heroVideoAspect === 'square' ? 'max-w-md aspect-square' : 'max-w-xl aspect-video'} mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-6 bg-black`}>
               {isYoutube ? (
                 <iframe
-                  src={heroVideoUrl}
+                  src={`${heroVideoUrl}${heroVideoUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1&playsinline=1`}
                   className="w-full h-full"
                   title={brand}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -433,8 +433,11 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                 <video
                   src={heroVideoUrl}
                   controls
+                  autoPlay
+                  muted
+                  loop
                   playsInline
-                  preload="metadata"
+                  preload="auto"
                   className="w-full h-full object-cover"
                 />
               )}
