@@ -1,33 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, ChevronRight, Package } from 'lucide-react';
+import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, ChevronRight, Package, Camera } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import { MyProductsSection } from '@/components/user/MyProductsSection';
 
 const ProfileDataSection: React.FC = () => {
   const { user, profile } = useAuth();
+  const fileRef = useRef<HTMLInputElement>(null);
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [cpf, setCpf] = useState('');
+  const [bio, setBio] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [cpfLocked, setCpfLocked] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   useEffect(() => {
-    if (profile) setFullName(profile.full_name || '');
+    if (profile) {
+      setFullName(profile.full_name || '');
+      setAvatarUrl(profile.avatar_url || null);
+    }
   }, [profile]);
 
   useEffect(() => {
     const fetchExtra = async () => {
       if (!user) return;
-      const { data } = await supabase.from('profiles').select('phone, cpf').eq('user_id', user.id).single();
+      const { data } = await supabase.from('profiles').select('phone, cpf, bio').eq('user_id', user.id).single();
       if (data?.phone) setPhone(data.phone);
+      if (data?.bio) setBio(data.bio);
       if (data?.cpf) {
         const d = data.cpf;
         setCpf(d.length === 11 ? `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}` : d);
@@ -37,11 +47,33 @@ const ProfileDataSection: React.FC = () => {
     fetchExtra();
   }, [user]);
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from('avatars').upload(path, file);
+      if (upErr) throw upErr;
+      const url = supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+      const { error } = await supabase.from('profiles').update({ avatar_url: url }).eq('user_id', user.id);
+      if (error) throw error;
+      setAvatarUrl(url);
+      toast.success('Foto atualizada!');
+      window.location.reload();
+    } catch (err: any) {
+      toast.error('Erro: ' + err.message);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
     try {
-      const updateData: Record<string, any> = { full_name: fullName.trim(), phone: phone.trim() || null };
+      const updateData: Record<string, any> = { full_name: fullName.trim(), phone: phone.trim() || null, bio: bio.trim() || null };
       if (!cpfLocked && cpf.replace(/\D/g, '').length === 11) updateData.cpf = cpf.replace(/\D/g, '');
       const { error } = await supabase.from('profiles').update(updateData).eq('user_id', user.id);
       if (error) throw error;
@@ -53,8 +85,37 @@ const ProfileDataSection: React.FC = () => {
     }
   };
 
+  const initial = (fullName || user?.email || 'U').charAt(0).toUpperCase();
+
   return (
     <div className="space-y-4 p-4">
+      <div className="flex flex-col items-center gap-3">
+        <div className="relative">
+          <Avatar className="h-24 w-24">
+            <AvatarImage src={avatarUrl || undefined} />
+            <AvatarFallback className="text-2xl">{initial}</AvatarFallback>
+          </Avatar>
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploadingAvatar}
+            className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+            aria-label="Trocar foto"
+          >
+            <Camera className="h-4 w-4" />
+          </button>
+          <input ref={fileRef} type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
+        </div>
+        {uploadingAvatar && <p className="text-xs text-muted-foreground">Enviando foto...</p>}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="fullName">Nome completo</Label>
+        <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome completo" />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="bio">Sobre você</Label>
+        <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Fale um pouco sobre você (aparece no Clube)" rows={3} />
+      </div>
       <div className="space-y-2">
         <Label htmlFor="fullName">Nome completo</Label>
         <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome completo" />
