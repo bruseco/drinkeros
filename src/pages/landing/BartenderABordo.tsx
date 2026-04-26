@@ -26,14 +26,14 @@ import instructorAbout from '@/assets/landing/bartender-bordo/rick-sousa.jpg';
 import heroVideo from '@/assets/landing/bartender-bordo/intro.mp4';
 import logo from '@/assets/landing/bartender-bordo/logo.png';
 
-// Paleta: vermelho Virgin + azul oceano
+// Paleta: vermelho Virgin + azul oceano + amarelo (logo)
 const theme: CourseTheme = {
   primary: '#ef4444',
   secondary: '#1d4ed8',
-  accent: '#38bdf8',
+  accent: '#facc15',
   glow1: 'rgba(239, 68, 68, 0.55)',
   glow2: 'rgba(29, 78, 216, 0.55)',
-  glow3: 'rgba(56, 189, 248, 0.30)',
+  glow3: 'rgba(250, 204, 21, 0.30)',
 };
 
 const learnItems: LearnItem[] = [
@@ -101,6 +101,7 @@ const BartenderABordo: React.FC = () => (
     heroBadge="Com Rick Souza · 15+ anos em cruzeiros"
     heroVideoUrl={heroVideo}
     tagline="Viaje o mundo, ganhe em dólar e viva momentos incríveis."
+    taglineClassName="text-yellow-400 drop-shadow-[0_2px_8px_rgba(250,204,21,0.35)]"
     subheadline="Saiba todos os detalhes para ser contratado em cruzeiros internacionais com quem viveu isso por mais de 15 anos."
     ctaHero="QUERO TRABALHAR EM CRUZEIROS"
     theme={theme}
