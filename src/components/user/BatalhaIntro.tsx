@@ -135,6 +135,19 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish, initialStage = 'loadin
             <span className="px-3 py-1 rounded-full bg-fuchsia-500/30 border border-fuchsia-400/40">👑 Mestre 500+</span>
           </div>
 
+          <div className="w-full aspect-square rounded-xl overflow-hidden bg-black mb-6 shadow-xl border border-white/10">
+            <video
+              src="/vinheta-batalha-dos-drinkeros-web.mp4"
+              className="w-full h-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster="/batalha-video-poster.jpg"
+            />
+          </div>
+
           <Button
             size="lg"
             onClick={handleFinish}
