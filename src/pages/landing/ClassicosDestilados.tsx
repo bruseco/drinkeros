@@ -42,9 +42,9 @@ const theme: CourseTheme = {
   primary: '#c9962f',     // dourado vivo
   secondary: '#7a4a14',   // âmbar profundo (uísque)
   accent: '#f1c75b',      // dourado claro brilhante
-  glow1: 'rgba(90, 58, 26, 0.55)',
+  glow1: 'rgba(74, 94, 50, 0.65)',   // verde musgo no topo
   glow2: 'rgba(43, 26, 13, 0.65)',
-  glow3: 'rgba(168, 114, 50, 0.30)',
+  glow3: 'rgba(85, 120, 55, 0.75)',  // verde musgo mais forte na base
 };
 
 const learnItems: LearnItem[] = [
