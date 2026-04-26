@@ -26,14 +26,14 @@ import instructorAbout from '@/assets/landing/bartender-bordo/rick-sousa.jpg';
 import heroVideo from '@/assets/landing/bartender-bordo/intro.mp4';
 import logo from '@/assets/landing/bartender-bordo/logo.png';
 
-// Paleta: vermelho Virgin + azul oceano
+// Paleta: vermelho Virgin + azul oceano + amarelo (logo)
 const theme: CourseTheme = {
   primary: '#ef4444',
   secondary: '#1d4ed8',
-  accent: '#38bdf8',
+  accent: '#facc15',
   glow1: 'rgba(239, 68, 68, 0.55)',
   glow2: 'rgba(29, 78, 216, 0.55)',
-  glow3: 'rgba(56, 189, 248, 0.30)',
+  glow3: 'rgba(250, 204, 21, 0.30)',
 };
 
 const learnItems: LearnItem[] = [
