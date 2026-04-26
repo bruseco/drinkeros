@@ -471,7 +471,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       {learnItems.length > 0 && (
         <section className="py-16 sm:py-24 bg-gradient-to-b from-[#0b0b0d] via-[#150810] to-[#0b0b0d]">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-center mb-16">
+            <h2 className={`text-3xl sm:text-5xl font-extrabold ${titleFontClassName}`} data-h2 text-center mb-16">
               {whatYouLearnTitle}{' '}
               <span
                 className="bg-clip-text text-transparent"
@@ -563,7 +563,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       {modules.length > 0 && (
         <section className="py-16 sm:py-24 bg-[#0b0b0d]">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-center mb-12">
+            <h2 className={`text-3xl sm:text-5xl font-extrabold ${titleFontClassName}`} data-h2 text-center mb-12">
               Grade do{' '}
               <span
                 className="bg-clip-text text-transparent"
@@ -613,7 +613,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       {profiles.length > 0 && (
         <section className="py-16 sm:py-24 bg-gradient-to-b from-[#0b0b0d] to-[#150810]">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-center mb-16">
+            <h2 className={`text-3xl sm:text-5xl font-extrabold ${titleFontClassName}`} data-h2 text-center mb-16">
               Para quem é{' '}
               <span
                 className="bg-clip-text text-transparent"
@@ -659,7 +659,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       {bonus.length > 0 && (
         <section className="py-16 sm:py-24 bg-[#0b0b0d]">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-center mb-4">
+            <h2 className={`text-3xl sm:text-5xl font-extrabold ${titleFontClassName}`} data-h2 text-center mb-4">
               {bonusTitle.split(' ').slice(0, -2).join(' ')}{' '}
               <span
                 className="bg-clip-text text-transparent"
@@ -717,7 +717,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       {testimonials.length > 0 && (
         <section className="py-16 sm:py-24 bg-[#0b0b0d]">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-center mb-4">
+            <h2 className={`text-3xl sm:text-5xl font-extrabold ${titleFontClassName}`} data-h2 text-center mb-4">
               O que dizem{' '}
               <span
                 className="bg-clip-text text-transparent"
@@ -755,7 +755,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       {aboutInstructor && (
         <section className="py-16 sm:py-24 bg-gradient-to-b from-[#0b0b0d] via-[#100712] to-[#0b0b0d]">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-center mb-12">
+            <h2 className={`text-3xl sm:text-5xl font-extrabold ${titleFontClassName}`} data-h2 text-center mb-12">
               {aboutInstructor.title ?? 'Quem é o seu'}{' '}
               <span
                 className="bg-clip-text text-transparent"
@@ -822,7 +822,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
             >
               <ShieldCheck className="h-12 w-12" style={{ color: theme.accent }} />
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
+            <h2 className={`text-3xl sm:text-4xl font-extrabold ${titleFontClassName}`} data-h2 mb-4">
               Garantia de{' '}
               <span
                 className="bg-clip-text text-transparent"
@@ -845,7 +845,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       >
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto rounded-3xl bg-gradient-to-b from-white/5 to-white/[0.02] border border-white/10 shadow-2xl p-6 sm:p-10 backdrop-blur">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-center mb-6">
+            <h2 className={`text-3xl sm:text-4xl font-extrabold ${titleFontClassName}`} data-h2 text-center mb-6">
               Garanta sua{' '}
               <span
                 className="bg-clip-text text-transparent"
@@ -958,7 +958,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       {faq.length > 0 && (
         <section className="py-16 sm:py-24 bg-gradient-to-b from-[#0b0b0d] to-[#14070f]">
           <div className="container mx-auto px-4 max-w-3xl">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-center mb-4">
+            <h2 className={`text-3xl sm:text-4xl font-extrabold ${titleFontClassName}`} data-h2 text-center mb-4">
               Tire todas suas{' '}
               <span
                 className="bg-clip-text text-transparent"
