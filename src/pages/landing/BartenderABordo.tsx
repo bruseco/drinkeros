@@ -84,7 +84,7 @@ const faq: FaqItem[] = [
 ];
 
 const BartenderABordo: React.FC = () => (
-  <div style={{ marginTop: '-10px' }}>
+  <div style={{ marginTop: '-20px' }}>
     <CourseLanding
       slug="bartender-a-bordo"
       brand="Bartender a Bordo"
