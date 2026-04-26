@@ -16,7 +16,6 @@ import CourseLanding, {
   type CourseTheme,
   type LearnItem,
   type ProfileItem,
-  type BonusItem,
   type FaqItem,
 } from './CourseLanding';
 
@@ -63,10 +62,6 @@ const profiles: ProfileItem[] = [
   { icon: Briefcase, title: 'Empresário(a)', description: 'Para donos de bar e restaurante que querem reduzir custos e aumentar a margem com produção própria.' },
 ];
 
-const bonus: BonusItem[] = [
-  { title: 'Receituário completo', description: 'PDF com todas as proporções, ingredientes e dicas de armazenamento para consulta rápida.' },
-];
-
 const faq: FaqItem[] = [
   { q: 'Não sou profissional, esse curso é pra mim?', a: 'Sim! O curso é didático e leva você do básico ao avançado para produzir seus próprios ingredientes em casa.' },
   { q: 'Quanto tempo terei acesso?', a: 'O acesso é de 1 ano, com direito a todos os vídeos durante 365 dias.' },
@@ -101,8 +96,6 @@ const IngredientesArtesanais: React.FC = () => (
     learnItems={learnItems}
     whatYouLearnTitle="O que você vai aprender"
     profiles={profiles}
-    bonusTitle="BÔNUS exclusivo"
-    bonus={bonus}
     testimonials={[{ src: dep1 }, { src: dep2 }, { src: dep3 }]}
     guaranteeDays={15}
     faq={faq}
