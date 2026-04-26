@@ -123,8 +123,7 @@ const VipLanding: React.FC = () => {
           </Link>
         </div>
 
-        <div className="px-4 pb-8">{/* content wrapper */}</div>
-        <div className="px-4 pb-8">
+        {/* Content */}
 
         {/* Hero */}
         <div className="text-center mb-16 space-y-6">
