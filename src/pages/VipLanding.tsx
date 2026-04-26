@@ -214,43 +214,8 @@ const VipLanding: React.FC = () => {
 
         <div className="relative z-10 container mx-auto max-w-4xl">
 
-        {/* Pricing Card */}
-        <div className="relative max-w-md mx-auto mb-16">
-          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-yellow-400 rounded-3xl blur opacity-60" />
-          <div className="relative bg-black rounded-3xl p-8 border border-purple-500/30">
-            <h2 className="text-center text-3xl md:text-4xl font-black mb-3 viplanding-gold-text">
-              Sócio do Clube · Anual
-            </h2>
-            <div className="text-center mb-6">
-              <div className="text-purple-300 line-through text-sm">de R$ 297</div>
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-2xl font-light text-purple-300">R$</span>
-                <span className="text-7xl font-black viplanding-gold-text">
-                  69
-                </span>
-              </div>
-              <div className="text-sm text-purple-300">por ano · menos de R$ 6/mês</div>
-            </div>
-
-            <Button
-              onClick={handleSubscribe}
-              disabled={loading}
-              className="viplanding-gold-btn w-full h-14 text-base font-bold border-0 hover:text-black"
-            >
-              {loading ? (
-                <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Abrindo checkout...</>
-              ) : (
-                <><Zap className="mr-2 h-5 w-5" /> Quero ser sócio do Clube</>
-              )}
-            </Button>
-            <p className="text-center text-xs text-purple-300 mt-3">
-              💳 Pagamento seguro · cancele quando quiser
-            </p>
-          </div>
-        </div>
-
         {/* Comparison */}
-        <div className="grid md:grid-cols-2 gap-4 mb-16">
+        <div className="grid grid-cols-2 gap-3 md:gap-4 mb-16 mt-4">
           {/* Free */}
           <div className="rounded-2xl bg-white/5 border border-white/10 p-6">
             <div className="flex items-center gap-2 mb-4">
