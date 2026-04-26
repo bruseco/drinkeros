@@ -915,6 +915,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
 
             <div className="flex justify-center mb-6">
               <button
+                id="cl-matricule-cta"
                 onClick={handleBuy}
                 disabled={checkoutLoading}
                 className="cl-cta cl-cta-green group relative inline-flex items-center justify-center gap-3 rounded-full px-8 sm:px-12 py-5 sm:py-6 font-extrabold text-white text-lg sm:text-xl overflow-hidden isolate transition-transform duration-300 hover:scale-[1.03] disabled:opacity-70 disabled:cursor-not-allowed"
