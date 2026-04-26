@@ -163,6 +163,7 @@ export function useRelatedRecipes(recipe: ExclusivePost | undefined) {
         family,
         similar: similar.map((s) => s.post),
         otherSyrups: [],
+        drinksWithSyrup: [],
         isSyrup: false,
       };
     },
