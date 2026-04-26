@@ -15,6 +15,16 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish }) => {
   const [showSkip, setShowSkip] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
 
+  const showExplainer = () => {
+    const v = videoRef.current;
+    if (v) {
+      v.pause();
+      v.removeAttribute('src');
+      v.load();
+    }
+    setStage('explainer');
+  };
+
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -23,28 +33,17 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish }) => {
       if (started) return;
       started = true;
       setStage('video');
-      // Mobile bloqueia autoplay com som — começamos mudo (garantido) e oferecemos botão pra ativar áudio
       v.muted = true;
-      v.play()
-        .then(() => {
-          // Tenta ativar o som — se o browser permitir (desktop), perfeito
-          v.muted = false;
-          v.volume = 1;
-          setIsMuted(false);
-        })
-        .catch(() => {
-          // Mantém mudo; usuário ativa pelo botão
-        });
+      v.play().catch(() => {});
     };
-    const onEnded = () => setStage('explainer');
     v.addEventListener('loadeddata', start);
     v.addEventListener('canplay', start);
-    v.addEventListener('ended', onEnded);
+    v.addEventListener('ended', showExplainer);
     const fallback = setTimeout(start, 2500);
     return () => {
       v.removeEventListener('loadeddata', start);
       v.removeEventListener('canplay', start);
-      v.removeEventListener('ended', onEnded);
+      v.removeEventListener('ended', showExplainer);
       clearTimeout(fallback);
     };
   }, []);
@@ -71,7 +70,7 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish }) => {
 
   if (stage === 'explainer') {
     return (
-      <div className="fixed inset-0 z-[100] bg-gradient-to-br from-black via-purple-950 to-pink-900 overflow-y-auto">
+      <div className="fixed inset-0 z-[100] overflow-y-auto bg-gradient-to-br from-neutral-950 via-orange-950 to-neutral-950">
         <div className="min-h-full flex flex-col items-center justify-center px-6 py-10 text-white max-w-xl mx-auto">
           <img src={logo} alt="Batalha dos Drinkeros" className="w-64 max-w-full mb-6 drop-shadow-2xl" />
 
@@ -85,21 +84,21 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish }) => {
           </p>
 
           <div className="w-full space-y-3 mb-8">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-white/10 backdrop-blur">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-white/10">
               <Sparkles className="h-5 w-5 text-pink-300 shrink-0" />
               <div className="flex-1">
                 <p className="font-semibold">+5 pontos</p>
                 <p className="text-xs text-white/70">por cada receita publicada</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-white/10 backdrop-blur">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-white/10">
               <Star className="h-5 w-5 text-yellow-300 shrink-0 fill-yellow-300" />
               <div className="flex-1">
                 <p className="font-semibold">+1 ponto</p>
                 <p className="text-xs text-white/70">por voto que você dá em outras receitas</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-white/10 backdrop-blur">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-white/10">
               <Trophy className="h-5 w-5 text-amber-300 shrink-0" />
               <div className="flex-1">
                 <p className="font-semibold">+10 pontos</p>
@@ -134,9 +133,11 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
+    <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-neutral-950 via-neutral-900 to-black" />
+
       {stage === 'loading' && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-white gap-3 z-10">
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-white gap-3 z-20">
           <Loader2 className="h-10 w-10 animate-spin" />
           <p className="text-sm text-white/70">Preparando a Batalha...</p>
         </div>
@@ -145,17 +146,18 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish }) => {
       <video
         ref={videoRef}
         src="/vinheta-batalha-dos-drinkeros-web.mp4"
-        className="w-full h-full object-contain"
+        className="relative z-10 w-full h-full object-contain"
         playsInline
         muted
         autoPlay
-        preload="auto"
+        preload="metadata"
+        poster="/batalha-video-poster.jpg"
       />
 
       {stage === 'video' && isMuted && (
         <button
           onClick={enableSound}
-          className="absolute top-6 left-6 px-4 py-2 rounded-full bg-white/15 backdrop-blur border border-white/30 text-white text-xs font-bold uppercase tracking-wide shadow-xl"
+          className="absolute top-6 left-6 z-30 px-4 py-2 rounded-full bg-white/15 border border-white/30 text-white text-xs font-bold uppercase tracking-wide shadow-xl"
         >
           🔊 Ativar som
         </button>
@@ -163,8 +165,8 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish }) => {
 
       {stage === 'video' && showSkip && (
         <button
-          onClick={() => setStage('explainer')}
-          className="absolute top-6 right-6 px-5 py-2.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm uppercase tracking-wide shadow-xl animate-fade-in transition-colors"
+          onClick={showExplainer}
+          className="absolute top-6 right-6 z-30 px-5 py-2.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm uppercase tracking-wide shadow-xl animate-fade-in transition-colors"
           style={{ animation: 'fadeIn 0.6s ease-in forwards' }}
         >
           Pular intro
