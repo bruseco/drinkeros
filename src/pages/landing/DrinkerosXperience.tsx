@@ -454,7 +454,7 @@ const DrinkerosXperience: React.FC = () => {
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-pink-500/20 border border-amber-400/40 mb-3">
                     <Crown className="h-4 w-4 text-amber-300" />
                     <span className="text-sm font-bold text-amber-200 uppercase tracking-wide">
-                      Preço exclusivo VIP · {VIP_DISCOUNT_PERCENT}% OFF
+                      Preço exclusivo Sócio do Clube · {VIP_DISCOUNT_PERCENT}% OFF
                     </span>
                   </div>
                   <p className="text-lg text-white/60 line-through">{formatBRL(basePrice)}</p>
