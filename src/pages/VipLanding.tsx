@@ -6,6 +6,7 @@ import bebidaCover from '@/assets/landing/bebida-decifrada/cover.jpg';
 import workshopVsl from '@/assets/landing/workshop/vsl.mp4';
 const workshopCover = 'https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/dd1da78d-6b25-49ee-8d49-8e83f675ff65.jpg';
 import xaropesVideo from '@/assets/landing/xaropes/clipe-xaropes-artesanais.mov';
+import xaropesCover from '@/assets/thumb-xaropes.jpg';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserPlan } from '@/hooks/useUserPlan';
@@ -393,7 +394,7 @@ const VipLanding: React.FC = () => {
             {/* Bônus 4 - Xaropes Artesanais */}
             <div className="rounded-2xl bg-gradient-to-br from-purple-900/40 to-black border border-purple-500/30 overflow-hidden p-6">
               <div className="w-[70%] sm:w-full max-w-md aspect-square mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-5 bg-black">
-                <VideoWithPoster src={xaropesVideo} poster={workshopCover} alt="Xaropes Artesanais" />
+                <VideoWithPoster src={xaropesVideo} poster={xaropesCover} alt="Xaropes Artesanais" />
               </div>
               <div className="text-center max-w-xl mx-auto">
                 <div className="flex items-center justify-center gap-2 mb-2">
