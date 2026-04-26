@@ -5,6 +5,7 @@ import { UserNavbar } from './UserNavbar';
 import { UserSidebar } from './UserSidebar';
 import { PushNotificationPrompt } from './PushNotificationPrompt';
 import { PageTransition } from './PageTransition';
+import { WinnerPopup } from './WinnerPopup';
 
 import { Loader2 } from 'lucide-react';
 
@@ -29,6 +30,7 @@ export const UserLayout: React.FC = () => {
       <div className="flex flex-1 flex-col min-w-0">
         <UserNavbar />
         <PushNotificationPrompt />
+        <WinnerPopup />
         <main className="flex-1 pb-20 lg:pb-0">
           <PageTransition>
             <Outlet />
