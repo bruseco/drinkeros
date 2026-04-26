@@ -114,7 +114,7 @@ const MixologiaAvancada: React.FC = () => (
     heroVideoUrl={heroVideo}
     heroVideoAspect="square"
     heroBadge="Com Tom Oliveira · 20+ anos de experiência"
-    heroBadgeClassName="opacity-60"
+    heroBadgeClassName="text-white/40"
     tagline="Domine os segredos da mixologia e aumente em até 70% o faturamento do seu bar."
     taglineClassName="text-[#06b6d4]"
     subheadline="Aprenda técnicas avançadas, famílias de coquetéis, produção e hospitalidade com quem já conquistou prêmios nacionais e formou milhares de profissionais."
