@@ -24,6 +24,7 @@ import CourseLanding, {
 import instructor from '@/assets/landing/bartender-bordo/instructor.jpg';
 import instructorAbout from '@/assets/landing/bartender-bordo/rick-sousa.jpg';
 import heroVideo from '@/assets/landing/bartender-bordo/intro.mp4';
+import logo from '@/assets/landing/bartender-bordo/logo.png';
 
 // Paleta: vermelho Virgin + azul oceano
 const theme: CourseTheme = {
