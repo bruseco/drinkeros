@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import { Crown, Check, X, GlassWater, Sparkles, Zap, BookOpen, GraduationCap, Lock, Loader2, RefreshCw, Gift, PlayCircle, Wand2 } from 'lucide-react';
+import { Crown, Check, X, GlassWater, Sparkles, Zap, BookOpen, GraduationCap, Loader2, RefreshCw, Gift, PlayCircle, Trophy } from 'lucide-react';
 import jackDaniels from '@/assets/landing/bebida-decifrada/jack-daniels-degustacao.mp4';
 import workshopVsl from '@/assets/landing/workshop/vsl.mp4';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
-import vipLogo from '@/assets/logotipo-assinante-vip.png';
+import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
 
 const VipLanding: React.FC = () => {
   const { user } = useAuth();
@@ -34,24 +34,26 @@ const VipLanding: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
 
-  // Trata retorno do Stripe Checkout
+  // Trata retorno do Stripe Checkout (mantém o param "vip" por compatibilidade do webhook)
   useEffect(() => {
-    const vipStatus = searchParams.get('vip');
-    if (vipStatus === 'success') {
-      toast.success('🎉 Bem-vindo ao VIP! Seu acesso já está liberado.');
+    const status = searchParams.get('vip') || searchParams.get('clube');
+    if (status === 'success') {
+      toast.success('🎉 Bem-vindo ao Clube dos Drinkeros! Seu acesso já está liberado.');
       queryClient.invalidateQueries({ queryKey: ['user-plan'] });
       searchParams.delete('vip');
+      searchParams.delete('clube');
       setSearchParams(searchParams, { replace: true });
-    } else if (vipStatus === 'cancel') {
+    } else if (status === 'cancel') {
       toast.info('Pagamento cancelado. Quando quiser, é só voltar 💜');
       searchParams.delete('vip');
+      searchParams.delete('clube');
       setSearchParams(searchParams, { replace: true });
     }
   }, [searchParams, setSearchParams, queryClient]);
 
   const handleSubscribe = async () => {
     if (!user) {
-      navigate('/signup?redirect=/vip');
+      navigate('/signup?redirect=/clube');
       return;
     }
     setLoading(true);
@@ -61,13 +63,13 @@ const VipLanding: React.FC = () => {
       if (!data?.url) throw new Error('URL de checkout não recebida');
       window.location.href = data.url;
     } catch (err) {
-      console.error('[vip-checkout]', err);
+      console.error('[clube-checkout]', err);
       toast.error('Não consegui abrir o checkout. Tenta de novo em instantes.');
       setLoading(false);
     }
   };
 
-  // Esconde a página VIP de quem já é VIP, tem acesso vitalício
+  // Esconde a página de quem já é sócio do Clube, tem acesso vitalício
   // ou tem o conteúdo exclusivo "receitas" liberado.
   if (user && (planData?.isVip || hasLifetime || hasExclusive)) {
     return <Navigate to="/app/receitas" replace />;
@@ -98,18 +100,19 @@ const VipLanding: React.FC = () => {
             Oferta especial
           </div>
           <img
-            src={vipLogo}
-            alt="Assinante VIP"
+            src={clubeLogo}
+            alt="Clube dos Drinkeros"
             className="mx-auto h-40 md:h-56 object-contain drop-shadow-[0_0_30px_rgba(168,85,247,0.55)]"
           />
           <h1 className="text-4xl md:text-6xl font-black leading-none">
-            <span className="text-white">Desbloqueie</span>{' '}
+            <span className="text-white">Seja</span>{' '}
             <span className="bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">
-              tudo
-            </span>
+              sócio
+            </span>{' '}
+            <span className="text-white">do clube</span>
           </h1>
           <p className="text-lg md:text-xl text-purple-200 max-w-2xl mx-auto">
-            Pare de contar drinks. Beba conhecimento sem limites.
+            Pare de contar drinks. Beba conhecimento sem limites e participe da Batalha dos Drinkeros.
           </p>
         </div>
 
@@ -118,9 +121,9 @@ const VipLanding: React.FC = () => {
           <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-yellow-400 rounded-3xl blur opacity-75 animate-pulse" />
           <div className="relative bg-black rounded-3xl p-8 border border-purple-500/30">
             <div className="flex items-center justify-center mb-2">
-              <img src={vipLogo} alt="VIP" className="h-20 object-contain" />
+              <img src={clubeLogo} alt="Clube dos Drinkeros" className="h-20 object-contain" />
             </div>
-            <h2 className="text-center text-2xl font-bold mb-2">Plano VIP Anual</h2>
+            <h2 className="text-center text-2xl font-bold mb-2">Sócio do Clube · Anual</h2>
             <div className="text-center mb-6">
               <div className="text-purple-300 line-through text-sm">de R$ 297</div>
               <div className="flex items-baseline justify-center gap-1">
@@ -140,7 +143,7 @@ const VipLanding: React.FC = () => {
               {loading ? (
                 <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Abrindo checkout...</>
               ) : (
-                <><Zap className="mr-2 h-5 w-5" /> Quero ser VIP agora</>
+                <><Zap className="mr-2 h-5 w-5" /> Quero ser sócio do Clube</>
               )}
             </Button>
             <p className="text-center text-xs text-purple-300 mt-3">
@@ -164,15 +167,16 @@ const VipLanding: React.FC = () => {
               <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> Sem acesso aos <strong>Xaropes Artesanais</strong></li>
               <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> Sem ebooks</li>
               <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> Sem Bebida Decifrada</li>
+              <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> Não participa da <strong>Batalha dos Drinkeros</strong></li>
               <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> Cursos com preço cheio</li>
             </ul>
           </div>
 
-          {/* VIP */}
+          {/* Sócio */}
           <div className="relative rounded-2xl bg-gradient-to-br from-purple-900/60 to-fuchsia-900/40 border border-purple-400/40 p-6 shadow-2xl shadow-purple-500/20">
             <div className="flex items-center gap-2 mb-4">
               <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white px-2.5 py-1 text-xs font-bold uppercase">
-                <Crown className="h-3 w-3" /> VIP
+                <Crown className="h-3 w-3" /> Sócio
               </span>
               <span className="text-yellow-300 text-sm font-medium">o que você merece</span>
             </div>
@@ -181,7 +185,8 @@ const VipLanding: React.FC = () => {
               <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><GlassWater className="inline h-3.5 w-3.5 text-yellow-300" /> <strong className="text-white">Xaropes Artesanais</strong> liberados</span></li>
               <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><BookOpen className="inline h-3.5 w-3.5 text-yellow-300" /> <strong className="text-white">Todos os ebooks</strong> de presente</span></li>
               <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span>Acesso ao <strong className="text-white">Bebida Decifrada</strong></span></li>
-              <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><GraduationCap className="inline h-3.5 w-3.5 text-yellow-300" /> Cursos com <strong className="text-white">desconto VIP</strong></span></li>
+              <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><Trophy className="inline h-3.5 w-3.5 text-yellow-300" /> Participa da <strong className="text-white">Batalha dos Drinkeros</strong></span></li>
+              <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><GraduationCap className="inline h-3.5 w-3.5 text-yellow-300" /> Cursos com <strong className="text-white">desconto de sócio</strong></span></li>
             </ul>
           </div>
         </div>
@@ -199,8 +204,8 @@ const VipLanding: React.FC = () => {
                 </h3>
                 <p className="text-purple-200 text-sm md:text-base leading-snug">
                   Qualquer curso, ebook ou pacote que você já comprou e que está expirado
-                  <strong className="text-white"> volta a ficar acessível</strong> assim que você ativa o VIP.
-                  Enquanto a sua assinatura estiver ativa, <strong className="text-white">tudo o que tem prazo continua liberado</strong>.
+                  <strong className="text-white"> volta a ficar acessível</strong> assim que você se torna sócio do Clube.
+                  Enquanto a sua participação no Clube estiver ativa, <strong className="text-white">tudo o que tem prazo continua liberado</strong>.
                 </p>
               </div>
             </div>
@@ -212,7 +217,7 @@ const VipLanding: React.FC = () => {
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 rounded-full bg-yellow-400/10 border border-yellow-400/30 px-4 py-1.5 text-yellow-300 text-xs font-bold uppercase tracking-widest mb-3">
               <Gift className="h-3.5 w-3.5" />
-              Bônus exclusivos VIP
+              Bônus exclusivos do Clube
             </div>
             <h2 className="text-3xl md:text-4xl font-black">
               E ainda leva <span className="bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">esses presentes</span>
@@ -286,7 +291,7 @@ const VipLanding: React.FC = () => {
             {loading ? (
               <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Abrindo checkout...</>
             ) : (
-              <><Crown className="mr-2 h-5 w-5" /> Garantir minha vaga VIP por R$ 69</>
+              <><Crown className="mr-2 h-5 w-5" /> Garantir minha vaga no Clube por R$ 69</>
             )}
           </Button>
           <p className="text-sm text-purple-300 mt-4">
