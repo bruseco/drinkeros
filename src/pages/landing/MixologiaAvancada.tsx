@@ -96,11 +96,13 @@ const MixologiaAvancada: React.FC = () => (
     slug="mixologia-avancada"
     brand="Mixologia Avançada"
     logoSrc={logo}
+    logoClassName="h-40 sm:h-56"
     instructorSrc={instructor}
     instructorName="Tom Oliveira"
     heroVideoUrl="https://www.youtube.com/embed/QFvnDgPX9jc?rel=0&playsinline=1"
     heroBadge="Com Tom Oliveira · 20+ anos de experiência"
     tagline="Domine os segredos da mixologia e aumente em até 70% o faturamento do seu bar."
+    taglineClassName="text-[#06b6d4]"
     subheadline="Aprenda técnicas avançadas, famílias de coquetéis, produção e hospitalidade com quem já conquistou prêmios nacionais e formou milhares de profissionais."
     ctaHero="QUERO ELEVAR MEU NÍVEL"
     theme={theme}
@@ -110,7 +112,7 @@ const MixologiaAvancada: React.FC = () => (
     whatYouLearnTitle="O que você vai dominar"
     modules={modules}
     profiles={profiles}
-    bonusTitle="6 BÔNUS exclusivos"
+    bonusTitle="4 BÔNUS exclusivos"
     bonus={bonus}
     testimonials={[{ src: dep1 }, { src: dep2 }, { src: dep3 }]}
     guaranteeDays={15}
