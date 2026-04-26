@@ -27,15 +27,19 @@ import instructor from '@/assets/landing/mix/instructor.jpg';
 import dep1 from '@/assets/landing/mix/dep-1.jpg';
 import dep2 from '@/assets/landing/mix/dep-2.jpg';
 import dep3 from '@/assets/landing/mix/dep-3.jpg';
+import bonusFilmes from '@/assets/landing/mix/bonus-filmes.jpg';
+import bonusHarmonizacao from '@/assets/landing/mix/bonus-harmonizacao.jpg';
+import bonusBitter from '@/assets/landing/mix/bonus-bitter.jpg';
+import bonusFatWash from '@/assets/landing/mix/bonus-fatwash.jpg';
 
-// Paleta: roxo elegante + dourado (alta coquetelaria)
+// Paleta: roxo + azul (cores do logotipo Mixologia Avançada)
 const theme: CourseTheme = {
-  primary: '#8b5cf6',
-  secondary: '#c026d3',
-  accent: '#fbbf24',
-  glow1: 'rgba(139, 92, 246, 0.55)',
-  glow2: 'rgba(192, 38, 211, 0.55)',
-  glow3: 'rgba(251, 191, 36, 0.30)',
+  primary: '#7c3aed',     // roxo do logo
+  secondary: '#2563eb',   // azul do logo
+  accent: '#06b6d4',      // azul piscina (cyan vivo)
+  glow1: 'rgba(124, 58, 237, 0.55)',
+  glow2: 'rgba(37, 99, 235, 0.55)',
+  glow3: 'rgba(6, 182, 212, 0.30)',
 };
 
 const learnItems: LearnItem[] = [
