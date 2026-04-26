@@ -99,6 +99,8 @@ export interface CourseLandingProps {
   subheadlineBelowVideo?: boolean;
   /** Classe extra para o container do logo (ex: 'mb-2 -mt-4'). */
   logoWrapperClassName?: string;
+  /** Classe Tailwind aplicada aos títulos de seção (h2). Ex: 'font-serif'. */
+  titleFontClassName?: string;
   /** Foto do professor — exibida no hero abaixo do CTA. */
   instructorSrc?: string;
   /** Nome do professor — legenda abaixo da foto. */
@@ -169,6 +171,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   instructorSrc,
   instructorName,
   aboutInstructor,
+  titleFontClassName = '',
 }) => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
