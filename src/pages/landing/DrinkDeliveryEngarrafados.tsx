@@ -28,14 +28,14 @@ import dep1 from '@/assets/landing/delivery/dep-1.jpg';
 import dep2 from '@/assets/landing/delivery/dep-2.jpg';
 import dep3 from '@/assets/landing/delivery/dep-3.jpg';
 
-// Paleta: vermelho coral + laranja (delivery / urgência / energia)
+// Paleta: rosa choque + roxo (do logotipo Drink Delivery)
 const theme: CourseTheme = {
-  primary: '#ef4444',
-  secondary: '#f97316',
-  accent: '#fde047',
-  glow1: 'rgba(239, 68, 68, 0.55)',
-  glow2: 'rgba(249, 115, 22, 0.55)',
-  glow3: 'rgba(253, 224, 71, 0.30)',
+  primary: '#ec4899',
+  secondary: '#a855f7',
+  accent: '#f0abfc',
+  glow1: 'rgba(236, 72, 153, 0.55)',
+  glow2: 'rgba(168, 85, 247, 0.55)',
+  glow3: 'rgba(240, 171, 252, 0.30)',
 };
 
 const learnItems: LearnItem[] = [
