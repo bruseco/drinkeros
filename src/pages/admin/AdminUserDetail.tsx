@@ -119,7 +119,7 @@ const AdminUserDetail: React.FC = () => {
     const { error } = await supabase.from('user_plans').update({ expires_at }).eq('user_id', userId!);
     if (error) toast({ title: 'Erro', description: error.message, variant: 'destructive' });
     else {
-      toast({ title: 'Validade VIP atualizada' });
+      toast({ title: 'Validade do Sócio atualizada' });
       queryClient.invalidateQueries({ queryKey: ['admin-user-detail'] });
       setEditVipOpen(false);
     }
