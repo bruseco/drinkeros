@@ -4,7 +4,7 @@ import { Crown, Check, X, GlassWater, Sparkles, Zap, BookOpen, GraduationCap, Lo
 import jackDaniels from '@/assets/landing/bebida-decifrada/jack-daniels-degustacao.mp4';
 import bebidaCover from '@/assets/landing/bebida-decifrada/cover.jpg';
 import workshopVsl from '@/assets/landing/workshop/vsl.mp4';
-import workshopCover from '@/assets/landing/workshop/aula-01.jpg';
+const workshopCover = 'https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/dd1da78d-6b25-49ee-8d49-8e83f675ff65.jpg';
 import xaropesVideo from '@/assets/landing/xaropes/clipe-xaropes-artesanais.mov';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
