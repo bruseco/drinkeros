@@ -910,7 +910,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       >
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto rounded-3xl bg-gradient-to-b from-white/5 to-white/[0.02] border border-white/10 shadow-2xl p-6 sm:p-10 backdrop-blur">
-            <h2 className={`text-3xl sm:text-4xl font-extrabold text-center mb-6${titleFontClassName ? ` ${titleFontClassName}` : ""}`}>
+            <h2 className={`text-3xl sm:text-4xl font-extrabold text-center mb-3${titleFontClassName ? ` ${titleFontClassName}` : ""}`}>
               Garanta sua{' '}
               <span
                 className="bg-clip-text text-transparent"
@@ -919,6 +919,12 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                 vaga agora
               </span>
             </h2>
+
+            {offerSummary && (
+              <p className="text-center text-xs sm:text-sm text-white/75 leading-relaxed max-w-xl mx-auto mb-6 whitespace-pre-line">
+                {offerSummary}
+              </p>
+            )}
 
             <div className="text-center mb-6">
               {isVip ? (
