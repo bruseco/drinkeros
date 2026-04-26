@@ -340,14 +340,14 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                 <img
                   src={logoSrc}
                   alt={brand}
-                  className="relative h-20 sm:h-28 w-auto object-contain"
+                  className={`relative w-auto object-contain ${logoClassName ?? 'h-20 sm:h-28'}`}
                 />
               </div>
             ) : (
               <img
                 src={logoSrc}
                 alt={brand}
-                className="mx-auto mb-6 h-20 sm:h-28 w-auto object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
+                className={`mx-auto mb-6 w-auto object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)] ${logoClassName ?? 'h-20 sm:h-28'}`}
               />
             )
           ) : null}
