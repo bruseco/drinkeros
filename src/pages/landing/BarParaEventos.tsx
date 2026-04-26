@@ -117,6 +117,10 @@ const BarParaEventos: React.FC = () => (
     bonus={bonus}
     testimonials={[{ src: dep1 }, { src: dep2 }, { src: dep3 }]}
     guaranteeDays={15}
+    offerSummary="Monte e opere bar para eventos do zero: estrutura, equipe, cardápio, precificação e logística.
+Aprenda a calcular consumo, montar kits e garantir margem alta em casamentos, corporativos e festas.
+Para quem quer empreender em eventos ou profissionalizar a operação que já tem.
+Acesso completo + bônus exclusivos + garantia incondicional."
     faq={faq}
   />
 );

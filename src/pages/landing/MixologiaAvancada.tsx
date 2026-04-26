@@ -148,6 +148,10 @@ const MixologiaAvancada: React.FC = () => (
         'Campeão nacional Bacardi Legacy 2018',
       ],
     }}
+    offerSummary="Domine técnicas avançadas de mixologia, famílias de coquetéis, hospitalidade e gestão de bar com Tom Oliveira (20+ anos de experiência).
+Aprenda do utensílio à precificação e eleve em até 70% o faturamento do seu bar.
+Ideal para bartenders, donos de estabelecimentos e entusiastas que querem virar referência.
+Acesso de 1 ano + 4 bônus exclusivos + garantia incondicional de 15 dias."
     faq={faq}
   />
 );

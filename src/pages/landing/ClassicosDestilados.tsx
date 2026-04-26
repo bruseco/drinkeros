@@ -128,6 +128,10 @@ const ClassicosDestilados: React.FC = () => (
     bonus={bonus}
     aboutInstructor={aboutInstructor}
     guaranteeDays={15}
+    offerSummary="Domine os grandes clássicos da coquetelaria: Old Fashioned, Negroni, Manhattan, Martini e companhia.
+Entenda a história, as proporções corretas e as variações que todo bartender precisa saber de cor.
+Para quem quer servir drinks com técnica de bar premium em casa ou no trabalho.
+Acesso completo + bônus exclusivos + garantia incondicional."
     faq={faq}
   />
 );
