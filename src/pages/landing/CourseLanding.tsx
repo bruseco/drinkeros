@@ -366,7 +366,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
               {brand}
             </h1>
           )}
-          <p className="text-xl sm:text-2xl font-bold text-white mb-3 max-w-3xl mx-auto leading-snug">
+          <p className={`text-xl sm:text-2xl font-bold mb-3 max-w-3xl mx-auto leading-snug ${taglineClassName ?? 'text-white'}`}>
             {tagline}
           </p>
           <p className="text-sm sm:text-base text-white/80 mb-6 max-w-3xl mx-auto">
