@@ -197,6 +197,36 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     }
   }, [searchParams, toast]);
 
+  // Hero video: starts muted (autoplay policy), unmute on first user interaction
+  const heroVideoRef = useRef<HTMLVideoElement | null>(null);
+  const heroIframeRef = useRef<HTMLIFrameElement | null>(null);
+  useEffect(() => {
+    if (!heroVideoUrl) return;
+    let unmuted = false;
+    const unmute = () => {
+      if (unmuted) return;
+      unmuted = true;
+      const v = heroVideoRef.current;
+      if (v) {
+        v.muted = false;
+        v.volume = 1;
+        const p = v.play();
+        if (p && typeof p.catch === 'function') p.catch(() => {});
+      }
+      const iframe = heroIframeRef.current;
+      if (iframe?.contentWindow) {
+        // YouTube IFrame API postMessage to unmute
+        iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+        iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      }
+      cleanup();
+    };
+    const events: Array<keyof WindowEventMap> = ['pointerdown', 'touchstart', 'keydown', 'scroll', 'wheel'];
+    const cleanup = () => events.forEach(e => window.removeEventListener(e, unmute));
+    events.forEach(e => window.addEventListener(e, unmute, { passive: true, once: false }));
+    return cleanup;
+  }, [heroVideoUrl]);
+
   const dbPrice = (course as any)?.price ? Number((course as any).price) : null;
   const basePrice = dbPrice ?? fallbackPrice;
   const finalPrice = isVip ? applyVipDiscount(basePrice) : basePrice;
