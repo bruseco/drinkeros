@@ -85,7 +85,22 @@ const VipLanding: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen text-white relative overflow-hidden bg-gradient-to-b from-purple-950 via-black to-purple-950">
+    <div
+      className={`fixed inset-0 z-[60] text-white overflow-y-auto overscroll-contain bg-gradient-to-b from-purple-950 via-black to-purple-950 ${isClosing ? 'animate-[viplanding-fade-out_280ms_ease-in_forwards]' : 'animate-[viplanding-bounce-in_520ms_cubic-bezier(0.34,1.56,0.64,1)_forwards]'}`}
+    >
+      {/* Animações de entrada/saída */}
+      <style>{`
+        @keyframes viplanding-bounce-in {
+          0% { opacity: 0; transform: scale(0.85); }
+          60% { opacity: 1; transform: scale(1.04); }
+          80% { transform: scale(0.98); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes viplanding-fade-out {
+          0% { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; transform: scale(0.96); }
+        }
+      `}</style>
       {/* Faixa de tijolos preta no topo — fade suave nas bordas para evitar quebra reta */}
       <div
         className="pointer-events-none absolute top-0 left-0 right-0 h-[80vh] md:h-[90vh] z-0"
