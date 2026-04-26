@@ -46,8 +46,8 @@ const VideoWithPoster: React.FC<{ src: string; poster: string; alt: string }> = 
           <img src={poster} alt={alt} className="absolute inset-0 w-full h-full object-cover" />
           <span className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
           <span className="absolute inset-0 flex items-center justify-center">
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 group-hover:bg-white shadow-2xl transition-transform group-hover:scale-110">
-              <svg viewBox="0 0 24 24" fill="currentColor" className="h-8 w-8 text-black ml-1"><path d="M8 5v14l11-7z" /></svg>
+            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/40 group-hover:bg-white/60 backdrop-blur-sm shadow-2xl transition-transform group-hover:scale-110">
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-8 w-8 text-black/80 ml-1"><path d="M8 5v14l11-7z" /></svg>
             </span>
           </span>
         </button>
