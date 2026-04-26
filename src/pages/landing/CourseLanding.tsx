@@ -775,18 +775,35 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-[auto,1fr] gap-10 items-start max-w-5xl mx-auto">
               <div className="flex flex-col items-center lg:items-start">
-                <div
-                  className="rounded-3xl p-1"
-                  style={{
-                    background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary}, ${theme.accent})`,
-                  }}
-                >
-                  <img
-                    src={aboutInstructor.photoSrc}
-                    alt={aboutInstructor.name}
-                    loading="lazy"
-                    className="h-64 w-64 sm:h-80 sm:w-80 rounded-3xl object-cover bg-black"
+                <div className="relative">
+                  {/* Gradient glows behind the photo */}
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute -inset-16 sm:-inset-20 -z-10 blur-3xl opacity-80"
+                    style={{
+                      background: `radial-gradient(circle at 20% 25%, ${theme.glow1} 0%, transparent 55%), radial-gradient(circle at 80% 30%, ${theme.glow2} 0%, transparent 55%), radial-gradient(circle at 50% 85%, ${theme.glow3} 0%, transparent 60%)`,
+                    }}
                   />
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute -inset-6 -z-10 rounded-[2rem] blur-2xl opacity-70"
+                    style={{
+                      background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary}, ${theme.accent})`,
+                    }}
+                  />
+                  <div
+                    className="relative rounded-3xl p-1"
+                    style={{
+                      background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary}, ${theme.accent})`,
+                    }}
+                  >
+                    <img
+                      src={aboutInstructor.photoSrc}
+                      alt={aboutInstructor.name}
+                      loading="lazy"
+                      className="h-64 w-64 sm:h-80 sm:w-80 rounded-3xl object-cover bg-black"
+                    />
+                  </div>
                 </div>
                 <p
                   className="mt-4 text-2xl font-extrabold bg-clip-text text-transparent text-center lg:text-left"
