@@ -407,7 +407,7 @@ const EbookLanding: React.FC = () => {
                 <Link to="/login" className="text-amber-300 hover:underline">
                   Entrar
                 </Link>{' '}
-                — VIPs ganham {VIP_DISCOUNT_PERCENT}% OFF automaticamente.
+                — Sócios do Clube ganham {VIP_DISCOUNT_PERCENT}% OFF automaticamente.
               </p>
             )}
 
