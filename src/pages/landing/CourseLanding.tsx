@@ -149,6 +149,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   tagline,
   subheadline,
   heroBadge,
+  heroBadgeClassName,
   heroVideoUrl,
   heroVideoAspect = 'video',
   ctaHero,
