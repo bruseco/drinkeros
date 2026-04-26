@@ -96,7 +96,7 @@ const VipLanding: React.FC = () => {
 
   return (
     <div
-      className={`fixed inset-0 z-[60] text-white overflow-y-auto overscroll-contain bg-gradient-to-b from-purple-950 via-black to-purple-950 ${isClosing ? 'animate-[viplanding-fade-out_280ms_ease-in_forwards]' : 'animate-[viplanding-bounce-in_520ms_cubic-bezier(0.34,1.56,0.64,1)_forwards]'}`}
+      className={`fixed inset-0 z-[60] text-white overflow-y-auto overscroll-contain bg-black ${isClosing ? 'animate-[viplanding-fade-out_280ms_ease-in_forwards]' : 'animate-[viplanding-bounce-in_520ms_cubic-bezier(0.34,1.56,0.64,1)_forwards]'}`}
     >
       {/* Animações de entrada/saída */}
       <style>{`
