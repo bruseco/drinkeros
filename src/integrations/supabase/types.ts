@@ -94,28 +94,37 @@ export type Database = {
           avg_rating: number
           created_at: string
           id: string
+          is_competing_yearly: boolean
           month_year: string
           recipe_id: string
           total_votes: number
           user_id: string
+          yearly_avg_rating: number
+          yearly_votes: number
         }
         Insert: {
           avg_rating: number
           created_at?: string
           id?: string
+          is_competing_yearly?: boolean
           month_year: string
           recipe_id: string
           total_votes: number
           user_id: string
+          yearly_avg_rating?: number
+          yearly_votes?: number
         }
         Update: {
           avg_rating?: number
           created_at?: string
           id?: string
+          is_competing_yearly?: boolean
           month_year?: string
           recipe_id?: string
           total_votes?: number
           user_id?: string
+          yearly_avg_rating?: number
+          yearly_votes?: number
         }
         Relationships: [
           {
@@ -256,6 +265,86 @@ export type Database = {
             columns: ["winner_id"]
             isOneToOne: false
             referencedRelation: "club_monthly_winners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_yearly_votes: {
+        Row: {
+          created_at: string
+          id: string
+          monthly_winner_id: string
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          monthly_winner_id: string
+          rating: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          monthly_winner_id?: string
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_yearly_votes_monthly_winner_id_fkey"
+            columns: ["monthly_winner_id"]
+            isOneToOne: false
+            referencedRelation: "club_monthly_winners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_yearly_winners: {
+        Row: {
+          avg_rating: number
+          created_at: string
+          id: string
+          monthly_winner_id: string | null
+          recipe_id: string
+          total_votes: number
+          user_id: string
+          year: number
+        }
+        Insert: {
+          avg_rating: number
+          created_at?: string
+          id?: string
+          monthly_winner_id?: string | null
+          recipe_id: string
+          total_votes: number
+          user_id: string
+          year: number
+        }
+        Update: {
+          avg_rating?: number
+          created_at?: string
+          id?: string
+          monthly_winner_id?: string | null
+          recipe_id?: string
+          total_votes?: number
+          user_id?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_yearly_winners_monthly_winner_id_fkey"
+            columns: ["monthly_winner_id"]
+            isOneToOne: false
+            referencedRelation: "club_monthly_winners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_yearly_winners_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "club_recipes"
             referencedColumns: ["id"]
           },
         ]
@@ -2720,6 +2809,8 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      close_monthly_battle: { Args: { _target_month?: string }; Returns: Json }
+      close_yearly_battle: { Args: { _target_year?: number }; Returns: Json }
       count_daily_views: { Args: { _user_id: string }; Returns: number }
       delete_email: {
         Args: { message_id: number; queue_name: string }
@@ -2729,6 +2820,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_current_battle_recipe_ids: { Args: never; Returns: string[] }
       get_package_recipe_metadata: {
         Args: { p_package_id: string }
         Returns: {
@@ -2793,6 +2885,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      recalc_yearly_winner_stats: {
+        Args: { _winner_id: string }
+        Returns: undefined
       }
       search_exclusive_posts: {
         Args: {
