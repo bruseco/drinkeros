@@ -28,15 +28,20 @@ serve(async (req) => {
     );
 
     const table = product_type === "course" ? "courses" : "ebooks";
+    // ebooks não possui a coluna is_available_for_sale; só selecionamos quando aplicável
+    const baseCols = "id, name, slug, price, stripe_price_id, stripe_product_id, cover_image_url, description";
+    const selectCols = product_type === "course" ? `${baseCols}, is_available_for_sale` : baseCols;
     const { data: product, error: productErr } = await supabase
       .from(table)
-      .select("id, name, slug, price, stripe_price_id, stripe_product_id, is_available_for_sale, cover_image_url, description")
+      .select(selectCols)
       .eq("slug", slug)
       .maybeSingle();
     if (productErr || !product) throw new Error("Produto não encontrado");
-    if (!(product as any).is_available_for_sale) throw new Error("Produto não está disponível para venda");
-    if (!(product as any).stripe_price_id) {
-      throw new Error("Produto ainda não foi sincronizado com Stripe");
+    if (product_type === "course" && !(product as any).is_available_for_sale) {
+      throw new Error("Produto não está disponível para venda");
+    }
+    if (!(product as any).price || Number((product as any).price) <= 0) {
+      throw new Error("Produto sem preço configurado");
     }
 
     // Tenta identificar usuário logado (opcional)
