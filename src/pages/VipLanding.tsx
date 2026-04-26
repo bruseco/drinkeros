@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Crown, Check, X, GlassWater, Sparkles, Zap, BookOpen, GraduationCap, Loader2, RefreshCw, Gift, PlayCircle, Trophy } from 'lucide-react';
 import jackDaniels from '@/assets/landing/bebida-decifrada/jack-daniels-degustacao.mp4';
+import bebidaCover from '@/assets/landing/bebida-decifrada/cover.jpg';
 import workshopVsl from '@/assets/landing/workshop/vsl.mp4';
+import workshopCover from '@/assets/landing/workshop/aula-01.jpg';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserPlan } from '@/hooks/useUserPlan';
@@ -13,6 +15,44 @@ import { toast } from 'sonner';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
 import bgTijolos from '@/assets/bg-tijolos-pretos.jpg';
+
+const VideoWithPoster: React.FC<{ src: string; poster: string; alt: string }> = ({ src, poster, alt }) => {
+  const [started, setStarted] = useState(false);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const handlePlay = () => {
+    setStarted(true);
+    requestAnimationFrame(() => videoRef.current?.play());
+  };
+  return (
+    <div className="relative w-full h-full bg-black">
+      <video
+        ref={videoRef}
+        src={src}
+        controls={started}
+        playsInline
+        preload="metadata"
+        className="w-full h-full object-cover"
+        onPlay={() => setStarted(true)}
+      />
+      {!started && (
+        <button
+          type="button"
+          onClick={handlePlay}
+          aria-label={`Reproduzir ${alt}`}
+          className="absolute inset-0 group"
+        >
+          <img src={poster} alt={alt} className="absolute inset-0 w-full h-full object-cover" />
+          <span className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
+          <span className="absolute inset-0 flex items-center justify-center">
+            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 group-hover:bg-white shadow-2xl transition-transform group-hover:scale-110">
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-8 w-8 text-black ml-1"><path d="M8 5v14l11-7z" /></svg>
+            </span>
+          </span>
+        </button>
+      )}
+    </div>
+  );
+};
 
 
 const VipLanding: React.FC = () => {
@@ -291,13 +331,7 @@ const VipLanding: React.FC = () => {
             {/* Bônus 1 - Bebida Decifrada */}
             <div className="rounded-2xl bg-gradient-to-br from-purple-900/40 to-black border border-purple-500/30 overflow-hidden p-6">
               <div className="w-[70%] sm:w-full max-w-md aspect-square mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-5 bg-black">
-                <video
-                  src={jackDaniels}
-                  controls
-                  playsInline
-                  preload="metadata"
-                  className="w-full h-full object-cover"
-                />
+                <VideoWithPoster src={jackDaniels} poster={bebidaCover} alt="Bebida Decifrada" />
               </div>
               <div className="text-center max-w-xl mx-auto">
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -318,13 +352,7 @@ const VipLanding: React.FC = () => {
             {/* Bônus 2 - Workshop Além dos Clássicos */}
             <div className="rounded-2xl bg-gradient-to-br from-fuchsia-900/40 to-black border border-fuchsia-500/30 overflow-hidden p-6">
               <div className="w-[70%] sm:w-full max-w-md aspect-square mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-5 bg-black">
-                <video
-                  src={workshopVsl}
-                  controls
-                  playsInline
-                  preload="metadata"
-                  className="w-full h-full object-cover"
-                />
+                <VideoWithPoster src={workshopVsl} poster={workshopCover} alt="Workshop Além dos Clássicos" />
               </div>
               <div className="text-center max-w-xl mx-auto">
                 <div className="flex items-center justify-center gap-2 mb-2">
