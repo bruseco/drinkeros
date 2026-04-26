@@ -269,33 +269,44 @@ const AdminUserDetail: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Sparkles className={isVipActive ? 'h-4 w-4 text-purple-500' : 'h-4 w-4 text-muted-foreground'} />
                   <div>
-                    <p className="text-sm font-medium">{isVipActive ? 'Sócio do Clube ativo' : 'Plano Free'}</p>
+                    <p className="text-sm font-medium">{isVipActive ? 'Clube dos Drinkeros ativo' : 'Plano Free'}</p>
+                    {isVipActive && plan?.activated_at && (
+                      <p className="text-xs text-muted-foreground">Início: {format(new Date(plan.activated_at), 'dd/MM/yyyy')}</p>
+                    )}
                     {isVipActive && plan?.expires_at && (
-                      <p className="text-xs text-muted-foreground">Expira em {format(new Date(plan.expires_at), 'dd/MM/yyyy')}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Expira em {format(new Date(plan.expires_at), 'dd/MM/yyyy')}
+                        {daysToExpire !== null && daysToExpire >= 0 && (
+                          <span className={daysToExpire <= 30 ? ' text-amber-600 font-medium' : ''}>
+                            {' '}({daysToExpire} {daysToExpire === 1 ? 'dia' : 'dias'})
+                          </span>
+                        )}
+                        {daysToExpire !== null && daysToExpire < 0 && (
+                          <span className="text-destructive font-medium"> (vencida)</span>
+                        )}
+                      </p>
                     )}
                     {isVipActive && plan?.source && (
-                      <p className="text-xs text-muted-foreground">Origem: {sourceLabel[plan.source] || plan.source}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Origem: {sourceLabel[plan.source] || plan.source}
+                        {!isAutoRenew(plan.source) && (
+                          <span className="ml-1 text-amber-600">• Renovação manual</span>
+                        )}
+                      </p>
                     )}
                   </div>
                 </div>
                 <Switch checked={isVipActive} onCheckedChange={handleToggleVip} />
               </div>
               {isVipActive && (
-                <Button size="sm" variant="outline" className="w-full" onClick={() => { setVipExpiresAt(plan?.expires_at?.slice(0, 10) || ''); setEditVipOpen(true); }}>
-                  <Calendar className="h-3.5 w-3.5 mr-1" /> Alterar data de expiração
+                <Button size="sm" variant="outline" className="w-full" onClick={() => {
+                  setVipExpiresAt(plan?.expires_at?.slice(0, 10) || '');
+                  setVipActivatedAt(plan?.activated_at?.slice(0, 10) || '');
+                  setEditVipOpen(true);
+                }}>
+                  <Calendar className="h-3.5 w-3.5 mr-1" /> Editar período do Clube
                 </Button>
               )}
-            </div>
-
-            <div className="flex items-center justify-between rounded-lg border p-3">
-              <div className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4 text-primary" />
-                <div>
-                  <p className="text-sm font-medium">Acesso a Receitas (Conteúdo Exclusivo)</p>
-                  <p className="text-xs text-muted-foreground">Libera a área de receitas e xaropes</p>
-                </div>
-              </div>
-              <Switch checked={has_receitas} onCheckedChange={(c) => toggleExclusive.mutate({ userId: userId!, feature: 'receitas', grant: c })} />
             </div>
           </CardContent>
         </Card>
