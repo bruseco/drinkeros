@@ -2797,6 +2797,33 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_orders: {
+        Args: {
+          p_from?: string
+          p_limit?: number
+          p_offset?: number
+          p_product_type?: string
+          p_search?: string
+          p_source?: string
+          p_to?: string
+        }
+        Returns: {
+          amount: number
+          buyer_email: string
+          buyer_name: string
+          buyer_phone: string
+          currency: string
+          external_ref: string
+          id: string
+          product_id: string
+          product_name: string
+          product_type: string
+          purchased_at: string
+          source: string
+          total_count: number
+          user_id: string
+        }[]
+      }
       can_edit: { Args: { _user_id: string }; Returns: boolean }
       claim_whatsapp_queue_items: {
         Args: { batch_size?: number }
