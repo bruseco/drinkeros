@@ -77,23 +77,28 @@ const VipLanding: React.FC = () => {
   }
 
   return (
-    <div
-      className="min-h-screen text-white relative overflow-hidden bg-black"
-      style={{
-        backgroundImage: `url(${bgTijolos})`,
-        backgroundRepeat: 'repeat',
-        backgroundSize: '600px auto',
-      }}
-    >
-      {/* Vignette para escurecer levemente o tijolo */}
-      <div className="pointer-events-none absolute inset-0 bg-black/40" />
+    <div className="min-h-screen text-white relative overflow-hidden bg-gradient-to-b from-purple-950 via-black to-purple-950">
+      {/* Faixa de tijolos preta no topo */}
+      <div
+        className="pointer-events-none absolute top-0 left-0 right-0 h-[55vh] md:h-[65vh] z-0"
+        style={{
+          backgroundImage: `url(${bgTijolos})`,
+          backgroundRepeat: 'repeat',
+          backgroundSize: '900px auto',
+          backgroundPosition: 'top center',
+          maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+        }}
+      />
+      {/* Vignette sutil só sobre o tijolo */}
+      <div className="pointer-events-none absolute top-0 left-0 right-0 h-[55vh] md:h-[65vh] bg-black/30 z-0" />
 
-      {/* Blobs animados de degradê roxo/pink — organismo vivo por cima do tijolo */}
+      {/* Blobs animados de degradê roxo/pink — apenas abaixo do topo de tijolos */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute -top-32 -left-32 h-[28rem] w-[28rem] rounded-full bg-purple-600/35 blur-3xl animate-[viplanding-blob1_18s_ease-in-out_infinite]" />
-        <div className="absolute top-1/4 -right-40 h-[26rem] w-[26rem] rounded-full bg-fuchsia-500/30 blur-3xl animate-[viplanding-blob2_22s_ease-in-out_infinite]" />
-        <div className="absolute top-1/2 left-1/4 h-[24rem] w-[24rem] rounded-full bg-pink-500/25 blur-3xl animate-[viplanding-blob3_26s_ease-in-out_infinite]" />
+        <div className="absolute top-[55vh] -right-40 h-[26rem] w-[26rem] rounded-full bg-fuchsia-500/30 blur-3xl animate-[viplanding-blob2_22s_ease-in-out_infinite]" />
+        <div className="absolute top-[80vh] left-1/4 h-[24rem] w-[24rem] rounded-full bg-pink-500/25 blur-3xl animate-[viplanding-blob3_26s_ease-in-out_infinite]" />
         <div className="absolute bottom-0 right-1/4 h-[28rem] w-[28rem] rounded-full bg-purple-700/30 blur-3xl animate-[viplanding-blob4_24s_ease-in-out_infinite]" />
+        <div className="absolute bottom-1/3 -left-32 h-[28rem] w-[28rem] rounded-full bg-purple-600/30 blur-3xl animate-[viplanding-blob1_18s_ease-in-out_infinite]" />
       </div>
       <style>{`
         @keyframes viplanding-blob1 {
