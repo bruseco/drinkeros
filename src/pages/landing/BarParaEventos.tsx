@@ -97,7 +97,8 @@ const BarParaEventos: React.FC = () => (
     slug="bar-p-eventos"
     brand="Bar para Eventos"
     logoSrc={logo}
-    logoClassName="h-16 sm:h-24"
+    logoClassName="h-24 sm:h-36 -mt-6 sm:-mt-10"
+    logoWrapperClassName="mb-0 -mt-2"
     instructorSrc={instructor}
     instructorName="Henrique Todeschini"
     heroBadge="Com Henrique Todeschini · La Mafia Drinkeros"
