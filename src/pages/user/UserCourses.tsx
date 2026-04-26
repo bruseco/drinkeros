@@ -188,18 +188,29 @@ const COURSE_LANDING_ROUTES: Record<string, string> = {
   'bebida-decifrada': '/bebida-decifrada',
 };
 
+// Cursos disponíveis APENAS para Assinantes VIP — quando bloqueados,
+// o "Saiba mais" leva direto para a página de assinatura VIP.
+const VIP_ONLY_COURSE_SLUGS = new Set<string>([
+  'bebida-decifrada',
+  'workshop-alem-dos-classicos',
+]);
+
 const CourseCard: React.FC<CourseCardProps> = ({ course, owned, expired = false, getCourseProgress }) => {
   const { progress, nextLessonId } = owned && !expired ? getCourseProgress(course.id) : { progress: 0, nextLessonId: null };
   const hasStarted = owned && !expired && progress > 0;
   const { ref, centrality } = useViewportCenter<HTMLDivElement>();
 
   // Expirado tem prioridade visual: leva pra /vip pra renovar
+  // VIP-only e não adquirido: leva direto pra /vip
   // Bloqueado: leva pra landing/página de venda do curso (se houver)
   const landingRoute = course.slug ? COURSE_LANDING_ROUTES[course.slug] : undefined;
+  const isVipOnly = course.slug ? VIP_ONLY_COURSE_SLUGS.has(course.slug) : false;
   const cardLink = expired
     ? '/vip'
     : owned
     ? `/app/curso/${course.id}`
+    : isVipOnly
+    ? '/vip'
     : landingRoute ?? `/app/curso/${course.id}?locked=true`;
 
   // Opacidade dinâmica: base 0.55 → 1.0 conforme se aproxima do centro
