@@ -98,6 +98,14 @@ export interface CourseLandingProps {
   instructorSrc?: string;
   /** Nome do professor — legenda abaixo da foto. */
   instructorName?: string;
+  /** Seção dedicada ao professor (renderizada antes da Garantia). */
+  aboutInstructor?: {
+    name: string;
+    photoSrc: string;
+    title?: string;       // ex: 'Quem é o seu professor?'
+    paragraphs: string[]; // textos em parágrafos
+    credentials?: string[]; // bullets de formações/credenciais
+  };
 
   fallbackPrice: number;    // preço default caso DB ainda não tenha
   oldPriceLabel?: string;   // 'De R$ 1.439,00'
@@ -152,6 +160,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   taglineClassName,
   instructorSrc,
   instructorName,
+  aboutInstructor,
 }) => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
