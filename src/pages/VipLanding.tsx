@@ -215,15 +215,8 @@ const VipLanding: React.FC = () => {
         }}
       >
         <div className="relative z-30 container mx-auto max-w-4xl">
-          {/* Header — logo Drinkeros centralizado */}
-          <div className="relative flex h-16 items-center justify-center px-4 mb-8">
-            <button type="button" onClick={handleClose} aria-label="Drinkeros">
-              <img src={drinkrosLogo} alt="Drinkeros" className="h-10 object-contain brightness-0 invert" />
-            </button>
-          </div>
-
           {/* Hero */}
-          <div className="text-center mb-16 space-y-6 px-4">
+          <div className="text-center pt-10 space-y-3 px-4">
             <h1 className="text-4xl md:text-6xl font-black leading-none">
               <span className="text-white">Seja</span>{' '}
               <span className="bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">
@@ -234,7 +227,7 @@ const VipLanding: React.FC = () => {
             <img
               src={clubeLogo}
               alt="Clube dos Drinkeros"
-              className="mx-auto h-40 md:h-56 object-contain [filter:drop-shadow(0_10px_25px_rgba(0,0,0,0.85))_drop-shadow(0_0_40px_rgba(0,0,0,0.7))]"
+              className="mx-auto h-32 md:h-44 object-contain [filter:drop-shadow(0_10px_25px_rgba(0,0,0,0.85))_drop-shadow(0_0_40px_rgba(0,0,0,0.7))]"
             />
           </div>
         </div>
