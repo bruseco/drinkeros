@@ -112,6 +112,7 @@ const ClassicosDestilados: React.FC = () => (
     taglineClassName="text-[#e8b923] [text-shadow:_0_0_24px_rgba(232,185,35,0.65),_0_0_48px_rgba(232,185,35,0.4)]"
     subheadline="Do básico ao avançado, da Vodka ao Bourbon, da Caipirinha ao Negroni. Divertido e interativo, no estilo Netflix."
     heroVideoUrl={heroVideo}
+    heroVideoAspect="square"
     subheadlineBelowVideo
     ctaHero="MATRICULE-SE AGORA"
     theme={theme}
