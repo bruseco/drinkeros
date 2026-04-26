@@ -30,6 +30,15 @@ import dep1 from '@/assets/landing/bar/dep-1.png';
 import dep2 from '@/assets/landing/bar/dep-2.png';
 import dep3 from '@/assets/landing/bar/dep-3.png';
 import heroVideo from '@/assets/landing/bar/intro.mp4';
+import learn1 from '@/assets/landing/bar/learn-1-empresa.jpg';
+import learn2 from '@/assets/landing/bar/learn-2-captacao.jpg';
+import learn3 from '@/assets/landing/bar/learn-3-contratos.jpg';
+import learn4 from '@/assets/landing/bar/learn-4-cardapio.jpg';
+import learn5 from '@/assets/landing/bar/learn-5-insumos.jpg';
+import learn6 from '@/assets/landing/bar/learn-6-equipe.jpg';
+import learn7 from '@/assets/landing/bar/learn-7-vendas.jpg';
+import learn8 from '@/assets/landing/bar/learn-8-estoque.jpg';
+import learn9 from '@/assets/landing/bar/learn-9-posvenda.jpg';
 
 // Paleta: salmão + pink (vibrante, eventos)
 const theme: CourseTheme = {
@@ -42,15 +51,15 @@ const theme: CourseTheme = {
 };
 
 const learnItems: LearnItem[] = [
-  { icon: Briefcase, title: 'Monte sua empresa do zero', description: 'O passo a passo completo para abrir seu bar para eventos a partir da sua casa.' },
-  { icon: Megaphone, title: 'Captação de clientes', description: 'Estratégias práticas para encontrar clientes e fechar parcerias.' },
-  { icon: FileText, title: 'Modelos de contratos', description: 'Receba modelos de contrato e proposta prontos para usar no seu dia a dia.' },
-  { icon: Wine, title: 'Cardápio de eventos', description: 'Modelo de cardápio com os melhores drinks para servir em eventos.' },
-  { icon: ClipboardList, title: 'Cálculo de insumos', description: 'Calcule bebidas e ingredientes na medida certa para cada evento.' },
-  { icon: Users, title: 'Gestão de equipe', description: 'Como selecionar, treinar e coordenar seu time para entregar serviço de alto nível.' },
-  { icon: TrendingUp, title: 'Técnicas de venda', description: 'Aprenda a apresentar seu trabalho e fechar contratos com mais valor.' },
-  { icon: Package, title: 'Organização e estoque', description: 'Como montar um estoque eficiente em casa e otimizar a logística.' },
-  { icon: HandshakeIcon, title: 'Pós-venda', description: 'Fidelize clientes e crie um fluxo recorrente de eventos.' },
+  { icon: Briefcase, imageSrc: learn1, title: 'Monte sua empresa do zero', description: 'O passo a passo completo para abrir seu bar para eventos a partir da sua casa.' },
+  { icon: Megaphone, imageSrc: learn2, title: 'Captação de clientes', description: 'Estratégias práticas para encontrar clientes e fechar parcerias.' },
+  { icon: FileText, imageSrc: learn3, title: 'Modelos de contratos', description: 'Receba modelos de contrato e proposta prontos para usar no seu dia a dia.' },
+  { icon: Wine, imageSrc: learn4, title: 'Cardápio de eventos', description: 'Modelo de cardápio com os melhores drinks para servir em eventos.' },
+  { icon: ClipboardList, imageSrc: learn5, title: 'Cálculo de insumos', description: 'Calcule bebidas e ingredientes na medida certa para cada evento.' },
+  { icon: Users, imageSrc: learn6, title: 'Gestão de equipe', description: 'Como selecionar, treinar e coordenar seu time para entregar serviço de alto nível.' },
+  { icon: TrendingUp, imageSrc: learn7, title: 'Técnicas de venda', description: 'Aprenda a apresentar seu trabalho e fechar contratos com mais valor.' },
+  { icon: Package, imageSrc: learn8, title: 'Organização e estoque', description: 'Como montar um estoque eficiente em casa e otimizar a logística.' },
+  { icon: HandshakeIcon, imageSrc: learn9, title: 'Pós-venda', description: 'Fidelize clientes e crie um fluxo recorrente de eventos.' },
 ];
 
 const modules: ModuleItem[] = [
