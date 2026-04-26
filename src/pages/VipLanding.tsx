@@ -184,15 +184,7 @@ const VipLanding: React.FC = () => {
         }
       `}</style>
 
-      {/* X fechar — fixo no canto direito da viewport */}
-      <button
-        type="button"
-        onClick={handleClose}
-        aria-label="Fechar"
-        className="absolute right-4 top-5 z-40 h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition"
-      >
-        <X className="h-4 w-4" />
-      </button>
+      {/* Botão de fechar removido — usuário volta pelo browser */}
 
       <div className="relative z-30 container mx-auto max-w-4xl">
         {/* Header — logo Drinkeros centralizado (h-16, logo h-10) */}
