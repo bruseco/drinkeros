@@ -95,6 +95,10 @@ export interface CourseLandingProps {
   logoClassName?: string;
   /** Classe extra para a tagline (ex: cor customizada). */
   taglineClassName?: string;
+  /** Renderiza a subheadline abaixo do vídeo (e não acima). */
+  subheadlineBelowVideo?: boolean;
+  /** Classe extra para o container do logo (ex: 'mb-2 -mt-4'). */
+  logoWrapperClassName?: string;
   /** Foto do professor — exibida no hero abaixo do CTA. */
   instructorSrc?: string;
   /** Nome do professor — legenda abaixo da foto. */
@@ -160,6 +164,8 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   logoBgSrc,
   logoClassName,
   taglineClassName,
+  subheadlineBelowVideo = false,
+  logoWrapperClassName,
   instructorSrc,
   instructorName,
   aboutInstructor,
@@ -360,7 +366,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                 />
               </div>
             ) : (
-              <div className="relative mx-auto mb-6 w-fit">
+              <div className={`relative mx-auto w-fit ${logoWrapperClassName ?? 'mb-6'}`}>
                 <div
                   aria-hidden
                   className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] sm:w-[560px] sm:h-[560px] rounded-full pointer-events-none -z-10"
@@ -395,9 +401,11 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
           <p className={`text-xl sm:text-2xl font-bold mb-3 max-w-3xl mx-auto leading-snug ${taglineClassName ?? 'text-white'}`}>
             {tagline}
           </p>
-          <p className="text-sm sm:text-base text-white/80 mb-6 max-w-3xl mx-auto">
-            {subheadline}
-          </p>
+          {!subheadlineBelowVideo && (
+            <p className="text-sm sm:text-base text-white/80 mb-6 max-w-3xl mx-auto">
+              {subheadline}
+            </p>
+          )}
 
           {heroVideoUrl && (
             <div className={`w-[70%] sm:w-full ${heroVideoAspect === 'square' ? 'max-w-md aspect-square' : 'max-w-xl aspect-video'} mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-6 bg-black`}>
@@ -419,6 +427,12 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                 />
               )}
             </div>
+          )}
+
+          {subheadlineBelowVideo && (
+            <p className="text-sm sm:text-base text-white/80 mb-6 max-w-3xl mx-auto">
+              {subheadline}
+            </p>
           )}
 
           <div className="flex justify-center">
