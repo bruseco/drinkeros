@@ -82,14 +82,30 @@ const VipLanding: React.FC = () => {
       <div className="pointer-events-none absolute top-1/3 -right-20 h-96 w-96 rounded-full bg-fuchsia-500/20 blur-3xl" />
       <div className="pointer-events-none absolute bottom-0 left-1/3 h-96 w-96 rounded-full bg-yellow-400/10 blur-3xl" />
 
-      <div className="relative z-10 container mx-auto px-4 py-8 max-w-4xl">
+      {/* Degradê preto animado no topo (varredura horizontal) */}
+      <div className="pointer-events-none fixed top-0 left-0 right-0 h-32 z-20 overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(0,0,0,0.85)_25%,rgba(0,0,0,0.95)_50%,rgba(0,0,0,0.85)_75%,transparent_100%)] bg-[length:200%_100%] animate-[viplanding-sweep_6s_linear_infinite]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/30 to-transparent" />
+      </div>
+      <style>{`
+        @keyframes viplanding-sweep {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+      `}</style>
+
+      <div className="relative z-30 container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-12">
-          <Link to="/app/receitas">
+        <div className="relative flex items-center justify-center mb-12">
+          <Link to="/app/receitas" aria-label="Drinkeros">
             <img src={drinkrosLogo} alt="Drinkeros" className="h-10 object-contain brightness-0 invert" />
           </Link>
-          <Link to="/app/receitas" className="text-sm text-purple-300 hover:text-white transition">
-            Voltar
+          <Link
+            to="/app/receitas"
+            aria-label="Fechar"
+            className="absolute right-0 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition"
+          >
+            <X className="h-4 w-4" />
           </Link>
         </div>
 
