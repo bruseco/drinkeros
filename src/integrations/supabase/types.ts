@@ -89,6 +89,177 @@ export type Database = {
         }
         Relationships: []
       }
+      club_monthly_winners: {
+        Row: {
+          avg_rating: number
+          created_at: string
+          id: string
+          month_year: string
+          recipe_id: string
+          total_votes: number
+          user_id: string
+        }
+        Insert: {
+          avg_rating: number
+          created_at?: string
+          id?: string
+          month_year: string
+          recipe_id: string
+          total_votes: number
+          user_id: string
+        }
+        Update: {
+          avg_rating?: number
+          created_at?: string
+          id?: string
+          month_year?: string
+          recipe_id?: string
+          total_votes?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_monthly_winners_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "club_recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_recipe_votes: {
+        Row: {
+          created_at: string
+          id: string
+          rating: number
+          recipe_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          rating: number
+          recipe_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          rating?: number
+          recipe_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_recipe_votes_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "club_recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_recipes: {
+        Row: {
+          characteristics: string[] | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          ingredients: string
+          instructions: string
+          is_hidden: boolean
+          is_reported: boolean
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          characteristics?: string[] | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          ingredients: string
+          instructions: string
+          is_hidden?: boolean
+          is_reported?: boolean
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          characteristics?: string[] | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string
+          instructions?: string
+          is_hidden?: boolean
+          is_reported?: boolean
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      club_user_points: {
+        Row: {
+          points: number
+          recipes_published: number
+          updated_at: string
+          user_id: string
+          votes_given: number
+          votes_received: number
+        }
+        Insert: {
+          points?: number
+          recipes_published?: number
+          updated_at?: string
+          user_id: string
+          votes_given?: number
+          votes_received?: number
+        }
+        Update: {
+          points?: number
+          recipes_published?: number
+          updated_at?: string
+          user_id?: string
+          votes_given?: number
+          votes_received?: number
+        }
+        Relationships: []
+      }
+      club_winner_dismissals: {
+        Row: {
+          dismissed_at: string
+          id: string
+          user_id: string
+          winner_id: string
+        }
+        Insert: {
+          dismissed_at?: string
+          id?: string
+          user_id: string
+          winner_id: string
+        }
+        Update: {
+          dismissed_at?: string
+          id?: string
+          user_id?: string
+          winner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_winner_dismissals_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "club_monthly_winners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collection_recipes: {
         Row: {
           collection_id: string
@@ -1125,6 +1296,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           cpf: string | null
           created_at: string
           email: string
@@ -1138,6 +1310,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           cpf?: string | null
           created_at?: string
           email: string
@@ -1151,6 +1324,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           cpf?: string | null
           created_at?: string
           email?: string
