@@ -22,16 +22,17 @@ import CourseLanding, {
 } from './CourseLanding';
 
 import instructor from '@/assets/landing/bartender-bordo/instructor.jpg';
+import instructorAbout from '@/assets/landing/bartender-bordo/rick-sousa.jpg';
 import heroVideo from '@/assets/landing/bartender-bordo/intro.mp4';
 
-// Paleta: azul oceano/náutico
+// Paleta: vermelho Virgin + azul oceano
 const theme: CourseTheme = {
-  primary: '#0ea5e9',
-  secondary: '#0369a1',
-  accent: '#fbbf24',
-  glow1: 'rgba(14, 165, 233, 0.55)',
-  glow2: 'rgba(3, 105, 161, 0.55)',
-  glow3: 'rgba(251, 191, 36, 0.30)',
+  primary: '#ef4444',
+  secondary: '#1d4ed8',
+  accent: '#38bdf8',
+  glow1: 'rgba(239, 68, 68, 0.55)',
+  glow2: 'rgba(29, 78, 216, 0.55)',
+  glow3: 'rgba(56, 189, 248, 0.30)',
 };
 
 const learnItems: LearnItem[] = [
@@ -68,6 +69,26 @@ const faq: FaqItem[] = [
   { q: 'Ainda tenho dúvida, o que faço?', a: 'Fale com nossa equipe pelo WhatsApp ou pelo e-mail suporte@drinkeros.com.br.' },
 ];
 
+const aboutInstructor = {
+  name: 'Rick Sousa',
+  photoSrc: instructorAbout,
+  title: 'Quem é o seu professor?',
+  paragraphs: [
+    'Meu nome é Ricardo Sousa — ou Rick Sousa, para os mais íntimos do Instagram. Sou mixologista, bartender clássico, barista, sommelier, chef e mestre destileiro. Falo e escrevo fluentemente 8 línguas (sim, graças ao navio) e trabalho no ramo de cruzeiros desde os 18 anos.',
+    'Já passei por mais de 6 companhias de cruzeiro e atualmente faço parte dos encarregados dentro do sistema do bar da Virgin Voyages. Também sou participante e ganhador de algumas competições como Melhor Margarita do Mundo, World Class, Bacardi Legacy, Campari Competition e Flor de Caña Rum, entre outras.',
+    'Mais do que uma formação profissional de qualidade, este curso será o seu passaporte para realizar sonhos ainda maiores e mais distantes — respeitando todas as nacionalidades. Aqui você vai entender o que as companhias realmente procuram: técnica, criatividade, postura, sociabilidade e domínio de outro idioma (inglês, essencialmente).',
+    'Vamos começar uma etapa de muitas aprendizagens! Existem várias fases até você chegar a bordo, e o inglês é a mais importante de todas — junto com a sua formação profissional. Bora?',
+  ],
+  credentials: [
+    'Mixologista formado pela EBS (European Bartender School)',
+    'Bartender Clássico pelo IBA (International Bartender Association)',
+    'Barista pela Faculdade Illy de Genova',
+    'Sommelier pelo WSET Global LV1',
+    'Chef pela Ferrandi — Paris',
+    'Mestre Destileiro pela InovBev (Brasil)',
+  ],
+};
+
 const BartenderABordo: React.FC = () => (
   <CourseLanding
     slug="bartender-a-bordo"
@@ -87,6 +108,7 @@ const BartenderABordo: React.FC = () => (
     profiles={profiles}
     bonusTitle="3 BÔNUS exclusivos"
     bonus={bonus}
+    aboutInstructor={aboutInstructor}
     guaranteeDays={15}
     faq={faq}
   />
