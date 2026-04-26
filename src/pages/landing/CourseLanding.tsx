@@ -387,6 +387,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
         <VipFloatingBanner
           watchTargetId="cl-matricule-cta"
           basePrice={basePrice}
+          productName={brand}
           delayMs={5000}
         />
       )}
