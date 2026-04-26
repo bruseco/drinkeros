@@ -174,11 +174,17 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish, initialStage = 'loadin
           <Button
             size="lg"
             onClick={handleFinish}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold uppercase tracking-wide shadow-lg"
+            className="w-full text-white font-bold uppercase tracking-wide shadow-lg border-0 bg-[linear-gradient(110deg,#7e22ce_0%,#c026d3_25%,#ec4899_50%,#c026d3_75%,#7e22ce_100%)] bg-[length:200%_100%] animate-[shine_3s_linear_infinite] hover:opacity-95"
           >
             Entrar na Batalha
           </Button>
         </div>
+        <style>{`
+          @keyframes shine {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+          }
+        `}</style>
       </div>
     );
   }
