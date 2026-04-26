@@ -257,7 +257,7 @@ const AdminUserDetail: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Sparkles className={isVipActive ? 'h-4 w-4 text-purple-500' : 'h-4 w-4 text-muted-foreground'} />
                   <div>
-                    <p className="text-sm font-medium">{isVipActive ? 'Plano VIP ativo' : 'Plano Free'}</p>
+                    <p className="text-sm font-medium">{isVipActive ? 'Sócio do Clube ativo' : 'Plano Free'}</p>
                     {isVipActive && plan?.expires_at && (
                       <p className="text-xs text-muted-foreground">Expira em {format(new Date(plan.expires_at), 'dd/MM/yyyy')}</p>
                     )}
