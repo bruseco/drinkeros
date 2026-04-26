@@ -8,7 +8,6 @@ import {
   Crown,
   BookOpen,
   Sparkles,
-  ArrowLeft,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
