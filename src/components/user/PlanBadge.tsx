@@ -24,7 +24,7 @@ export const PlanBadge: React.FC<PlanBadgeProps> = ({ className, linkOnFree = tr
         )}
       >
         <Crown className="h-3 w-3" />
-        Sócio
+        Clube
       </span>
     );
   }
