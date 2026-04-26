@@ -196,7 +196,7 @@ const VipLanding: React.FC = () => {
 
         {/* Pricing Card */}
         <div className="relative max-w-md mx-auto mb-16">
-          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-yellow-400 rounded-3xl blur opacity-75 animate-pulse" />
+          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-yellow-400 rounded-3xl blur opacity-60" />
           <div className="relative bg-black rounded-3xl p-8 border border-purple-500/30">
             <h2 className="text-center text-3xl md:text-4xl font-black mb-3 viplanding-gold-text">
               Sócio do Clube · Anual
