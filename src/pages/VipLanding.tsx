@@ -215,7 +215,7 @@ const VipLanding: React.FC = () => {
         <div className="relative z-10 container mx-auto max-w-4xl">
 
         {/* Comparison */}
-        <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-16 mt-4 -mx-2 sm:mx-0">
+        <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-16 mt-4 -mx-[13px] sm:mx-0">
           {/* Free */}
           <div className="rounded-2xl bg-white/5 border border-white/10 p-4 md:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 mb-4">
