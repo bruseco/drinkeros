@@ -22,6 +22,7 @@ import {
   formatBRL,
 } from '@/lib/vipDiscount';
 import { EBOOK_CONTENT } from './ebookContent';
+import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 
 const EbookLanding: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
