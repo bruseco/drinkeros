@@ -108,7 +108,7 @@ const ClassicosDestilados: React.FC = () => (
     instructorName="Rand Bartender"
     logoSrc={logo}
     logoClassName="h-44 sm:h-60"
-    logoWrapperClassName="-mt-4 sm:-mt-6 mb-2"
+    logoWrapperClassName="mt-6 sm:mt-10 mb-2"
     titleFontClassName="[font-family:'Playfair_Display',serif] tracking-tight"
     heroBadge="Com Rand Bartender"
     tagline="Aprenda coquetelaria com quem está crescendo a cada dia nesse mercado."
