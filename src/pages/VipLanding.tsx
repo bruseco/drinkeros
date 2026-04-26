@@ -82,32 +82,48 @@ const VipLanding: React.FC = () => {
       <div className="pointer-events-none absolute top-1/3 -right-20 h-96 w-96 rounded-full bg-fuchsia-500/20 blur-3xl" />
       <div className="pointer-events-none absolute bottom-0 left-1/3 h-96 w-96 rounded-full bg-yellow-400/10 blur-3xl" />
 
-      {/* Degradê preto animado no topo (varredura horizontal) */}
-      <div className="pointer-events-none fixed top-0 left-0 right-0 h-32 z-20 overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(0,0,0,0.85)_25%,rgba(0,0,0,0.95)_50%,rgba(0,0,0,0.85)_75%,transparent_100%)] bg-[length:200%_100%] animate-[viplanding-sweep_6s_linear_infinite]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/30 to-transparent" />
+      {/* Blobs animados no fundo — organismo vivo */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute -top-32 -left-32 h-[28rem] w-[28rem] rounded-full bg-purple-600/40 blur-3xl animate-[viplanding-blob1_18s_ease-in-out_infinite]" />
+        <div className="absolute top-1/4 -right-40 h-[26rem] w-[26rem] rounded-full bg-fuchsia-500/35 blur-3xl animate-[viplanding-blob2_22s_ease-in-out_infinite]" />
+        <div className="absolute top-1/2 left-1/4 h-[24rem] w-[24rem] rounded-full bg-pink-500/25 blur-3xl animate-[viplanding-blob3_26s_ease-in-out_infinite]" />
+        <div className="absolute bottom-0 right-1/4 h-[28rem] w-[28rem] rounded-full bg-purple-700/35 blur-3xl animate-[viplanding-blob4_24s_ease-in-out_infinite]" />
       </div>
       <style>{`
-        @keyframes viplanding-sweep {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
+        @keyframes viplanding-blob1 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(40vw, 20vh) scale(1.2); }
+        }
+        @keyframes viplanding-blob2 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(-50vw, 30vh) scale(1.15); }
+        }
+        @keyframes viplanding-blob3 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(30vw, -20vh) scale(1.25); }
+        }
+        @keyframes viplanding-blob4 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(-35vw, -25vh) scale(1.1); }
         }
       `}</style>
 
-      <div className="relative z-30 container mx-auto px-4 py-8 max-w-4xl">
-        {/* Header */}
-        <div className="relative flex items-center justify-center mb-12">
-          <Link to="/app/receitas" aria-label="Drinkeros">
+      <div className="relative z-30 container mx-auto max-w-4xl">
+        {/* Header — espelha UserNavbar (h-16, logo h-10 centralizado, X onde fica o avatar sm h-9 w-9) */}
+        <div className="relative flex h-16 items-center justify-center px-4 mb-8">
+          <Link to="/app/receitas" aria-label="Drinkeros" className="absolute left-1/2 -translate-x-1/2">
             <img src={drinkrosLogo} alt="Drinkeros" className="h-10 object-contain brightness-0 invert" />
           </Link>
           <Link
             to="/app/receitas"
             aria-label="Fechar"
-            className="absolute right-0 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition"
+            className="absolute right-4 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition"
           >
             <X className="h-4 w-4" />
           </Link>
         </div>
+
+        <div className="px-4 pb-8">
 
         {/* Hero */}
         <div className="text-center mb-16 space-y-6">
