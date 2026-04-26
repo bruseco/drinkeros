@@ -26,6 +26,7 @@ import instructor from '@/assets/landing/ingredientes/instructor.jpg';
 import dep1 from '@/assets/landing/ingredientes/dep-1.jpg';
 import dep2 from '@/assets/landing/ingredientes/dep-2.jpg';
 import dep3 from '@/assets/landing/ingredientes/dep-3.jpg';
+import heroVideo from '@/assets/landing/ingredientes/hero-video.mp4';
 
 // Paleta: verde esmeralda + âmbar (artesanal / natural / orgânico)
 const theme: CourseTheme = {
@@ -78,10 +79,13 @@ const IngredientesArtesanais: React.FC = () => (
     logoBgSrc={logoBg}
     instructorSrc={instructor}
     instructorName="Bruno Abreu"
-    heroVideoUrl="https://www.youtube.com/embed/YWZRA7NsL48?rel=0&playsinline=1"
+    heroVideoUrl={heroVideo}
+    heroVideoAspect="square"
     heroBadge="Com Bruno Abreu · Drinkeros"
     tagline="Economize no dia a dia produzindo seus próprios ingredientes artesanais."
+    taglineClassName="text-[#fbbf24]"
     subheadline="Eleve o nível dos seus drinks com xaropes artesanais, gelo translúcido, espumas saborizadas, bitter artesanal e tudo o que você precisa para deixar seu drink ainda mais valioso."
+    subheadlineBelowVideo
     ctaHero="QUERO COMEÇAR"
     theme={theme}
     fallbackPrice={197}
