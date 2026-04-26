@@ -3,13 +3,11 @@ import {
   Ship,
   DollarSign,
   Globe,
-  Briefcase,
   GraduationCap,
   ClipboardCheck,
   Users,
   Plane,
   PartyPopper,
-  Heart,
   TrendingUp,
 } from 'lucide-react';
 import CourseLanding, {
@@ -20,16 +18,16 @@ import CourseLanding, {
   type FaqItem,
 } from './CourseLanding';
 
-import logo from '@/assets/landing/bab/logo.png';
-import instructor from '@/assets/landing/bab/instructor.jpg';
-import heroVideo from '@/assets/landing/bab/hero-video.mp4';
+import logo from '@/assets/landing/bartender-bordo/logo.png';
+import instructor from '@/assets/landing/bartender-bordo/rick-sousa.jpg';
+import heroVideo from '@/assets/landing/bartender-bordo/intro.mp4';
 
 const theme: CourseTheme = {
-  primary: '#0ea5e9',
-  secondary: '#0284c7',
+  primary: '#ef4444',
+  secondary: '#1d4ed8',
   accent: '#facc15',
-  glow1: 'rgba(14, 165, 233, 0.55)',
-  glow2: 'rgba(2, 132, 199, 0.50)',
+  glow1: 'rgba(239, 68, 68, 0.55)',
+  glow2: 'rgba(29, 78, 216, 0.55)',
   glow3: 'rgba(250, 204, 21, 0.30)',
 };
 
@@ -56,9 +54,22 @@ const bonus: BonusItem[] = [
 
 const aboutInstructor = {
   name: 'Rick Souza',
-  title: 'Bartender com 15+ anos em cruzeiros internacionais',
-  bio: 'Rick passou mais de 15 anos a bordo dos maiores navios do mundo, viajando por dezenas de países e ganhando em dólar. Hoje compartilha tudo o que aprendeu para ajudar outros bartenders a viverem essa mesma experiência.',
-  image: instructor,
+  photoSrc: instructor,
+  title: 'Quem é o seu professor?',
+  paragraphs: [
+    'Meu nome é Ricardo Sousa — ou Rick Sousa para os mais íntimos do Instagram. Sou mixologista formado pela EBS (European Bartender School), Bartender Clássico pelo IBA (International Bartender Association), Barista pela Faculdade Illy de Genova, Sommelier WSET Global LV1, Chef pela Ferrandi-Paris e Mestre Destilador pela InovBev (Brasil).',
+    'Sou participante e ganhador de competições como melhor margarita do mundo, World Class, Bacardi Legacy, Campari Competition e Flor de Caña Rum, entre outras. Falo e escrevo fluentemente 8 idiomas (sim, graças aos navios) e trabalho no ramo de cruzeiros desde os 18 anos. Já passei por mais de 6 companhias e atualmente sou um dos encarregados do sistema de bar da Virgin Voyages.',
+    'O curso será o seu passaporte para realizar sonhos ainda maiores e mais distantes — respeitando todas as nacionalidades. Vamos começar uma etapa de muitas aprendizagens! Aqui você descobre o que as companhias realmente procuram em um bartender, as técnicas, a postura, o atendimento e tudo o que separa quem sonha de quem embarca.',
+  ],
+  credentials: [
+    'EBS — European Bartender School',
+    'IBA — International Bartender Association',
+    'Barista — Faculdade Illy (Genova)',
+    'WSET Global LV1 — Sommelier',
+    'Ferrandi — Paris (Chef)',
+    'InovBev — Mestre Destilador (Brasil)',
+    '15+ anos em cruzeiros · Virgin Voyages',
+  ],
 };
 
 const faq: FaqItem[] = [
