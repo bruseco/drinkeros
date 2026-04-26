@@ -16,6 +16,44 @@ import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
 import bgTijolos from '@/assets/bg-tijolos-pretos.jpg';
 
+const VideoWithPoster: React.FC<{ src: string; poster: string; alt: string }> = ({ src, poster, alt }) => {
+  const [started, setStarted] = useState(false);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const handlePlay = () => {
+    setStarted(true);
+    requestAnimationFrame(() => videoRef.current?.play());
+  };
+  return (
+    <div className="relative w-full h-full bg-black">
+      <video
+        ref={videoRef}
+        src={src}
+        controls={started}
+        playsInline
+        preload="metadata"
+        className="w-full h-full object-cover"
+        onPlay={() => setStarted(true)}
+      />
+      {!started && (
+        <button
+          type="button"
+          onClick={handlePlay}
+          aria-label={`Reproduzir ${alt}`}
+          className="absolute inset-0 group"
+        >
+          <img src={poster} alt={alt} className="absolute inset-0 w-full h-full object-cover" />
+          <span className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
+          <span className="absolute inset-0 flex items-center justify-center">
+            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 group-hover:bg-white shadow-2xl transition-transform group-hover:scale-110">
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-8 w-8 text-black ml-1"><path d="M8 5v14l11-7z" /></svg>
+            </span>
+          </span>
+        </button>
+      )}
+    </div>
+  );
+};
+
 
 const VipLanding: React.FC = () => {
   const { user } = useAuth();
