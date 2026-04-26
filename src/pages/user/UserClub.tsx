@@ -14,7 +14,7 @@ const UserClub: React.FC = () => {
     <div className="container mx-auto max-w-3xl py-6 px-4 pb-24 md:pb-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Clube Drinkeros</h1>
+          <h1 className="text-2xl font-bold">Batalha Drinkeros</h1>
           <p className="text-muted-foreground text-sm">Compartilhe receitas e vote nas favoritas.</p>
         </div>
         <Button asChild size="sm">

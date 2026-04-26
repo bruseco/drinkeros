@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Wine, Heart, GraduationCap, BookOpen, Users, ArrowLeft } from 'lucide-react';
+import { Wine, Heart, GraduationCap, BookOpen, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
+import batalhaIcon from '@/assets/ico-batalha.png';
+import batalhaIconAtivo from '@/assets/ico-batalha-ativo.png';
 import { Button } from '@/components/ui/button';
 import { UserAvatarMenu } from '@/components/user/UserAvatarMenu';
 
@@ -18,7 +20,7 @@ export const UserNavbar: React.FC = () => {
   const navItems = [
     { icon: Wine, label: 'Receitas', href: '/app/receitas' },
     { icon: GraduationCap, label: 'Cursos', href: '/app/cursos' },
-    { icon: Users, label: 'Clube', href: '/app/clube' },
+    { label: 'Batalha', href: '/app/clube', img: batalhaIcon, imgActive: batalhaIconAtivo },
     { icon: BookOpen, label: 'Ebooks', href: '/app/ebooks' },
     { icon: Heart, label: 'Favoritos', href: '/app/favoritos' },
   ];
@@ -68,7 +70,15 @@ export const UserNavbar: React.FC = () => {
                   isActive ? 'text-accent' : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                <item.icon className={cn("h-6 w-6 transition-transform duration-300", isActive && "scale-110")} />
+                {item.img ? (
+                  <img
+                    src={isActive ? item.imgActive : item.img}
+                    alt=""
+                    className={cn("h-6 w-6 object-contain transition-transform duration-300", isActive && "scale-110")}
+                  />
+                ) : (
+                  <item.icon className={cn("h-6 w-6 transition-transform duration-300", isActive && "scale-110")} />
+                )}
                 <span className={cn("text-[10px] font-medium transition-all duration-300", isActive && "font-semibold")}>
                   {item.label}
                 </span>
