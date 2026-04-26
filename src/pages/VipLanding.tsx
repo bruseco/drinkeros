@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Crown, Check, X, GlassWater, Sparkles, Zap, BookOpen, GraduationCap, Lock, Loader2, RefreshCw, Gift, PlayCircle, Wand2 } from 'lucide-react';
 import jackDaniels from '@/assets/landing/bebida-decifrada/jack-daniels-degustacao.mp4';
+import workshopVsl from '@/assets/landing/workshop/vsl.mp4';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserPlan } from '@/hooks/useUserPlan';
@@ -218,10 +219,10 @@ const VipLanding: React.FC = () => {
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="space-y-10">
             {/* Bônus 1 - Bebida Decifrada */}
-            <div className="rounded-2xl bg-gradient-to-br from-purple-900/40 to-black border border-purple-500/30 overflow-hidden">
-              <div className="aspect-video bg-black relative">
+            <div className="rounded-2xl bg-gradient-to-br from-purple-900/40 to-black border border-purple-500/30 overflow-hidden p-6">
+              <div className="w-[70%] sm:w-full max-w-md aspect-square mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-5 bg-black">
                 <video
                   src={jackDaniels}
                   controls
@@ -230,37 +231,39 @@ const VipLanding: React.FC = () => {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="p-6">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="text-center max-w-xl mx-auto">
+                <div className="flex items-center justify-center gap-2 mb-2">
                   <PlayCircle className="h-5 w-5 text-yellow-300" />
                   <span className="text-xs font-bold uppercase tracking-wider text-yellow-300">Bônus 1</span>
                 </div>
-                <h3 className="text-xl font-black mb-2">Bebida Decifrada</h3>
+                <h3 className="text-2xl font-black mb-2">Bebida Decifrada</h3>
                 <p className="text-sm text-purple-200 leading-snug">
                   Uma minissérie onde você aprende as melhores curiosidades das bebidas mais
                   famosas do mundo, como <strong className="text-white">Jack Daniels</strong>,{' '}
                   <strong className="text-white">Tequila José Cuervo</strong>,{' '}
                   <strong className="text-white">Amarula</strong> e várias outras.
                 </p>
-                <p className="text-xs text-purple-300 mt-3 italic">▶ Assista acima a degustação do Jack Daniels.</p>
+                <p className="text-xs text-purple-300 mt-3 italic">▶ Acima, a degustação do Jack Daniels.</p>
               </div>
             </div>
 
             {/* Bônus 2 - Workshop Além dos Clássicos */}
-            <div className="rounded-2xl bg-gradient-to-br from-fuchsia-900/40 to-black border border-fuchsia-500/30 overflow-hidden">
-              <div className="aspect-video bg-gradient-to-br from-fuchsia-600/30 via-purple-700/20 to-yellow-400/10 relative flex items-center justify-center">
-                <div className="text-center px-6">
-                  <Wand2 className="h-12 w-12 text-yellow-300 mx-auto mb-3 drop-shadow-[0_0_20px_rgba(253,224,71,0.5)]" />
-                  <div className="text-2xl font-black leading-tight">Workshop</div>
-                  <div className="text-lg font-light text-purple-200">Além dos Clássicos</div>
-                </div>
+            <div className="rounded-2xl bg-gradient-to-br from-fuchsia-900/40 to-black border border-fuchsia-500/30 overflow-hidden p-6">
+              <div className="w-[70%] sm:w-full max-w-md aspect-square mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-5 bg-black">
+                <video
+                  src={workshopVsl}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <div className="p-6">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="text-center max-w-xl mx-auto">
+                <div className="flex items-center justify-center gap-2 mb-2">
                   <GraduationCap className="h-5 w-5 text-yellow-300" />
                   <span className="text-xs font-bold uppercase tracking-wider text-yellow-300">Bônus 2</span>
                 </div>
-                <h3 className="text-xl font-black mb-2">Workshop Além dos Clássicos</h3>
+                <h3 className="text-2xl font-black mb-2">Workshop Além dos Clássicos</h3>
                 <p className="text-sm text-purple-200 leading-snug">
                   Você vai aprender a <strong className="text-white">história dos clássicos mais famosos do mundo</strong>,
                   entender como foram criados e aprender a{' '}
