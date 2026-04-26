@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { MyProductsSection } from '@/components/user/MyProductsSection';
 import { AvatarCropDialog } from '@/components/user/AvatarCropDialog';
 
-const ProfileDataSection: React.FC = () => {
+const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) => void }> = ({ onCompletenessChange }) => {
   const { user, profile } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
   const [fullName, setFullName] = useState('');
@@ -48,6 +48,18 @@ const ProfileDataSection: React.FC = () => {
     };
     fetchExtra();
   }, [user]);
+
+  useEffect(() => {
+    if (!onCompletenessChange) return;
+    const complete = Boolean(
+      fullName.trim() &&
+      phone.trim() &&
+      bio.trim() &&
+      cpf.replace(/\D/g, '').length === 11 &&
+      avatarUrl
+    );
+    onCompletenessChange(complete);
+  }, [fullName, phone, bio, cpf, avatarUrl, onCompletenessChange]);
 
   const handleFilePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
