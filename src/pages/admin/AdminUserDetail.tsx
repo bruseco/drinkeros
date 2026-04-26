@@ -67,9 +67,12 @@ const AdminUserDetail: React.FC = () => {
     );
   }
 
-  const { profile, role, plan, is_lifetime, has_receitas, courses, ebooks, combos, packages, last_sign_in_at, certificates_count, recipe_views_count } = data;
+  const { profile, role, plan, is_lifetime, courses, ebooks, combos, packages, last_sign_in_at, certificates_count, recipe_views_count } = data;
 
   const isVipActive = !!plan && plan.plan === 'vip' && (!plan.expires_at || new Date(plan.expires_at) > new Date());
+  const daysToExpire = plan?.expires_at
+    ? Math.ceil((new Date(plan.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null;
 
   const startEdit = (field: 'name' | 'email' | 'phone' | 'cpf', current: string | null) => {
     setEditingField(field);
@@ -113,18 +116,22 @@ const AdminUserDetail: React.FC = () => {
     const { error } = await supabase.from('user_plans').upsert(update, { onConflict: 'user_id' });
     if (error) toast({ title: 'Erro', description: error.message, variant: 'destructive' });
     else {
-      toast({ title: enable ? 'Sócio do Clube ativado por 1 ano' : 'Sócio do Clube removido' });
+      toast({ title: enable ? 'Clube dos Drinkeros ativado por 1 ano' : 'Clube dos Drinkeros removido' });
       queryClient.invalidateQueries({ queryKey: ['admin-user-detail'] });
     }
   };
 
-  const saveVipExpiration = async () => {
-    if (!vipExpiresAt) return;
+  const saveVipPeriod = async () => {
+    if (!vipExpiresAt || !vipActivatedAt) return;
     const expires_at = new Date(vipExpiresAt + 'T23:59:59').toISOString();
-    const { error } = await supabase.from('user_plans').update({ expires_at }).eq('user_id', userId!);
+    const activated_at = new Date(vipActivatedAt + 'T00:00:00').toISOString();
+    const { error } = await supabase
+      .from('user_plans')
+      .update({ expires_at, activated_at })
+      .eq('user_id', userId!);
     if (error) toast({ title: 'Erro', description: error.message, variant: 'destructive' });
     else {
-      toast({ title: 'Validade do Sócio atualizada' });
+      toast({ title: 'Período do Clube atualizado' });
       queryClient.invalidateQueries({ queryKey: ['admin-user-detail'] });
       setEditVipOpen(false);
     }
