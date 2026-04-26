@@ -21,6 +21,9 @@ import CourseLanding, {
 import logo from '@/assets/landing/bartender-bordo/logo.png';
 import instructor from '@/assets/landing/bartender-bordo/rick-sousa.jpg';
 import heroVideo from '@/assets/landing/bartender-bordo/intro.mp4';
+import bonus1Img from '@/assets/landing/bartender-bordo/bonus-1-curriculo.jpg';
+import bonus2Img from '@/assets/landing/bartender-bordo/bonus-2-companhias.jpg';
+import bonus3Img from '@/assets/landing/bartender-bordo/bonus-3-mentoria.jpg';
 
 const theme: CourseTheme = {
   primary: '#ef4444',
