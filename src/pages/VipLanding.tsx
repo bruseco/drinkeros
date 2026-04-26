@@ -145,18 +145,20 @@ const VipLanding: React.FC = () => {
         }
       `}</style>
 
+      {/* X fechar — fixo no canto direito da viewport */}
+      <Link
+        to="/app/receitas"
+        aria-label="Fechar"
+        className="absolute right-4 top-5 z-40 h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition"
+      >
+        <X className="h-4 w-4" />
+      </Link>
+
       <div className="relative z-30 container mx-auto max-w-4xl">
-        {/* Header — espelha UserNavbar (h-16, logo h-10 centralizado, X onde fica o avatar sm h-9 w-9) */}
+        {/* Header — logo Drinkeros centralizado (h-16, logo h-10) */}
         <div className="relative flex h-16 items-center justify-center px-4 mb-8">
-          <Link to="/app/receitas" aria-label="Drinkeros" className="absolute left-1/2 -translate-x-1/2">
+          <Link to="/app/receitas" aria-label="Drinkeros">
             <img src={drinkrosLogo} alt="Drinkeros" className="h-10 object-contain brightness-0 invert" />
-          </Link>
-          <Link
-            to="/app/receitas"
-            aria-label="Fechar"
-            className="absolute right-4 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition"
-          >
-            <X className="h-4 w-4" />
           </Link>
         </div>
 
