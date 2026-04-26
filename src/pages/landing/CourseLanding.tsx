@@ -82,6 +82,7 @@ export interface CourseLandingProps {
   tagline: string;          // headline do hero
   subheadline: string;      // texto secundário
   heroBadge?: string;       // ex: 'COM TOM OLIVEIRA'
+  heroBadgeClassName?: string;
   heroVideoUrl?: string;    // YouTube embed ou mp4
   heroVideoAspect?: 'video' | 'square';
   ctaHero: string;          // texto do botão do hero
