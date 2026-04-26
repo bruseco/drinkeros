@@ -1386,10 +1386,12 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          birth_date: string | null
           cpf: string | null
           created_at: string
           email: string
           full_name: string | null
+          gender: string | null
           id: string
           is_admin: boolean | null
           last_sign_in_provider: string | null
@@ -1400,10 +1402,12 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          birth_date?: string | null
           cpf?: string | null
           created_at?: string
           email: string
           full_name?: string | null
+          gender?: string | null
           id?: string
           is_admin?: boolean | null
           last_sign_in_provider?: string | null
@@ -1414,10 +1418,12 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          birth_date?: string | null
           cpf?: string | null
           created_at?: string
           email?: string
           full_name?: string | null
+          gender?: string | null
           id?: string
           is_admin?: boolean | null
           last_sign_in_provider?: string | null
