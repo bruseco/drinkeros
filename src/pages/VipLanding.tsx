@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
+import bgTijolos from '@/assets/bg-tijolos-pretos.jpg';
 
 const VipLanding: React.FC = () => {
   const { user } = useAuth();
@@ -76,18 +77,23 @@ const VipLanding: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-950 via-black to-purple-950 text-white relative overflow-hidden">
-      {/* Glow effects */}
-      <div className="pointer-events-none absolute -top-20 -left-20 h-96 w-96 rounded-full bg-purple-600/30 blur-3xl" />
-      <div className="pointer-events-none absolute top-1/3 -right-20 h-96 w-96 rounded-full bg-fuchsia-500/20 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 left-1/3 h-96 w-96 rounded-full bg-yellow-400/10 blur-3xl" />
+    <div
+      className="min-h-screen text-white relative overflow-hidden bg-black"
+      style={{
+        backgroundImage: `url(${bgTijolos})`,
+        backgroundRepeat: 'repeat',
+        backgroundSize: '600px auto',
+      }}
+    >
+      {/* Vignette para escurecer levemente o tijolo */}
+      <div className="pointer-events-none absolute inset-0 bg-black/40" />
 
-      {/* Blobs animados no fundo — organismo vivo */}
+      {/* Blobs animados de degradê roxo/pink — organismo vivo por cima do tijolo */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute -top-32 -left-32 h-[28rem] w-[28rem] rounded-full bg-purple-600/40 blur-3xl animate-[viplanding-blob1_18s_ease-in-out_infinite]" />
-        <div className="absolute top-1/4 -right-40 h-[26rem] w-[26rem] rounded-full bg-fuchsia-500/35 blur-3xl animate-[viplanding-blob2_22s_ease-in-out_infinite]" />
+        <div className="absolute -top-32 -left-32 h-[28rem] w-[28rem] rounded-full bg-purple-600/35 blur-3xl animate-[viplanding-blob1_18s_ease-in-out_infinite]" />
+        <div className="absolute top-1/4 -right-40 h-[26rem] w-[26rem] rounded-full bg-fuchsia-500/30 blur-3xl animate-[viplanding-blob2_22s_ease-in-out_infinite]" />
         <div className="absolute top-1/2 left-1/4 h-[24rem] w-[24rem] rounded-full bg-pink-500/25 blur-3xl animate-[viplanding-blob3_26s_ease-in-out_infinite]" />
-        <div className="absolute bottom-0 right-1/4 h-[28rem] w-[28rem] rounded-full bg-purple-700/35 blur-3xl animate-[viplanding-blob4_24s_ease-in-out_infinite]" />
+        <div className="absolute bottom-0 right-1/4 h-[28rem] w-[28rem] rounded-full bg-purple-700/30 blur-3xl animate-[viplanding-blob4_24s_ease-in-out_infinite]" />
       </div>
       <style>{`
         @keyframes viplanding-blob1 {
@@ -105,6 +111,32 @@ const VipLanding: React.FC = () => {
         @keyframes viplanding-blob4 {
           0%, 100% { transform: translate(0, 0) scale(1); }
           50% { transform: translate(-35vw, -25vh) scale(1.1); }
+        }
+        @keyframes viplanding-gold-shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        @keyframes viplanding-gold-glow {
+          0%, 100% { box-shadow: 0 0 20px 0 rgba(250, 204, 21, 0.45), 0 0 40px 0 rgba(250, 204, 21, 0.25); }
+          50% { box-shadow: 0 0 35px 6px rgba(250, 204, 21, 0.75), 0 0 70px 12px rgba(250, 204, 21, 0.45); }
+        }
+        .viplanding-gold-text {
+          background-image: linear-gradient(110deg, #b8860b 0%, #fde68a 25%, #fbbf24 50%, #fde68a 75%, #b8860b 100%);
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          animation: viplanding-gold-shimmer 4s linear infinite;
+          filter: drop-shadow(0 0 14px rgba(250, 204, 21, 0.55));
+        }
+        .viplanding-gold-btn {
+          background-image: linear-gradient(110deg, #b8860b 0%, #fde68a 25%, #fbbf24 50%, #fde68a 75%, #b8860b 100%);
+          background-size: 200% auto;
+          animation: viplanding-gold-shimmer 3.5s linear infinite, viplanding-gold-glow 2.4s ease-in-out infinite;
+          color: #1a1206;
+        }
+        .viplanding-gold-btn:hover {
+          filter: brightness(1.05);
         }
       `}</style>
 
@@ -152,15 +184,14 @@ const VipLanding: React.FC = () => {
         <div className="relative max-w-md mx-auto mb-16">
           <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-yellow-400 rounded-3xl blur opacity-75 animate-pulse" />
           <div className="relative bg-black rounded-3xl p-8 border border-purple-500/30">
-            <div className="flex items-center justify-center mb-2">
-              <img src={clubeLogo} alt="Clube dos Drinkeros" className="h-20 object-contain" />
-            </div>
-            <h2 className="text-center text-2xl font-bold mb-2">Sócio do Clube · Anual</h2>
+            <h2 className="text-center text-3xl md:text-4xl font-black mb-3 viplanding-gold-text">
+              Sócio do Clube · Anual
+            </h2>
             <div className="text-center mb-6">
               <div className="text-purple-300 line-through text-sm">de R$ 297</div>
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-2xl font-light text-purple-300">R$</span>
-                <span className="text-7xl font-black bg-gradient-to-b from-yellow-200 to-yellow-500 bg-clip-text text-transparent">
+                <span className="text-7xl font-black viplanding-gold-text">
                   69
                 </span>
               </div>
@@ -170,7 +201,7 @@ const VipLanding: React.FC = () => {
             <Button
               onClick={handleSubscribe}
               disabled={loading}
-              className="w-full h-14 text-base font-bold bg-gradient-to-r from-yellow-400 to-yellow-300 hover:from-yellow-300 hover:to-yellow-200 text-black shadow-lg shadow-yellow-500/40"
+              className="viplanding-gold-btn w-full h-14 text-base font-bold border-0 hover:text-black"
             >
               {loading ? (
                 <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Abrindo checkout...</>
