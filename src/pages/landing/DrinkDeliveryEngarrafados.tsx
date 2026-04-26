@@ -114,6 +114,10 @@ const DrinkDeliveryEngarrafados: React.FC = () => (
         'Residindo em Florianópolis desde 2017, hoje presta serviços de consultoria e mentoria pela Gipsy Cocktails.',
       ],
     }}
+    offerSummary="Crie seu próprio negócio de drinks engarrafados para delivery, com receitas estáveis e alto giro.
+Aprenda formulação, conservação, rotulagem, precificação e canais de venda (iFood, Instagram, WhatsApp).
+Para quem quer faturar com drinks sem precisar de ponto físico ou equipe grande.
+Acesso completo + bônus exclusivos + garantia incondicional."
     faq={faq}
   />
 );

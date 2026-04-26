@@ -85,6 +85,10 @@ const BebidaDecifrada: React.FC = () => (
     bonusTitle="3 BÔNUS exclusivos"
     bonus={bonus}
     guaranteeDays={15}
+    offerSummary="Entenda de verdade o universo das bebidas: destilados, fermentados, vinhos e licores sem decoreba.
+Aprenda história, produção, harmonização e como recomendar a bebida certa em qualquer ocasião.
+Ideal para apaixonados, atendentes e profissionais que querem soar como especialistas.
+Acesso completo + bônus exclusivos + garantia incondicional."
     faq={faq}
   />
 );

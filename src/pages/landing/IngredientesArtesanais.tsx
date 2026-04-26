@@ -98,6 +98,10 @@ const IngredientesArtesanais: React.FC = () => (
     profiles={profiles}
     testimonials={[{ src: dep1 }, { src: dep2 }, { src: dep3 }]}
     guaranteeDays={15}
+    offerSummary="Produza seus próprios xaropes, bitters, infusões, shrubs e cordiais com qualidade de bar premium.
+Aprenda receitas testadas, técnicas de conservação e como agregar valor (e margem) à sua carta de drinks.
+Ideal para bartenders, donos de bar e entusiastas que querem assinar cada drink com identidade própria.
+Acesso completo + bônus exclusivos + garantia incondicional."
     faq={faq}
   />
 );

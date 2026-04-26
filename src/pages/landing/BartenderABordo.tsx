@@ -114,6 +114,10 @@ const BartenderABordo: React.FC = () => (
       bonus={bonus}
       aboutInstructor={aboutInstructor}
       guaranteeDays={15}
+      offerSummary="Trabalhe como bartender em navios de cruzeiro: como se candidatar, entrevistas, contratos e rotina a bordo.
+Domine o inglês essencial, drinks internacionais e o padrão de serviço exigido pelas grandes companhias.
+Para quem quer rodar o mundo ganhando em dólar e construir carreira sólida em hospitalidade.
+Acesso completo + bônus exclusivos + garantia incondicional."
       faq={faq}
     />
   </div>

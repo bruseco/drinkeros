@@ -83,6 +83,10 @@ const WorkshopAlemDosClassicos: React.FC = () => (
     bonusTitle="3 BÔNUS exclusivos"
     bonus={bonus}
     guaranteeDays={15}
+    offerSummary="Vá além dos clássicos: aprenda a criar autorais, releituras e drinks de assinatura que encantam e fidelizam clientes.
+Técnicas modernas, equilíbrio de sabores e storytelling líquido para diferenciar sua carta.
+Perfeito para bartenders, donos de bar e curiosos que querem sair do óbvio.
+Acesso completo + bônus exclusivos + garantia incondicional."
     faq={faq}
   />
 );
