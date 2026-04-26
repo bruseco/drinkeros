@@ -82,7 +82,7 @@ export const useRecipeAccessGuard = () => {
       const count = (countData as number) ?? 0;
 
       if (count >= DAILY_LIMIT) {
-        navigate('/clube');
+        navigate('/clube', { replace: true, state: { from: '/app/receitas' } });
         return false;
       }
 
