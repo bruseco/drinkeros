@@ -37,11 +37,11 @@ import bonusVip from '@/assets/landing/classicos/bonus-vip.jpg';
 import bonusXaropes from '@/assets/landing/classicos/bonus-xaropes.jpg';
 import bonusBebidaDecifrada from '@/assets/landing/classicos/bonus-bebida-decifrada.jpg';
 
-// Paleta: verde musgo → verde bandeira (estrutura) + dourado profundo (amarelo + marrom) nos CTAs/ícones
+// Paleta: dourados ricos para os CTAs (mantendo glows quentes para o fundo)
 const theme: CourseTheme = {
-  primary: '#5a3a1a',     // marrom uísque profundo
-  secondary: '#2b1a0d',   // marrom quase preto (couro/madeira escura)
-  accent: '#a87232',      // âmbar tostado / caramelo escuro
+  primary: '#c9962f',     // dourado vivo
+  secondary: '#7a4a14',   // âmbar profundo (uísque)
+  accent: '#f1c75b',      // dourado claro brilhante
   glow1: 'rgba(90, 58, 26, 0.55)',
   glow2: 'rgba(43, 26, 13, 0.65)',
   glow3: 'rgba(168, 114, 50, 0.30)',
