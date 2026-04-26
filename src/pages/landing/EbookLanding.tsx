@@ -373,7 +373,7 @@ const EbookLanding: React.FC = () => {
                 </div>
                 {isVip && (
                   <p className="mt-3 text-sm text-fuchsia-300">
-                    💜 Você é VIP — esse preço é exclusivo seu
+                    💜 Você é Sócio do Clube — esse preço é exclusivo seu
                   </p>
                 )}
               </div>
