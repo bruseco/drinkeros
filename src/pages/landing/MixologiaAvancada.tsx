@@ -73,12 +73,10 @@ const profiles: ProfileItem[] = [
 ];
 
 const bonus: BonusItem[] = [
-  { title: 'Clube dos Drinkeros', description: 'Acesso de 1 ano ao app com mais de 1.000 receitas para pesquisar e salvar nos seus favoritos.', originalPrice: 'R$ 247,00' },
-  { title: '40 receitas de xaropes artesanais', description: 'Eleve o nível dos seus drinks com xaropes artesanais que dão identidade às suas receitas.', originalPrice: 'R$ 97,00' },
-  { title: 'Filmes & seriados', description: 'Encontre vivências e inspirações através de filmes, livros e seriados sobre o mundo da coquetelaria.', originalPrice: 'R$ 57,00' },
-  { title: 'Harmonização entre comida e drinks', description: 'Entenda com o que cada drink será servido para se destacar na hora de elaborar a carta.', originalPrice: 'R$ 87,00' },
-  { title: 'Bitter artesanal', description: 'Receita exclusiva de bitter para economizar e elevar o nível dos seus coquetéis com mais valor agregado.', originalPrice: 'R$ 57,00' },
-  { title: '3 receitas de fat washes', description: 'Whisky com bacon, rum com óleo de coco e tequila com azeite — três receitas exclusivas e inovadoras.', originalPrice: 'R$ 67,00' },
+  { title: 'Filmes & seriados', description: 'Encontre vivências e inspirações através de filmes, livros e seriados sobre o mundo da coquetelaria.', originalPrice: 'R$ 57,00', imageSrc: bonusFilmes },
+  { title: 'Harmonização entre comida e drinks', description: 'Entenda com o que cada drink será servido para se destacar na hora de elaborar a carta.', originalPrice: 'R$ 87,00', imageSrc: bonusHarmonizacao },
+  { title: 'Bitter artesanal', description: 'Receita exclusiva de bitter para economizar e elevar o nível dos seus coquetéis com mais valor agregado.', originalPrice: 'R$ 57,00', imageSrc: bonusBitter },
+  { title: 'Fat Wash', description: 'Domine a técnica avançada do fat wash com receitas exclusivas — whisky com bacon, rum com óleo de coco e tequila com azeite.', originalPrice: 'R$ 67,00', imageSrc: bonusFatWash },
 ];
 
 const faq: FaqItem[] = [
