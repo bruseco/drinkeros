@@ -486,6 +486,20 @@ const UserProfile: React.FC = () => {
         </CollapsibleContent>
       </Collapsible>
 
+      {/* Notificações - collapsible */}
+      <Collapsible open={openSection === 'notif'} onOpenChange={() => toggle('notif')}>
+        <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 h-14 hover:bg-accent/50 transition-colors">
+          <span className="flex items-center gap-3 text-sm font-medium">
+            <Bell className="h-5 w-5 text-muted-foreground" />
+            Notificações
+          </span>
+          <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-200", openSection === 'notif' && "rotate-180")} />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="rounded-b-lg border border-t-0 border-border bg-card overflow-hidden">
+          <NotificationsSection />
+        </CollapsibleContent>
+      </Collapsible>
+
       {/* Suporte WhatsApp - action button */}
       <button
         onClick={() => window.open('https://wa.me/5548991601025', '_blank')}
