@@ -27,6 +27,14 @@ import dep1 from '@/assets/landing/ingredientes/dep-1.jpg';
 import dep2 from '@/assets/landing/ingredientes/dep-2.jpg';
 import dep3 from '@/assets/landing/ingredientes/dep-3.jpg';
 import heroVideo from '@/assets/landing/ingredientes/hero-video.mp4';
+import learnXaropes from '@/assets/landing/ingredientes/learn-xaropes.jpg';
+import learnEspumas from '@/assets/landing/ingredientes/learn-espumas.jpg';
+import learnGelo from '@/assets/landing/ingredientes/learn-gelo.jpg';
+import learnBitter from '@/assets/landing/ingredientes/learn-bitter.jpg';
+import learnDecoracoes from '@/assets/landing/ingredientes/learn-decoracoes.jpg';
+import learnInfusoes from '@/assets/landing/ingredientes/learn-infusoes.jpg';
+import learnPures from '@/assets/landing/ingredientes/learn-pures.jpg';
+import learnAquafaba from '@/assets/landing/ingredientes/learn-aquafaba.jpg';
 
 // Paleta: verde esmeralda + âmbar (artesanal / natural / orgânico)
 const theme: CourseTheme = {
@@ -39,14 +47,14 @@ const theme: CourseTheme = {
 };
 
 const learnItems: LearnItem[] = [
-  { icon: Droplets, title: 'Xaropes artesanais', description: 'Mais de 40 receitas com frutas, especiarias e ervas para dar identidade aos seus drinks.' },
-  { icon: Sparkles, title: 'Espumas no sifão', description: 'Use o sifão com segurança e crie espumas perfeitas que dão textura e visual aos seus drinks.' },
-  { icon: Snowflake, title: 'Gelo translúcido', description: 'Aprenda a fazer o gelo translúcido utilizado pela alta coquetelaria mundial.' },
-  { icon: Beaker, title: 'Bitter artesanal', description: 'Crie bitters aromáticos a baixo custo e traga complexidade e equilíbrio aos seus coquetéis.' },
-  { icon: Leaf, title: 'Decorações comestíveis', description: 'Técnicas criativas para desidratar frutas, conservar ingredientes e decorar como um artista.' },
-  { icon: FlaskConical, title: 'Infusões', description: 'Faça rum com especiarias, gin infusionado com frutas e crie perfis únicos de sabor.' },
-  { icon: Apple, title: 'Purês de frutas', description: 'Crie purês naturais e saborosos para elevar a base dos seus coquetéis.' },
-  { icon: Egg, title: 'Aquafaba', description: 'Uma alternativa vegana à clara de ovo, ideal para coquetéis espumantes e mais éticos.' },
+  { icon: Droplets, title: 'Xaropes artesanais', description: 'Mais de 40 receitas com frutas, especiarias e ervas para dar identidade aos seus drinks.', imageSrc: learnXaropes },
+  { icon: Sparkles, title: 'Espumas no sifão', description: 'Use o sifão com segurança e crie espumas perfeitas que dão textura e visual aos seus drinks.', imageSrc: learnEspumas },
+  { icon: Snowflake, title: 'Gelo translúcido', description: 'Aprenda a fazer o gelo translúcido utilizado pela alta coquetelaria mundial.', imageSrc: learnGelo },
+  { icon: Beaker, title: 'Bitter artesanal', description: 'Crie bitters aromáticos a baixo custo e traga complexidade e equilíbrio aos seus coquetéis.', imageSrc: learnBitter },
+  { icon: Leaf, title: 'Decorações comestíveis', description: 'Técnicas criativas para desidratar frutas, conservar ingredientes e decorar como um artista.', imageSrc: learnDecoracoes },
+  { icon: FlaskConical, title: 'Infusões', description: 'Faça rum com especiarias, gin infusionado com frutas e crie perfis únicos de sabor.', imageSrc: learnInfusoes },
+  { icon: Apple, title: 'Purês de frutas', description: 'Crie purês naturais e saborosos para elevar a base dos seus coquetéis.', imageSrc: learnPures },
+  { icon: Egg, title: 'Aquafaba', description: 'Uma alternativa vegana à clara de ovo, ideal para coquetéis espumantes e mais éticos.', imageSrc: learnAquafaba },
 ];
 
 const profiles: ProfileItem[] = [
