@@ -24,14 +24,14 @@ import CourseLanding, {
 import instructor from '@/assets/landing/classicos/instructor.jpg';
 import logo from '@/assets/landing/classicos/logo.png';
 
-// Paleta: verde musgo → verde bandeira (com acento dourado para CTAs)
+// Paleta: verde musgo → verde bandeira (estrutura) + dourado profundo (amarelo + marrom) nos CTAs/ícones
 const theme: CourseTheme = {
-  primary: '#4a5d3a',     // verde musgo
-  secondary: '#0f5132',   // verde bandeira
-  accent: '#d4a017',      // dourado clássico (CTAs)
-  glow1: 'rgba(74, 93, 58, 0.55)',
-  glow2: 'rgba(15, 81, 50, 0.55)',
-  glow3: 'rgba(212, 160, 23, 0.30)',
+  primary: '#b8860b',     // dark goldenrod (dourado escuro com marrom)
+  secondary: '#5c3a12',   // marrom profundo (vinho/uísque)
+  accent: '#e8b923',      // dourado quente (amarelo puxado pro mel)
+  glow1: 'rgba(184, 134, 11, 0.55)',
+  glow2: 'rgba(92, 58, 18, 0.55)',
+  glow3: 'rgba(232, 185, 35, 0.35)',
 };
 
 const learnItems: LearnItem[] = [
