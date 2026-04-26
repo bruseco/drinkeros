@@ -97,12 +97,13 @@ const BarParaEventos: React.FC = () => (
     slug="bar-p-eventos"
     brand="Bar para Eventos"
     logoSrc={logo}
-    logoClassName="h-24 sm:h-36 -mt-6 sm:-mt-10"
-    logoWrapperClassName="mb-0 -mt-2"
+    logoClassName="h-16 sm:h-24"
+    logoWrapperClassName="mb-0 mt-6 sm:mt-10"
     instructorSrc={instructor}
     instructorName="Henrique Todeschini"
     heroBadge="Com Henrique Todeschini · La Mafia Drinkeros"
     tagline="Monte sua empresa de bar para eventos do zero, na sua casa, e comece a faturar alto."
+    taglineClassName="bg-gradient-to-r from-[#fff3a8] via-[#ffd58a] to-[#ff9a8a] bg-clip-text text-transparent [text-shadow:_0_0_24px_rgba(255,180,140,0.35)]"
     subheadline="O primeiro e único curso online do Brasil que ensina o passo a passo para abrir e escalar uma empresa de bar para eventos — investindo muito pouco."
     heroVideoUrl={heroVideo}
     heroVideoAspect="square"
