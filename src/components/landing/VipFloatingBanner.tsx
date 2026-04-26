@@ -87,11 +87,21 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
         </button>
 
         <div className="flex items-center gap-3">
-          <img
-            src={vipLogo}
-            alt="Assinante VIP"
-            className="h-12 w-auto object-contain shrink-0 drop-shadow-[0_0_10px_rgba(232,121,249,0.6)]"
-          />
+          <div className="relative shrink-0 flex items-center justify-center">
+            <span
+              aria-hidden
+              className="absolute inset-0 -m-2 rounded-full"
+              style={{
+                background:
+                  'radial-gradient(circle, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0) 75%)',
+              }}
+            />
+            <img
+              src={vipLogo}
+              alt="Assinante VIP"
+              className="relative h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(232,121,249,0.6)]"
+            />
+          </div>
           <div className="min-w-0 flex-1">
             <span className="block text-[10px] font-extrabold tracking-[0.18em] uppercase text-yellow-300 mb-0.5">
               Oferta VIP · {VIP_DISCOUNT_PERCENT}% OFF
