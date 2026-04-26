@@ -12,6 +12,7 @@ import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, Chev
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import { MyProductsSection } from '@/components/user/MyProductsSection';
+import { AvatarCropDialog } from '@/components/user/AvatarCropDialog';
 
 const ProfileDataSection: React.FC = () => {
   const { user, profile } = useAuth();
