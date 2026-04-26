@@ -198,9 +198,6 @@ const VipLanding: React.FC = () => {
               </span>{' '}
               <span className="text-white">do clube</span>
             </h1>
-            <p className="text-lg md:text-xl text-purple-200 max-w-2xl mx-auto">
-              Pare de contar drinks. Beba conhecimento sem limites e participe da Batalha dos Drinkeros.
-            </p>
           </div>
         </div>
       </div>
