@@ -5,6 +5,8 @@ import jackDaniels from '@/assets/landing/bebida-decifrada/jack-daniels-degustac
 import bebidaCover from '@/assets/landing/bebida-decifrada/cover.jpg';
 import workshopVsl from '@/assets/landing/workshop/vsl.mp4';
 import workshopCover from '@/assets/landing/workshop/aula-01.jpg';
+import xaropesVideo from '@/assets/landing/xaropes/clipe-xaropes-artesanais.mov';
+import batalhaLogo from '@/assets/logotipo-batalha-dos-drinkeros-branco.png';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserPlan } from '@/hooks/useUserPlan';
