@@ -14,9 +14,11 @@ interface Props {
 
 export const BatalhaIntro: React.FC<Props> = ({ onFinish, initialStage = 'loading', showCloseButton = false, persistOnFinish = true }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const explainerVideoRef = useRef<HTMLVideoElement>(null);
   const [stage, setStage] = useState<'loading' | 'video' | 'explainer'>(initialStage);
   const [showSkip, setShowSkip] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [explainerVideoExpanded, setExplainerVideoExpanded] = useState(false);
 
   const showExplainer = () => {
     const v = videoRef.current;
