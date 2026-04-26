@@ -4,23 +4,45 @@ import { useBatalhaFeed, useBatalhaMyPoints, tierColor } from '@/hooks/useBatalh
 import { BatalhaIntro, hasSeenBatalhaIntro } from '@/components/user/BatalhaIntro';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Star, Plus, Trophy, Loader2 } from 'lucide-react';
+import { Star, Plus, Trophy, Loader2, HelpCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 const UserBatalha: React.FC = () => {
   const { data: feed, isLoading } = useBatalhaFeed();
   const { data: myPoints } = useBatalhaMyPoints();
   const [showIntro, setShowIntro] = useState(() => !hasSeenBatalhaIntro());
+  const [showExplainer, setShowExplainer] = useState(false);
 
   if (showIntro) {
     return <BatalhaIntro onFinish={() => setShowIntro(false)} />;
   }
 
+  if (showExplainer) {
+    return (
+      <BatalhaIntro
+        initialStage="explainer"
+        showCloseButton
+        persistOnFinish={false}
+        onFinish={() => setShowExplainer(false)}
+      />
+    );
+  }
+
   return (
     <div className="container mx-auto max-w-3xl py-6 px-4 pb-24 md:pb-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Batalha Drinkeros</h1>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">Batalha dos Drinkeros</h1>
+            <button
+              type="button"
+              onClick={() => setShowExplainer(true)}
+              aria-label="Como funciona a Batalha"
+              className="h-7 w-7 rounded-full bg-muted hover:bg-muted/70 text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors shrink-0"
+            >
+              <HelpCircle className="h-4 w-4" />
+            </button>
+          </div>
           <p className="text-muted-foreground text-sm">Compartilhe receitas e vote nas favoritas.</p>
         </div>
         <Button asChild size="sm">
