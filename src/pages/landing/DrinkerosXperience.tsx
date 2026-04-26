@@ -178,7 +178,7 @@ const DrinkerosXperience: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0b0b0d] text-white overflow-x-hidden">
       {!isVip && (
-        <VipFloatingBanner watchTargetId="dx-matricule-cta" basePrice={basePrice} />
+        <VipFloatingBanner watchTargetId="dx-matricule-cta" basePrice={basePrice} productName="Drinkeros Xperience" />
       )}
       {/* Animação do gradiente do hero */}
       <style>{`

@@ -8,6 +8,8 @@ interface VipFloatingBannerProps {
   /** ID do elemento "Matricule-se" que dispara a contagem */
   watchTargetId: string;
   basePrice: number;
+  /** Nome do curso/produto exibido no banner para dar contexto ao desconto. */
+  productName?: string;
   /** Delay em ms após visualização do CTA. Default 5000. */
   delayMs?: number;
 }
@@ -17,6 +19,7 @@ const STORAGE_KEY_PREFIX = 'vipFloatingDismissed:';
 const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
   watchTargetId,
   basePrice,
+  productName,
   delayMs = 5000,
 }) => {
   const [visible, setVisible] = useState(false);
@@ -93,14 +96,22 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
             <span className="block text-[10px] font-extrabold tracking-[0.18em] uppercase text-yellow-300 mb-0.5">
               Oferta VIP · {VIP_DISCOUNT_PERCENT}% OFF
             </span>
+            {productName && (
+              <p className="text-white/95 text-[11px] leading-tight mb-0.5">
+                Assinantes VIP pagam no <strong className="text-white">{productName}</strong>
+              </p>
+            )}
             <p className="text-white text-sm leading-snug">
-              Por apenas{' '}
+              apenas{' '}
               <strong className="text-yellow-300 text-base">{formatBRL(vipPrice)}</strong>{' '}
               <span className="text-white/80 text-xs">
                 (de <span className="line-through">{formatBRL(basePrice)}</span>)
               </span>
             </p>
-            <p className="mt-0.5 text-[11px] text-white/85">Toque e veja a oferta →</p>
+            <p className="mt-0.5 text-[11px] text-white/90 flex items-center gap-1">
+              Toque e veja a oferta
+              <span aria-hidden className="inline-block animate-wiggle-x" style={{ ['--wiggle-amp' as any]: '4px' }}>→</span>
+            </p>
           </div>
         </div>
       </Link>
