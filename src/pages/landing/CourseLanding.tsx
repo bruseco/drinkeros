@@ -82,6 +82,7 @@ export interface CourseLandingProps {
   tagline: string;          // headline do hero
   subheadline: string;      // texto secundário
   heroBadge?: string;       // ex: 'COM TOM OLIVEIRA'
+  heroBadgeClassName?: string;
   heroVideoUrl?: string;    // YouTube embed ou mp4
   heroVideoAspect?: 'video' | 'square';
   ctaHero: string;          // texto do botão do hero
@@ -148,6 +149,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   tagline,
   subheadline,
   heroBadge,
+  heroBadgeClassName,
   heroVideoUrl,
   heroVideoAspect = 'video',
   ctaHero,
@@ -431,7 +433,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
             )
           ) : null}
           {heroBadge && (
-            <p className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase text-white/70 mb-2">
+            <p className={`text-xs sm:text-sm font-bold tracking-[0.3em] uppercase mb-2 ${heroBadgeClassName ?? 'text-white/70'}`}>
               {heroBadge}
             </p>
           )}
