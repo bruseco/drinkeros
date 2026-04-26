@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, ChevronRight, Package, Camera, Crown } from 'lucide-react';
@@ -23,6 +24,8 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
   const [phone, setPhone] = useState('');
   const [cpf, setCpf] = useState('');
   const [bio, setBio] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [gender, setGender] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [cpfLocked, setCpfLocked] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -39,9 +42,11 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
   useEffect(() => {
     const fetchExtra = async () => {
       if (!user) return;
-      const { data } = await supabase.from('profiles').select('phone, cpf, bio').eq('user_id', user.id).single();
+      const { data } = await supabase.from('profiles').select('phone, cpf, bio, birth_date, gender').eq('user_id', user.id).single();
       if (data?.phone) setPhone(data.phone);
       if (data?.bio) setBio(data.bio);
+      if ((data as any)?.birth_date) setBirthDate((data as any).birth_date);
+      if ((data as any)?.gender) setGender((data as any).gender);
       if (data?.cpf) {
         const d = data.cpf;
         setCpf(d.length === 11 ? `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}` : d);
@@ -57,11 +62,13 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
       fullName.trim() &&
       phone.trim() &&
       bio.trim() &&
+      birthDate &&
+      gender &&
       cpf.replace(/\D/g, '').length === 11 &&
       avatarUrl
     );
     onCompletenessChange(complete);
-  }, [fullName, phone, bio, cpf, avatarUrl, onCompletenessChange]);
+  }, [fullName, phone, bio, birthDate, gender, cpf, avatarUrl, onCompletenessChange]);
 
   const handleFilePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -98,7 +105,13 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
     if (!user) return;
     setSaving(true);
     try {
-      const updateData: Record<string, any> = { full_name: fullName.trim(), phone: phone.trim() || null, bio: bio.trim() || null };
+      const updateData: Record<string, any> = {
+        full_name: fullName.trim(),
+        phone: phone.trim() || null,
+        bio: bio.trim() || null,
+        birth_date: birthDate || null,
+        gender: gender || null,
+      };
       if (!cpfLocked && cpf.replace(/\D/g, '').length === 11) updateData.cpf = cpf.replace(/\D/g, '');
       const { error } = await supabase.from('profiles').update(updateData).eq('user_id', user.id);
       if (error) throw error;
@@ -144,6 +157,31 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
       <div className="space-y-2">
         <Label htmlFor="phone">Telefone</Label>
         <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(00) 00000-0000" />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <Label htmlFor="birthDate">Data de nascimento</Label>
+          <Input
+            id="birthDate"
+            type="date"
+            value={birthDate}
+            onChange={(e) => setBirthDate(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="gender">Sexo</Label>
+          <Select value={gender} onValueChange={setGender}>
+            <SelectTrigger id="gender">
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="masculino">Masculino</SelectItem>
+              <SelectItem value="feminino">Feminino</SelectItem>
+              <SelectItem value="outro">Outro</SelectItem>
+              <SelectItem value="prefiro_nao_dizer">Prefiro não dizer</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <div className="space-y-2">
         <Label htmlFor="cpf">CPF</Label>
