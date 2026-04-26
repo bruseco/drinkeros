@@ -30,7 +30,7 @@ const RelatedRecipesSection: React.FC<Props> = ({ title, recipes, isLockedForUse
       <div className="grid grid-cols-2 gap-3">
         {shown.map((recipe) => {
           const isLocked = isLockedForUser && isVipOnlyCharacteristic(recipe.characteristics);
-          const target = isLocked ? '/vip' : `/app/receita/${(recipe as any).slug || recipe.id}`;
+          const target = isLocked ? '/clube' : `/app/receita/${(recipe as any).slug || recipe.id}`;
           return (
             <Link key={recipe.id} to={target}>
               <div className="group overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative">
@@ -51,7 +51,7 @@ const RelatedRecipesSection: React.FC<Props> = ({ title, recipes, isLockedForUse
                           <Lock className="h-5 w-5 text-white" />
                         </div>
                         <span className="rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-lg">
-                          Exclusivo VIP
+                          Exclusivo do Clube
                         </span>
                       </div>
                     )}

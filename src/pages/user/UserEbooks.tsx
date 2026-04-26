@@ -102,7 +102,7 @@ const UserEbooks: React.FC = () => {
                   {expired ? (
                     <Button size="sm" className="bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:from-purple-500 hover:to-fuchsia-400 text-white">
                       <Crown className="mr-2 h-4 w-4" />
-                      Renovar com VIP
+                      Renovar no Clube
                     </Button>
                   ) : canDownload ? (
                     <Button size="sm">
@@ -119,10 +119,10 @@ const UserEbooks: React.FC = () => {
             const wrapperClass =
               'flex flex-col items-center w-full max-w-[390px] mx-auto cursor-pointer transition-transform active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl';
 
-            // Para expirados, sempre vai para o /vip
+            // Para expirados, sempre vai para o /clube
             if (expired) {
               return (
-                <Link key={ebook.id} to="/vip" className={wrapperClass} aria-label={`${ebook.name} — Renovar com VIP`}>
+                <Link key={ebook.id} to="/clube" className={wrapperClass} aria-label={`${ebook.name} — Renovar no Clube`}>
                   {cardInner}
                 </Link>
               );
