@@ -95,6 +95,10 @@ export interface CourseLandingProps {
   logoClassName?: string;
   /** Classe extra para a tagline (ex: cor customizada). */
   taglineClassName?: string;
+  /** Renderiza a subheadline abaixo do vídeo (e não acima). */
+  subheadlineBelowVideo?: boolean;
+  /** Classe extra para o container do logo (ex: 'mb-2 -mt-4'). */
+  logoWrapperClassName?: string;
   /** Foto do professor — exibida no hero abaixo do CTA. */
   instructorSrc?: string;
   /** Nome do professor — legenda abaixo da foto. */
