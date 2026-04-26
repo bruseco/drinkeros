@@ -390,7 +390,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
           </p>
 
           {heroVideoUrl && (
-            <div className={`w-full ${heroVideoAspect === 'square' ? 'max-w-md aspect-square' : 'max-w-xl aspect-video'} mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-6 bg-black`}>
+            <div className={`w-[70%] sm:w-full ${heroVideoAspect === 'square' ? 'max-w-md aspect-square' : 'max-w-xl aspect-video'} mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-6 bg-black`}>
               {isYoutube ? (
                 <iframe
                   src={heroVideoUrl}
