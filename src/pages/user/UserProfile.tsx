@@ -161,6 +161,14 @@ const ProfileDataSection: React.FC = () => {
         <Save className="mr-2 h-4 w-4" />
         {saving ? 'Salvando...' : 'Salvar Dados'}
       </Button>
+
+      <AvatarCropDialog
+        open={!!cropSrc}
+        imageSrc={cropSrc}
+        onClose={() => setCropSrc(null)}
+        onConfirm={handleCroppedUpload}
+        saving={uploadingAvatar}
+      />
     </div>
   );
 };
