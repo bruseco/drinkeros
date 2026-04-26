@@ -33,6 +33,9 @@ import learnBebidas from '@/assets/landing/classicos/learn-bebidas.jpg';
 import learnCuriosidades from '@/assets/landing/classicos/learn-curiosidades.jpg';
 import learnClassicos from '@/assets/landing/classicos/learn-classicos.jpg';
 import heroVideo from '@/assets/landing/classicos/hero-video.mp4';
+import bonusVip from '@/assets/landing/classicos/bonus-vip.jpg';
+import bonusXaropes from '@/assets/landing/classicos/bonus-xaropes.jpg';
+import bonusBebidaDecifrada from '@/assets/landing/classicos/bonus-bebida-decifrada.jpg';
 
 // Paleta: verde musgo → verde bandeira (estrutura) + dourado profundo (amarelo + marrom) nos CTAs/ícones
 const theme: CourseTheme = {
@@ -63,9 +66,9 @@ const profiles: ProfileItem[] = [
 ];
 
 const bonus: BonusItem[] = [
-  { title: 'Acesso VIP por 1 Ano', description: 'Acesso completo ao Clube VIP Drinkeros por 12 meses: app com mais de 1.000 receitas, conteúdos exclusivos e benefícios premium.', originalPrice: 'R$ 247,00' },
-  { title: 'Mais de 40 receitas de Xaropes', description: 'Receituário exclusivo de xaropes artesanais para gerar economia e elevar seus drinks.' },
-  { title: 'Minissérie Bebida Decifrada', description: '6 episódios contando curiosidades das bebidas mais famosas (Jack Daniels, Amarula, Absolut e mais), com receitas exclusivas.', originalPrice: 'R$ 97,00' },
+  { title: 'Acesso VIP por 1 Ano', description: 'Acesso completo ao Clube VIP Drinkeros por 12 meses: app com mais de 1.000 receitas, conteúdos exclusivos e benefícios premium.', originalPrice: 'R$ 247,00', imageSrc: bonusVip },
+  { title: 'Mais de 40 receitas de Xaropes', description: 'Receituário exclusivo de xaropes artesanais para gerar economia e elevar seus drinks.', imageSrc: bonusXaropes },
+  { title: 'Minissérie Bebida Decifrada', description: '6 episódios contando curiosidades das bebidas mais famosas (Jack Daniels, Amarula, Absolut e mais), com receitas exclusivas.', originalPrice: 'R$ 97,00', imageSrc: bonusBebidaDecifrada },
 ];
 
 const faq: FaqItem[] = [
