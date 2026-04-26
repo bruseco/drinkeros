@@ -143,6 +143,8 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   whatsappPhone = '5548991601025',
   logoSrc,
   logoBgSrc,
+  logoClassName,
+  taglineClassName,
   instructorSrc,
   instructorName,
 }) => {
