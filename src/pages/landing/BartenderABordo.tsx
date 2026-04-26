@@ -100,6 +100,7 @@ const BartenderABordo: React.FC = () => (
     logoClassName="h-52 sm:h-72"
     heroBadge="Com Rick Souza · 15+ anos em cruzeiros"
     heroVideoUrl={heroVideo}
+    heroVideoAspect="square"
     tagline="Viaje o mundo, ganhe em dólar e viva momentos incríveis."
     taglineClassName="text-yellow-400 drop-shadow-[0_2px_8px_rgba(250,204,21,0.35)]"
     subheadline="Saiba todos os detalhes para ser contratado em cruzeiros internacionais com quem viveu isso por mais de 15 anos."
