@@ -429,6 +429,12 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
             </div>
           )}
 
+          {subheadlineBelowVideo && (
+            <p className="text-sm sm:text-base text-white/80 mb-6 max-w-3xl mx-auto">
+              {subheadline}
+            </p>
+          )}
+
           <div className="flex justify-center">
             <CTAButton size="lg">{ctaHero}</CTAButton>
           </div>
