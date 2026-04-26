@@ -41,6 +41,7 @@ import learnCarreira from '@/assets/landing/mix/learn-carreira.jpg';
 import learnHospitalidade from '@/assets/landing/mix/learn-hospitalidade.jpg';
 import learnMiseEnPlace from '@/assets/landing/mix/learn-miseenplace.jpg';
 import learnPrecificacao from '@/assets/landing/mix/learn-precificacao.jpg';
+import heroVideo from '@/assets/landing/mixologia/hero-video.mp4';
 
 // Paleta: roxo + azul (cores do logotipo Mixologia Avançada)
 const theme: CourseTheme = {
@@ -109,11 +110,13 @@ const MixologiaAvancada: React.FC = () => (
     logoClassName="h-40 sm:h-56"
     instructorSrc={instructor}
     instructorName="Tom Oliveira"
-    heroVideoUrl="https://www.youtube.com/embed/QFvnDgPX9jc?rel=0&playsinline=1"
+    heroVideoUrl={heroVideo}
+    heroVideoAspect="square"
     heroBadge="Com Tom Oliveira · 20+ anos de experiência"
     tagline="Domine os segredos da mixologia e aumente em até 70% o faturamento do seu bar."
     taglineClassName="text-[#06b6d4]"
     subheadline="Aprenda técnicas avançadas, famílias de coquetéis, produção e hospitalidade com quem já conquistou prêmios nacionais e formou milhares de profissionais."
+    subheadlineBelowVideo
     ctaHero="QUERO ELEVAR MEU NÍVEL"
     theme={theme}
     fallbackPrice={797}
