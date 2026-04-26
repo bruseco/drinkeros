@@ -34,6 +34,14 @@ const VipLanding: React.FC = () => {
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleClose = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    if (isClosing) return;
+    setIsClosing(true);
+    setTimeout(() => navigate(-1), 280);
+  };
 
   // Trata retorno do Stripe Checkout (mantém o param "vip" por compatibilidade do webhook)
   useEffect(() => {
