@@ -98,6 +98,18 @@ const IngredientesArtesanais: React.FC = () => (
     profiles={profiles}
     testimonials={[{ src: dep1 }, { src: dep2 }, { src: dep3 }]}
     guaranteeDays={15}
+    aboutInstructor={{
+      name: 'Bruno Abreu',
+      photoSrc: instructor,
+      title: 'Quem é o seu',
+      paragraphs: [
+        'Fundador da Drinkeros, o maior canal de receitas de drinks em vídeo da América Latina.',
+        'Bruno trabalha com desenvolvimento de projetos para internet desde seus 12 anos de idade — é web-designer, editor de vídeo, roteirista, humorista e drinkero.',
+        'Um completo apaixonado por drinks, que transformou seu aprendizado em uma experiência online única e inovadora.',
+        'O canal Drinkeros possui mais de 6 milhões de seguidores em toda América Latina e já conta com mais de 2 mil receitas criadas utilizando seu Método Áureo das proporções dos drinks.',
+        'Em 2020, Bruno criou o curso de drinks mais divertido da internet — o Drinkeros Xperience, que hoje já certificou mais de 11.000 alunos pelo mundo.',
+      ],
+    }}
     offerSummary="Produza seus próprios xaropes, bitters, infusões, shrubs e cordiais com qualidade de bar premium.
 Aprenda receitas testadas, técnicas de conservação e como agregar valor (e margem) à sua carta de drinks.
 Ideal para bartenders, donos de bar e entusiastas que querem assinar cada drink com identidade própria.
