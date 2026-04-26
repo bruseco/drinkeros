@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useTriggerRedirect } from "@/components/TriggerRedirect";
+import ScrollToTop from "@/components/ScrollToTop";
 
 // Public pages
 import Login from "./pages/Login";
@@ -104,6 +105,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <ScrollToTop />
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<RootRedirect />} />
