@@ -9,6 +9,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
+import vipLogo from '@/assets/logotipo-assinante-vip.png';
 
 const VipLanding: React.FC = () => {
   const { user } = useAuth();
@@ -94,13 +95,13 @@ const VipLanding: React.FC = () => {
             <Sparkles className="h-3.5 w-3.5" />
             Oferta especial
           </div>
-          <h1 className="text-5xl md:text-7xl font-black leading-none">
-            <span className="bg-gradient-to-r from-purple-300 via-fuchsia-300 to-yellow-200 bg-clip-text text-transparent">
-              Vire VIP
-            </span>
-            <br />
-            <span className="text-white">e desbloqueie</span>
-            <br />
+          <img
+            src={vipLogo}
+            alt="Assinante VIP"
+            className="mx-auto h-40 md:h-56 object-contain drop-shadow-[0_0_30px_rgba(168,85,247,0.55)]"
+          />
+          <h1 className="text-4xl md:text-6xl font-black leading-none">
+            <span className="text-white">Desbloqueie</span>{' '}
             <span className="bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">
               tudo
             </span>
@@ -114,8 +115,8 @@ const VipLanding: React.FC = () => {
         <div className="relative max-w-md mx-auto mb-16">
           <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-yellow-400 rounded-3xl blur opacity-75 animate-pulse" />
           <div className="relative bg-black rounded-3xl p-8 border border-purple-500/30">
-            <div className="flex items-center justify-center mb-4">
-              <Crown className="h-12 w-12 text-yellow-400" />
+            <div className="flex items-center justify-center mb-2">
+              <img src={vipLogo} alt="VIP" className="h-20 object-contain" />
             </div>
             <h2 className="text-center text-2xl font-bold mb-2">Plano VIP Anual</h2>
             <div className="text-center mb-6">
