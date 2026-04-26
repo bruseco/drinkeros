@@ -22,15 +22,16 @@ import CourseLanding, {
 } from './CourseLanding';
 
 import instructor from '@/assets/landing/classicos/instructor.jpg';
+import logo from '@/assets/landing/classicos/logo.png';
 
-// Paleta: âmbar/dourado clássico (whisky / bourbon)
+// Paleta: verde musgo → verde bandeira (com acento dourado para CTAs)
 const theme: CourseTheme = {
-  primary: '#f59e0b',
-  secondary: '#d97706',
-  accent: '#fde047',
-  glow1: 'rgba(245, 158, 11, 0.55)',
-  glow2: 'rgba(217, 119, 6, 0.50)',
-  glow3: 'rgba(253, 224, 71, 0.30)',
+  primary: '#4a5d3a',     // verde musgo
+  secondary: '#0f5132',   // verde bandeira
+  accent: '#d4a017',      // dourado clássico (CTAs)
+  glow1: 'rgba(74, 93, 58, 0.55)',
+  glow2: 'rgba(15, 81, 50, 0.55)',
+  glow3: 'rgba(212, 160, 23, 0.30)',
 };
 
 const learnItems: LearnItem[] = [
@@ -69,12 +70,33 @@ const faq: FaqItem[] = [
   { q: 'Ainda tenho dúvida, o que faço?', a: 'Fale com nossa equipe pelo WhatsApp ou pelo e-mail suporte@drinkeros.com.br.' },
 ];
 
+const aboutInstructor = {
+  name: 'Rand Bartender',
+  photoSrc: instructor,
+  title: 'Quem é o seu professor?',
+  paragraphs: [
+    'Rand Bartender é um dos profissionais que mais cresce no mercado de coquetelaria nacional. Com anos de bar, eventos e bancadas, transformou a paixão pelos clássicos em método — ensinando do básico ao avançado, da Vodka ao Bourbon, da Caipirinha ao Negroni.',
+    'Apaixonado por destilados e suas histórias, Rand acredita que entender a bebida é o que separa um bartender comum de um grande bartender. Por isso, cada aula é construída para você dominar a técnica, a teoria e a criatividade por trás de cada drink.',
+    'No curso Clássicos & Destilados você aprende com quem vive a coquetelaria todos os dias e está disposto a compartilhar tudo o que sabe — de forma divertida, interativa e no estilo Netflix.',
+  ],
+  credentials: [
+    'Bartender profissional em atividade',
+    'Especialista em coquetelaria clássica',
+    'Mentor de novos bartenders no Brasil',
+    'Criador de conteúdo Drinkeros',
+  ],
+};
+
 const ClassicosDestilados: React.FC = () => (
   <CourseLanding
     slug="classicos-destilados"
     brand="Clássicos & Destilados"
     instructorSrc={instructor}
     instructorName="Rand Bartender"
+    logoSrc={logo}
+    logoClassName="h-44 sm:h-60"
+    logoWrapperClassName="-mt-4 sm:-mt-6 mb-2"
+    titleFontClassName="[font-family:'Playfair_Display',serif] tracking-tight"
     heroBadge="Com Rand Bartender"
     tagline="Aprenda coquetelaria com quem está crescendo a cada dia nesse mercado."
     subheadline="Do básico ao avançado, da Vodka ao Bourbon, da Caipirinha ao Negroni. Divertido e interativo, no estilo Netflix."
@@ -87,6 +109,7 @@ const ClassicosDestilados: React.FC = () => (
     profiles={profiles}
     bonusTitle="3 BÔNUS exclusivos"
     bonus={bonus}
+    aboutInstructor={aboutInstructor}
     guaranteeDays={15}
     faq={faq}
   />
