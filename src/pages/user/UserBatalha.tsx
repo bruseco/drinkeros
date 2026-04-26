@@ -17,19 +17,16 @@ const UserBatalha: React.FC = () => {
     return <BatalhaIntro onFinish={() => setShowIntro(false)} />;
   }
 
-  if (showExplainer) {
-    return (
-      <BatalhaIntro
-        initialStage="explainer"
-        showCloseButton
-        persistOnFinish={false}
-        onFinish={() => setShowExplainer(false)}
-      />
-    );
-  }
-
   return (
     <div className="container mx-auto max-w-3xl py-6 px-4 pb-24 md:pb-6 space-y-4">
+      {showExplainer && (
+        <BatalhaIntro
+          initialStage="explainer"
+          showCloseButton
+          persistOnFinish={false}
+          onFinish={() => setShowExplainer(false)}
+        />
+      )}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
