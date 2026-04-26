@@ -34,6 +34,34 @@ export const UserSidebar: React.FC = () => {
           const isActive =
             location.pathname === item.href || location.pathname.startsWith(item.href + '/');
 
+          const content = (
+            <>
+              {item.img ? (
+                <img src={isActive ? item.imgActive : item.img} alt="" className="h-5 w-5 shrink-0 object-contain" />
+              ) : (
+                <item.icon className="h-5 w-5 shrink-0" />
+              )}
+              <span>{item.label}</span>
+              {item.comingSoon && (
+                <span className="ml-auto text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-lime-400 text-lime-950">
+                  Em breve
+                </span>
+              )}
+            </>
+          );
+
+          if (item.comingSoon) {
+            return (
+              <div
+                key={item.href}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground/60 cursor-not-allowed"
+                aria-disabled="true"
+              >
+                {content}
+              </div>
+            );
+          }
+
           return (
             <Link
               key={item.href}
@@ -45,12 +73,7 @@ export const UserSidebar: React.FC = () => {
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               )}
             >
-              {item.img ? (
-                <img src={isActive ? item.imgActive : item.img} alt="" className="h-5 w-5 shrink-0 object-contain" />
-              ) : (
-                <item.icon className="h-5 w-5 shrink-0" />
-              )}
-              <span>{item.label}</span>
+              {content}
             </Link>
           );
         })}
