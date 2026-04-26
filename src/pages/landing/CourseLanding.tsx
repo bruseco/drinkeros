@@ -164,6 +164,8 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   logoBgSrc,
   logoClassName,
   taglineClassName,
+  subheadlineBelowVideo = false,
+  logoWrapperClassName,
   instructorSrc,
   instructorName,
   aboutInstructor,
