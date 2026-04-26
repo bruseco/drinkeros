@@ -28,15 +28,20 @@ serve(async (req) => {
     );
 
     const table = product_type === "course" ? "courses" : "ebooks";
+    // ebooks não possui a coluna is_available_for_sale; só selecionamos quando aplicável
+    const baseCols = "id, name, slug, price, stripe_price_id, stripe_product_id, cover_image_url, description";
+    const selectCols = product_type === "course" ? `${baseCols}, is_available_for_sale` : baseCols;
     const { data: product, error: productErr } = await supabase
       .from(table)
-      .select("id, name, slug, price, stripe_price_id, stripe_product_id, is_available_for_sale, cover_image_url, description")
+      .select(selectCols)
       .eq("slug", slug)
       .maybeSingle();
     if (productErr || !product) throw new Error("Produto não encontrado");
-    if (!(product as any).is_available_for_sale) throw new Error("Produto não está disponível para venda");
-    if (!(product as any).stripe_price_id) {
-      throw new Error("Produto ainda não foi sincronizado com Stripe");
+    if (product_type === "course" && !(product as any).is_available_for_sale) {
+      throw new Error("Produto não está disponível para venda");
+    }
+    if (!(product as any).price || Number((product as any).price) <= 0) {
+      throw new Error("Produto sem preço configurado");
     }
 
     // Tenta identificar usuário logado (opcional)
@@ -63,6 +68,31 @@ serve(async (req) => {
     }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+
+    // Sincroniza produto/preço com Stripe sob demanda (ex.: ebooks sem stripe_price_id)
+    if (!(product as any).stripe_price_id) {
+      let stripeProductId = (product as any).stripe_product_id as string | null;
+      if (!stripeProductId) {
+        const created = await stripe.products.create({
+          name: (product as any).name,
+          description: (product as any).description ?? undefined,
+          images: (product as any).cover_image_url ? [(product as any).cover_image_url] : undefined,
+          metadata: { source_product_id: (product as any).id, source_table: table },
+        });
+        stripeProductId = created.id;
+      }
+      const priceObj = await stripe.prices.create({
+        product: stripeProductId!,
+        currency: "brl",
+        unit_amount: Math.round(Number((product as any).price) * 100),
+      });
+      await supabase.from(table).update({
+        stripe_product_id: stripeProductId,
+        stripe_price_id: priceObj.id,
+      }).eq("id", (product as any).id);
+      (product as any).stripe_product_id = stripeProductId;
+      (product as any).stripe_price_id = priceObj.id;
+    }
 
     let customerId: string | undefined;
     if (userEmail) {

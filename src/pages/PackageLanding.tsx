@@ -86,8 +86,8 @@ const PackageLanding: React.FC = () => {
     return <Navigate to="/404" replace />;
   }
 
-  const sellable = (isCourse || isEbook) && (item as any).is_available_for_sale && (item as any).price;
-  const hasStripePrice = (isCourse || isEbook) && !!(item as any).stripe_price_id;
+  const sellable = (isCourse && (item as any).is_available_for_sale && (item as any).price) || (isEbook && (item as any).price);
+  const hasStripePrice = (isCourse || isEbook) && (!!(item as any).stripe_price_id || (isEbook && !!(item as any).price));
   const price = (item as any).price ? Number((item as any).price) : null;
   const finalPrice = price !== null && isVip ? applyVipDiscount(price) : price;
   const formattedPrice = finalPrice !== null ? formatBRL(finalPrice) : null;
