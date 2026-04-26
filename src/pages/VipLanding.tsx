@@ -368,11 +368,48 @@ const VipLanding: React.FC = () => {
                 </p>
               </div>
             </div>
+
+            {/* Bônus 3 - Batalha dos Drinkeros */}
+            <div className="rounded-2xl bg-gradient-to-br from-yellow-900/30 to-black border border-yellow-500/30 overflow-hidden p-6">
+              <div className="w-[70%] sm:w-full max-w-md aspect-square mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-5 bg-black">
+                <VideoWithPoster src="/vinheta-batalha-dos-drinkeros-web.mp4" poster="/batalha-video-poster.jpg" alt="Batalha dos Drinkeros" />
+              </div>
+              <div className="text-center max-w-xl mx-auto">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Trophy className="h-5 w-5 text-yellow-300" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-yellow-300">Bônus 3</span>
+                </div>
+                <h3 className="text-2xl font-black mb-2">Batalha dos Drinkeros</h3>
+                <p className="text-sm text-purple-200 leading-snug">
+                  Toda semana, sócios do Clube competem com seus drinks autorais.
+                  Os <strong className="text-white">melhores do mês</strong> ganham destaque e disputam o título de
+                  <strong className="text-white"> melhor drinker do ano</strong>.
+                </p>
+              </div>
+            </div>
+
+            {/* Bônus 4 - Xaropes Artesanais */}
+            <div className="rounded-2xl bg-gradient-to-br from-purple-900/40 to-black border border-purple-500/30 overflow-hidden p-6">
+              <div className="w-[70%] sm:w-full max-w-md aspect-square mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-5 bg-black">
+                <VideoWithPoster src={xaropesVideo} poster={workshopCover} alt="Xaropes Artesanais" />
+              </div>
+              <div className="text-center max-w-xl mx-auto">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <GlassWater className="h-5 w-5 text-yellow-300" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-yellow-300">Bônus 4</span>
+                </div>
+                <h3 className="text-2xl font-black mb-2">Xaropes Artesanais</h3>
+                <p className="text-sm text-purple-200 leading-snug">
+                  Aprenda a fazer os <strong className="text-white">xaropes que dão alma aos seus drinks</strong>.
+                  Receitas exclusivas e fáceis pra você levar seus coquetéis pra outro nível.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Pricing Card — fechamento da página */}
-        <div className="relative max-w-md mx-auto mb-16">
+        <div id="clube-pricing" className="relative max-w-md mx-auto mb-16 scroll-mt-6">
           <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-yellow-400 rounded-3xl blur opacity-60" />
           <div className="relative bg-black rounded-3xl p-8 border border-purple-500/30">
             <h2 className="text-center text-3xl md:text-4xl font-black mb-3 viplanding-gold-text">
