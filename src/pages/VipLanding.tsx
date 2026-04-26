@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import { Crown, Check, X, GlassWater, Sparkles, Zap, BookOpen, GraduationCap, Lock, Loader2 } from 'lucide-react';
+import { Crown, Check, X, GlassWater, Sparkles, Zap, BookOpen, GraduationCap, Lock, Loader2, RefreshCw, Gift, PlayCircle, Wand2 } from 'lucide-react';
+import jackDaniels from '@/assets/landing/bebida-decifrada/jack-daniels-degustacao.mp4';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserPlan } from '@/hooks/useUserPlan';
@@ -181,6 +182,93 @@ const VipLanding: React.FC = () => {
               <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span>Acesso ao <strong className="text-white">Bebida Decifrada</strong></span></li>
               <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><GraduationCap className="inline h-3.5 w-3.5 text-yellow-300" /> Cursos com <strong className="text-white">desconto VIP</strong></span></li>
             </ul>
+          </div>
+        </div>
+
+        {/* Reativação de cursos expirados */}
+        <div className="relative max-w-3xl mx-auto mb-12">
+          <div className="rounded-2xl bg-gradient-to-br from-yellow-400/10 to-purple-600/10 border border-yellow-400/30 p-6 md:p-8">
+            <div className="flex items-start gap-4">
+              <div className="shrink-0 rounded-full bg-yellow-400/20 p-3">
+                <RefreshCw className="h-6 w-6 text-yellow-300" />
+              </div>
+              <div>
+                <h3 className="text-xl md:text-2xl font-black mb-2">
+                  Cursos expirados? <span className="text-yellow-300">Reativam na hora.</span>
+                </h3>
+                <p className="text-purple-200 text-sm md:text-base leading-snug">
+                  Qualquer curso, ebook ou pacote que você já comprou e que está expirado
+                  <strong className="text-white"> volta a ficar acessível</strong> assim que você ativa o VIP.
+                  Enquanto a sua assinatura estiver ativa, <strong className="text-white">tudo o que tem prazo continua liberado</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bônus exclusivos */}
+        <div className="max-w-4xl mx-auto mb-16">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 rounded-full bg-yellow-400/10 border border-yellow-400/30 px-4 py-1.5 text-yellow-300 text-xs font-bold uppercase tracking-widest mb-3">
+              <Gift className="h-3.5 w-3.5" />
+              Bônus exclusivos VIP
+            </div>
+            <h2 className="text-3xl md:text-4xl font-black">
+              E ainda leva <span className="bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">esses presentes</span>
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Bônus 1 - Bebida Decifrada */}
+            <div className="rounded-2xl bg-gradient-to-br from-purple-900/40 to-black border border-purple-500/30 overflow-hidden">
+              <div className="aspect-video bg-black relative">
+                <video
+                  src={jackDaniels}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <PlayCircle className="h-5 w-5 text-yellow-300" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-yellow-300">Bônus 1</span>
+                </div>
+                <h3 className="text-xl font-black mb-2">Bebida Decifrada</h3>
+                <p className="text-sm text-purple-200 leading-snug">
+                  Uma minissérie onde você aprende as melhores curiosidades das bebidas mais
+                  famosas do mundo, como <strong className="text-white">Jack Daniels</strong>,{' '}
+                  <strong className="text-white">Tequila José Cuervo</strong>,{' '}
+                  <strong className="text-white">Amarula</strong> e várias outras.
+                </p>
+                <p className="text-xs text-purple-300 mt-3 italic">▶ Assista acima a degustação do Jack Daniels.</p>
+              </div>
+            </div>
+
+            {/* Bônus 2 - Workshop Além dos Clássicos */}
+            <div className="rounded-2xl bg-gradient-to-br from-fuchsia-900/40 to-black border border-fuchsia-500/30 overflow-hidden">
+              <div className="aspect-video bg-gradient-to-br from-fuchsia-600/30 via-purple-700/20 to-yellow-400/10 relative flex items-center justify-center">
+                <div className="text-center px-6">
+                  <Wand2 className="h-12 w-12 text-yellow-300 mx-auto mb-3 drop-shadow-[0_0_20px_rgba(253,224,71,0.5)]" />
+                  <div className="text-2xl font-black leading-tight">Workshop</div>
+                  <div className="text-lg font-light text-purple-200">Além dos Clássicos</div>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <GraduationCap className="h-5 w-5 text-yellow-300" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-yellow-300">Bônus 2</span>
+                </div>
+                <h3 className="text-xl font-black mb-2">Workshop Além dos Clássicos</h3>
+                <p className="text-sm text-purple-200 leading-snug">
+                  Você vai aprender a <strong className="text-white">história dos clássicos mais famosos do mundo</strong>,
+                  entender como foram criados e aprender a{' '}
+                  <strong className="text-white">criar variações</strong> mantendo a mesma estrutura.
+                  Na primeira aula, você aprende os xaropes que serão utilizados nos drinks.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
