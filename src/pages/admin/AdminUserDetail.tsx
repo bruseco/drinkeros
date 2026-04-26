@@ -366,7 +366,7 @@ const AdminUserDetail: React.FC = () => {
       <Dialog open={editVipOpen} onOpenChange={setEditVipOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Alterar validade do VIP</DialogTitle>
+            <DialogTitle>Alterar validade do Sócio do Clube</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 py-2">
             <Label>Nova data de expiração</Label>
