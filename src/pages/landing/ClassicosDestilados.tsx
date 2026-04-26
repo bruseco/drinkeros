@@ -32,6 +32,7 @@ import learnDecoracoes from '@/assets/landing/classicos/learn-decoracoes.jpg';
 import learnBebidas from '@/assets/landing/classicos/learn-bebidas.jpg';
 import learnCuriosidades from '@/assets/landing/classicos/learn-curiosidades.jpg';
 import learnClassicos from '@/assets/landing/classicos/learn-classicos.jpg';
+import heroVideo from '@/assets/landing/classicos/hero-video.mp4';
 
 // Paleta: verde musgo → verde bandeira (estrutura) + dourado profundo (amarelo + marrom) nos CTAs/ícones
 const theme: CourseTheme = {
@@ -108,7 +109,10 @@ const ClassicosDestilados: React.FC = () => (
     titleFontClassName="[font-family:'Playfair_Display',serif] tracking-tight"
     heroBadge="Com Rand Bartender"
     tagline="Aprenda coquetelaria com quem está crescendo a cada dia nesse mercado."
+    taglineClassName="text-[#e8b923] [text-shadow:_0_0_24px_rgba(232,185,35,0.65),_0_0_48px_rgba(232,185,35,0.4)]"
     subheadline="Do básico ao avançado, da Vodka ao Bourbon, da Caipirinha ao Negroni. Divertido e interativo, no estilo Netflix."
+    heroVideoUrl={heroVideo}
+    subheadlineBelowVideo
     ctaHero="MATRICULE-SE AGORA"
     theme={theme}
     fallbackPrice={697}
