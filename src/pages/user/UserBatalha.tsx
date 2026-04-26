@@ -89,7 +89,12 @@ const UserBatalha: React.FC = () => {
             const initial = (r.author_name || 'U').charAt(0).toUpperCase();
             return (
               <Link key={r.id} to={`/app/batalha/receita/${r.id}`}>
-                <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
+                <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full relative">
+                  {r.is_in_battle && (
+                    <span className="absolute top-2 left-2 z-10 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-lime-400 text-lime-950 shadow-md">
+                      Em Batalha
+                    </span>
+                  )}
                   {r.image_url ? (
                     <img src={r.image_url} alt={r.name} className="w-full aspect-video object-cover" />
                   ) : (
