@@ -203,6 +203,14 @@ const UserRecipeDetail: React.FC = () => {
           </div>
         )}
 
+        {related?.isSyrup && related.drinksWithSyrup.length > 0 && (
+          <RelatedRecipesSection
+            title="Drinks com esse xarope"
+            recipes={related.drinksWithSyrup}
+            isLockedForUser={isLockedForUser}
+          />
+        )}
+
         {related?.isSyrup && related.otherSyrups.length > 0 && (
           <RelatedRecipesSection
             title="Veja mais xaropes"

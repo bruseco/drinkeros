@@ -65,7 +65,23 @@ export interface RelatedRecipesResult {
   family: ExclusivePost[];
   similar: ExclusivePost[];
   otherSyrups: ExclusivePost[];
+  drinksWithSyrup: ExclusivePost[];
   isSyrup: boolean;
+}
+
+/**
+ * Extrai termos-chave de um título de xarope para buscar nos ingredientes.
+ * Ex: "Xarope de Maçã Verde" -> ["maca verde", "maca", "verde"]
+ */
+function getSyrupKeywords(title: string): string[] {
+  const tokens = normalize(title)
+    .split(' ')
+    .filter((w) => w.length >= 3 && !STOPWORDS.has(w) && w !== 'xarope');
+  const phrase = tokens.join(' ').trim();
+  const result: string[] = [];
+  if (phrase) result.push(phrase);
+  for (const t of tokens) if (!result.includes(t)) result.push(t);
+  return result;
 }
 
 export function useRelatedRecipes(recipe: ExclusivePost | undefined) {
@@ -74,7 +90,7 @@ export function useRelatedRecipes(recipe: ExclusivePost | undefined) {
     enabled: !!recipe?.id,
     staleTime: 5 * 60 * 1000,
     queryFn: async (): Promise<RelatedRecipesResult> => {
-      if (!recipe) return { family: [], similar: [], otherSyrups: [], isSyrup: false };
+      if (!recipe) return { family: [], similar: [], otherSyrups: [], drinksWithSyrup: [], isSyrup: false };
 
       const { data, error } = await supabase
         .from('exclusive_posts')
@@ -87,10 +103,20 @@ export function useRelatedRecipes(recipe: ExclusivePost | undefined) {
       const all = (data || []) as ExclusivePost[];
       const recipeIsSyrup = isXarope(recipe);
 
-      // If current recipe is a syrup, only return other syrups
+      // If current recipe is a syrup, return other syrups + drinks que usam esse xarope
       if (recipeIsSyrup) {
         const otherSyrups = all.filter((p) => isXarope(p));
-        return { family: [], similar: [], otherSyrups, isSyrup: true };
+        const keywords = getSyrupKeywords(recipe.title);
+        const drinksWithSyrup = keywords.length > 0
+          ? all.filter((p) => {
+              if (isXarope(p)) return false;
+              const ings = (p.ingredients || []).map((i) => normalize(i));
+              return ings.some((ing) =>
+                keywords.some((kw) => ing.includes('xarope') && ing.includes(kw))
+              );
+            })
+          : [];
+        return { family: [], similar: [], otherSyrups, drinksWithSyrup, isSyrup: true };
       }
 
       // Exclude syrups from candidate pool for non-syrup recipes
@@ -137,6 +163,7 @@ export function useRelatedRecipes(recipe: ExclusivePost | undefined) {
         family,
         similar: similar.map((s) => s.post),
         otherSyrups: [],
+        drinksWithSyrup: [],
         isSyrup: false,
       };
     },
