@@ -82,6 +82,7 @@ export interface CourseLandingProps {
   subheadline: string;      // texto secundário
   heroBadge?: string;       // ex: 'COM TOM OLIVEIRA'
   heroVideoUrl?: string;    // YouTube embed ou mp4
+  heroVideoAspect?: 'video' | 'square';
   ctaHero: string;          // texto do botão do hero
   ctaCheckout?: string;     // texto botão final, default: 'MATRICULE-SE! ACESSO INSTANTÂNEO'
   theme: CourseTheme;
@@ -138,6 +139,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   subheadline,
   heroBadge,
   heroVideoUrl,
+  heroVideoAspect = 'video',
   ctaHero,
   ctaCheckout = 'MATRICULE-SE! ACESSO INSTANTÂNEO',
   theme,
@@ -388,7 +390,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
           </p>
 
           {heroVideoUrl && (
-            <div className="w-full max-w-xl mx-auto aspect-video rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-6 bg-black">
+            <div className={`w-full ${heroVideoAspect === 'square' ? 'max-w-md aspect-square' : 'max-w-xl aspect-video'} mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-6 bg-black`}>
               {isYoutube ? (
                 <iframe
                   src={heroVideoUrl}

@@ -29,15 +29,16 @@ import instructor from '@/assets/landing/bar/instructor.jpg';
 import dep1 from '@/assets/landing/bar/dep-1.png';
 import dep2 from '@/assets/landing/bar/dep-2.png';
 import dep3 from '@/assets/landing/bar/dep-3.png';
+import heroVideo from '@/assets/landing/bar/intro.mp4';
 
-// Paleta: azul executivo + dourado (empreendedorismo / eventos premium)
+// Paleta: salmão + pink (vibrante, eventos)
 const theme: CourseTheme = {
-  primary: '#3b82f6',
-  secondary: '#06b6d4',
-  accent: '#facc15',
-  glow1: 'rgba(59, 130, 246, 0.55)',
-  glow2: 'rgba(6, 182, 212, 0.45)',
-  glow3: 'rgba(250, 204, 21, 0.30)',
+  primary: '#fb7185',    // pink/rose
+  secondary: '#fda4af',  // salmão claro
+  accent: '#f9a8d4',     // pink suave
+  glow1: 'rgba(251, 113, 133, 0.55)',
+  glow2: 'rgba(253, 164, 175, 0.45)',
+  glow3: 'rgba(249, 168, 212, 0.30)',
 };
 
 const learnItems: LearnItem[] = [
@@ -102,6 +103,8 @@ const BarParaEventos: React.FC = () => (
     heroBadge="Com Henrique Todeschini · La Mafia Drinkeros"
     tagline="Monte sua empresa de bar para eventos do zero, na sua casa, e comece a faturar alto."
     subheadline="O primeiro e único curso online do Brasil que ensina o passo a passo para abrir e escalar uma empresa de bar para eventos — investindo muito pouco."
+    heroVideoUrl={heroVideo}
+    heroVideoAspect="square"
     ctaHero="QUERO EMPREENDER COM DRINKS"
     theme={theme}
     fallbackPrice={697}
