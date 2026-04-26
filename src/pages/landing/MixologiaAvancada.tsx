@@ -129,6 +129,25 @@ const MixologiaAvancada: React.FC = () => (
     bonus={bonus}
     testimonials={[{ src: dep1 }, { src: dep2 }, { src: dep3 }]}
     guaranteeDays={15}
+    aboutInstructor={{
+      name: 'Tom Oliveira',
+      photoSrc: instructor,
+      title: 'Quem é o seu',
+      paragraphs: [
+        'Tom Oliveira é natural de São Paulo e começou sua trajetória no mundo da coquetelaria em 2005, quando atuou como bartender na Rua Augusta. Desde então, já passou por alguns dos principais bares do Brasil.',
+        'Além de mais de 20 anos de experiência na área da mixologia, o Tom sempre investiu em atualização e aprofundamento — acumulando formações de referência no setor.',
+        'Ele também é um profissional premiado: vice-campeão por duas vezes na etapa nacional do Gin Bombay e campeão nacional do Bacardi Legacy em 2018.',
+        'Atualmente, é proprietário da sua própria empresa de mentoria e consultoria, a Gipsy Cocktails, onde compartilha todo o seu repertório com profissionais e estabelecimentos de todo o país.',
+      ],
+      credentials: [
+        'Mixologia pela ABS',
+        'Bartender profissional pelo "O Bar Virtual"',
+        'Mídias Sociais e gerenciamento de carreiras digitais pelo Bartender Mindset',
+        'Gestão e coquetelaria pelo Mixology News',
+        'Vice-campeão nacional Gin Bombay (2x)',
+        'Campeão nacional Bacardi Legacy 2018',
+      ],
+    }}
     faq={faq}
   />
 );
