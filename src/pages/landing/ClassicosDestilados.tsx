@@ -62,7 +62,7 @@ const profiles: ProfileItem[] = [
 ];
 
 const bonus: BonusItem[] = [
-  { title: 'Clube dos Drinkeros', description: 'Acesso exclusivo ao app com mais de 1.000 receitas para pesquisar e salvar como favoritas.', originalPrice: 'R$ 247,00' },
+  { title: 'Acesso VIP por 1 Ano', description: 'Acesso completo ao Clube VIP Drinkeros por 12 meses: app com mais de 1.000 receitas, conteúdos exclusivos e benefícios premium.', originalPrice: 'R$ 247,00' },
   { title: 'Mais de 40 receitas de Xaropes', description: 'Receituário exclusivo de xaropes artesanais para gerar economia e elevar seus drinks.' },
   { title: 'Minissérie Bebida Decifrada', description: '6 episódios contando curiosidades das bebidas mais famosas (Jack Daniels, Amarula, Absolut e mais), com receitas exclusivas.', originalPrice: 'R$ 97,00' },
 ];
