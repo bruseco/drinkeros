@@ -360,11 +360,21 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                 />
               </div>
             ) : (
-              <img
-                src={logoSrc}
-                alt={brand}
-                className={`mx-auto mb-6 w-auto object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)] ${logoClassName ?? 'h-20 sm:h-28'}`}
-              />
+              <div className="relative mx-auto mb-6 w-fit">
+                <div
+                  aria-hidden
+                  className="absolute inset-0 -m-8 rounded-full pointer-events-none"
+                  style={{
+                    background:
+                      'radial-gradient(circle, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0) 75%)',
+                  }}
+                />
+                <img
+                  src={logoSrc}
+                  alt={brand}
+                  className={`relative w-auto object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)] ${logoClassName ?? 'h-20 sm:h-28'}`}
+                />
+              </div>
             )
           ) : null}
           {heroBadge && (
