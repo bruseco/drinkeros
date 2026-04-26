@@ -57,7 +57,7 @@ export const useRecipeAccessGuard = () => {
       // Xaropes: liberado para qualquer um com acesso pleno (inclui usuários importados com acesso manual)
       if (isVipOnlyCharacteristic(characteristics)) {
         if (hasFullRecipeAccess) return true;
-        navigate('/clube');
+        navigate('/clube', { replace: true, state: { from: '/app/receitas' } });
         return false;
       }
 
@@ -82,7 +82,7 @@ export const useRecipeAccessGuard = () => {
       const count = (countData as number) ?? 0;
 
       if (count >= DAILY_LIMIT) {
-        navigate('/clube');
+        navigate('/clube', { replace: true, state: { from: '/app/receitas' } });
         return false;
       }
 

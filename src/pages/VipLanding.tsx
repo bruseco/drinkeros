@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Crown, Check, X, GlassWater, Sparkles, Zap, BookOpen, GraduationCap, Loader2, RefreshCw, Gift, PlayCircle, Trophy } from 'lucide-react';
 import jackDaniels from '@/assets/landing/bebida-decifrada/jack-daniels-degustacao.mp4';
 import workshopVsl from '@/assets/landing/workshop/vsl.mp4';
@@ -31,6 +31,7 @@ const VipLanding: React.FC = () => {
     },
   });
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -40,7 +41,16 @@ const VipLanding: React.FC = () => {
     e?.preventDefault();
     if (isClosing) return;
     setIsClosing(true);
-    setTimeout(() => navigate(-1), 280);
+    const fromState = (location.state as { from?: string } | null)?.from;
+    setTimeout(() => {
+      // Se veio de uma receita bloqueada (state.from), volta direto pra listagem.
+      // Caso contrário tenta o histórico, com fallback pra /app/receitas.
+      if (fromState) {
+        navigate(fromState, { replace: true });
+      } else {
+        navigate('/app/receitas', { replace: true });
+      }
+    }, 280);
   };
 
   // Trata retorno do Stripe Checkout (mantém o param "vip" por compatibilidade do webhook)

@@ -1,12 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useExclusivePostsPaginated } from '@/hooks/useExclusivePosts';
 import { Loader2, Search, Wine, GlassWater, Users, Citrus, CupSoda, Martini, IceCream, Snowflake, Droplets, Lock, Coffee, Utensils } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useUserPlan } from '@/hooks/useUserPlan';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 import { useRecipeAccessGuard, isVipOnlyCharacteristic } from '@/hooks/useRecipeAccessGuard';
 import { cn } from '@/lib/utils';
@@ -113,8 +116,26 @@ const UserRecipes: React.FC = () => {
   const stickyRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { data: planData } = useUserPlan();
-  const { isVip: hasFullRecipeAccess } = useRecipeAccessGuard();
+  const { isVip: hasFullRecipeAccess, dailyLimit } = useRecipeAccessGuard();
   const isLockedForUser = planData ? !hasFullRecipeAccess : false;
+  const { user } = useAuth();
+
+  // Para usuários free: busca quais receitas já foram vistas hoje + total para saber se o limite estourou
+  const { data: dailyViews } = useQuery({
+    queryKey: ['daily-views-today', user?.id],
+    enabled: !!user?.id && isLockedForUser,
+    queryFn: async () => {
+      const today = new Date().toISOString().split('T')[0];
+      const { data } = await supabase
+        .from('daily_recipe_views')
+        .select('recipe_id')
+        .eq('user_id', user!.id)
+        .eq('view_date', today);
+      const ids = new Set((data ?? []).map((r) => r.recipe_id as string));
+      return { ids, count: ids.size };
+    },
+  });
+  const limitReached = isLockedForUser && (dailyViews?.count ?? 0) >= dailyLimit;
 
 
   useEffect(() => {
@@ -228,7 +249,10 @@ const UserRecipes: React.FC = () => {
           <>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
               {recipes.map((recipe) => {
-                const isLocked = isLockedForUser && isVipOnlyCharacteristic((recipe as any).characteristics);
+                const isVipOnly = isLockedForUser && isVipOnlyCharacteristic((recipe as any).characteristics);
+                const alreadyViewedToday = dailyViews?.ids.has(recipe.id) ?? false;
+                const blockedByLimit = limitReached && !alreadyViewedToday;
+                const isLocked = isVipOnly || blockedByLimit;
                 const target = isLocked ? '/clube' : `/app/receita/${(recipe as any).slug || recipe.id}`;
                 return (
                   <Link key={recipe.id} to={target}>
