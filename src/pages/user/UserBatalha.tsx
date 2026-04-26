@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useClubFeed, useClubMyPoints, tierColor } from '@/hooks/useClub';
+import { useBatalhaFeed, useBatalhaMyPoints, tierColor } from '@/hooks/useBatalha';
 import { BatalhaIntro, hasSeenBatalhaIntro } from '@/components/user/BatalhaIntro';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Star, Plus, Trophy, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
-const UserClub: React.FC = () => {
-  const { data: feed, isLoading } = useClubFeed();
-  const { data: myPoints } = useClubMyPoints();
+const UserBatalha: React.FC = () => {
+  const { data: feed, isLoading } = useBatalhaFeed();
+  const { data: myPoints } = useBatalhaMyPoints();
   const [showIntro, setShowIntro] = useState(() => !hasSeenBatalhaIntro());
 
   if (showIntro) {
@@ -24,7 +24,7 @@ const UserClub: React.FC = () => {
           <p className="text-muted-foreground text-sm">Compartilhe receitas e vote nas favoritas.</p>
         </div>
         <Button asChild size="sm">
-          <Link to="/app/clube/nova"><Plus className="h-4 w-4 mr-1" /> Postar</Link>
+          <Link to="/app/batalha/nova"><Plus className="h-4 w-4 mr-1" /> Postar</Link>
         </Button>
       </div>
 
@@ -40,7 +40,7 @@ const UserClub: React.FC = () => {
               <p className="text-2xl font-bold">{myPoints.points}</p>
             </div>
             <Button asChild variant="secondary" size="sm">
-              <Link to="/app/clube/ranking"><Trophy className="h-4 w-4 mr-1" /> Ranking</Link>
+              <Link to="/app/batalha/ranking"><Trophy className="h-4 w-4 mr-1" /> Ranking</Link>
             </Button>
           </div>
         </Card>
@@ -57,7 +57,7 @@ const UserClub: React.FC = () => {
           {feed.map(r => {
             const initial = (r.author_name || 'U').charAt(0).toUpperCase();
             return (
-              <Link key={r.id} to={`/app/clube/receita/${r.id}`}>
+              <Link key={r.id} to={`/app/batalha/receita/${r.id}`}>
                 <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
                   {r.image_url ? (
                     <img src={r.image_url} alt={r.name} className="w-full aspect-video object-cover" />
@@ -89,4 +89,4 @@ const UserClub: React.FC = () => {
   );
 };
 
-export default UserClub;
+export default UserBatalha;

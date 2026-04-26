@@ -3,7 +3,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Trophy, Star } from 'lucide-react';
-import { useCurrentWinner } from '@/hooks/useClub';
+import { useCurrentWinner } from '@/hooks/useBatalha';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -70,7 +70,7 @@ export const WinnerPopup: React.FC = () => {
           <div className="flex gap-2">
             <Button variant="outline" onClick={handleDismiss} className="flex-1">Fechar</Button>
             <Button asChild className="flex-1">
-              <Link to={`/app/clube/receita/${data.recipe.id}`} onClick={handleDismiss}>Ver receita</Link>
+              <Link to={`/app/batalha/receita/${data.recipe.id}`} onClick={handleDismiss}>Ver receita</Link>
             </Button>
           </div>
         </div>

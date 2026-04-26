@@ -13,7 +13,7 @@ import AutocompleteTagInput from '@/components/admin/AutocompleteTagInput';
 import { useExistingTags } from '@/hooks/useExistingTags';
 import { findCanonicalTag } from '@/lib/normalizeTag';
 
-const UserClubNew: React.FC = () => {
+const UserBatalhaNew: React.FC = () => {
   const { user } = useAuth();
   const nav = useNavigate();
   const { data: existingTags } = useExistingTags();
@@ -85,7 +85,7 @@ const UserClubNew: React.FC = () => {
       });
       if (error) throw error;
       toast.success('Receita publicada! +5 pontos 🎉');
-      nav('/app/clube');
+      nav('/app/batalha');
     } catch (err: any) {
       toast.error('Erro ao publicar: ' + err.message);
     } finally {
@@ -214,4 +214,4 @@ const UserClubNew: React.FC = () => {
   );
 };
 
-export default UserClubNew;
+export default UserBatalhaNew;

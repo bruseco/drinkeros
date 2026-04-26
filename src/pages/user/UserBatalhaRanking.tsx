@@ -1,12 +1,12 @@
 import React from 'react';
-import { useClubRanking, tierColor } from '@/hooks/useClub';
+import { useBatalhaRanking, tierColor } from '@/hooks/useBatalha';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
 import { Trophy, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
-const UserClubRanking: React.FC = () => {
-  const { data, isLoading } = useClubRanking();
+const UserBatalhaRanking: React.FC = () => {
+  const { data, isLoading } = useBatalhaRanking();
   const { user } = useAuth();
 
   return (
@@ -49,4 +49,4 @@ const UserClubRanking: React.FC = () => {
   );
 };
 
-export default UserClubRanking;
+export default UserBatalhaRanking;

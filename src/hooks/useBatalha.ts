@@ -37,7 +37,7 @@ export interface ClubRecipeWithStats {
   author_avatar: string | null;
 }
 
-export const useClubFeed = () => {
+export const useBatalhaFeed = () => {
   const { user } = useAuth();
   return useQuery({
     queryKey: ['club-feed', user?.id],
@@ -78,7 +78,7 @@ export const useClubFeed = () => {
   });
 };
 
-export const useClubRanking = () => {
+export const useBatalhaRanking = () => {
   return useQuery({
     queryKey: ['club-ranking'],
     queryFn: async () => {
@@ -109,7 +109,7 @@ export const useClubRanking = () => {
   });
 };
 
-export const useClubMyPoints = () => {
+export const useBatalhaMyPoints = () => {
   const { user } = useAuth();
   return useQuery({
     queryKey: ['club-my-points', user?.id],
