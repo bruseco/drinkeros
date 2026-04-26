@@ -222,22 +222,18 @@ const VipLanding: React.FC = () => {
 
           {/* Hero */}
           <div className="text-center mb-16 space-y-6 px-4">
-            <div className="inline-flex items-center gap-2 rounded-full bg-yellow-400/10 border border-yellow-400/30 px-4 py-1.5 text-yellow-300 text-xs font-bold uppercase tracking-widest">
-              <Sparkles className="h-3.5 w-3.5" />
-              Oferta especial
-            </div>
-            <img
-              src={clubeLogo}
-              alt="Clube dos Drinkeros"
-              className="mx-auto h-40 md:h-56 object-contain [filter:drop-shadow(0_10px_25px_rgba(0,0,0,0.85))_drop-shadow(0_0_40px_rgba(0,0,0,0.7))]"
-            />
             <h1 className="text-4xl md:text-6xl font-black leading-none">
               <span className="text-white">Seja</span>{' '}
               <span className="bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">
                 sócio
               </span>{' '}
-              <span className="text-white">do clube</span>
+              <span className="text-white">do</span>
             </h1>
+            <img
+              src={clubeLogo}
+              alt="Clube dos Drinkeros"
+              className="mx-auto h-40 md:h-56 object-contain [filter:drop-shadow(0_10px_25px_rgba(0,0,0,0.85))_drop-shadow(0_0_40px_rgba(0,0,0,0.7))]"
+            />
           </div>
         </div>
       </div>
