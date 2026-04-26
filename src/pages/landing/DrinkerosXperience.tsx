@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -14,6 +14,7 @@ import { useUserPlan } from '@/hooks/useUserPlan';
 import { useCourseBySlug } from '@/hooks/useCourses';
 import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
 import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
+import VipFloatingBanner from '@/components/landing/VipFloatingBanner';
 
 // Imagens
 import logo from '@/assets/landing/dx/logo.png';
@@ -110,6 +111,28 @@ const DrinkerosXperience: React.FC = () => {
     }
   }, [searchParams, toast]);
 
+  // Hero video: autoplay muted + unmute na primeira interação
+  const heroVideoRef = useRef<HTMLVideoElement | null>(null);
+  useEffect(() => {
+    let unmuted = false;
+    const unmute = () => {
+      if (unmuted) return;
+      unmuted = true;
+      const v = heroVideoRef.current;
+      if (v) {
+        v.muted = false;
+        v.volume = 1;
+        const p = v.play();
+        if (p && typeof p.catch === 'function') p.catch(() => {});
+      }
+      cleanup();
+    };
+    const events: Array<keyof WindowEventMap> = ['pointerdown', 'touchstart', 'keydown', 'scroll', 'wheel'];
+    const cleanup = () => events.forEach(e => window.removeEventListener(e, unmute));
+    events.forEach(e => window.addEventListener(e, unmute, { passive: true }));
+    return cleanup;
+  }, []);
+
   // Preço (com fallback para o valor da página antiga: R$ 497)
   const dbPrice = (course as any)?.price ? Number((course as any).price) : null;
   const basePrice = dbPrice ?? 497;
@@ -154,6 +177,9 @@ const DrinkerosXperience: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0b0b0d] text-white overflow-x-hidden">
+      {!isVip && (
+        <VipFloatingBanner watchTargetId="dx-matricule-cta" basePrice={basePrice} />
+      )}
       {/* Animação do gradiente do hero */}
       <style>{`
         @keyframes dxAuroraDrift {
@@ -266,10 +292,14 @@ const DrinkerosXperience: React.FC = () => {
           {/* VÍDEO logo abaixo do headline */}
           <div className="w-[240px] sm:w-[280px] mx-auto aspect-square rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(236,72,153,0.35)] ring-1 ring-white/10 mb-4 bg-black">
             <video
+              ref={heroVideoRef}
               src="https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/landing-assets/drinkeros-xperience/clipe.mp4"
               controls
+              autoPlay
+              muted
+              loop
               playsInline
-              preload="metadata"
+              preload="auto"
               className="w-full h-full object-cover"
             />
           </div>
@@ -456,6 +486,7 @@ const DrinkerosXperience: React.FC = () => {
             <div className="flex justify-center mb-6">
               <button
                 onClick={handleBuy}
+                id="dx-matricule-cta"
                 disabled={checkoutLoading}
                 className="dx-cta dx-cta-green group relative inline-flex items-center justify-center gap-3 rounded-full px-8 sm:px-12 py-5 sm:py-6 font-extrabold text-white text-lg sm:text-xl overflow-hidden isolate transition-transform duration-300 hover:scale-[1.03] disabled:opacity-70 disabled:cursor-not-allowed"
               >
