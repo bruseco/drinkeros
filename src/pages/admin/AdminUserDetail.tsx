@@ -15,7 +15,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useUserDetail } from '@/hooks/useUserDetail';
 import { useUpdateUserProfile, useDeleteUser, useResetUserPassword, useResendWelcomeEmail } from '@/hooks/useAdminUsers';
 import { useToggleLifetimeAccess } from '@/hooks/useLifetimeAccess';
-import { useToggleExclusiveAccess } from '@/hooks/useExclusiveAccess';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
