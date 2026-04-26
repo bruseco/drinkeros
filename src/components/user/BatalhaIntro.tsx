@@ -17,7 +17,10 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish }) => {
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    const onCanPlay = () => {
+    let started = false;
+    const start = () => {
+      if (started) return;
+      started = true;
       setStage('video');
       v.muted = false;
       v.volume = 1;
@@ -28,11 +31,16 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish }) => {
       });
     };
     const onEnded = () => setStage('explainer');
-    v.addEventListener('canplaythrough', onCanPlay);
+    v.addEventListener('loadeddata', start);
+    v.addEventListener('canplay', start);
     v.addEventListener('ended', onEnded);
+    // Fallback: se em 2.5s nada disparou, tenta dar play mesmo assim
+    const fallback = setTimeout(start, 2500);
     return () => {
-      v.removeEventListener('canplaythrough', onCanPlay);
+      v.removeEventListener('loadeddata', start);
+      v.removeEventListener('canplay', start);
       v.removeEventListener('ended', onEnded);
+      clearTimeout(fallback);
     };
   }, []);
 
