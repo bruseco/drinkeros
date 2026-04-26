@@ -51,7 +51,7 @@ const profiles: ProfileItem[] = [
 const bonus: BonusItem[] = [
   { title: '4 E-books exclusivos do Workshop', description: 'Um e-book por aula, com receitas, técnicas e curiosidades dos drinks apresentados.' },
   { title: 'Clube dos Drinkeros', description: 'Acesso ao app com mais de 1.000 receitas para pesquisar e salvar como favoritas.', originalPrice: 'R$ 247,00' },
-  { title: 'Comunidade VIP no WhatsApp', description: 'Grupo exclusivo para tirar dúvidas e trocar experiências com outros alunos.' },
+  { title: 'Comunidade exclusiva no WhatsApp', description: 'Grupo exclusivo para tirar dúvidas e trocar experiências com outros alunos.' },
 ];
 
 const faq: FaqItem[] = [
