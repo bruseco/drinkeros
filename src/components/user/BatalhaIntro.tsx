@@ -137,18 +137,37 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish, initialStage = 'loadin
             <span className="px-3 py-1 rounded-full bg-fuchsia-500/30 border border-fuchsia-400/40">👑 Mestre 500+</span>
           </div>
 
-          <div className="w-full aspect-square rounded-xl overflow-hidden bg-black mb-6 shadow-xl border border-white/10">
+          <button
+            type="button"
+            onClick={() => {
+              const v = explainerVideoRef.current;
+              if (v) {
+                v.muted = false;
+                v.volume = 1;
+                v.play().catch(() => {});
+              }
+              setExplainerVideoExpanded(true);
+            }}
+            className={`w-full ${explainerVideoExpanded ? 'aspect-auto' : 'aspect-square'} rounded-xl overflow-hidden bg-black mb-6 shadow-xl border border-white/10 relative group`}
+            aria-label={explainerVideoExpanded ? 'Vídeo expandido' : 'Clique para ver completo com som'}
+          >
             <video
+              ref={explainerVideoRef}
               src="/vinheta-batalha-dos-drinkeros-web.mp4"
-              className="w-full h-full object-cover"
+              className={`w-full h-auto ${explainerVideoExpanded ? 'object-contain' : 'object-cover aspect-square'}`}
               autoPlay
-              muted
+              muted={!explainerVideoExpanded}
               loop
               playsInline
               preload="metadata"
               poster="/batalha-video-poster.jpg"
             />
-          </div>
+            {!explainerVideoExpanded && (
+              <span className="absolute bottom-2 right-2 px-2 py-1 rounded-full bg-black/60 text-white text-[10px] font-bold uppercase tracking-wide">
+                🔊 Toque para som
+              </span>
+            )}
+          </button>
 
           <Button
             size="lg"
