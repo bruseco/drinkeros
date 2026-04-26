@@ -306,6 +306,15 @@ const VipLanding: React.FC = () => {
           </div>
         </div>
 
+        {/* CTA âncora para o card de preço */}
+        <div className="max-w-md mx-auto mb-16 px-4">
+          <a href="#clube-pricing">
+            <Button className="viplanding-gold-btn w-full h-14 text-base font-bold border-0 hover:text-black">
+              <Crown className="mr-2 h-5 w-5" /> Quero ser sócio!
+            </Button>
+          </a>
+        </div>
+
         {/* Bônus exclusivos */}
         <div className="max-w-4xl mx-auto mb-16">
           <div className="text-center mb-8">
