@@ -147,8 +147,19 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish }) => {
         src="/vinheta-batalha-dos-drinkeros.mp4"
         className="w-full h-full object-contain"
         playsInline
+        muted
+        autoPlay
         preload="auto"
       />
+
+      {stage === 'video' && isMuted && (
+        <button
+          onClick={enableSound}
+          className="absolute top-6 left-6 px-4 py-2 rounded-full bg-white/15 backdrop-blur border border-white/30 text-white text-xs font-bold uppercase tracking-wide shadow-xl"
+        >
+          🔊 Ativar som
+        </button>
+      )}
 
       {stage === 'video' && showSkip && (
         <button
