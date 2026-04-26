@@ -34,6 +34,14 @@ const VipLanding: React.FC = () => {
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleClose = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    if (isClosing) return;
+    setIsClosing(true);
+    setTimeout(() => navigate(-1), 280);
+  };
 
   // Trata retorno do Stripe Checkout (mantém o param "vip" por compatibilidade do webhook)
   useEffect(() => {
@@ -77,7 +85,22 @@ const VipLanding: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen text-white relative overflow-hidden bg-gradient-to-b from-purple-950 via-black to-purple-950">
+    <div
+      className={`fixed inset-0 z-[60] text-white overflow-y-auto overscroll-contain bg-gradient-to-b from-purple-950 via-black to-purple-950 ${isClosing ? 'animate-[viplanding-fade-out_280ms_ease-in_forwards]' : 'animate-[viplanding-bounce-in_520ms_cubic-bezier(0.34,1.56,0.64,1)_forwards]'}`}
+    >
+      {/* Animações de entrada/saída */}
+      <style>{`
+        @keyframes viplanding-bounce-in {
+          0% { opacity: 0; transform: scale(0.85); }
+          60% { opacity: 1; transform: scale(1.04); }
+          80% { transform: scale(0.98); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes viplanding-fade-out {
+          0% { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; transform: scale(0.96); }
+        }
+      `}</style>
       {/* Faixa de tijolos preta no topo — fade suave nas bordas para evitar quebra reta */}
       <div
         className="pointer-events-none absolute top-0 left-0 right-0 h-[80vh] md:h-[90vh] z-0"
@@ -152,20 +175,21 @@ const VipLanding: React.FC = () => {
       `}</style>
 
       {/* X fechar — fixo no canto direito da viewport */}
-      <Link
-        to="/app/receitas"
+      <button
+        type="button"
+        onClick={handleClose}
         aria-label="Fechar"
         className="absolute right-4 top-5 z-40 h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition"
       >
         <X className="h-4 w-4" />
-      </Link>
+      </button>
 
       <div className="relative z-30 container mx-auto max-w-4xl">
         {/* Header — logo Drinkeros centralizado (h-16, logo h-10) */}
         <div className="relative flex h-16 items-center justify-center px-4 mb-8">
-          <Link to="/app/receitas" aria-label="Drinkeros">
+          <button type="button" onClick={handleClose} aria-label="Drinkeros">
             <img src={drinkrosLogo} alt="Drinkeros" className="h-10 object-contain brightness-0 invert" />
-          </Link>
+          </button>
         </div>
 
         {/* Content */}
