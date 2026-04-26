@@ -959,7 +959,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                     </strong>
                   </p>
                   <p className="text-xs mt-2" style={{ color: theme.accent }}>
-                    Esse valor especial é só para você que já é assinante VIP. 💜
+                    Esse valor especial é só para você que já é Sócio do Clube. 💜
                   </p>
                 </>
               ) : (
