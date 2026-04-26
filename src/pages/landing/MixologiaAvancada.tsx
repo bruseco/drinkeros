@@ -107,7 +107,8 @@ const MixologiaAvancada: React.FC = () => (
     slug="mixologia-avancada"
     brand="Mixologia Avançada"
     logoSrc={logo}
-    logoClassName="h-40 sm:h-56 -mt-6 sm:-mt-10"
+    logoClassName="h-32 sm:h-44 -mt-10 sm:-mt-14"
+    logoWrapperClassName="mb-0 -mt-4"
     instructorSrc={instructor}
     instructorName="Tom Oliveira"
     heroVideoUrl={heroVideo}
