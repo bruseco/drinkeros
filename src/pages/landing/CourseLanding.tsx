@@ -36,9 +36,10 @@ export interface CourseTheme {
 }
 
 export interface LearnItem {
-  icon: LucideIcon;
+  icon?: LucideIcon;
   title: string;
   description: string;
+  imageSrc?: string;
 }
 
 export interface ModuleItem {
@@ -440,20 +441,53 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {learnItems.map((item, i) => {
                 const Icon = item.icon;
+                if (item.imageSrc) {
+                  return (
+                    <div
+                      key={i}
+                      className="group rounded-2xl overflow-hidden bg-white/5 border border-white/10 transition-all duration-300 hover:scale-[1.02]"
+                      style={{ boxShadow: undefined }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = `${theme.accent}80`;
+                        e.currentTarget.style.boxShadow = `0 10px 40px ${theme.glow1}`;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '';
+                        e.currentTarget.style.boxShadow = '';
+                      }}
+                    >
+                      <div className="aspect-video overflow-hidden">
+                        <img
+                          src={item.imageSrc}
+                          alt={item.title}
+                          loading="lazy"
+                          width={1024}
+                          height={576}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </div>
+                      <div className="p-5">
+                        <h3 className="font-bold text-lg mb-2">{item.title}</h3>
+                        <p className="text-sm text-white/75 leading-relaxed">{item.description}</p>
+                      </div>
+                    </div>
+                  );
+                }
                 return (
                   <div
                     key={i}
                     className="group rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 transition-all duration-300 hover:scale-[1.02] p-6"
-                    style={{ borderColor: undefined }}
                   >
-                    <div
-                      className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
-                      style={{
-                        background: `linear-gradient(135deg, ${theme.primary}40, ${theme.secondary}40)`,
-                      }}
-                    >
-                      <Icon className="h-7 w-7" style={{ color: theme.accent }} />
-                    </div>
+                    {Icon && (
+                      <div
+                        className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
+                        style={{
+                          background: `linear-gradient(135deg, ${theme.primary}40, ${theme.secondary}40)`,
+                        }}
+                      >
+                        <Icon className="h-7 w-7" style={{ color: theme.accent }} />
+                      </div>
+                    )}
                     <h3 className="font-bold text-lg mb-2">{item.title}</h3>
                     <p className="text-sm text-white/75 leading-relaxed">{item.description}</p>
                   </div>
