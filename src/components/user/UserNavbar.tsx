@@ -70,7 +70,7 @@ export const UserNavbar: React.FC = () => {
                   {item.label}
                 </span>
                 {item.comingSoon && (
-                  <span className="absolute -top-1 right-0 text-[8px] font-bold uppercase tracking-wide px-1 py-0.5 rounded-full bg-lime-400 text-lime-950 leading-none">
+                  <span className="absolute -top-1 right-0 text-[8px] font-bold uppercase tracking-wide px-1 py-0.5 rounded-full bg-muted-foreground/20 text-muted-foreground leading-none">
                     Breve
                   </span>
                 )}
