@@ -39,12 +39,12 @@ import bonusBebidaDecifrada from '@/assets/landing/classicos/bonus-bebida-decifr
 
 // Paleta: verde musgo → verde bandeira (estrutura) + dourado profundo (amarelo + marrom) nos CTAs/ícones
 const theme: CourseTheme = {
-  primary: '#b8860b',     // dark goldenrod (dourado escuro com marrom)
-  secondary: '#5c3a12',   // marrom profundo (vinho/uísque)
-  accent: '#e8b923',      // dourado quente (amarelo puxado pro mel)
-  glow1: 'rgba(184, 134, 11, 0.55)',
-  glow2: 'rgba(92, 58, 18, 0.55)',
-  glow3: 'rgba(232, 185, 35, 0.35)',
+  primary: '#5a3a1a',     // marrom uísque profundo
+  secondary: '#2b1a0d',   // marrom quase preto (couro/madeira escura)
+  accent: '#a87232',      // âmbar tostado / caramelo escuro
+  glow1: 'rgba(90, 58, 26, 0.55)',
+  glow2: 'rgba(43, 26, 13, 0.65)',
+  glow3: 'rgba(168, 114, 50, 0.30)',
 };
 
 const learnItems: LearnItem[] = [
