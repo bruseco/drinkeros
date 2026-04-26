@@ -1,11 +1,19 @@
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0 });
+  useLayoutEffect(() => {
+    // Disable browser's automatic scroll restoration on navigation
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    // Scroll window and main scroll containers to top
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
   }, [pathname]);
 
   return null;
