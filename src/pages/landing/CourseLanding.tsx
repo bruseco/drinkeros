@@ -394,7 +394,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
 
       {/* HERO */}
       <section className="relative cl-aurora min-h-screen flex items-start">
-        <div className={`container mx-auto px-4 pb-8 sm:pb-12 text-center relative z-10 ${logoBgSrc ? 'pt-0' : 'pt-10 sm:pt-14'}`}>
+        <div className={`container mx-auto px-4 pb-6 sm:pb-10 text-center relative z-10 ${logoBgSrc ? 'pt-0' : 'pt-4 sm:pt-8'}`}>
           {logoSrc ? (
             logoBgSrc ? (
               <div
@@ -413,7 +413,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                 />
               </div>
             ) : (
-              <div className={`relative mx-auto w-fit ${logoWrapperClassName ?? 'mb-6'}`}>
+              <div className={`relative mx-auto w-fit ${logoWrapperClassName ?? 'mb-3'}`}>
                 <div
                   aria-hidden
                   className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] sm:w-[560px] sm:h-[560px] rounded-full pointer-events-none -z-10"
@@ -431,13 +431,13 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
             )
           ) : null}
           {heroBadge && (
-            <p className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase text-white/70 mb-4">
+            <p className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase text-white/70 mb-2">
               {heroBadge}
             </p>
           )}
           {!logoSrc && (
             <h1
-              className="text-3xl sm:text-5xl lg:text-6xl font-extrabold uppercase tracking-tight mb-4 leading-[1.05] max-w-4xl mx-auto bg-clip-text text-transparent"
+              className="text-3xl sm:text-5xl lg:text-6xl font-extrabold uppercase tracking-tight mb-3 leading-[1.05] max-w-4xl mx-auto bg-clip-text text-transparent"
               style={{
                 backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})`,
               }}
@@ -445,17 +445,17 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
               {brand}
             </h1>
           )}
-          <p className={`text-xl sm:text-2xl font-bold mb-3 max-w-3xl mx-auto leading-snug ${taglineClassName ?? 'text-white'}`}>
+          <p className={`text-xl sm:text-2xl font-bold mb-2 max-w-3xl mx-auto leading-snug ${taglineClassName ?? 'text-white'}`}>
             {tagline}
           </p>
           {!subheadlineBelowVideo && (
-            <p className="text-sm sm:text-base text-white/80 mb-6 max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base text-white/80 mb-4 max-w-3xl mx-auto">
               {subheadline}
             </p>
           )}
 
           {heroVideoUrl && (
-            <div className={`w-[70%] sm:w-full ${heroVideoAspect === 'square' ? 'max-w-md aspect-square' : 'max-w-xl aspect-video'} mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-6 bg-black`}>
+            <div className={`w-[70%] sm:w-full ${heroVideoAspect === 'square' ? 'max-w-md aspect-square' : 'max-w-xl aspect-video'} mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-4 bg-black`}>
               {isYoutube ? (
                 <iframe
                   ref={heroIframeRef}
@@ -482,7 +482,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
           )}
 
           {subheadlineBelowVideo && (
-            <p className="text-sm sm:text-base text-white/80 mb-6 max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base text-white/80 mb-4 max-w-3xl mx-auto">
               {subheadline}
             </p>
           )}
