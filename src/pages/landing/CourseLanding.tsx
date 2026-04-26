@@ -136,6 +136,9 @@ export interface CourseLandingProps {
 
   faq: FaqItem[];
 
+  /** Resumo curto (~4 linhas) exibido abaixo do título "Garanta sua vaga agora". */
+  offerSummary?: string;
+
   whatsappPhone?: string; // default: 5548991601025
 }
 
@@ -172,6 +175,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   instructorSrc,
   instructorName,
   aboutInstructor,
+  offerSummary,
   titleFontClassName = '',
 }) => {
   const { toast } = useToast();
