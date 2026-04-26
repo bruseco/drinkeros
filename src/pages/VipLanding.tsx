@@ -112,33 +112,8 @@ const VipLanding: React.FC = () => {
         }
       `}</style>
       {/* Faixa de tijolos preta no topo — fade suave nas bordas para evitar quebra reta */}
-      <div
-        className="pointer-events-none absolute top-0 left-0 right-0 h-[80vh] md:h-[90vh] z-0"
-        style={{
-          backgroundImage: `url(${bgTijolos})`,
-          backgroundRepeat: 'repeat',
-          backgroundSize: '900px auto',
-          backgroundPosition: 'top center',
-          maskImage:
-            'linear-gradient(to bottom, transparent 0%, black 15%, black 55%, transparent 100%)',
-          WebkitMaskImage:
-            'linear-gradient(to bottom, transparent 0%, black 15%, black 55%, transparent 100%)',
-        }}
-      />
-      {/* Degradês pretos animados por cima do tijolo — dão vida ao topo */}
-      <div className="pointer-events-none absolute top-0 left-0 right-0 h-[80vh] md:h-[90vh] z-0 overflow-hidden">
-        <div className="absolute -top-20 -left-24 h-[22rem] w-[22rem] rounded-full bg-black/70 blur-3xl animate-[viplanding-blob1_20s_ease-in-out_infinite]" />
-        <div className="absolute top-10 -right-24 h-[24rem] w-[24rem] rounded-full bg-black/60 blur-3xl animate-[viplanding-blob2_24s_ease-in-out_infinite]" />
-        <div className="absolute top-1/3 left-1/4 h-[20rem] w-[20rem] rounded-full bg-black/50 blur-3xl animate-[viplanding-blob3_28s_ease-in-out_infinite]" />
-      </div>
+      {/* Primeira dobra sem degradês — fundo preto sólido */}
 
-      {/* Blobs animados de degradê roxo/pink — passam por cima do tijolo e seguem abaixo */}
-      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-1/4 -right-40 h-[26rem] w-[26rem] rounded-full bg-fuchsia-500/25 blur-3xl animate-[viplanding-blob2_22s_ease-in-out_infinite]" />
-        <div className="absolute top-1/2 left-1/4 h-[24rem] w-[24rem] rounded-full bg-pink-500/20 blur-3xl animate-[viplanding-blob3_26s_ease-in-out_infinite]" />
-        <div className="absolute bottom-0 right-1/4 h-[28rem] w-[28rem] rounded-full bg-purple-700/30 blur-3xl animate-[viplanding-blob4_24s_ease-in-out_infinite]" />
-        <div className="absolute bottom-1/3 -left-32 h-[28rem] w-[28rem] rounded-full bg-purple-600/25 blur-3xl animate-[viplanding-blob1_18s_ease-in-out_infinite]" />
-      </div>
       <style>{`
         @keyframes viplanding-blob1 {
           0%, 100% { transform: translate(0, 0) scale(1); }
