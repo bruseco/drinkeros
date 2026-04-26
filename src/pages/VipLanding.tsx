@@ -5,6 +5,7 @@ import jackDaniels from '@/assets/landing/bebida-decifrada/jack-daniels-degustac
 import bebidaCover from '@/assets/landing/bebida-decifrada/cover.jpg';
 import workshopVsl from '@/assets/landing/workshop/vsl.mp4';
 import workshopCover from '@/assets/landing/workshop/aula-01.jpg';
+import xaropesVideo from '@/assets/landing/xaropes/clipe-xaropes-artesanais.mov';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserPlan } from '@/hooks/useUserPlan';
@@ -12,7 +13,7 @@ import { useHasExclusiveAccess } from '@/hooks/useExclusiveAccess';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
+
 import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
 import bgTijolos from '@/assets/bg-tijolos-pretos.jpg';
 
@@ -213,15 +214,8 @@ const VipLanding: React.FC = () => {
         }}
       >
         <div className="relative z-30 container mx-auto max-w-4xl">
-          {/* Header — logo Drinkeros centralizado */}
-          <div className="relative flex h-16 items-center justify-center px-4 mb-8">
-            <button type="button" onClick={handleClose} aria-label="Drinkeros">
-              <img src={drinkrosLogo} alt="Drinkeros" className="h-10 object-contain brightness-0 invert" />
-            </button>
-          </div>
-
           {/* Hero */}
-          <div className="text-center mb-16 space-y-6 px-4">
+          <div className="text-center pt-10 space-y-3 px-4">
             <h1 className="text-4xl md:text-6xl font-black leading-none">
               <span className="text-white">Seja</span>{' '}
               <span className="bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">
@@ -232,7 +226,7 @@ const VipLanding: React.FC = () => {
             <img
               src={clubeLogo}
               alt="Clube dos Drinkeros"
-              className="mx-auto h-40 md:h-56 object-contain [filter:drop-shadow(0_10px_25px_rgba(0,0,0,0.85))_drop-shadow(0_0_40px_rgba(0,0,0,0.7))]"
+              className="mx-auto h-32 md:h-44 object-contain [filter:drop-shadow(0_10px_25px_rgba(0,0,0,0.85))_drop-shadow(0_0_40px_rgba(0,0,0,0.7))]"
             />
           </div>
         </div>
@@ -251,7 +245,7 @@ const VipLanding: React.FC = () => {
         <div className="relative z-10 container mx-auto max-w-4xl">
 
         {/* Comparison */}
-        <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-16 mt-4 sm:mx-0 relative left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 w-[calc(100vw-6px)] sm:w-auto">
+        <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-10 mt-2 sm:mx-0 relative left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 w-[calc(100vw-6px)] sm:w-auto">
           {/* Free */}
           <div className="rounded-2xl bg-white/5 border border-white/10 p-4 md:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 mb-4">
@@ -261,7 +255,7 @@ const VipLanding: React.FC = () => {
               <span className="text-purple-300 text-xs sm:text-sm">o que você tem hoje</span>
             </div>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> <span>Apenas <strong>3 drinks por dia</strong></span></li>
+              <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> <span>Você pode ver só <strong>3 drinks por dia</strong></span></li>
               <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> <span>Sem acesso aos <strong>Xaropes Artesanais</strong></span></li>
               
               <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> <span>Sem Bebida Decifrada</span></li>
@@ -311,6 +305,15 @@ const VipLanding: React.FC = () => {
           </div>
         </div>
 
+        {/* CTA âncora para o card de preço */}
+        <div className="max-w-md mx-auto mb-16 px-4">
+          <a href="#clube-pricing">
+            <Button className="viplanding-gold-btn w-full h-14 text-base font-bold border-0 hover:text-black">
+              <Crown className="mr-2 h-5 w-5" /> Quero ser sócio!
+            </Button>
+          </a>
+        </div>
+
         {/* Bônus exclusivos */}
         <div className="max-w-4xl mx-auto mb-16">
           <div className="text-center mb-8">
@@ -319,7 +322,7 @@ const VipLanding: React.FC = () => {
               Bônus exclusivos do Clube
             </div>
             <h2 className="text-3xl md:text-4xl font-black">
-              E ainda leva <span className="bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">esses presentes</span>
+              Saiba mais sobre <span className="bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">cada bônus</span>
             </h2>
           </div>
 
@@ -364,11 +367,48 @@ const VipLanding: React.FC = () => {
                 </p>
               </div>
             </div>
+
+            {/* Bônus 3 - Batalha dos Drinkeros */}
+            <div className="rounded-2xl bg-gradient-to-br from-yellow-900/30 to-black border border-yellow-500/30 overflow-hidden p-6">
+              <div className="w-[70%] sm:w-full max-w-md aspect-square mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-5 bg-black">
+                <VideoWithPoster src="/vinheta-batalha-dos-drinkeros-web.mp4" poster="/batalha-video-poster.jpg" alt="Batalha dos Drinkeros" />
+              </div>
+              <div className="text-center max-w-xl mx-auto">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Trophy className="h-5 w-5 text-yellow-300" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-yellow-300">Bônus 3</span>
+                </div>
+                <h3 className="text-2xl font-black mb-2">Batalha dos Drinkeros</h3>
+                <p className="text-sm text-purple-200 leading-snug">
+                  Toda semana, sócios do Clube competem com seus drinks autorais.
+                  Os <strong className="text-white">melhores do mês</strong> ganham destaque e disputam o título de
+                  <strong className="text-white"> melhor drinker do ano</strong>.
+                </p>
+              </div>
+            </div>
+
+            {/* Bônus 4 - Xaropes Artesanais */}
+            <div className="rounded-2xl bg-gradient-to-br from-purple-900/40 to-black border border-purple-500/30 overflow-hidden p-6">
+              <div className="w-[70%] sm:w-full max-w-md aspect-square mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-5 bg-black">
+                <VideoWithPoster src={xaropesVideo} poster={workshopCover} alt="Xaropes Artesanais" />
+              </div>
+              <div className="text-center max-w-xl mx-auto">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <GlassWater className="h-5 w-5 text-yellow-300" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-yellow-300">Bônus 4</span>
+                </div>
+                <h3 className="text-2xl font-black mb-2">Xaropes Artesanais</h3>
+                <p className="text-sm text-purple-200 leading-snug">
+                  Aprenda a fazer os <strong className="text-white">xaropes que dão alma aos seus drinks</strong>.
+                  Receitas exclusivas e fáceis pra você levar seus coquetéis pra outro nível.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Pricing Card — fechamento da página */}
-        <div className="relative max-w-md mx-auto mb-16">
+        <div id="clube-pricing" className="relative max-w-md mx-auto mb-16 scroll-mt-6">
           <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-yellow-400 rounded-3xl blur opacity-60" />
           <div className="relative bg-black rounded-3xl p-8 border border-purple-500/30">
             <h2 className="text-center text-3xl md:text-4xl font-black mb-3 viplanding-gold-text">
