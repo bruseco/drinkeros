@@ -722,6 +722,64 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
         </section>
       )}
 
+      {/* SOBRE O PROFESSOR */}
+      {aboutInstructor && (
+        <section className="py-16 sm:py-24 bg-gradient-to-b from-[#0b0b0d] via-[#100712] to-[#0b0b0d]">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-center mb-12">
+              {aboutInstructor.title ?? 'Quem é o seu'}{' '}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})` }}
+              >
+                {aboutInstructor.title ? '' : 'professor?'}
+              </span>
+            </h2>
+            <div className="grid grid-cols-1 lg:grid-cols-[auto,1fr] gap-10 items-start max-w-5xl mx-auto">
+              <div className="flex flex-col items-center lg:items-start">
+                <div
+                  className="rounded-3xl p-1"
+                  style={{
+                    background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary}, ${theme.accent})`,
+                  }}
+                >
+                  <img
+                    src={aboutInstructor.photoSrc}
+                    alt={aboutInstructor.name}
+                    loading="lazy"
+                    className="h-64 w-64 sm:h-80 sm:w-80 rounded-3xl object-cover bg-black"
+                  />
+                </div>
+                <p
+                  className="mt-4 text-2xl font-extrabold bg-clip-text text-transparent text-center lg:text-left"
+                  style={{ backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.secondary})` }}
+                >
+                  {aboutInstructor.name}
+                </p>
+              </div>
+              <div className="space-y-4 text-white/85 text-base sm:text-lg leading-relaxed">
+                {aboutInstructor.paragraphs.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+                {aboutInstructor.credentials && aboutInstructor.credentials.length > 0 && (
+                  <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2 pt-2">
+                    {aboutInstructor.credentials.map((c, i) => (
+                      <li key={i} className="flex items-start gap-2 text-white/90">
+                        <CheckCircle2
+                          className="h-5 w-5 mt-0.5 flex-shrink-0"
+                          style={{ color: theme.accent }}
+                        />
+                        <span>{c}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* GARANTIA */}
       <section className="py-16 sm:py-20 bg-gradient-to-b from-[#0b0b0d] to-[#14070f]">
         <div className="container mx-auto px-4">
