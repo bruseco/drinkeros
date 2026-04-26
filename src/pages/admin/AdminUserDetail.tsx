@@ -25,11 +25,16 @@ import { AddAccessDialog } from '@/components/admin/AddAccessDialog';
 
 const sourceLabel: Record<string, string> = {
   manual: 'Manual',
-  stripe: 'Stripe',
+  stripe: 'Stripe (renova sozinho)',
   webhook: 'Webhook',
   hotmart: 'Hotmart',
   woocommerce: 'WooCommerce',
+  pix: 'PIX',
+  legacy_exclusive: 'Acesso legado',
+  import: 'Importado',
 };
+
+const isAutoRenew = (source?: string) => source === 'stripe';
 
 const AdminUserDetail: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -43,7 +48,6 @@ const AdminUserDetail: React.FC = () => {
   const resetPassword = useResetUserPassword();
   const resendEmail = useResendWelcomeEmail();
   const toggleLifetime = useToggleLifetimeAccess();
-  const toggleExclusive = useToggleExclusiveAccess();
 
   const [editingField, setEditingField] = useState<null | 'name' | 'email' | 'phone' | 'cpf'>(null);
   const [draftValue, setDraftValue] = useState('');
@@ -53,6 +57,7 @@ const AdminUserDetail: React.FC = () => {
   const [newPassword, setNewPassword] = useState('');
   const [editVipOpen, setEditVipOpen] = useState(false);
   const [vipExpiresAt, setVipExpiresAt] = useState('');
+  const [vipActivatedAt, setVipActivatedAt] = useState('');
 
   if (isLoading || !data) {
     return (
