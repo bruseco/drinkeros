@@ -349,6 +349,14 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     <div className="min-h-screen bg-[#0b0b0d] text-white overflow-x-hidden">
       <style>{themeStyles}</style>
 
+      {!isVip && (
+        <VipFloatingBanner
+          watchTargetId="cl-matricule-cta"
+          basePrice={basePrice}
+          delayMs={5000}
+        />
+      )}
+
       {/* HERO */}
       <section className="relative cl-aurora min-h-screen flex items-start">
         <div className={`container mx-auto px-4 pb-8 sm:pb-12 text-center relative z-10 ${logoBgSrc ? 'pt-0' : 'pt-10 sm:pt-14'}`}>
