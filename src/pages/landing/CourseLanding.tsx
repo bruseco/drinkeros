@@ -20,6 +20,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useUserPlan } from '@/hooks/useUserPlan';
 import { useCourseBySlug } from '@/hooks/useCourses';
 import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
+import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
+
+/** Total padrão de alunos certificados — usado em todas as landings de curso. */
+export const TOTAL_STUDENTS_CERTIFIED = 22341;
 
 /**
  * Tema (paleta) por curso. Sempre 3 cores em HSL/HEX para gerar
@@ -500,6 +504,22 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
           </div>
         </section>
       )}
+
+      {/* CONTAGEM DE ALUNOS */}
+      <section
+        className="py-12 sm:py-16"
+        style={{
+          backgroundImage: `linear-gradient(90deg, ${theme.primary}, ${theme.secondary}, ${theme.accent})`,
+        }}
+      >
+        <div className="container mx-auto px-4 text-center text-white">
+          <p className="text-lg sm:text-xl font-semibold uppercase tracking-wider opacity-90">Já certificamos</p>
+          <p className="text-6xl sm:text-7xl lg:text-8xl font-black my-2 drop-shadow-lg tabular-nums">
+            <AnimatedStudentCount target={TOTAL_STUDENTS_CERTIFIED} />
+          </p>
+          <p className="text-lg sm:text-xl font-semibold uppercase tracking-wider opacity-90">alunos até o momento</p>
+        </div>
+      </section>
 
       {/* MÓDULOS */}
       {modules.length > 0 && (
