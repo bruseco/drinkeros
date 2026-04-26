@@ -194,10 +194,8 @@ const App = () => (
               <Route path="combos" element={<UserCombos />} />
               <Route path="combo/:comboId" element={<UserComboDetail />} />
               <Route path="perfil" element={<UserProfile />} />
-              <Route path="batalha" element={<UserBatalha />} />
-              <Route path="batalha/nova" element={<UserBatalhaNew />} />
-              <Route path="batalha/ranking" element={<UserBatalhaRanking />} />
-              <Route path="batalha/receita/:id" element={<UserBatalhaRecipeDetail />} />
+              <Route path="batalha" element={<Navigate to="/app/receitas" replace />} />
+              <Route path="batalha/*" element={<Navigate to="/app/receitas" replace />} />
             </Route>
 
             {/* Catch all */}

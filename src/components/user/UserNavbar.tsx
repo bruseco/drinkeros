@@ -20,7 +20,7 @@ export const UserNavbar: React.FC = () => {
   const navItems = [
     { icon: Wine, label: 'Receitas', href: '/app/receitas' },
     { icon: GraduationCap, label: 'Cursos', href: '/app/cursos' },
-    { label: 'Batalha', href: '/app/batalha', img: batalhaIcon, imgActive: batalhaIconAtivo },
+    { label: 'Batalha', href: '/app/batalha', img: batalhaIcon, imgActive: batalhaIconAtivo, comingSoon: true },
     { icon: BookOpen, label: 'Ebooks', href: '/app/ebooks' },
     { icon: Heart, label: 'Favoritos', href: '/app/favoritos' },
   ];
@@ -55,6 +55,40 @@ export const UserNavbar: React.FC = () => {
         <div className="flex items-center justify-around py-2 px-2">
           {navItems.map((item) => {
             const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
+            const inner = (
+              <>
+                {item.img ? (
+                  <img
+                    src={isActive ? item.imgActive : item.img}
+                    alt=""
+                    className={cn("h-6 w-6 object-contain transition-transform duration-300", isActive && "scale-110")}
+                  />
+                ) : (
+                  <item.icon className={cn("h-6 w-6 transition-transform duration-300", isActive && "scale-110")} />
+                )}
+                <span className={cn("text-[10px] font-medium transition-all duration-300", isActive && "font-semibold")}>
+                  {item.label}
+                </span>
+                {item.comingSoon && (
+                  <span className="absolute -top-1 right-0 text-[8px] font-bold uppercase tracking-wide px-1 py-0.5 rounded-full bg-lime-400 text-lime-950 leading-none">
+                    Breve
+                  </span>
+                )}
+              </>
+            );
+
+            if (item.comingSoon) {
+              return (
+                <div
+                  key={item.href}
+                  className="relative flex flex-col items-center gap-1 px-3 py-2 text-muted-foreground/60 cursor-not-allowed"
+                  aria-disabled="true"
+                >
+                  {inner}
+                </div>
+              );
+            }
+
             return (
               <Link
                 key={item.href}
@@ -70,18 +104,7 @@ export const UserNavbar: React.FC = () => {
                   isActive ? 'text-accent' : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                {item.img ? (
-                  <img
-                    src={isActive ? item.imgActive : item.img}
-                    alt=""
-                    className={cn("h-6 w-6 object-contain transition-transform duration-300", isActive && "scale-110")}
-                  />
-                ) : (
-                  <item.icon className={cn("h-6 w-6 transition-transform duration-300", isActive && "scale-110")} />
-                )}
-                <span className={cn("text-[10px] font-medium transition-all duration-300", isActive && "font-semibold")}>
-                  {item.label}
-                </span>
+                {inner}
               </Link>
             );
           })}
