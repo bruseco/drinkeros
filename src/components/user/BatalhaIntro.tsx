@@ -78,7 +78,9 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish, initialStage = 'loadin
 
   if (stage === 'explainer') {
     return (
-      <div className="fixed inset-0 z-[100] overflow-y-auto bg-gradient-to-br from-neutral-950 via-orange-950 to-neutral-950">
+      <div className="fixed inset-0 z-[100] overflow-y-auto bg-gradient-to-br from-neutral-950 via-orange-950 to-neutral-950 relative">
+        {/* Degradê preto radial no topo */}
+        <div className="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 w-[140%] h-64 bg-[radial-gradient(ellipse_at_top,_rgba(0,0,0,0.85)_0%,_rgba(0,0,0,0.5)_40%,_transparent_75%)] z-[105]" />
         {showCloseButton && (
           <button
             onClick={handleFinish}
