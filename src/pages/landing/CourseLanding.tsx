@@ -482,7 +482,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
           )}
 
           {subheadlineBelowVideo && (
-            <p className="text-sm sm:text-base text-white/80 mb-4 max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base text-white/80 mb-3 max-w-3xl mx-auto leading-snug">
               {subheadline}
             </p>
           )}
