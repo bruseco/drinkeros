@@ -32,6 +32,16 @@ import bonusHarmonizacao from '@/assets/landing/mix/bonus-harmonizacao.jpg';
 import bonusBitter from '@/assets/landing/mix/bonus-bitter.jpg';
 import bonusFatWash from '@/assets/landing/mix/bonus-fatwash.jpg';
 
+import learnHistoria from '@/assets/landing/mix/learn-historia.jpg';
+import learnTecnicas from '@/assets/landing/mix/learn-tecnicas.jpg';
+import learnFamilia from '@/assets/landing/mix/learn-familia.jpg';
+import learnManipulacao from '@/assets/landing/mix/learn-manipulacao.jpg';
+import learnUtensilios from '@/assets/landing/mix/learn-utensilios.jpg';
+import learnCarreira from '@/assets/landing/mix/learn-carreira.jpg';
+import learnHospitalidade from '@/assets/landing/mix/learn-hospitalidade.jpg';
+import learnMiseEnPlace from '@/assets/landing/mix/learn-miseenplace.jpg';
+import learnPrecificacao from '@/assets/landing/mix/learn-precificacao.jpg';
+
 // Paleta: roxo + azul (cores do logotipo Mixologia Avançada)
 const theme: CourseTheme = {
   primary: '#7c3aed',     // roxo do logo
@@ -43,15 +53,15 @@ const theme: CourseTheme = {
 };
 
 const learnItems: LearnItem[] = [
-  { icon: BookOpen, title: 'História da coquetelaria', description: 'Da lei seca à coquetelaria molecular: entenda a evolução do mundo dos drinks.' },
-  { icon: Beaker, title: 'Técnicas avançadas', description: 'Infusão, óleo saccharum, clarificação, fat wash, shrubs e pré-batched.' },
-  { icon: Wine, title: 'Família de coquetéis', description: 'Punch, Cobbler, Collins, Crusta, Daisy, Sour, Highball, Julep, Martini e mais.' },
-  { icon: GlassWater, title: 'Técnicas de manipulação', description: 'Free pour, batidos, mexidos, montados, throwing e rolling.' },
-  { icon: Sparkles, title: 'Utensílios profissionais', description: 'Conheça e domine cada utensílio do bar como um verdadeiro mixologista.' },
-  { icon: TrendingUp, title: 'Carreira de bar', description: 'Barback, bartender, chefe de bar, gestor de bar, mixologista e consultoria.' },
-  { icon: Users, title: 'Hospitalidade e atendimento', description: 'Postura, contato visual, vestuário e discrição para um serviço impecável.' },
-  { icon: Award, title: 'Mise en place e serviços', description: 'Montagem, organização, higiene e limpeza no padrão dos melhores bares.' },
-  { icon: Trophy, title: 'Bônus de precificação', description: 'Aprenda a precificar drinks e aumentar o faturamento do seu bar em até 70%.' },
+  { icon: BookOpen, title: 'História da coquetelaria', description: 'Da lei seca à coquetelaria molecular: entenda a evolução do mundo dos drinks.', imageSrc: learnHistoria },
+  { icon: Beaker, title: 'Técnicas avançadas', description: 'Infusão, óleo saccharum, clarificação, fat wash, shrubs e pré-batched.', imageSrc: learnTecnicas },
+  { icon: Wine, title: 'Família de coquetéis', description: 'Punch, Cobbler, Collins, Crusta, Daisy, Sour, Highball, Julep, Martini e mais.', imageSrc: learnFamilia },
+  { icon: GlassWater, title: 'Técnicas de manipulação', description: 'Free pour, batidos, mexidos, montados, throwing e rolling.', imageSrc: learnManipulacao },
+  { icon: Sparkles, title: 'Utensílios profissionais', description: 'Conheça e domine cada utensílio do bar como um verdadeiro mixologista.', imageSrc: learnUtensilios },
+  { icon: TrendingUp, title: 'Carreira de bar', description: 'Barback, bartender, chefe de bar, gestor de bar, mixologista e consultoria.', imageSrc: learnCarreira },
+  { icon: Users, title: 'Hospitalidade e atendimento', description: 'Postura, contato visual, vestuário e discrição para um serviço impecável.', imageSrc: learnHospitalidade },
+  { icon: Award, title: 'Mise en place e serviços', description: 'Montagem, organização, higiene e limpeza no padrão dos melhores bares.', imageSrc: learnMiseEnPlace },
+  { icon: Trophy, title: 'Bônus de precificação', description: 'Aprenda a precificar drinks e aumentar o faturamento do seu bar em até 70%.', imageSrc: learnPrecificacao },
 ];
 
 const modules: ModuleItem[] = [
