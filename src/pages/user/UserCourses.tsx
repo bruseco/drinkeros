@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useViewportCenter } from '@/hooks/useViewportCenter';
 import defaultCover from '@/assets/default-cover.png';
 import { Link } from 'react-router-dom';
 import { useUserCourses, useCourses } from '@/hooks/useCourses';
@@ -190,6 +191,7 @@ const COURSE_LANDING_ROUTES: Record<string, string> = {
 const CourseCard: React.FC<CourseCardProps> = ({ course, owned, expired = false, getCourseProgress }) => {
   const { progress, nextLessonId } = owned && !expired ? getCourseProgress(course.id) : { progress: 0, nextLessonId: null };
   const hasStarted = owned && !expired && progress > 0;
+  const { ref, centrality } = useViewportCenter<HTMLDivElement>();
 
   // Expirado tem prioridade visual: leva pra /vip pra renovar
   // Bloqueado: leva pra landing/página de venda do curso (se houver)
@@ -200,15 +202,22 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, owned, expired = false,
     ? `/app/curso/${course.id}`
     : landingRoute ?? `/app/curso/${course.id}?locked=true`;
 
+  // Opacidade dinâmica: base 0.55 → 1.0 conforme se aproxima do centro
+  const dynamicOpacity = expired ? 0.4 : 0.55 + 0.45 * centrality;
+  // "Saiba mais" oscila horizontalmente proporcional à centralidade
+  const wiggleX = Math.sin(Date.now() / 350) * 6 * centrality;
+
   return (
     <Link to={cardLink}>
-      <div className="group rounded-2xl shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative">
+      <div
+        ref={ref}
+        className="group rounded-2xl shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative"
+      >
         <img
           src={course.cover_image_url || defaultCover}
           alt={course.name}
-          className={`w-full h-auto rounded-2xl transition-transform duration-500 ${
-            expired ? 'opacity-40 grayscale' : !owned ? 'opacity-50 grayscale-[30%]' : ''
-          }`}
+          style={{ opacity: dynamicOpacity, transition: 'opacity 200ms linear' }}
+          className={`w-full h-auto rounded-2xl ${expired ? 'grayscale' : !owned ? 'grayscale-[30%]' : ''}`}
         />
 
         {/* Badge */}
@@ -250,7 +259,10 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, owned, expired = false,
               <ChevronRight className="h-3 w-3" />
             </Link>
           ) : (
-            <div className="flex items-center gap-1 text-white/90 text-xs">
+            <div
+              className="flex items-center gap-1 text-white/90 text-xs"
+              style={{ transform: `translateX(${wiggleX}px)`, transition: 'transform 120ms linear' }}
+            >
               <span>{expired ? 'Reativar com VIP' : owned ? 'Ver módulos' : 'Saiba mais'}</span>
               <ChevronRight className="h-3 w-3" />
             </div>
