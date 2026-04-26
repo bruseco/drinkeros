@@ -433,7 +433,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
             )
           ) : null}
           {heroBadge && (
-            <p className="text-xs sm:text-sm font-bold tracking-[0.3em] uppercase text-white/70 mb-2">
+            <p className={`text-xs sm:text-sm font-bold tracking-[0.3em] uppercase mb-2 ${heroBadgeClassName ?? 'text-white/70'}`}>
               {heroBadge}
             </p>
           )}
