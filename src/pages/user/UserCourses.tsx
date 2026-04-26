@@ -204,8 +204,8 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, owned, expired = false,
 
   // Opacidade dinâmica: base 0.55 → 1.0 conforme se aproxima do centro
   const dynamicOpacity = expired ? 0.4 : 0.55 + 0.45 * centrality;
-  // "Saiba mais" oscila horizontalmente proporcional à centralidade
-  const wiggleX = Math.sin(Date.now() / 350) * 6 * centrality;
+  // Amplitude do wiggle horizontal (0 nas bordas, ~7px no centro)
+  const wiggleAmp = `${(centrality * 7).toFixed(2)}px`;
 
   return (
     <Link to={cardLink}>
@@ -260,8 +260,8 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, owned, expired = false,
             </Link>
           ) : (
             <div
-              className="flex items-center gap-1 text-white/90 text-xs"
-              style={{ transform: `translateX(${wiggleX}px)`, transition: 'transform 120ms linear' }}
+              className="flex items-center gap-1 text-white/90 text-xs animate-wiggle-x"
+              style={{ ['--wiggle-amp' as any]: wiggleAmp }}
             >
               <span>{expired ? 'Reativar com VIP' : owned ? 'Ver módulos' : 'Saiba mais'}</span>
               <ChevronRight className="h-3 w-3" />
