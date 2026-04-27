@@ -20,6 +20,7 @@ import CourseLanding, {
 } from './CourseLanding';
 
 import instructor from '@/assets/landing/classicos/instructor.jpg';
+import certificadoModelo from '@/assets/landing/certificado-workshop-classicos.png';
 
 // Paleta: rubi/vinho intenso (workshop premium, "além dos clássicos")
 const theme: CourseTheme = {
@@ -49,7 +50,11 @@ const profiles: ProfileItem[] = [
 ];
 
 const bonus: BonusItem[] = [
-  { title: '4 E-books exclusivos do Workshop', description: 'Um e-book por aula, com receitas, técnicas e curiosidades dos drinks apresentados.' },
+  {
+    title: '4 E-books exclusivos do Workshop',
+    description: 'Um e-book por aula, com receitas, técnicas e curiosidades dos drinks apresentados. E ao concluir o workshop, você ainda recebe um Certificado de Conclusão exclusivo, assinado por Bruno Abreu.',
+    imageSrc: certificadoModelo,
+  },
   { title: 'Clube dos Drinkeros', description: 'Acesso ao app com mais de 1.000 receitas para pesquisar e salvar como favoritas.', originalPrice: 'R$ 247,00' },
   { title: 'Comunidade exclusiva no WhatsApp', description: 'Grupo exclusivo para tirar dúvidas e trocar experiências com outros alunos.' },
 ];
