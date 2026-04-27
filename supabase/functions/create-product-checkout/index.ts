@@ -134,6 +134,14 @@ serve(async (req) => {
       client_reference_id: userId || undefined,
       line_items: [lineItem as any],
       allow_promotion_codes: !applyDiscount, // evita stack de cupom + desconto VIP
+      // Parcelamento com juros do emissor (cliente paga juros, loja recebe à vista)
+      // Requer ativação manual: Stripe Dashboard → Settings → Payments → Cards → Installments (Brazil)
+      payment_method_types: ["card"],
+      payment_method_options: {
+        card: {
+          installments: { enabled: true },
+        },
+      },
       success_url: `${origin}/${product.slug}?checkout=success`,
       cancel_url: `${origin}/${product.slug}?checkout=cancel`,
       metadata: {
