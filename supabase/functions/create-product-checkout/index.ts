@@ -154,6 +154,15 @@ serve(async (req) => {
       },
     });
 
+    console.log("[create-product-checkout] session debug:", JSON.stringify({
+      id: session.id,
+      mode: session.mode,
+      currency: session.currency,
+      amount_total: session.amount_total,
+      payment_method_types: session.payment_method_types,
+      payment_method_options: session.payment_method_options,
+    }));
+
     return new Response(JSON.stringify({ url: session.url }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
