@@ -129,6 +129,7 @@ const App = () => (
             <Route path="/bar-p-eventos" element={<BarParaEventos />} />
             <Route path="/drinkdelivery-engarrafados" element={<DrinkDeliveryEngarrafados />} />
             <Route path="/ingredientes-artesanais" element={<IngredientesArtesanais />} />
+            <Route path="/producao-de-ingredientes-artesanais" element={<IngredientesArtesanais />} />
             <Route path="/classicos-destilados" element={<ClassicosDestilados />} />
             <Route path="/workshop-alem-dos-classicos" element={<WorkshopAlemDosClassicos />} />
             <Route path="/bartender-a-bordo" element={<BartenderABordo />} />
