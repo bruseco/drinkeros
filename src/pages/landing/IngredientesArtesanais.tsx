@@ -76,7 +76,7 @@ const faq: FaqItem[] = [
 
 const IngredientesArtesanais: React.FC = () => (
   <CourseLanding
-    slug="ingredientes-artesanais"
+    slug="producao-de-ingredientes-artesanais"
     brand="Ingredientes Artesanais"
     logoSrc={logo}
     logoBgSrc={logoBg}
