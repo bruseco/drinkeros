@@ -390,7 +390,7 @@ const AdminUserDetail: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Editar período do Clube dos Drinkeros</DialogTitle>
             <DialogDescription>
-              Ajuste o início e a expiração da assinatura. A régua de avisos de renovação será reiniciada automaticamente para a nova data.
+              Ajuste o início e a expiração do acesso. A régua de avisos de renovação será reiniciada automaticamente para a nova data.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">

@@ -314,9 +314,9 @@ const PlanSection: React.FC = () => {
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => window.open('https://wa.me/5548991601025?text=Olá! Quero gerenciar/cancelar minha assinatura do Clube.', '_blank')}
+            onClick={() => window.open('https://wa.me/5548991601025?text=Olá! Quero gerenciar/cancelar meu acesso de Sócio do Clube.', '_blank')}
           >
-            Gerenciar / Cancelar assinatura
+            Gerenciar Sócio do Clube
           </Button>
         </>
       ) : (
