@@ -4,6 +4,7 @@ import { Crown, Check, X, GlassWater, Sparkles, Zap, BookOpen, GraduationCap, Lo
 import jackDaniels from '@/assets/landing/bebida-decifrada/jack-daniels-degustacao.mp4';
 import bebidaCover from '@/assets/landing/bebida-decifrada/cover.jpg';
 import workshopVsl from '@/assets/landing/workshop/vsl.mp4';
+import certificadoWorkshop from '@/assets/landing/certificado-workshop-classicos.png';
 const workshopCover = 'https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/dd1da78d-6b25-49ee-8d49-8e83f675ff65.jpg';
 import xaropesVideo from '@/assets/landing/xaropes/clipe-xaropes-artesanais.mov';
 import xaropesCover from '@/assets/thumb-xaropes.jpg';
@@ -369,6 +370,18 @@ const VipLanding: React.FC = () => {
                   <strong className="text-white">criar variações</strong> mantendo a mesma estrutura.
                   Na primeira aula, você aprende os xaropes que serão utilizados nos drinks.
                 </p>
+                <p className="text-sm text-purple-100 leading-snug mt-4">
+                  E ao concluir o workshop, você ainda recebe um{' '}
+                  <strong className="text-white">Certificado de Conclusão exclusivo</strong>, assinado por Bruno Abreu.
+                </p>
+                <div className="mt-5 rounded-xl overflow-hidden ring-1 ring-white/10 bg-black/40">
+                  <img
+                    src={certificadoWorkshop}
+                    alt="Modelo do Certificado de Conclusão do Workshop Além dos Clássicos"
+                    loading="lazy"
+                    className="w-full h-auto"
+                  />
+                </div>
               </div>
             </div>
 
