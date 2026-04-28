@@ -1221,6 +1221,48 @@ export type Database = {
         }
         Relationships: []
       }
+      mercadopago_events: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          event_type: string
+          external_reference: string | null
+          id: string
+          payment_id: string | null
+          preference_id: string | null
+          processed: boolean
+          processed_at: string | null
+          raw_payload: Json
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          event_type: string
+          external_reference?: string | null
+          id?: string
+          payment_id?: string | null
+          preference_id?: string | null
+          processed?: boolean
+          processed_at?: string | null
+          raw_payload: Json
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          event_type?: string
+          external_reference?: string | null
+          id?: string
+          payment_id?: string | null
+          preference_id?: string | null
+          processed?: boolean
+          processed_at?: string | null
+          raw_payload?: Json
+          status?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string
@@ -1950,6 +1992,7 @@ export type Database = {
           combo_id: string
           expires_at: string | null
           id: string
+          mercadopago_payment_id: string | null
           purchased_at: string
           source: string
           user_id: string
@@ -1958,6 +2001,7 @@ export type Database = {
           combo_id: string
           expires_at?: string | null
           id?: string
+          mercadopago_payment_id?: string | null
           purchased_at?: string
           source?: string
           user_id: string
@@ -1966,6 +2010,7 @@ export type Database = {
           combo_id?: string
           expires_at?: string | null
           id?: string
+          mercadopago_payment_id?: string | null
           purchased_at?: string
           source?: string
           user_id?: string
@@ -1985,6 +2030,7 @@ export type Database = {
           course_id: string
           expires_at: string | null
           id: string
+          mercadopago_payment_id: string | null
           purchased_at: string
           source: string
           user_id: string
@@ -1993,6 +2039,7 @@ export type Database = {
           course_id: string
           expires_at?: string | null
           id?: string
+          mercadopago_payment_id?: string | null
           purchased_at?: string
           source?: string
           user_id: string
@@ -2001,6 +2048,7 @@ export type Database = {
           course_id?: string
           expires_at?: string | null
           id?: string
+          mercadopago_payment_id?: string | null
           purchased_at?: string
           source?: string
           user_id?: string
@@ -2020,6 +2068,7 @@ export type Database = {
           ebook_id: string
           expires_at: string | null
           id: string
+          mercadopago_payment_id: string | null
           purchased_at: string
           source: string
           user_id: string
@@ -2028,6 +2077,7 @@ export type Database = {
           ebook_id: string
           expires_at?: string | null
           id?: string
+          mercadopago_payment_id?: string | null
           purchased_at?: string
           source?: string
           user_id: string
@@ -2036,6 +2086,7 @@ export type Database = {
           ebook_id?: string
           expires_at?: string | null
           id?: string
+          mercadopago_payment_id?: string | null
           purchased_at?: string
           source?: string
           user_id?: string
@@ -2097,6 +2148,7 @@ export type Database = {
           expires_at: string | null
           hotmart_transaction_id: string | null
           id: string
+          mercadopago_payment_id: string | null
           package_id: string
           purchased_at: string
           source: string
@@ -2106,6 +2158,7 @@ export type Database = {
           expires_at?: string | null
           hotmart_transaction_id?: string | null
           id?: string
+          mercadopago_payment_id?: string | null
           package_id: string
           purchased_at?: string
           source?: string
@@ -2115,6 +2168,7 @@ export type Database = {
           expires_at?: string | null
           hotmart_transaction_id?: string | null
           id?: string
+          mercadopago_payment_id?: string | null
           package_id?: string
           purchased_at?: string
           source?: string
