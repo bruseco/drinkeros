@@ -112,9 +112,11 @@ const Migracao: React.FC = () => {
           <Link to="/" className="mx-auto mb-4">
             <img src={drinkrosLogo} alt="Drinkeros" className="h-14 object-contain" />
           </Link>
-          <CardTitle className="text-2xl">Migração de Conta</CardTitle>
+          <CardTitle className="text-2xl">
+            {step === 'done' ? 'Migração de Conta' : 'O Sistema mudou!'}
+          </CardTitle>
           <CardDescription>
-            {step === 'email' && 'Digite seu e-mail cadastrado para criar sua senha de acesso.'}
+            {step === 'email' && 'Migre agora para a nova conta.'}
             {step === 'password' && 'Crie uma senha para acessar a plataforma.'}
             {step === 'done' && 'Tudo pronto! Sua conta foi migrada.'}
           </CardDescription>
@@ -122,6 +124,17 @@ const Migracao: React.FC = () => {
         <CardContent className="space-y-4">
           {step === 'email' && (
             <form onSubmit={handleCheckEmail} className="space-y-4">
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-2 text-sm text-muted-foreground">
+                <p>
+                  Agora estamos com um novo sistema feito com{' '}
+                  <span className="font-semibold text-foreground">inteligência artificial</span>,
+                  assim temos mais controle e menos bugs. O aplicativo está{' '}
+                  <span className="font-semibold text-foreground">mais rápido e mais inteligente</span>.
+                </p>
+                <p className="text-foreground font-medium">
+                  Insira abaixo o e-mail utilizado no sistema antigo e crie uma nova senha de acesso.
+                </p>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="migration-email">E-mail</Label>
                 <Input
