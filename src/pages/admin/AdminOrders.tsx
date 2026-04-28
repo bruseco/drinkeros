@@ -245,7 +245,7 @@ const AdminOrders: React.FC = () => {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            Página {page + 1} de {totalPages} · {total.toLocaleString('pt-BR')} pedidos
+            Página {page + 1} de {totalPages} · {total.toLocaleString('pt-BR')} vendas
             {isFetching && <Loader2 className="inline ml-2 h-3 w-3 animate-spin" />}
           </div>
           <div className="flex gap-2">
