@@ -44,6 +44,7 @@ export default function Checkout() {
   const [pixResult, setPixResult] = useState<PixData | null>(null);
   const [pixPaymentId, setPixPaymentId] = useState<string | null>(null);
   const [paid, setPaid] = useState(false);
+  const [payerEmail, setPayerEmail] = useState<string>("");
 
   // 1. Carrega Public Key e inicializa MP SDK
   useEffect(() => {
