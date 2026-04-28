@@ -479,11 +479,11 @@ export type Database = {
       }
       combos: {
         Row: {
+          checkout_url: string | null
           cover_image_url: string | null
           created_at: string
           description: string | null
           display_order: number | null
-          hotmart_product_code: string | null
           id: string
           includes_exclusive_access: boolean
           is_active: boolean
@@ -494,15 +494,14 @@ export type Database = {
           price: number | null
           slug: string
           updated_at: string
-          woocommerce_product_id: string | null
           workload_hours: number | null
         }
         Insert: {
+          checkout_url?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
           display_order?: number | null
-          hotmart_product_code?: string | null
           id?: string
           includes_exclusive_access?: boolean
           is_active?: boolean
@@ -513,15 +512,14 @@ export type Database = {
           price?: number | null
           slug: string
           updated_at?: string
-          woocommerce_product_id?: string | null
           workload_hours?: number | null
         }
         Update: {
+          checkout_url?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
           display_order?: number | null
-          hotmart_product_code?: string | null
           id?: string
           includes_exclusive_access?: boolean
           is_active?: boolean
@@ -532,7 +530,6 @@ export type Database = {
           price?: number | null
           slug?: string
           updated_at?: string
-          woocommerce_product_id?: string | null
           workload_hours?: number | null
         }
         Relationships: []
@@ -581,12 +578,12 @@ export type Database = {
           certificate_bg_url: string | null
           certificate_enabled: boolean
           certificate_text_color: string | null
+          checkout_url: string | null
           cover_image_url: string | null
           created_at: string
           description: string | null
           discount_price: number | null
           display_order: number | null
-          hotmart_product_code: string | null
           id: string
           is_active: boolean
           is_available_for_sale: boolean
@@ -597,19 +594,18 @@ export type Database = {
           stripe_price_id: string | null
           stripe_product_id: string | null
           updated_at: string
-          woocommerce_product_id: string | null
           workload_hours: number | null
         }
         Insert: {
           certificate_bg_url?: string | null
           certificate_enabled?: boolean
           certificate_text_color?: string | null
+          checkout_url?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
           discount_price?: number | null
           display_order?: number | null
-          hotmart_product_code?: string | null
           id?: string
           is_active?: boolean
           is_available_for_sale?: boolean
@@ -620,19 +616,18 @@ export type Database = {
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           updated_at?: string
-          woocommerce_product_id?: string | null
           workload_hours?: number | null
         }
         Update: {
           certificate_bg_url?: string | null
           certificate_enabled?: boolean
           certificate_text_color?: string | null
+          checkout_url?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
           discount_price?: number | null
           display_order?: number | null
-          hotmart_product_code?: string | null
           id?: string
           is_active?: boolean
           is_available_for_sale?: boolean
@@ -643,7 +638,6 @@ export type Database = {
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           updated_at?: string
-          woocommerce_product_id?: string | null
           workload_hours?: number | null
         }
         Relationships: []
@@ -1221,48 +1215,6 @@ export type Database = {
         }
         Relationships: []
       }
-      mercadopago_events: {
-        Row: {
-          created_at: string
-          error_message: string | null
-          event_type: string
-          external_reference: string | null
-          id: string
-          payment_id: string | null
-          preference_id: string | null
-          processed: boolean
-          processed_at: string | null
-          raw_payload: Json
-          status: string | null
-        }
-        Insert: {
-          created_at?: string
-          error_message?: string | null
-          event_type: string
-          external_reference?: string | null
-          id?: string
-          payment_id?: string | null
-          preference_id?: string | null
-          processed?: boolean
-          processed_at?: string | null
-          raw_payload: Json
-          status?: string | null
-        }
-        Update: {
-          created_at?: string
-          error_message?: string | null
-          event_type?: string
-          external_reference?: string | null
-          id?: string
-          payment_id?: string | null
-          preference_id?: string | null
-          processed?: boolean
-          processed_at?: string | null
-          raw_payload?: Json
-          status?: string | null
-        }
-        Relationships: []
-      }
       notifications: {
         Row: {
           body: string
@@ -1369,11 +1321,11 @@ export type Database = {
       }
       packages: {
         Row: {
+          checkout_url: string | null
           cover_image_url: string | null
           created_at: string
           description: string | null
           display_order: number | null
-          hotmart_product_code: string | null
           id: string
           is_active: boolean | null
           is_available_for_sale: boolean
@@ -1383,15 +1335,14 @@ export type Database = {
           price: number | null
           slug: string
           updated_at: string
-          woocommerce_product_id: string | null
           workload_hours: number | null
         }
         Insert: {
+          checkout_url?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
           display_order?: number | null
-          hotmart_product_code?: string | null
           id?: string
           is_active?: boolean | null
           is_available_for_sale?: boolean
@@ -1401,15 +1352,14 @@ export type Database = {
           price?: number | null
           slug: string
           updated_at?: string
-          woocommerce_product_id?: string | null
           workload_hours?: number | null
         }
         Update: {
+          checkout_url?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
           display_order?: number | null
-          hotmart_product_code?: string | null
           id?: string
           is_active?: boolean | null
           is_available_for_sale?: boolean
@@ -1419,7 +1369,6 @@ export type Database = {
           price?: number | null
           slug?: string
           updated_at?: string
-          woocommerce_product_id?: string | null
           workload_hours?: number | null
         }
         Relationships: []
@@ -2361,63 +2310,6 @@ export type Database = {
           step?: string
           user_id?: string
           user_plan_expires_at?: string
-        }
-        Relationships: []
-      }
-      webhook_logs: {
-        Row: {
-          already_had_access: boolean | null
-          created_at: string
-          email: string | null
-          error_message: string | null
-          id: string
-          is_new_user: boolean | null
-          phone: string | null
-          processing_time_ms: number | null
-          product_id: string | null
-          product_name: string | null
-          raw_payload: Json | null
-          source: string
-          status: string
-          status_detail: string | null
-          user_id: string | null
-          user_name: string | null
-        }
-        Insert: {
-          already_had_access?: boolean | null
-          created_at?: string
-          email?: string | null
-          error_message?: string | null
-          id?: string
-          is_new_user?: boolean | null
-          phone?: string | null
-          processing_time_ms?: number | null
-          product_id?: string | null
-          product_name?: string | null
-          raw_payload?: Json | null
-          source?: string
-          status?: string
-          status_detail?: string | null
-          user_id?: string | null
-          user_name?: string | null
-        }
-        Update: {
-          already_had_access?: boolean | null
-          created_at?: string
-          email?: string | null
-          error_message?: string | null
-          id?: string
-          is_new_user?: boolean | null
-          phone?: string | null
-          processing_time_ms?: number | null
-          product_id?: string | null
-          product_name?: string | null
-          raw_payload?: Json | null
-          source?: string
-          status?: string
-          status_detail?: string | null
-          user_id?: string | null
-          user_name?: string | null
         }
         Relationships: []
       }

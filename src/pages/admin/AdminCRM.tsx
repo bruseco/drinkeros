@@ -362,7 +362,6 @@ const AdminCRM: React.FC = () => {
 
   const sourceLabels: Record<string, string> = {
     manual: 'Manual',
-    woocommerce: 'WooCommerce',
     whatsapp: 'WhatsApp',
   };
 
@@ -483,7 +482,6 @@ const AdminCRM: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="manual">Manual</SelectItem>
-                    <SelectItem value="woocommerce">WooCommerce</SelectItem>
                     <SelectItem value="whatsapp">WhatsApp</SelectItem>
                   </SelectContent>
                 </Select>

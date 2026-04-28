@@ -62,7 +62,7 @@ const UserModuleLessons: React.FC = () => {
   const totalLessons = infiniteData?.pages[0]?.total || 0;
 
   const moduleName = moduleInfo?.package.name || packageData?.name || '';
-  const checkoutUrl = packageData?.hotmart_product_code || '';
+  const checkoutUrl = packageData?.checkout_url || '';
 
   const handleCheckout = () => {
     if (checkoutUrl) {

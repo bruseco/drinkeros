@@ -110,9 +110,9 @@ const AdminPackages: React.FC = () => {
                   <TableCell>
                     {(pkg as any).is_free ? (
                       <span className="text-sm text-muted-foreground">-</span>
-                    ) : pkg.hotmart_product_code ? (
-                      <a href={pkg.hotmart_product_code} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm truncate block max-w-[200px]">
-                        {pkg.hotmart_product_code}
+                    ) : pkg.checkout_url ? (
+                      <a href={pkg.checkout_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm truncate block max-w-[200px]">
+                        {pkg.checkout_url}
                       </a>
                     ) : '-'}
                   </TableCell>

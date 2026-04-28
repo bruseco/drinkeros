@@ -15,7 +15,7 @@ const UserModules: React.FC = () => {
 
   const userPackageIds = userPackages.map((up) => up.package_id);
   const upsellPackages = allPackages.filter(
-    (p) => !userPackageIds.includes(p.id) && !p.is_free && p.is_available_for_sale && !!p.hotmart_product_code
+    (p) => !userPackageIds.includes(p.id) && !p.is_free && p.is_available_for_sale && !!p.checkout_url
   );
 
   if (isLoading) {

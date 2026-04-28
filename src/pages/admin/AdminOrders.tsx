@@ -17,17 +17,11 @@ import { Loader2, Search, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide
 const sourceLabel: Record<string, string> = {
   stripe: 'Stripe',
   mercadopago: 'Mercado Pago',
-  woocommerce: 'WooCommerce',
-  hotmart: 'Hotmart',
-  pix: 'PIX',
 };
 
 const sourceVariant: Record<string, 'default' | 'secondary' | 'outline'> = {
   stripe: 'default',
-  mercadopago: 'default',
-  woocommerce: 'secondary',
-  hotmart: 'secondary',
-  pix: 'outline',
+  mercadopago: 'secondary',
 };
 
 const productLabel: Record<string, string> = {
@@ -170,9 +164,6 @@ const AdminOrders: React.FC = () => {
                 <SelectItem value="all">Todas as origens</SelectItem>
                 <SelectItem value="stripe">Stripe</SelectItem>
                 <SelectItem value="mercadopago">Mercado Pago</SelectItem>
-                <SelectItem value="woocommerce">WooCommerce</SelectItem>
-                <SelectItem value="hotmart">Hotmart</SelectItem>
-                <SelectItem value="pix">PIX</SelectItem>
               </SelectContent>
             </Select>
             <Select value={productType} onValueChange={(v) => { setProductType(v); setPage(0); }}>

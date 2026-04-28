@@ -25,10 +25,8 @@ import { AddAccessDialog } from '@/components/admin/AddAccessDialog';
 const sourceLabel: Record<string, string> = {
   manual: 'Manual',
   stripe: 'Stripe (renova sozinho)',
-  webhook: 'Webhook',
-  hotmart: 'Hotmart',
-  woocommerce: 'WooCommerce',
-  pix: 'PIX',
+  mercadopago: 'Mercado Pago',
+  vip_bonus: 'Bônus do Clube',
   legacy_exclusive: 'Acesso legado',
   import: 'Importado',
 };

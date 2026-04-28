@@ -55,31 +55,31 @@ Deno.serve(async (req) => {
 
     // 3. Check products without checkout URL
     const [coursesRes, combosRes, packagesRes] = await Promise.all([
-      adminClient.from("courses").select("id, name, hotmart_product_code, is_available_for_sale, is_active"),
-      adminClient.from("combos").select("id, name, hotmart_product_code, is_available_for_sale, is_active"),
-      adminClient.from("packages").select("id, name, hotmart_product_code, is_available_for_sale, is_active, is_free"),
+      adminClient.from("courses").select("id, name, checkout_url, is_available_for_sale, is_active"),
+      adminClient.from("combos").select("id, name, checkout_url, is_available_for_sale, is_active"),
+      adminClient.from("packages").select("id, name, checkout_url, is_available_for_sale, is_active, is_free"),
     ]);
 
     const productsWithoutUrl: string[] = [];
     for (const c of (coursesRes.data || [])) {
-      if (c.is_active && c.is_available_for_sale && !c.hotmart_product_code) {
+      if (c.is_active && c.is_available_for_sale && !c.checkout_url) {
         productsWithoutUrl.push(`Curso: ${c.name}`);
       }
     }
     for (const cb of (combosRes.data || [])) {
-      if (cb.is_active && cb.is_available_for_sale && !cb.hotmart_product_code) {
+      if (cb.is_active && cb.is_available_for_sale && !cb.checkout_url) {
         productsWithoutUrl.push(`Combo: ${cb.name}`);
       }
     }
     for (const p of (packagesRes.data || [])) {
-      if (p.is_active && p.is_available_for_sale && !p.is_free && !p.hotmart_product_code) {
+      if (p.is_active && p.is_available_for_sale && !p.is_free && !p.checkout_url) {
         productsWithoutUrl.push(`Módulo: ${p.name}`);
       }
     }
 
     // 4. Check combo coverage in sequences
     const comboSeqs = seqs.filter((s: any) => s.product_type === "combo");
-    const sellableCombos = (combosRes.data || []).filter((cb: any) => cb.is_active && cb.is_available_for_sale && cb.hotmart_product_code);
+    const sellableCombos = (combosRes.data || []).filter((cb: any) => cb.is_active && cb.is_available_for_sale && cb.checkout_url);
 
     // 5. Check upsell_settings
     const { data: settings } = await adminClient.from("upsell_settings").select("*").limit(1).single();

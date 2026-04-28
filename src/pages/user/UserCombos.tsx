@@ -14,7 +14,7 @@ const UserCombos: React.FC = () => {
 
   const userComboIds = userCombos.map((uc) => uc.combo_id);
   const upsellCombos = allCombos.filter(
-    (c) => !userComboIds.includes(c.id) && !c.is_free && c.is_available_for_sale && !!c.hotmart_product_code
+    (c) => !userComboIds.includes(c.id) && !c.is_free && c.is_available_for_sale && !!c.checkout_url
   );
 
   if (isLoading) {
@@ -99,7 +99,7 @@ const UserCombos: React.FC = () => {
                   name: combo.name,
                   description: combo.description,
                   cover_image_url: combo.cover_image_url,
-                  hotmart_product_code: combo.hotmart_product_code,
+                  checkout_url: combo.checkout_url,
                 }}
               />
             ))}

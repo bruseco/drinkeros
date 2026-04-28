@@ -90,8 +90,8 @@ Deno.serve(async (req) => {
           adminClient.from("user_packages").select("package_id, packages(name)").eq("user_id", profile.user_id),
           adminClient.from("user_courses").select("course_id, courses(name)").eq("user_id", profile.user_id),
           adminClient.from("user_combos").select("combo_id, combos(name)").eq("user_id", profile.user_id),
-          adminClient.from("packages").select("id, name, description, hotmart_product_code").eq("is_active", true).eq("is_available_for_sale", true).eq("is_free", false),
-          adminClient.from("courses").select("id, name, description, hotmart_product_code").eq("is_active", true).eq("is_available_for_sale", true).eq("is_free", false),
+          adminClient.from("packages").select("id, name, description, checkout_url").eq("is_active", true).eq("is_available_for_sale", true).eq("is_free", false),
+          adminClient.from("courses").select("id, name, description, checkout_url").eq("is_active", true).eq("is_available_for_sale", true).eq("is_free", false),
           adminClient.from("upsell_product_rules").select("*").eq("is_active", true).order("priority", { ascending: true }),
           adminClient.from("recipe_views").select("recipe_id, completed").eq("user_id", profile.user_id),
         ]);
@@ -210,16 +210,16 @@ Responda em JSON:
 
       let matches: any[] = [];
       const [{ data: pkgs }, { data: courses }] = await Promise.all([
-        adminClient.from("packages").select("id, name, hotmart_product_code, description").ilike("name", `%${cleaned}%`).limit(3),
-        adminClient.from("courses").select("id, name, hotmart_product_code, description").ilike("name", `%${cleaned}%`).limit(3),
+        adminClient.from("packages").select("id, name, checkout_url, description").ilike("name", `%${cleaned}%`).limit(3),
+        adminClient.from("courses").select("id, name, checkout_url, description").ilike("name", `%${cleaned}%`).limit(3),
       ]);
       matches = [...(pkgs || []).map((p: any) => ({ ...p, type: "package" })), ...(courses || []).map((c: any) => ({ ...c, type: "course" }))];
 
       if (matches.length === 0 && keywords.length > 0) {
         for (const kw of keywords) {
           const [{ data: kp }, { data: kc }] = await Promise.all([
-            adminClient.from("packages").select("id, name, hotmart_product_code, description").ilike("name", `%${kw}%`).limit(3),
-            adminClient.from("courses").select("id, name, hotmart_product_code, description").ilike("name", `%${kw}%`).limit(3),
+            adminClient.from("packages").select("id, name, checkout_url, description").ilike("name", `%${kw}%`).limit(3),
+            adminClient.from("courses").select("id, name, checkout_url, description").ilike("name", `%${kw}%`).limit(3),
           ]);
           const km = [...(kp || []).map((p: any) => ({ ...p, type: "package" })), ...(kc || []).map((c: any) => ({ ...c, type: "course" }))];
           if (km.length > 0) { matches = km; break; }
@@ -228,8 +228,8 @@ Responda em JSON:
 
       let salesContent = "", matchedProduct: any = null;
       for (const m of matches) {
-        if (m.hotmart_product_code) {
-          const url = m.hotmart_product_code.startsWith("http") ? m.hotmart_product_code : `https://pay.hotmart.com/${m.hotmart_product_code}`;
+        if (m.checkout_url) {
+          const url = m.checkout_url.startsWith("http") ? m.checkout_url : `https://pay.hotmart.com/${m.checkout_url}`;
           salesContent = await getCachedOrScrape(adminClient, m.type, m.id, url);
           if (salesContent) { matchedProduct = m; break; }
         }

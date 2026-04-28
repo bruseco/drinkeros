@@ -110,9 +110,9 @@ const AdminCourses: React.FC = () => {
                   <TableCell>
                     {course.is_free ? (
                       <span className="text-sm text-muted-foreground">-</span>
-                    ) : course.hotmart_product_code ? (
-                      <a href={course.hotmart_product_code} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm truncate block max-w-[200px]">
-                        {course.hotmart_product_code}
+                    ) : course.checkout_url ? (
+                      <a href={course.checkout_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm truncate block max-w-[200px]">
+                        {course.checkout_url}
                       </a>
                     ) : '-'}
                   </TableCell>

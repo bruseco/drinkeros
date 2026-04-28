@@ -31,8 +31,7 @@ const ComboForm: React.FC = () => {
     slug: '',
     description: '',
     cover_image_url: '',
-    hotmart_product_code: '',
-    woocommerce_product_id: '',
+    checkout_url: '',
     is_active: true,
     is_free: false,
     is_available_for_sale: true,
@@ -49,8 +48,7 @@ const ComboForm: React.FC = () => {
         slug: combo.slug || '',
         description: combo.description || '',
         cover_image_url: combo.cover_image_url || '',
-        hotmart_product_code: combo.hotmart_product_code || '',
-        woocommerce_product_id: combo.woocommerce_product_id || '',
+        checkout_url: combo.checkout_url || '',
         is_active: combo.is_active ?? true,
         is_free: combo.is_free ?? false,
         is_available_for_sale: combo.is_available_for_sale ?? true,
@@ -111,8 +109,7 @@ const ComboForm: React.FC = () => {
       slug: formData.slug,
       description: formData.description || null,
       cover_image_url: formData.cover_image_url || null,
-      hotmart_product_code: formData.is_free ? null : (formData.hotmart_product_code || null),
-      woocommerce_product_id: formData.is_free ? null : (formData.woocommerce_product_id || null),
+      checkout_url: formData.is_free ? null : (formData.checkout_url || null),
       is_active: formData.is_active,
       is_free: formData.is_free,
       is_available_for_sale: formData.is_free ? false : formData.is_available_for_sale,
@@ -178,17 +175,10 @@ const ComboForm: React.FC = () => {
                   <Textarea id="description" value={formData.description} onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))} placeholder="Descreva o combo..." rows={3} />
                 </div>
                 {!formData.is_free && (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="hotmart_product_code">Link do Checkout</Label>
-                      <Input id="hotmart_product_code" type="url" value={formData.hotmart_product_code} onChange={(e) => setFormData((prev) => ({ ...prev, hotmart_product_code: e.target.value }))} placeholder="https://www.criminallab.com.br/pagamento/nome-do-produto/" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="woocommerce_product_id">ID do Produto WooCommerce</Label>
-                      <Input id="woocommerce_product_id" value={formData.woocommerce_product_id} onChange={(e) => setFormData((prev) => ({ ...prev, woocommerce_product_id: e.target.value }))} placeholder="Ex: 12345" />
-                      <p className="text-xs text-muted-foreground">ID do produto no WooCommerce. Usado para mapear compras via webhook.</p>
-                    </div>
-                  </>
+                  <div className="space-y-2">
+                    <Label htmlFor="checkout_url">Link do Checkout (Stripe ou Mercado Pago)</Label>
+                    <Input id="checkout_url" type="url" value={formData.checkout_url} onChange={(e) => setFormData((prev) => ({ ...prev, checkout_url: e.target.value }))} placeholder="https://drinkeros.com/checkout/..." />
+                  </div>
                 )}
                 <div className="space-y-2">
                   <Label htmlFor="workload_hours">Carga Horária (horas)</Label>

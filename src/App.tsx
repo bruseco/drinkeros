@@ -57,7 +57,7 @@ import AdminWhatsAppQueue from "./pages/admin/AdminWhatsAppQueue";
 import AdminWhatsAppConnections from "./pages/admin/AdminWhatsAppConnections";
 import AdminWhatsAppTemplates from "./pages/admin/AdminWhatsAppTemplates";
 import AdminWhatsAppBindings from "./pages/admin/AdminWhatsAppBindings";
-import AdminWebhookLogs from "./pages/admin/AdminWebhookLogs";
+
 import AdminCSReports from "./pages/admin/AdminCSReports";
 import AdminCSTimeline from "./pages/admin/AdminCSTimeline";
 import AdminCRM from "./pages/admin/AdminCRM";
@@ -175,7 +175,7 @@ const App = () => (
               <Route path="whatsapp/conexoes" element={<AdminWhatsAppConnections />} />
               <Route path="whatsapp/modelos" element={<AdminWhatsAppTemplates />} />
               <Route path="whatsapp/associacoes" element={<AdminWhatsAppBindings />} />
-              <Route path="webhooks" element={<AdminWebhookLogs />} />
+              
               <Route path="cs-reports" element={<AdminCSReports />} />
               <Route path="cs-timeline" element={<AdminCSTimeline />} />
               <Route path="crm" element={<AdminCRM />} />

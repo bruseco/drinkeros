@@ -500,13 +500,13 @@ const UserHome: React.FC = () => {
             (() => {
               // Build upsell element
               const upsellPackages = allPackages.filter(
-                (p) => !userPackageIds.includes(p.id) && !p.is_free && p.is_available_for_sale && !!p.hotmart_product_code
+                (p) => !userPackageIds.includes(p.id) && !p.is_free && p.is_available_for_sale && !!p.checkout_url
               );
               const upsellCourses = allCourses.filter(
-                (c) => !userCourses.some(uc => uc.course_id === c.id) && !c.is_free && c.is_available_for_sale && !!c.hotmart_product_code
+                (c) => !userCourses.some(uc => uc.course_id === c.id) && !c.is_free && c.is_available_for_sale && !!c.checkout_url
               );
               const upsellCombos = allCombos.filter(
-                (c) => !userCombos.some(uc => uc.combo_id === c.id) && !c.is_free && c.is_available_for_sale && !!c.hotmart_product_code
+                (c) => !userCombos.some(uc => uc.combo_id === c.id) && !c.is_free && c.is_available_for_sale && !!c.checkout_url
               );
               const hasUpsell = upsellPackages.length > 0 || upsellCourses.length > 0 || upsellCombos.length > 0;
 
@@ -518,14 +518,14 @@ const UserHome: React.FC = () => {
                       name: c.name,
                       description: c.description,
                       cover_image_url: c.cover_image_url,
-                      hotmart_product_code: c.hotmart_product_code,
+                      checkout_url: c.checkout_url,
                     })),
                     ...upsellCourses.map(c => ({
                       id: c.id,
                       name: c.name,
                       description: c.description,
                       cover_image_url: c.cover_image_url,
-                      hotmart_product_code: c.hotmart_product_code,
+                      checkout_url: c.checkout_url,
                     })),
                     ...upsellPackages,
                   ]} />

@@ -10,8 +10,7 @@ export interface Combo {
   slug: string;
   description: string | null;
   cover_image_url: string | null;
-  hotmart_product_code: string | null;
-  woocommerce_product_id: string | null;
+  checkout_url: string | null;
   is_active: boolean;
   is_free: boolean;
   is_available_for_sale: boolean;
