@@ -114,6 +114,7 @@ serve(async (req) => {
         user_id: userId || "",
         vip_discount_applied: isVip ? "true" : "false",
         vip_discount_percent: isVip ? String(VIP_DISCOUNT_PERCENT) : "0",
+        access_period_days: product_type === "club" ? "365" : "",
       },
       payer: {
         email: payerEmail,
@@ -161,6 +162,7 @@ serve(async (req) => {
         status: mpData.status,
         status_detail: mpData.status_detail,
         payment_method_id: mpData.payment_method_id,
+      installments: mpData.installments,
         product_slug: product.slug,
         pix: pixData ? {
           qr_code: pixData.qr_code,
