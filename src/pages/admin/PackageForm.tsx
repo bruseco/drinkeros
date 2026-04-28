@@ -26,7 +26,7 @@ const PackageForm: React.FC = () => {
     slug: '',
     description: '',
     cover_image_url: '',
-    hotmart_product_code: '',
+    checkout_url: '',
     woocommerce_product_id: '',
     is_active: true,
     is_free: false,
@@ -43,7 +43,7 @@ const PackageForm: React.FC = () => {
         slug: pkg.slug || '',
         description: pkg.description || '',
         cover_image_url: pkg.cover_image_url || '',
-        hotmart_product_code: pkg.hotmart_product_code || '',
+        checkout_url: pkg.checkout_url || '',
         woocommerce_product_id: (pkg as any).woocommerce_product_id || '',
         is_active: pkg.is_active ?? true,
         is_free: (pkg as any).is_free ?? false,
@@ -96,7 +96,7 @@ const PackageForm: React.FC = () => {
       slug: formData.slug,
       description: formData.description || null,
       cover_image_url: formData.cover_image_url || null,
-      hotmart_product_code: formData.is_free ? null : (formData.hotmart_product_code || null),
+      checkout_url: formData.is_free ? null : (formData.checkout_url || null),
       woocommerce_product_id: formData.is_free ? null : (formData.woocommerce_product_id || null),
       is_active: formData.is_active,
       is_free: formData.is_free,
@@ -187,13 +187,13 @@ const PackageForm: React.FC = () => {
                 {!formData.is_free && (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="hotmart_product_code">Link do Checkout</Label>
+                      <Label htmlFor="checkout_url">Link do Checkout</Label>
                       <Input
-                        id="hotmart_product_code"
+                        id="checkout_url"
                         type="url"
-                        value={formData.hotmart_product_code}
+                        value={formData.checkout_url}
                         onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, hotmart_product_code: e.target.value }))
+                          setFormData((prev) => ({ ...prev, checkout_url: e.target.value }))
                         }
                         placeholder="https://www.criminallab.com.br/pagamento/nome-do-produto/"
                       />

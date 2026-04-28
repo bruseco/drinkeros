@@ -19,12 +19,12 @@ export interface UpsellCardCompactProps {
     name: string;
     description: string | null;
     cover_image_url: string | null;
-    hotmart_product_code: string | null;
+    checkout_url: string | null;
   };
 }
 
 export const UpsellCardCompact: React.FC<UpsellCardCompactProps> = ({ pkg }) => {
-  const baseCheckoutUrl = pkg.hotmart_product_code || null;
+  const baseCheckoutUrl = pkg.checkout_url || null;
   
   // Append UTM params for platform tracking
   const checkoutUrl = baseCheckoutUrl
@@ -104,7 +104,7 @@ export interface UpsellSectionProps {
     name: string;
     description: string | null;
     cover_image_url: string | null;
-    hotmart_product_code: string | null;
+    checkout_url: string | null;
   }>;
 }
 

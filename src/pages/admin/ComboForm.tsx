@@ -31,7 +31,7 @@ const ComboForm: React.FC = () => {
     slug: '',
     description: '',
     cover_image_url: '',
-    hotmart_product_code: '',
+    checkout_url: '',
     woocommerce_product_id: '',
     is_active: true,
     is_free: false,
@@ -49,7 +49,7 @@ const ComboForm: React.FC = () => {
         slug: combo.slug || '',
         description: combo.description || '',
         cover_image_url: combo.cover_image_url || '',
-        hotmart_product_code: combo.hotmart_product_code || '',
+        checkout_url: combo.checkout_url || '',
         woocommerce_product_id: combo.woocommerce_product_id || '',
         is_active: combo.is_active ?? true,
         is_free: combo.is_free ?? false,
@@ -111,7 +111,7 @@ const ComboForm: React.FC = () => {
       slug: formData.slug,
       description: formData.description || null,
       cover_image_url: formData.cover_image_url || null,
-      hotmart_product_code: formData.is_free ? null : (formData.hotmart_product_code || null),
+      checkout_url: formData.is_free ? null : (formData.checkout_url || null),
       woocommerce_product_id: formData.is_free ? null : (formData.woocommerce_product_id || null),
       is_active: formData.is_active,
       is_free: formData.is_free,
@@ -180,8 +180,8 @@ const ComboForm: React.FC = () => {
                 {!formData.is_free && (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="hotmart_product_code">Link do Checkout</Label>
-                      <Input id="hotmart_product_code" type="url" value={formData.hotmart_product_code} onChange={(e) => setFormData((prev) => ({ ...prev, hotmart_product_code: e.target.value }))} placeholder="https://www.criminallab.com.br/pagamento/nome-do-produto/" />
+                      <Label htmlFor="checkout_url">Link do Checkout</Label>
+                      <Input id="checkout_url" type="url" value={formData.checkout_url} onChange={(e) => setFormData((prev) => ({ ...prev, checkout_url: e.target.value }))} placeholder="https://www.criminallab.com.br/pagamento/nome-do-produto/" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="woocommerce_product_id">ID do Produto WooCommerce</Label>

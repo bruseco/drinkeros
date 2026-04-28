@@ -167,7 +167,7 @@ interface CourseCardProps {
     slug?: string | null;
     description: string | null;
     cover_image_url: string | null;
-    hotmart_product_code: string | null;
+    checkout_url: string | null;
   };
   owned: boolean;
   expired?: boolean;

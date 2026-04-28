@@ -25,7 +25,7 @@ const UserComboDetail: React.FC = () => {
 
   const isLoading = comboLoading || coursesLoading;
 
-  const checkoutUrl = combo?.hotmart_product_code || null;
+  const checkoutUrl = combo?.checkout_url || null;
 
   const handleCheckout = () => {
     if (checkoutUrl) {

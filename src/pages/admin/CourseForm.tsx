@@ -94,7 +94,7 @@ const CourseForm: React.FC = () => {
     slug: '',
     description: '',
     cover_image_url: '',
-    hotmart_product_code: '',
+    checkout_url: '',
     woocommerce_product_id: '',
     is_active: true,
     is_free: false,
@@ -121,7 +121,7 @@ const CourseForm: React.FC = () => {
         slug: course.slug || '',
         description: course.description || '',
         cover_image_url: course.cover_image_url || '',
-        hotmart_product_code: course.hotmart_product_code || '',
+        checkout_url: course.checkout_url || '',
         woocommerce_product_id: course.woocommerce_product_id || '',
         is_active: course.is_active ?? true,
         is_free: course.is_free ?? false,
@@ -236,7 +236,7 @@ const CourseForm: React.FC = () => {
         slug: formData.slug,
         description: formData.description || null,
         cover_image_url: formData.cover_image_url || null,
-        hotmart_product_code: formData.is_free ? null : (formData.hotmart_product_code || null),
+        checkout_url: formData.is_free ? null : (formData.checkout_url || null),
         woocommerce_product_id: formData.is_free ? null : (formData.woocommerce_product_id || null),
         is_active: formData.is_active,
         is_free: formData.is_free,
@@ -444,13 +444,13 @@ const CourseForm: React.FC = () => {
                 {!formData.is_free && (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="hotmart_product_code">Link do Checkout</Label>
+                      <Label htmlFor="checkout_url">Link do Checkout</Label>
                       <Input
-                        id="hotmart_product_code"
+                        id="checkout_url"
                         type="url"
-                        value={formData.hotmart_product_code}
+                        value={formData.checkout_url}
                         onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, hotmart_product_code: e.target.value }))
+                          setFormData((prev) => ({ ...prev, checkout_url: e.target.value }))
                         }
                         placeholder="https://www.criminallab.com.br/pagamento/nome-do-produto/"
                       />

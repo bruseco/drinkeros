@@ -90,9 +90,9 @@ const AdminCombos: React.FC = () => {
                   <TableCell>
                     {combo.is_free ? (
                       <span className="text-sm text-muted-foreground">-</span>
-                    ) : combo.hotmart_product_code ? (
-                      <a href={combo.hotmart_product_code} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm truncate block max-w-[200px]">
-                        {combo.hotmart_product_code}
+                    ) : combo.checkout_url ? (
+                      <a href={combo.checkout_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm truncate block max-w-[200px]">
+                        {combo.checkout_url}
                       </a>
                     ) : '-'}
                   </TableCell>

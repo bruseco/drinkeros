@@ -459,22 +459,22 @@ serve(async (req: Request) => {
 
     // 5. Get all packages, courses, combos, and recipe_packages
     const [allPackages, allCourses, allCombos, allRecipePkgs] = await Promise.all([
-      supabase.from("packages").select("id, name, description, hotmart_product_code, is_free, is_available_for_sale, is_active").then(r => r.data || []),
-      supabase.from("courses").select("id, name, description, hotmart_product_code, is_free, is_available_for_sale, is_active").then(r => r.data || []),
-      supabase.from("combos").select("id, name, description, hotmart_product_code, is_free, is_available_for_sale, is_active").then(r => r.data || []),
+      supabase.from("packages").select("id, name, description, checkout_url, is_free, is_available_for_sale, is_active").then(r => r.data || []),
+      supabase.from("courses").select("id, name, description, checkout_url, is_free, is_available_for_sale, is_active").then(r => r.data || []),
+      supabase.from("combos").select("id, name, description, checkout_url, is_free, is_available_for_sale, is_active").then(r => r.data || []),
       fetchAll("recipe_packages", "recipe_id, package_id"),
     ]);
 
     const packageMap = new Map(allPackages.map((p: any) => [p.id, p]));
 
     const sellablePackages = allPackages.filter(
-      (p: any) => p.is_active && p.is_available_for_sale && !p.is_free && p.hotmart_product_code
+      (p: any) => p.is_active && p.is_available_for_sale && !p.is_free && p.checkout_url
     );
     const sellableCourses = allCourses.filter(
-      (c: any) => c.is_active && c.is_available_for_sale && !c.is_free && c.hotmart_product_code
+      (c: any) => c.is_active && c.is_available_for_sale && !c.is_free && c.checkout_url
     );
     const sellableCombos = allCombos.filter(
-      (cb: any) => cb.is_active && cb.is_available_for_sale && !cb.is_free && cb.hotmart_product_code
+      (cb: any) => cb.is_active && cb.is_available_for_sale && !cb.is_free && cb.checkout_url
     );
 
     console.log(`[process-upsell] Sellable catalog: ${sellableCourses.length} courses, ${sellablePackages.length} packages, ${sellableCombos.length} combos`);
@@ -525,7 +525,7 @@ serve(async (req: Request) => {
             ? comboById.get(rule.offer_product_id)
             : packageById.get(rule.offer_product_id);
 
-        if (!offerProduct || !offerProduct.hotmart_product_code) continue;
+        if (!offerProduct || !offerProduct.checkout_url) continue;
 
         return { product: offerProduct, type: rule.offer_product_type as "course" | "package" | "combo" };
       }
@@ -650,7 +650,7 @@ serve(async (req: Request) => {
       }
 
       // Skip products without checkout URL
-      if (!offerProduct.hotmart_product_code) {
+      if (!offerProduct.checkout_url) {
         console.log(`Skipping email for ${student.email}: product "${offerProduct.name}" has no checkout URL`);
         continue;
       }
@@ -678,7 +678,7 @@ serve(async (req: Request) => {
         const unsubscribeUrl = `${supabaseUrl}/functions/v1/upsell-unsubscribe?token=${encodeURIComponent(unsubToken)}`;
 
         // Create redirect link with UTMs for email
-        const emailCheckoutUrl = appendUtmParams(offerProduct.hotmart_product_code, {
+        const emailCheckoutUrl = appendUtmParams(offerProduct.checkout_url, {
           utm_source: "email",
           utm_medium: "upsell",
           utm_campaign: offerProduct.name,
@@ -830,7 +830,7 @@ serve(async (req: Request) => {
                 conversationHistory = messages || [];
               }
 
-              const waCheckoutUrl = appendUtmParams(offerProduct.hotmart_product_code, {
+              const waCheckoutUrl = appendUtmParams(offerProduct.checkout_url, {
                 utm_source: "whatsapp",
                 utm_medium: "upsell",
                 utm_campaign: offerProduct.name,
@@ -923,7 +923,7 @@ serve(async (req: Request) => {
             }
 
             // Create redirect link with UTMs for WhatsApp
-            const waCheckoutUrl = appendUtmParams(offerProduct.hotmart_product_code, {
+            const waCheckoutUrl = appendUtmParams(offerProduct.checkout_url, {
               utm_source: "whatsapp",
               utm_medium: "upsell",
               utm_campaign: offerProduct.name,

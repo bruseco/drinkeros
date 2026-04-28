@@ -595,8 +595,8 @@ Isso só se aplica a leads do CRM (pessoas que ainda não compraram). Se for um 
       let allMatches: any[] = [];
       
       const [{ data: matchedPkgs }, { data: matchedCourses }] = await Promise.all([
-        adminClient.from("packages").select("id, name, hotmart_product_code, description").ilike("name", `%${cleanedQuery}%`).limit(3),
-        adminClient.from("courses").select("id, name, hotmart_product_code, description").ilike("name", `%${cleanedQuery}%`).limit(3),
+        adminClient.from("packages").select("id, name, checkout_url, description").ilike("name", `%${cleanedQuery}%`).limit(3),
+        adminClient.from("courses").select("id, name, checkout_url, description").ilike("name", `%${cleanedQuery}%`).limit(3),
       ]);
 
       allMatches = [
@@ -609,8 +609,8 @@ Isso só se aplica a leads do CRM (pessoas que ainda não compraram). Se for um 
         console.log(`[agent] No results with cleaned query, trying keyword search...`);
         for (const keyword of keywords) {
           const [{ data: kwPkgs }, { data: kwCourses }] = await Promise.all([
-            adminClient.from("packages").select("id, name, hotmart_product_code, description").ilike("name", `%${keyword}%`).limit(3),
-            adminClient.from("courses").select("id, name, hotmart_product_code, description").ilike("name", `%${keyword}%`).limit(3),
+            adminClient.from("packages").select("id, name, checkout_url, description").ilike("name", `%${keyword}%`).limit(3),
+            adminClient.from("courses").select("id, name, checkout_url, description").ilike("name", `%${keyword}%`).limit(3),
           ]);
           const kwMatches = [
             ...(kwPkgs || []).map((p: any) => ({ ...p, type: "package" })),
@@ -628,11 +628,11 @@ Isso só se aplica a leads do CRM (pessoas que ainda não compraram). Se for um 
       let matchedProduct: any = null;
 
       for (const match of allMatches) {
-        if (match.hotmart_product_code) {
-          // Check if hotmart_product_code is already a full URL
-          const checkoutUrl = match.hotmart_product_code.startsWith("http")
-            ? match.hotmart_product_code
-            : `https://pay.hotmart.com/${match.hotmart_product_code}`;
+        if (match.checkout_url) {
+          // Check if checkout_url is already a full URL
+          const checkoutUrl = match.checkout_url.startsWith("http")
+            ? match.checkout_url
+            : `https://pay.hotmart.com/${match.checkout_url}`;
           salesPageContent = await getCachedOrScrape(adminClient, match.type, match.id, checkoutUrl);
           if (salesPageContent) {
             matchedProduct = match;

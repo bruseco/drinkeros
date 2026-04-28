@@ -68,7 +68,7 @@ const UserCourseModules: React.FC = () => {
   const isExpired = !!courseId && (expiredAccess?.course_ids?.has(courseId) ?? false);
   const isLocked = isLockedParam || (!courseLoading && !packagesLoading && !hasAccess) || isExpired;
 
-  const checkoutUrl = course?.hotmart_product_code || '';
+  const checkoutUrl = course?.checkout_url || '';
 
   const handleCheckout = () => {
     if (checkoutUrl) window.open(checkoutUrl, '_blank');
