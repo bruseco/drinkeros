@@ -6,13 +6,22 @@ import { Loader2, ShieldCheck, ArrowLeft, CheckCircle2, Copy } from "lucide-reac
 import { toast } from "sonner";
 import drinkerosLogo from "@/assets/logotipo-drinkeros.png";
 
-type ProductType = "course" | "ebook" | "combo" | "package";
+type ProductType = "course" | "ebook" | "combo" | "package" | "club";
 
-const TABLE_MAP: Record<ProductType, string> = {
+const TABLE_MAP: Record<Exclude<ProductType, "club">, string> = {
   course: "courses",
   ebook: "ebooks",
   combo: "combos",
   package: "packages",
+};
+
+const CLUB_PRODUCT: Product = {
+  id: "club",
+  name: "Clube dos Drinkeros · Anual",
+  slug: "clube",
+  price: 69,
+  cover_image_url: null,
+  description: "Acesso anual às receitas exclusivas e benefícios do Clube.",
 };
 
 interface Product {
@@ -66,13 +75,31 @@ export default function Checkout() {
 
   // 2. Carrega produto + checa VIP
   useEffect(() => {
-    if (!productType || !slug || !TABLE_MAP[productType]) {
+    if (!productType || !slug) {
       navigate("/");
       return;
     }
     (async () => {
       setLoading(true);
       try {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (productType === "club") {
+          if (!user) {
+            navigate("/signup?redirect=/checkout/club/clube");
+            return;
+          }
+          if (user.email) setPayerEmail(user.email);
+          setProduct(CLUB_PRODUCT);
+          setIsVip(false);
+          return;
+        }
+
+        if (!TABLE_MAP[productType]) {
+          navigate("/");
+          return;
+        }
+
         const { data: prod, error: prodErr } = await supabase
           .from(TABLE_MAP[productType] as any)
           .select("id, name, slug, price, cover_image_url, description")
@@ -85,7 +112,6 @@ export default function Checkout() {
         }
         setProduct(prod as unknown as Product);
 
-        const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           if (user.email) setPayerEmail(user.email);
           const { data: planData } = await supabase.rpc("get_user_plan", { _user_id: user.id });
