@@ -178,17 +178,10 @@ const ComboForm: React.FC = () => {
                   <Textarea id="description" value={formData.description} onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))} placeholder="Descreva o combo..." rows={3} />
                 </div>
                 {!formData.is_free && (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="checkout_url">Link do Checkout</Label>
-                      <Input id="checkout_url" type="url" value={formData.checkout_url} onChange={(e) => setFormData((prev) => ({ ...prev, checkout_url: e.target.value }))} placeholder="https://www.criminallab.com.br/pagamento/nome-do-produto/" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="woocommerce_product_id">ID do Produto WooCommerce</Label>
-                      <Input id="woocommerce_product_id" value={formData.woocommerce_product_id} onChange={(e) => setFormData((prev) => ({ ...prev, woocommerce_product_id: e.target.value }))} placeholder="Ex: 12345" />
-                      <p className="text-xs text-muted-foreground">ID do produto no WooCommerce. Usado para mapear compras via webhook.</p>
-                    </div>
-                  </>
+                  <div className="space-y-2">
+                    <Label htmlFor="checkout_url">Link do Checkout (Stripe ou Mercado Pago)</Label>
+                    <Input id="checkout_url" type="url" value={formData.checkout_url} onChange={(e) => setFormData((prev) => ({ ...prev, checkout_url: e.target.value }))} placeholder="https://drinkeros.com/checkout/..." />
+                  </div>
                 )}
                 <div className="space-y-2">
                   <Label htmlFor="workload_hours">Carga Horária (horas)</Label>
