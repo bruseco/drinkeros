@@ -18,6 +18,7 @@ import VipFloatingBanner from '@/components/landing/VipFloatingBanner';
 
 // Imagens
 import logo from '@/assets/landing/dx/logo.png';
+import drinkerosFooterLogo from '@/assets/logotipo-drinkeros.png';
 import brunoHero from '@/assets/landing/dx/bruno-hero.png';
 import garantia from '@/assets/landing/dx/garantia-15dias.png';
 import pagamentos from '@/assets/landing/dx/pagamentos.png';
