@@ -200,7 +200,7 @@ const AdminOrders: React.FC = () => {
             </div>
           ) : rows.length === 0 ? (
             <div className="py-16 text-center text-muted-foreground">
-              Nenhum pedido encontrado para os filtros atuais.
+              Nenhuma venda encontrada para os filtros atuais.
             </div>
           ) : (
             <Table>
