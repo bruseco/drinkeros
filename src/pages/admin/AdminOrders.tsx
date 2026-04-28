@@ -16,6 +16,7 @@ import { Loader2, Search, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide
 
 const sourceLabel: Record<string, string> = {
   stripe: 'Stripe',
+  mercadopago: 'Mercado Pago',
   woocommerce: 'WooCommerce',
   hotmart: 'Hotmart',
   pix: 'PIX',
@@ -23,6 +24,7 @@ const sourceLabel: Record<string, string> = {
 
 const sourceVariant: Record<string, 'default' | 'secondary' | 'outline'> = {
   stripe: 'default',
+  mercadopago: 'default',
   woocommerce: 'secondary',
   hotmart: 'secondary',
   pix: 'outline',
@@ -70,20 +72,61 @@ const AdminOrders: React.FC = () => {
 
   const totalRevenue = rows.reduce((sum, r) => sum + (r.amount ?? 0), 0);
 
+  const applyPreset = (preset: 'today' | '7d' | '30d' | 'mtd' | 'lastMonth' | 'ytd' | 'clear') => {
+    const now = new Date();
+    const fmt = (d: Date) => d.toISOString().slice(0, 10);
+    setPage(0);
+    if (preset === 'clear') { setFrom(''); setTo(''); return; }
+    if (preset === 'today') {
+      setFrom(fmt(now)); setTo(fmt(now)); return;
+    }
+    if (preset === '7d') {
+      const d = new Date(now); d.setDate(d.getDate() - 6);
+      setFrom(fmt(d)); setTo(fmt(now)); return;
+    }
+    if (preset === '30d') {
+      const d = new Date(now); d.setDate(d.getDate() - 29);
+      setFrom(fmt(d)); setTo(fmt(now)); return;
+    }
+    if (preset === 'mtd') {
+      setFrom(fmt(new Date(now.getFullYear(), now.getMonth(), 1)));
+      setTo(fmt(now)); return;
+    }
+    if (preset === 'lastMonth') {
+      const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const end = new Date(now.getFullYear(), now.getMonth(), 0);
+      setFrom(fmt(start)); setTo(fmt(end)); return;
+    }
+    if (preset === 'ytd') {
+      setFrom(fmt(new Date(now.getFullYear(), 0, 1)));
+      setTo(fmt(now)); return;
+    }
+  };
+
+  const presets: Array<{ key: Parameters<typeof applyPreset>[0]; label: string }> = [
+    { key: 'today', label: 'Hoje' },
+    { key: '7d', label: '7 dias' },
+    { key: '30d', label: '30 dias' },
+    { key: 'mtd', label: 'Mês vigente' },
+    { key: 'lastMonth', label: 'Mês passado' },
+    { key: 'ytd', label: 'Este ano' },
+    { key: 'clear', label: 'Personalizado' },
+  ];
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center gap-3">
         <ShoppingCart className="h-7 w-7 text-primary" />
         <div>
-          <h1 className="text-3xl font-bold">Pedidos</h1>
-          <p className="text-muted-foreground">Histórico de vendas reais (Stripe e WooCommerce)</p>
+          <h1 className="text-3xl font-bold">Vendas</h1>
+          <p className="text-muted-foreground">Histórico de vendas confirmadas (Stripe, Mercado Pago, WooCommerce, Hotmart e Pix)</p>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Pedidos no filtro</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Vendas no filtro</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{total.toLocaleString('pt-BR')}</div>
@@ -104,6 +147,13 @@ const AdminOrders: React.FC = () => {
           <CardTitle>Filtros</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {presets.map((p) => (
+              <Button key={p.key} variant="outline" size="sm" onClick={() => applyPreset(p.key)}>
+                {p.label}
+              </Button>
+            ))}
+          </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -119,6 +169,7 @@ const AdminOrders: React.FC = () => {
               <SelectContent>
                 <SelectItem value="all">Todas as origens</SelectItem>
                 <SelectItem value="stripe">Stripe</SelectItem>
+                <SelectItem value="mercadopago">Mercado Pago</SelectItem>
                 <SelectItem value="woocommerce">WooCommerce</SelectItem>
                 <SelectItem value="hotmart">Hotmart</SelectItem>
                 <SelectItem value="pix">PIX</SelectItem>
@@ -132,7 +183,7 @@ const AdminOrders: React.FC = () => {
                 <SelectItem value="curso">Cursos</SelectItem>
                 <SelectItem value="ebook">E-books</SelectItem>
                 <SelectItem value="combo">Combos</SelectItem>
-                <SelectItem value="pacote">Pacotes</SelectItem>
+                <SelectItem value="pacote">Pacotes (avulsos)</SelectItem>
               </SelectContent>
             </Select>
             <Input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(0); }} />
@@ -149,7 +200,7 @@ const AdminOrders: React.FC = () => {
             </div>
           ) : rows.length === 0 ? (
             <div className="py-16 text-center text-muted-foreground">
-              Nenhum pedido encontrado para os filtros atuais.
+              Nenhuma venda encontrada para os filtros atuais.
             </div>
           ) : (
             <Table>
@@ -194,7 +245,7 @@ const AdminOrders: React.FC = () => {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            Página {page + 1} de {totalPages} · {total.toLocaleString('pt-BR')} pedidos
+            Página {page + 1} de {totalPages} · {total.toLocaleString('pt-BR')} vendas
             {isFetching && <Loader2 className="inline ml-2 h-3 w-3 animate-spin" />}
           </div>
           <div className="flex gap-2">
