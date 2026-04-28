@@ -285,6 +285,7 @@ const UserRecipes: React.FC = () => {
                                 Exclusivo do Clube
                               </span>
                             </div>
+                            </>
                           )}
                         </div>
                       ) : (
