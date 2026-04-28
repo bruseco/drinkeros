@@ -195,15 +195,17 @@ export default function Checkout() {
           ) : (
             <div className="bg-white rounded-xl overflow-hidden p-2 sm:p-4 text-black">
               <Payment
+                key={`brick-${finalPrice}-${payerEmail}`}
                 initialization={{
                   amount: finalPrice,
-                  payer: { email: "" },
+                  payer: { email: payerEmail || undefined },
                 }}
                 customization={{
                   paymentMethods: {
                     creditCard: "all",
                     bankTransfer: ["pix"],
                     maxInstallments: 12,
+                    minInstallments: 1,
                   },
                   visual: {
                     style: { theme: "default" },
