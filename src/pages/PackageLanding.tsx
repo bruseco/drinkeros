@@ -212,6 +212,7 @@ const PackageLanding: React.FC = () => {
       </main>
 
       <footer className="py-6 text-center text-sm text-muted-foreground">
+        <img src={drinkerosFooterLogo} alt="Drinkeros" className="h-7 w-auto mx-auto mb-2 opacity-70" />
         <p>&copy; {new Date().getFullYear()} {(item as any).name}. Todos os direitos reservados.</p>
       </footer>
     </div>
