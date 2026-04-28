@@ -601,6 +601,7 @@ const DrinkerosXperience: React.FC = () => {
 
       {/* FOOTER */}
       <footer className="py-10 bg-black text-center border-t border-white/5">
+        <img src={drinkerosFooterLogo} alt="Drinkeros" className="h-8 w-auto mx-auto mb-3 opacity-70" />
         <p className="text-sm text-white/50">© {new Date().getFullYear()} Drinkeros — Todos os direitos reservados</p>
       </footer>
     </div>
