@@ -24,3 +24,9 @@ project_id = "pvjlcfhqueibjnkuzzna"
 
   [functions.create-vip-checkout]
     verify_jwt = true
+
+  [functions.create-mp-checkout]
+    verify_jwt = false
+
+  [functions.mercadopago-webhook]
+    verify_jwt = false
