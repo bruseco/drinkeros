@@ -95,7 +95,9 @@ serve(async (req) => {
 
     const VIP_DISCOUNT_PERCENT = 80;
     const basePrice = Number(product.price);
-    const finalPrice = isVip
+    const finalPrice = product_type === "club"
+      ? basePrice
+      : isVip
       ? Math.round(basePrice * (1 - VIP_DISCOUNT_PERCENT / 100) * 100) / 100
       : basePrice;
 
