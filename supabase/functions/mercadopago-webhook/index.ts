@@ -17,6 +17,31 @@ const ACCESS_TABLE_MAP: Record<string, { table: string; fk: string }> = {
   package: { table: "user_packages", fk: "package_id" },
 };
 
+async function grantClubAccess(supabase: any, userId: string, payment: any, paymentId: string) {
+  const now = new Date();
+  const periodEnd = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+
+  await supabase.from("vip_payments").insert({
+    user_id: userId,
+    amount: Number(payment?.transaction_amount || 0),
+    currency: String(payment?.currency_id || "BRL").toUpperCase(),
+    status: "paid",
+    payment_method: payment?.payment_method_id === "pix" ? "pix" : "card",
+    paid_at: now.toISOString(),
+    period_start: now.toISOString(),
+    period_end: periodEnd.toISOString(),
+    metadata: { mercadopago_payment_id: String(paymentId), source: "mercadopago" },
+  });
+
+  await supabase.from("user_plans").upsert({
+    user_id: userId,
+    plan: "vip",
+    source: "mercadopago",
+    activated_at: now.toISOString(),
+    expires_at: periodEnd.toISOString(),
+  }, { onConflict: "user_id" });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -105,7 +130,7 @@ serve(async (req) => {
     const productId = metadata.product_id as string | undefined;
     let userId = (metadata.user_id as string | undefined) || null;
 
-    if (!productType || !productId || !ACCESS_TABLE_MAP[productType]) {
+    if (!productType || !productId || (productType !== "club" && !ACCESS_TABLE_MAP[productType])) {
       throw new Error(`Metadata inválido: type=${productType} id=${productId}`);
     }
 
@@ -127,6 +152,19 @@ serve(async (req) => {
         error_message: `Guest purchase awaiting account creation. Email: ${payerEmail}`,
       }).eq("id", eventRow!.id);
       return new Response(JSON.stringify({ ok: true, pending_user: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (productType === "club") {
+      await grantClubAccess(supabase, userId, payment, String(paymentId));
+      await supabase.from("mercadopago_events").update({
+        processed: true,
+        processed_at: new Date().toISOString(),
+      }).eq("id", eventRow!.id);
+
+      return new Response(JSON.stringify({ ok: true, granted: true, club: true }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
