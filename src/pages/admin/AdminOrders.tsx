@@ -164,9 +164,6 @@ const AdminOrders: React.FC = () => {
                 <SelectItem value="all">Todas as origens</SelectItem>
                 <SelectItem value="stripe">Stripe</SelectItem>
                 <SelectItem value="mercadopago">Mercado Pago</SelectItem>
-                <SelectItem value="woocommerce">WooCommerce</SelectItem>
-                <SelectItem value="hotmart">Hotmart</SelectItem>
-                <SelectItem value="pix">PIX</SelectItem>
               </SelectContent>
             </Select>
             <Select value={productType} onValueChange={(v) => { setProductType(v); setPage(0); }}>
