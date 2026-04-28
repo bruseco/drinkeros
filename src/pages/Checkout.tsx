@@ -89,7 +89,7 @@ export default function Checkout() {
             navigate("/signup?redirect=/checkout/club/clube");
             return;
           }
-          if (user.email) setPayerEmail(user.email);
+          setPayerEmail(user.email ?? "");
           setProduct(CLUB_PRODUCT);
           setIsVip(false);
           return;
