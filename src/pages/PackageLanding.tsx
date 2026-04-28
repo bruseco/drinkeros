@@ -49,12 +49,15 @@ const PackageLanding: React.FC = () => {
   }, [searchParams, toast]);
 
   const handleBuy = async () => {
-    if (!item || isPackage) return;
+    if (!item) return;
     setCheckoutLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('create-product-checkout', {
+      const productType = isCourse ? 'course' : isEbook ? 'ebook' : isPackage ? 'package' : null;
+      if (!productType) throw new Error('Tipo de produto inválido');
+
+      const { data, error } = await supabase.functions.invoke('create-mp-checkout', {
         body: {
-          product_type: isCourse ? 'course' : 'ebook',
+          product_type: productType,
           slug: packageSlug,
         },
       });
