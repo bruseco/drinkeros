@@ -362,7 +362,6 @@ const AdminCRM: React.FC = () => {
 
   const sourceLabels: Record<string, string> = {
     manual: 'Manual',
-    woocommerce: 'WooCommerce',
     whatsapp: 'WhatsApp',
   };
 
