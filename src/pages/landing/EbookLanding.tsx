@@ -79,7 +79,7 @@ const EbookLanding: React.FC = () => {
     setCheckoutLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke(
-        'create-product-checkout',
+        'create-mp-checkout',
         { body: { product_type: 'ebook', slug } },
       );
       if (error) throw error;

@@ -142,7 +142,7 @@ const DrinkerosXperience: React.FC = () => {
   const handleBuy = async () => {
     setCheckoutLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('create-product-checkout', {
+      const { data, error } = await supabase.functions.invoke('create-mp-checkout', {
         body: { product_type: 'course', slug: SLUG },
       });
       if (error) throw error;

@@ -241,7 +241,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const handleBuy = async () => {
     setCheckoutLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('create-product-checkout', {
+      const { data, error } = await supabase.functions.invoke('create-mp-checkout', {
         body: { product_type: 'course', slug },
       });
       if (error) throw error;
