@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useRecipes } from '@/hooks/useRecipes';
 import { usePackages } from '@/hooks/usePackages';
-import { BookOpen, Package, FileCheck, FilePen, BellRing, TrendingUp, Loader2 } from 'lucide-react';
+import { BookOpen, Package, FileCheck, FilePen, BellRing, TrendingUp, Loader2, Smartphone } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -12,6 +12,17 @@ const AdminDashboard: React.FC = () => {
   const { data: packages = [] } = usePackages();
   const [runningStudy, setRunningStudy] = useState(false);
   const [runningUpsell, setRunningUpsell] = useState(false);
+  const [pwaStats, setPwaStats] = useState<{ installed: number; total: number } | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const [{ count: total }, { count: installed }] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).not('pwa_installed_at', 'is', null),
+      ]);
+      setPwaStats({ installed: installed ?? 0, total: total ?? 0 });
+    })();
+  }, []);
 
   const publishedRecipes = recipes.filter((r) => r.status === 'published').length;
   const draftRecipes = recipes.filter((r) => r.status === 'draft').length;
@@ -105,6 +116,28 @@ const AdminDashboard: React.FC = () => {
           </Card>
         ))}
       </div>
+
+      {/* PWA adoption */}
+      {pwaStats && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Adoção do App (PWA)
+            </CardTitle>
+            <Smartphone className="h-5 w-5 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">
+              {pwaStats.installed} <span className="text-base font-normal text-muted-foreground">/ {pwaStats.total}</span>
+            </div>
+            <CardDescription>
+              {pwaStats.total > 0
+                ? `${Math.round((pwaStats.installed / pwaStats.total) * 100)}% dos usuários já instalaram o app`
+                : 'Nenhum usuário ainda'}
+            </CardDescription>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quick Actions */}
       <div>
