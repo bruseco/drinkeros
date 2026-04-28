@@ -89,6 +89,10 @@ serve(async (req) => {
       } catch (_) { /* visitante */ }
     }
 
+    if (product_type === "club" && !userId) {
+      throw new Error("Faça login para assinar o Clube dos Drinkeros");
+    }
+
     const VIP_DISCOUNT_PERCENT = 80;
     const basePrice = Number(product.price);
     const finalPrice = isVip
