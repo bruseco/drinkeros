@@ -82,7 +82,7 @@ export default function Checkout() {
           navigate("/");
           return;
         }
-        setProduct(prod as Product);
+        setProduct(prod as unknown as Product);
 
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
