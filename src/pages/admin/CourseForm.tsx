@@ -442,32 +442,18 @@ const CourseForm: React.FC = () => {
                 )}
 
                 {!formData.is_free && (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="checkout_url">Link do Checkout</Label>
-                      <Input
-                        id="checkout_url"
-                        type="url"
-                        value={formData.checkout_url}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, checkout_url: e.target.value }))
-                        }
-                        placeholder="https://www.criminallab.com.br/pagamento/nome-do-produto/"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="woocommerce_product_id">ID do Produto WooCommerce</Label>
-                      <Input
-                        id="woocommerce_product_id"
-                        value={formData.woocommerce_product_id}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, woocommerce_product_id: e.target.value }))
-                        }
-                        placeholder="Ex: 12345"
-                      />
-                    </div>
-                  </>
+                  <div className="space-y-2">
+                    <Label htmlFor="checkout_url">Link do Checkout (Stripe ou Mercado Pago)</Label>
+                    <Input
+                      id="checkout_url"
+                      type="url"
+                      value={formData.checkout_url}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, checkout_url: e.target.value }))
+                      }
+                      placeholder="https://drinkeros.com/checkout/..."
+                    />
+                  </div>
                 )}
 
                 <div className="space-y-2">
