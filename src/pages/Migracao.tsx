@@ -112,9 +112,11 @@ const Migracao: React.FC = () => {
           <Link to="/" className="mx-auto mb-4">
             <img src={drinkrosLogo} alt="Drinkeros" className="h-14 object-contain" />
           </Link>
-          <CardTitle className="text-2xl">Migração de Conta</CardTitle>
+          <CardTitle className="text-2xl">
+            {step === 'done' ? 'Migração de Conta' : 'O Sistema mudou!'}
+          </CardTitle>
           <CardDescription>
-            {step === 'email' && 'Digite seu e-mail cadastrado para criar sua senha de acesso.'}
+            {step === 'email' && 'Migre agora para a nova conta.'}
             {step === 'password' && 'Crie uma senha para acessar a plataforma.'}
             {step === 'done' && 'Tudo pronto! Sua conta foi migrada.'}
           </CardDescription>
