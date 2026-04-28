@@ -70,20 +70,61 @@ const AdminOrders: React.FC = () => {
 
   const totalRevenue = rows.reduce((sum, r) => sum + (r.amount ?? 0), 0);
 
+  const applyPreset = (preset: 'today' | '7d' | '30d' | 'mtd' | 'lastMonth' | 'ytd' | 'clear') => {
+    const now = new Date();
+    const fmt = (d: Date) => d.toISOString().slice(0, 10);
+    setPage(0);
+    if (preset === 'clear') { setFrom(''); setTo(''); return; }
+    if (preset === 'today') {
+      setFrom(fmt(now)); setTo(fmt(now)); return;
+    }
+    if (preset === '7d') {
+      const d = new Date(now); d.setDate(d.getDate() - 6);
+      setFrom(fmt(d)); setTo(fmt(now)); return;
+    }
+    if (preset === '30d') {
+      const d = new Date(now); d.setDate(d.getDate() - 29);
+      setFrom(fmt(d)); setTo(fmt(now)); return;
+    }
+    if (preset === 'mtd') {
+      setFrom(fmt(new Date(now.getFullYear(), now.getMonth(), 1)));
+      setTo(fmt(now)); return;
+    }
+    if (preset === 'lastMonth') {
+      const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const end = new Date(now.getFullYear(), now.getMonth(), 0);
+      setFrom(fmt(start)); setTo(fmt(end)); return;
+    }
+    if (preset === 'ytd') {
+      setFrom(fmt(new Date(now.getFullYear(), 0, 1)));
+      setTo(fmt(now)); return;
+    }
+  };
+
+  const presets: Array<{ key: Parameters<typeof applyPreset>[0]; label: string }> = [
+    { key: 'today', label: 'Hoje' },
+    { key: '7d', label: '7 dias' },
+    { key: '30d', label: '30 dias' },
+    { key: 'mtd', label: 'Mês vigente' },
+    { key: 'lastMonth', label: 'Mês passado' },
+    { key: 'ytd', label: 'Este ano' },
+    { key: 'clear', label: 'Personalizado' },
+  ];
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center gap-3">
         <ShoppingCart className="h-7 w-7 text-primary" />
         <div>
-          <h1 className="text-3xl font-bold">Pedidos</h1>
-          <p className="text-muted-foreground">Histórico de vendas reais (Stripe e WooCommerce)</p>
+          <h1 className="text-3xl font-bold">Vendas</h1>
+          <p className="text-muted-foreground">Histórico de vendas confirmadas (Stripe, Mercado Pago, WooCommerce, Hotmart e Pix)</p>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Pedidos no filtro</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Vendas no filtro</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{total.toLocaleString('pt-BR')}</div>
