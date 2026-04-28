@@ -168,6 +168,7 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
             type="date"
             value={birthDate}
             onChange={(e) => setBirthDate(e.target.value)}
+            className="h-10 block appearance-none [&::-webkit-date-and-time-value]:text-left [&::-webkit-date-and-time-value]:min-h-0"
           />
         </div>
         <div className="space-y-2">
