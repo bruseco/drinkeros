@@ -87,6 +87,7 @@ export default function Checkout() {
 
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          if (user.email) setPayerEmail(user.email);
           const { data: planData } = await supabase.rpc("get_user_plan", { _user_id: user.id });
           setIsVip(planData === "vip");
         }
