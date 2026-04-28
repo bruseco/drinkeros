@@ -18,6 +18,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUserPlan } from '@/hooks/useUserPlan';
+import drinkerosFooterLogo from '@/assets/logotipo-drinkeros.png';
 import { useCourseBySlug } from '@/hooks/useCourses';
 import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
 import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
