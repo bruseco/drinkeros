@@ -215,9 +215,9 @@ const AdminUsers: React.FC = () => {
   
   React.useEffect(() => {
     setPage(0);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, pwaFilter, sortBy]);
 
-  const { data, isLoading } = useAdminUsers(page, PAGE_SIZE, debouncedSearch);
+  const { data, isLoading } = useAdminUsers(page, PAGE_SIZE, debouncedSearch, pwaFilter, sortBy);
   const users = data?.users ?? [];
   const totalCount = data?.totalCount ?? 0;
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
