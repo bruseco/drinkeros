@@ -33,7 +33,7 @@ const adminItems = [
   { title: 'Notificações', icon: Bell, href: '/admin/notificacoes' },
   { title: 'Máquina de Ascensão', icon: Rocket, href: '/admin/upsell' },
   { title: 'WhatsApp', icon: MessageCircle, href: '/admin/whatsapp' },
-  { title: 'Webhooks', icon: Webhook, href: '/admin/webhooks' },
+  
   { title: 'Agente CS', icon: ClipboardCheck, href: '/admin/cs-reports' },
   { title: 'Timeline CS', icon: Clock, href: '/admin/cs-timeline' },
   { title: 'CRM', icon: Target, href: '/admin/crm' },
