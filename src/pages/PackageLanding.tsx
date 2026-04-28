@@ -56,18 +56,8 @@ const PackageLanding: React.FC = () => {
       const productType = isCourse ? 'course' : isEbook ? 'ebook' : isPackage ? 'package' : null;
       if (!productType) throw new Error('Tipo de produto inválido');
 
-      const { data, error } = await supabase.functions.invoke('create-mp-checkout', {
-        body: {
-          product_type: productType,
-          slug: packageSlug,
-        },
-      });
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error(data?.error || 'Não foi possível iniciar o checkout');
-      }
+      window.location.href = `/checkout/${productType}/${packageSlug}`;
+      return;
     } catch (err: any) {
       toast({
         title: 'Erro ao iniciar compra',

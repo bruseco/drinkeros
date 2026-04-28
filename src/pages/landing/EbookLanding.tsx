@@ -78,16 +78,8 @@ const EbookLanding: React.FC = () => {
     }
     setCheckoutLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke(
-        'create-mp-checkout',
-        { body: { product_type: 'ebook', slug } },
-      );
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error(data?.error || 'Não foi possível iniciar o checkout');
-      }
+      window.location.href = `/checkout/ebook/${slug}`;
+      return;
     } catch (err: any) {
       toast({
         title: 'Erro ao iniciar compra',
