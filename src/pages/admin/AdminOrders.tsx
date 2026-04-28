@@ -145,6 +145,13 @@ const AdminOrders: React.FC = () => {
           <CardTitle>Filtros</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {presets.map((p) => (
+              <Button key={p.key} variant="outline" size="sm" onClick={() => applyPreset(p.key)}>
+                {p.label}
+              </Button>
+            ))}
+          </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -160,6 +167,7 @@ const AdminOrders: React.FC = () => {
               <SelectContent>
                 <SelectItem value="all">Todas as origens</SelectItem>
                 <SelectItem value="stripe">Stripe</SelectItem>
+                <SelectItem value="mercadopago">Mercado Pago</SelectItem>
                 <SelectItem value="woocommerce">WooCommerce</SelectItem>
                 <SelectItem value="hotmart">Hotmart</SelectItem>
                 <SelectItem value="pix">PIX</SelectItem>
@@ -173,7 +181,7 @@ const AdminOrders: React.FC = () => {
                 <SelectItem value="curso">Cursos</SelectItem>
                 <SelectItem value="ebook">E-books</SelectItem>
                 <SelectItem value="combo">Combos</SelectItem>
-                <SelectItem value="pacote">Pacotes</SelectItem>
+                <SelectItem value="pacote">Pacotes (avulsos)</SelectItem>
               </SelectContent>
             </Select>
             <Input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(0); }} />
