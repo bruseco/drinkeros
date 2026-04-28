@@ -57,7 +57,7 @@ import AdminWhatsAppQueue from "./pages/admin/AdminWhatsAppQueue";
 import AdminWhatsAppConnections from "./pages/admin/AdminWhatsAppConnections";
 import AdminWhatsAppTemplates from "./pages/admin/AdminWhatsAppTemplates";
 import AdminWhatsAppBindings from "./pages/admin/AdminWhatsAppBindings";
-import AdminWebhookLogs from "./pages/admin/AdminWebhookLogs";
+
 import AdminCSReports from "./pages/admin/AdminCSReports";
 import AdminCSTimeline from "./pages/admin/AdminCSTimeline";
 import AdminCRM from "./pages/admin/AdminCRM";
