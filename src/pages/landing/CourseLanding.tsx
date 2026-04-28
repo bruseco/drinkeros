@@ -242,15 +242,8 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const handleBuy = async () => {
     setCheckoutLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('create-mp-checkout', {
-        body: { product_type: 'course', slug },
-      });
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error(data?.error || 'Não foi possível iniciar o checkout');
-      }
+      window.location.href = `/checkout/course/${slug}`;
+      return;
     } catch (err: any) {
       toast({
         title: 'Erro ao iniciar compra',

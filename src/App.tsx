@@ -25,6 +25,7 @@ import WorkshopAlemDosClassicos from "./pages/landing/WorkshopAlemDosClassicos";
 import BartenderABordo from "./pages/landing/BartenderABordo";
 import BebidaDecifrada from "./pages/landing/BebidaDecifrada";
 import EbookLanding from "./pages/landing/EbookLanding";
+import Checkout from "./pages/Checkout";
 import SSO from "./pages/SSO";
 import Migracao from "./pages/Migracao";
 
@@ -135,6 +136,7 @@ const App = () => (
             <Route path="/bartender-a-bordo" element={<BartenderABordo />} />
             <Route path="/bebida-decifrada" element={<BebidaDecifrada />} />
             <Route path="/ebook/:slug" element={<EbookLanding />} />
+            <Route path="/checkout/:productType/:slug" element={<Checkout />} />
 
             {/* Dynamic package landing pages - must be after static routes */}
             <Route path="/:packageSlug" element={<PackageLanding />} />
