@@ -175,7 +175,7 @@ const App = () => (
               <Route path="whatsapp/conexoes" element={<AdminWhatsAppConnections />} />
               <Route path="whatsapp/modelos" element={<AdminWhatsAppTemplates />} />
               <Route path="whatsapp/associacoes" element={<AdminWhatsAppBindings />} />
-              <Route path="webhooks" element={<AdminWebhookLogs />} />
+              
               <Route path="cs-reports" element={<AdminCSReports />} />
               <Route path="cs-timeline" element={<AdminCSTimeline />} />
               <Route path="crm" element={<AdminCRM />} />
