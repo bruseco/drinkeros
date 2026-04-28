@@ -141,12 +141,12 @@ export default function Checkout() {
         if (j.status === "approved") {
           setPaid(true);
           clearInterval(interval);
-          setTimeout(() => navigate(`/${product?.slug}?checkout=success`), 2000);
+          setTimeout(() => navigate(productType === "club" ? "/clube?clube=success" : `/${product?.slug}?checkout=success`), 2000);
         }
       } catch (_) { /* ignore */ }
     }, 4000);
     return () => clearInterval(interval);
-  }, [pixPaymentId, paid, navigate, product]);
+  }, [pixPaymentId, paid, navigate, product, productType]);
 
   const onSubmit = async (formData: any) => {
     if (!product) return;
@@ -164,10 +164,10 @@ export default function Checkout() {
       } else if (data.status === "approved") {
         setPaid(true);
         toast.success("Pagamento aprovado!");
-        setTimeout(() => navigate(`/${product.slug}?checkout=success`), 1500);
+        setTimeout(() => navigate(productType === "club" ? "/clube?clube=success" : `/${product.slug}?checkout=success`), 1500);
       } else if (data.status === "in_process" || data.status === "pending") {
         toast.info("Pagamento em análise. Você receberá uma confirmação em breve.");
-        setTimeout(() => navigate(`/${product.slug}?checkout=pending`), 2000);
+        setTimeout(() => navigate(productType === "club" ? "/clube?clube=pending" : `/${product.slug}?checkout=pending`), 2000);
       } else {
         toast.error("Pagamento recusado", { description: data.status_detail || "Tente outro cartão." });
       }
@@ -193,7 +193,7 @@ export default function Checkout() {
       {/* Header */}
       <header className="border-b border-white/10 bg-black/80 backdrop-blur sticky top-0 z-20">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to={`/${product.slug}`} className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
+          <Link to={productType === "club" ? "/clube" : `/${product.slug}`} className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
           <img src={drinkerosLogo} alt="Drinkeros" className="h-7 w-auto opacity-90" />
