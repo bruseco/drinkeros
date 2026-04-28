@@ -1,48 +1,69 @@
+## Resposta curta
 
-## Objetivo
+**Sim e não.** Dá pra detectar com bastante precisão **se a sessão atual está rodando dentro do PWA instalado** (modo standalone), mas o navegador **não expõe diretamente** "esse usuário tem o app instalado em algum lugar". O truque é: toda vez que ele abre **pelo PWA**, registramos isso no perfil dele no backend → assim sabemos quem já instalou pelo menos uma vez.
 
-Hoje as landings prometem "12x de R$ X" mas o Stripe Checkout só aceita 1x. Vamos habilitar o **parcelamento com juros do emissor** no Stripe — o cliente vê e escolhe as parcelas (com juros do banco dele), e a Drinkeros recebe o valor cheio à vista (descontada a taxa Stripe). Os juros ficam entre cliente ↔ banco emissor, como você pediu.
+Com isso a gente consegue:
+1. Saber quem **nunca** abriu pelo PWA → forçar banner persistente.
+2. Saber quem **já abriu** pelo PWA pelo menos 1x → nunca mais mostrar banner em lugar nenhum.
+3. Painel admin com lista de quem instalou e quem não.
 
-## O que muda
+---
 
-### 1. Edge Function `create-product-checkout` (cursos + ebooks)
-Adicionar nas opções da sessão Stripe:
-```ts
-payment_method_types: ['card'],
-payment_method_options: {
-  card: { installments: { enabled: true } }
-}
-```
-Isso ativa automaticamente os planos de parcelamento elegíveis (Stripe calcula com base no valor — normalmente 2x até 12x, parcela mínima ~R$ 5).
+## O que vamos construir
 
-### 2. Edge Function `create-vip-checkout` (Clube dos Drinkeros)
-Vou inspecionar o arquivo para ver se é `mode: payment` (one-time anual) ou `mode: subscription`:
-- **Se `payment`** → habilita parcelamento igual aos cursos.
-- **Se `subscription`** → Stripe não permite parcelar assinatura no BR. Nesse caso aviso e mantemos à vista (e ajusto o copy da landing do Clube se necessário).
+### 1. Detecção e registro automático (cliente)
+Hook `usePwaStatus()` que detecta:
+- `display-mode: standalone` (Android/Desktop)
+- `navigator.standalone` (iOS Safari)
+- `display-mode: fullscreen` / `minimal-ui` (fallback)
 
-### 3. Ação manual no painel Stripe (você faz, eu mostro o caminho)
-Stripe Dashboard → **Settings → Payments → Payment methods → Cards → Installments (Brazil)** → ativar.
-Sem isso, o parâmetro acima não tem efeito. É um toggle único, vale para toda a conta.
+Quando detectar standalone **e** usuário logado, dispara um `upsert` na tabela `profiles` setando `pwa_installed_at = now()` e `last_pwa_open_at = now()` (só atualiza se mudou de dia, pra não martelar o banco).
 
-### 4. Ajuste de copy nas landings (opcional, recomendado)
-Hoje a landing mostra "12x R$ X" sem mencionar juros. Como o cliente verá juros do emissor no checkout, sugiro trocar para:
-> "**em até 12x no cartão** *(parcelas com juros do seu banco)*"
+### 2. Banco
+Migration adicionando 2 colunas em `profiles`:
+- `pwa_installed_at timestamptz` — primeira vez que abriu via PWA
+- `last_pwa_open_at timestamptz` — última vez que abriu via PWA
 
-Ou manter "12x R$ X" + asterisco "*sujeito a juros do emissor*". Te pergunto qual prefere antes de mexer.
+### 3. Banner persistente (não-dismissável pra quem não instalou)
+Refatorar `InstallBanner.tsx`:
+- Se `display-mode: standalone` → não renderiza nada (já está no app).
+- Se `profile.pwa_installed_at` existe → não renderiza (já instalou antes, está só usando navegador agora).
+- Se nenhum dos dois → mostra banner **sem botão de fechar** (X removido) e remove o `localStorage` de "dismissed".
+- Mantém o fluxo: Chrome/Android usa `beforeinstallprompt`; iOS/outros mandam pra `/install` com tutorial.
+
+### 4. Banner flutuante global (opcional, recomendado)
+Hoje o `InstallBanner` só aparece em algumas páginas (Index, Login, UserHome, PackageLanding). Pra "forçar até instalar", criar um `PwaInstallGate` montado no `UserLayout` que mostra um **banner fixo no topo** (estilo o `VipFloatingBanner`) em **todas** as páginas internas pra quem ainda não instalou. Mantemos o `InstallBanner` inline nas landings públicas.
+
+### 5. Painel admin
+Nova aba em `/admin/users` (ou coluna nova): mostrar badge "PWA instalado" / "Só navegador" e filtro. Adicionar também card no `AdminDashboard` com:
+- Total de usuários com PWA instalado
+- % de adoção
+- Usuários ativos nos últimos 7d que **não** têm PWA
+
+---
+
+## Limitações honestas
+
+- Se o usuário **desinstalar** o PWA, não temos como saber — `pwa_installed_at` continua marcado e o banner some pra sempre. Mitigação: usar `last_pwa_open_at` — se passou >30 dias sem abrir via PWA, voltamos a mostrar o banner.
+- iOS no modo "Adicionar à Tela Inicial" funciona, mas o `beforeinstallprompt` não existe no Safari → continua redirecionando pra `/install` com o tutorial visual (já existe).
+- Em janela anônima ou outro device, a detecção é por sessão; o registro no `profiles` resolve o cross-device porque está atrelado ao `user_id`.
+
+---
 
 ## Detalhes técnicos
 
-- O parâmetro `payment_method_options.card.installments.enabled` é compatível com a API version já usada (`2025-08-27.basil`).
-- Quando `installments` está habilitado, **Pix e boleto não aparecem na mesma sessão** (Stripe limita a `card` only). Preciso confirmar com você se hoje vocês oferecem Pix/boleto no checkout — se sim, decidimos:
-  - **Opção A**: cartão parcelado apenas (perde Pix/boleto).
-  - **Opção B**: deixa Stripe escolher automaticamente (`automatic_payment_methods`) e parcelamento fica desabilitado.
-  - **Opção C**: 2 botões na landing — "Pagar à vista (Pix/Cartão)" vs "Parcelar no cartão".
-- O cálculo de juros é 100% feito pelo emissor do cartão (Itaú, Nubank, etc.) e exibido pelo Stripe no checkout — você não precisa configurar tabela de juros.
+**Arquivos a criar:**
+- `src/hooks/usePwaStatus.ts` — detecta standalone + reporta pro backend
+- `src/components/user/PwaInstallGate.tsx` — banner global persistente
+- `supabase/migrations/...` — adiciona colunas em `profiles`
 
-## Perguntas antes de eu implementar
+**Arquivos a editar:**
+- `src/components/user/InstallBanner.tsx` — usar hook, remover X quando não instalado, sumir quando já instalou
+- `src/components/user/UserLayout.tsx` — montar `<PwaInstallGate />`
+- `src/pages/admin/AdminUsers.tsx` — coluna/filtro de PWA
+- `src/pages/admin/AdminDashboard.tsx` — card de adoção PWA
+- `src/hooks/useAdminUsers.ts` — incluir `pwa_installed_at` na query
 
-1. **Clube dos Drinkeros é assinatura recorrente ou pagamento único anual?** (vou verificar no código também, mas confirma).
-2. **Vocês oferecem Pix/boleto hoje no checkout?** Isso decide entre Opção A/B/C acima.
-3. **Copy das landings**: trocar "12x R$ X" por "em até 12x *(com juros do seu banco)*"?
+**RLS:** as colunas novas em `profiles` herdam as policies existentes (usuário lê/atualiza o próprio; admin lê tudo).
 
-Depois das respostas eu implemento as 2 edge functions e ajusto as landings se necessário. Você só precisa ligar o toggle no painel Stripe (te passo o link exato).
+**Performance:** o report do hook só roda 1x por sessão (guarda em `sessionStorage`) e só faz UPDATE se `last_pwa_open_at` for de outro dia.
