@@ -53,7 +53,7 @@ export default function Checkout() {
   const [pixResult, setPixResult] = useState<PixData | null>(null);
   const [pixPaymentId, setPixPaymentId] = useState<string | null>(null);
   const [paid, setPaid] = useState(false);
-  const [payerEmail, setPayerEmail] = useState<string>("");
+  const [payerEmail, setPayerEmail] = useState<string | null>(null);
 
   // 1. Carrega Public Key e inicializa MP SDK
   useEffect(() => {
@@ -89,7 +89,7 @@ export default function Checkout() {
             navigate("/signup?redirect=/checkout/club/clube");
             return;
           }
-          if (user.email) setPayerEmail(user.email);
+          setPayerEmail(user.email ?? "");
           setProduct(CLUB_PRODUCT);
           setIsVip(false);
           return;
@@ -113,9 +113,11 @@ export default function Checkout() {
         setProduct(prod as unknown as Product);
 
         if (user) {
-          if (user.email) setPayerEmail(user.email);
+          setPayerEmail(user.email ?? "");
           const { data: planData } = await supabase.rpc("get_user_plan", { _user_id: user.id });
           setIsVip(planData === "vip");
+        } else {
+          setPayerEmail("");
         }
       } finally {
         setLoading(false);
@@ -220,31 +222,40 @@ export default function Checkout() {
             <PixDisplay pix={pixResult} amount={finalPrice} />
           ) : (
             <div className="bg-white rounded-xl overflow-hidden p-2 sm:p-4 text-black">
-              <Payment
-                key={`brick-${finalPrice}-${payerEmail}`}
-                initialization={{
-                  amount: finalPrice,
-                  payer: { email: payerEmail || undefined },
-                }}
-                customization={{
-                  paymentMethods: {
-                    creditCard: "all",
-                    bankTransfer: ["pix"],
-                    maxInstallments: 12,
-                    minInstallments: 1,
-                  },
-                  visual: {
-                    style: { theme: "default" },
-                    hideFormTitle: true,
-                  },
-                }}
-                onSubmit={async ({ formData }) => {
-                  await onSubmit(formData);
-                }}
-                onError={(err) => {
-                  console.error("[Brick error]", err);
-                }}
-              />
+              {payerEmail !== null ? (
+                <Payment
+                  key={`brick-${finalPrice}`}
+                  initialization={{
+                    amount: finalPrice,
+                    ...(payerEmail ? { payer: { email: payerEmail } } : {}),
+                  }}
+                  customization={{
+                    paymentMethods: {
+                      creditCard: "all",
+                      bankTransfer: ["pix"],
+                      maxInstallments: 12,
+                      minInstallments: 1,
+                    },
+                    visual: {
+                      style: { theme: "default" },
+                      hideFormTitle: true,
+                    },
+                  }}
+                  onReady={() => {
+                    console.log("[MP Brick] ready", { amount: finalPrice, maxInstallments: 12 });
+                  }}
+                  onSubmit={async ({ formData }) => {
+                    await onSubmit(formData);
+                  }}
+                  onError={(err) => {
+                    console.error("[Brick error]", err);
+                  }}
+                />
+              ) : (
+                <div className="flex items-center justify-center py-8 text-black/60 text-sm gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" /> Carregando pagamento...
+                </div>
+              )}
               {submitting && (
                 <div className="flex items-center justify-center gap-2 py-3 text-sm text-black/70">
                   <Loader2 className="w-4 h-4 animate-spin" /> Processando pagamento...
