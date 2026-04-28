@@ -9,12 +9,21 @@ const corsHeaders = {
 };
 
 const MP_API = "https://api.mercadopago.com";
-type ProductType = "course" | "ebook" | "combo" | "package";
-const TABLE_MAP: Record<ProductType, string> = {
+type ProductType = "course" | "ebook" | "combo" | "package" | "club";
+const TABLE_MAP: Record<Exclude<ProductType, "club">, string> = {
   course: "courses",
   ebook: "ebooks",
   combo: "combos",
   package: "packages",
+};
+
+const CLUB_PRODUCT = {
+  id: "club",
+  name: "Clube dos Drinkeros · Anual",
+  slug: "clube",
+  price: 69,
+  cover_image_url: null,
+  description: "Acesso anual às receitas exclusivas e benefícios do Clube.",
 };
 
 serve(async (req) => {
@@ -31,7 +40,7 @@ serve(async (req) => {
       formData, // vindo do Brick: { token, payment_method_id, issuer_id, installments, payer:{email, identification}, transaction_amount }
     } = body || {};
 
-    if (!["course", "ebook", "combo", "package"].includes(product_type)) {
+    if (!["course", "ebook", "combo", "package", "club"].includes(product_type)) {
       throw new Error("Invalid product_type");
     }
     if (!slug) throw new Error("Missing slug");
@@ -43,13 +52,17 @@ serve(async (req) => {
       { auth: { persistSession: false } },
     );
 
-    const table = TABLE_MAP[product_type as ProductType];
-    const { data: product, error: productErr } = await supabase
-      .from(table)
-      .select("id, name, slug, price, cover_image_url, description")
-      .eq("slug", slug)
-      .maybeSingle();
-    if (productErr || !product) throw new Error("Produto não encontrado");
+    let product = CLUB_PRODUCT;
+    if (product_type !== "club") {
+      const table = TABLE_MAP[product_type as Exclude<ProductType, "club">];
+      const { data: productData, error: productErr } = await supabase
+        .from(table)
+        .select("id, name, slug, price, cover_image_url, description")
+        .eq("slug", slug)
+        .maybeSingle();
+      if (productErr || !productData) throw new Error("Produto não encontrado");
+      product = productData;
+    }
     if (!product.price || Number(product.price) <= 0) {
       throw new Error("Produto sem preço configurado");
     }
@@ -76,9 +89,15 @@ serve(async (req) => {
       } catch (_) { /* visitante */ }
     }
 
+    if (product_type === "club" && !userId) {
+      throw new Error("Faça login para assinar o Clube dos Drinkeros");
+    }
+
     const VIP_DISCOUNT_PERCENT = 80;
     const basePrice = Number(product.price);
-    const finalPrice = isVip
+    const finalPrice = product_type === "club"
+      ? basePrice
+      : isVip
       ? Math.round(basePrice * (1 - VIP_DISCOUNT_PERCENT / 100) * 100) / 100
       : basePrice;
 
@@ -101,6 +120,7 @@ serve(async (req) => {
         user_id: userId || "",
         vip_discount_applied: isVip ? "true" : "false",
         vip_discount_percent: isVip ? String(VIP_DISCOUNT_PERCENT) : "0",
+        access_period_days: product_type === "club" ? "365" : "",
       },
       payer: {
         email: payerEmail,
@@ -148,6 +168,7 @@ serve(async (req) => {
         status: mpData.status,
         status_detail: mpData.status_detail,
         payment_method_id: mpData.payment_method_id,
+      installments: mpData.installments,
         product_slug: product.slug,
         pix: pixData ? {
           qr_code: pixData.qr_code,

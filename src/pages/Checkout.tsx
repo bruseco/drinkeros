@@ -6,13 +6,22 @@ import { Loader2, ShieldCheck, ArrowLeft, CheckCircle2, Copy } from "lucide-reac
 import { toast } from "sonner";
 import drinkerosLogo from "@/assets/logotipo-drinkeros.png";
 
-type ProductType = "course" | "ebook" | "combo" | "package";
+type ProductType = "course" | "ebook" | "combo" | "package" | "club";
 
-const TABLE_MAP: Record<ProductType, string> = {
+const TABLE_MAP: Record<Exclude<ProductType, "club">, string> = {
   course: "courses",
   ebook: "ebooks",
   combo: "combos",
   package: "packages",
+};
+
+const CLUB_PRODUCT: Product = {
+  id: "club",
+  name: "Clube dos Drinkeros · Anual",
+  slug: "clube",
+  price: 69,
+  cover_image_url: null,
+  description: "Acesso anual às receitas exclusivas e benefícios do Clube.",
 };
 
 interface Product {
@@ -66,13 +75,31 @@ export default function Checkout() {
 
   // 2. Carrega produto + checa VIP
   useEffect(() => {
-    if (!productType || !slug || !TABLE_MAP[productType]) {
+    if (!productType || !slug) {
       navigate("/");
       return;
     }
     (async () => {
       setLoading(true);
       try {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (productType === "club") {
+          if (!user) {
+            navigate("/signup?redirect=/checkout/club/clube");
+            return;
+          }
+          if (user.email) setPayerEmail(user.email);
+          setProduct(CLUB_PRODUCT);
+          setIsVip(false);
+          return;
+        }
+
+        if (!TABLE_MAP[productType]) {
+          navigate("/");
+          return;
+        }
+
         const { data: prod, error: prodErr } = await supabase
           .from(TABLE_MAP[productType] as any)
           .select("id, name, slug, price, cover_image_url, description")
@@ -85,7 +112,6 @@ export default function Checkout() {
         }
         setProduct(prod as unknown as Product);
 
-        const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           if (user.email) setPayerEmail(user.email);
           const { data: planData } = await supabase.rpc("get_user_plan", { _user_id: user.id });
@@ -115,12 +141,12 @@ export default function Checkout() {
         if (j.status === "approved") {
           setPaid(true);
           clearInterval(interval);
-          setTimeout(() => navigate(`/${product?.slug}?checkout=success`), 2000);
+          setTimeout(() => navigate(productType === "club" ? "/clube?clube=success" : `/${product?.slug}?checkout=success`), 2000);
         }
       } catch (_) { /* ignore */ }
     }, 4000);
     return () => clearInterval(interval);
-  }, [pixPaymentId, paid, navigate, product]);
+  }, [pixPaymentId, paid, navigate, product, productType]);
 
   const onSubmit = async (formData: any) => {
     if (!product) return;
@@ -138,10 +164,10 @@ export default function Checkout() {
       } else if (data.status === "approved") {
         setPaid(true);
         toast.success("Pagamento aprovado!");
-        setTimeout(() => navigate(`/${product.slug}?checkout=success`), 1500);
+        setTimeout(() => navigate(productType === "club" ? "/clube?clube=success" : `/${product.slug}?checkout=success`), 1500);
       } else if (data.status === "in_process" || data.status === "pending") {
         toast.info("Pagamento em análise. Você receberá uma confirmação em breve.");
-        setTimeout(() => navigate(`/${product.slug}?checkout=pending`), 2000);
+        setTimeout(() => navigate(productType === "club" ? "/clube?clube=pending" : `/${product.slug}?checkout=pending`), 2000);
       } else {
         toast.error("Pagamento recusado", { description: data.status_detail || "Tente outro cartão." });
       }
@@ -167,7 +193,7 @@ export default function Checkout() {
       {/* Header */}
       <header className="border-b border-white/10 bg-black/80 backdrop-blur sticky top-0 z-20">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to={`/${product.slug}`} className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
+          <Link to={productType === "club" ? "/clube" : `/${product.slug}`} className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
           <img src={drinkerosLogo} alt="Drinkeros" className="h-7 w-auto opacity-90" />
