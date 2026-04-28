@@ -52,13 +52,17 @@ serve(async (req) => {
       { auth: { persistSession: false } },
     );
 
-    const table = TABLE_MAP[product_type as ProductType];
-    const { data: product, error: productErr } = await supabase
-      .from(table)
-      .select("id, name, slug, price, cover_image_url, description")
-      .eq("slug", slug)
-      .maybeSingle();
-    if (productErr || !product) throw new Error("Produto não encontrado");
+    let product = CLUB_PRODUCT;
+    if (product_type !== "club") {
+      const table = TABLE_MAP[product_type as Exclude<ProductType, "club">];
+      const { data: productData, error: productErr } = await supabase
+        .from(table)
+        .select("id, name, slug, price, cover_image_url, description")
+        .eq("slug", slug)
+        .maybeSingle();
+      if (productErr || !productData) throw new Error("Produto não encontrado");
+      product = productData;
+    }
     if (!product.price || Number(product.price) <= 0) {
       throw new Error("Produto sem preço configurado");
     }
