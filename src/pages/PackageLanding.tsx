@@ -49,12 +49,15 @@ const PackageLanding: React.FC = () => {
   }, [searchParams, toast]);
 
   const handleBuy = async () => {
-    if (!item || isPackage) return;
+    if (!item) return;
     setCheckoutLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('create-product-checkout', {
+      const productType = isCourse ? 'course' : isEbook ? 'ebook' : isPackage ? 'package' : null;
+      if (!productType) throw new Error('Tipo de produto inválido');
+
+      const { data, error } = await supabase.functions.invoke('create-mp-checkout', {
         body: {
-          product_type: isCourse ? 'course' : 'ebook',
+          product_type: productType,
           slug: packageSlug,
         },
       });
@@ -86,8 +89,11 @@ const PackageLanding: React.FC = () => {
     return <Navigate to="/404" replace />;
   }
 
-  const sellable = (isCourse && (item as any).is_available_for_sale && (item as any).price) || (isEbook && (item as any).price);
-  const hasStripePrice = (isCourse || isEbook) && (!!(item as any).stripe_price_id || (isEbook && !!(item as any).price));
+  const sellable = !!(
+    (isCourse && (item as any).is_available_for_sale && (item as any).price) ||
+    (isEbook && (item as any).price) ||
+    (isPackage && (item as any).price)
+  );
   const price = (item as any).price ? Number((item as any).price) : null;
   const finalPrice = price !== null && isVip ? applyVipDiscount(price) : price;
   const formattedPrice = finalPrice !== null ? formatBRL(finalPrice) : null;
@@ -155,7 +161,7 @@ const PackageLanding: React.FC = () => {
           )}
 
           {/* Preço + CTA de compra */}
-          {sellable && hasStripePrice && (
+          {sellable && (
             <div className="mb-8">
               {isVip && formattedOriginalPrice && (
                 <div className="mb-2 flex items-center justify-center gap-2">
@@ -167,7 +173,7 @@ const PackageLanding: React.FC = () => {
               )}
               <div className="text-4xl font-extrabold text-foreground mb-1">{formattedPrice}</div>
               <p className="text-sm text-muted-foreground mb-6">
-                {isVip ? 'Preço exclusivo para sócios do Clube · ' : ''}Acesso por 1 ano · Pagamento único
+                {isVip ? 'Preço exclusivo para sócios do Clube · ' : ''}Acesso por 1 ano · Pix, Cartão até 12x ou Boleto
               </p>
               <Button
                 size="lg"
@@ -182,7 +188,7 @@ const PackageLanding: React.FC = () => {
                 )}
               </Button>
               <div className="flex items-center justify-center gap-2 mt-4 text-xs text-muted-foreground">
-                <CheckCircle2 className="h-4 w-4 text-green-600" /> Pagamento seguro via Stripe
+                <CheckCircle2 className="h-4 w-4 text-green-600" /> Pagamento seguro via Mercado Pago
               </div>
             </div>
           )}
@@ -194,11 +200,11 @@ const PackageLanding: React.FC = () => {
           <Button
             size="lg"
             asChild
-            variant={sellable && hasStripePrice ? 'outline' : 'default'}
-            className={sellable && hasStripePrice ? '' : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-6 text-lg font-semibold'}
+            variant={sellable ? 'outline' : 'default'}
+            className={sellable ? '' : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-6 text-lg font-semibold'}
           >
             <Link to="/login">
-              {sellable && hasStripePrice ? 'Já comprei · Acessar' : 'Iniciar'}
+              {sellable ? 'Já comprei · Acessar' : 'Iniciar'}
             </Link>
           </Button>
         </div>
