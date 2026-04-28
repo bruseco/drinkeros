@@ -11,6 +11,7 @@ import { useUserPlan } from '@/hooks/useUserPlan';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
+import drinkerosFooterLogo from '@/assets/logotipo-drinkeros.png';
 
 const PackageLanding: React.FC = () => {
   const { packageSlug } = useParams<{ packageSlug: string }>();
@@ -211,6 +212,7 @@ const PackageLanding: React.FC = () => {
       </main>
 
       <footer className="py-6 text-center text-sm text-muted-foreground">
+        <img src={drinkerosFooterLogo} alt="Drinkeros" className="h-7 w-auto mx-auto mb-2 opacity-70" />
         <p>&copy; {new Date().getFullYear()} {(item as any).name}. Todos os direitos reservados.</p>
       </footer>
     </div>

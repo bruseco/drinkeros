@@ -18,6 +18,7 @@ import VipFloatingBanner from '@/components/landing/VipFloatingBanner';
 
 // Imagens
 import logo from '@/assets/landing/dx/logo.png';
+import drinkerosFooterLogo from '@/assets/logotipo-drinkeros.png';
 import brunoHero from '@/assets/landing/dx/bruno-hero.png';
 import garantia from '@/assets/landing/dx/garantia-15dias.png';
 import pagamentos from '@/assets/landing/dx/pagamentos.png';
@@ -600,6 +601,7 @@ const DrinkerosXperience: React.FC = () => {
 
       {/* FOOTER */}
       <footer className="py-10 bg-black text-center border-t border-white/5">
+        <img src={drinkerosFooterLogo} alt="Drinkeros" className="h-8 w-auto mx-auto mb-3 opacity-70" />
         <p className="text-sm text-white/50">© {new Date().getFullYear()} Drinkeros — Todos os direitos reservados</p>
       </footer>
     </div>

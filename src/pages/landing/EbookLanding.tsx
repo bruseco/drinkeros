@@ -422,6 +422,7 @@ const EbookLanding: React.FC = () => {
 
       {/* Footer */}
       <footer className="py-8 border-t border-white/5 bg-black text-center text-xs text-white/40">
+        <img src={drinkrosLogo} alt="Drinkeros" className="h-7 w-auto mx-auto mb-2 opacity-70" />
         <p>© {new Date().getFullYear()} Drinkeros. Todos os direitos reservados.</p>
       </footer>
     </div>

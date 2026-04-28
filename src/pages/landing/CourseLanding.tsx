@@ -18,6 +18,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUserPlan } from '@/hooks/useUserPlan';
+import drinkerosFooterLogo from '@/assets/logotipo-drinkeros.png';
 import { useCourseBySlug } from '@/hooks/useCourses';
 import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
 import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
@@ -1086,6 +1087,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
 
       {/* FOOTER */}
       <footer className="py-10 bg-black text-center border-t border-white/5">
+        <img src={drinkerosFooterLogo} alt="Drinkeros" className="h-8 w-auto mx-auto mb-3 opacity-70" />
         <p className="text-sm text-white/50">
           © {new Date().getFullYear()} Drinkeros — Todos os direitos reservados
         </p>
