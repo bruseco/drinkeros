@@ -141,6 +141,8 @@ const AccessItemList: React.FC<{
 const AdminUsers: React.FC = () => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
+  const [pwaFilter, setPwaFilter] = useState<'all' | 'pwa' | 'web'>('all');
+  const [sortBy, setSortBy] = useState<'created_desc' | 'pwa_installed_desc' | 'pwa_installed_asc' | 'last_pwa_open_desc'>('created_desc');
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
   const [selectedAccess, setSelectedAccess] = useState<Set<string>>(new Set());
   const [accessSearch, setAccessSearch] = useState('');
@@ -213,9 +215,9 @@ const AdminUsers: React.FC = () => {
   
   React.useEffect(() => {
     setPage(0);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, pwaFilter, sortBy]);
 
-  const { data, isLoading } = useAdminUsers(page, PAGE_SIZE, debouncedSearch);
+  const { data, isLoading } = useAdminUsers(page, PAGE_SIZE, debouncedSearch, pwaFilter, sortBy);
   const users = data?.users ?? [];
   const totalCount = data?.totalCount ?? 0;
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
@@ -432,15 +434,38 @@ const AdminUsers: React.FC = () => {
         </Card>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Buscar por email ou nome..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-10"
-        />
+      {/* Search + Filters */}
+      <div className="flex flex-col gap-3 md:flex-row md:items-center">
+        <div className="relative md:max-w-md md:flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por email ou nome..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={pwaFilter} onValueChange={(v) => setPwaFilter(v as typeof pwaFilter)}>
+          <SelectTrigger className="md:w-[180px]">
+            <SelectValue placeholder="Tipo de acesso" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos (PWA + Web)</SelectItem>
+            <SelectItem value="pwa">📱 Apenas PWA</SelectItem>
+            <SelectItem value="web">🌐 Apenas Web</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+          <SelectTrigger className="md:w-[240px]">
+            <SelectValue placeholder="Ordenar por" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="created_desc">Cadastro (mais recente)</SelectItem>
+            <SelectItem value="pwa_installed_desc">Instalação PWA (mais recente)</SelectItem>
+            <SelectItem value="pwa_installed_asc">Instalação PWA (mais antiga)</SelectItem>
+            <SelectItem value="last_pwa_open_desc">Última abertura no PWA</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Users Table */}

@@ -146,9 +146,18 @@ export interface AdminUsersResult {
   totalCount: number;
 }
 
-export const useAdminUsers = (page: number = 0, pageSize: number = 50, search: string = '') => {
+export type PwaFilter = 'all' | 'pwa' | 'web';
+export type AdminUsersSort = 'created_desc' | 'pwa_installed_desc' | 'pwa_installed_asc' | 'last_pwa_open_desc';
+
+export const useAdminUsers = (
+  page: number = 0,
+  pageSize: number = 50,
+  search: string = '',
+  pwaFilter: PwaFilter = 'all',
+  sort: AdminUsersSort = 'created_desc',
+) => {
   return useQuery({
-    queryKey: ['admin-users', page, pageSize, search],
+    queryKey: ['admin-users', page, pageSize, search, pwaFilter, sort],
     queryFn: async (): Promise<AdminUsersResult> => {
       const from = page * pageSize;
       const to = from + pageSize - 1;
@@ -161,8 +170,27 @@ export const useAdminUsers = (page: number = 0, pageSize: number = 50, search: s
         query = query.or(`email.ilike.%${search}%,full_name.ilike.%${search}%`);
       }
 
+      if (pwaFilter === 'pwa') {
+        query = query.not('pwa_installed_at', 'is', null);
+      } else if (pwaFilter === 'web') {
+        query = query.is('pwa_installed_at', null);
+      }
+
+      switch (sort) {
+        case 'pwa_installed_desc':
+          query = query.order('pwa_installed_at', { ascending: false, nullsFirst: false });
+          break;
+        case 'pwa_installed_asc':
+          query = query.order('pwa_installed_at', { ascending: true, nullsFirst: false });
+          break;
+        case 'last_pwa_open_desc':
+          query = query.order('last_pwa_open_at', { ascending: false, nullsFirst: false });
+          break;
+        default:
+          query = query.order('created_at', { ascending: false });
+      }
+
       const { data: profiles, count, error: profilesError } = await query
-        .order('created_at', { ascending: false })
         .range(from, to);
 
       if (profilesError) throw profilesError;
