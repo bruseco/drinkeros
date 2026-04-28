@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Download, Smartphone } from 'lucide-react';
+import { Download, Smartphone, X } from 'lucide-react';
 import { usePwaStatus } from '@/hooks/usePwaStatus';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -9,12 +9,17 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-/** Banner persistente (não-dismissável) exibido em todas as páginas internas
- *  até que o usuário instale o PWA. Some automaticamente quando detecta
- *  que o usuário já abriu via PWA pelo menos uma vez. */
+const DISMISS_KEY = 'pwa-install-banner-dismissed';
+
+/** Banner exibido acima do menu inferior (mobile) e no topo (desktop) até
+ *  o usuário instalar o PWA ou fechar manualmente no X. */
 export const PwaInstallGate: React.FC = () => {
   const { isStandalone, hasInstalledBefore, loading } = usePwaStatus();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [dismissed, setDismissed] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem(DISMISS_KEY) === '1';
+  });
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -28,6 +33,7 @@ export const PwaInstallGate: React.FC = () => {
   if (loading) return null;
   if (isStandalone) return null;
   if (hasInstalledBefore) return null;
+  if (dismissed) return null;
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
@@ -36,8 +42,19 @@ export const PwaInstallGate: React.FC = () => {
     if (outcome === 'accepted') setDeferredPrompt(null);
   };
 
+  const handleDismiss = () => {
+    localStorage.setItem(DISMISS_KEY, '1');
+    setDismissed(true);
+  };
+
   return (
-    <div className="sticky top-0 z-40 w-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg">
+    <div
+      className={
+        // Mobile: fica acima do menu inferior (que é fixed bottom-0 com pb-[7px] + ~64px de altura).
+        // Desktop (lg): volta para o topo do conteúdo.
+        'fixed bottom-[72px] left-0 right-0 z-40 lg:static lg:bottom-auto bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg lg:shadow-none'
+      }
+    >
       <div className="mx-auto flex max-w-5xl items-center gap-3 px-3 py-2.5">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/20 backdrop-blur">
           <Smartphone className="h-5 w-5" />
@@ -64,6 +81,14 @@ export const PwaInstallGate: React.FC = () => {
             </Button>
           </Link>
         )}
+        <button
+          type="button"
+          onClick={handleDismiss}
+          aria-label="Fechar"
+          className="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/15 transition-colors"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
     </div>
   );
