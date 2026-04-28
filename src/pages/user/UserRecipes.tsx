@@ -264,13 +264,19 @@ const UserRecipes: React.FC = () => {
                           <img
                             src={recipe.cover_image_url}
                             alt={recipe.title}
-                            className={cn(
-                              'h-full w-full object-cover transition-transform duration-500 group-hover:scale-105',
-                              showLockOverlay && 'brightness-50 saturate-50'
-                            )}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                             loading="lazy"
                           />
                           {showLockOverlay && (
+                            <>
+                              {/* Degradê preto (esquerda) → transparente (direita) para destacar o xarope no lado direito */}
+                              <div
+                                className="absolute inset-0 pointer-events-none"
+                                style={{
+                                  background:
+                                    'linear-gradient(to right, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.75) 35%, rgba(0,0,0,0.35) 65%, rgba(0,0,0,0) 100%)',
+                                }}
+                              />
                             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
                               <div className="rounded-full bg-purple-600/90 p-3 shadow-lg shadow-purple-500/50">
                                 <Lock className="h-5 w-5 text-white" />
@@ -279,6 +285,7 @@ const UserRecipes: React.FC = () => {
                                 Exclusivo do Clube
                               </span>
                             </div>
+                            </>
                           )}
                         </div>
                       ) : (
