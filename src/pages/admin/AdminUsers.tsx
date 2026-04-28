@@ -472,10 +472,19 @@ const AdminUsers: React.FC = () => {
                     <TableRow key={user.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/users/${user.user_id}`)}>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="font-medium">
+                          <span className="font-medium flex items-center gap-1.5 flex-wrap">
                             {user.full_name || 'Sem nome'}
                             {isCurrentUser && (
-                              <Badge variant="outline" className="ml-2 text-xs">Você</Badge>
+                              <Badge variant="outline" className="text-xs">Você</Badge>
+                            )}
+                            {user.pwa_installed_at ? (
+                              <Badge variant="default" className="text-[10px] px-1.5 py-0 h-4" title={`Instalou em ${format(new Date(user.pwa_installed_at), 'dd/MM/yyyy')}`}>
+                                📱 PWA
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 text-muted-foreground" title="Ainda não instalou o app">
+                                🌐 Web
+                              </Badge>
                             )}
                           </span>
                           <span className="text-sm text-muted-foreground">{user.email}</span>

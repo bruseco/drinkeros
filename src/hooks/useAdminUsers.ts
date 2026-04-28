@@ -137,6 +137,8 @@ export interface UserWithRole {
   course_ids: string[];
   ebook_ids: string[];
   has_receitas: boolean;
+  pwa_installed_at: string | null;
+  last_pwa_open_at: string | null;
 }
 
 export interface AdminUsersResult {
@@ -153,7 +155,7 @@ export const useAdminUsers = (page: number = 0, pageSize: number = 50, search: s
 
       let query = supabase
         .from('profiles')
-        .select('id, user_id, email, full_name, phone, created_at', { count: 'exact' });
+        .select('id, user_id, email, full_name, phone, created_at, pwa_installed_at, last_pwa_open_at', { count: 'exact' });
 
       if (search) {
         query = query.or(`email.ilike.%${search}%,full_name.ilike.%${search}%`);
@@ -241,6 +243,8 @@ export const useAdminUsers = (page: number = 0, pageSize: number = 50, search: s
           course_ids: courseIds,
           ebook_ids: ebookIds,
           has_receitas: hasReceitas,
+          pwa_installed_at: (profile as any).pwa_installed_at ?? null,
+          last_pwa_open_at: (profile as any).last_pwa_open_at ?? null,
         };
       });
 

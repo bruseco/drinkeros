@@ -6,6 +6,7 @@ import { UserSidebar } from './UserSidebar';
 import { PushNotificationPrompt } from './PushNotificationPrompt';
 import { PageTransition } from './PageTransition';
 import { WinnerPopup } from './WinnerPopup';
+import { PwaInstallGate } from './PwaInstallGate';
 
 import { Loader2 } from 'lucide-react';
 
@@ -28,6 +29,7 @@ export const UserLayout: React.FC = () => {
     <div className="flex min-h-screen bg-background">
       <UserSidebar />
       <div className="flex flex-1 flex-col min-w-0">
+        <PwaInstallGate />
         <UserNavbar />
         <PushNotificationPrompt />
         <WinnerPopup />
