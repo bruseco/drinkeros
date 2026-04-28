@@ -113,9 +113,11 @@ export default function Checkout() {
         setProduct(prod as unknown as Product);
 
         if (user) {
-          if (user.email) setPayerEmail(user.email);
+          setPayerEmail(user.email ?? "");
           const { data: planData } = await supabase.rpc("get_user_plan", { _user_id: user.id });
           setIsVip(planData === "vip");
+        } else {
+          setPayerEmail("");
         }
       } finally {
         setLoading(false);
