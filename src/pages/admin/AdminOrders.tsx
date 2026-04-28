@@ -17,17 +17,11 @@ import { Loader2, Search, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide
 const sourceLabel: Record<string, string> = {
   stripe: 'Stripe',
   mercadopago: 'Mercado Pago',
-  woocommerce: 'WooCommerce',
-  hotmart: 'Hotmart',
-  pix: 'PIX',
 };
 
 const sourceVariant: Record<string, 'default' | 'secondary' | 'outline'> = {
   stripe: 'default',
-  mercadopago: 'default',
-  woocommerce: 'secondary',
-  hotmart: 'secondary',
-  pix: 'outline',
+  mercadopago: 'secondary',
 };
 
 const productLabel: Record<string, string> = {
