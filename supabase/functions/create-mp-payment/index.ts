@@ -9,12 +9,21 @@ const corsHeaders = {
 };
 
 const MP_API = "https://api.mercadopago.com";
-type ProductType = "course" | "ebook" | "combo" | "package";
-const TABLE_MAP: Record<ProductType, string> = {
+type ProductType = "course" | "ebook" | "combo" | "package" | "club";
+const TABLE_MAP: Record<Exclude<ProductType, "club">, string> = {
   course: "courses",
   ebook: "ebooks",
   combo: "combos",
   package: "packages",
+};
+
+const CLUB_PRODUCT = {
+  id: "club",
+  name: "Clube dos Drinkeros · Anual",
+  slug: "clube",
+  price: 69,
+  cover_image_url: null,
+  description: "Acesso anual às receitas exclusivas e benefícios do Clube.",
 };
 
 serve(async (req) => {
@@ -31,7 +40,7 @@ serve(async (req) => {
       formData, // vindo do Brick: { token, payment_method_id, issuer_id, installments, payer:{email, identification}, transaction_amount }
     } = body || {};
 
-    if (!["course", "ebook", "combo", "package"].includes(product_type)) {
+    if (!["course", "ebook", "combo", "package", "club"].includes(product_type)) {
       throw new Error("Invalid product_type");
     }
     if (!slug) throw new Error("Missing slug");
