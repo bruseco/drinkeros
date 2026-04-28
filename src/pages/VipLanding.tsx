@@ -450,7 +450,7 @@ const VipLanding: React.FC = () => {
               )}
             </Button>
             <p className="text-center text-xs text-purple-300 mt-3">
-              💳 Pagamento seguro · cancele quando quiser
+              💳 Pagamento seguro · cartão em até 12x ou Pix
             </p>
           </div>
         </div>
