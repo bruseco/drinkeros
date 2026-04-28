@@ -105,11 +105,6 @@ export default function Checkout() {
     if (!pixPaymentId || paid) return;
     const interval = setInterval(async () => {
       try {
-        const { data, error } = await supabase.functions.invoke("get-mp-payment-status", {
-          body: null,
-          method: "GET" as any,
-        } as any);
-        // fallback manual via fetch
         const resp = await fetch(
           `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/get-mp-payment-status?id=${pixPaymentId}`,
           { headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } }
