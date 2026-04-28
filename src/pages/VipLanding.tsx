@@ -97,7 +97,7 @@ const VipLanding: React.FC = () => {
     }, 280);
   };
 
-  // Trata retorno do Stripe Checkout (mantém o param "vip" por compatibilidade do webhook)
+  // Trata retorno do checkout (mantém o param "vip" por compatibilidade do fluxo antigo)
   useEffect(() => {
     const status = searchParams.get('vip') || searchParams.get('clube');
     if (status === 'success') {
@@ -111,6 +111,11 @@ const VipLanding: React.FC = () => {
       searchParams.delete('vip');
       searchParams.delete('clube');
       setSearchParams(searchParams, { replace: true });
+    } else if (status === 'pending') {
+      toast.info('Pagamento em análise. Assim que aprovar, seu Clube será liberado.');
+      searchParams.delete('vip');
+      searchParams.delete('clube');
+      setSearchParams(searchParams, { replace: true });
     }
   }, [searchParams, setSearchParams, queryClient]);
 
@@ -120,16 +125,7 @@ const VipLanding: React.FC = () => {
       return;
     }
     setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('create-vip-checkout');
-      if (error) throw error;
-      if (!data?.url) throw new Error('URL de checkout não recebida');
-      window.location.href = data.url;
-    } catch (err) {
-      console.error('[clube-checkout]', err);
-      toast.error('Não consegui abrir o checkout. Tenta de novo em instantes.');
-      setLoading(false);
-    }
+    navigate('/checkout/club/clube');
   };
 
   // Esconde a página de quem já é sócio do Clube, tem acesso vitalício
