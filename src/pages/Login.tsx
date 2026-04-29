@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { InstallBanner } from '@/components/user/InstallBanner';
 import { WhatsAppFloatingButton } from '@/components/user/WhatsAppFloatingButton';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
+import drinksStrip from '@/assets/1000-drinks.jpg';
 
 const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -160,14 +161,22 @@ const Login: React.FC = () => {
       </div>
       
       <Card className="w-full max-w-md border-0 shadow-xl">
-        <CardHeader className="text-center">
-          <Link to="/" className="mx-auto mb-4">
+        <CardHeader className="text-center p-0">
+          <Link to="/" className="mx-auto mb-4 mt-6">
             <img src={drinkrosLogo} alt="Drinkeros" className="h-14 object-contain" />
           </Link>
-          <CardTitle className="text-2xl">Bem-vindo!</CardTitle>
-          <CardDescription>Acesse a Drinkeros</CardDescription>
+          <div className="w-full overflow-hidden">
+            <div className="flex w-max animate-drinks-marquee">
+              <img src={drinksStrip} alt="" aria-hidden className="h-20 w-auto max-w-none object-cover shrink-0" />
+              <img src={drinksStrip} alt="" aria-hidden className="h-20 w-auto max-w-none object-cover shrink-0" />
+            </div>
+          </div>
+          <div className="px-6 pt-4">
+            <CardTitle className="text-2xl">Mais de 1000 Drinks no seu Bolso.</CardTitle>
+            <CardDescription className="text-success font-semibold mt-1">Baixe grátis!</CardDescription>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-4">
           {/* OAuth Buttons */}
           <div className="space-y-2">
             <div className="relative">
