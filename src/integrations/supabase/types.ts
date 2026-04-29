@@ -1951,6 +1951,9 @@ export type Database = {
           id: string
           mercadopago_payment_id: string | null
           purchased_at: string
+          refund_amount: number | null
+          refund_id: string | null
+          refunded_at: string | null
           source: string
           stripe_payment_intent_id: string | null
           stripe_session_id: string | null
@@ -1964,6 +1967,9 @@ export type Database = {
           id?: string
           mercadopago_payment_id?: string | null
           purchased_at?: string
+          refund_amount?: number | null
+          refund_id?: string | null
+          refunded_at?: string | null
           source?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
@@ -1977,6 +1983,9 @@ export type Database = {
           id?: string
           mercadopago_payment_id?: string | null
           purchased_at?: string
+          refund_amount?: number | null
+          refund_id?: string | null
+          refunded_at?: string | null
           source?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
@@ -2001,6 +2010,9 @@ export type Database = {
           id: string
           mercadopago_payment_id: string | null
           purchased_at: string
+          refund_amount: number | null
+          refund_id: string | null
+          refunded_at: string | null
           source: string
           stripe_payment_intent_id: string | null
           stripe_session_id: string | null
@@ -2014,6 +2026,9 @@ export type Database = {
           id?: string
           mercadopago_payment_id?: string | null
           purchased_at?: string
+          refund_amount?: number | null
+          refund_id?: string | null
+          refunded_at?: string | null
           source?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
@@ -2027,6 +2042,9 @@ export type Database = {
           id?: string
           mercadopago_payment_id?: string | null
           purchased_at?: string
+          refund_amount?: number | null
+          refund_id?: string | null
+          refunded_at?: string | null
           source?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
@@ -2051,6 +2069,9 @@ export type Database = {
           id: string
           mercadopago_payment_id: string | null
           purchased_at: string
+          refund_amount: number | null
+          refund_id: string | null
+          refunded_at: string | null
           source: string
           stripe_payment_intent_id: string | null
           stripe_session_id: string | null
@@ -2064,6 +2085,9 @@ export type Database = {
           id?: string
           mercadopago_payment_id?: string | null
           purchased_at?: string
+          refund_amount?: number | null
+          refund_id?: string | null
+          refunded_at?: string | null
           source?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
@@ -2077,6 +2101,9 @@ export type Database = {
           id?: string
           mercadopago_payment_id?: string | null
           purchased_at?: string
+          refund_amount?: number | null
+          refund_id?: string | null
+          refunded_at?: string | null
           source?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
@@ -2144,6 +2171,9 @@ export type Database = {
           mercadopago_payment_id: string | null
           package_id: string
           purchased_at: string
+          refund_amount: number | null
+          refund_id: string | null
+          refunded_at: string | null
           source: string
           stripe_payment_intent_id: string | null
           stripe_session_id: string | null
@@ -2158,6 +2188,9 @@ export type Database = {
           mercadopago_payment_id?: string | null
           package_id: string
           purchased_at?: string
+          refund_amount?: number | null
+          refund_id?: string | null
+          refunded_at?: string | null
           source?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
@@ -2172,6 +2205,9 @@ export type Database = {
           mercadopago_payment_id?: string | null
           package_id?: string
           purchased_at?: string
+          refund_amount?: number | null
+          refund_id?: string | null
+          refunded_at?: string | null
           source?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
@@ -2278,6 +2314,9 @@ export type Database = {
           payment_method: string
           period_end: string | null
           period_start: string | null
+          refund_amount: number | null
+          refund_id: string | null
+          refunded_at: string | null
           status: string
           stripe_charge_id: string | null
           stripe_customer_id: string | null
@@ -2299,6 +2338,9 @@ export type Database = {
           payment_method?: string
           period_end?: string | null
           period_start?: string | null
+          refund_amount?: number | null
+          refund_id?: string | null
+          refunded_at?: string | null
           status?: string
           stripe_charge_id?: string | null
           stripe_customer_id?: string | null
@@ -2320,6 +2362,9 @@ export type Database = {
           payment_method?: string
           period_end?: string | null
           period_start?: string | null
+          refund_amount?: number | null
+          refund_id?: string | null
+          refunded_at?: string | null
           status?: string
           stripe_charge_id?: string | null
           stripe_customer_id?: string | null
