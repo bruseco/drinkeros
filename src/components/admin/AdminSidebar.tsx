@@ -38,6 +38,7 @@ const adminItems = [
   { title: 'Timeline CS', icon: Clock, href: '/admin/cs-timeline' },
   { title: 'CRM', icon: Target, href: '/admin/crm' },
   { title: 'Métricas UX', icon: BarChart3, href: '/admin/ux-metrics' },
+  { title: 'Métricas de Acesso', icon: Activity, href: '/admin/metricas-acesso' },
   { title: 'Páginas de Venda', icon: Tag, href: '/admin/paginas-venda' },
 ];
 
