@@ -221,6 +221,7 @@ const AdminNotifications: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos os alunos</SelectItem>
+                  <SelectItem value="course">Alunos de um curso</SelectItem>
                   <SelectItem value="package">Alunos de um módulo</SelectItem>
                   <SelectItem value="individual">Alunos específicos</SelectItem>
                 </SelectContent>
@@ -238,6 +239,24 @@ const AdminNotifications: React.FC = () => {
                     {packages.map((pkg) => (
                       <SelectItem key={pkg.id} value={pkg.id}>
                         {pkg.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {targetType === 'course' && (
+              <div className="space-y-2">
+                <Label>Curso</Label>
+                <Select value={targetCourseId} onValueChange={setTargetCourseId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um curso" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {courses.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
