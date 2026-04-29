@@ -236,6 +236,6 @@ All colors MUST be HSL.
   100% { transform: translateX(-50%); }
 }
 .animate-drinks-marquee {
-  animation: drinks-marquee 40s linear infinite;
+  animation: drinks-marquee 70s linear infinite;
   will-change: transform;
 }
