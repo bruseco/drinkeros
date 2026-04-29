@@ -40,12 +40,24 @@ const fmtDate = (s: string) =>
 
 const PAGE_SIZE = 50;
 
+type PresetKey = 'today' | '7d' | '30d' | 'mtd' | 'lastMonth' | 'ytd' | 'clear';
+
+const initialMtd = () => {
+  const now = new Date();
+  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  return {
+    from: fmt(new Date(now.getFullYear(), now.getMonth(), 1)),
+    to: fmt(now),
+  };
+};
+
 const AdminOrders: React.FC = () => {
   const [search, setSearch] = useState('');
   const [source, setSource] = useState<string>('all');
   const [productType, setProductType] = useState<string>('all');
-  const [from, setFrom] = useState<string>('');
-  const [to, setTo] = useState<string>('');
+  const [from, setFrom] = useState<string>(() => initialMtd().from);
+  const [to, setTo] = useState<string>(() => initialMtd().to);
+  const [activePreset, setActivePreset] = useState<PresetKey>('mtd');
   const [page, setPage] = useState(0);
 
   const debouncedSearch = useDebounce(search, 300);
