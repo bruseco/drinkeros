@@ -1944,30 +1944,42 @@ export type Database = {
       }
       user_combos: {
         Row: {
+          amount: number | null
           combo_id: string
+          currency: string | null
           expires_at: string | null
           id: string
           mercadopago_payment_id: string | null
           purchased_at: string
           source: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
           user_id: string
         }
         Insert: {
+          amount?: number | null
           combo_id: string
+          currency?: string | null
           expires_at?: string | null
           id?: string
           mercadopago_payment_id?: string | null
           purchased_at?: string
           source?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           user_id: string
         }
         Update: {
+          amount?: number | null
           combo_id?: string
+          currency?: string | null
           expires_at?: string | null
           id?: string
           mercadopago_payment_id?: string | null
           purchased_at?: string
           source?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -1982,30 +1994,42 @@ export type Database = {
       }
       user_courses: {
         Row: {
+          amount: number | null
           course_id: string
+          currency: string | null
           expires_at: string | null
           id: string
           mercadopago_payment_id: string | null
           purchased_at: string
           source: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
           user_id: string
         }
         Insert: {
+          amount?: number | null
           course_id: string
+          currency?: string | null
           expires_at?: string | null
           id?: string
           mercadopago_payment_id?: string | null
           purchased_at?: string
           source?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           user_id: string
         }
         Update: {
+          amount?: number | null
           course_id?: string
+          currency?: string | null
           expires_at?: string | null
           id?: string
           mercadopago_payment_id?: string | null
           purchased_at?: string
           source?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -2020,30 +2044,42 @@ export type Database = {
       }
       user_ebooks: {
         Row: {
+          amount: number | null
+          currency: string | null
           ebook_id: string
           expires_at: string | null
           id: string
           mercadopago_payment_id: string | null
           purchased_at: string
           source: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
           user_id: string
         }
         Insert: {
+          amount?: number | null
+          currency?: string | null
           ebook_id: string
           expires_at?: string | null
           id?: string
           mercadopago_payment_id?: string | null
           purchased_at?: string
           source?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           user_id: string
         }
         Update: {
+          amount?: number | null
+          currency?: string | null
           ebook_id?: string
           expires_at?: string | null
           id?: string
           mercadopago_payment_id?: string | null
           purchased_at?: string
           source?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -2100,6 +2136,8 @@ export type Database = {
       }
       user_packages: {
         Row: {
+          amount: number | null
+          currency: string | null
           expires_at: string | null
           hotmart_transaction_id: string | null
           id: string
@@ -2107,9 +2145,13 @@ export type Database = {
           package_id: string
           purchased_at: string
           source: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
           user_id: string
         }
         Insert: {
+          amount?: number | null
+          currency?: string | null
           expires_at?: string | null
           hotmart_transaction_id?: string | null
           id?: string
@@ -2117,9 +2159,13 @@ export type Database = {
           package_id: string
           purchased_at?: string
           source?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           user_id: string
         }
         Update: {
+          amount?: number | null
+          currency?: string | null
           expires_at?: string | null
           hotmart_transaction_id?: string | null
           id?: string
@@ -2127,6 +2173,8 @@ export type Database = {
           package_id?: string
           purchased_at?: string
           source?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           user_id?: string
         }
         Relationships: [
