@@ -444,10 +444,10 @@ const UserProfile: React.FC = () => {
             <Crown className={cn("h-5 w-5", isVip ? "text-yellow-500" : "text-muted-foreground")} />
             Plano Atual
             <span className={cn(
-              "text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border",
+              "text-[10px] font-bold uppercase px-2 py-0.5 rounded-full",
               isVip
-                ? "bg-yellow-500/15 text-yellow-600 border-yellow-500/30"
-                : "bg-muted-foreground/15 text-muted-foreground border-muted-foreground/30"
+                ? "bg-yellow-500/15 text-yellow-600 border border-yellow-500/30"
+                : "bg-lime-400 text-lime-950 shadow-sm"
             )}>
               {isVip ? 'Clube' : 'Gratuito'}
             </span>
