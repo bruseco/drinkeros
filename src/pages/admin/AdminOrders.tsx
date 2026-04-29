@@ -90,7 +90,7 @@ const AdminOrders: React.FC = () => {
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  const totalRevenue = rows.reduce((sum, r) => sum + (r.amount ?? 0), 0);
+  
 
   const applyPreset = (preset: PresetKey) => {
     const now = new Date();
