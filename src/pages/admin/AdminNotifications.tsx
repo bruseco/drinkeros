@@ -44,9 +44,11 @@ const AdminNotifications: React.FC = () => {
   const [url, setUrl] = useState('/app');
   const [targetType, setTargetType] = useState('all');
   const [targetPackageId, setTargetPackageId] = useState('');
+  const [targetCourseId, setTargetCourseId] = useState('');
   const [targetUserEmails, setTargetUserEmails] = useState('');
 
   const { data: packages = [] } = usePackages();
+  const { data: courses = [] } = useCourses(true);
   const queryClient = useQueryClient();
 
   // Check VAPID configuration
