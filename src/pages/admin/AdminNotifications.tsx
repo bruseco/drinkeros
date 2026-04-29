@@ -5,6 +5,7 @@ import OnboardingReminderSettings from '@/components/admin/OnboardingReminderSet
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { usePackages } from '@/hooks/usePackages';
+import { useCourses } from '@/hooks/useCourses';
 import {
   Card,
   CardContent,
