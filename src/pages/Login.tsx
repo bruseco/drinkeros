@@ -171,7 +171,7 @@ const Login: React.FC = () => {
               <img src={drinksStrip} alt="" aria-hidden className="h-28 w-auto max-w-none object-cover shrink-0" />
             </div>
           </div>
-          <div className="px-6 pt-0 pb-4 -mt-2">
+          <div className="px-6 pt-0 pb-4 -mt-6">
             <CardTitle className="text-2xl">Mais de 1000 Drinks no seu Bolso.</CardTitle>
             <CardDescription className="text-success font-semibold mt-1 mb-4">Baixe grátis!</CardDescription>
           </div>
