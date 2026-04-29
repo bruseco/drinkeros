@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAdminOrders } from '@/hooks/useAdminOrders';
+import { useAdminOrdersChart } from '@/hooks/useAdminOrdersChart';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -72,11 +74,23 @@ const AdminOrders: React.FC = () => {
     pageSize: PAGE_SIZE,
   });
 
+  const chartFilters = useMemo(() => ({
+    search: debouncedSearch,
+    source: source === 'all' ? undefined : source,
+    productType: productType === 'all' ? undefined : productType,
+    from: from ? new Date(from).toISOString() : undefined,
+    to: to ? new Date(`${to}T23:59:59`).toISOString() : undefined,
+  }), [debouncedSearch, source, productType, from, to]);
+
+  const { data: chartData = [], isLoading: chartLoading } = useAdminOrdersChart(chartFilters);
+  const chartTotalRevenue = chartData.reduce((s, p) => s + p.revenue, 0);
+  const chartTotalCount = chartData.reduce((s, p) => s + p.count, 0);
+
   const rows = data?.rows ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  const totalRevenue = rows.reduce((sum, r) => sum + (r.amount ?? 0), 0);
+  
 
   const applyPreset = (preset: PresetKey) => {
     const now = new Date();
@@ -130,21 +144,80 @@ const AdminOrders: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-muted-foreground">Vendas no filtro</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{total.toLocaleString('pt-BR')}</div>
+            <div className="text-3xl font-bold">{chartTotalCount.toLocaleString('pt-BR')}</div>
+            <p className="text-xs text-muted-foreground mt-1">no período selecionado</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Receita (página atual)</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Receita do período</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{fmtBRL(totalRevenue)}</div>
+            <div className="text-3xl font-bold">{fmtBRL(chartTotalRevenue)}</div>
+            <p className="text-xs text-muted-foreground mt-1">soma de todas as vendas no filtro</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">Vendas por dia</CardTitle>
+          </CardHeader>
+          <CardContent className="h-[120px] p-2">
+            {chartLoading ? (
+              <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
+                Carregando...
+              </div>
+            ) : chartData.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
+                Sem vendas no período
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.6} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                    tickLine={false}
+                    axisLine={false}
+                    interval="preserveStartEnd"
+                    minTickGap={20}
+                  />
+                  <YAxis hide />
+                  <Tooltip
+                    contentStyle={{
+                      background: 'hsl(var(--popover))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: 8,
+                      fontSize: 12,
+                    }}
+                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                    formatter={(value: number, name) => {
+                      if (name === 'revenue') return [fmtBRL(value), 'Receita'];
+                      return [value, 'Vendas'];
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="count"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    fill="url(#salesGradient)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
