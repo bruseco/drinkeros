@@ -139,11 +139,6 @@ serve(async (req) => {
 
     if (!userId) {
       console.log("[mp-webhook] approved but no user_id (guest checkout). Email:", payerEmail);
-      await supabase.from("mercadopago_events").update({
-        processed: true,
-        processed_at: new Date().toISOString(),
-        error_message: `Guest purchase awaiting account creation. Email: ${payerEmail}`,
-      }).eq("id", eventRow!.id);
       return new Response(JSON.stringify({ ok: true, pending_user: true }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -152,10 +147,6 @@ serve(async (req) => {
 
     if (productType === "club") {
       await grantClubAccess(supabase, userId, payment, String(paymentId));
-      await supabase.from("mercadopago_events").update({
-        processed: true,
-        processed_at: new Date().toISOString(),
-      }).eq("id", eventRow!.id);
 
       return new Response(JSON.stringify({ ok: true, granted: true, club: true }), {
         status: 200,
@@ -169,21 +160,15 @@ serve(async (req) => {
       [fk]: productId,
       source: "mercadopago",
       mercadopago_payment_id: String(paymentId),
+      amount: Number(payment?.transaction_amount || 0),
+      currency: String(payment?.currency_id || "BRL").toUpperCase(),
       purchased_at: new Date().toISOString(),
     }, { onConflict: `user_id,${fk}` });
 
     if (insertErr) {
       console.error("[mp-webhook] failed to grant access:", insertErr);
-      await supabase.from("mercadopago_events").update({
-        error_message: `Grant access failed: ${insertErr.message}`,
-      }).eq("id", eventRow!.id);
       throw insertErr;
     }
-
-    await supabase.from("mercadopago_events").update({
-      processed: true,
-      processed_at: new Date().toISOString(),
-    }).eq("id", eventRow!.id);
 
     console.log("[mp-webhook] access granted:", { userId, productType, productId, paymentId });
 
