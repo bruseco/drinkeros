@@ -138,6 +138,8 @@ const AdminNotifications: React.FC = () => {
         return 'Todos';
       case 'package':
         return 'Módulo';
+      case 'course':
+        return 'Curso';
       case 'individual':
         return 'Individual';
       case 'study_reminder':
