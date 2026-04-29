@@ -5,6 +5,7 @@ import OnboardingReminderSettings from '@/components/admin/OnboardingReminderSet
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { usePackages } from '@/hooks/usePackages';
+import { useCourses } from '@/hooks/useCourses';
 import {
   Card,
   CardContent,
@@ -43,9 +44,11 @@ const AdminNotifications: React.FC = () => {
   const [url, setUrl] = useState('/app');
   const [targetType, setTargetType] = useState('all');
   const [targetPackageId, setTargetPackageId] = useState('');
+  const [targetCourseId, setTargetCourseId] = useState('');
   const [targetUserEmails, setTargetUserEmails] = useState('');
 
   const { data: packages = [] } = usePackages();
+  const { data: courses = [] } = useCourses(true);
   const queryClient = useQueryClient();
 
   // Check VAPID configuration
@@ -107,6 +110,7 @@ const AdminNotifications: React.FC = () => {
           url,
           targetType,
           targetPackageId: targetType === 'package' ? targetPackageId : null,
+          targetCourseId: targetType === 'course' ? targetCourseId : null,
           targetUserIds,
         },
       });
@@ -134,6 +138,8 @@ const AdminNotifications: React.FC = () => {
         return 'Todos';
       case 'package':
         return 'Módulo';
+      case 'course':
+        return 'Curso';
       case 'individual':
         return 'Individual';
       case 'study_reminder':
@@ -215,6 +221,7 @@ const AdminNotifications: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos os alunos</SelectItem>
+                  <SelectItem value="course">Alunos de um curso</SelectItem>
                   <SelectItem value="package">Alunos de um módulo</SelectItem>
                   <SelectItem value="individual">Alunos específicos</SelectItem>
                 </SelectContent>
@@ -232,6 +239,24 @@ const AdminNotifications: React.FC = () => {
                     {packages.map((pkg) => (
                       <SelectItem key={pkg.id} value={pkg.id}>
                         {pkg.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {targetType === 'course' && (
+              <div className="space-y-2">
+                <Label>Curso</Label>
+                <Select value={targetCourseId} onValueChange={setTargetCourseId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um curso" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {courses.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

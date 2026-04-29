@@ -1222,6 +1222,7 @@ export type Database = {
           id: string
           sent_by: string
           sent_count: number | null
+          target_course_id: string | null
           target_package_id: string | null
           target_type: string
           target_user_ids: string[] | null
@@ -1234,6 +1235,7 @@ export type Database = {
           id?: string
           sent_by: string
           sent_count?: number | null
+          target_course_id?: string | null
           target_package_id?: string | null
           target_type?: string
           target_user_ids?: string[] | null
@@ -1246,6 +1248,7 @@ export type Database = {
           id?: string
           sent_by?: string
           sent_count?: number | null
+          target_course_id?: string | null
           target_package_id?: string | null
           target_type?: string
           target_user_ids?: string[] | null
@@ -1253,6 +1256,13 @@ export type Database = {
           url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "notifications_target_course_id_fkey"
+            columns: ["target_course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "notifications_target_package_id_fkey"
             columns: ["target_package_id"]

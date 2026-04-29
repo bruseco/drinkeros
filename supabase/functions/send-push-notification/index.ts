@@ -30,7 +30,7 @@ serve(async (req: Request) => {
     const { data: isAdmin } = await supabase.rpc("is_admin", { _user_id: user.id });
     if (!isAdmin) throw new Error("Forbidden: admin only");
 
-    const { title, body, url, targetType, targetPackageId, targetUserIds } = await req.json();
+    const { title, body, url, targetType, targetPackageId, targetCourseId, targetUserIds } = await req.json();
 
     if (!title || !body) throw new Error("Missing title or body");
 
@@ -56,6 +56,19 @@ serve(async (req: Request) => {
         .select("user_id")
         .eq("package_id", targetPackageId);
       const userIds = (userPackages || []).map((up: any) => up.user_id);
+      if (userIds.length > 0) {
+        const { data } = await supabase
+          .from("push_subscriptions")
+          .select("*")
+          .in("user_id", userIds);
+        subscriptions = data || [];
+      }
+    } else if (targetType === "course" && targetCourseId) {
+      const { data: userCourses } = await supabase
+        .from("user_courses")
+        .select("user_id")
+        .eq("course_id", targetCourseId);
+      const userIds = Array.from(new Set((userCourses || []).map((uc: any) => uc.user_id)));
       if (userIds.length > 0) {
         const { data } = await supabase
           .from("push_subscriptions")
@@ -111,6 +124,7 @@ serve(async (req: Request) => {
       url: url || "/app",
       target_type: targetType || "all",
       target_package_id: targetType === "package" ? targetPackageId : null,
+      target_course_id: targetType === "course" ? targetCourseId : null,
       target_user_ids: targetType === "individual" ? targetUserIds : [],
       sent_count: sentCount,
       sent_by: user.id,
