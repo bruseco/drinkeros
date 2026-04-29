@@ -199,8 +199,8 @@ const AdminOrders: React.FC = () => {
                 <SelectItem value="pacote">Pacotes (avulsos)</SelectItem>
               </SelectContent>
             </Select>
-            <Input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(0); }} />
-            <Input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(0); }} />
+            <Input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(0); setActivePreset('clear'); }} />
+            <Input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(0); setActivePreset('clear'); }} />
           </div>
         </CardContent>
       </Card>
