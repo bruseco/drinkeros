@@ -124,6 +124,7 @@ serve(async (req: Request) => {
       url: url || "/app",
       target_type: targetType || "all",
       target_package_id: targetType === "package" ? targetPackageId : null,
+      target_course_id: targetType === "course" ? targetCourseId : null,
       target_user_ids: targetType === "individual" ? targetUserIds : [],
       sent_count: sentCount,
       sent_by: user.id,
