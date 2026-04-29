@@ -573,6 +573,27 @@ export type Database = {
           },
         ]
       }
+      course_views: {
+        Row: {
+          course_id: string
+          id: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          course_id: string
+          id?: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          course_id?: string
+          id?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: []
+      }
       courses: {
         Row: {
           certificate_bg_url: string | null
@@ -901,6 +922,27 @@ export type Database = {
         }
         Relationships: []
       }
+      ebook_downloads: {
+        Row: {
+          downloaded_at: string
+          ebook_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          downloaded_at?: string
+          ebook_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          downloaded_at?: string
+          ebook_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ebooks: {
         Row: {
           cover_image_url: string | null
@@ -1135,6 +1177,27 @@ export type Database = {
         }
         Relationships: []
       }
+      exclusive_post_views: {
+        Row: {
+          id: string
+          post_id: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: []
+      }
       exclusive_posts: {
         Row: {
           category_id: string | null
@@ -1212,6 +1275,33 @@ export type Database = {
           id?: string
           recipe_id?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      lesson_watch_time: {
+        Row: {
+          course_id: string | null
+          id: string
+          lesson_id: string
+          seconds_watched: number
+          user_id: string
+          watched_at: string
+        }
+        Insert: {
+          course_id?: string | null
+          id?: string
+          lesson_id: string
+          seconds_watched?: number
+          user_id: string
+          watched_at?: string
+        }
+        Update: {
+          course_id?: string | null
+          id?: string
+          lesson_id?: string
+          seconds_watched?: number
+          user_id?: string
+          watched_at?: string
         }
         Relationships: []
       }
@@ -2937,6 +3027,10 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      get_access_metrics: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
       }
       get_current_battle_recipe_ids: { Args: never; Returns: string[] }
       get_package_recipe_metadata: {
