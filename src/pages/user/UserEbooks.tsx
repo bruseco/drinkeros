@@ -140,6 +140,9 @@ const UserEbooks: React.FC = () => {
                   rel="noopener noreferrer"
                   className={wrapperClass}
                   aria-label={`Abrir e-book ${ebook.name}`}
+                  onClick={() => {
+                    if (user?.id) trackEbookDownload(user.id, ebook.id).catch(() => {});
+                  }}
                 >
                   {cardInner}
                 </a>
