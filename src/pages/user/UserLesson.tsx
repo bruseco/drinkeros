@@ -221,6 +221,8 @@ const UserLesson: React.FC = () => {
 
   // Fetch next module's first lesson (when current lesson is the last in its module)
   const currentPackageId = (!Array.isArray(moduleLessons) && moduleLessons?.packageId) || null;
+  const currentCourseIdForTracking = (!Array.isArray(moduleLessons) && moduleLessons?.courseId) || null;
+  useLessonWatchHeartbeat(id, currentCourseIdForTracking, !!lesson);
   const { data: nextModuleData } = useQuery({
     queryKey: ['next-module-first-lesson', currentPackageId],
     queryFn: async () => {
