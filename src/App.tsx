@@ -63,6 +63,7 @@ import AdminCSTimeline from "./pages/admin/AdminCSTimeline";
 import AdminCRM from "./pages/admin/AdminCRM";
 
 import AdminUXMetrics from "./pages/admin/AdminUXMetrics";
+import AdminAccessMetrics from "./pages/admin/AdminAccessMetrics";
 import AdminSalesPages from "./pages/admin/AdminSalesPages";
 
 // User pages
