@@ -155,11 +155,20 @@ const AdminOrders: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
-            {presets.map((p) => (
-              <Button key={p.key} variant="outline" size="sm" onClick={() => applyPreset(p.key)}>
-                {p.label}
-              </Button>
-            ))}
+            {presets.map((p) => {
+              const isActive = activePreset === p.key;
+              return (
+                <Button
+                  key={p.key}
+                  variant={isActive ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => applyPreset(p.key)}
+                  className={isActive ? 'bg-[hsl(var(--brand-orange))] text-white hover:bg-[hsl(var(--brand-orange))]/90 border-transparent' : ''}
+                >
+                  {p.label}
+                </Button>
+              );
+            })}
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
