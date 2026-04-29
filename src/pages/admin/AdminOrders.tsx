@@ -74,6 +74,18 @@ const AdminOrders: React.FC = () => {
     pageSize: PAGE_SIZE,
   });
 
+  const chartFilters = useMemo(() => ({
+    search: debouncedSearch,
+    source: source === 'all' ? undefined : source,
+    productType: productType === 'all' ? undefined : productType,
+    from: from ? new Date(from).toISOString() : undefined,
+    to: to ? new Date(`${to}T23:59:59`).toISOString() : undefined,
+  }), [debouncedSearch, source, productType, from, to]);
+
+  const { data: chartData = [], isLoading: chartLoading } = useAdminOrdersChart(chartFilters);
+  const chartTotalRevenue = chartData.reduce((s, p) => s + p.revenue, 0);
+  const chartTotalCount = chartData.reduce((s, p) => s + p.count, 0);
+
   const rows = data?.rows ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
