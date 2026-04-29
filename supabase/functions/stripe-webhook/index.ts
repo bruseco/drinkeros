@@ -142,7 +142,16 @@ serve(async (req) => {
           const { error: grantErr } = await supabase
             .from(targetTable)
             .upsert(
-              { user_id: userId, [idCol]: productId, source: "stripe", purchased_at: new Date().toISOString() },
+              {
+                user_id: userId,
+                [idCol]: productId,
+                source: "stripe",
+                purchased_at: new Date().toISOString(),
+                amount: (session.amount_total ?? 0) / 100,
+                currency: (session.currency ?? "brl").toUpperCase(),
+                stripe_session_id: session.id,
+                stripe_payment_intent_id: (session.payment_intent as string) || null,
+              },
               { onConflict: `user_id,${idCol}` },
             );
           if (grantErr) log("grant-access-error", { error: grantErr.message, productType, productId });
@@ -167,20 +176,8 @@ serve(async (req) => {
           periodEnd = sub.current_period_end ?? null;
         }
 
-        await supabase.from("vip_payments").insert({
-          user_id: userId,
-          amount: (session.amount_total ?? 0) / 100,
-          currency: (session.currency ?? "brl").toUpperCase(),
-          status: "paid",
-          payment_method: "card",
-          stripe_customer_id: customerId,
-          stripe_subscription_id: subscriptionId,
-          paid_at: new Date().toISOString(),
-          period_start: new Date().toISOString(),
-          period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
-          metadata: { event_id: event.id, session_id: session.id },
-        });
-
+        // A venda real da assinatura é registrada em invoice.paid.
+        // checkout.session.completed só libera/atualiza o acesso para evitar duplicar Vendas.
         await upsertVipPlan(userId, periodEnd);
         break;
       }
@@ -205,7 +202,7 @@ serve(async (req) => {
           periodEnd = sub.current_period_end ?? null;
         }
 
-        await supabase.from("vip_payments").insert({
+        await supabase.from("vip_payments").upsert({
           user_id: userId,
           amount: (invoice.amount_paid ?? 0) / 100,
           currency: (invoice.currency ?? "brl").toUpperCase(),
@@ -214,13 +211,14 @@ serve(async (req) => {
           stripe_customer_id: customerId,
           stripe_subscription_id: subscriptionId,
           stripe_invoice_id: invoice.id,
+          stripe_payment_intent_id: ((invoice as any).payment_intent as string) || null,
           paid_at: new Date((invoice.status_transitions?.paid_at ?? Math.floor(Date.now() / 1000)) * 1000).toISOString(),
           period_start: invoice.lines.data[0]?.period?.start
             ? new Date(invoice.lines.data[0].period.start * 1000).toISOString()
             : null,
           period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
           metadata: { event_id: event.id },
-        });
+        }, { onConflict: "stripe_invoice_id" });
 
         await upsertVipPlan(userId, periodEnd);
         break;

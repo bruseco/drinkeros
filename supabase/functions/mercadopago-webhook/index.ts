@@ -21,6 +21,23 @@ async function grantClubAccess(supabase: any, userId: string, payment: any, paym
   const now = new Date();
   const periodEnd = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
 
+  const { data: existingPayment } = await supabase
+    .from("vip_payments")
+    .select("id")
+    .eq("metadata->>mercadopago_payment_id", String(paymentId))
+    .maybeSingle();
+
+  if (existingPayment?.id) {
+    await supabase.from("user_plans").upsert({
+      user_id: userId,
+      plan: "vip",
+      source: "mercadopago",
+      activated_at: now.toISOString(),
+      expires_at: periodEnd.toISOString(),
+    }, { onConflict: "user_id" });
+    return;
+  }
+
   await supabase.from("vip_payments").insert({
     user_id: userId,
     amount: Number(payment?.transaction_amount || 0),
@@ -69,17 +86,6 @@ serve(async (req) => {
 
     console.log("[mp-webhook] received:", { topic, paymentId, body });
 
-    // Registra evento bruto sempre
-    const { data: eventRow } = await supabase
-      .from("mercadopago_events")
-      .insert({
-        event_type: String(topic || "unknown"),
-        payment_id: paymentId ? String(paymentId) : null,
-        raw_payload: body,
-      })
-      .select("id")
-      .single();
-
     if (topic !== "payment" || !paymentId) {
       // Apenas ack — outros tópicos (merchant_order, etc.) ignorados por enquanto
       return new Response(JSON.stringify({ ok: true, ignored: true }), {
@@ -96,9 +102,6 @@ serve(async (req) => {
 
     if (!payResp.ok) {
       console.error("[mp-webhook] failed to fetch payment:", payment);
-      await supabase.from("mercadopago_events").update({
-        error_message: `Failed to fetch payment: ${JSON.stringify(payment)}`,
-      }).eq("id", eventRow!.id);
       return new Response(JSON.stringify({ ok: false }), { status: 200, headers: corsHeaders });
     }
 
@@ -107,18 +110,8 @@ serve(async (req) => {
     const metadata = payment?.metadata || {};
     const payerEmail = payment?.payer?.email;
 
-    await supabase.from("mercadopago_events").update({
-      status,
-      external_reference: externalRef,
-      preference_id: payment?.order?.id ? String(payment.order.id) : null,
-    }).eq("id", eventRow!.id);
-
     if (status !== "approved") {
       console.log("[mp-webhook] payment not approved, status:", status);
-      await supabase.from("mercadopago_events").update({
-        processed: true,
-        processed_at: new Date().toISOString(),
-      }).eq("id", eventRow!.id);
       return new Response(JSON.stringify({ ok: true, status }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -146,11 +139,6 @@ serve(async (req) => {
 
     if (!userId) {
       console.log("[mp-webhook] approved but no user_id (guest checkout). Email:", payerEmail);
-      await supabase.from("mercadopago_events").update({
-        processed: true,
-        processed_at: new Date().toISOString(),
-        error_message: `Guest purchase awaiting account creation. Email: ${payerEmail}`,
-      }).eq("id", eventRow!.id);
       return new Response(JSON.stringify({ ok: true, pending_user: true }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -159,10 +147,6 @@ serve(async (req) => {
 
     if (productType === "club") {
       await grantClubAccess(supabase, userId, payment, String(paymentId));
-      await supabase.from("mercadopago_events").update({
-        processed: true,
-        processed_at: new Date().toISOString(),
-      }).eq("id", eventRow!.id);
 
       return new Response(JSON.stringify({ ok: true, granted: true, club: true }), {
         status: 200,
@@ -176,21 +160,15 @@ serve(async (req) => {
       [fk]: productId,
       source: "mercadopago",
       mercadopago_payment_id: String(paymentId),
+      amount: Number(payment?.transaction_amount || 0),
+      currency: String(payment?.currency_id || "BRL").toUpperCase(),
       purchased_at: new Date().toISOString(),
     }, { onConflict: `user_id,${fk}` });
 
     if (insertErr) {
       console.error("[mp-webhook] failed to grant access:", insertErr);
-      await supabase.from("mercadopago_events").update({
-        error_message: `Grant access failed: ${insertErr.message}`,
-      }).eq("id", eventRow!.id);
       throw insertErr;
     }
-
-    await supabase.from("mercadopago_events").update({
-      processed: true,
-      processed_at: new Date().toISOString(),
-    }).eq("id", eventRow!.id);
 
     console.log("[mp-webhook] access granted:", { userId, productType, productId, paymentId });
 
