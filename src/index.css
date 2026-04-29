@@ -229,3 +229,13 @@ All colors MUST be HSL.
   animation: wiggle-x 1.1s ease-in-out infinite;
   will-change: transform;
 }
+
+/* Drinks marquee - right to left infinite loop */
+@keyframes drinks-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-drinks-marquee {
+  animation: drinks-marquee 40s linear infinite;
+  will-change: transform;
+}
