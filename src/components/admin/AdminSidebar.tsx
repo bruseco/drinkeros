@@ -13,7 +13,7 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
 } from '@/components/ui/sidebar';
-import { GraduationCap, Play, Users, UserCog, LogOut, Home, Mail, Bell, BookOpen, Rocket, MessageCircle, Layers, ClipboardCheck, Clock, Target, BarChart3, FileText, ShoppingBag, Wine, Tag, ShoppingCart } from 'lucide-react';
+import { GraduationCap, Play, Users, UserCog, LogOut, Home, Mail, Bell, BookOpen, Rocket, MessageCircle, Layers, ClipboardCheck, Clock, Target, BarChart3, FileText, ShoppingBag, Wine, Tag, ShoppingCart, Activity } from 'lucide-react';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { Button } from '@/components/ui/button';
 
