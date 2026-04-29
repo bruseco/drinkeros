@@ -6,8 +6,11 @@ import { useExpiredAccess } from '@/hooks/useExpiredAccess';
 import { Loader2, FileText, Download, Lock, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/contexts/AuthContext';
+import { trackEbookDownload } from '@/hooks/useAccessTracking';
 
 const UserEbooks: React.FC = () => {
+  const { user } = useAuth();
   const { data: ebooks = [], isLoading } = useEbooks();
   const { data: userEbookIds = [], isLoading: userLoading } = useUserEbooks();
   const { data: expiredAccess } = useExpiredAccess();
@@ -137,6 +140,9 @@ const UserEbooks: React.FC = () => {
                   rel="noopener noreferrer"
                   className={wrapperClass}
                   aria-label={`Abrir e-book ${ebook.name}`}
+                  onClick={() => {
+                    if (user?.id) trackEbookDownload(user.id, ebook.id).catch(() => {});
+                  }}
                 >
                   {cardInner}
                 </a>

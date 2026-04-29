@@ -12,10 +12,12 @@ import { Loader2, ArrowLeft, Heart, Share2, Wine } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import FavoriteDialog from '@/components/user/FavoriteDialog';
 import RelatedRecipesSection from '@/components/user/RelatedRecipesSection';
+import { useTrackExclusivePostView } from '@/hooks/useAccessTracking';
 
 const UserRecipeDetail: React.FC = () => {
   const { id: idOrSlug } = useParams<{ id: string }>();
   const { data: recipe, isLoading } = useExclusivePost(idOrSlug || '');
+  useTrackExclusivePostView(recipe?.id);
   const { data: favorites = [] } = useFavorites();
   const toggleFavorite = useToggleFavorite();
   const { toast } = useToast();

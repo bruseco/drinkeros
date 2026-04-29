@@ -17,12 +17,14 @@ import {
 import { Lock, ShoppingCart, ChevronDown, CheckCircle2, PlayCircle, Award, Crown } from 'lucide-react';
 import CertificateDownloadButton from '@/components/user/CertificateDownloadButton';
 import CourseCompletionCelebration from '@/components/user/CourseCompletionCelebration';
+import { useTrackCourseView } from '@/hooks/useAccessTracking';
 
 const UserCourseModules: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const isLockedParam = searchParams.get('locked') === 'true';
+  useTrackCourseView(courseId);
 
   const { data: course, isLoading: courseLoading } = useCourse(courseId || '');
   const { data: coursePackages = [], isLoading: packagesLoading } = useCoursePackages(courseId || '');

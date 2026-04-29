@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
 import { useAddToCursosCollection } from '@/hooks/useCollections';
 import { useTrackRecipeView, useToggleLessonComplete } from '@/hooks/useRecipeViews';
+import { useLessonWatchHeartbeat } from '@/hooks/useAccessTracking';
 import CourseCompletionCelebration from '@/components/user/CourseCompletionCelebration';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -220,6 +221,8 @@ const UserLesson: React.FC = () => {
 
   // Fetch next module's first lesson (when current lesson is the last in its module)
   const currentPackageId = (!Array.isArray(moduleLessons) && moduleLessons?.packageId) || null;
+  const currentCourseIdForTracking = (!Array.isArray(moduleLessons) && moduleLessons?.courseId) || null;
+  useLessonWatchHeartbeat(id, currentCourseIdForTracking, !!lesson);
   const { data: nextModuleData } = useQuery({
     queryKey: ['next-module-first-lesson', currentPackageId],
     queryFn: async () => {
