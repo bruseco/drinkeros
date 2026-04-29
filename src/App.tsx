@@ -181,6 +181,7 @@ const App = () => (
               <Route path="cs-timeline" element={<AdminCSTimeline />} />
               <Route path="crm" element={<AdminCRM />} />
               <Route path="ux-metrics" element={<AdminUXMetrics />} />
+              <Route path="metricas-acesso" element={<AdminAccessMetrics />} />
               <Route path="paginas-venda" element={<AdminSalesPages />} />
             </Route>
 
