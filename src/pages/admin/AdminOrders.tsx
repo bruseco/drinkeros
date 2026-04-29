@@ -163,7 +163,7 @@ const AdminOrders: React.FC = () => {
                   variant={isActive ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => applyPreset(p.key)}
-                  className={isActive ? 'bg-[hsl(var(--brand-orange))] text-white hover:bg-[hsl(var(--brand-orange))]/90 border-transparent' : ''}
+                  className={isActive ? 'bg-primary text-primary-foreground hover:bg-primary/90 border-transparent' : ''}
                 >
                   {p.label}
                 </Button>
