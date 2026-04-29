@@ -110,6 +110,7 @@ const AdminNotifications: React.FC = () => {
           url,
           targetType,
           targetPackageId: targetType === 'package' ? targetPackageId : null,
+          targetCourseId: targetType === 'course' ? targetCourseId : null,
           targetUserIds,
         },
       });
