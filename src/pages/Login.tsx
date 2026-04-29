@@ -21,6 +21,7 @@ import { InstallBanner } from '@/components/user/InstallBanner';
 import { WhatsAppFloatingButton } from '@/components/user/WhatsAppFloatingButton';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import drinksStrip from '@/assets/1000-drinks.jpg';
+import AnimatedNumber from '@/components/AnimatedNumber';
 
 const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -172,7 +173,9 @@ const Login: React.FC = () => {
             </div>
           </div>
           <div className="px-6 pt-0 pb-4 mt-[-10px] md:-mt-6">
-            <CardTitle className="text-lg md:text-2xl">Mais de 1000 Drinks no seu Bolso.</CardTitle>
+            <CardTitle className="text-lg md:text-2xl">
+              Mais de <AnimatedNumber target={1000} /> Drinks no seu Bolso.
+            </CardTitle>
             <CardDescription className="text-success font-semibold mt-1 mb-4">Baixe grátis!</CardDescription>
           </div>
         </CardHeader>
