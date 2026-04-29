@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { InstallBanner } from '@/components/user/InstallBanner';
 import { WhatsAppFloatingButton } from '@/components/user/WhatsAppFloatingButton';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
+import drinksStrip from '@/assets/1000-drinks.jpg';
 
 const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
