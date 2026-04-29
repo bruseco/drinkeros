@@ -113,7 +113,7 @@ const AdminOrders: React.FC = () => {
         <ShoppingCart className="h-7 w-7 text-primary" />
         <div>
           <h1 className="text-3xl font-bold">Vendas</h1>
-          <p className="text-muted-foreground">Histórico de vendas confirmadas (Stripe, Mercado Pago, WooCommerce, Hotmart e Pix)</p>
+          <p className="text-muted-foreground">Histórico de vendas confirmadas pelo Stripe e Mercado Pago</p>
         </div>
       </div>
 
