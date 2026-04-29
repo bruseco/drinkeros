@@ -78,10 +78,11 @@ const AdminOrders: React.FC = () => {
 
   const totalRevenue = rows.reduce((sum, r) => sum + (r.amount ?? 0), 0);
 
-  const applyPreset = (preset: 'today' | '7d' | '30d' | 'mtd' | 'lastMonth' | 'ytd' | 'clear') => {
+  const applyPreset = (preset: PresetKey) => {
     const now = new Date();
     const fmt = (d: Date) => d.toISOString().slice(0, 10);
     setPage(0);
+    setActivePreset(preset);
     if (preset === 'clear') { setFrom(''); setTo(''); return; }
     if (preset === 'today') {
       setFrom(fmt(now)); setTo(fmt(now)); return;
@@ -109,7 +110,7 @@ const AdminOrders: React.FC = () => {
     }
   };
 
-  const presets: Array<{ key: Parameters<typeof applyPreset>[0]; label: string }> = [
+  const presets: Array<{ key: PresetKey; label: string }> = [
     { key: 'today', label: 'Hoje' },
     { key: '7d', label: '7 dias' },
     { key: '30d', label: '30 dias' },
