@@ -40,12 +40,24 @@ const fmtDate = (s: string) =>
 
 const PAGE_SIZE = 50;
 
+type PresetKey = 'today' | '7d' | '30d' | 'mtd' | 'lastMonth' | 'ytd' | 'clear';
+
+const initialMtd = () => {
+  const now = new Date();
+  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  return {
+    from: fmt(new Date(now.getFullYear(), now.getMonth(), 1)),
+    to: fmt(now),
+  };
+};
+
 const AdminOrders: React.FC = () => {
   const [search, setSearch] = useState('');
   const [source, setSource] = useState<string>('all');
   const [productType, setProductType] = useState<string>('all');
-  const [from, setFrom] = useState<string>('');
-  const [to, setTo] = useState<string>('');
+  const [from, setFrom] = useState<string>(() => initialMtd().from);
+  const [to, setTo] = useState<string>(() => initialMtd().to);
+  const [activePreset, setActivePreset] = useState<PresetKey>('mtd');
   const [page, setPage] = useState(0);
 
   const debouncedSearch = useDebounce(search, 300);
@@ -66,10 +78,11 @@ const AdminOrders: React.FC = () => {
 
   const totalRevenue = rows.reduce((sum, r) => sum + (r.amount ?? 0), 0);
 
-  const applyPreset = (preset: 'today' | '7d' | '30d' | 'mtd' | 'lastMonth' | 'ytd' | 'clear') => {
+  const applyPreset = (preset: PresetKey) => {
     const now = new Date();
     const fmt = (d: Date) => d.toISOString().slice(0, 10);
     setPage(0);
+    setActivePreset(preset);
     if (preset === 'clear') { setFrom(''); setTo(''); return; }
     if (preset === 'today') {
       setFrom(fmt(now)); setTo(fmt(now)); return;
@@ -97,7 +110,7 @@ const AdminOrders: React.FC = () => {
     }
   };
 
-  const presets: Array<{ key: Parameters<typeof applyPreset>[0]; label: string }> = [
+  const presets: Array<{ key: PresetKey; label: string }> = [
     { key: 'today', label: 'Hoje' },
     { key: '7d', label: '7 dias' },
     { key: '30d', label: '30 dias' },
@@ -142,11 +155,20 @@ const AdminOrders: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
-            {presets.map((p) => (
-              <Button key={p.key} variant="outline" size="sm" onClick={() => applyPreset(p.key)}>
-                {p.label}
-              </Button>
-            ))}
+            {presets.map((p) => {
+              const isActive = activePreset === p.key;
+              return (
+                <Button
+                  key={p.key}
+                  variant={isActive ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => applyPreset(p.key)}
+                  className={isActive ? 'bg-primary text-primary-foreground hover:bg-primary/90 border-transparent' : ''}
+                >
+                  {p.label}
+                </Button>
+              );
+            })}
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -177,8 +199,8 @@ const AdminOrders: React.FC = () => {
                 <SelectItem value="pacote">Pacotes (avulsos)</SelectItem>
               </SelectContent>
             </Select>
-            <Input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(0); }} />
-            <Input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(0); }} />
+            <Input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(0); setActivePreset('clear'); }} />
+            <Input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(0); setActivePreset('clear'); }} />
           </div>
         </CardContent>
       </Card>
