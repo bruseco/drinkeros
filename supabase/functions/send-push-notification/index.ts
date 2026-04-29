@@ -63,6 +63,19 @@ serve(async (req: Request) => {
           .in("user_id", userIds);
         subscriptions = data || [];
       }
+    } else if (targetType === "course" && targetCourseId) {
+      const { data: userCourses } = await supabase
+        .from("user_courses")
+        .select("user_id")
+        .eq("course_id", targetCourseId);
+      const userIds = Array.from(new Set((userCourses || []).map((uc: any) => uc.user_id)));
+      if (userIds.length > 0) {
+        const { data } = await supabase
+          .from("push_subscriptions")
+          .select("*")
+          .in("user_id", userIds);
+        subscriptions = data || [];
+      }
     } else if (targetType === "individual" && targetUserIds?.length > 0) {
       const { data } = await supabase
         .from("push_subscriptions")
