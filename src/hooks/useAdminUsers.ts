@@ -175,6 +175,21 @@ export const useAdminUsers = (
         query = query.not('pwa_installed_at', 'is', null);
       } else if (pwaFilter === 'web') {
         query = query.is('pwa_installed_at', null);
+      } else if (pwaFilter === 'push' || pwaFilter === 'no_push') {
+        // Pre-fetch user_ids that have at least one push subscription
+        const { data: pushRows, error: pushErr } = await supabase
+          .from('push_subscriptions')
+          .select('user_id');
+        if (pushErr) throw pushErr;
+        const pushUserIds = Array.from(new Set((pushRows || []).map((r: any) => r.user_id)));
+        if (pwaFilter === 'push') {
+          if (pushUserIds.length === 0) return { users: [], totalCount: 0 };
+          query = query.in('user_id', pushUserIds);
+        } else {
+          if (pushUserIds.length > 0) {
+            query = query.not('user_id', 'in', `(${pushUserIds.join(',')})`);
+          }
+        }
       }
 
       switch (sort) {
