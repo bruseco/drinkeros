@@ -293,6 +293,7 @@ export const useAdminUsers = (
           has_receitas: hasReceitas,
           pwa_installed_at: (profile as any).pwa_installed_at ?? null,
           last_pwa_open_at: (profile as any).last_pwa_open_at ?? null,
+          has_push: pushSet.has(profile.user_id),
         };
       });
 
