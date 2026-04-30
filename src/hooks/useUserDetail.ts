@@ -9,6 +9,12 @@ export interface UserDetailContent {
   cover_image_url: string | null;
   purchased_at: string;
   expires_at: string | null;
+  // Extras for richer admin view
+  progress?: number; // 0-100, only for courses
+  total_lessons?: number; // only for courses
+  completed_lessons?: number; // only for courses
+  downloaded?: boolean; // only for ebooks
+  downloaded_at?: string | null; // only for ebooks
 }
 
 export interface UserDetail {
@@ -34,6 +40,8 @@ export interface UserDetail {
   last_sign_in_at: string | null;
   certificates_count: number;
   recipe_views_count: number;
+  push_enabled: boolean;
+  push_subscriptions_count: number;
 }
 
 export const useUserDetail = (userId: string | undefined) => {
