@@ -4,7 +4,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Calendar, Trash2, Infinity as InfinityIcon, Pencil, Check, X } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Plus, Calendar, Trash2, Infinity as InfinityIcon, Pencil, Check, X, Download, CircleDashed } from 'lucide-react';
 import { useUpdateAccessExpiration, useRevokeAccess, type UserDetailContent } from '@/hooks/useUserDetail';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
@@ -53,10 +54,40 @@ export const UserAccessCard: React.FC<Props> = ({ title, table, items, onAdd }) 
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{item.name}</p>
+
+                  {/* Course progress bar */}
+                  {table === 'user_courses' && item.progress !== undefined && (
+                    <div className="mt-1.5 mb-1">
+                      <div className="flex items-center justify-between text-[11px] mb-0.5">
+                        <span className="text-muted-foreground">
+                          {item.completed_lessons ?? 0}/{item.total_lessons ?? 0} aulas
+                        </span>
+                        <span className="font-semibold">{item.progress}%</span>
+                      </div>
+                      <Progress value={item.progress} className="h-1.5" />
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <span className="text-xs text-muted-foreground">
                       Comprado: {format(new Date(item.purchased_at), 'dd/MM/yyyy')}
                     </span>
+
+                    {/* Ebook download badge */}
+                    {table === 'user_ebooks' && (
+                      item.downloaded ? (
+                        <Badge variant="default" className="text-xs gap-1 bg-emerald-600 hover:bg-emerald-600">
+                          <Download className="h-3 w-3" />
+                          Baixou {item.downloaded_at && `em ${format(new Date(item.downloaded_at), 'dd/MM/yyyy')}`}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs gap-1 text-muted-foreground">
+                          <CircleDashed className="h-3 w-3" />
+                          Não baixou
+                        </Badge>
+                      )
+                    )}
+
                     {editing === item.id ? (
                       <div className="flex items-center gap-1">
                         <Input

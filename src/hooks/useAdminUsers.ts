@@ -139,6 +139,7 @@ export interface UserWithRole {
   has_receitas: boolean;
   pwa_installed_at: string | null;
   last_pwa_open_at: string | null;
+  has_push: boolean;
 }
 
 export interface AdminUsersResult {
@@ -146,7 +147,7 @@ export interface AdminUsersResult {
   totalCount: number;
 }
 
-export type PwaFilter = 'all' | 'pwa' | 'web';
+export type PwaFilter = 'all' | 'pwa' | 'web' | 'push' | 'no_push';
 export type AdminUsersSort = 'created_desc' | 'pwa_installed_desc' | 'pwa_installed_asc' | 'last_pwa_open_desc';
 
 export const useAdminUsers = (
@@ -174,6 +175,21 @@ export const useAdminUsers = (
         query = query.not('pwa_installed_at', 'is', null);
       } else if (pwaFilter === 'web') {
         query = query.is('pwa_installed_at', null);
+      } else if (pwaFilter === 'push' || pwaFilter === 'no_push') {
+        // Pre-fetch user_ids that have at least one push subscription
+        const { data: pushRows, error: pushErr } = await supabase
+          .from('push_subscriptions')
+          .select('user_id');
+        if (pushErr) throw pushErr;
+        const pushUserIds = Array.from(new Set((pushRows || []).map((r: any) => r.user_id)));
+        if (pwaFilter === 'push') {
+          if (pushUserIds.length === 0) return { users: [], totalCount: 0 };
+          query = query.in('user_id', pushUserIds);
+        } else {
+          if (pushUserIds.length > 0) {
+            query = query.not('user_id', 'in', `(${pushUserIds.join(',')})`);
+          }
+        }
       }
 
       switch (sort) {
@@ -201,13 +217,14 @@ export const useAdminUsers = (
 
       const userIds = profiles.map((p) => p.user_id);
 
-      const [rolesResult, packagesResult, combosResult, coursesResult, ebooksResult, exclusiveResult] = await Promise.all([
+      const [rolesResult, packagesResult, combosResult, coursesResult, ebooksResult, exclusiveResult, pushResult] = await Promise.all([
         supabase.from('user_roles').select('id, user_id, role').in('user_id', userIds),
         supabase.from('user_packages').select('user_id, package_id').in('user_id', userIds),
         supabase.from('user_combos').select('user_id, combo_id').in('user_id', userIds),
         supabase.from('user_courses').select('user_id, course_id').in('user_id', userIds),
         supabase.from('user_ebooks').select('user_id, ebook_id').in('user_id', userIds),
         supabase.from('user_exclusive_access').select('user_id, feature').eq('feature', 'receitas').in('user_id', userIds),
+        supabase.from('push_subscriptions').select('user_id').in('user_id', userIds),
       ]);
 
       if (rolesResult.error) throw rolesResult.error;
@@ -216,6 +233,9 @@ export const useAdminUsers = (
       if (coursesResult.error) throw coursesResult.error;
       if (ebooksResult.error) throw ebooksResult.error;
       if (exclusiveResult.error) throw exclusiveResult.error;
+      if (pushResult.error) throw pushResult.error;
+
+      const pushSet = new Set((pushResult.data || []).map((p: any) => p.user_id));
 
       const rolesMap = new Map(rolesResult.data?.map((r) => [r.user_id, { role: r.role, id: r.id }]));
       
@@ -273,6 +293,7 @@ export const useAdminUsers = (
           has_receitas: hasReceitas,
           pwa_installed_at: (profile as any).pwa_installed_at ?? null,
           last_pwa_open_at: (profile as any).last_pwa_open_at ?? null,
+          has_push: pushSet.has(profile.user_id),
         };
       });
 

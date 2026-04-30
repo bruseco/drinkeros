@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
-import { ArrowLeft, Mail, Phone, IdCard, Crown, Shield, Calendar, Send, Key, Trash2, Loader2, Pencil, Check, X, BookOpen, FileText, Package, Layers, Sparkles, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, IdCard, Crown, Shield, Calendar, Send, Key, Trash2, Loader2, Pencil, Check, X, BookOpen, FileText, Package, Layers, Sparkles, BarChart3, Bell, BellOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -64,7 +64,7 @@ const AdminUserDetail: React.FC = () => {
     );
   }
 
-  const { profile, role, plan, is_lifetime, courses, ebooks, combos, packages, last_sign_in_at, certificates_count, recipe_views_count } = data;
+  const { profile, role, plan, is_lifetime, courses, ebooks, combos, packages, last_sign_in_at, certificates_count, recipe_views_count, push_enabled } = data;
 
   const isVipActive = !!plan && plan.plan === 'vip' && (!plan.expires_at || new Date(plan.expires_at) > new Date());
   const daysToExpire = plan?.expires_at
@@ -196,6 +196,15 @@ const AdminUserDetail: React.FC = () => {
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-2xl font-bold">{profile.full_name || 'Sem nome'}</h1>
                 {planBadge}
+                {push_enabled ? (
+                  <Badge className="gap-1 bg-emerald-600 hover:bg-emerald-600 text-white">
+                    <Bell className="h-3 w-3" /> Notificações ativas
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="gap-1 text-muted-foreground">
+                    <BellOff className="h-3 w-3" /> Sem notificações
+                  </Badge>
+                )}
               </div>
               <p className="text-muted-foreground">{profile.email}</p>
               <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm text-muted-foreground">

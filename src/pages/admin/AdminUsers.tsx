@@ -141,7 +141,7 @@ const AccessItemList: React.FC<{
 const AdminUsers: React.FC = () => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
-  const [pwaFilter, setPwaFilter] = useState<'all' | 'pwa' | 'web'>('all');
+  const [pwaFilter, setPwaFilter] = useState<'all' | 'pwa' | 'web' | 'push' | 'no_push'>('all');
   const [sortBy, setSortBy] = useState<'created_desc' | 'pwa_installed_desc' | 'pwa_installed_asc' | 'last_pwa_open_desc'>('created_desc');
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
   const [selectedAccess, setSelectedAccess] = useState<Set<string>>(new Set());
@@ -446,13 +446,15 @@ const AdminUsers: React.FC = () => {
           />
         </div>
         <Select value={pwaFilter} onValueChange={(v) => setPwaFilter(v as typeof pwaFilter)}>
-          <SelectTrigger className="md:w-[180px]">
+          <SelectTrigger className="md:w-[220px]">
             <SelectValue placeholder="Tipo de acesso" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos (PWA + Web)</SelectItem>
             <SelectItem value="pwa">📱 Apenas PWA</SelectItem>
             <SelectItem value="web">🌐 Apenas Web</SelectItem>
+            <SelectItem value="push">🔔 Com notificações ativas</SelectItem>
+            <SelectItem value="no_push">🔕 Sem notificações</SelectItem>
           </SelectContent>
         </Select>
         <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
@@ -509,6 +511,11 @@ const AdminUsers: React.FC = () => {
                             ) : (
                               <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 text-muted-foreground" title="Ainda não instalou o app">
                                 🌐 Web
+                              </Badge>
+                            )}
+                            {user.has_push && (
+                              <Badge className="text-[10px] px-1.5 py-0 h-4 bg-emerald-600 hover:bg-emerald-600" title="Notificações ativas">
+                                🔔
                               </Badge>
                             )}
                           </span>
