@@ -141,7 +141,7 @@ const AccessItemList: React.FC<{
 const AdminUsers: React.FC = () => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
-  const [pwaFilter, setPwaFilter] = useState<'all' | 'pwa' | 'web'>('all');
+  const [pwaFilter, setPwaFilter] = useState<'all' | 'pwa' | 'web' | 'push' | 'no_push'>('all');
   const [sortBy, setSortBy] = useState<'created_desc' | 'pwa_installed_desc' | 'pwa_installed_asc' | 'last_pwa_open_desc'>('created_desc');
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
   const [selectedAccess, setSelectedAccess] = useState<Set<string>>(new Set());
