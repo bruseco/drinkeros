@@ -217,13 +217,14 @@ export const useAdminUsers = (
 
       const userIds = profiles.map((p) => p.user_id);
 
-      const [rolesResult, packagesResult, combosResult, coursesResult, ebooksResult, exclusiveResult] = await Promise.all([
+      const [rolesResult, packagesResult, combosResult, coursesResult, ebooksResult, exclusiveResult, pushResult] = await Promise.all([
         supabase.from('user_roles').select('id, user_id, role').in('user_id', userIds),
         supabase.from('user_packages').select('user_id, package_id').in('user_id', userIds),
         supabase.from('user_combos').select('user_id, combo_id').in('user_id', userIds),
         supabase.from('user_courses').select('user_id, course_id').in('user_id', userIds),
         supabase.from('user_ebooks').select('user_id, ebook_id').in('user_id', userIds),
         supabase.from('user_exclusive_access').select('user_id, feature').eq('feature', 'receitas').in('user_id', userIds),
+        supabase.from('push_subscriptions').select('user_id').in('user_id', userIds),
       ]);
 
       if (rolesResult.error) throw rolesResult.error;
@@ -232,6 +233,9 @@ export const useAdminUsers = (
       if (coursesResult.error) throw coursesResult.error;
       if (ebooksResult.error) throw ebooksResult.error;
       if (exclusiveResult.error) throw exclusiveResult.error;
+      if (pushResult.error) throw pushResult.error;
+
+      const pushSet = new Set((pushResult.data || []).map((p: any) => p.user_id));
 
       const rolesMap = new Map(rolesResult.data?.map((r) => [r.user_id, { role: r.role, id: r.id }]));
       
