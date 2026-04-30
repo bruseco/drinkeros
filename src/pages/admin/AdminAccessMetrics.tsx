@@ -293,12 +293,32 @@ const RankList: React.FC<{ items: RankItem[]; emptyText: string }> = ({ items, e
       {items.map((it, idx) => (
         <li key={it.id} className="flex items-center gap-3 py-1">
           <span className="w-6 text-xs font-bold text-muted-foreground tabular-nums text-right">{idx + 1}.</span>
-          <img
-            src={it.image || defaultCover}
-            alt=""
-            className={`h-10 w-10 ${it.rounded ? 'rounded-full' : 'rounded-md'} object-cover bg-muted shrink-0`}
-            onError={(e) => { (e.currentTarget as HTMLImageElement).src = defaultCover; }}
-          />
+          {it.rounded && !it.image ? (
+            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+              <UserIcon className="h-5 w-5 text-muted-foreground" />
+            </div>
+          ) : (
+            <img
+              src={it.image || defaultCover}
+              alt=""
+              className={`h-10 w-10 ${it.rounded ? 'rounded-full' : 'rounded-md'} object-cover bg-muted shrink-0`}
+              onError={(e) => {
+                if (it.rounded) {
+                  (e.currentTarget as HTMLImageElement).style.display = 'none';
+                  const parent = e.currentTarget.parentElement;
+                  if (parent && !parent.querySelector('[data-avatar-fallback]')) {
+                    const div = document.createElement('div');
+                    div.setAttribute('data-avatar-fallback', '');
+                    div.className = 'h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0';
+                    div.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+                    e.currentTarget.insertAdjacentElement('afterend', div);
+                  }
+                } else {
+                  (e.currentTarget as HTMLImageElement).src = defaultCover;
+                }
+              }}
+            />
+          )}
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-foreground truncate">{it.name}</p>
             {it.subtitle && <p className="text-xs text-muted-foreground truncate">{it.subtitle}</p>}
