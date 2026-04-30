@@ -513,6 +513,11 @@ const AdminUsers: React.FC = () => {
                                 🌐 Web
                               </Badge>
                             )}
+                            {user.has_push && (
+                              <Badge className="text-[10px] px-1.5 py-0 h-4 bg-emerald-600 hover:bg-emerald-600" title="Notificações ativas">
+                                🔔
+                              </Badge>
+                            )}
                           </span>
                           <span className="text-sm text-muted-foreground">{user.email}</span>
                         </div>
