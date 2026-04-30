@@ -3,7 +3,7 @@ import { useAccessMetrics } from '@/hooks/useAccessMetrics';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Users, TrendingUp, Clock, Award, Wine, Download, BookOpen, Activity } from 'lucide-react';
+import { Loader2, Users, TrendingUp, Clock, Award, Wine, Download, BookOpen, Activity, User as UserIcon } from 'lucide-react';
 import defaultCover from '@/assets/default-cover.png';
 
 type Preset = 'today' | '7d' | '30d' | 'mtd' | 'custom';
