@@ -4,7 +4,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Calendar, Trash2, Infinity as InfinityIcon, Pencil, Check, X } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Plus, Calendar, Trash2, Infinity as InfinityIcon, Pencil, Check, X, Download, CircleDashed } from 'lucide-react';
 import { useUpdateAccessExpiration, useRevokeAccess, type UserDetailContent } from '@/hooks/useUserDetail';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
