@@ -9,7 +9,20 @@ export interface AccessMetrics {
   top_courses_views: Array<{ id: string; name: string; cover_image_url: string | null; views: number }>;
   top_courses_watch_time: Array<{ id: string; name: string; cover_image_url: string | null; total_seconds: number; unique_users: number }>;
   top_exclusive_posts: Array<{ id: string; name: string; cover_image_url: string | null; views: number }>;
-  top_active_users: Array<{ user_id: string; full_name: string | null; email: string; avatar_url: string | null; sessions: number }>;
+  top_active_users: Array<{
+    user_id: string;
+    full_name: string | null;
+    email: string;
+    avatar_url: string | null;
+    sessions: number;
+    points: number;
+    sessions_count: number;
+    exclusive_posts: number;
+    lessons: number;
+    courses: number;
+    ebooks: number;
+    certificates: number;
+  }>;
   certificates_generated: Array<{ name: string; type: string; total: number }>;
   top_ebooks_downloads: Array<{ id: string; name: string; cover_image_url: string | null; downloads: number }>;
 }
