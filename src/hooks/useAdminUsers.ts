@@ -147,7 +147,7 @@ export interface AdminUsersResult {
   totalCount: number;
 }
 
-export type PwaFilter = 'all' | 'pwa' | 'web';
+export type PwaFilter = 'all' | 'pwa' | 'web' | 'push' | 'no_push';
 export type AdminUsersSort = 'created_desc' | 'pwa_installed_desc' | 'pwa_installed_asc' | 'last_pwa_open_desc';
 
 export const useAdminUsers = (
