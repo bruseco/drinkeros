@@ -205,18 +205,27 @@ const AdminAccessMetrics: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2"><Activity className="h-4 w-4" />Usuários mais ativos</CardTitle>
-                <CardDescription>Por número de sessões iniciadas no app</CardDescription>
+                <CardDescription>Pontos por engajamento (1 ponto por: sessão, receita, aula, curso, e-book, certificado)</CardDescription>
               </CardHeader>
               <CardContent>
                 <RankList
-                  items={metrics.top_active_users.map((u) => ({
-                    id: u.user_id,
-                    name: u.full_name || u.email,
-                    subtitle: u.full_name ? u.email : undefined,
-                    image: u.avatar_url,
-                    rounded: true,
-                    metric: `${u.sessions.toLocaleString('pt-BR')} sessões`,
-                  }))}
+                  items={metrics.top_active_users.map((u) => {
+                    const parts: string[] = [];
+                    if (u.sessions_count) parts.push(`${u.sessions_count} sess.`);
+                    if (u.exclusive_posts) parts.push(`${u.exclusive_posts} receitas`);
+                    if (u.lessons) parts.push(`${u.lessons} aulas`);
+                    if (u.courses) parts.push(`${u.courses} cursos`);
+                    if (u.ebooks) parts.push(`${u.ebooks} ebooks`);
+                    if (u.certificates) parts.push(`${u.certificates} cert.`);
+                    return {
+                      id: u.user_id,
+                      name: u.full_name || u.email,
+                      subtitle: parts.join(' · ') || (u.full_name ? u.email : undefined),
+                      image: u.avatar_url,
+                      rounded: true,
+                      metric: `${u.points.toLocaleString('pt-BR')} pts`,
+                    };
+                  })}
                   emptyText="Sem usuários ativos no período"
                 />
               </CardContent>
