@@ -139,6 +139,7 @@ export interface UserWithRole {
   has_receitas: boolean;
   pwa_installed_at: string | null;
   last_pwa_open_at: string | null;
+  has_push: boolean;
 }
 
 export interface AdminUsersResult {
