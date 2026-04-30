@@ -446,13 +446,15 @@ const AdminUsers: React.FC = () => {
           />
         </div>
         <Select value={pwaFilter} onValueChange={(v) => setPwaFilter(v as typeof pwaFilter)}>
-          <SelectTrigger className="md:w-[180px]">
+          <SelectTrigger className="md:w-[220px]">
             <SelectValue placeholder="Tipo de acesso" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos (PWA + Web)</SelectItem>
             <SelectItem value="pwa">📱 Apenas PWA</SelectItem>
             <SelectItem value="web">🌐 Apenas Web</SelectItem>
+            <SelectItem value="push">🔔 Com notificações ativas</SelectItem>
+            <SelectItem value="no_push">🔕 Sem notificações</SelectItem>
           </SelectContent>
         </Select>
         <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
