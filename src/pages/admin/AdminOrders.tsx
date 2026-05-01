@@ -82,9 +82,10 @@ const AdminOrders: React.FC = () => {
     to: to ? new Date(`${to}T23:59:59`).toISOString() : undefined,
   }), [debouncedSearch, source, productType, from, to]);
 
-  const { data: chartData = [], isLoading: chartLoading } = useAdminOrdersChart(chartFilters);
-  const chartTotalRevenue = chartData.reduce((s, p) => s + p.revenue, 0);
-  const chartTotalCount = chartData.reduce((s, p) => s + p.count, 0);
+  const { data: chartResult, isLoading: chartLoading } = useAdminOrdersChart(chartFilters);
+  const chartData = chartResult?.points ?? [];
+  const chartTotalRevenue = chartResult?.totalRevenue ?? 0;
+  const chartTotalCount = chartResult?.totalCount ?? 0;
 
   const rows = data?.rows ?? [];
   const total = data?.total ?? 0;
