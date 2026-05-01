@@ -14,6 +14,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useRecipeAccessGuard, isVipOnlyCharacteristic } from '@/hooks/useRecipeAccessGuard';
 import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
+import { Crown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const CATEGORY_FILTERS = [
   { label: 'Xaropes Artesanais', value: 'Xaropes Artesanais', icon: GlassWater },
