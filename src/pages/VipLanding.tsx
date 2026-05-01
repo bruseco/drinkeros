@@ -128,6 +128,15 @@ const VipLanding: React.FC = () => {
     navigate('/checkout/club/clube');
   };
 
+  const handleAnnualPix = async () => {
+    if (!user) {
+      navigate('/signup?redirect=/clube');
+      return;
+    }
+    setLoading(true);
+    navigate('/checkout/club/clube-anual');
+  };
+
   // Esconde a página de quem já é sócio do Clube, tem acesso vitalício
   // ou tem o conteúdo exclusivo "receitas" liberado.
   if (user && (planData?.isVip || hasLifetime || hasExclusive)) {
@@ -446,13 +455,33 @@ const VipLanding: React.FC = () => {
               {loading ? (
                 <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Abrindo checkout...</>
               ) : (
-                <><Zap className="mr-2 h-5 w-5" /> Quero ser sócio do Clube</>
+                <><Zap className="mr-2 h-5 w-5" /> Assinar anual recorrente</>
               )}
             </Button>
-            <p className="text-center text-xs text-purple-300 mt-3">
-              💳 Pagamento seguro · cartão em até 12x ou Pix
+            <p className="text-center text-[11px] text-purple-300 mt-2">
+              💳 Cartão · Apple Pay · Google Pay · renova sozinho todo ano
             </p>
-            <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
+
+            {/* Divisor "ou" */}
+            <div className="flex items-center gap-3 my-4">
+              <div className="flex-1 h-px bg-white/20" />
+              <span className="text-[11px] uppercase tracking-wider text-purple-300">ou</span>
+              <div className="flex-1 h-px bg-white/20" />
+            </div>
+
+            <Button
+              onClick={handleAnnualPix}
+              disabled={loading}
+              variant="outline"
+              className="w-full h-14 text-base font-bold bg-teal-500 hover:bg-teal-400 text-white border-0"
+            >
+              <Sparkles className="mr-2 h-5 w-5" /> Pagar 1 ano à vista no PIX
+            </Button>
+            <p className="text-center text-[11px] text-purple-300 mt-2">
+              🇧🇷 Pagamento único · vale 1 ano · sem renovação automática
+            </p>
+
+            <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
               <span className="inline-flex items-center justify-center h-7 px-2 rounded-md bg-white text-[10px] font-bold text-slate-800 shadow-sm">VISA</span>
               <span className="inline-flex items-center justify-center h-7 px-2 rounded-md bg-white text-[10px] font-bold text-slate-800 shadow-sm tracking-tight">master<span className="text-red-500">.</span></span>
               <span className="inline-flex items-center justify-center h-7 px-2 rounded-md bg-white text-[10px] font-bold text-blue-700 shadow-sm">ELO</span>

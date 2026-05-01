@@ -2506,6 +2506,27 @@ export type Database = {
         }
         Relationships: []
       }
+      vip_renewal_reminders_sent: {
+        Row: {
+          expires_at_snapshot: string
+          sent_at: string
+          template: string
+          user_id: string
+        }
+        Insert: {
+          expires_at_snapshot: string
+          sent_at?: string
+          template: string
+          user_id: string
+        }
+        Update: {
+          expires_at_snapshot?: string
+          sent_at?: string
+          template?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       whatsapp_agent_settings: {
         Row: {
           agent_templates: Json | null

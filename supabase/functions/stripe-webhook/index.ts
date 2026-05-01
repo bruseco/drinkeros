@@ -159,7 +159,53 @@ serve(async (req) => {
           break;
         }
 
-        // Caso original: assinatura VIP
+        // Caso: Plano Anual à vista (one-time payment, NÃO recorrente)
+        // Concede 1 ano de VIP e registra em vip_payments.
+        if (session.mode === "payment" && meta.plan_kind === "vip_annual_one_time") {
+          const email = session.customer_details?.email ?? session.customer_email ?? null;
+          let userId: string | null = await resolveUserId({
+            customerId,
+            email,
+            clientReferenceId: session.client_reference_id,
+          });
+
+          if (!userId && email) {
+            const { data: created, error: createErr } = await supabase.auth.admin.createUser({
+              email: email.toLowerCase(),
+              email_confirm: true,
+              user_metadata: { full_name: session.customer_details?.name || "" },
+            });
+            if (createErr) log("auto-create-user-error-annual", { error: createErr.message, email });
+            else if (created.user) userId = created.user.id;
+          }
+
+          if (!userId) { log("user-not-found-annual", { sessionId: session.id }); break; }
+
+          // 1 ano a partir de agora
+          const oneYearFromNow = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60;
+
+          // Reset de lembretes do ciclo anterior (vai entrar em ciclo novo)
+          await supabase.from("vip_renewal_reminders_sent").delete().eq("user_id", userId);
+
+          await supabase.from("vip_payments").upsert({
+            user_id: userId,
+            amount: (session.amount_total ?? 0) / 100,
+            currency: (session.currency ?? "brl").toUpperCase(),
+            status: "paid",
+            payment_method: "annual_one_time",
+            stripe_customer_id: customerId,
+            stripe_payment_intent_id: (session.payment_intent as string) || null,
+            paid_at: new Date().toISOString(),
+            period_start: new Date().toISOString(),
+            period_end: new Date(oneYearFromNow * 1000).toISOString(),
+            metadata: { event_id: event.id, session_id: session.id, plan_kind: "vip_annual_one_time" },
+          }, { onConflict: "stripe_payment_intent_id" });
+
+          await upsertVipPlan(userId, oneYearFromNow);
+          break;
+        }
+
+        // Caso original: assinatura VIP recorrente
         const userId = await resolveUserId({
           customerId,
           email: session.customer_details?.email ?? session.customer_email,
@@ -176,11 +222,15 @@ serve(async (req) => {
           periodEnd = sub.current_period_end ?? null;
         }
 
+        // Reset de lembretes ao renovar/ativar
+        await supabase.from("vip_renewal_reminders_sent").delete().eq("user_id", userId);
+
         // A venda real da assinatura é registrada em invoice.paid.
         // checkout.session.completed só libera/atualiza o acesso para evitar duplicar Vendas.
         await upsertVipPlan(userId, periodEnd);
         break;
       }
+
 
       case "invoice.paid": {
         const invoice = event.data.object as Stripe.Invoice;
@@ -219,6 +269,9 @@ serve(async (req) => {
           period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
           metadata: { event_id: event.id },
         }, { onConflict: "stripe_invoice_id" });
+
+        // Reset lembretes ao renovar
+        await supabase.from("vip_renewal_reminders_sent").delete().eq("user_id", userId);
 
         await upsertVipPlan(userId, periodEnd);
         break;
