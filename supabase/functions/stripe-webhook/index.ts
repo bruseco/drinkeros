@@ -270,6 +270,9 @@ serve(async (req) => {
           metadata: { event_id: event.id },
         }, { onConflict: "stripe_invoice_id" });
 
+        // Reset lembretes ao renovar
+        await supabase.from("vip_renewal_reminders_sent").delete().eq("user_id", userId);
+
         await upsertVipPlan(userId, periodEnd);
         break;
       }
