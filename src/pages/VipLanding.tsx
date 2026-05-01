@@ -452,6 +452,14 @@ const VipLanding: React.FC = () => {
             <p className="text-center text-xs text-purple-300 mt-3">
               💳 Pagamento seguro · cartão em até 12x ou Pix
             </p>
+            <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
+              <span className="inline-flex items-center justify-center h-7 px-2 rounded-md bg-white text-[10px] font-bold text-slate-800 shadow-sm">VISA</span>
+              <span className="inline-flex items-center justify-center h-7 px-2 rounded-md bg-white text-[10px] font-bold text-slate-800 shadow-sm tracking-tight">master<span className="text-red-500">.</span></span>
+              <span className="inline-flex items-center justify-center h-7 px-2 rounded-md bg-white text-[10px] font-bold text-blue-700 shadow-sm">ELO</span>
+              <span className="inline-flex items-center justify-center h-7 px-2 rounded-md bg-white text-[10px] font-bold text-slate-800 shadow-sm"> Pay</span>
+              <span className="inline-flex items-center justify-center h-7 px-2 rounded-md bg-white text-[10px] font-bold text-slate-800 shadow-sm">G Pay</span>
+              <span className="inline-flex items-center justify-center h-7 px-2 rounded-md bg-white text-[10px] font-bold text-teal-600 shadow-sm">PIX</span>
+            </div>
           </div>
         </div>
         </div>
