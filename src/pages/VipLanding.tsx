@@ -464,7 +464,7 @@ const VipLanding: React.FC = () => {
               )}
             </Button>
             <p className="text-center text-[11px] text-purple-300 mt-2">
-              💳 Cartão · Apple Pay · Google Pay · PIX · Cancele quando quiser
+              ✓ Cancele quando quiser!
             </p>
 
             <div className="flex items-center justify-center gap-2 mt-4 flex-nowrap">
