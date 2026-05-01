@@ -311,7 +311,7 @@ const UserRecipes: React.FC = () => {
       </div>
 
       {isLockedForUser && (
-        <div className="fixed bottom-[72px] left-0 right-0 z-40 px-3 pb-2 lg:bottom-3 pointer-events-none">
+        <div className="fixed bottom-[84px] left-0 right-0 z-40 px-3 pb-2 lg:bottom-6 pointer-events-none">
           <div className="mx-auto max-w-md pointer-events-auto rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-500 p-3 shadow-lg shadow-purple-500/30 text-white flex items-center gap-3">
             <div className="shrink-0 rounded-full bg-white/20 p-2">
               <Crown className="h-5 w-5" />
@@ -321,7 +321,7 @@ const UserRecipes: React.FC = () => {
                 Torne-se um membro do clube e veja quantas receitas você quiser. Salve em listas e participe da batalha.
               </p>
             </div>
-            <Link to="/membership" className="shrink-0">
+            <Link to="/clube" className="shrink-0">
               <Button size="sm" className="bg-white text-purple-700 hover:bg-white/90 font-bold rounded-full h-9 px-4">
                 Quero
               </Button>
