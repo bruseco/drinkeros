@@ -16,13 +16,26 @@ export interface ChartPoint {
   revenue: number;
 }
 
+export interface ChartResult {
+  points: ChartPoint[];
+  totalCount: number;
+  totalRevenue: number;
+}
+
+const localDateKey = (d: Date) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
 const fmtLabel = (d: Date) =>
   d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 
 export const useAdminOrdersChart = (filters: AdminOrdersChartFilters) => {
   return useQuery({
     queryKey: ['admin-orders-chart', filters],
-    queryFn: async (): Promise<ChartPoint[]> => {
+    queryFn: async (): Promise<ChartResult> => {
       const { data, error } = await (supabase as any).rpc('admin_orders', {
         p_search: filters.search || null,
         p_source: filters.source || null,
@@ -35,19 +48,23 @@ export const useAdminOrdersChart = (filters: AdminOrdersChartFilters) => {
       if (error) throw error;
       const rows = (data || []) as Array<{ purchased_at: string; amount: number | null }>;
 
-      // Aggregate by day
+      // Totals over ALL rows (independent of bucket date math, so late-night BRT
+      // sales that fall in next UTC day are still counted)
+      const totalCount = rows.length;
+      const totalRevenue = rows.reduce((s, r) => s + Number(r.amount ?? 0), 0);
+
+      // Aggregate by LOCAL day (matches the date pickers, which are local)
       const buckets = new Map<string, { count: number; revenue: number }>();
       rows.forEach((r) => {
         if (!r.purchased_at) return;
-        const d = new Date(r.purchased_at);
-        const key = d.toISOString().slice(0, 10);
+        const key = localDateKey(new Date(r.purchased_at));
         const cur = buckets.get(key) ?? { count: 0, revenue: 0 };
         cur.count += 1;
         cur.revenue += Number(r.amount ?? 0);
         buckets.set(key, cur);
       });
 
-      // Build continuous range
+      // Build continuous range based on local dates
       const from = filters.from ? new Date(filters.from) : null;
       const to = filters.to ? new Date(filters.to) : new Date();
       const start = from ?? (rows.length
@@ -58,12 +75,12 @@ export const useAdminOrdersChart = (filters: AdminOrdersChartFilters) => {
       const cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate());
       const end = new Date(to.getFullYear(), to.getMonth(), to.getDate());
       while (cursor <= end) {
-        const key = cursor.toISOString().slice(0, 10);
+        const key = localDateKey(cursor);
         const b = buckets.get(key) ?? { count: 0, revenue: 0 };
         points.push({ date: key, label: fmtLabel(cursor), count: b.count, revenue: b.revenue });
         cursor.setDate(cursor.getDate() + 1);
       }
-      return points;
+      return { points, totalCount, totalRevenue };
     },
     staleTime: 30_000,
   });
