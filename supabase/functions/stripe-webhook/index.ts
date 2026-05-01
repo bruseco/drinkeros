@@ -217,16 +217,54 @@ serve(async (req) => {
         }
 
         let periodEnd: number | null = null;
+        let periodStart: number | null = null;
+        let invoiceId: string | null = null;
+        let invoicePaymentIntent: string | null = null;
+        let invoiceAmount: number | null = null;
+        let invoiceCurrency: string | null = null;
+        let invoicePaidAt: number | null = null;
+
         if (subscriptionId) {
-          const sub = await stripe.subscriptions.retrieve(subscriptionId);
+          const sub = await stripe.subscriptions.retrieve(subscriptionId, {
+            expand: ["latest_invoice"],
+          });
           periodEnd = sub.current_period_end ?? null;
+          periodStart = sub.current_period_start ?? null;
+
+          const latestInvoice = sub.latest_invoice as Stripe.Invoice | null;
+          if (latestInvoice && typeof latestInvoice === "object") {
+            invoiceId = latestInvoice.id ?? null;
+            invoicePaymentIntent = (latestInvoice.payment_intent as string) || null;
+            invoiceAmount = latestInvoice.amount_paid ?? null;
+            invoiceCurrency = latestInvoice.currency ?? null;
+            invoicePaidAt = latestInvoice.status_transitions?.paid_at ?? null;
+          }
         }
 
         // Reset de lembretes ao renovar/ativar
         await supabase.from("vip_renewal_reminders_sent").delete().eq("user_id", userId);
 
-        // A venda real da assinatura é registrada em invoice.paid.
-        // checkout.session.completed só libera/atualiza o acesso para evitar duplicar Vendas.
+        // Grava a venda em vip_payments (idempotente via stripe_invoice_id).
+        // Antes era feito apenas em invoice.paid, mas esse evento pode falhar/atrasar,
+        // deixando assinaturas ativas SEM registro de venda no histórico.
+        if (invoiceId) {
+          await supabase.from("vip_payments").upsert({
+            user_id: userId,
+            amount: (invoiceAmount ?? session.amount_total ?? 0) / 100,
+            currency: (invoiceCurrency ?? session.currency ?? "brl").toUpperCase(),
+            status: "paid",
+            payment_method: "card",
+            stripe_customer_id: customerId,
+            stripe_subscription_id: subscriptionId,
+            stripe_invoice_id: invoiceId,
+            stripe_payment_intent_id: invoicePaymentIntent || (session.payment_intent as string) || null,
+            paid_at: new Date((invoicePaidAt ?? Math.floor(Date.now() / 1000)) * 1000).toISOString(),
+            period_start: periodStart ? new Date(periodStart * 1000).toISOString() : new Date().toISOString(),
+            period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
+            metadata: { event_id: event.id, session_id: session.id, recorded_from: "checkout.session.completed" },
+          }, { onConflict: "stripe_invoice_id" });
+        }
+
         await upsertVipPlan(userId, periodEnd);
         break;
       }
