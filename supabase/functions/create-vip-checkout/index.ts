@@ -47,6 +47,9 @@ serve(async (req) => {
       client_reference_id: user.id,
       line_items: [{ price: priceId, quantity: 1 }],
       allow_promotion_codes: true,
+      // Aceita cartão (inclui Apple Pay e Google Pay automaticamente) e Pix.
+      // Boleto removido conforme regra de negócio.
+      payment_method_types: ["card", "pix"],
       success_url: `${origin}/vip?vip=success`,
       cancel_url: `${origin}/vip?vip=cancel`,
       subscription_data: {
