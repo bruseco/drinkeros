@@ -66,6 +66,13 @@ export const useUserPayments = (userId: string | undefined) => {
         nameKey: string
       ) => {
         (list || []).forEach((r: any) => {
+          // Apenas pagamentos REAIS: precisam ter referência externa própria
+          // (acessos propagados de cursos para módulos/combos não têm payment id)
+          const hasOwnPayment =
+            !!r.stripe_payment_intent_id ||
+            !!r.mercadopago_payment_id ||
+            !!r.stripe_session_id;
+          if (!hasOwnPayment) return;
           rows.push({
             id: `${product_type}:${r.id}`,
             table,
