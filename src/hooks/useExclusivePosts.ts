@@ -117,10 +117,11 @@ export const useExclusivePostsPaginated = ({
       }
 
       if (randomOrder) {
-        // Fetch ALL ids, shuffle with seed, then fetch only the page slice
+        // Fetch ALL ids + characteristics, shuffle with seed, then aplica boost sazonal,
+        // e por fim faz fetch dos detalhes apenas da página atual.
         let allQuery = supabase
           .from('exclusive_posts')
-          .select('id');
+          .select('id, characteristics');
 
         if (publishedOnly) {
           allQuery = allQuery.eq('is_published', true);
@@ -129,12 +130,28 @@ export const useExclusivePostsPaginated = ({
           allQuery = allQuery.contains('characteristics', [characteristicFilter]);
         }
 
-        const { data: allIds, error: allErr } = await allQuery;
+        const { data: allRows, error: allErr } = await allQuery;
         if (allErr) throw allErr;
 
-        const shuffled = seededShuffle(allIds || [], postsSeed);
-        const total = shuffled.length;
-        const pageIds = shuffled.slice(from, from + pageSize).map(r => r.id);
+        const shuffled = seededShuffle((allRows || []) as { id: string; characteristics: string[] | null }[], postsSeed);
+
+        // Boost sazonal: drinks que casam com a fase ativa primária vão para o topo
+        // (mantendo ordem aleatória entre si). Quando o usuário filtra por categoria,
+        // não aplicamos boost para não desalinhar o filtro escolhido.
+        const phase = !characteristicFilter ? getPrimaryPhase() : null;
+        let ordered = shuffled;
+        if (phase) {
+          const hits: typeof shuffled = [];
+          const rest: typeof shuffled = [];
+          for (const r of shuffled) {
+            if (matchesPhase(r.characteristics, phase)) hits.push(r);
+            else rest.push(r);
+          }
+          ordered = [...hits, ...rest];
+        }
+
+        const total = ordered.length;
+        const pageIds = ordered.slice(from, from + pageSize).map((r) => r.id);
 
         if (pageIds.length === 0) {
           return { posts: [] as ExclusivePost[], total, hasMore: false };
@@ -147,7 +164,7 @@ export const useExclusivePostsPaginated = ({
 
         if (error) throw error;
 
-        // Re-sort to match shuffled order
+        // Re-sort to match ordered slice
         const orderMap = new Map(pageIds.map((id, i) => [id, i]));
         const sorted = (data as ExclusivePost[]).sort(
           (a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)
