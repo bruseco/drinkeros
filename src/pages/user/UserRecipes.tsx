@@ -318,12 +318,12 @@ const UserRecipes: React.FC = () => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[13px] leading-snug font-medium">
-                Torne-se um membro do clube e veja quantas receitas você quiser. Salve em listas e participe da batalha.
+                Torne-se membro do Clube dos Drinkeros: acesse receitas ilimitadas, mais de 40 xaropes artesanais e muito mais.
               </p>
             </div>
             <Link to="/clube" className="shrink-0">
               <Button size="sm" className="bg-white text-purple-700 hover:bg-white/90 font-bold rounded-full h-9 px-4">
-                Quero
+                Saiba mais
               </Button>
             </Link>
           </div>
