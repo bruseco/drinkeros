@@ -81,8 +81,23 @@ export const useExclusivePostsPaginated = ({
       const from = pageParam * pageSize;
 
       if (search.trim()) {
+        // Stopwords: termos genéricos que não ajudam a buscar (ex: "drinks com espumante" → busca "espumante")
+        const STOPWORDS = new Set([
+          'drink', 'drinks', 'bebida', 'bebidas', 'receita', 'receitas',
+          'com', 'sem', 'de', 'da', 'do', 'das', 'dos', 'e', 'ou',
+          'para', 'pra', 'no', 'na', 'nos', 'nas', 'em', 'a', 'o', 'os', 'as', 'um', 'uma',
+        ]);
+        const raw = search.trim();
+        const tokens = raw.split(/\s+/).filter(Boolean);
+        const meaningful = tokens.filter(t => !STOPWORDS.has(t.toLowerCase()));
+        // Se removeu alguma stopword e sobrou pelo menos 1 termo, usa só os termos significativos
+        // (ex: "drinks com espumante" → "espumante"; "drinks com gin tônica" → "gin tônica")
+        const effectiveTerm = meaningful.length > 0 && meaningful.length < tokens.length
+          ? meaningful.join(' ')
+          : raw;
+
         const { data, error } = await supabase.rpc('search_exclusive_posts', {
-          p_term: search.trim(),
+          p_term: effectiveTerm,
           p_published_only: publishedOnly,
           p_limit: pageSize,
           p_offset: from,
