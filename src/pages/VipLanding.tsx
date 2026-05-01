@@ -459,26 +459,7 @@ const VipLanding: React.FC = () => {
               )}
             </Button>
             <p className="text-center text-[11px] text-purple-300 mt-2">
-              💳 Cartão · Apple Pay · Google Pay · renova sozinho todo ano
-            </p>
-
-            {/* Divisor "ou" */}
-            <div className="flex items-center gap-3 my-4">
-              <div className="flex-1 h-px bg-white/20" />
-              <span className="text-[11px] uppercase tracking-wider text-purple-300">ou</span>
-              <div className="flex-1 h-px bg-white/20" />
-            </div>
-
-            <Button
-              onClick={handleAnnualPix}
-              disabled={loading}
-              variant="outline"
-              className="w-full h-14 text-base font-bold bg-teal-500 hover:bg-teal-400 text-white border-0"
-            >
-              <Sparkles className="mr-2 h-5 w-5" /> Pagar 1 ano à vista no PIX
-            </Button>
-            <p className="text-center text-[11px] text-purple-300 mt-2">
-              🇧🇷 Pagamento único · vale 1 ano · sem renovação automática
+              💳 Cartão · Apple Pay · Google Pay · PIX
             </p>
 
             <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
