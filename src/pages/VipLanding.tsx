@@ -18,6 +18,11 @@ import { toast } from 'sonner';
 
 import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
 import bgTijolos from '@/assets/bg-tijolos-pretos.jpg';
+import payVisa from '@/assets/pagamento-visa.png';
+import payMaster from '@/assets/pagamento-mastercard.png';
+import payApple from '@/assets/pagamento-apple.png';
+import payGoogle from '@/assets/pagamento-google.png';
+import payPix from '@/assets/pagamento-pix.png';
 
 const VideoWithPoster: React.FC<{ src: string; poster: string; alt: string }> = ({ src, poster, alt }) => {
   const [started, setStarted] = useState(false);
@@ -462,13 +467,12 @@ const VipLanding: React.FC = () => {
               💳 Cartão · Apple Pay · Google Pay · PIX
             </p>
 
-            <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
-              <span className="inline-flex items-center justify-center h-7 px-2 rounded-md bg-white text-[10px] font-bold text-slate-800 shadow-sm">VISA</span>
-              <span className="inline-flex items-center justify-center h-7 px-2 rounded-md bg-white text-[10px] font-bold text-slate-800 shadow-sm tracking-tight">master<span className="text-red-500">.</span></span>
-              <span className="inline-flex items-center justify-center h-7 px-2 rounded-md bg-white text-[10px] font-bold text-blue-700 shadow-sm">ELO</span>
-              <span className="inline-flex items-center justify-center h-7 px-2 rounded-md bg-white text-[10px] font-bold text-slate-800 shadow-sm"> Pay</span>
-              <span className="inline-flex items-center justify-center h-7 px-2 rounded-md bg-white text-[10px] font-bold text-slate-800 shadow-sm">G Pay</span>
-              <span className="inline-flex items-center justify-center h-7 px-2 rounded-md bg-white text-[10px] font-bold text-teal-600 shadow-sm">PIX</span>
+            <div className="flex items-center justify-center gap-2 mt-4 flex-nowrap">
+              <span className="inline-flex items-center justify-center h-7 px-1.5 rounded-md bg-white shadow-sm"><img src={payVisa} alt="Visa" className="h-4 w-auto object-contain" /></span>
+              <span className="inline-flex items-center justify-center h-7 px-1.5 rounded-md bg-white shadow-sm"><img src={payMaster} alt="Mastercard" className="h-5 w-auto object-contain" /></span>
+              <span className="inline-flex items-center justify-center h-7 px-1.5 rounded-md bg-white shadow-sm"><img src={payApple} alt="Apple Pay" className="h-4 w-auto object-contain" /></span>
+              <span className="inline-flex items-center justify-center h-7 px-1.5 rounded-md bg-white shadow-sm"><img src={payGoogle} alt="Google Pay" className="h-4 w-auto object-contain" /></span>
+              <span className="inline-flex items-center justify-center h-7 px-1.5 rounded-md bg-white shadow-sm"><img src={payPix} alt="PIX" className="h-4 w-auto object-contain" /></span>
             </div>
           </div>
         </div>
