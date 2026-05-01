@@ -16,6 +16,19 @@ export interface ChartPoint {
   revenue: number;
 }
 
+export interface ChartResult {
+  points: ChartPoint[];
+  totalCount: number;
+  totalRevenue: number;
+}
+
+const localDateKey = (d: Date) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
 const fmtLabel = (d: Date) =>
   d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 
