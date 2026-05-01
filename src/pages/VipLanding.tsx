@@ -128,6 +128,15 @@ const VipLanding: React.FC = () => {
     navigate('/checkout/club/clube');
   };
 
+  const handleAnnualPix = async () => {
+    if (!user) {
+      navigate('/signup?redirect=/clube');
+      return;
+    }
+    setLoading(true);
+    navigate('/checkout/club/clube-anual');
+  };
+
   // Esconde a página de quem já é sócio do Clube, tem acesso vitalício
   // ou tem o conteúdo exclusivo "receitas" liberado.
   if (user && (planData?.isVip || hasLifetime || hasExclusive)) {
