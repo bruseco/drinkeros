@@ -318,7 +318,7 @@ const UserRecipes: React.FC = () => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[13px] leading-snug font-medium">
-                Torne-se membro do Clube dos Drinkeros: acesse receitas ilimitadas, mais de 40 xaropes artesanais e muito mais.
+                Torne-se membro do Clube: acesse receitas ilimitadas, mais de 40 xaropes artesanais e muito mais.
               </p>
             </div>
             <Link to="/clube" className="shrink-0">
