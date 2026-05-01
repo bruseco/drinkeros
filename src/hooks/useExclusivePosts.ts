@@ -1,6 +1,7 @@
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getPrimaryPhase, matchesPhase } from '@/lib/seasonalPhases';
 
 // Seed that changes on every call to refreshPostsSeed()
 let postsSeed = Math.floor(Math.random() * 2147483647);
