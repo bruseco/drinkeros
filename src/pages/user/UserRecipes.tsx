@@ -125,11 +125,11 @@ const UserRecipes: React.FC = () => {
   const { user } = useAuth();
   const pwa = usePwaStatus();
   const [installBannerVisible, setInstallBannerVisible] = useState<boolean>(() =>
-    shouldShowInstallBanner({ isStandalone: pwa.isStandalone, hasInstalledBefore: pwa.hasInstalledBefore, loading: pwa.loading })
+    shouldShowPwaGate({ isStandalone: pwa.isStandalone, hasInstalledBefore: pwa.hasInstalledBefore, loading: pwa.loading })
   );
   useEffect(() => {
     setInstallBannerVisible(
-      shouldShowInstallBanner({ isStandalone: pwa.isStandalone, hasInstalledBefore: pwa.hasInstalledBefore, loading: pwa.loading })
+      shouldShowPwaGate({ isStandalone: pwa.isStandalone, hasInstalledBefore: pwa.hasInstalledBefore, loading: pwa.loading })
     );
     const onDismiss = () => setInstallBannerVisible(false);
     window.addEventListener('install-banner-dismissed', onDismiss);
