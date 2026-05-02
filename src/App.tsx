@@ -202,6 +202,7 @@ const App = () => (
               <Route path="combos" element={<UserCombos />} />
               <Route path="combo/:comboId" element={<UserComboDetail />} />
               <Route path="perfil" element={<UserProfile />} />
+              <Route path="clube/gerenciar" element={<UserClubeManage />} />
               <Route path="batalha" element={<Navigate to="/app/receitas" replace />} />
               <Route path="batalha/*" element={<Navigate to="/app/receitas" replace />} />
             </Route>
