@@ -59,6 +59,7 @@ export const PwaInstallGate: React.FC = () => {
   const handleDismiss = () => {
     localStorage.setItem(DISMISS_KEY, '1');
     setDismissed(true);
+    window.dispatchEvent(new Event('install-banner-dismissed'));
   };
 
   return (
