@@ -142,6 +142,14 @@ export interface CourseLandingProps {
   offerSummary?: string;
 
   whatsappPhone?: string; // default: 5548991601025
+
+  /** Imagem extra (PNG transparente) que aparece atrás do logo no hero,
+   * deslocada para a direita — ex.: cutout do professor "saindo" do logo. */
+  heroOverlayImageSrc?: string;
+  /** Classe Tailwind extra para o overlay (posição/tamanho). */
+  heroOverlayClassName?: string;
+  /** Sobrescreve a rota de checkout. Default: `/checkout/course/${slug}`. */
+  checkoutPath?: string;
 }
 
 const CourseLanding: React.FC<CourseLandingProps> = ({
@@ -180,6 +188,9 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   aboutInstructor,
   offerSummary,
   titleFontClassName = '',
+  heroOverlayImageSrc,
+  heroOverlayClassName,
+  checkoutPath,
 }) => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -242,7 +253,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const handleBuy = async () => {
     setCheckoutLoading(true);
     try {
-      window.location.href = `/checkout/course/${slug}`;
+      window.location.href = checkoutPath ?? `/checkout/course/${slug}`;
       return;
     } catch (err: any) {
       toast({
