@@ -484,6 +484,45 @@ const UserLesson: React.FC = () => {
             </Card>
           )}
 
+          {/* Clickable Banner */}
+          {(lesson as any).banner_image_url && (
+            (() => {
+              const link = (lesson as any).banner_link_url as string | null;
+              const img = (
+                <img
+                  src={(lesson as any).banner_image_url}
+                  alt="Banner"
+                  className="w-full h-auto rounded-xl object-contain"
+                />
+              );
+              if (!link) {
+                return <div className="mb-4">{img}</div>;
+              }
+              const isExternal = /^https?:\/\//i.test(link);
+              if (isExternal) {
+                return (
+                  <a
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mb-4 block transition-opacity hover:opacity-90"
+                  >
+                    {img}
+                  </a>
+                );
+              }
+              return (
+                <button
+                  type="button"
+                  onClick={() => navigate(link)}
+                  className="mb-4 block w-full text-left transition-opacity hover:opacity-90"
+                >
+                  {img}
+                </button>
+              );
+            })()
+          )}
+
           {/* Resumo da Aula */}
           {lesson.instructions && (
             <Card className="mb-4 rounded-xl border-muted/20">

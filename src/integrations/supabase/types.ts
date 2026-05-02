@@ -1665,6 +1665,8 @@ export type Database = {
       }
       recipes: {
         Row: {
+          banner_image_url: string | null
+          banner_link_url: string | null
           created_at: string
           created_by: string | null
           duration_seconds: number | null
@@ -1683,6 +1685,8 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          banner_image_url?: string | null
+          banner_link_url?: string | null
           created_at?: string
           created_by?: string | null
           duration_seconds?: number | null
@@ -1701,6 +1705,8 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          banner_image_url?: string | null
+          banner_link_url?: string | null
           created_at?: string
           created_by?: string | null
           duration_seconds?: number | null

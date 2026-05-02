@@ -12,6 +12,8 @@ export interface Recipe {
   video_url: string | null;
   material_url: string | null;
   transcript: string | null;
+  banner_image_url: string | null;
+  banner_link_url: string | null;
   status: 'draft' | 'published';
   created_by: string | null;
   created_at: string;

@@ -55,6 +55,7 @@ const LessonForm: React.FC = () => {
   const createLesson = useCreateRecipe();
   const updateLesson = useUpdateRecipe();
   const { upload, isUploading } = useImageUpload('recipe-images');
+  const { upload: uploadBanner, isUploading: isUploadingBanner } = useImageUpload('recipe-images', { skipOptimize: true });
   const { upload: uploadMaterial, isUploading: isUploadingMaterial } = useFileUpload('lesson-materials');
 
   const [formData, setFormData] = useState({
@@ -66,6 +67,8 @@ const LessonForm: React.FC = () => {
     video_url: '',
     material_url: '',
     transcript: '',
+    banner_image_url: '',
+    banner_link_url: '',
     status: 'draft' as 'draft' | 'published',
     duration_seconds: 0,
   });
@@ -88,6 +91,8 @@ const LessonForm: React.FC = () => {
         video_url: lesson.video_url || '',
         material_url: lesson.material_url || '',
         transcript: (lesson as any).transcript || '',
+        banner_image_url: (lesson as any).banner_image_url || '',
+        banner_link_url: (lesson as any).banner_link_url || '',
         status: lesson.status,
         duration_seconds: (lesson as any).duration_seconds || 0,
       });
@@ -907,42 +912,71 @@ const LessonForm: React.FC = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Módulos</CardTitle>
+                <CardTitle>Banner clicável</CardTitle>
               </CardHeader>
-              <CardContent>
-                {modules.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Nenhum módulo cadastrado</p>
-                ) : (
-                  <div className="space-y-2">
-                    {modules.map((mod) => (
-                      <div key={mod.id} className="flex items-center gap-2">
-                        <Checkbox
-                          id={`mod-${mod.id}`}
-                          checked={selectedModules.includes(mod.id)}
-                          onCheckedChange={() => toggleModule(mod.id)}
-                        />
-                        <Label htmlFor={`mod-${mod.id}`} className="cursor-pointer flex-1 truncate">
-                          {mod.name}
-                        </Label>
-                        {selectedModules.includes(mod.id) && (
-                          <Input
-                            type="number"
-                            min={0}
-                            className="w-16 h-8 text-xs px-2"
-                            placeholder="Ord."
-                            value={moduleOrders[mod.id] ?? ''}
-                            onChange={(e) =>
-                              setModuleOrders((prev) => ({
-                                ...prev,
-                                [mod.id]: parseInt(e.target.value) || 0,
-                              }))
-                            }
-                          />
-                        )}
-                      </div>
-                    ))}
+              <CardContent className="space-y-3">
+                <p className="text-xs text-muted-foreground">
+                  Habilite um banner com imagem que leva a uma seção/link externo quando clicado.
+                </p>
+
+                {formData.banner_image_url ? (
+                  <div className="relative">
+                    <img
+                      src={formData.banner_image_url}
+                      alt="Banner preview"
+                      className="w-full rounded-lg border object-contain"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute right-2 top-2"
+                      onClick={() => setFormData((prev) => ({ ...prev, banner_image_url: '' }))}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
+                ) : (
+                  <label className="flex aspect-video cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 transition-colors hover:bg-muted">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const url = await uploadBanner(file);
+                        if (url) setFormData((prev) => ({ ...prev, banner_image_url: url }));
+                        e.target.value = '';
+                      }}
+                      className="hidden"
+                      disabled={isUploadingBanner}
+                    />
+                    {isUploadingBanner ? (
+                      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    ) : (
+                      <>
+                        <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">
+                          Upload da imagem do banner
+                        </span>
+                      </>
+                    )}
+                  </label>
                 )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="banner_link_url">Link do banner</Label>
+                  <Input
+                    id="banner_link_url"
+                    type="url"
+                    value={formData.banner_link_url}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, banner_link_url: e.target.value }))}
+                    placeholder="https://... ou /app/receitas"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Pode ser uma URL externa ou um caminho interno (ex: <code>/app/receitas</code>).
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>
