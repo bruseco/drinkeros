@@ -90,6 +90,8 @@ const LessonForm: React.FC = () => {
         video_url: lesson.video_url || '',
         material_url: lesson.material_url || '',
         transcript: (lesson as any).transcript || '',
+        banner_image_url: (lesson as any).banner_image_url || '',
+        banner_link_url: (lesson as any).banner_link_url || '',
         status: lesson.status,
         duration_seconds: (lesson as any).duration_seconds || 0,
       });
