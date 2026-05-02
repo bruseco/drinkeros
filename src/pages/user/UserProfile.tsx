@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { MyProductsSection } from '@/components/user/MyProductsSection';
 import { AvatarCropDialog } from '@/components/user/AvatarCropDialog';
 import { useUserPlan } from '@/hooks/useUserPlan';
+import { useProfileCompleteness } from '@/hooks/useProfileCompleteness';
 import { useNavigate } from 'react-router-dom';
 
 const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) => void }> = ({ onCompletenessChange }) => {
