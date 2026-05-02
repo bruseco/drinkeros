@@ -411,7 +411,7 @@ const NotificationsSection: React.FC = () => {
 const UserProfile: React.FC = () => {
   const { signOut } = useAuth();
   const [openSection, setOpenSection] = useState<string | null>(null);
-  const [profileComplete, setProfileComplete] = useState(true);
+  const { missingCount, missingFields, isComplete } = useProfileCompleteness();
   const { data: planData } = useUserPlan();
   const isVip = !!planData?.isVip;
 
