@@ -429,10 +429,21 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                       'radial-gradient(circle, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0) 75%)',
                   }}
                 />
+                {heroOverlayImageSrc && (
+                  <img
+                    src={heroOverlayImageSrc}
+                    alt=""
+                    aria-hidden
+                    className={
+                      heroOverlayClassName ??
+                      'pointer-events-none select-none absolute z-0 left-[58%] sm:left-[60%] top-1/2 -translate-y-1/2 h-[110%] sm:h-[120%] w-auto object-contain drop-shadow-[0_8px_24px_rgba(0,0,0,0.6)]'
+                    }
+                  />
+                )}
                 <img
                   src={logoSrc}
                   alt={brand}
-                  className={`relative w-auto object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)] ${logoClassName ?? 'h-20 sm:h-28'}`}
+                  className={`relative z-10 w-auto object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)] ${logoClassName ?? 'h-20 sm:h-28'}`}
                 />
               </div>
             )
