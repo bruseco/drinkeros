@@ -16,6 +16,8 @@ import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { usePwaStatus } from '@/hooks/usePwaStatus';
+import { shouldShowInstallBanner } from '@/components/user/InstallBanner';
 
 const CATEGORY_FILTERS = [
   { label: 'Xaropes Artesanais', value: 'Xaropes Artesanais', icon: GlassWater },
