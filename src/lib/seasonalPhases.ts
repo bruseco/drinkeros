@@ -129,6 +129,26 @@ export function getPrimaryPhase(date: Date = new Date()): SeasonalPhase | null {
   return getActivePhases(date)[0] ?? null;
 }
 
+/** Tags estritamente sazonais — só devem aparecer durante suas respectivas fases. */
+const STRICT_SEASONAL_TAGS = ['Natal', 'Halloween', 'Carnaval', 'Festa Junina', 'Verão', 'Inverno'];
+
+/**
+ * Retorna true se o drink deve ser ocultado por estar fora da sua época sazonal.
+ * Um drink é ocultado se possui alguma tag sazonal estrita E nenhuma das suas
+ * fases está atualmente ativa.
+ */
+export function isOutOfSeason(characteristics: string[] | null | undefined, date: Date = new Date()): boolean {
+  const chars = characteristics ?? [];
+  if (chars.length === 0) return false;
+
+  const seasonalTagsOnDrink = chars.filter((c) => STRICT_SEASONAL_TAGS.includes(c));
+  if (seasonalTagsOnDrink.length === 0) return false;
+
+  const activeTags = new Set(getActivePhases(date).flatMap((p) => p.tags));
+  // Se ao menos uma das tags sazonais do drink está ativa agora, mostra.
+  return !seasonalTagsOnDrink.some((t) => activeTags.has(t));
+}
+
 /**
  * Verifica se um drink (suas characteristics) deve ser destacado para a fase.
  * Aplica regra de exclusão das includeTags (ex: Drinks de Galera no Carnaval
