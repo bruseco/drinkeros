@@ -152,6 +152,8 @@ export interface CourseLandingProps {
   checkoutPath?: string;
   /** Oculta o banner flutuante de oferta do Clube (útil quando o produto já inclui o Clube). */
   hideVipBanner?: boolean;
+  /** Desabilita o desconto VIP nesta oferta (preço cheio para todos, inclusive sócios). */
+  disableVipDiscount?: boolean;
 }
 
 const CourseLanding: React.FC<CourseLandingProps> = ({
