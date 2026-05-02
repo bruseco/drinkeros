@@ -16,6 +16,8 @@ import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { usePwaStatus } from '@/hooks/usePwaStatus';
+import { shouldShowInstallBanner } from '@/components/user/InstallBanner';
 
 const CATEGORY_FILTERS = [
   { label: 'Xaropes Artesanais', value: 'Xaropes Artesanais', icon: GlassWater },
@@ -121,6 +123,18 @@ const UserRecipes: React.FC = () => {
   const { isVip: hasFullRecipeAccess, dailyLimit } = useRecipeAccessGuard();
   const isLockedForUser = planData ? !hasFullRecipeAccess : false;
   const { user } = useAuth();
+  const pwa = usePwaStatus();
+  const [installBannerVisible, setInstallBannerVisible] = useState<boolean>(() =>
+    shouldShowInstallBanner({ isStandalone: pwa.isStandalone, hasInstalledBefore: pwa.hasInstalledBefore, loading: pwa.loading })
+  );
+  useEffect(() => {
+    setInstallBannerVisible(
+      shouldShowInstallBanner({ isStandalone: pwa.isStandalone, hasInstalledBefore: pwa.hasInstalledBefore, loading: pwa.loading })
+    );
+    const onDismiss = () => setInstallBannerVisible(false);
+    window.addEventListener('install-banner-dismissed', onDismiss);
+    return () => window.removeEventListener('install-banner-dismissed', onDismiss);
+  }, [pwa.isStandalone, pwa.hasInstalledBefore, pwa.loading]);
 
   // Para usuários free: busca quais receitas já foram vistas hoje + total para saber se o limite estourou
   const { data: dailyViews } = useQuery({
@@ -310,7 +324,7 @@ const UserRecipes: React.FC = () => {
         )}
       </div>
 
-      {isLockedForUser && (
+      {isLockedForUser && !installBannerVisible && (
         <div className="fixed bottom-[84px] left-0 right-0 z-40 px-3 pb-2 lg:bottom-6 pointer-events-none">
           <div className="mx-auto max-w-md pointer-events-auto rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-500 p-3 shadow-lg shadow-purple-500/30 text-white flex items-center gap-3">
             <div className="shrink-0 rounded-full bg-white/20 p-2">
