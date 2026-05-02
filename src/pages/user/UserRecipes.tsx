@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useExclusivePostsPaginated } from '@/hooks/useExclusivePosts';
-import { Loader2, Search, Wine, GlassWater, Users, Citrus, CupSoda, Martini, IceCream, Snowflake, Droplets, Lock, Coffee, Utensils } from 'lucide-react';
+import { Loader2, Search, Wine, GlassWater, Users, Citrus, CupSoda, Martini, IceCream, Snowflake, Droplets, Lock, Coffee, Utensils, Zap } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -23,6 +23,7 @@ const CATEGORY_FILTERS = [
   { label: 'Xaropes Artesanais', value: 'Xaropes Artesanais', icon: GlassWater },
   { label: 'Sem Álcool', value: 'Sem Álcool', icon: Droplets },
   { label: 'Drinks de Galera', value: 'Drinks de Galera', icon: Users },
+  { label: 'Shots', value: 'Shot', icon: Zap },
   { label: 'Caipirinhas', value: 'Caipirinha', icon: Citrus },
   { label: 'Batidas', value: 'Batida', icon: CupSoda },
   { label: 'Clássicos e Variações', value: 'Clássico', icon: Martini },
