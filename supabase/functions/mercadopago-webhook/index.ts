@@ -74,23 +74,109 @@ serve(async (req) => {
 
     const url = new URL(req.url);
     let body: any = {};
-    try {
-      body = await req.json();
-    } catch {
-      body = {};
+    try { body = await req.json(); } catch { body = {}; }
+
+    const topic = body?.type || body?.topic || url.searchParams.get("topic") || url.searchParams.get("type");
+    const resourceId = body?.data?.id || url.searchParams.get("id") || url.searchParams.get("data.id");
+
+    console.log("[mp-webhook] received:", { topic, resourceId, body });
+
+    // ============ Assinatura recorrente do Clube (preapproval) ============
+    if ((topic === "preapproval" || topic === "subscription_preapproval") && resourceId) {
+      const r = await fetch(`${MP_API}/preapproval/${resourceId}`, {
+        headers: { "Authorization": `Bearer ${mpToken}` },
+      });
+      const pre = await r.json();
+      if (!r.ok) {
+        console.error("[mp-webhook] preapproval fetch failed:", pre);
+        return new Response(JSON.stringify({ ok: false }), { status: 200, headers: corsHeaders });
+      }
+      console.log("[mp-webhook] preapproval status:", pre?.status);
+      return new Response(JSON.stringify({ ok: true, preapproval: pre?.status }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    // MP envia: { type: "payment", data: { id: "..." } } ou query ?topic=payment&id=...
-    const topic = body?.type || body?.topic || url.searchParams.get("topic") || url.searchParams.get("type");
-    const paymentId = body?.data?.id || url.searchParams.get("id") || url.searchParams.get("data.id");
+    // ============ Cobrança recorrente da assinatura (authorized_payment) ============
+    if ((topic === "subscription_authorized_payment" || topic === "authorized_payment") && resourceId) {
+      const r = await fetch(`${MP_API}/authorized_payments/${resourceId}`, {
+        headers: { "Authorization": `Bearer ${mpToken}` },
+      });
+      const ap = await r.json();
+      if (!r.ok) {
+        console.error("[mp-webhook] authorized_payment fetch failed:", ap);
+        return new Response(JSON.stringify({ ok: false }), { status: 200, headers: corsHeaders });
+      }
+      if (ap?.status !== "approved") {
+        return new Response(JSON.stringify({ ok: true, status: ap?.status }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
-    console.log("[mp-webhook] received:", { topic, paymentId, body });
+      const preapprovalId = ap?.preapproval_id;
+      const preR = await fetch(`${MP_API}/preapproval/${preapprovalId}`, {
+        headers: { "Authorization": `Bearer ${mpToken}` },
+      });
+      const pre = await preR.json();
+      const externalRef = pre?.external_reference as string | undefined;
+      const payerEmail = pre?.payer_email;
+      let userId: string | null = null;
+      if (externalRef?.startsWith("club:")) userId = externalRef.split(":")[1] || null;
+      if (!userId && payerEmail) {
+        const { data: profile } = await supabase
+          .from("profiles").select("user_id").eq("email", payerEmail).maybeSingle();
+        userId = profile?.user_id || null;
+      }
+      if (!userId) {
+        return new Response(JSON.stringify({ ok: true, pending_user: true }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
+      const isAnnual = pre?.auto_recurring?.frequency === 12;
+      const now = new Date();
+      const periodEnd = new Date(now.getTime() + (isAnnual ? 365 : 31) * 24 * 60 * 60 * 1000);
+
+      const { data: existing } = await supabase
+        .from("vip_payments").select("id")
+        .eq("metadata->>mp_authorized_payment_id", String(resourceId))
+        .maybeSingle();
+
+      if (!existing?.id) {
+        await supabase.from("vip_payments").insert({
+          user_id: userId,
+          amount: Number(ap?.transaction_amount || pre?.auto_recurring?.transaction_amount || 0),
+          currency: "BRL",
+          status: "paid",
+          payment_method: "card",
+          paid_at: now.toISOString(),
+          period_start: now.toISOString(),
+          period_end: periodEnd.toISOString(),
+          metadata: {
+            source: "mercadopago",
+            mp_authorized_payment_id: String(resourceId),
+            mp_preapproval_id: String(preapprovalId),
+          },
+        });
+      }
+
+      await supabase.from("user_plans").upsert({
+        user_id: userId,
+        plan: "vip",
+        source: "mercadopago",
+        activated_at: now.toISOString(),
+        expires_at: periodEnd.toISOString(),
+      }, { onConflict: "user_id" });
+
+      return new Response(JSON.stringify({ ok: true, recurring: true }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const paymentId = resourceId;
     if (topic !== "payment" || !paymentId) {
-      // Apenas ack — outros tópicos (merchant_order, etc.) ignorados por enquanto
       return new Response(JSON.stringify({ ok: true, ignored: true }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
