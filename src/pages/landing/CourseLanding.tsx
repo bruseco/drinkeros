@@ -152,6 +152,8 @@ export interface CourseLandingProps {
   checkoutPath?: string;
   /** Oculta o banner flutuante de oferta do Clube (útil quando o produto já inclui o Clube). */
   hideVipBanner?: boolean;
+  /** Desabilita o desconto VIP nesta oferta (preço cheio para todos, inclusive sócios). */
+  disableVipDiscount?: boolean;
 }
 
 const CourseLanding: React.FC<CourseLandingProps> = ({
@@ -194,13 +196,14 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   heroOverlayClassName,
   checkoutPath,
   hideVipBanner = false,
+  disableVipDiscount = false,
 }) => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const { data: course } = useCourseBySlug(slug);
   const { data: userPlan } = useUserPlan();
-  const isVip = !!userPlan?.isVip;
+  const isVip = !disableVipDiscount && !!userPlan?.isVip;
 
   useEffect(() => {
     const status = searchParams.get('checkout');

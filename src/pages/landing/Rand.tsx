@@ -126,6 +126,7 @@ const Rand: React.FC = () => (
     oldPriceLabel="De R$ 944,00"
     checkoutPath="/checkout/combo/rand"
     hideVipBanner
+    disableVipDiscount
     learnItems={learnItems}
     whatYouLearnTitle="O que você vai aprender"
     profiles={profiles}
