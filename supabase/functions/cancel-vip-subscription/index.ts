@@ -1,12 +1,12 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const MP_API = "https://api.mercadopago.com";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -25,48 +25,51 @@ serve(async (req) => {
     if (userErr || !userData.user) throw new Error("Not authenticated");
     const userId = userData.user.id;
 
-    // Pega assinatura ativa mais recente
+    // Busca vip_payment mais recente com preapproval do MP
     const { data: payments } = await supabase
       .from("vip_payments")
-      .select("stripe_subscription_id, metadata")
+      .select("id, metadata")
       .eq("user_id", userId)
-      .not("stripe_subscription_id", "is", null)
-      .order("paid_at", { ascending: false })
-      .limit(1);
+      .order("created_at", { ascending: false })
+      .limit(20);
 
-    const subscriptionId = payments?.[0]?.stripe_subscription_id;
+    const preapprovalId = payments?.find(
+      (p: any) => p.metadata?.mp_preapproval_id
+    )?.metadata?.mp_preapproval_id as string | undefined;
 
-    if (!subscriptionId) {
+    if (!preapprovalId) {
       return new Response(
         JSON.stringify({
           success: false,
           error: "no_subscription",
           message:
-            "Nenhuma assinatura recorrente encontrada. Se foi pago manualmente ou via PIX/boleto, fale com o suporte pelo WhatsApp.",
+            "Nenhuma assinatura recorrente encontrada. Se foi pago manualmente ou por outro canal, fale com o suporte pelo WhatsApp.",
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY not configured");
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+    const mpToken = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
+    if (!mpToken) throw new Error("MERCADOPAGO_ACCESS_TOKEN not configured");
 
-    // Cancela ao fim do período — usuário mantém acesso até expires_at
-    const sub = await stripe.subscriptions.update(subscriptionId, {
-      cancel_at_period_end: true,
+    const resp = await fetch(`${MP_API}/preapproval/${preapprovalId}`, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${mpToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status: "cancelled" }),
     });
 
-    const cancelAt = sub.cancel_at
-      ? new Date(sub.cancel_at * 1000).toISOString()
-      : sub.current_period_end
-      ? new Date(sub.current_period_end * 1000).toISOString()
-      : null;
+    const data = await resp.json();
+    if (!resp.ok) {
+      console.error("[cancel-vip-subscription] MP error:", data);
+      throw new Error(data?.message || "Falha ao cancelar assinatura");
+    }
 
     return new Response(
       JSON.stringify({
         success: true,
-        cancel_at: cancelAt,
         message: "Assinatura cancelada. Você mantém acesso até o fim do período já pago.",
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }

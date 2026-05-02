@@ -58,7 +58,7 @@ const UserClubeManage: React.FC = () => {
 
   // Mostra somente pagamentos do Clube
   const clubePayments = payments.filter((p) => p.product_type === 'clube');
-  const hasRecurring = clubePayments.some((p) => p.source === 'stripe' && p.status === 'paid');
+  const hasRecurring = clubePayments.some((p) => p.source === 'mercadopago' && p.status === 'paid');
 
   const handleCancel = async () => {
     setCancelling(true);
