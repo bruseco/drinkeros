@@ -66,6 +66,8 @@ const LessonForm: React.FC = () => {
     video_url: '',
     material_url: '',
     transcript: '',
+    banner_image_url: '',
+    banner_link_url: '',
     status: 'draft' as 'draft' | 'published',
     duration_seconds: 0,
   });
