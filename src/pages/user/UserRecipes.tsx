@@ -17,7 +17,7 @@ import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePwaStatus } from '@/hooks/usePwaStatus';
-import { shouldShowInstallBanner } from '@/components/user/InstallBanner';
+import { shouldShowPwaGate } from '@/components/user/PwaInstallGate';
 
 const CATEGORY_FILTERS = [
   { label: 'Xaropes Artesanais', value: 'Xaropes Artesanais', icon: GlassWater },
@@ -125,11 +125,11 @@ const UserRecipes: React.FC = () => {
   const { user } = useAuth();
   const pwa = usePwaStatus();
   const [installBannerVisible, setInstallBannerVisible] = useState<boolean>(() =>
-    shouldShowInstallBanner({ isStandalone: pwa.isStandalone, hasInstalledBefore: pwa.hasInstalledBefore, loading: pwa.loading })
+    shouldShowPwaGate({ isStandalone: pwa.isStandalone, hasInstalledBefore: pwa.hasInstalledBefore, loading: pwa.loading })
   );
   useEffect(() => {
     setInstallBannerVisible(
-      shouldShowInstallBanner({ isStandalone: pwa.isStandalone, hasInstalledBefore: pwa.hasInstalledBefore, loading: pwa.loading })
+      shouldShowPwaGate({ isStandalone: pwa.isStandalone, hasInstalledBefore: pwa.hasInstalledBefore, loading: pwa.loading })
     );
     const onDismiss = () => setInstallBannerVisible(false);
     window.addEventListener('install-banner-dismissed', onDismiss);

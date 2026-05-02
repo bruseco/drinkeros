@@ -11,6 +11,20 @@ interface BeforeInstallPromptEvent extends Event {
 
 const DISMISS_KEY = 'pwa-install-banner-dismissed';
 
+/** Helper compartilhado: o gate do PWA está visível para este usuário?
+ *  Outros componentes (ex: banner do Clube) usam isso pra evitar empilhar CTAs. */
+export function shouldShowPwaGate(opts: {
+  isStandalone: boolean;
+  hasInstalledBefore: boolean | null;
+  loading: boolean;
+}): boolean {
+  if (opts.loading) return true; // enquanto carrega, assume que pode aparecer (evita flash do banner do Clube)
+  if (opts.isStandalone) return false;
+  if (opts.hasInstalledBefore) return false;
+  if (typeof window !== 'undefined' && localStorage.getItem(DISMISS_KEY) === '1') return false;
+  return true;
+}
+
 /** Banner exibido acima do menu inferior (mobile) e no topo (desktop) até
  *  o usuário instalar o PWA ou fechar manualmente no X. */
 export const PwaInstallGate: React.FC = () => {
@@ -45,6 +59,7 @@ export const PwaInstallGate: React.FC = () => {
   const handleDismiss = () => {
     localStorage.setItem(DISMISS_KEY, '1');
     setDismissed(true);
+    window.dispatchEvent(new Event('install-banner-dismissed'));
   };
 
   return (
