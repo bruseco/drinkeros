@@ -128,11 +128,30 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
 
   const initial = (fullName || user?.email || 'U').charAt(0).toUpperCase();
 
+  // Indicadores de campos incompletos (em tempo real conforme o usuário edita)
+  const miss = {
+    avatar: !avatarUrl,
+    fullName: !fullName.trim(),
+    bio: !bio.trim(),
+    phone: !phone.trim(),
+    birthDate: !birthDate,
+    gender: !gender,
+    cpf: cpf.replace(/\D/g, '').length !== 11,
+  };
+
+  const IncompleteTag = () => (
+    <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-destructive/15 text-destructive border border-destructive/30">
+      Incompleto
+    </span>
+  );
+
+  const incompleteRing = 'ring-2 ring-destructive/40 focus-visible:ring-destructive';
+
   return (
     <div className="space-y-4 p-4">
       <div className="flex flex-col items-center gap-3">
         <div className="relative">
-          <Avatar className="h-24 w-24">
+          <Avatar className={cn("h-24 w-24", miss.avatar && "ring-2 ring-destructive/50")}>
             <AvatarImage src={avatarUrl || undefined} />
             <AvatarFallback className="text-2xl">{initial}</AvatarFallback>
           </Avatar>
@@ -146,36 +165,42 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
           </button>
           <input ref={fileRef} type="file" accept="image/*" onChange={handleFilePicked} className="hidden" />
         </div>
+        {miss.avatar && (
+          <div className="flex items-center gap-2">
+            <IncompleteTag />
+            <span className="text-xs text-muted-foreground">Adicione uma foto de perfil</span>
+          </div>
+        )}
         {uploadingAvatar && <p className="text-xs text-muted-foreground">Enviando foto...</p>}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="fullName">Nome completo</Label>
-        <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome completo" />
+        <Label htmlFor="fullName" className="flex items-center gap-2">Nome completo {miss.fullName && <IncompleteTag />}</Label>
+        <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome completo" className={cn(miss.fullName && incompleteRing)} />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="bio">Sobre você</Label>
-        <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Fale um pouco sobre você (aparece no Clube)" rows={3} />
+        <Label htmlFor="bio" className="flex items-center gap-2">Sobre você {miss.bio && <IncompleteTag />}</Label>
+        <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Fale um pouco sobre você (aparece no Clube)" rows={3} className={cn(miss.bio && incompleteRing)} />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="phone">Telefone</Label>
-        <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(00) 00000-0000" />
+        <Label htmlFor="phone" className="flex items-center gap-2">Telefone {miss.phone && <IncompleteTag />}</Label>
+        <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(00) 00000-0000" className={cn(miss.phone && incompleteRing)} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="birthDate">Data de nascimento</Label>
+          <Label htmlFor="birthDate" className="flex items-center gap-2">Data de nascimento {miss.birthDate && <IncompleteTag />}</Label>
           <Input
             id="birthDate"
             type="date"
             value={birthDate}
             onChange={(e) => setBirthDate(e.target.value)}
-            className="h-10 block appearance-none [&::-webkit-date-and-time-value]:text-left [&::-webkit-date-and-time-value]:min-h-0"
+            className={cn("h-10 block appearance-none [&::-webkit-date-and-time-value]:text-left [&::-webkit-date-and-time-value]:min-h-0", miss.birthDate && incompleteRing)}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="gender">Sexo</Label>
+          <Label htmlFor="gender" className="flex items-center gap-2">Sexo {miss.gender && <IncompleteTag />}</Label>
           <Select value={gender} onValueChange={setGender}>
-            <SelectTrigger id="gender">
+            <SelectTrigger id="gender" className={cn(miss.gender && incompleteRing)}>
               <SelectValue placeholder="Selecione" />
             </SelectTrigger>
             <SelectContent>
@@ -188,7 +213,7 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="cpf">CPF</Label>
+        <Label htmlFor="cpf" className="flex items-center gap-2">CPF {miss.cpf && !cpfLocked && <IncompleteTag />}</Label>
         <Input
           id="cpf"
           value={cpf}
@@ -204,7 +229,7 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
           placeholder="000.000.000-00"
           maxLength={14}
           disabled={cpfLocked}
-          className={cpfLocked ? 'opacity-60' : ''}
+          className={cn(cpfLocked && 'opacity-60', !cpfLocked && miss.cpf && incompleteRing)}
         />
         {cpfLocked && <p className="text-xs text-muted-foreground">O CPF não pode ser alterado após o cadastro.</p>}
       </div>
