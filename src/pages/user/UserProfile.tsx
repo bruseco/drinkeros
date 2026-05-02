@@ -229,7 +229,7 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
           placeholder="000.000.000-00"
           maxLength={14}
           disabled={cpfLocked}
-          className={cpfLocked ? 'opacity-60' : ''}
+          className={cn(cpfLocked && 'opacity-60', !cpfLocked && miss.cpf && incompleteRing)}
         />
         {cpfLocked && <p className="text-xs text-muted-foreground">O CPF não pode ser alterado após o cadastro.</p>}
       </div>
