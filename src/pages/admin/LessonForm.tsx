@@ -55,6 +55,7 @@ const LessonForm: React.FC = () => {
   const createLesson = useCreateRecipe();
   const updateLesson = useUpdateRecipe();
   const { upload, isUploading } = useImageUpload('recipe-images');
+  const { upload: uploadBanner, isUploading: isUploadingBanner } = useImageUpload('recipe-images', { skipOptimize: true });
   const { upload: uploadMaterial, isUploading: isUploadingMaterial } = useFileUpload('lesson-materials');
 
   const [formData, setFormData] = useState({
