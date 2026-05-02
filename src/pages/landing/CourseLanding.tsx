@@ -150,6 +150,8 @@ export interface CourseLandingProps {
   heroOverlayClassName?: string;
   /** Sobrescreve a rota de checkout. Default: `/checkout/course/${slug}`. */
   checkoutPath?: string;
+  /** Oculta o banner flutuante de oferta do Clube (útil quando o produto já inclui o Clube). */
+  hideVipBanner?: boolean;
 }
 
 const CourseLanding: React.FC<CourseLandingProps> = ({
@@ -191,6 +193,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   heroOverlayImageSrc,
   heroOverlayClassName,
   checkoutPath,
+  hideVipBanner = false,
 }) => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -390,7 +393,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     <div className="min-h-screen bg-[#0b0b0d] text-white overflow-x-hidden">
       <style>{themeStyles}</style>
 
-      {!isVip && (
+      {!isVip && !hideVipBanner && (
         <VipFloatingBanner
           watchTargetId="cl-matricule-cta"
           basePrice={basePrice}

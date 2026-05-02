@@ -124,7 +124,8 @@ const Rand: React.FC = () => (
     theme={theme}
     fallbackPrice={147}
     oldPriceLabel="De R$ 944,00"
-    checkoutPath="/checkout/package/rand"
+    checkoutPath="/checkout/combo/rand"
+    hideVipBanner
     learnItems={learnItems}
     whatYouLearnTitle="O que você vai aprender"
     profiles={profiles}
