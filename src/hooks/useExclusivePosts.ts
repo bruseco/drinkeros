@@ -1,7 +1,7 @@
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { getPrimaryPhase, matchesPhase } from '@/lib/seasonalPhases';
+import { getPrimaryPhase, matchesPhase, isOutOfSeason } from '@/lib/seasonalPhases';
 
 // Seed that changes on every call to refreshPostsSeed()
 let postsSeed = Math.floor(Math.random() * 2147483647);
@@ -133,7 +133,20 @@ export const useExclusivePostsPaginated = ({
         const { data: allRows, error: allErr } = await allQuery;
         if (allErr) throw allErr;
 
-        const shuffled = seededShuffle((allRows || []) as { id: string; characteristics: string[] | null }[], postsSeed);
+        // Filtra drinks sazonais fora de época (Natal, Halloween, Carnaval,
+        // Festa Junina, Verão, Inverno só aparecem dentro de suas janelas).
+        // Se o usuário escolheu explicitamente uma categoria sazonal via filtro,
+        // respeitamos a escolha e não filtramos.
+        const isFilteringSeasonal = !!characteristicFilter && [
+          'Natal', 'Halloween', 'Carnaval', 'Festa Junina', 'Verão', 'Inverno',
+        ].includes(characteristicFilter);
+        const inSeason = isFilteringSeasonal
+          ? ((allRows || []) as { id: string; characteristics: string[] | null }[])
+          : ((allRows || []) as { id: string; characteristics: string[] | null }[]).filter(
+              (r) => !isOutOfSeason(r.characteristics)
+            );
+
+        const shuffled = seededShuffle(inSeason, postsSeed);
 
         // Boost sazonal: drinks que casam com a fase ativa primária vão para o topo
         // (mantendo ordem aleatória entre si). Quando o usuário filtra por categoria,
