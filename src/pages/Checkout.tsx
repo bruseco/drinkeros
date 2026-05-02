@@ -85,17 +85,16 @@ export default function Checkout() {
         const { data: { user } } = await supabase.auth.getUser();
 
         if (productType === "club") {
-          // Assinatura do Sócio do Clube é recorrente e fica no Stripe.
-          // Mercado Pago é usado apenas para pagamentos avulsos (cursos/ebooks).
+          // Assinatura recorrente do Clube via Mercado Pago (Preapproval).
           if (!user) {
             navigate(`/signup?redirect=/checkout/club/${slug}`);
             return;
           }
-          // slug "clube-anual" → plano anual à vista (one-time, aceita PIX)
-          // slug "clube" (qualquer outro) → assinatura mensal recorrente
-          const fnName = slug === "clube-anual" ? "create-vip-annual-checkout" : "create-vip-checkout";
+          const planKey = slug === "clube-anual" ? "annual" : "monthly";
           try {
-            const { data, error } = await supabase.functions.invoke(fnName);
+            const { data, error } = await supabase.functions.invoke("create-mp-subscription", {
+              body: { plan: planKey },
+            });
             if (error) throw error;
             if (!data?.url) throw new Error("URL do checkout não retornada");
             window.location.href = data.url;
