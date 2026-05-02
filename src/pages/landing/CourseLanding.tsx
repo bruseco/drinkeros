@@ -142,6 +142,14 @@ export interface CourseLandingProps {
   offerSummary?: string;
 
   whatsappPhone?: string; // default: 5548991601025
+
+  /** Imagem extra (PNG transparente) que aparece atrás do logo no hero,
+   * deslocada para a direita — ex.: cutout do professor "saindo" do logo. */
+  heroOverlayImageSrc?: string;
+  /** Classe Tailwind extra para o overlay (posição/tamanho). */
+  heroOverlayClassName?: string;
+  /** Sobrescreve a rota de checkout. Default: `/checkout/course/${slug}`. */
+  checkoutPath?: string;
 }
 
 const CourseLanding: React.FC<CourseLandingProps> = ({
@@ -180,6 +188,9 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   aboutInstructor,
   offerSummary,
   titleFontClassName = '',
+  heroOverlayImageSrc,
+  heroOverlayClassName,
+  checkoutPath,
 }) => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -242,7 +253,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const handleBuy = async () => {
     setCheckoutLoading(true);
     try {
-      window.location.href = `/checkout/course/${slug}`;
+      window.location.href = checkoutPath ?? `/checkout/course/${slug}`;
       return;
     } catch (err: any) {
       toast({
@@ -418,10 +429,21 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                       'radial-gradient(circle, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0) 75%)',
                   }}
                 />
+                {heroOverlayImageSrc && (
+                  <img
+                    src={heroOverlayImageSrc}
+                    alt=""
+                    aria-hidden
+                    className={
+                      heroOverlayClassName ??
+                      'pointer-events-none select-none absolute z-0 left-[58%] sm:left-[60%] top-1/2 -translate-y-1/2 h-[110%] sm:h-[120%] w-auto object-contain drop-shadow-[0_8px_24px_rgba(0,0,0,0.6)]'
+                    }
+                  />
+                )}
                 <img
                   src={logoSrc}
                   alt={brand}
-                  className={`relative w-auto object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)] ${logoClassName ?? 'h-20 sm:h-28'}`}
+                  className={`relative z-10 w-auto object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.5)] ${logoClassName ?? 'h-20 sm:h-28'}`}
                 />
               </div>
             )
