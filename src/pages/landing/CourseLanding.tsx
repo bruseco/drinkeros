@@ -196,6 +196,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   heroOverlayClassName,
   checkoutPath,
   hideVipBanner = false,
+  disableVipDiscount = false,
 }) => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
