@@ -81,6 +81,7 @@ import UserCourseModules from "./pages/user/UserCourseModules";
 import UserCombos from "./pages/user/UserCombos";
 import UserComboDetail from "./pages/user/UserComboDetail";
 import UserProfile from "./pages/user/UserProfile";
+import UserClubeManage from "./pages/user/UserClubeManage";
 import UserRecipeDetail from "./pages/user/UserRecipeDetail";
 import UserBatalha from "./pages/user/UserBatalha";
 import UserBatalhaNew from "./pages/user/UserBatalhaNew";
@@ -201,6 +202,7 @@ const App = () => (
               <Route path="combos" element={<UserCombos />} />
               <Route path="combo/:comboId" element={<UserComboDetail />} />
               <Route path="perfil" element={<UserProfile />} />
+              <Route path="clube/gerenciar" element={<UserClubeManage />} />
               <Route path="batalha" element={<Navigate to="/app/receitas" replace />} />
               <Route path="batalha/*" element={<Navigate to="/app/receitas" replace />} />
             </Route>
