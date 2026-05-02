@@ -203,7 +203,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const { data: course } = useCourseBySlug(slug);
   const { data: userPlan } = useUserPlan();
-  const isVip = !!userPlan?.isVip;
+  const isVip = !disableVipDiscount && !!userPlan?.isVip;
 
   useEffect(() => {
     const status = searchParams.get('checkout');
