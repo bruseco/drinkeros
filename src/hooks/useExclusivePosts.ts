@@ -135,12 +135,9 @@ export const useExclusivePostsPaginated = ({
 
         // Filtra drinks sazonais fora de época (Natal, Halloween, Carnaval,
         // Festa Junina, Verão, Inverno só aparecem dentro de suas janelas).
-        // Se o usuário escolheu explicitamente uma categoria sazonal via filtro,
-        // respeitamos a escolha e não filtramos.
-        const isFilteringSeasonal = !!characteristicFilter && [
-          'Natal', 'Halloween', 'Carnaval', 'Festa Junina', 'Verão', 'Inverno',
-        ].includes(characteristicFilter);
-        const inSeason = isFilteringSeasonal
+        // Quando o usuário aplica QUALQUER filtro de característica, liberamos
+        // todas as tags (busca também libera, mas vai por outro branch via RPC).
+        const inSeason = characteristicFilter
           ? ((allRows || []) as { id: string; characteristics: string[] | null }[])
           : ((allRows || []) as { id: string; characteristics: string[] | null }[]).filter(
               (r) => !isOutOfSeason(r.characteristics)
