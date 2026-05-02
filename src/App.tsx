@@ -81,6 +81,7 @@ import UserCourseModules from "./pages/user/UserCourseModules";
 import UserCombos from "./pages/user/UserCombos";
 import UserComboDetail from "./pages/user/UserComboDetail";
 import UserProfile from "./pages/user/UserProfile";
+import UserClubeManage from "./pages/user/UserClubeManage";
 import UserRecipeDetail from "./pages/user/UserRecipeDetail";
 import UserBatalha from "./pages/user/UserBatalha";
 import UserBatalhaNew from "./pages/user/UserBatalhaNew";
