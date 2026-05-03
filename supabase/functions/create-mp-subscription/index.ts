@@ -1,5 +1,5 @@
-// Cria assinatura recorrente (preapproval) do Clube no Mercado Pago.
-// Retorna init_point para redirecionar o usuário ao checkout do MP.
+// Cria assinatura recorrente (preapproval) do Clube no Mercado Pago
+// usando o token do cartão gerado pelo Brick — checkout transparente, sem redirect.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
@@ -10,11 +10,10 @@ const corsHeaders = {
 
 const MP_API = "https://api.mercadopago.com";
 
-// Planos do Clube
-const PLANS = {
-  monthly: { amount: 9.9, frequency: 1, frequency_type: "months", reason: "Clube dos Drinkeros · Mensal" },
-  annual:  { amount: 69,  frequency: 12, frequency_type: "months", reason: "Clube dos Drinkeros · Anual" },
-} as const;
+const PLANS: Record<string, { amount: number; frequency: number; reason: string }> = {
+  "clube-anual": { amount: 69, frequency: 12, reason: "Clube dos Drinkeros · Anual" },
+  clube:         { amount: 9.9, frequency: 1,  reason: "Clube dos Drinkeros · Mensal" },
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -24,14 +23,10 @@ serve(async (req) => {
     if (!mpToken) throw new Error("MERCADOPAGO_ACCESS_TOKEN not configured");
 
     const body = await req.json().catch(() => ({}));
-    const planKey = (body?.plan === "annual" ? "annual" : "monthly") as keyof typeof PLANS;
-    const plan = PLANS[planKey];
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      { auth: { persistSession: false } },
-    );
+    const slug = (body?.slug as string) || "clube-anual";
+    const plan = PLANS[slug] || PLANS["clube-anual"];
+    const cardTokenId = body?.card_token_id as string | undefined;
+    if (!cardTokenId) throw new Error("Token do cartão ausente");
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Faça login para assinar");
@@ -43,21 +38,22 @@ serve(async (req) => {
     const user = userData.user;
     if (!user?.email) throw new Error("Usuário sem email");
 
-    const origin = req.headers.get("origin") || "https://drinkeros.com";
-    const externalRef = `club:${user.id}:${planKey}:${Date.now()}`;
+    const payerEmail = (body?.payer_email as string | undefined) || user.email;
+    const externalRef = `club:${user.id}:${slug}:${Date.now()}`;
 
-    const preapprovalBody = {
+    const preapprovalBody: Record<string, unknown> = {
       reason: plan.reason,
       external_reference: externalRef,
-      payer_email: user.email,
-      back_url: `${origin}/clube?clube=success`,
+      payer_email: payerEmail,
+      card_token_id: cardTokenId,
       auto_recurring: {
         frequency: plan.frequency,
-        frequency_type: plan.frequency_type,
+        frequency_type: "months",
         transaction_amount: plan.amount,
         currency_id: "BRL",
       },
-      status: "pending",
+      back_url: "https://drinkeros.com/clube?clube=success",
+      status: "authorized",
     };
 
     const resp = await fetch(`${MP_API}/preapproval`, {
@@ -65,6 +61,7 @@ serve(async (req) => {
       headers: {
         "Authorization": `Bearer ${mpToken}`,
         "Content-Type": "application/json",
+        "X-Idempotency-Key": externalRef,
       },
       body: JSON.stringify(preapprovalBody),
     });
@@ -78,7 +75,12 @@ serve(async (req) => {
     console.log("[create-mp-subscription] created:", { id: data.id, status: data.status });
 
     return new Response(
-      JSON.stringify({ url: data.init_point, id: data.id, status: data.status }),
+      JSON.stringify({
+        id: data.id,
+        status: data.status, // "authorized" quando aprovado, "pending" caso contrário
+        status_detail: data?.status_detail,
+        next_payment_date: data?.next_payment_date,
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
