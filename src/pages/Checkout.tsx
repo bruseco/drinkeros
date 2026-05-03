@@ -15,13 +15,23 @@ const TABLE_MAP: Record<Exclude<ProductType, "club">, string> = {
   package: "packages",
 };
 
-const CLUB_PRODUCT: Product = {
-  id: "club",
-  name: "Clube dos Drinkeros · Anual",
-  slug: "clube",
-  price: 69,
-  cover_image_url: null,
-  description: "Acesso anual às receitas exclusivas e benefícios do Clube.",
+const CLUB_PRODUCTS: Record<string, Product> = {
+  "clube-anual": {
+    id: "club",
+    name: "Clube dos Drinkeros · Anual",
+    slug: "clube-anual",
+    price: 69,
+    cover_image_url: null,
+    description: "Acesso por 12 meses às receitas exclusivas e benefícios do Clube.",
+  },
+  clube: {
+    id: "club",
+    name: "Clube dos Drinkeros · Mensal",
+    slug: "clube",
+    price: 9.9,
+    cover_image_url: null,
+    description: "Acesso por 30 dias às receitas exclusivas e benefícios do Clube.",
+  },
 };
 
 interface Product {
