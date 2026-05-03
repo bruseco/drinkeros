@@ -455,7 +455,7 @@ const VipLanding: React.FC = () => {
               )}
             </Button>
             <p className="text-center text-[11px] text-purple-300 mt-2">
-              ✓ Cancele quando quiser!
+              ✓ Acesso por 12 meses · sem renovação automática
             </p>
 
             <div className="flex items-center justify-center gap-2 mt-4 flex-nowrap">
