@@ -232,9 +232,10 @@ serve(async (req) => {
     }
 
     if (productType === "club") {
-      await grantClubAccess(supabase, userId, payment, String(paymentId));
+      const periodDays = Number(metadata.access_period_days) || 365;
+      await grantClubAccess(supabase, userId, payment, String(paymentId), periodDays);
 
-      return new Response(JSON.stringify({ ok: true, granted: true, club: true }), {
+      return new Response(JSON.stringify({ ok: true, granted: true, club: true, period_days: periodDays }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
