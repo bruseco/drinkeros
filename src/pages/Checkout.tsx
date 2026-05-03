@@ -70,8 +70,12 @@ export default function Checkout() {
 
   const isClub = productType === "club";
 
-  // 1. Carrega Public Key e inicializa MP SDK
+  // 1. Carrega Public Key e inicializa MP SDK (apenas p/ produtos avulsos no MP; Clube agora usa Stripe)
   useEffect(() => {
+    if (isClub) {
+      setPublicKeyReady(true);
+      return;
+    }
     (async () => {
       try {
         const { data, error } = await supabase.functions.invoke("get-mp-public-key");
@@ -86,7 +90,24 @@ export default function Checkout() {
         toast.error("Erro ao iniciar checkout", { description: err.message });
       }
     })();
-  }, []);
+  }, [isClub]);
+
+  // Clube → redireciona para Stripe Checkout
+  const handleClubCheckout = async () => {
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-club-checkout", {
+        body: { method: clubMethod },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (!data?.url) throw new Error("URL de checkout não retornada");
+      window.location.href = data.url;
+    } catch (err: any) {
+      toast.error("Erro ao iniciar checkout", { description: err.message });
+      setSubmitting(false);
+    }
+  };
 
   // 2. Carrega produto + checa VIP
   useEffect(() => {
