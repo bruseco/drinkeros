@@ -125,7 +125,7 @@ const VipLanding: React.FC = () => {
     }
   }, [searchParams, setSearchParams, queryClient]);
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = async (chosenMethod: 'card' | 'pix' = 'card') => {
     if (!user) {
       navigate('/signup?redirect=/clube');
       return;
@@ -133,7 +133,7 @@ const VipLanding: React.FC = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-club-checkout', {
-        body: { method },
+        body: { method: chosenMethod },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -455,26 +455,8 @@ const VipLanding: React.FC = () => {
               <div className="text-sm text-purple-300">por ano · menos de R$ 6/mês</div>
             </div>
 
-            {/* Toggle método de pagamento */}
-            <div className="grid grid-cols-2 gap-2 mb-4 p-1 rounded-xl bg-white/5 border border-white/10">
-              <button
-                type="button"
-                onClick={() => setMethod('card')}
-                className={`rounded-lg py-2.5 text-sm font-bold transition ${method === 'card' ? 'bg-white text-black shadow' : 'text-purple-200 hover:text-white'}`}
-              >
-                Cartão
-              </button>
-              <button
-                type="button"
-                onClick={() => setMethod('pix')}
-                className={`rounded-lg py-2.5 text-sm font-bold transition ${method === 'pix' ? 'bg-white text-black shadow' : 'text-purple-200 hover:text-white'}`}
-              >
-                Pix
-              </button>
-            </div>
-
             <Button
-              onClick={handleSubscribe}
+              onClick={() => handleSubscribe('card')}
               disabled={loading}
               className="viplanding-gold-btn w-full h-14 text-base font-bold border-0 hover:text-black"
             >
@@ -485,10 +467,18 @@ const VipLanding: React.FC = () => {
               )}
             </Button>
             <p className="text-center text-[11px] text-purple-300 mt-2">
-              {method === 'card'
-                ? '✓ Renovação automática anual · cancele quando quiser'
-                : '✓ Pagamento único · 12 meses de acesso'}
+              ✓ Renovação automática anual · cancele quando quiser
             </p>
+            <div className="text-center mt-3">
+              <button
+                type="button"
+                onClick={() => handleSubscribe('pix')}
+                disabled={loading}
+                className="text-xs text-purple-200 underline underline-offset-4 hover:text-white transition disabled:opacity-50"
+              >
+                Prefiro pagar via Pix (pagamento único · 12 meses)
+              </button>
+            </div>
 
             <div className="flex items-center justify-center gap-2 mt-4 flex-nowrap">
               <span className="inline-flex items-center justify-center h-7 px-1.5 rounded-md bg-white shadow-sm"><img src={payVisa} alt="Visa" className="h-4 w-auto object-contain" /></span>
