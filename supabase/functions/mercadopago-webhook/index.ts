@@ -17,9 +17,9 @@ const ACCESS_TABLE_MAP: Record<string, { table: string; fk: string }> = {
   package: { table: "user_packages", fk: "package_id" },
 };
 
-async function grantClubAccess(supabase: any, userId: string, payment: any, paymentId: string) {
+async function grantClubAccess(supabase: any, userId: string, payment: any, paymentId: string, periodDays: number) {
   const now = new Date();
-  const periodEnd = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+  const periodEnd = new Date(now.getTime() + periodDays * 24 * 60 * 60 * 1000);
 
   const { data: existingPayment } = await supabase
     .from("vip_payments")
