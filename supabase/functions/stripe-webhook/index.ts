@@ -160,8 +160,11 @@ serve(async (req) => {
         }
 
         // Caso: Plano Anual à vista (one-time payment, NÃO recorrente)
-        // Concede 1 ano de VIP e registra em vip_payments.
-        if (session.mode === "payment" && meta.plan_kind === "vip_annual_one_time") {
+        // Cobre tanto o legacy "vip_annual_one_time" quanto o novo "club_pix_annual".
+        if (
+          session.mode === "payment" &&
+          (meta.plan_kind === "vip_annual_one_time" || meta.plan_kind === "club_pix_annual")
+        ) {
           const email = session.customer_details?.email ?? session.customer_email ?? null;
           let userId: string | null = await resolveUserId({
             customerId,
@@ -187,18 +190,19 @@ serve(async (req) => {
           // Reset de lembretes do ciclo anterior (vai entrar em ciclo novo)
           await supabase.from("vip_renewal_reminders_sent").delete().eq("user_id", userId);
 
+          const isClubPix = meta.plan_kind === "club_pix_annual";
           await supabase.from("vip_payments").upsert({
             user_id: userId,
             amount: (session.amount_total ?? 0) / 100,
             currency: (session.currency ?? "brl").toUpperCase(),
             status: "paid",
-            payment_method: "annual_one_time",
+            payment_method: isClubPix ? "pix_annual" : "annual_one_time",
             stripe_customer_id: customerId,
             stripe_payment_intent_id: (session.payment_intent as string) || null,
             paid_at: new Date().toISOString(),
             period_start: new Date().toISOString(),
             period_end: new Date(oneYearFromNow * 1000).toISOString(),
-            metadata: { event_id: event.id, session_id: session.id, plan_kind: "vip_annual_one_time" },
+            metadata: { event_id: event.id, session_id: session.id, plan_kind: meta.plan_kind },
           }, { onConflict: "stripe_payment_intent_id" });
 
           await upsertVipPlan(userId, oneYearFromNow);
