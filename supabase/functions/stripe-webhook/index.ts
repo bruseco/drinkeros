@@ -339,6 +339,31 @@ serve(async (req) => {
           stripe_invoice_id: invoice.id,
           metadata: { event_id: event.id, reason: "payment_failed" },
         });
+
+        // Bloqueia acesso imediatamente: expira o plano agora.
+        const { error: expireErr } = await supabase
+          .from("user_plans")
+          .update({ expires_at: new Date().toISOString() })
+          .eq("user_id", userId);
+        if (expireErr) log("expire-on-failed-error", expireErr);
+
+        // Avisa o cliente por e-mail (template clube-payment-failed).
+        try {
+          const recipient = invoice.customer_email
+            || (await supabase.from("profiles").select("email,full_name").eq("user_id", userId).maybeSingle()).data?.email;
+          const profile = (await supabase.from("profiles").select("full_name").eq("user_id", userId).maybeSingle()).data;
+          if (recipient) {
+            await supabase.functions.invoke("send-transactional-email", {
+              body: {
+                templateName: "clube-payment-failed",
+                recipientEmail: recipient,
+                templateData: { userName: profile?.full_name?.split(" ")[0] || "" },
+              },
+            });
+          }
+        } catch (e) {
+          log("payment-failed-email-error", { error: (e as Error).message });
+        }
         break;
       }
 
