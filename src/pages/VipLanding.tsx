@@ -133,7 +133,7 @@ const VipLanding: React.FC = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-club-checkout', {
-        body: { method: 'card' },
+        body: { method },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
