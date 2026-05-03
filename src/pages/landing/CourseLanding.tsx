@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useUserPlan } from '@/hooks/useUserPlan';
 import drinkerosFooterLogo from '@/assets/logotipo-drinkeros.png';
 import { useCourseBySlug } from '@/hooks/useCourses';
+import { useComboBySlug } from '@/hooks/useCombos';
 import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
 import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
 import VipFloatingBanner from '@/components/landing/VipFloatingBanner';
@@ -202,6 +203,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const [searchParams] = useSearchParams();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const { data: course } = useCourseBySlug(slug);
+  const { data: combo } = useComboBySlug(slug);
   const { data: userPlan } = useUserPlan();
   const isVip = !disableVipDiscount && !!userPlan?.isVip;
 
@@ -251,7 +253,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     return cleanup;
   }, [heroVideoUrl]);
 
-  const dbPrice = (course as any)?.price ? Number((course as any).price) : null;
+  const dbPrice = (course as any)?.price ? Number((course as any).price) : (combo as any)?.price ? Number((combo as any).price) : null;
   const basePrice = dbPrice ?? fallbackPrice;
   const finalPrice = isVip ? applyVipDiscount(basePrice) : basePrice;
   const installments = (finalPrice / 12).toFixed(2).replace('.', ',');

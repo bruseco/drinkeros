@@ -13,7 +13,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, MoreHorizontal, Pencil, Trash2, Loader2, ShoppingBag } from 'lucide-react';
+import { Plus, MoreHorizontal, Pencil, Trash2, Loader2, ShoppingBag, ExternalLink } from 'lucide-react';
 
 const AdminProdutos: React.FC = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -63,6 +63,7 @@ const AdminProdutos: React.FC = () => {
               <TableRow>
                 <TableHead>Pacote</TableHead>
                 <TableHead>Preço</TableHead>
+                <TableHead>Página</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-12"></TableHead>
               </TableRow>
@@ -92,6 +93,20 @@ const AdminProdutos: React.FC = () => {
                       <span className="text-sm font-medium">R$ {Number((produto as any).price).toFixed(2)}</span>
                     ) : produto.is_free ? (
                       <span className="text-sm text-muted-foreground">Gratuito</span>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {produto.slug ? (
+                      <a
+                        href={`/${produto.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                      >
+                        /{produto.slug} <ExternalLink className="h-3 w-3" />
+                      </a>
                     ) : (
                       <span className="text-sm text-muted-foreground">-</span>
                     )}
