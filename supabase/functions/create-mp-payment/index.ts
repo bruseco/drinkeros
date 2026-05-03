@@ -17,13 +17,25 @@ const TABLE_MAP: Record<Exclude<ProductType, "club">, string> = {
   package: "packages",
 };
 
-const CLUB_PRODUCT = {
-  id: "club",
-  name: "Clube dos Drinkeros · Anual",
-  slug: "clube",
-  price: 69,
-  cover_image_url: null,
-  description: "Acesso anual às receitas exclusivas e benefícios do Clube.",
+const CLUB_PRODUCTS: Record<string, { id: string; name: string; slug: string; price: number; cover_image_url: null; description: string; period_days: number }> = {
+  "clube-anual": {
+    id: "club",
+    name: "Clube dos Drinkeros · Anual",
+    slug: "clube-anual",
+    price: 69,
+    cover_image_url: null,
+    description: "Acesso por 12 meses ao Clube.",
+    period_days: 365,
+  },
+  clube: {
+    id: "club",
+    name: "Clube dos Drinkeros · Mensal",
+    slug: "clube",
+    price: 9.9,
+    cover_image_url: null,
+    description: "Acesso por 30 dias ao Clube.",
+    period_days: 30,
+  },
 };
 
 serve(async (req) => {
