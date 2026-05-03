@@ -67,6 +67,22 @@ export const useCombos = (activeOnly = false) => {
   });
 };
 
+export const useComboBySlug = (slug: string) => {
+  return useQuery({
+    queryKey: ['combos', 'slug', slug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('combos')
+        .select('*')
+        .eq('slug', slug)
+        .maybeSingle();
+      if (error) throw error;
+      return data as Combo | null;
+    },
+    enabled: !!slug,
+  });
+};
+
 export const useCombo = (id: string) => {
   return useQuery({
     queryKey: ['combos', id],
