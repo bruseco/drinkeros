@@ -130,7 +130,18 @@ const VipLanding: React.FC = () => {
       return;
     }
     setLoading(true);
-    navigate('/checkout/club/clube-anual');
+    try {
+      const { data, error } = await supabase.functions.invoke('create-club-checkout', {
+        body: { method: 'card' },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (!data?.url) throw new Error('URL de checkout não retornada');
+      window.location.href = data.url;
+    } catch (err: any) {
+      toast.error('Erro ao iniciar checkout', { description: err.message });
+      setLoading(false);
+    }
   };
 
   // Esconde a página de quem já é sócio do Clube, tem acesso vitalício
