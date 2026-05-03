@@ -11,7 +11,7 @@ const corsHeaders = {
 };
 
 const PRICE_CARD = "price_1TOEs9GlXZFgg9244Xs7Bloe"; // R$ 69 / ano (recurring) — prod_UMyp07z2Rx5wUF
-const PRICE_PIX = "price_1TSyMzGlXZFgg9249bdDQHbB";  // R$ 69 (one-time)
+const PRICE_PIX = "price_1TT4AHGlXZFgg924s0NVsKIV";  // R$ 69 (one-time, live) — prod_UMyp07z2Rx5wUF
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
