@@ -10,7 +10,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const PRICE_CARD = "price_1TSyLOGlXZFgg924porFlxNf"; // R$ 69 / ano (recurring)
+const PRICE_CARD = "price_1TOEs9GlXZFgg9244Xs7Bloe"; // R$ 69 / ano (recurring) — prod_UMyp07z2Rx5wUF
 const PRICE_PIX = "price_1TSyMzGlXZFgg9249bdDQHbB";  // R$ 69 (one-time)
 
 serve(async (req) => {
