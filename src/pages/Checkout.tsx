@@ -15,13 +15,23 @@ const TABLE_MAP: Record<Exclude<ProductType, "club">, string> = {
   package: "packages",
 };
 
-const CLUB_PRODUCT: Product = {
-  id: "club",
-  name: "Clube dos Drinkeros · Anual",
-  slug: "clube",
-  price: 69,
-  cover_image_url: null,
-  description: "Acesso anual às receitas exclusivas e benefícios do Clube.",
+const CLUB_PRODUCTS: Record<string, Product> = {
+  "clube-anual": {
+    id: "club",
+    name: "Clube dos Drinkeros · Anual",
+    slug: "clube-anual",
+    price: 69,
+    cover_image_url: null,
+    description: "Acesso por 12 meses às receitas exclusivas e benefícios do Clube.",
+  },
+  clube: {
+    id: "club",
+    name: "Clube dos Drinkeros · Mensal",
+    slug: "clube",
+    price: 9.9,
+    cover_image_url: null,
+    description: "Acesso por 30 dias às receitas exclusivas e benefícios do Clube.",
+  },
 };
 
 interface Product {
@@ -85,23 +95,17 @@ export default function Checkout() {
         const { data: { user } } = await supabase.auth.getUser();
 
         if (productType === "club") {
-          // Assinatura recorrente do Clube via Mercado Pago (Preapproval).
+          // Checkout transparente: usa o mesmo Brick (cartão + Pix).
+          // Não é assinatura recorrente — é pagamento único que libera 30/365 dias.
           if (!user) {
             navigate(`/signup?redirect=/checkout/club/${slug}`);
             return;
           }
-          const planKey = slug === "clube-anual" ? "annual" : "monthly";
-          try {
-            const { data, error } = await supabase.functions.invoke("create-mp-subscription", {
-              body: { plan: planKey },
-            });
-            if (error) throw error;
-            if (!data?.url) throw new Error("URL do checkout não retornada");
-            window.location.href = data.url;
-          } catch (err: any) {
-            toast.error("Erro ao iniciar assinatura", { description: err.message });
-            navigate("/clube");
-          }
+          const clubProd = CLUB_PRODUCTS[slug as string] || CLUB_PRODUCTS["clube-anual"];
+          setProduct(clubProd);
+          setPayerEmail(user.email ?? "");
+          setIsVip(false);
+          setLoading(false);
           return;
         }
 

@@ -17,13 +17,25 @@ const TABLE_MAP: Record<Exclude<ProductType, "club">, string> = {
   package: "packages",
 };
 
-const CLUB_PRODUCT = {
-  id: "club",
-  name: "Clube dos Drinkeros · Anual",
-  slug: "clube",
-  price: 69,
-  cover_image_url: null,
-  description: "Acesso anual às receitas exclusivas e benefícios do Clube.",
+const CLUB_PRODUCTS: Record<string, { id: string; name: string; slug: string; price: number; cover_image_url: null; description: string; period_days: number }> = {
+  "clube-anual": {
+    id: "club",
+    name: "Clube dos Drinkeros · Anual",
+    slug: "clube-anual",
+    price: 69,
+    cover_image_url: null,
+    description: "Acesso por 12 meses ao Clube.",
+    period_days: 365,
+  },
+  clube: {
+    id: "club",
+    name: "Clube dos Drinkeros · Mensal",
+    slug: "clube",
+    price: 9.9,
+    cover_image_url: null,
+    description: "Acesso por 30 dias ao Clube.",
+    period_days: 30,
+  },
 };
 
 serve(async (req) => {
@@ -52,8 +64,13 @@ serve(async (req) => {
       { auth: { persistSession: false } },
     );
 
-    let product = CLUB_PRODUCT;
-    if (product_type !== "club") {
+    let product: any = null;
+    let clubPeriodDays = 0;
+    if (product_type === "club") {
+      const clubProd = CLUB_PRODUCTS[slug] || CLUB_PRODUCTS["clube-anual"];
+      product = clubProd;
+      clubPeriodDays = clubProd.period_days;
+    } else {
       const table = TABLE_MAP[product_type as Exclude<ProductType, "club">];
       const { data: productData, error: productErr } = await supabase
         .from(table)
@@ -120,7 +137,7 @@ serve(async (req) => {
         user_id: userId || "",
         vip_discount_applied: isVip ? "true" : "false",
         vip_discount_percent: isVip ? String(VIP_DISCOUNT_PERCENT) : "0",
-        access_period_days: product_type === "club" ? "365" : "",
+        access_period_days: product_type === "club" ? String(clubPeriodDays) : "",
       },
       payer: {
         email: payerEmail,

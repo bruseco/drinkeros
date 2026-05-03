@@ -17,9 +17,9 @@ const ACCESS_TABLE_MAP: Record<string, { table: string; fk: string }> = {
   package: { table: "user_packages", fk: "package_id" },
 };
 
-async function grantClubAccess(supabase: any, userId: string, payment: any, paymentId: string) {
+async function grantClubAccess(supabase: any, userId: string, payment: any, paymentId: string, periodDays: number) {
   const now = new Date();
-  const periodEnd = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+  const periodEnd = new Date(now.getTime() + periodDays * 24 * 60 * 60 * 1000);
 
   const { data: existingPayment } = await supabase
     .from("vip_payments")
@@ -232,9 +232,10 @@ serve(async (req) => {
     }
 
     if (productType === "club") {
-      await grantClubAccess(supabase, userId, payment, String(paymentId));
+      const periodDays = Number(metadata.access_period_days) || 365;
+      await grantClubAccess(supabase, userId, payment, String(paymentId), periodDays);
 
-      return new Response(JSON.stringify({ ok: true, granted: true, club: true }), {
+      return new Response(JSON.stringify({ ok: true, granted: true, club: true, period_days: periodDays }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
