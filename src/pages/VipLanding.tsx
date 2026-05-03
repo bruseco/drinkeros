@@ -130,15 +130,6 @@ const VipLanding: React.FC = () => {
       return;
     }
     setLoading(true);
-    navigate('/checkout/club/clube');
-  };
-
-  const handleAnnualPix = async () => {
-    if (!user) {
-      navigate('/signup?redirect=/clube');
-      return;
-    }
-    setLoading(true);
     navigate('/checkout/club/clube-anual');
   };
 
