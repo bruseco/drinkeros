@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { initMercadoPago, Payment } from "@mercadopago/sdk-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ShieldCheck, ArrowLeft, CheckCircle2, Copy } from "lucide-react";
+import { Loader2, ShieldCheck, ArrowLeft, CheckCircle2, Copy, CreditCard, QrCode, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import drinkerosLogo from "@/assets/logotipo-drinkeros.png";
+
+type ClubMethod = "card" | "pix";
 
 type ProductType = "course" | "ebook" | "combo" | "package" | "club";
 
