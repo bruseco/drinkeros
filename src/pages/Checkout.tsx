@@ -66,6 +66,9 @@ export default function Checkout() {
   const [pixPaymentId, setPixPaymentId] = useState<string | null>(null);
   const [paid, setPaid] = useState(false);
   const [payerEmail, setPayerEmail] = useState<string | null>(null);
+  const [clubMethod, setClubMethod] = useState<ClubMethod>("card");
+
+  const isClub = productType === "club";
 
   // 1. Carrega Public Key e inicializa MP SDK
   useEffect(() => {
@@ -97,8 +100,6 @@ export default function Checkout() {
         const { data: { user } } = await supabase.auth.getUser();
 
         if (productType === "club") {
-          // Checkout transparente: usa o mesmo Brick (cartão + Pix).
-          // Não é assinatura recorrente — é pagamento único que libera 30/365 dias.
           if (!user) {
             navigate(`/signup?redirect=/checkout/club/${slug}`);
             return;
@@ -143,8 +144,9 @@ export default function Checkout() {
 
   const finalPrice = useMemo(() => {
     if (!product) return 0;
+    if (isClub) return Number(product.price);
     return isVip ? Math.round(Number(product.price) * 0.2 * 100) / 100 : Number(product.price);
-  }, [product, isVip]);
+  }, [product, isVip, isClub]);
 
   // 3. Polling do status do Pix
   useEffect(() => {
@@ -159,17 +161,43 @@ export default function Checkout() {
         if (j.status === "approved") {
           setPaid(true);
           clearInterval(interval);
-          setTimeout(() => navigate(productType === "club" ? "/clube?clube=success" : `/${product?.slug}?checkout=success`), 2000);
+          setTimeout(() => navigate(isClub ? "/clube?clube=success" : `/${product?.slug}?checkout=success`), 2000);
         }
       } catch (_) { /* ignore */ }
     }, 4000);
     return () => clearInterval(interval);
-  }, [pixPaymentId, paid, navigate, product, productType]);
+  }, [pixPaymentId, paid, navigate, product, isClub]);
 
   const onSubmit = async (formData: any) => {
     if (!product) return;
     setSubmitting(true);
     try {
+      // Cartão no Clube → cria assinatura recorrente (preapproval) com card_token_id
+      if (isClub && clubMethod === "card" && formData?.token) {
+        const { data, error } = await supabase.functions.invoke("create-mp-subscription", {
+          body: {
+            slug: product.slug,
+            card_token_id: formData.token,
+            payer_email: formData?.payer?.email || payerEmail,
+            identification: formData?.payer?.identification,
+          },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        if (data?.status === "authorized") {
+          setPaid(true);
+          toast.success("Assinatura ativada! Renovação automática anual.");
+          setTimeout(() => navigate("/clube?clube=success"), 1500);
+        } else if (data?.status === "pending") {
+          toast.info("Assinatura em análise. Você receberá a confirmação em breve.");
+          setTimeout(() => navigate("/clube?clube=pending"), 1800);
+        } else {
+          toast.error("Não foi possível ativar a assinatura", { description: data?.status_detail || "Tente outro cartão." });
+        }
+        return;
+      }
+
+      // Pix (Clube ou produto avulso) ou Cartão de produto avulso → pagamento único
       const { data, error } = await supabase.functions.invoke("create-mp-payment", {
         body: { product_type: productType, slug: product.slug, formData },
       });
@@ -182,10 +210,10 @@ export default function Checkout() {
       } else if (data.status === "approved") {
         setPaid(true);
         toast.success("Pagamento aprovado!");
-        setTimeout(() => navigate(productType === "club" ? "/clube?clube=success" : `/${product.slug}?checkout=success`), 1500);
+        setTimeout(() => navigate(isClub ? "/clube?clube=success" : `/${product.slug}?checkout=success`), 1500);
       } else if (data.status === "in_process" || data.status === "pending") {
         toast.info("Pagamento em análise. Você receberá uma confirmação em breve.");
-        setTimeout(() => navigate(productType === "club" ? "/clube?clube=pending" : `/${product.slug}?checkout=pending`), 2000);
+        setTimeout(() => navigate(isClub ? "/clube?clube=pending" : `/${product.slug}?checkout=pending`), 2000);
       } else {
         toast.error("Pagamento recusado", { description: data.status_detail || "Tente outro cartão." });
       }
@@ -208,10 +236,9 @@ export default function Checkout() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Header */}
       <header className="border-b border-white/10 bg-black/80 backdrop-blur sticky top-0 z-20">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to={productType === "club" ? "/clube" : `/${product.slug}`} className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
+          <Link to={isClub ? "/clube" : `/${product.slug}`} className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
           <img src={drinkerosLogo} alt="Drinkeros" className="h-7 w-auto opacity-90" />
@@ -223,65 +250,113 @@ export default function Checkout() {
       </header>
 
       <div className="max-w-5xl mx-auto px-4 py-6 grid md:grid-cols-[1fr_380px] gap-6">
-        {/* Coluna esquerda - Pagamento */}
         <div>
           <h1 className="text-xl font-semibold mb-1">Finalizar compra</h1>
-          <p className="text-sm text-white/60 mb-5">Escolha cartão ou Pix abaixo. Tudo dentro da Drinkeros.</p>
+          <p className="text-sm text-white/60 mb-5">
+            {isClub
+              ? "Escolha cartão (renovação automática) ou Pix (1 ano sem renovação)."
+              : "Escolha cartão ou Pix abaixo. Tudo dentro da Drinkeros."}
+          </p>
 
           {paid ? (
             <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-8 text-center">
               <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
-              <h2 className="text-lg font-semibold mb-1">Pagamento aprovado!</h2>
+              <h2 className="text-lg font-semibold mb-1">Tudo certo!</h2>
               <p className="text-sm text-white/70">Liberando seu acesso...</p>
             </div>
           ) : pixResult ? (
             <PixDisplay pix={pixResult} amount={finalPrice} />
           ) : (
-            <div className="bg-white rounded-xl overflow-hidden p-2 sm:p-4 text-black">
-              {payerEmail !== null ? (
-                <Payment
-                  key={`brick-${finalPrice}`}
-                  initialization={{
-                    amount: finalPrice,
-                    ...(payerEmail ? { payer: { email: payerEmail } } : {}),
-                  }}
-                  customization={{
-                    paymentMethods: {
-                      creditCard: "all",
-                      bankTransfer: ["pix"],
-                      maxInstallments: 12,
-                      minInstallments: 1,
-                    },
-                    visual: {
-                      style: { theme: "default" },
-                      hideFormTitle: true,
-                    },
-                  }}
-                  onReady={() => {
-                    console.log("[MP Brick] ready", { amount: finalPrice, maxInstallments: 12 });
-                  }}
-                  onSubmit={async ({ formData }) => {
-                    await onSubmit(formData);
-                  }}
-                  onError={(err) => {
-                    console.error("[Brick error]", err);
-                  }}
-                />
-              ) : (
-                <div className="flex items-center justify-center py-8 text-black/60 text-sm gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" /> Carregando pagamento...
+            <>
+              {isClub && (
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => setClubMethod("card")}
+                    className={`rounded-xl border p-3 text-left transition ${
+                      clubMethod === "card"
+                        ? "border-primary bg-primary/10"
+                        : "border-white/10 bg-white/5 hover:border-white/20"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <CreditCard className="w-4 h-4" />
+                      <span className="text-sm font-medium">Cartão</span>
+                      <span className="ml-auto text-[10px] uppercase tracking-wider bg-primary/20 text-primary px-1.5 py-0.5 rounded">
+                        Recomendado
+                      </span>
+                    </div>
+                    <p className="text-xs text-white/60 flex items-center gap-1">
+                      <RefreshCw className="w-3 h-3" /> Renovação automática anual
+                    </p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setClubMethod("pix")}
+                    className={`rounded-xl border p-3 text-left transition ${
+                      clubMethod === "pix"
+                        ? "border-primary bg-primary/10"
+                        : "border-white/10 bg-white/5 hover:border-white/20"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <QrCode className="w-4 h-4" />
+                      <span className="text-sm font-medium">Pix</span>
+                    </div>
+                    <p className="text-xs text-white/60">Acesso por 12 meses · sem renovação</p>
+                  </button>
                 </div>
               )}
-              {submitting && (
-                <div className="flex items-center justify-center gap-2 py-3 text-sm text-black/70">
-                  <Loader2 className="w-4 h-4 animate-spin" /> Processando pagamento...
-                </div>
-              )}
-            </div>
+
+              <div className="bg-white rounded-xl overflow-hidden p-2 sm:p-4 text-black">
+                {payerEmail !== null ? (
+                  <Payment
+                    key={`brick-${finalPrice}-${isClub ? clubMethod : "all"}`}
+                    initialization={{
+                      amount: finalPrice,
+                      ...(payerEmail ? { payer: { email: payerEmail } } : {}),
+                    }}
+                    customization={{
+                      paymentMethods: isClub
+                        ? clubMethod === "card"
+                          ? { creditCard: "all", maxInstallments: 1, minInstallments: 1 }
+                          : { bankTransfer: ["pix"] }
+                        : {
+                            creditCard: "all",
+                            bankTransfer: ["pix"],
+                            maxInstallments: 12,
+                            minInstallments: 1,
+                          },
+                      visual: {
+                        style: { theme: "default" },
+                        hideFormTitle: true,
+                      },
+                    }}
+                    onReady={() => {
+                      console.log("[MP Brick] ready", { amount: finalPrice, method: isClub ? clubMethod : "all" });
+                    }}
+                    onSubmit={async ({ formData }) => {
+                      await onSubmit(formData);
+                    }}
+                    onError={(err) => {
+                      console.error("[Brick error]", err);
+                    }}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center py-8 text-black/60 text-sm gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Carregando pagamento...
+                  </div>
+                )}
+                {submitting && (
+                  <div className="flex items-center justify-center gap-2 py-3 text-sm text-black/70">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Processando...
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </div>
 
-        {/* Coluna direita - Resumo */}
         <aside className="bg-white/5 border border-white/10 rounded-xl p-5 h-fit md:sticky md:top-20">
           <p className="text-xs uppercase tracking-wider text-white/50 mb-3">Resumo do pedido</p>
           <div className="flex gap-3 mb-4">
@@ -303,20 +378,27 @@ export default function Checkout() {
           <div className="border-t border-white/10 pt-4 space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-white/60">Subtotal</span>
-              <span className={isVip ? "line-through text-white/40" : ""}>
+              <span className={isVip && !isClub ? "line-through text-white/40" : ""}>
                 R$ {Number(product.price).toFixed(2).replace(".", ",")}
               </span>
             </div>
-            {isVip && (
+            {isVip && !isClub && (
               <div className="flex justify-between text-sm text-primary">
                 <span>Desconto Sócio do Clube (-80%)</span>
                 <span>−R$ {(Number(product.price) - finalPrice).toFixed(2).replace(".", ",")}</span>
               </div>
             )}
             <div className="flex justify-between text-base font-semibold pt-2 border-t border-white/10">
-              <span>Total</span>
+              <span>Total {isClub && clubMethod === "card" ? "/ ano" : ""}</span>
               <span>R$ {finalPrice.toFixed(2).replace(".", ",")}</span>
             </div>
+            {isClub && (
+              <p className="text-[11px] text-white/50 pt-1">
+                {clubMethod === "card"
+                  ? "Cobrança automática a cada 12 meses. Cancele quando quiser."
+                  : "Pagamento único. Avisamos antes do vencimento para renovar."}
+              </p>
+            )}
           </div>
 
           <div className="mt-5 flex items-start gap-2 text-xs text-white/50">
