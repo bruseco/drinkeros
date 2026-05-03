@@ -64,8 +64,13 @@ serve(async (req) => {
       { auth: { persistSession: false } },
     );
 
-    let product = CLUB_PRODUCT;
-    if (product_type !== "club") {
+    let product: any = null;
+    let clubPeriodDays = 0;
+    if (product_type === "club") {
+      const clubProd = CLUB_PRODUCTS[slug] || CLUB_PRODUCTS["clube-anual"];
+      product = clubProd;
+      clubPeriodDays = clubProd.period_days;
+    } else {
       const table = TABLE_MAP[product_type as Exclude<ProductType, "club">];
       const { data: productData, error: productErr } = await supabase
         .from(table)
