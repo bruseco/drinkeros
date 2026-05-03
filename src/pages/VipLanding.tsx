@@ -130,15 +130,6 @@ const VipLanding: React.FC = () => {
       return;
     }
     setLoading(true);
-    navigate('/checkout/club/clube');
-  };
-
-  const handleAnnualPix = async () => {
-    if (!user) {
-      navigate('/signup?redirect=/clube');
-      return;
-    }
-    setLoading(true);
     navigate('/checkout/club/clube-anual');
   };
 
@@ -460,11 +451,11 @@ const VipLanding: React.FC = () => {
               {loading ? (
                 <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Abrindo checkout...</>
               ) : (
-                <><Zap className="mr-2 h-5 w-5" /> Assinar anual recorrente</>
+                <><Zap className="mr-2 h-5 w-5" /> Quero ser Sócio do Clube</>
               )}
             </Button>
             <p className="text-center text-[11px] text-purple-300 mt-2">
-              ✓ Cancele quando quiser!
+              ✓ Acesso por 12 meses · sem renovação automática
             </p>
 
             <div className="flex items-center justify-center gap-2 mt-4 flex-nowrap">
