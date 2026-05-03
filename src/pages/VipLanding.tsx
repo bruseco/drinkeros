@@ -85,6 +85,7 @@ const VipLanding: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [method, setMethod] = useState<'card' | 'pix'>('card');
 
   const handleClose = (e?: React.MouseEvent) => {
     e?.preventDefault();
