@@ -256,7 +256,13 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const dbPrice = (course as any)?.price ? Number((course as any).price) : (combo as any)?.price ? Number((combo as any).price) : null;
   const basePrice = dbPrice ?? fallbackPrice;
   const finalPrice = isVip ? applyVipDiscount(basePrice) : basePrice;
-  const installments = (finalPrice / 12).toFixed(2).replace('.', ',');
+  // Parcelamento com juros do cliente (padrão Hotmart: 1,99% a.m. compostos)
+  const INSTALLMENT_RATE = 0.0199;
+  const INSTALLMENT_COUNT = 12;
+  const installmentValue =
+    (finalPrice * INSTALLMENT_RATE * Math.pow(1 + INSTALLMENT_RATE, INSTALLMENT_COUNT)) /
+    (Math.pow(1 + INSTALLMENT_RATE, INSTALLMENT_COUNT) - 1);
+  const installments = installmentValue.toFixed(2).replace('.', ',');
 
   const handleBuy = async () => {
     setCheckoutLoading(true);
