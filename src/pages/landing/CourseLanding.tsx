@@ -744,7 +744,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
             <p className="text-center text-lg sm:text-xl text-white/80 max-w-3xl mx-auto mb-16">
               Veja os <strong style={{ color: theme.accent }}>{bonus.length} BÔNUS</strong> que você ganha ao adquirir esse curso:
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-5xl mx-auto">
+            <div className={`grid grid-cols-1 sm:grid-cols-2 ${bonus.length === 3 ? 'lg:grid-cols-3 max-w-6xl' : 'max-w-5xl'} gap-6 mx-auto`}>
               {bonus.map((b, i) => (
                 <div
                   key={i}
