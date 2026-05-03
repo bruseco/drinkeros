@@ -137,7 +137,7 @@ serve(async (req) => {
         user_id: userId || "",
         vip_discount_applied: isVip ? "true" : "false",
         vip_discount_percent: isVip ? String(VIP_DISCOUNT_PERCENT) : "0",
-        access_period_days: product_type === "club" ? "365" : "",
+        access_period_days: product_type === "club" ? String(clubPeriodDays) : "",
       },
       payer: {
         email: payerEmail,
