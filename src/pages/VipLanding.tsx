@@ -85,6 +85,7 @@ const VipLanding: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [method, setMethod] = useState<'card' | 'pix'>('card');
 
   const handleClose = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -132,7 +133,7 @@ const VipLanding: React.FC = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-club-checkout', {
-        body: { method: 'card' },
+        body: { method },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -454,6 +455,24 @@ const VipLanding: React.FC = () => {
               <div className="text-sm text-purple-300">por ano · menos de R$ 6/mês</div>
             </div>
 
+            {/* Toggle método de pagamento */}
+            <div className="grid grid-cols-2 gap-2 mb-4 p-1 rounded-xl bg-white/5 border border-white/10">
+              <button
+                type="button"
+                onClick={() => setMethod('card')}
+                className={`rounded-lg py-2.5 text-sm font-bold transition ${method === 'card' ? 'bg-white text-black shadow' : 'text-purple-200 hover:text-white'}`}
+              >
+                Cartão
+              </button>
+              <button
+                type="button"
+                onClick={() => setMethod('pix')}
+                className={`rounded-lg py-2.5 text-sm font-bold transition ${method === 'pix' ? 'bg-white text-black shadow' : 'text-purple-200 hover:text-white'}`}
+              >
+                Pix
+              </button>
+            </div>
+
             <Button
               onClick={handleSubscribe}
               disabled={loading}
@@ -466,7 +485,9 @@ const VipLanding: React.FC = () => {
               )}
             </Button>
             <p className="text-center text-[11px] text-purple-300 mt-2">
-              ✓ Cartão com renovação automática anual · ou Pix com 12 meses de acesso
+              {method === 'card'
+                ? '✓ Renovação automática anual · cancele quando quiser'
+                : '✓ Pagamento único · 12 meses de acesso'}
             </p>
 
             <div className="flex items-center justify-center gap-2 mt-4 flex-nowrap">
