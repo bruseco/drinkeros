@@ -115,11 +115,20 @@ const UserRecipeDetail: React.FC = () => {
       {/* Action buttons */}
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
-          <Link to="/app/receitas">
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full"
+            onClick={() => {
+              if (window.history.length > 1) {
+                navigate(-1);
+              } else {
+                navigate('/app/receitas');
+              }
+            }}
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           <Button variant="ghost" size="icon" className="rounded-full" onClick={handleShare}>
             <Share2 className="h-5 w-5" />
           </Button>
