@@ -13,7 +13,9 @@ export const FullscreenVideo: React.FC<FullscreenVideoProps> = ({ embedUrl, titl
 
   const addAutoplay = (url: string) => {
     const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}autoplay=1`;
+    // mute=1 + playsinline=1 are required so mobile browsers (especially iOS)
+    // actually autoplay without showing YouTube's own play overlay.
+    return `${url}${separator}autoplay=1&mute=1&playsinline=1`;
   };
 
   const handlePlay = useCallback(() => {
