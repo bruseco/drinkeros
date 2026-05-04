@@ -348,8 +348,7 @@ const AdminUserDetail: React.FC = () => {
         <TabsList>
           <TabsTrigger value="courses" className="gap-2"><BookOpen className="h-3.5 w-3.5" /> Cursos ({courses.length})</TabsTrigger>
           <TabsTrigger value="ebooks" className="gap-2"><FileText className="h-3.5 w-3.5" /> E-books ({ebooks.length})</TabsTrigger>
-          <TabsTrigger value="combos" className="gap-2"><Layers className="h-3.5 w-3.5" /> Combos ({combos.length})</TabsTrigger>
-          <TabsTrigger value="packages" className="gap-2"><Package className="h-3.5 w-3.5" /> Pacotes ({packages.length})</TabsTrigger>
+          <TabsTrigger value="exclusives" className="gap-2"><Sparkles className="h-3.5 w-3.5" /> Conteúdo Exclusivo ({exclusives.length})</TabsTrigger>
         </TabsList>
         <TabsContent value="courses">
           <UserAccessCard title="Cursos" table="user_courses" items={courses} onAdd={() => setAddAccessOpen(true)} />
@@ -357,11 +356,8 @@ const AdminUserDetail: React.FC = () => {
         <TabsContent value="ebooks">
           <UserAccessCard title="E-books" table="user_ebooks" items={ebooks} onAdd={() => setAddAccessOpen(true)} />
         </TabsContent>
-        <TabsContent value="combos">
-          <UserAccessCard title="Combos" table="user_combos" items={combos} onAdd={() => setAddAccessOpen(true)} />
-        </TabsContent>
-        <TabsContent value="packages">
-          <UserAccessCard title="Pacotes" table="user_packages" items={packages} onAdd={() => setAddAccessOpen(true)} />
+        <TabsContent value="exclusives">
+          <UserAccessCard title="Conteúdo Exclusivo" table="user_exclusive_access" items={exclusives} onAdd={() => setAddAccessOpen(true)} />
         </TabsContent>
       </Tabs>
 
