@@ -14,9 +14,10 @@ export interface LessonCardProps {
   };
   compact?: boolean;
   hideTitle?: boolean;
+  to?: string;
 }
 
-export const LessonCard: React.FC<LessonCardProps> = ({ lesson, compact = false, hideTitle = false }) => {
+export const LessonCard: React.FC<LessonCardProps> = ({ lesson, compact = false, hideTitle = false, to }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
