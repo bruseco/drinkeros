@@ -307,6 +307,7 @@ export const useFavorites = () => {
         const post = postsMap.get(fav.recipe_id);
         return {
           ...fav,
+          kind: recipe ? ('aula' as const) : post ? ('receita' as const) : null,
           recipe: recipe
             ? { id: recipe.id, name: recipe.name, image_url: recipe.image_url, servings: recipe.servings }
             : post
