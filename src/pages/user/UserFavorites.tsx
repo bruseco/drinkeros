@@ -215,6 +215,7 @@ const UserFavorites: React.FC = () => {
                                     image_url: (cr.recipe as any).image_url || (cr.recipe as any).cover_image_url,
                                     servings: (cr.recipe as any).servings,
                                   }}
+                                  to={(cr as any).kind === 'receita' ? `/app/receita/${cr.recipe_id}` : `/app/aula/${cr.recipe_id}`}
                                   compact
                                 />
                               ) : null
@@ -286,6 +287,7 @@ const UserFavorites: React.FC = () => {
                             image_url: (cr.recipe as any).image_url || (cr.recipe as any).cover_image_url,
                             servings: (cr.recipe as any).servings,
                           }}
+                          to={(cr as any).kind === 'receita' ? `/app/receita/${cr.recipe_id}` : `/app/aula/${cr.recipe_id}`}
                           compact
                           hideTitle
                         />
@@ -323,6 +325,7 @@ const UserFavorites: React.FC = () => {
                         image_url: fav.recipe.image_url,
                         servings: fav.recipe.servings,
                       }}
+                      to={(fav as any).kind === 'receita' ? `/app/receita/${fav.recipe_id}` : `/app/aula/${fav.recipe_id}`}
                       compact
                       hideTitle
                     />
