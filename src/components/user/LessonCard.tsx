@@ -44,7 +44,7 @@ export const LessonCard: React.FC<LessonCardProps> = ({ lesson, compact = false,
   }, []);
 
   return (
-    <Link to={`/app/aula/${lesson.id}`}>
+    <Link to={to || `/app/aula/${lesson.id}`}>
       <Card
         ref={cardRef}
         className="group overflow-hidden rounded-2xl border-0 bg-card shadow-md transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1"
