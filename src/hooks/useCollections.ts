@@ -66,6 +66,7 @@ export const useCollectionRecipes = () => {
         const p = postsMap.get(cr.recipe_id);
         return {
           ...cr,
+          kind: r ? ('aula' as const) : p ? ('receita' as const) : null,
           recipe: r
             ? { id: r.id, name: r.name, image_url: r.image_url, servings: r.servings }
             : p
