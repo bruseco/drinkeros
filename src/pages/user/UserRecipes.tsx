@@ -183,6 +183,16 @@ const UserRecipes: React.FC = () => {
     };
   }, []);
 
+  // Persist search/filter so returning from a recipe restores the same list
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        RECIPES_STATE_KEY,
+        JSON.stringify({ search, category: selectedCategory })
+      );
+    } catch {}
+  }, [search, selectedCategory]);
+
   const {
     data,
     isLoading,
