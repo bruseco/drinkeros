@@ -17,8 +17,8 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
     if (disableWrapper || location.key === prevKeyRef.current) return;
 
     const isPop = navigationType === 'POP';
-    const exitClass = isPop ? 'page-exit-right' : 'page-exit-left';
-    const enterClass = isPop ? 'page-enter-left' : 'page-enter-right';
+    const exitClass = isPop ? 'page-exit-left' : 'page-exit-right';
+    const enterClass = isPop ? 'page-enter-right' : 'page-enter-left';
 
     setTransitionClass(exitClass);
 
