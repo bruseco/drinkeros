@@ -37,6 +37,7 @@ export interface UserDetail {
   ebooks: UserDetailContent[];
   combos: UserDetailContent[];
   packages: UserDetailContent[];
+  exclusives: UserDetailContent[];
   last_sign_in_at: string | null;
   certificates_count: number;
   recipe_views_count: number;
