@@ -9,7 +9,7 @@ import { Plus, Calendar, Trash2, Infinity as InfinityIcon, Pencil, Check, X, Dow
 import { useUpdateAccessExpiration, useRevokeAccess, type UserDetailContent } from '@/hooks/useUserDetail';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
-type AccessTable = 'user_courses' | 'user_ebooks' | 'user_combos' | 'user_packages';
+type AccessTable = 'user_courses' | 'user_ebooks' | 'user_combos' | 'user_packages' | 'user_exclusive_access';
 
 interface Props {
   title: string;

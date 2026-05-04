@@ -64,7 +64,7 @@ const AdminUserDetail: React.FC = () => {
     );
   }
 
-  const { profile, role, plan, is_lifetime, courses, ebooks, combos, packages, last_sign_in_at, certificates_count, recipe_views_count, push_enabled } = data;
+  const { profile, role, plan, is_lifetime, courses, ebooks, combos, packages, exclusives, last_sign_in_at, certificates_count, recipe_views_count, push_enabled } = data;
 
   const isVipActive = !!plan && plan.plan === 'vip' && (!plan.expires_at || new Date(plan.expires_at) > new Date());
   const daysToExpire = plan?.expires_at
@@ -348,8 +348,7 @@ const AdminUserDetail: React.FC = () => {
         <TabsList>
           <TabsTrigger value="courses" className="gap-2"><BookOpen className="h-3.5 w-3.5" /> Cursos ({courses.length})</TabsTrigger>
           <TabsTrigger value="ebooks" className="gap-2"><FileText className="h-3.5 w-3.5" /> E-books ({ebooks.length})</TabsTrigger>
-          <TabsTrigger value="combos" className="gap-2"><Layers className="h-3.5 w-3.5" /> Combos ({combos.length})</TabsTrigger>
-          <TabsTrigger value="packages" className="gap-2"><Package className="h-3.5 w-3.5" /> Pacotes ({packages.length})</TabsTrigger>
+          <TabsTrigger value="exclusives" className="gap-2"><Sparkles className="h-3.5 w-3.5" /> Conteúdo Exclusivo ({exclusives.length})</TabsTrigger>
         </TabsList>
         <TabsContent value="courses">
           <UserAccessCard title="Cursos" table="user_courses" items={courses} onAdd={() => setAddAccessOpen(true)} />
@@ -357,11 +356,27 @@ const AdminUserDetail: React.FC = () => {
         <TabsContent value="ebooks">
           <UserAccessCard title="E-books" table="user_ebooks" items={ebooks} onAdd={() => setAddAccessOpen(true)} />
         </TabsContent>
-        <TabsContent value="combos">
-          <UserAccessCard title="Combos" table="user_combos" items={combos} onAdd={() => setAddAccessOpen(true)} />
-        </TabsContent>
-        <TabsContent value="packages">
-          <UserAccessCard title="Pacotes" table="user_packages" items={packages} onAdd={() => setAddAccessOpen(true)} />
+        <TabsContent value="exclusives">
+          <UserAccessCard
+            title="Conteúdo Exclusivo"
+            table="user_exclusive_access"
+            items={exclusives}
+            onAdd={async () => {
+              if (exclusives.some((e) => e.ref_id === 'receitas')) {
+                toast({ title: 'Aluno já tem acesso às Receitas Exclusivas' });
+                return;
+              }
+              const expires_at = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+              const { error } = await supabase
+                .from('user_exclusive_access')
+                .insert({ user_id: userId!, feature: 'receitas', expires_at });
+              if (error) toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+              else {
+                toast({ title: 'Acesso a Receitas Exclusivas concedido por 1 ano' });
+                queryClient.invalidateQueries({ queryKey: ['admin-user-detail'] });
+              }
+            }}
+          />
         </TabsContent>
       </Tabs>
 

@@ -37,6 +37,7 @@ export interface UserDetail {
   ebooks: UserDetailContent[];
   combos: UserDetailContent[];
   packages: UserDetailContent[];
+  exclusives: UserDetailContent[];
   last_sign_in_at: string | null;
   certificates_count: number;
   recipe_views_count: number;
@@ -68,7 +69,7 @@ export const useUserDetail = (userId: string | undefined) => {
         supabase.from('user_roles').select('role').eq('user_id', userId!).maybeSingle(),
         supabase.from('user_plans').select('plan, expires_at, activated_at, source').eq('user_id', userId!).maybeSingle(),
         supabase.from('user_lifetime_access').select('id').eq('user_id', userId!).maybeSingle(),
-        supabase.from('user_exclusive_access').select('feature').eq('user_id', userId!).eq('feature', 'receitas').maybeSingle(),
+        supabase.from('user_exclusive_access').select('id, feature, created_at, expires_at').eq('user_id', userId!),
         supabase.from('user_courses').select('id, course_id, purchased_at, expires_at, courses(name, cover_image_url)').eq('user_id', userId!),
         supabase.from('user_ebooks').select('id, ebook_id, purchased_at, expires_at, ebooks(name, cover_image_url)').eq('user_id', userId!),
         supabase.from('user_combos').select('id, combo_id, purchased_at, expires_at, combos(name, cover_image_url)').eq('user_id', userId!),
@@ -180,16 +181,29 @@ export const useUserDetail = (userId: string | undefined) => {
 
       const pushCount = pushRes.count || 0;
 
+      const exclusiveRows = (exclusiveRes.data || []) as any[];
+      const featureLabel = (f: string) =>
+        f === 'receitas' ? 'Bebida Decifrada (Receitas Exclusivas)' : `Acesso Exclusivo: ${f}`;
+      const exclusives: UserDetailContent[] = exclusiveRows.map((r) => ({
+        id: r.id,
+        ref_id: r.feature,
+        name: featureLabel(r.feature),
+        cover_image_url: null,
+        purchased_at: r.created_at,
+        expires_at: r.expires_at,
+      }));
+
       return {
         profile: profileRes.data as any,
         role: roleRes.data?.role || null,
         plan: planRes.data as any,
         is_lifetime: !!lifetimeRes.data,
-        has_receitas: !!exclusiveRes.data,
+        has_receitas: exclusiveRows.some((r) => r.feature === 'receitas'),
         courses: mapItem(coursesRes.data, 'course_id', 'courses'),
         ebooks: mapItem(ebooksRes.data, 'ebook_id', 'ebooks'),
         combos: mapItem(combosRes.data, 'combo_id', 'combos'),
         packages: mapItem(packagesRes.data, 'package_id', 'packages'),
+        exclusives,
         last_sign_in_at: lastSignIn,
         certificates_count: certsRes.count || 0,
         recipe_views_count: viewsRes.count || 0,
@@ -200,7 +214,7 @@ export const useUserDetail = (userId: string | undefined) => {
   });
 };
 
-type AccessTable = 'user_courses' | 'user_ebooks' | 'user_combos' | 'user_packages';
+type AccessTable = 'user_courses' | 'user_ebooks' | 'user_combos' | 'user_packages' | 'user_exclusive_access';
 
 export const useUpdateAccessExpiration = () => {
   const queryClient = useQueryClient();
