@@ -214,7 +214,7 @@ export const useUserDetail = (userId: string | undefined) => {
   });
 };
 
-type AccessTable = 'user_courses' | 'user_ebooks' | 'user_combos' | 'user_packages';
+type AccessTable = 'user_courses' | 'user_ebooks' | 'user_combos' | 'user_packages' | 'user_exclusive_access';
 
 export const useUpdateAccessExpiration = () => {
   const queryClient = useQueryClient();
