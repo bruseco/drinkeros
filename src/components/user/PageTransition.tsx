@@ -26,7 +26,7 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
       setDisplayChildren(children);
       setTransitionClass(enterClass);
       prevKeyRef.current = location.key;
-    }, 150);
+    }, 220);
 
     return () => clearTimeout(timeout);
   }, [location.key, navigationType, children, disableWrapper]);
