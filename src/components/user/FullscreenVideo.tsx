@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useEffect } from 'react';
 import { Play } from 'lucide-react';
 
 interface FullscreenVideoProps {
@@ -9,18 +9,19 @@ interface FullscreenVideoProps {
 
 export const FullscreenVideo: React.FC<FullscreenVideoProps> = ({ embedUrl, title, thumbnailUrl }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [playing, setPlaying] = React.useState(false);
 
   const addAutoplay = (url: string) => {
     const separator = url.includes('?') ? '&' : '?';
     // mute=1 + playsinline=1 are required so mobile browsers (especially iOS)
     // actually autoplay without showing YouTube's own play overlay.
-    return `${url}${separator}autoplay=1&mute=1&playsinline=1`;
+    // enablejsapi=1 lets us postMessage to unmute after user interaction.
+    return `${url}${separator}autoplay=1&mute=1&playsinline=1&enablejsapi=1`;
   };
 
   const handlePlay = useCallback(() => {
     setPlaying(true);
-    // Try to enter fullscreen on the container
     const el = containerRef.current;
     if (el) {
       const requestFS =
@@ -28,17 +29,36 @@ export const FullscreenVideo: React.FC<FullscreenVideoProps> = ({ embedUrl, titl
         (el as any).webkitRequestFullscreen ||
         (el as any).msRequestFullscreen;
       if (requestFS) {
-        requestFS.call(el).catch(() => {
-          // Fullscreen denied by browser — video still plays inline
-        });
+        requestFS.call(el).catch(() => {});
       }
     }
   }, []);
+
+  // After play starts, unmute on first user interaction (scroll / touch / click)
+  useEffect(() => {
+    if (!playing) return;
+    let unmuted = false;
+    const unmute = () => {
+      if (unmuted) return;
+      const iframe = iframeRef.current;
+      if (iframe?.contentWindow) {
+        unmuted = true;
+        iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+        iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+        cleanup();
+      }
+    };
+    const events: Array<keyof WindowEventMap> = ['pointerdown', 'touchstart', 'keydown', 'scroll', 'wheel'];
+    const cleanup = () => events.forEach(e => window.removeEventListener(e, unmute));
+    events.forEach(e => window.addEventListener(e, unmute, { passive: true }));
+    return cleanup;
+  }, [playing]);
 
   return (
     <div ref={containerRef} className="relative aspect-video bg-black w-full">
       {playing ? (
         <iframe
+          ref={iframeRef}
           src={addAutoplay(embedUrl)}
           title={title}
           className="h-full w-full"
