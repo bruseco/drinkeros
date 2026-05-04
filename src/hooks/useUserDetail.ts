@@ -69,7 +69,7 @@ export const useUserDetail = (userId: string | undefined) => {
         supabase.from('user_roles').select('role').eq('user_id', userId!).maybeSingle(),
         supabase.from('user_plans').select('plan, expires_at, activated_at, source').eq('user_id', userId!).maybeSingle(),
         supabase.from('user_lifetime_access').select('id').eq('user_id', userId!).maybeSingle(),
-        supabase.from('user_exclusive_access').select('feature').eq('user_id', userId!).eq('feature', 'receitas').maybeSingle(),
+        supabase.from('user_exclusive_access').select('id, feature, created_at, expires_at').eq('user_id', userId!),
         supabase.from('user_courses').select('id, course_id, purchased_at, expires_at, courses(name, cover_image_url)').eq('user_id', userId!),
         supabase.from('user_ebooks').select('id, ebook_id, purchased_at, expires_at, ebooks(name, cover_image_url)').eq('user_id', userId!),
         supabase.from('user_combos').select('id, combo_id, purchased_at, expires_at, combos(name, cover_image_url)').eq('user_id', userId!),
