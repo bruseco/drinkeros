@@ -64,7 +64,7 @@ const AdminUserDetail: React.FC = () => {
     );
   }
 
-  const { profile, role, plan, is_lifetime, courses, ebooks, combos, packages, last_sign_in_at, certificates_count, recipe_views_count, push_enabled } = data;
+  const { profile, role, plan, is_lifetime, courses, ebooks, combos, packages, exclusives, last_sign_in_at, certificates_count, recipe_views_count, push_enabled } = data;
 
   const isVipActive = !!plan && plan.plan === 'vip' && (!plan.expires_at || new Date(plan.expires_at) > new Date());
   const daysToExpire = plan?.expires_at
