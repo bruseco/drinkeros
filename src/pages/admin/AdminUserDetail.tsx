@@ -357,7 +357,26 @@ const AdminUserDetail: React.FC = () => {
           <UserAccessCard title="E-books" table="user_ebooks" items={ebooks} onAdd={() => setAddAccessOpen(true)} />
         </TabsContent>
         <TabsContent value="exclusives">
-          <UserAccessCard title="Conteúdo Exclusivo" table="user_exclusive_access" items={exclusives} onAdd={() => setAddAccessOpen(true)} />
+          <UserAccessCard
+            title="Conteúdo Exclusivo"
+            table="user_exclusive_access"
+            items={exclusives}
+            onAdd={async () => {
+              if (exclusives.some((e) => e.ref_id === 'receitas')) {
+                toast({ title: 'Aluno já tem acesso às Receitas Exclusivas' });
+                return;
+              }
+              const expires_at = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+              const { error } = await supabase
+                .from('user_exclusive_access')
+                .insert({ user_id: userId!, feature: 'receitas', expires_at });
+              if (error) toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+              else {
+                toast({ title: 'Acesso a Receitas Exclusivas concedido por 1 ano' });
+                queryClient.invalidateQueries({ queryKey: ['admin-user-detail'] });
+              }
+            }}
+          />
         </TabsContent>
       </Tabs>
 
