@@ -109,14 +109,24 @@ const useTypingPlaceholder = (texts: string[], typingSpeed = 80, pauseMs = 2000)
   return { display, isFocused, setIsFocused };
 };
 
+const RECIPES_STATE_KEY = 'user-recipes:list-state';
+
 const UserRecipes: React.FC = () => {
   // Seed persists across navigation within the session — only re-shuffles on full page refresh
   // so users can return to a recipe they had eyed without losing their place.
   const [searchParams] = useSearchParams();
-  const [search, setSearch] = useState(searchParams.get('q') || '');
+  const persisted = (() => {
+    try {
+      const raw = sessionStorage.getItem(RECIPES_STATE_KEY);
+      return raw ? JSON.parse(raw) as { search?: string; category?: string | null } : null;
+    } catch {
+      return null;
+    }
+  })();
+  const [search, setSearch] = useState(searchParams.get('q') || persisted?.search || '');
   const [isStuck, setIsStuck] = useState(false);
   const { display: typingPlaceholder, isFocused, setIsFocused } = useTypingPlaceholder(SEARCH_PLACEHOLDERS);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(persisted?.category ?? null);
   const debouncedSearch = useDebounce(search, 300);
   const stickyRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -172,6 +182,16 @@ const UserRecipes: React.FC = () => {
       sentinel.remove();
     };
   }, []);
+
+  // Persist search/filter so returning from a recipe restores the same list
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        RECIPES_STATE_KEY,
+        JSON.stringify({ search, category: selectedCategory })
+      );
+    } catch {}
+  }, [search, selectedCategory]);
 
   const {
     data,
