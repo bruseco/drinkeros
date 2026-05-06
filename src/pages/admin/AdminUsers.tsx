@@ -477,6 +477,7 @@ const AdminUsers: React.FC = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Usuário</TableHead>
+                <TableHead>WhatsApp</TableHead>
                 <TableHead>Permissão</TableHead>
                 <TableHead>Acessos</TableHead>
                 <TableHead>Cadastro</TableHead>
