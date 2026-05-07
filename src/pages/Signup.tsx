@@ -101,6 +101,14 @@ const Signup: React.FC = () => {
       title: 'Conta criada! 🍹',
       description: 'Bem-vindo ao Drinkeros! Você está no plano Grátis.',
     });
+    try {
+      const { data: { user: createdUser } } = await supabase.auth.getUser();
+      trackFbEvent(
+        'CompleteRegistration',
+        { method: 'email' },
+        { dedupeKey: `user:${createdUser?.id || email}` }
+      );
+    } catch { /* ignore */ }
     navigate('/app');
     setIsLoading(false);
   };
