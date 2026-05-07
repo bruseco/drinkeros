@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
 import drinkerosFooterLogo from '@/assets/logotipo-drinkeros.png';
+import { useViewContent } from '@/hooks/useViewContent';
 
 const PackageLanding: React.FC = () => {
   const { packageSlug } = useParams<{ packageSlug: string }>();
@@ -31,6 +32,16 @@ const PackageLanding: React.FC = () => {
   const isCourse = !pkg && !ebook && !!course;
   const isEbook = !pkg && !course && !!ebook;
   const isPackage = !!pkg;
+
+  useViewContent({
+    key: (item as any)?.id,
+    content_name: (item as any)?.name,
+    content_category: isCourse ? 'pagina_venda_curso' : isEbook ? 'pagina_venda_ebook' : 'pagina_venda_pacote',
+    content_type: 'product',
+    content_ids: (item as any)?.id ? [(item as any).id] : undefined,
+    value: (item as any)?.price ? Number((item as any).price) : undefined,
+    currency: 'BRL',
+  });
 
   // Mostra toast com base em ?checkout=success|cancel
   useEffect(() => {

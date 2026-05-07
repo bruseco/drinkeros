@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { trackFbEvent } from '@/lib/metaPixel';
 
 type AppRole = 'super_admin' | 'editor' | 'viewer';
 
@@ -66,6 +67,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setProfile(null);
         } else {
           setProfile(newProfile as UserProfile);
+          // Novo cadastro via OAuth/Magic Link → CompleteRegistration
+          const provider = (userObj.app_metadata as any)?.provider || 'oauth';
+          trackFbEvent(
+            'CompleteRegistration',
+            { method: provider },
+            { dedupeKey: `user:${userId}` }
+          );
         }
         return;
       }

@@ -15,6 +15,8 @@ import { useHasExclusiveAccess } from '@/hooks/useExclusiveAccess';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { trackFbEvent } from '@/lib/metaPixel';
+import { useViewContent } from '@/hooks/useViewContent';
 
 import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
 import bgTijolos from '@/assets/bg-tijolos-pretos.jpg';
@@ -85,7 +87,15 @@ const VipLanding: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  
+
+  useViewContent({
+    key: 'clube-dos-drinkeros',
+    content_name: 'Clube dos Drinkeros',
+    content_category: 'clube',
+    content_type: 'product',
+    value: 69,
+    currency: 'BRL',
+  });
 
   const handleClose = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -109,6 +119,21 @@ const VipLanding: React.FC = () => {
     if (status === 'success') {
       toast.success('🎉 Bem-vindo ao Clube dos Drinkeros! Seu acesso já está liberado.');
       queryClient.invalidateQueries({ queryKey: ['user-plan'] });
+      trackFbEvent(
+        'Subscribe',
+        { value: 69.0, currency: 'BRL', content_name: 'Clube dos Drinkeros · Anual' },
+        { dedupeKey: `clube-success:${user?.id || 'anon'}` }
+      );
+      trackFbEvent(
+        'Purchase',
+        {
+          value: 69.0,
+          currency: 'BRL',
+          content_name: 'Clube dos Drinkeros · Anual',
+          content_type: 'subscription',
+        },
+        { dedupeKey: `clube-purchase:${user?.id || 'anon'}` }
+      );
       searchParams.delete('vip');
       searchParams.delete('clube');
       setSearchParams(searchParams, { replace: true });

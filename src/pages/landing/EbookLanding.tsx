@@ -22,6 +22,7 @@ import {
 } from '@/lib/vipDiscount';
 import { EBOOK_CONTENT } from './ebookContent';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
+import { useViewContent } from '@/hooks/useViewContent';
 
 const EbookLanding: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -35,6 +36,16 @@ const EbookLanding: React.FC = () => {
   const { data: ownedEbookIds } = useUserEbooks();
   const isVip = !!userPlan?.isVip;
   const isOwned = !!ebook && (ownedEbookIds ?? []).includes(ebook.id);
+
+  useViewContent({
+    key: ebook?.id,
+    content_name: ebook?.name,
+    content_category: 'ebook_landing',
+    content_type: 'product',
+    content_ids: ebook?.id ? [ebook.id] : undefined,
+    value: ebook?.price ? Number(ebook.price) : undefined,
+    currency: 'BRL',
+  });
 
   // Toast pós-checkout
   useEffect(() => {

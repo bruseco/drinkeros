@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { trackFbEvent } from '@/lib/metaPixel';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
@@ -100,6 +101,14 @@ const Signup: React.FC = () => {
       title: 'Conta criada! 🍹',
       description: 'Bem-vindo ao Drinkeros! Você está no plano Grátis.',
     });
+    try {
+      const { data: { user: createdUser } } = await supabase.auth.getUser();
+      trackFbEvent(
+        'CompleteRegistration',
+        { method: 'email' },
+        { dedupeKey: `user:${createdUser?.id || email}` }
+      );
+    } catch { /* ignore */ }
     navigate('/app');
     setIsLoading(false);
   };

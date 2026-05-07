@@ -13,11 +13,19 @@ import { useToast } from '@/hooks/use-toast';
 import FavoriteDialog from '@/components/user/FavoriteDialog';
 import RelatedRecipesSection from '@/components/user/RelatedRecipesSection';
 import { useTrackExclusivePostView } from '@/hooks/useAccessTracking';
+import { useViewContent } from '@/hooks/useViewContent';
 
 const UserRecipeDetail: React.FC = () => {
   const { id: idOrSlug } = useParams<{ id: string }>();
   const { data: recipe, isLoading } = useExclusivePost(idOrSlug || '');
   useTrackExclusivePostView(recipe?.id);
+  useViewContent({
+    key: recipe?.id,
+    content_name: recipe?.title,
+    content_category: 'receita',
+    content_type: 'product',
+    content_ids: recipe?.id ? [recipe.id] : undefined,
+  });
   const { data: favorites = [] } = useFavorites();
   const toggleFavorite = useToggleFavorite();
   const { toast } = useToast();
