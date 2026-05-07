@@ -258,6 +258,24 @@ export default function Checkout() {
         if (data?.status === "authorized") {
           setPaid(true);
           toast.success("Assinatura ativada! Renovação automática anual.");
+          const subId = data?.id || data?.preapproval_id || `${product.slug}-${Date.now()}`;
+          trackFbEvent(
+            'Subscribe',
+            { value: 69.0, currency: 'BRL', content_name: 'Clube dos Drinkeros · Anual' },
+            { dedupeKey: `subscribe:${subId}` }
+          );
+          trackFbEvent(
+            'Purchase',
+            {
+              value: 69.0,
+              currency: 'BRL',
+              content_name: 'Clube dos Drinkeros · Anual',
+              content_type: 'subscription',
+              content_ids: [product.id],
+              transaction_id: subId,
+            },
+            { dedupeKey: `purchase:${subId}` }
+          );
           setTimeout(() => navigate("/clube?clube=success"), 1500);
         } else if (data?.status === "pending") {
           toast.info("Assinatura em análise. Você receberá a confirmação em breve.");
@@ -281,6 +299,26 @@ export default function Checkout() {
       } else if (data.status === "approved") {
         setPaid(true);
         toast.success("Pagamento aprovado!");
+        const txId = String(data.id || `${product.slug}-${Date.now()}`);
+        trackFbEvent(
+          'Purchase',
+          {
+            value: finalPrice,
+            currency: 'BRL',
+            content_name: product.name,
+            content_type: isClub ? 'subscription' : 'product',
+            content_ids: [product.id],
+            transaction_id: txId,
+          },
+          { dedupeKey: `purchase:${txId}` }
+        );
+        if (isClub) {
+          trackFbEvent(
+            'Subscribe',
+            { value: 69.0, currency: 'BRL', content_name: 'Clube dos Drinkeros · Anual' },
+            { dedupeKey: `subscribe:${txId}` }
+          );
+        }
         setTimeout(() => navigate(isClub ? "/clube?clube=success" : `/${product.slug}?checkout=success`), 1500);
       } else if (data.status === "in_process" || data.status === "pending") {
         toast.info("Pagamento em análise. Você receberá uma confirmação em breve.");
