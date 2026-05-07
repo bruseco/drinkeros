@@ -287,7 +287,11 @@ const Login: React.FC = () => {
 
           <div className="text-center text-sm text-muted-foreground border-t pt-4">
             Não tem conta?{' '}
-            <Link to="/signup" className="font-semibold text-foreground underline">
+            <Link
+              to="/signup"
+              className="font-semibold text-foreground underline"
+              onClick={() => trackFbEvent('Lead', { source: 'login_page', content_name: 'Criar conta' })}
+            >
               Crie agora mesmo!
             </Link>
           </div>
