@@ -13,7 +13,7 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
 } from '@/components/ui/sidebar';
-import { GraduationCap, Play, Users, UserCog, LogOut, Home, Mail, Bell, BookOpen, Rocket, MessageCircle, Layers, ClipboardCheck, Clock, Target, BarChart3, FileText, ShoppingBag, Wine, Tag, ShoppingCart, Activity } from 'lucide-react';
+import { GraduationCap, Play, Users, UserCog, LogOut, Home, Mail, Bell, BookOpen, Rocket, MessageCircle, Layers, ClipboardCheck, Clock, Target, BarChart3, FileText, ShoppingBag, Wine, Tag, ShoppingCart, Activity, LineChart } from 'lucide-react';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { Button } from '@/components/ui/button';
 
@@ -39,6 +39,7 @@ const adminItems = [
   { title: 'CRM', icon: Target, href: '/admin/crm' },
   { title: 'Métricas UX', icon: BarChart3, href: '/admin/ux-metrics' },
   { title: 'Métricas de Acesso', icon: Activity, href: '/admin/metricas-acesso' },
+  { title: 'Métricas', icon: LineChart, href: '/admin/metricas' },
   { title: 'Páginas de Venda', icon: Tag, href: '/admin/paginas-venda' },
 ];
 

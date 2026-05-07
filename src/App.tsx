@@ -66,6 +66,8 @@ import AdminCRM from "./pages/admin/AdminCRM";
 import AdminUXMetrics from "./pages/admin/AdminUXMetrics";
 import AdminAccessMetrics from "./pages/admin/AdminAccessMetrics";
 import AdminSalesPages from "./pages/admin/AdminSalesPages";
+import AdminTracking from "./pages/admin/AdminTracking";
+import { FacebookPixel } from "./components/FacebookPixel";
 
 // User pages
 import { UserLayout } from "./components/user/UserLayout";
@@ -115,6 +117,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <ScrollToTop />
+          <FacebookPixel />
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<RootRedirect />} />
@@ -186,6 +189,7 @@ const App = () => (
               <Route path="ux-metrics" element={<AdminUXMetrics />} />
               <Route path="metricas-acesso" element={<AdminAccessMetrics />} />
               <Route path="paginas-venda" element={<AdminSalesPages />} />
+              <Route path="metricas" element={<AdminTracking />} />
             </Route>
 
             {/* User app routes */}
