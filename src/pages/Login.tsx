@@ -22,6 +22,7 @@ import { WhatsAppFloatingButton } from '@/components/user/WhatsAppFloatingButton
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import drinksStrip from '@/assets/1000-drinks.jpg';
 import AnimatedNumber from '@/components/AnimatedNumber';
+import { trackFbEvent } from '@/lib/metaPixel';
 
 const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
