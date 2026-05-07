@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, BookOpen, Play, ChevronRight, Lock, ShoppingCart, Crown } from 'lucide-react';
+import { useViewContent } from '@/hooks/useViewContent';
 
 const UserComboDetail: React.FC = () => {
   const { comboId } = useParams<{ comboId: string }>();
@@ -15,6 +16,13 @@ const UserComboDetail: React.FC = () => {
   const isLockedParam = searchParams.get('locked') === 'true';
 
   const { data: combo, isLoading: comboLoading } = useCombo(comboId || '');
+  useViewContent({
+    key: combo?.id,
+    content_name: combo?.name,
+    content_category: 'pacote',
+    content_type: 'product',
+    content_ids: combo?.id ? [combo.id] : undefined,
+  });
   const { data: comboCourses = [], isLoading: coursesLoading } = useComboCourses(comboId || '');
   const { data: userCombos = [] } = useUserCombos();
   const { data: expiredAccess } = useExpiredAccess();

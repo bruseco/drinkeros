@@ -18,6 +18,7 @@ import { Lock, ShoppingCart, ChevronDown, CheckCircle2, PlayCircle, Award, Crown
 import CertificateDownloadButton from '@/components/user/CertificateDownloadButton';
 import CourseCompletionCelebration from '@/components/user/CourseCompletionCelebration';
 import { useTrackCourseView } from '@/hooks/useAccessTracking';
+import { useViewContent } from '@/hooks/useViewContent';
 
 const UserCourseModules: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -28,6 +29,13 @@ const UserCourseModules: React.FC = () => {
 
   const { data: course, isLoading: courseLoading } = useCourse(courseId || '');
   const { data: coursePackages = [], isLoading: packagesLoading } = useCoursePackages(courseId || '');
+  useViewContent({
+    key: course?.id,
+    content_name: course?.name,
+    content_category: 'curso',
+    content_type: 'product',
+    content_ids: course?.id ? [course.id] : undefined,
+  });
   const isLoading = courseLoading || packagesLoading;
 
   const { data: recipesByPackage } = useUserRecipesByPackage();
