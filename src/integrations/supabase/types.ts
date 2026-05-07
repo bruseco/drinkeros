@@ -1839,6 +1839,30 @@ export type Database = {
         }
         Relationships: []
       }
+      tracking_settings: {
+        Row: {
+          created_at: string
+          facebook_pixel_enabled: boolean
+          facebook_pixel_id: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          facebook_pixel_enabled?: boolean
+          facebook_pixel_id?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          facebook_pixel_enabled?: boolean
+          facebook_pixel_id?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       upsell_email_logs: {
         Row: {
           body_html: string | null
