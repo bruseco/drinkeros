@@ -171,6 +171,34 @@ export default function Checkout() {
     return isVip ? Math.round(Number(product.price) * 0.2 * 100) / 100 : Number(product.price);
   }, [product, isVip, isClub]);
 
+  // ViewContent da tela de checkout
+  useViewContent({
+    key: product ? `${productType}:${product.slug}` : null,
+    content_name: product?.name,
+    content_category: 'checkout',
+    content_type: 'product',
+    content_ids: product?.id ? [product.id] : undefined,
+    value: finalPrice,
+    currency: 'BRL',
+  });
+
+  // InitiateCheckout — uma única vez quando o produto carrega
+  useEffect(() => {
+    if (!product) return;
+    trackFbEvent(
+      'InitiateCheckout',
+      {
+        content_name: product.name,
+        content_type: isClub ? 'subscription' : 'product',
+        content_ids: [product.id],
+        value: finalPrice,
+        currency: 'BRL',
+        num_items: 1,
+      },
+      { dedupeKey: `checkout:${productType}:${product.slug}` }
+    );
+  }, [product?.id, finalPrice, isClub, productType]);
+
   // 3. Polling do status do Pix
   useEffect(() => {
     if (!pixPaymentId || paid) return;
