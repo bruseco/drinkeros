@@ -119,6 +119,21 @@ const VipLanding: React.FC = () => {
     if (status === 'success') {
       toast.success('🎉 Bem-vindo ao Clube dos Drinkeros! Seu acesso já está liberado.');
       queryClient.invalidateQueries({ queryKey: ['user-plan'] });
+      trackFbEvent(
+        'Subscribe',
+        { value: 69.0, currency: 'BRL', content_name: 'Clube dos Drinkeros · Anual' },
+        { dedupeKey: `clube-success:${user?.id || 'anon'}` }
+      );
+      trackFbEvent(
+        'Purchase',
+        {
+          value: 69.0,
+          currency: 'BRL',
+          content_name: 'Clube dos Drinkeros · Anual',
+          content_type: 'subscription',
+        },
+        { dedupeKey: `clube-purchase:${user?.id || 'anon'}` }
+      );
       searchParams.delete('vip');
       searchParams.delete('clube');
       setSearchParams(searchParams, { replace: true });
