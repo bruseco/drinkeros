@@ -209,9 +209,29 @@ export default function Checkout() {
           { headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } }
         );
         const j = await resp.json();
-        if (j.status === "approved") {
+      if (data?.status === "approved" || j.status === "approved") {
           setPaid(true);
           clearInterval(interval);
+          // Purchase: pagamento Pix confirmado
+          trackFbEvent(
+            'Purchase',
+            {
+              value: finalPrice,
+              currency: 'BRL',
+              content_name: product?.name,
+              content_type: isClub ? 'subscription' : 'product',
+              content_ids: product ? [product.id] : undefined,
+              transaction_id: pixPaymentId,
+            },
+            { dedupeKey: `purchase:${pixPaymentId}` }
+          );
+          if (isClub) {
+            trackFbEvent(
+              'Subscribe',
+              { value: 69.0, currency: 'BRL', content_name: 'Clube dos Drinkeros · Anual' },
+              { dedupeKey: `subscribe:${pixPaymentId}` }
+            );
+          }
           setTimeout(() => navigate(isClub ? "/clube?clube=success" : `/${product?.slug}?checkout=success`), 2000);
         }
       } catch (_) { /* ignore */ }
