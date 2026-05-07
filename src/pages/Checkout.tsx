@@ -209,7 +209,7 @@ export default function Checkout() {
           { headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } }
         );
         const j = await resp.json();
-      if (data?.status === "approved" || j.status === "approved") {
+      if (j.status === "approved") {
           setPaid(true);
           clearInterval(interval);
           // Purchase: pagamento Pix confirmado
