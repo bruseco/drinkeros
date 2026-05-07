@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -10,12 +10,11 @@ declare global {
 }
 
 let injected = false;
-let injectedPixelId: string | null = null;
+let lastTrackedPath: string | null = null;
 
-const injectPixel = (pixelId: string) => {
+const injectPixel = (pixelId: string, initialPath: string) => {
   if (injected || typeof window === 'undefined') return;
   injected = true;
-  injectedPixelId = pixelId;
 
   /* eslint-disable */
   (function (f: any, b, e, v, n?: any, t?: any, s?: any) {
@@ -34,7 +33,7 @@ const injectPixel = (pixelId: string) => {
     t.onload = () => console.log('[FacebookPixel] fbevents.js loaded');
     t.onerror = () =>
       console.warn(
-        '[FacebookPixel] Falha ao carregar fbevents.js — provável bloqueador de anúncios/extensão de privacidade.'
+        '[FacebookPixel] Falha ao carregar fbevents.js — provável bloqueador de anúncios.'
       );
     s = b.getElementsByTagName(e)[0];
     s.parentNode.insertBefore(t, s);
@@ -43,9 +42,10 @@ const injectPixel = (pixelId: string) => {
 
   window.fbq('init', pixelId);
   window.fbq('track', 'PageView');
-  console.log('[FacebookPixel] init + PageView', pixelId);
+  lastTrackedPath = initialPath;
+  console.log('[FacebookPixel] init + PageView', pixelId, initialPath);
 
-  // <noscript> fallback (ajuda na validação pelo Meta Pixel Helper)
+  // <noscript> fallback p/ Meta Pixel Helper
   const noscript = document.createElement('noscript');
   const img = document.createElement('img');
   img.height = 1;
@@ -58,7 +58,6 @@ const injectPixel = (pixelId: string) => {
 
 export const FacebookPixel: React.FC = () => {
   const location = useLocation();
-  const ready = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -75,8 +74,7 @@ export const FacebookPixel: React.FC = () => {
         return;
       }
       if (data?.facebook_pixel_enabled && data.facebook_pixel_id) {
-        injectPixel(data.facebook_pixel_id);
-        ready.current = true;
+        injectPixel(data.facebook_pixel_id, location.pathname);
       } else {
         console.log('[FacebookPixel] Desativado ou sem ID configurado.');
       }
@@ -84,12 +82,15 @@ export const FacebookPixel: React.FC = () => {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (injected && window.fbq) {
-      window.fbq('track', 'PageView');
-    }
+    if (!injected || !window.fbq) return;
+    if (lastTrackedPath === location.pathname) return; // evita duplicar o PageView do init
+    lastTrackedPath = location.pathname;
+    window.fbq('track', 'PageView');
+    console.log('[FacebookPixel] PageView', location.pathname);
   }, [location.pathname]);
 
   return null;
