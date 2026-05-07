@@ -44,16 +44,6 @@ const injectPixel = (pixelId: string, initialPath: string) => {
   window.fbq('track', 'PageView');
   lastTrackedPath = initialPath;
   console.log('[FacebookPixel] init + PageView', pixelId, initialPath);
-
-  // <noscript> fallback p/ Meta Pixel Helper
-  const noscript = document.createElement('noscript');
-  const img = document.createElement('img');
-  img.height = 1;
-  img.width = 1;
-  img.style.display = 'none';
-  img.src = `https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`;
-  noscript.appendChild(img);
-  document.body.appendChild(noscript);
 };
 
 export const FacebookPixel: React.FC = () => {
