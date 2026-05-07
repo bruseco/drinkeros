@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ShieldCheck, ArrowLeft, CheckCircle2, Copy, CreditCard, QrCode, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import drinkerosLogo from "@/assets/logotipo-drinkeros.png";
+import { trackFbEvent } from "@/lib/metaPixel";
+import { useViewContent } from "@/hooks/useViewContent";
 
 type ClubMethod = "card" | "pix";
 
