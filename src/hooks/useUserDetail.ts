@@ -183,7 +183,7 @@ export const useUserDetail = (userId: string | undefined) => {
 
       const exclusiveRows = (exclusiveRes.data || []) as any[];
       const featureLabel = (f: string) =>
-        f === 'receitas' ? 'Bebida Decifrada (Receitas Exclusivas)' : `Acesso Exclusivo: ${f}`;
+        f === 'receitas' ? 'Receitas' : `Acesso Exclusivo: ${f}`;
       const exclusives: UserDetailContent[] = exclusiveRows.map((r) => ({
         id: r.id,
         ref_id: r.feature,
