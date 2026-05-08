@@ -2,28 +2,37 @@
 
 Sempre que um pagamento for confirmado (Stripe, Mercado Pago ou Clube), o sistema:
 1. Cria/atualiza o cliente (stakeholder) no NIBO
-2. Cria um agendamento de recebimento já marcado como recebido
+2. Cria um agendamento de recebimento já marcado como recebido, na categoria **101 – Infoprodutos e Cursos**
 3. Dispara a emissão automática da NFS-e
 
-Tudo isso roda no backend, de forma idempotente (não duplica se o webhook reprocessa).
+Tudo no backend, idempotente (não duplica em reprocessos de webhook).
 
 ---
 
-## Pré-requisitos que vou pedir antes de começar
+## Pré-requisitos (vou pedir via formulário seguro de secrets)
 
-Para conseguir conversar com a API do NIBO, preciso destes dados (todos pegos dentro do painel NIBO em **Empresa → Configurações → API** e **Cadastros**):
+1. **NIBO_API_TOKEN** — token de API (NIBO Premium). Encontrado em: *Empresa → Mais opções → Configurações → API*
+2. **NIBO_ACCOUNT_ID** — ID da conta financeira onde o recebimento entra (ex.: "Conta Stripe / Mercado Pago / Caixa")
+3. **NIBO_SERVICE_PROFILE_ID** — perfil de serviço usado para a NFS-e (já configurado no NIBO com CNAE, alíquota ISS, descrição padrão, etc.)
+4. **NIBO_CATEGORY_ID** — ID da categoria única **"101 – Infoprodutos e Cursos"**
 
-1. **NIBO_API_TOKEN** — token de API (plano Premium do NIBO)
-2. **NIBO_ACCOUNT_ID** — ID da conta financeira onde o recebimento entra (ex: "Conta Stripe", "Conta Mercado Pago")
-3. **NIBO_SERVICE_PROFILE_ID** — perfil de serviço usado para a NFS-e (já configurado no NIBO com CNAE, alíquota ISS, etc.)
-4. **Os 5 IDs de categoria de receita**, um por tipo de produto:
-   - `NIBO_CATEGORY_CURSO`
-   - `NIBO_CATEGORY_EBOOK`
-   - `NIBO_CATEGORY_COMBO`
-   - `NIBO_CATEGORY_PACOTE`
-   - `NIBO_CATEGORY_CLUBE`
+> Mudança em relação ao plano anterior: **uma categoria única**, não 5. Os produtos viram diferentes pelo nome do agendamento ("Descrição") e pelo número de referência (`Ref`), igual ao que aparece hoje no seu NIBO.
 
-Vou pedir tudo isso de uma vez via formulário seguro de secrets quando começar a implementação.
+---
+
+## O que aparece em cada agendamento criado
+
+Inspirado no padrão que você já usa:
+
+| Campo NIBO | Origem |
+|---|---|
+| **Nome (stakeholder)** | `profiles.full_name` |
+| **CPF** | `profiles.cpf` (já coletado no checkout MP e no perfil) |
+| **Descrição** | Nome do produto (ex.: "Clube dos Drinkeros – Anual", "Pacote 7 Anos Drinkeros", "Drink Delivery & Engarrafados") |
+| **Ref** | `order_ref` interno (ex.: `course:UUID:user:UUID:timestamp`) |
+| **Categoria** | sempre `NIBO_CATEGORY_ID` (101 – Infoprodutos e Cursos) |
+| **Valor** | `amount` da venda |
+| **Data agendamento / vencimento / recebimento** | data do pagamento confirmado |
 
 ---
 
@@ -31,73 +40,65 @@ Vou pedir tudo isso de uma vez via formulário seguro de secrets quando começar
 
 ### Para você
 - Nada visível no app do aluno.
-- Painel admin ganha uma seção em **Pedidos** mostrando, por venda: status NIBO (pendente / enviado / NFS-e emitida / erro) e link direto para o agendamento no NIBO.
-- Botão "Reenviar para NIBO" para corrigir vendas que falharem.
+- Em **Admin → Pedidos**: nova coluna **NIBO** com badge (Pendente / Enviado / NFS-e emitida / Erro) e botão "Reenviar para NIBO" para corrigir falhas.
 
 ### Para o cliente final
-- Nada muda no fluxo de checkout.
-- A NF chega normalmente conforme o NIBO já emite hoje.
+- Nada muda. NF chega normalmente conforme NIBO já emite hoje.
 
 ---
 
-## Como vai funcionar (visão técnica)
+## Como vai funcionar (técnico)
 
-### 1. Tabela de controle `nibo_invoices`
-Nova tabela para rastrear o que já foi enviado:
-- referência da venda (`order_ref`, `product_type`, `user_id`, `amount`)
-- `nibo_stakeholder_id`, `nibo_schedule_id`, `nibo_invoice_id`
-- `status` (pending / sent / invoiced / error)
-- `error_message`, `attempts`, timestamps
+### 1. Tabela `nibo_invoices` (controle e idempotência)
+Campos: `order_ref` (único), `product_type`, `user_id`, `amount`, `nibo_stakeholder_id`, `nibo_schedule_id`, `nibo_invoice_id`, `status` (pending / sent / invoiced / error / pending_cpf), `error_message`, `attempts`, timestamps.
 
-A `order_ref` é única — garante idempotência (Stripe e Mercado Pago podem reenviar webhook).
+A unicidade do `order_ref` impede duplicatas mesmo que Stripe/MP reenviem o webhook.
 
 ### 2. Edge function `nibo-sync`
-Função única que recebe `{ order_ref }` e faz:
-1. Lê os dados da venda + perfil do comprador (nome, email, CPF, telefone)
-2. Busca/cria stakeholder no NIBO via `POST /customers` (deduplica por CPF)
-3. Cria agendamento de recebimento via `POST /schedules/receivable` já com `scheduleDate`, `dueDate`, categoria correta e status pago
-4. Dispara `POST /invoices/serviceinvoice` com o `scheduleId` e o `serviceProfileId` para emitir a NFS-e
-5. Atualiza `nibo_invoices` com os IDs e status finais
-6. Em qualquer erro, salva mensagem e mantém status para reprocesso
+Recebe `{ order_ref }` e executa:
+1. Lê venda + perfil do comprador
+2. Busca/cria stakeholder no NIBO (`POST /v1/customers`), deduplicando por CPF
+3. Cria agendamento de recebimento já recebido (`POST /v1/schedules/receivable`) com a categoria 101
+4. Emite NFS-e (`POST /v1/invoices/serviceinvoice`) com o `scheduleId` + `serviceProfileId`
+5. Atualiza `nibo_invoices` com IDs e status. Erro → guarda mensagem para reprocesso
 
-Toda chamada vai pra `https://api.nibo.com.br/v1/...` com header `apitoken: $NIBO_API_TOKEN`.
+Header padrão: `apitoken: $NIBO_API_TOKEN`. Base URL: `https://api.nibo.com.br/v1/...`
 
-### 3. Disparo automático
-Adiciono uma chamada `supabase.functions.invoke('nibo-sync', { body: { order_ref } })` em três pontos:
-- `supabase/functions/stripe-webhook/index.ts` — após gravar `vip_payments` / `user_courses` / `user_ebooks` / `user_combos` / `user_packages`
-- `supabase/functions/mercadopago-webhook/index.ts` — mesmo ponto
-- Cron a cada 15 min reprocessa registros com `status='error'` e `attempts<5` (resiliente a indisponibilidade do NIBO)
+### 3. Disparos automáticos
+- `supabase/functions/stripe-webhook/index.ts` — após gravar venda
+- `supabase/functions/mercadopago-webhook/index.ts` — após gravar venda
+- Cron a cada 15 min reprocessa `status = 'error'` com `attempts < 5`
 
-### 4. Coleta de CPF
-Hoje o checkout do Mercado Pago já coleta CPF (Brick) e o perfil também tem campo CPF. Para Stripe, vou ler o CPF do `profiles.cpf`. Se faltar:
-- Marca a venda como `pending_cpf`
-- Stakeholder é criado no NIBO sem CPF (apenas nome/email)
-- NFS-e fica como rascunho até o usuário preencher CPF no perfil; cron dispara emissão quando completar
+### 4. CPF
+Lê `profiles.cpf`. Se faltar:
+- Stakeholder criado no NIBO sem CPF
+- Status fica `pending_cpf`
+- Cron tenta novamente quando o usuário completar o CPF no perfil
 
 ### 5. Painel admin
 Em `src/pages/admin/AdminOrders.tsx`:
 - Coluna "NIBO" com badge de status
-- Click abre drawer com detalhes (IDs do NIBO, link externo, erro se houver, botão "Reenviar")
+- Drawer com IDs do NIBO, mensagem de erro e botão "Reenviar"
 
 ---
 
-## O que vou construir (ordem)
+## Ordem de implementação
 
-1. Pedir os secrets (NIBO_API_TOKEN + 6 IDs) via formulário seguro
+1. Pedir os 4 secrets (NIBO_API_TOKEN, NIBO_ACCOUNT_ID, NIBO_SERVICE_PROFILE_ID, NIBO_CATEGORY_ID)
 2. Migração: tabela `nibo_invoices` + RLS (admin only)
-3. Edge function `nibo-sync` com cliente HTTP, retry, idempotência
-4. Edge function `nibo-retry-failed` agendada via cron a cada 15 min
-5. Hooks nos webhooks Stripe e Mercado Pago para enfileirar sync
-6. UI no AdminOrders: coluna status + botão reenviar
-7. Teste end-to-end com 1 venda em cada provedor (modo sandbox/produção do NIBO conforme você indicar)
+3. Edge function `nibo-sync` (cliente HTTP, retry, idempotência)
+4. Edge function `nibo-retry-failed` agendada por cron a cada 15 min
+5. Hooks nos webhooks Stripe e Mercado Pago
+6. UI no AdminOrders: coluna + botão reenviar
+7. Teste com 1 venda real em cada provedor
 
 ---
 
 ## Riscos e suposições
 
-- **Suposição:** seu plano NIBO é Premium (necessário para a API). Se não for, a integração não funciona — confirmar antes.
-- **Suposição:** o `ServiceProfileId` já está cadastrado no NIBO com tributação correta. A NFS-e é emitida com base nele.
-- **Risco:** prefeituras às vezes rejeitam NFS-e por dados incompletos do tomador (endereço, IM). Nesses casos a NF fica como erro no NIBO e você corrige por lá — nosso painel mostra o status mas não tenta consertar dados fiscais.
-- **Compras antigas (anteriores à integração):** não são enviadas retroativamente por padrão. Se quiser, monto um botão "enviar para NIBO" também na lista existente, mas isso é trabalho extra.
+- **Suposição:** plano NIBO Premium (necessário para a API).
+- **Suposição:** o `ServiceProfileId` já está configurado no NIBO com tributação correta — ele dita o cálculo de impostos e a descrição padrão da NF.
+- **Risco:** prefeituras às vezes rejeitam NFS-e por dados incompletos do tomador. Esses casos ficam como erro no NIBO; o painel mostra o status, mas a correção fiscal é feita lá no NIBO.
+- **Compras antigas (anteriores à integração):** não enviadas retroativamente. Se quiser, posso adicionar depois um botão "enviar para NIBO" também na lista existente.
 
-Confirme se posso seguir, e já te peço os secrets do NIBO no próximo passo.
+Confirme e eu já peço os 4 secrets para começar a implementação.
