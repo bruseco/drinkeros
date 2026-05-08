@@ -299,23 +299,29 @@ export default function Checkout() {
         setPaid(true);
         toast.success("Pagamento aprovado!");
         const txId = String(data.id || `${product.slug}-${Date.now()}`);
-        trackFbEvent(
-          'Purchase',
-          {
-            value: finalPrice,
-            currency: 'BRL',
-            content_name: product.name,
-            content_type: isClub ? 'subscription' : 'product',
-            content_ids: [product.id],
-            transaction_id: txId,
-          },
-          { dedupeKey: `purchase:${txId}` }
-        );
         if (isClub) {
           trackFbEvent(
             'Subscribe',
-            { value: 69.0, currency: 'BRL', content_name: 'Clube dos Drinkeros · Anual' },
+            {
+              value: 69.0,
+              currency: 'BRL',
+              content_name: 'Clube dos Drinkeros Anual',
+              content_type: 'subscription',
+            },
             { dedupeKey: `subscribe:${txId}` }
+          );
+        } else {
+          trackFbEvent(
+            'Purchase',
+            {
+              value: finalPrice,
+              currency: 'BRL',
+              content_name: product.name,
+              content_type: 'product',
+              content_ids: [product.id],
+              transaction_id: txId,
+            },
+            { dedupeKey: `purchase:${txId}` }
           );
         }
         setTimeout(() => navigate(isClub ? "/clube?clube=success" : `/${product.slug}?checkout=success`), 1500);
