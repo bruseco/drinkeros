@@ -8,6 +8,7 @@ declare global {
     _fbq?: any;
     __META_PIXEL_LAST_PAGEVIEW_PATH__?: string;
     __META_PIXEL_LAST_PAGEVIEW_TS__?: number;
+    __META_PIXEL_PAGEVIEW_TS_BY_PATH__?: Record<string, number>;
   }
 }
 
@@ -20,17 +21,21 @@ const trackPageViewOnce = (pathname: string) => {
   const now = Date.now();
   const lastPath = window.__META_PIXEL_LAST_PAGEVIEW_PATH__;
   const lastTs = window.__META_PIXEL_LAST_PAGEVIEW_TS__ ?? 0;
+  const pathTimestamps = window.__META_PIXEL_PAGEVIEW_TS_BY_PATH__ ?? {};
+  const lastTsForPath = pathTimestamps[pathname] ?? 0;
 
   if (lastPath === pathname) {
     console.log('[MetaPixel] PageView skipped duplicate', pathname);
     return;
   }
 
-  if (lastPath === pathname && now - lastTs < PAGEVIEW_DEDUPE_MS) {
+  if (now - lastTsForPath < PAGEVIEW_DEDUPE_MS || now - lastTs < PAGEVIEW_DEDUPE_MS && lastPath === pathname) {
     console.log('[MetaPixel] PageView skipped duplicate', pathname);
     return;
   }
 
+  pathTimestamps[pathname] = now;
+  window.__META_PIXEL_PAGEVIEW_TS_BY_PATH__ = pathTimestamps;
   window.__META_PIXEL_LAST_PAGEVIEW_PATH__ = pathname;
   window.__META_PIXEL_LAST_PAGEVIEW_TS__ = now;
   window.fbq('track', 'PageView');
