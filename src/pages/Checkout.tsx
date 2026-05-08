@@ -267,20 +267,13 @@ export default function Checkout() {
           const subId = data?.id || data?.preapproval_id || `${product.slug}-${Date.now()}`;
           trackFbEvent(
             'Subscribe',
-            { value: 69.0, currency: 'BRL', content_name: 'Clube dos Drinkeros · Anual' },
-            { dedupeKey: `subscribe:${subId}` }
-          );
-          trackFbEvent(
-            'Purchase',
             {
               value: 69.0,
               currency: 'BRL',
-              content_name: 'Clube dos Drinkeros · Anual',
+              content_name: 'Clube dos Drinkeros Anual',
               content_type: 'subscription',
-              content_ids: [product.id],
-              transaction_id: subId,
             },
-            { dedupeKey: `purchase:${subId}` }
+            { dedupeKey: `subscribe:${subId}` }
           );
           setTimeout(() => navigate("/clube?clube=success"), 1500);
         } else if (data?.status === "pending") {
