@@ -212,24 +212,30 @@ export default function Checkout() {
       if (j.status === "approved") {
           setPaid(true);
           clearInterval(interval);
-          // Purchase: pagamento Pix confirmado
-          trackFbEvent(
-            'Purchase',
-            {
-              value: finalPrice,
-              currency: 'BRL',
-              content_name: product?.name,
-              content_type: isClub ? 'subscription' : 'product',
-              content_ids: product ? [product.id] : undefined,
-              transaction_id: pixPaymentId,
-            },
-            { dedupeKey: `purchase:${pixPaymentId}` }
-          );
+          // Clube anual = Subscribe; produto avulso = Purchase
           if (isClub) {
             trackFbEvent(
               'Subscribe',
-              { value: 69.0, currency: 'BRL', content_name: 'Clube dos Drinkeros · Anual' },
+              {
+                value: 69.0,
+                currency: 'BRL',
+                content_name: 'Clube dos Drinkeros Anual',
+                content_type: 'subscription',
+              },
               { dedupeKey: `subscribe:${pixPaymentId}` }
+            );
+          } else {
+            trackFbEvent(
+              'Purchase',
+              {
+                value: finalPrice,
+                currency: 'BRL',
+                content_name: product?.name,
+                content_type: 'product',
+                content_ids: product ? [product.id] : undefined,
+                transaction_id: pixPaymentId,
+              },
+              { dedupeKey: `purchase:${pixPaymentId}` }
             );
           }
           setTimeout(() => navigate(isClub ? "/clube?clube=success" : `/${product?.slug}?checkout=success`), 2000);
