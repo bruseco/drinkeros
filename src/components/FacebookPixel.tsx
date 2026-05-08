@@ -91,7 +91,7 @@ export const FacebookPixel: React.FC = () => {
         return;
       }
       if (data?.facebook_pixel_enabled && data.facebook_pixel_id) {
-        injectPixel(data.facebook_pixel_id, location.pathname);
+        injectPixel(data.facebook_pixel_id, window.location.pathname);
       } else {
         console.log('[FacebookPixel] Desativado ou sem ID configurado.');
       }
