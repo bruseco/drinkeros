@@ -20,7 +20,6 @@ const trackPageViewOnce = (pathname: string) => {
 
   const now = Date.now();
   const lastPath = window.__META_PIXEL_LAST_PAGEVIEW_PATH__;
-  const lastTs = window.__META_PIXEL_LAST_PAGEVIEW_TS__ ?? 0;
   const pathTimestamps = window.__META_PIXEL_PAGEVIEW_TS_BY_PATH__ ?? {};
   const lastTsForPath = pathTimestamps[pathname] ?? 0;
 
