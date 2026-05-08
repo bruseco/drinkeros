@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -7,43 +7,42 @@ declare global {
     fbq?: any;
     _fbq?: any;
     __META_PIXEL_LAST_PAGEVIEW_PATH__?: string;
-    __META_PIXEL_LAST_PAGEVIEW_TS__?: number;
-    __META_PIXEL_PAGEVIEW_TS_BY_PATH__?: Record<string, number>;
+    __META_PIXEL_LAST_PAGEVIEW_TIME__?: number;
+    __META_PIXEL_INITIALIZED_ID__?: string;
+    __META_PIXEL_READY__?: boolean;
   }
 }
 
 let injected = false;
-const PAGEVIEW_DEDUPE_MS = 2000;
+const PAGEVIEW_LOCK_MS = 3000;
 
-const trackPageViewOnce = (pathname: string) => {
-  if (typeof window === 'undefined' || !window.fbq) return;
+const firePageViewFromGlobalRoute = (pathname: string) => {
+  if (typeof window === 'undefined' || !window.fbq) return false;
 
   const now = Date.now();
   const lastPath = window.__META_PIXEL_LAST_PAGEVIEW_PATH__;
-  const pathTimestamps = window.__META_PIXEL_PAGEVIEW_TS_BY_PATH__ ?? {};
-  const lastTsForPath = pathTimestamps[pathname] ?? 0;
+  const lastTime = window.__META_PIXEL_LAST_PAGEVIEW_TIME__ ?? 0;
 
-  if (lastPath === pathname) {
-    console.log('[MetaPixel] PageView skipped duplicate', pathname);
-    return;
+  if (lastPath === pathname || now - lastTime < PAGEVIEW_LOCK_MS) {
+    console.warn('[MetaPixel] PageView BLOCKED duplicate', pathname, now, new Error().stack);
+    return false;
   }
 
-  if (now - lastTsForPath < PAGEVIEW_DEDUPE_MS) {
-    console.log('[MetaPixel] PageView skipped duplicate', pathname);
-    return;
-  }
-
-  pathTimestamps[pathname] = now;
-  window.__META_PIXEL_PAGEVIEW_TS_BY_PATH__ = pathTimestamps;
   window.__META_PIXEL_LAST_PAGEVIEW_PATH__ = pathname;
-  window.__META_PIXEL_LAST_PAGEVIEW_TS__ = now;
+  window.__META_PIXEL_LAST_PAGEVIEW_TIME__ = now;
   window.fbq('track', 'PageView');
-  console.log('[MetaPixel] PageView fired', pathname);
+  console.log('[MetaPixel] PageView FIRED', pathname, now, new Error().stack);
+  return true;
 };
 
-const injectPixel = (pixelId: string, initialPath: string) => {
-  if (injected || typeof window === 'undefined') return;
-  injected = true;
+const injectPixel = (pixelId: string) => {
+  if (typeof window === 'undefined') return false;
+
+  if (window.__META_PIXEL_INITIALIZED_ID__ === pixelId && window.fbq) {
+    injected = true;
+    window.__META_PIXEL_READY__ = true;
+    return true;
+  }
 
   /* eslint-disable */
   (function (f: any, b, e, v, n?: any, t?: any, s?: any) {
@@ -73,12 +72,18 @@ const injectPixel = (pixelId: string, initialPath: string) => {
   // para que apenas eventos disparados manualmente apareçam no Pixel Helper.
   window.fbq('set', 'autoConfig', 'false', pixelId);
   window.fbq('init', pixelId);
-  trackPageViewOnce(initialPath);
-  console.log('[FacebookPixel] init (autoConfig off)', pixelId, initialPath);
+  injected = true;
+  window.__META_PIXEL_INITIALIZED_ID__ = pixelId;
+  window.__META_PIXEL_READY__ = true;
+  console.log('[FacebookPixel] init (autoConfig off)', pixelId);
+  return true;
 };
 
 export const FacebookPixel: React.FC = () => {
   const location = useLocation();
+  const [pixelReady, setPixelReady] = useState(() =>
+    typeof window !== 'undefined' ? Boolean(window.__META_PIXEL_READY__) : false
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -95,7 +100,7 @@ export const FacebookPixel: React.FC = () => {
         return;
       }
       if (data?.facebook_pixel_enabled && data.facebook_pixel_id) {
-        injectPixel(data.facebook_pixel_id, window.location.pathname);
+        setPixelReady(injectPixel(data.facebook_pixel_id));
       } else {
         console.log('[FacebookPixel] Desativado ou sem ID configurado.');
       }
@@ -107,9 +112,9 @@ export const FacebookPixel: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!injected || !window.fbq) return;
-    trackPageViewOnce(location.pathname);
-  }, [location.pathname]);
+    if (!pixelReady || !injected || !window.fbq) return;
+    firePageViewFromGlobalRoute(location.pathname);
+  }, [location.pathname, pixelReady]);
 
   return null;
 };

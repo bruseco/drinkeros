@@ -9,7 +9,6 @@ declare global {
 }
 
 type FbEvent =
-  | 'PageView'
   | 'CompleteRegistration'
   | 'Lead'
   | 'ViewContent'
