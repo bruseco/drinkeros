@@ -29,7 +29,7 @@ const trackPageViewOnce = (pathname: string) => {
     return;
   }
 
-  if (now - lastTsForPath < PAGEVIEW_DEDUPE_MS || now - lastTs < PAGEVIEW_DEDUPE_MS && lastPath === pathname) {
+  if (now - lastTsForPath < PAGEVIEW_DEDUPE_MS) {
     console.log('[MetaPixel] PageView skipped duplicate', pathname);
     return;
   }
