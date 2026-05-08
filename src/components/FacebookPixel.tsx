@@ -6,11 +6,40 @@ declare global {
   interface Window {
     fbq?: any;
     _fbq?: any;
+    __META_PIXEL_LAST_PAGEVIEW_PATH__?: string;
+    __META_PIXEL_LAST_PAGEVIEW_TS__?: number;
+    __META_PIXEL_PAGEVIEW_TS_BY_PATH__?: Record<string, number>;
   }
 }
 
 let injected = false;
-let lastTrackedPath: string | null = null;
+const PAGEVIEW_DEDUPE_MS = 2000;
+
+const trackPageViewOnce = (pathname: string) => {
+  if (typeof window === 'undefined' || !window.fbq) return;
+
+  const now = Date.now();
+  const lastPath = window.__META_PIXEL_LAST_PAGEVIEW_PATH__;
+  const pathTimestamps = window.__META_PIXEL_PAGEVIEW_TS_BY_PATH__ ?? {};
+  const lastTsForPath = pathTimestamps[pathname] ?? 0;
+
+  if (lastPath === pathname) {
+    console.log('[MetaPixel] PageView skipped duplicate', pathname);
+    return;
+  }
+
+  if (now - lastTsForPath < PAGEVIEW_DEDUPE_MS) {
+    console.log('[MetaPixel] PageView skipped duplicate', pathname);
+    return;
+  }
+
+  pathTimestamps[pathname] = now;
+  window.__META_PIXEL_PAGEVIEW_TS_BY_PATH__ = pathTimestamps;
+  window.__META_PIXEL_LAST_PAGEVIEW_PATH__ = pathname;
+  window.__META_PIXEL_LAST_PAGEVIEW_TS__ = now;
+  window.fbq('track', 'PageView');
+  console.log('[MetaPixel] PageView fired', pathname);
+};
 
 const injectPixel = (pixelId: string, initialPath: string) => {
   if (injected || typeof window === 'undefined') return;
@@ -44,9 +73,8 @@ const injectPixel = (pixelId: string, initialPath: string) => {
   // para que apenas eventos disparados manualmente apareçam no Pixel Helper.
   window.fbq('set', 'autoConfig', 'false', pixelId);
   window.fbq('init', pixelId);
-  window.fbq('track', 'PageView');
-  lastTrackedPath = initialPath;
-  console.log('[FacebookPixel] init + PageView (autoConfig off)', pixelId, initialPath);
+  trackPageViewOnce(initialPath);
+  console.log('[FacebookPixel] init (autoConfig off)', pixelId, initialPath);
 };
 
 export const FacebookPixel: React.FC = () => {
@@ -67,7 +95,7 @@ export const FacebookPixel: React.FC = () => {
         return;
       }
       if (data?.facebook_pixel_enabled && data.facebook_pixel_id) {
-        injectPixel(data.facebook_pixel_id, location.pathname);
+        injectPixel(data.facebook_pixel_id, window.location.pathname);
       } else {
         console.log('[FacebookPixel] Desativado ou sem ID configurado.');
       }
@@ -80,10 +108,7 @@ export const FacebookPixel: React.FC = () => {
 
   useEffect(() => {
     if (!injected || !window.fbq) return;
-    if (lastTrackedPath === location.pathname) return; // evita duplicar o PageView do init
-    lastTrackedPath = location.pathname;
-    window.fbq('track', 'PageView');
-    console.log('[FacebookPixel] PageView', location.pathname);
+    trackPageViewOnce(location.pathname);
   }, [location.pathname]);
 
   return null;
