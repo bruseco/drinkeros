@@ -40,10 +40,13 @@ const injectPixel = (pixelId: string, initialPath: string) => {
   })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
   /* eslint-enable */
 
+  // Desliga a detecção automática de eventos (SubscribedButtonClick, ButtonClick, etc.)
+  // para que apenas eventos disparados manualmente apareçam no Pixel Helper.
+  window.fbq('set', 'autoConfig', 'false', pixelId);
   window.fbq('init', pixelId);
   window.fbq('track', 'PageView');
   lastTrackedPath = initialPath;
-  console.log('[FacebookPixel] init + PageView', pixelId, initialPath);
+  console.log('[FacebookPixel] init + PageView (autoConfig off)', pixelId, initialPath);
 };
 
 export const FacebookPixel: React.FC = () => {
