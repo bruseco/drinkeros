@@ -279,6 +279,20 @@ const AdminAccessMetrics: React.FC = () => {
   );
 };
 
+const DatePickerButton: React.FC<{ value: Date | undefined; onChange: (d: Date | undefined) => void; placeholder: string }> = ({ value, onChange, placeholder }) => (
+  <Popover>
+    <PopoverTrigger asChild>
+      <Button variant="outline" size="sm" className={cn('justify-start text-left font-normal', !value && 'text-muted-foreground')}>
+        <CalendarIcon className="mr-2 h-4 w-4" />
+        {value ? format(value, "dd/MM/yyyy", { locale: ptBR }) : placeholder}
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent className="w-auto p-0" align="start">
+      <Calendar mode="single" selected={value} onSelect={onChange} initialFocus locale={ptBR} />
+    </PopoverContent>
+  </Popover>
+);
+
 interface RankItem {
   id: string;
   name: string;
