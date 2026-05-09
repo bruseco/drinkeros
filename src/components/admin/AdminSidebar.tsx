@@ -39,7 +39,7 @@ const adminItems = [
   { title: 'CRM', icon: Target, href: '/admin/crm' },
   { title: 'Métricas UX', icon: BarChart3, href: '/admin/ux-metrics' },
   { title: 'Métricas de Acesso', icon: Activity, href: '/admin/metricas-acesso' },
-  { title: 'Métricas', icon: LineChart, href: '/admin/metricas' },
+  { title: 'Tracking', icon: LineChart, href: '/admin/metricas' },
   { title: 'Páginas de Venda', icon: Tag, href: '/admin/paginas-venda' },
 ];
 
