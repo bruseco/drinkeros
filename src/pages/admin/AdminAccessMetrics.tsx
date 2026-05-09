@@ -40,8 +40,8 @@ const presetLabels: Record<Exclude<Preset, 'custom'>, string> = {
 
 const AdminAccessMetrics: React.FC = () => {
   const [preset, setPreset] = useState<Preset>('30d');
-  const [customFrom, setCustomFrom] = useState<string>('');
-  const [customTo, setCustomTo] = useState<string>('');
+  const [customFrom, setCustomFrom] = useState<Date | undefined>();
+  const [customTo, setCustomTo] = useState<Date | undefined>();
 
   const { from, to } = useMemo(() => {
     const now = new Date();
