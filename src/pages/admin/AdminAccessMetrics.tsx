@@ -2,8 +2,12 @@ import React, { useMemo, useState } from 'react';
 import { useAccessMetrics } from '@/hooks/useAccessMetrics';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Loader2, Users, TrendingUp, Clock, Award, Wine, Download, BookOpen, Activity, User as UserIcon } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Loader2, Users, TrendingUp, Clock, Award, Wine, Download, BookOpen, Activity, User as UserIcon, CalendarIcon } from 'lucide-react';
+import { ptBR } from 'date-fns/locale';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import defaultCover from '@/assets/default-cover.png';
 
 type Preset = 'today' | '7d' | '30d' | 'mtd' | 'custom';
@@ -36,8 +40,8 @@ const presetLabels: Record<Exclude<Preset, 'custom'>, string> = {
 
 const AdminAccessMetrics: React.FC = () => {
   const [preset, setPreset] = useState<Preset>('30d');
-  const [customFrom, setCustomFrom] = useState<string>('');
-  const [customTo, setCustomTo] = useState<string>('');
+  const [customFrom, setCustomFrom] = useState<Date | undefined>();
+  const [customTo, setCustomTo] = useState<Date | undefined>();
 
   const { from, to } = useMemo(() => {
     const now = new Date();
@@ -57,12 +61,8 @@ const AdminAccessMetrics: React.FC = () => {
       return { from: startOfDay(f), to: endOfDay(now) };
     }
     // custom — parse YYYY-MM-DD as LOCAL date (não UTC) pra não pular um dia em BRT
-    const parseLocal = (s: string) => {
-      const [y, m, d] = s.split('-').map(Number);
-      return new Date(y, (m || 1) - 1, d || 1);
-    };
-    const f = customFrom ? parseLocal(customFrom) : startOfDay(now);
-    const t = customTo ? parseLocal(customTo) : endOfDay(now);
+    const f = customFrom ?? now;
+    const t = customTo ?? now;
     return { from: startOfDay(f), to: endOfDay(t) };
   }, [preset, customFrom, customTo]);
 
@@ -92,10 +92,10 @@ const AdminAccessMetrics: React.FC = () => {
             Personalizado
           </Button>
           {preset === 'custom' && (
-            <div className="flex items-center gap-2 ml-2">
-              <Input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} className="w-auto" />
+            <div className="flex items-center gap-2 ml-2 flex-wrap">
+              <DatePickerButton value={customFrom} onChange={setCustomFrom} placeholder="Data inicial" />
               <span className="text-muted-foreground text-sm">até</span>
-              <Input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} className="w-auto" />
+              <DatePickerButton value={customTo} onChange={setCustomTo} placeholder="Data final" />
             </div>
           )}
         </CardContent>
@@ -278,6 +278,20 @@ const AdminAccessMetrics: React.FC = () => {
     </div>
   );
 };
+
+const DatePickerButton: React.FC<{ value: Date | undefined; onChange: (d: Date | undefined) => void; placeholder: string }> = ({ value, onChange, placeholder }) => (
+  <Popover>
+    <PopoverTrigger asChild>
+      <Button variant="outline" size="sm" className={cn('justify-start text-left font-normal', !value && 'text-muted-foreground')}>
+        <CalendarIcon className="mr-2 h-4 w-4" />
+        {value ? format(value, "dd/MM/yyyy", { locale: ptBR }) : placeholder}
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent className="w-auto p-0" align="start">
+      <Calendar mode="single" selected={value} onSelect={onChange} initialFocus locale={ptBR} />
+    </PopoverContent>
+  </Popover>
+);
 
 interface RankItem {
   id: string;
