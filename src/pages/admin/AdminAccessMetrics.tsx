@@ -92,10 +92,10 @@ const AdminAccessMetrics: React.FC = () => {
             Personalizado
           </Button>
           {preset === 'custom' && (
-            <div className="flex items-center gap-2 ml-2">
-              <Input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} className="w-auto" />
+            <div className="flex items-center gap-2 ml-2 flex-wrap">
+              <DatePickerButton value={customFrom} onChange={setCustomFrom} placeholder="Data inicial" />
               <span className="text-muted-foreground text-sm">até</span>
-              <Input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} className="w-auto" />
+              <DatePickerButton value={customTo} onChange={setCustomTo} placeholder="Data final" />
             </div>
           )}
         </CardContent>
