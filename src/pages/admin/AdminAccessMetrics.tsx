@@ -56,9 +56,13 @@ const AdminAccessMetrics: React.FC = () => {
       const f = new Date(now.getFullYear(), now.getMonth(), 1);
       return { from: startOfDay(f), to: endOfDay(now) };
     }
-    // custom
-    const f = customFrom ? new Date(customFrom) : startOfDay(now);
-    const t = customTo ? new Date(customTo) : endOfDay(now);
+    // custom — parse YYYY-MM-DD as LOCAL date (não UTC) pra não pular um dia em BRT
+    const parseLocal = (s: string) => {
+      const [y, m, d] = s.split('-').map(Number);
+      return new Date(y, (m || 1) - 1, d || 1);
+    };
+    const f = customFrom ? parseLocal(customFrom) : startOfDay(now);
+    const t = customTo ? parseLocal(customTo) : endOfDay(now);
     return { from: startOfDay(f), to: endOfDay(t) };
   }, [preset, customFrom, customTo]);
 
