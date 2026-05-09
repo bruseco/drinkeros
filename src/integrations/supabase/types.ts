@@ -1210,6 +1210,7 @@ export type Database = {
           ingredients: string[] | null
           instructions: string | null
           is_published: boolean
+          posted_checked_at: string | null
           slug: string | null
           title: string
           updated_at: string
@@ -1226,6 +1227,7 @@ export type Database = {
           ingredients?: string[] | null
           instructions?: string | null
           is_published?: boolean
+          posted_checked_at?: string | null
           slug?: string | null
           title: string
           updated_at?: string
@@ -1242,6 +1244,7 @@ export type Database = {
           ingredients?: string[] | null
           instructions?: string | null
           is_published?: boolean
+          posted_checked_at?: string | null
           slug?: string | null
           title?: string
           updated_at?: string

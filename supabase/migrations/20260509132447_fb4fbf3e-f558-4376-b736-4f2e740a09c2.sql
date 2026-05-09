@@ -1,0 +1,2 @@
+ALTER TABLE public.exclusive_posts ADD COLUMN IF NOT EXISTS posted_checked_at timestamptz;
+CREATE INDEX IF NOT EXISTS idx_exclusive_posts_posted_checked_at ON public.exclusive_posts(posted_checked_at);
