@@ -67,6 +67,7 @@ import AdminUXMetrics from "./pages/admin/AdminUXMetrics";
 import AdminAccessMetrics from "./pages/admin/AdminAccessMetrics";
 import AdminSalesPages from "./pages/admin/AdminSalesPages";
 import AdminTracking from "./pages/admin/AdminTracking";
+import AdminPostChecklist from "./pages/admin/AdminPostChecklist";
 import { FacebookPixel } from "./components/FacebookPixel";
 
 // User pages
@@ -190,6 +191,7 @@ const App = () => (
               <Route path="metricas-acesso" element={<AdminAccessMetrics />} />
               <Route path="paginas-venda" element={<AdminSalesPages />} />
               <Route path="metricas" element={<AdminTracking />} />
+              <Route path="checklist-postagens" element={<AdminPostChecklist />} />
             </Route>
 
             {/* User app routes */}
