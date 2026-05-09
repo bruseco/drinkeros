@@ -13,7 +13,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 
 interface Recipe {
   id: string;
-  name: string;
+  title: string;
   cover_image_url: string | null;
   posted_checked_at: string | null;
 }
@@ -31,13 +31,13 @@ const AdminPostChecklist: React.FC = () => {
     queryFn: async () => {
       let q = supabase
         .from('exclusive_posts')
-        .select('id, name, cover_image_url, posted_checked_at', { count: 'exact' })
+        .select('id, title, cover_image_url, posted_checked_at', { count: 'exact' })
         // unchecked first (nulls first), then alphabetical; checked items go to the end ordered by check time
         .order('posted_checked_at', { ascending: true, nullsFirst: true })
-        .order('name', { ascending: true });
+        .order("title", { ascending: true });
 
       if (debouncedSearch.trim()) {
-        q = q.ilike('name', `%${debouncedSearch.trim()}%`);
+        q = q.ilike("title", `%${debouncedSearch.trim()}%`);
       }
 
       const from = page * PAGE_SIZE;
@@ -139,7 +139,7 @@ const AdminPostChecklist: React.FC = () => {
                         checked ? 'line-through' : ''
                       }`}
                     >
-                      {r.name}
+                      {r.title}
                     </span>
                     {checked && (
                       <Badge variant="secondary" className="text-xs">
