@@ -2,8 +2,12 @@ import React, { useMemo, useState } from 'react';
 import { useAccessMetrics } from '@/hooks/useAccessMetrics';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Loader2, Users, TrendingUp, Clock, Award, Wine, Download, BookOpen, Activity, User as UserIcon } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Loader2, Users, TrendingUp, Clock, Award, Wine, Download, BookOpen, Activity, User as UserIcon, CalendarIcon } from 'lucide-react';
+import { ptBR } from 'date-fns/locale';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import defaultCover from '@/assets/default-cover.png';
 
 type Preset = 'today' | '7d' | '30d' | 'mtd' | 'custom';
