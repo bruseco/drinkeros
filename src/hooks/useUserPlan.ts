@@ -8,6 +8,7 @@ export interface UserPlanData {
   plan: UserPlan;
   expires_at: string | null;
   isVip: boolean;
+  isLifetime: boolean;
 }
 
 export const useUserPlan = () => {
@@ -18,11 +19,17 @@ export const useUserPlan = () => {
     enabled: !!user?.id,
     staleTime: 60_000,
     queryFn: async () => {
-      if (!user?.id) return { plan: 'free', expires_at: null, isVip: false };
+      if (!user?.id) return { plan: 'free', expires_at: null, isVip: false, isLifetime: false };
 
       const { data: planRow } = await supabase
         .from('user_plans')
         .select('plan, expires_at')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const { data: lifetimeRow } = await supabase
+        .from('user_lifetime_access')
+        .select('user_id')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -36,6 +43,7 @@ export const useUserPlan = () => {
         plan,
         expires_at: planRow?.expires_at ?? null,
         isVip: plan === 'vip',
+        isLifetime: !!lifetimeRow,
       };
     },
   });
