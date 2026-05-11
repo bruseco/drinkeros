@@ -2,13 +2,20 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-export type UserPlan = 'free' | 'vip';
+export type UserPlan = 'free' | 'aluno' | 'socio' | 'vitalicio';
 
 export interface UserPlanData {
+  /** Plano oficial: free | aluno | socio | vitalicio */
   plan: UserPlan;
   expires_at: string | null;
-  isVip: boolean;
+  /** Sócio (assinatura ativa) — não inclui Vitalício */
+  isSocio: boolean;
+  /** Vitalício (concessão manual, sem expiração) */
   isLifetime: boolean;
+  /** Aluno (tem ao menos 1 acesso avulso ativo) — não inclui Sócio/Vitalício */
+  isAluno: boolean;
+  /** Alias retrocompatível: Sócio OU Vitalício */
+  isVip: boolean;
 }
 
 export const useUserPlan = () => {
@@ -19,7 +26,16 @@ export const useUserPlan = () => {
     enabled: !!user?.id,
     staleTime: 60_000,
     queryFn: async () => {
-      if (!user?.id) return { plan: 'free', expires_at: null, isVip: false, isLifetime: false };
+      if (!user?.id) {
+        return {
+          plan: 'free',
+          expires_at: null,
+          isSocio: false,
+          isLifetime: false,
+          isAluno: false,
+          isVip: false,
+        };
+      }
 
       const { data: planRow } = await supabase
         .from('user_plans')
@@ -33,18 +49,24 @@ export const useUserPlan = () => {
         .eq('user_id', user.id)
         .maybeSingle();
 
-      // Admin sempre é tratado como VIP (via função get_user_plan)
-      const { data: effectivePlan } = await supabase.rpc('get_user_plan', {
+      // Plano oficial via hierarquia (Vitalício > Sócio > Aluno > Grátis)
+      const { data: effectivePlan } = await supabase.rpc('get_user_plan_v2' as any, {
         _user_id: user.id,
       });
 
-      const plan = (effectivePlan as UserPlan) || 'free';
-      const isLifetime = !!lifetimeRow;
+      const plan = ((effectivePlan as UserPlan) || 'free') as UserPlan;
+      const isLifetime = !!lifetimeRow || plan === 'vitalicio';
+      const isSocio = plan === 'socio';
+      const isAluno = plan === 'aluno';
+      const isVip = isSocio || isLifetime;
+
       return {
-        plan,
+        plan: isLifetime ? 'vitalicio' : plan,
         expires_at: isLifetime ? null : (planRow?.expires_at ?? null),
-        isVip: plan === 'vip',
+        isSocio,
         isLifetime,
+        isAluno,
+        isVip,
       };
     },
   });
