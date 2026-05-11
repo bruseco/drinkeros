@@ -53,7 +53,8 @@ const UserClubeManage: React.FC = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [cancelling, setCancelling] = useState(false);
 
-  const expiresAt = plan?.expires_at ? new Date(plan.expires_at) : null;
+  const isLifetime = !!plan?.isLifetime;
+  const expiresAt = !isLifetime && plan?.expires_at ? new Date(plan.expires_at) : null;
   const isVip = !!plan?.isVip;
 
   // Mostra somente pagamentos do Clube
