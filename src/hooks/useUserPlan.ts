@@ -8,6 +8,7 @@ export interface UserPlanData {
   plan: UserPlan;
   expires_at: string | null;
   isVip: boolean;
+  isLifetime: boolean;
 }
 
 export const useUserPlan = () => {
