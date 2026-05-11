@@ -53,7 +53,8 @@ const UserClubeManage: React.FC = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [cancelling, setCancelling] = useState(false);
 
-  const expiresAt = plan?.expires_at ? new Date(plan.expires_at) : null;
+  const isLifetime = !!plan?.isLifetime;
+  const expiresAt = !isLifetime && plan?.expires_at ? new Date(plan.expires_at) : null;
   const isVip = !!plan?.isVip;
 
   // Mostra somente pagamentos do Clube
@@ -106,17 +107,26 @@ const UserClubeManage: React.FC = () => {
           ) : isVip ? (
             <>
               <div className="flex items-center gap-2">
-                <Crown className="h-5 w-5 text-yellow-500" />
-                <p className="font-semibold">Sócio do Clube dos Drinkeros</p>
-                <Badge variant="outline" className="ml-auto border-yellow-500/40 text-yellow-500">
-                  Ativo
+                <Crown className={`h-5 w-5 ${isLifetime ? 'text-amber-400' : 'text-yellow-500'}`} />
+                <p className="font-semibold">
+                  {isLifetime ? 'Sócio Vitalício dos Drinkeros' : 'Sócio do Clube dos Drinkeros'}
+                </p>
+                <Badge
+                  variant="outline"
+                  className={`ml-auto ${isLifetime ? 'border-amber-400/50 text-amber-400' : 'border-yellow-500/40 text-yellow-500'}`}
+                >
+                  {isLifetime ? 'Vitalício' : 'Ativo'}
                 </Badge>
               </div>
-              {expiresAt && (
+              {isLifetime ? (
+                <p className="text-xs text-muted-foreground">
+                  Acesso vitalício — sem data de expiração.
+                </p>
+              ) : expiresAt ? (
                 <p className="text-xs text-muted-foreground">
                   Renova / expira em {expiresAt.toLocaleDateString('pt-BR')}
                 </p>
-              )}
+              ) : null}
               <div className="grid sm:grid-cols-2 gap-2 pt-1">
                 <Button
                   variant="outline"
