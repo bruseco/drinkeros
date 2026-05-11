@@ -96,7 +96,7 @@ const UserClubeManage: React.FC = () => {
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Voltar">
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-xl font-bold">Sócio do Clube</h1>
+        <h1 className="text-xl font-bold">Meu Plano</h1>
       </div>
 
       {/* Plano atual */}
@@ -109,7 +109,7 @@ const UserClubeManage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Crown className={`h-5 w-5 ${isLifetime ? 'text-amber-400' : 'text-yellow-500'}`} />
                 <p className="font-semibold">
-                  {isLifetime ? 'Sócio Vitalício dos Drinkeros' : 'Sócio do Clube dos Drinkeros'}
+                  {isLifetime ? 'Sócio Vitalício dos Drinkeros' : 'Sócio Drinkeros'}
                 </p>
                 <Badge
                   variant="outline"
@@ -133,7 +133,7 @@ const UserClubeManage: React.FC = () => {
                   className="w-full"
                   onClick={() =>
                     window.open(
-                      'https://wa.me/5548991601025?text=Olá! Preciso de ajuda com meu Sócio do Clube.',
+                      'https://wa.me/5548991601025?text=Olá! Preciso de ajuda com meu plano Sócio Drinkeros.',
                       '_blank'
                     )
                   }
@@ -156,7 +156,9 @@ const UserClubeManage: React.FC = () => {
               )}
             </>
           ) : (
-            <p className="text-sm text-muted-foreground">Você não é Sócio do Clube no momento.</p>
+            <p className="text-sm text-muted-foreground">
+              Você {plan?.isAluno ? 'é Aluno' : 'está no plano Grátis'} no momento — ainda não é Sócio Drinkeros.
+            </p>
           )}
         </CardContent>
       </Card>
