@@ -15,16 +15,19 @@ export const PlanBadge: React.FC<PlanBadgeProps> = ({ className, linkOnFree = tr
   if (!data) return null;
 
   if (data.isVip) {
+    const label = data.isLifetime ? 'Vitalício' : 'Clube';
     return (
       <span
         className={cn(
           'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-wide',
-          'bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white shadow-md shadow-purple-500/30',
+          data.isLifetime
+            ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-950 shadow-md shadow-amber-500/30'
+            : 'bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white shadow-md shadow-purple-500/30',
           className
         )}
       >
         <Crown className="h-3 w-3" />
-        Clube
+        {label}
       </span>
     );
   }
