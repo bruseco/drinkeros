@@ -444,6 +444,7 @@ const UserProfile: React.FC = () => {
   const { missingCount, missingFields, isComplete } = useProfileCompleteness();
   const { data: planData } = useUserPlan();
   const isVip = !!planData?.isVip;
+  const isLifetime = !!planData?.isLifetime;
 
   const toggle = (key: string) => setOpenSection(prev => prev === key ? null : key);
 
