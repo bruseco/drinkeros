@@ -16,7 +16,7 @@ type PlanRow = { plan: string; expires_at: string | null } | null;
 
 let lifetimeRow: LifetimeRow = null;
 let planRow: PlanRow = null;
-let effectivePlan: 'free' | 'vip' = 'free';
+let effectivePlan: 'free' | 'aluno' | 'socio' | 'vitalicio' = 'free';
 
 vi.mock('@/integrations/supabase/client', () => {
   const buildSelect = (row: any) => ({
@@ -43,61 +43,65 @@ const wrapper = ({ children }: { children: React.ReactNode }) => {
   return <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
 };
 
-describe('useUserPlan — lifetime access', () => {
+describe('useUserPlan — hierarquia de planos', () => {
   beforeEach(() => {
     lifetimeRow = null;
     planRow = null;
     effectivePlan = 'free';
   });
 
-  it('lifetime user returns expires_at = null even when user_plans has a date', async () => {
+  it('Vitalício: expires_at = null mesmo com data em user_plans, plan = vitalicio', async () => {
     lifetimeRow = { user_id: 'user-123' };
     planRow = { plan: 'vip', expires_at: '2027-04-14T00:00:00Z' };
-    effectivePlan = 'vip';
+    effectivePlan = 'vitalicio';
 
     const { result } = renderHook(() => useUserPlan(), { wrapper });
     await waitFor(() => expect(result.current.data).toBeDefined());
 
+    expect(result.current.data?.plan).toBe('vitalicio');
     expect(result.current.data?.isLifetime).toBe(true);
     expect(result.current.data?.isVip).toBe(true);
     expect(result.current.data?.expires_at).toBeNull();
   });
 
-  it('lifetime user with no plan row still returns expires_at = null and isVip', async () => {
-    lifetimeRow = { user_id: 'user-123' };
-    planRow = null;
-    effectivePlan = 'vip';
-
-    const { result } = renderHook(() => useUserPlan(), { wrapper });
-    await waitFor(() => expect(result.current.data).toBeDefined());
-
-    expect(result.current.data?.isLifetime).toBe(true);
-    expect(result.current.data?.expires_at).toBeNull();
-  });
-
-  it('non-lifetime VIP user keeps the user_plans expires_at date', async () => {
-    lifetimeRow = null;
+  it('Sócio: mantém expires_at, isSocio = true, isLifetime = false', async () => {
     planRow = { plan: 'vip', expires_at: '2027-04-14T00:00:00Z' };
-    effectivePlan = 'vip';
+    effectivePlan = 'socio';
 
     const { result } = renderHook(() => useUserPlan(), { wrapper });
     await waitFor(() => expect(result.current.data).toBeDefined());
 
+    expect(result.current.data?.plan).toBe('socio');
+    expect(result.current.data?.isSocio).toBe(true);
     expect(result.current.data?.isLifetime).toBe(false);
     expect(result.current.data?.isVip).toBe(true);
     expect(result.current.data?.expires_at).toBe('2027-04-14T00:00:00Z');
   });
 
-  it('free user returns expires_at = null and isLifetime = false', async () => {
-    lifetimeRow = null;
-    planRow = null;
+  it('Aluno: isAluno = true, não é Sócio nem Vitalício', async () => {
+    effectivePlan = 'aluno';
+
+    const { result } = renderHook(() => useUserPlan(), { wrapper });
+    await waitFor(() => expect(result.current.data).toBeDefined());
+
+    expect(result.current.data?.plan).toBe('aluno');
+    expect(result.current.data?.isAluno).toBe(true);
+    expect(result.current.data?.isSocio).toBe(false);
+    expect(result.current.data?.isLifetime).toBe(false);
+    expect(result.current.data?.isVip).toBe(false);
+  });
+
+  it('Grátis: tudo false, expires_at null', async () => {
     effectivePlan = 'free';
 
     const { result } = renderHook(() => useUserPlan(), { wrapper });
     await waitFor(() => expect(result.current.data).toBeDefined());
 
-    expect(result.current.data?.isVip).toBe(false);
+    expect(result.current.data?.plan).toBe('free');
+    expect(result.current.data?.isAluno).toBe(false);
+    expect(result.current.data?.isSocio).toBe(false);
     expect(result.current.data?.isLifetime).toBe(false);
+    expect(result.current.data?.isVip).toBe(false);
     expect(result.current.data?.expires_at).toBeNull();
   });
 });
