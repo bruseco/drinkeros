@@ -29,7 +29,7 @@ vi.mock('@/integrations/supabase/client', () => {
         }
         return buildSelect(null);
       },
-      rpc: async () => ({ data: 'vip', error: null }),
+      rpc: async () => ({ data: 'vitalicio', error: null }),
     },
   };
 });
@@ -45,7 +45,7 @@ const ProfilePlanArea: React.FC = () => {
   return (
     <div>
       <PlanBadge linkOnFree={false} />
-      <p>{data.isLifetime ? 'Sócio Vitalício dos Drinkeros' : 'Sócio do Clube dos Drinkeros'}</p>
+      <p>{data.isLifetime ? 'Sócio Vitalício dos Drinkeros' : 'Sócio Drinkeros'}</p>
       {data.isLifetime ? (
         <p>Acesso vitalício — sem data de expiração.</p>
       ) : expiresAt ? (
