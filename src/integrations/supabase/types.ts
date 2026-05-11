@@ -3102,6 +3102,7 @@ export type Database = {
       }
       get_study_reminder_stats: { Args: never; Returns: Json }
       get_user_plan: { Args: { _user_id: string }; Returns: string }
+      get_user_plan_v2: { Args: { _user_id: string }; Returns: string }
       get_ux_metrics: { Args: never; Returns: Json }
       get_zapi_credentials: {
         Args: { p_connection_id: string }
