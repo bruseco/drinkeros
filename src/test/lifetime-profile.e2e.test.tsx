@@ -70,9 +70,9 @@ describe('E2E — Perfil de usuário vitalício', () => {
   it('mostra o badge VITALÍCIO e não exibe data de expiração', async () => {
     renderProfile();
 
-    // Badge "Vitalício"
+    // Badge "Vitalício" (também aparece no título "Sócio Vitalício...")
     await waitFor(() => {
-      expect(screen.getByText(/Vitalício/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Vitalício/i).length).toBeGreaterThanOrEqual(2);
     });
 
     // NÃO deve aparecer "Clube" como label do badge
