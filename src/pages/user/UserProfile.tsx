@@ -321,6 +321,7 @@ const PlanSection: React.FC = () => {
   const { data: planData, isLoading } = useUserPlan();
   const navigate = useNavigate();
   const isVip = !!planData?.isVip;
+  const isLifetime = !!planData?.isLifetime;
   const expiresAt = planData?.expires_at ? new Date(planData.expires_at) : null;
 
   return (
@@ -330,20 +331,24 @@ const PlanSection: React.FC = () => {
       ) : isVip ? (
         <>
           <div className="flex items-center gap-2">
-            <Crown className="h-5 w-5 text-yellow-500" />
-            <p className="font-semibold">Sócio do Clube dos Drinkeros</p>
+            <Crown className={cn("h-5 w-5", isLifetime ? "text-amber-400" : "text-yellow-500")} />
+            <p className="font-semibold">
+              {isLifetime ? 'Sócio Vitalício dos Drinkeros' : 'Sócio do Clube dos Drinkeros'}
+            </p>
           </div>
-          {expiresAt && (
+          {isLifetime ? (
+            <p className="text-xs text-muted-foreground">Acesso vitalício — sem data de expiração.</p>
+          ) : expiresAt ? (
             <p className="text-xs text-muted-foreground">
               Renova / expira em {expiresAt.toLocaleDateString('pt-BR')}
             </p>
-          )}
+          ) : null}
           <Button
             variant="outline"
             className="w-full"
             onClick={() => navigate('/app/clube/gerenciar')}
           >
-            Gerenciar Sócio do Clube
+            {isLifetime ? 'Gerenciar Acesso Vitalício' : 'Gerenciar Sócio do Clube'}
           </Button>
         </>
       ) : (
