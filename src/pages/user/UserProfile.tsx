@@ -322,6 +322,8 @@ const PlanSection: React.FC = () => {
   const navigate = useNavigate();
   const isVip = !!planData?.isVip;
   const isLifetime = !!planData?.isLifetime;
+  const isSocio = !!planData?.isSocio;
+  const isAluno = !!planData?.isAluno;
   const expiresAt = planData?.expires_at ? new Date(planData.expires_at) : null;
 
   return (
@@ -333,7 +335,7 @@ const PlanSection: React.FC = () => {
           <div className="flex items-center gap-2">
             <Crown className={cn("h-5 w-5", isLifetime ? "text-amber-400" : "text-yellow-500")} />
             <p className="font-semibold">
-              {isLifetime ? 'Sócio Vitalício dos Drinkeros' : 'Sócio do Clube dos Drinkeros'}
+              {isLifetime ? 'Sócio Vitalício dos Drinkeros' : 'Sócio Drinkeros'}
             </p>
           </div>
           {isLifetime ? (
@@ -348,21 +350,35 @@ const PlanSection: React.FC = () => {
             className="w-full"
             onClick={() => navigate('/app/clube/gerenciar')}
           >
-            {isLifetime ? 'Gerenciar Acesso Vitalício' : 'Gerenciar Sócio do Clube'}
+            {isLifetime ? 'Gerenciar Acesso Vitalício' : 'Gerenciar plano Sócio'}
           </Button>
         </>
-      ) : (
+      ) : isAluno ? (
         <>
-          <p className="font-semibold">Plano Gratuito</p>
+          <p className="font-semibold">Plano Aluno</p>
           <p className="text-sm text-muted-foreground">
-            Faça upgrade para o Clube dos Drinkeros e desbloqueie receitas exclusivas, Batalha e muito mais.
+            Você tem acesso aos cursos, e-books, combos ou pacotes que adquiriu. Vire Sócio para desbloquear receitas exclusivas, Batalha e bônus.
           </p>
           <Button
             className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:opacity-95 text-white border-0"
             onClick={() => navigate('/clube')}
           >
             <Crown className="mr-2 h-4 w-4" />
-            Fazer upgrade para o Clube
+            Virar Sócio Drinkeros
+          </Button>
+        </>
+      ) : (
+        <>
+          <p className="font-semibold">Plano Grátis</p>
+          <p className="text-sm text-muted-foreground">
+            Faça upgrade para Sócio Drinkeros e desbloqueie receitas exclusivas, Batalha e muito mais.
+          </p>
+          <Button
+            className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:opacity-95 text-white border-0"
+            onClick={() => navigate('/clube')}
+          >
+            <Crown className="mr-2 h-4 w-4" />
+            Virar Sócio Drinkeros
           </Button>
         </>
       )}
@@ -445,6 +461,17 @@ const UserProfile: React.FC = () => {
   const { data: planData } = useUserPlan();
   const isVip = !!planData?.isVip;
   const isLifetime = !!planData?.isLifetime;
+  const isSocio = !!planData?.isSocio;
+  const isAluno = !!planData?.isAluno;
+
+  const planLabel = isLifetime ? 'Vitalício' : isSocio ? 'Sócio' : isAluno ? 'Aluno' : 'Grátis';
+  const planChipClass = isLifetime
+    ? 'bg-amber-500/15 text-amber-500 border border-amber-500/40'
+    : isSocio
+      ? 'bg-purple-500/15 text-purple-500 border border-purple-500/30'
+      : isAluno
+        ? 'bg-sky-500/15 text-sky-500 border border-sky-500/30'
+        : 'bg-lime-400 text-lime-950 shadow-sm';
 
   const toggle = (key: string) => setOpenSection(prev => prev === key ? null : key);
 
@@ -480,13 +507,9 @@ const UserProfile: React.FC = () => {
             Plano Atual
             <span className={cn(
               "text-[10px] font-bold uppercase px-2 py-0.5 rounded-full",
-              isLifetime
-                ? "bg-amber-500/15 text-amber-500 border border-amber-500/40"
-                : isVip
-                  ? "bg-yellow-500/15 text-yellow-600 border border-yellow-500/30"
-                  : "bg-lime-400 text-lime-950 shadow-sm"
+              planChipClass
             )}>
-              {isLifetime ? 'Vitalício' : isVip ? 'Clube' : 'Gratuito'}
+              {planLabel}
             </span>
           </span>
           <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-200", openSection === 'plano' && "rotate-180")} />

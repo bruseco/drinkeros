@@ -1,104 +1,63 @@
-## Objetivo
+## Organização Oficial dos Planos
 
-Sempre que um pagamento for confirmado (Stripe, Mercado Pago ou Clube), o sistema:
-1. Cria/atualiza o cliente (stakeholder) no NIBO
-2. Cria um agendamento de recebimento já marcado como recebido, na categoria **101 – Infoprodutos e Cursos**
-3. Dispara a emissão automática da NFS-e
+A plataforma terá **4 planos oficiais**, com hierarquia clara. Compras avulsas (cursos, ebooks, combos, pacotes) deixam de ser tratadas como "sem plano" e passam a definir automaticamente o plano "Aluno".
 
-Tudo no backend, idempotente (não duplica em reprocessos de webhook).
+### Os 4 planos
 
----
+| Plano | Quem entra | Acesso | Badge | Cor |
+|---|---|---|---|---|
+| **Grátis** | Cadastro sem nenhuma compra | Conteúdo livre (cursos/módulos com `is_free=true`) | `Grátis` | Lima |
+| **Aluno** | Tem ao menos 1 acesso ativo em `user_courses`, `user_ebooks`, `user_combos` ou `user_packages` (não vencido) e **não** é Sócio nem Vitalício | Apenas o que comprou + conteúdo grátis | `Aluno` | Azul |
+| **Sócio** | Tem `user_plans.plan = 'vip'` ativo (não vencido) e **não** é Vitalício | Receitas exclusivas + Batalha + 2 cursos bônus (Bebida Decifrada, Workshop Além dos Clássicos) + tudo que comprou | `Sócio` | Roxo (gradiente atual) |
+| **Vitalício** | Tem `user_lifetime_access` (concessão manual, sem checkout) | Tudo do Sócio, sem expiração, libera Receitas globais | `Vitalício` | Âmbar |
 
-## Pré-requisitos (vou pedir via formulário seguro de secrets)
+Hierarquia de prioridade na exibição: **Vitalício > Sócio > Aluno > Grátis** (sempre mostra o mais alto).
 
-1. **NIBO_API_TOKEN** — token de API (NIBO Premium). Encontrado em: *Empresa → Mais opções → Configurações → API*
-2. **NIBO_ACCOUNT_ID** — ID da conta financeira onde o recebimento entra (ex.: "Conta Stripe / Mercado Pago / Caixa")
-3. **NIBO_SERVICE_PROFILE_ID** — perfil de serviço usado para a NFS-e (já configurado no NIBO com CNAE, alíquota ISS, descrição padrão, etc.)
-4. **NIBO_CATEGORY_ID** — ID da categoria única **"101 – Infoprodutos e Cursos"**
+### O que renomear (UI / copy apenas)
 
-> Mudança em relação ao plano anterior: **uma categoria única**, não 5. Os produtos viram diferentes pelo nome do agendamento ("Descrição") e pelo número de referência (`Ref`), igual ao que aparece hoje no seu NIBO.
+- "Clube" → **"Sócio"** em badges, títulos e textos voltados ao usuário
+- Página `/clube` (gerenciar assinatura) continua existindo, mas o título passa de "Sócio do Clube" para **"Sócio Drinkeros"**; "Sócio Vitalício dos Drinkeros" continua como está
+- E-mails, WhatsApp templates e copy de upsell que mencionam "Clube" passam a usar "Sócio" (texto), mantendo o conceito interno de "Clube" só no banco/legado
 
----
+> Nota: o termo legado **"Clube"** continua existindo internamente para Batalha mensal, pontos, ranking (`club_recipes`, `club_monthly_winners`, etc.) — isso é uma **feature do plano Sócio**, não um plano. Vamos esclarecer essa separação na UI.
 
-## O que aparece em cada agendamento criado
+### Mudanças técnicas
 
-Inspirado no padrão que você já usa:
+**`src/hooks/useUserPlan.ts`**
+- Tipo `UserPlan` passa de `'free' | 'vip'` para `'free' | 'aluno' | 'socio' | 'vitalicio'`
+- Adicionar query para detectar `isAluno` (existe ao menos uma linha em `user_courses`/`user_ebooks`/`user_combos`/`user_packages` com `expires_at IS NULL OR expires_at > now()`)
+- Computar plano final por hierarquia: vitalício > sócio > aluno > grátis
+- Manter `isVip` como alias derivado (`isSocio || isVitalicio`) para retrocompatibilidade
+- Continuar zerando `expires_at` quando vitalício
 
-| Campo NIBO | Origem |
-|---|---|
-| **Nome (stakeholder)** | `profiles.full_name` |
-| **CPF** | `profiles.cpf` (já coletado no checkout MP e no perfil) |
-| **Descrição** | Nome do produto (ex.: "Clube dos Drinkeros – Anual", "Pacote 7 Anos Drinkeros", "Drink Delivery & Engarrafados") |
-| **Ref** | `order_ref` interno (ex.: `course:UUID:user:UUID:timestamp`) |
-| **Categoria** | sempre `NIBO_CATEGORY_ID` (101 – Infoprodutos e Cursos) |
-| **Valor** | `amount` da venda |
-| **Data agendamento / vencimento / recebimento** | data do pagamento confirmado |
+**`src/components/user/PlanBadge.tsx`**
+- 4 variantes: Grátis (lima), Aluno (azul, ícone `GraduationCap`), Sócio (roxo, `Crown`), Vitalício (âmbar, `Crown`)
+- `linkOnFree` continua linkando para `/clube`; novo `linkOnAluno` (default true) também leva para `/clube` como upsell
 
----
+**`src/pages/user/UserClubeManage.tsx`**
+- Trocar "Sócio do Clube" → "Sócio Drinkeros"
+- Mostrar para `Aluno` um card "Vire Sócio" antes do histórico
+- "Sócio Vitalício dos Drinkeros" inalterado
 
-## O que muda no produto
+**Banco — função `get_user_plan`**
+- Atualizar para retornar `'vitalicio'`, `'socio'`, `'aluno'`, `'free'` (texto)
+- Manter retrocompat: criar nova função `get_user_plan_v2` e ajustar `useUserPlan` para usá-la; `get_user_plan` continua devolvendo `'vip'/'free'` para não quebrar RLS/edge functions existentes
 
-### Para você
-- Nada visível no app do aluno.
-- Em **Admin → Pedidos**: nova coluna **NIBO** com badge (Pendente / Enviado / NFS-e emitida / Erro) e botão "Reenviar para NIBO" para corrigir falhas.
+**Documentação**
+- Criar `mem://business/plans-hierarchy` com a tabela acima como fonte da verdade
 
-### Para o cliente final
-- Nada muda. NF chega normalmente conforme NIBO já emite hoje.
+### Não-objetivos (fora deste plano)
 
----
+- Não mexer em RLS, triggers de propagação de acesso, ou regras de expiração
+- Não criar checkout para Vitalício (continua manual)
+- Não mexer em Batalha, pontos, recipes_published — continuam sendo features do Sócio
+- Não renomear tabelas/colunas do banco (`user_plans.plan = 'vip'` permanece)
 
-## Como vai funcionar (técnico)
+### Ordem de implementação
 
-### 1. Tabela `nibo_invoices` (controle e idempotência)
-Campos: `order_ref` (único), `product_type`, `user_id`, `amount`, `nibo_stakeholder_id`, `nibo_schedule_id`, `nibo_invoice_id`, `status` (pending / sent / invoiced / error / pending_cpf), `error_message`, `attempts`, timestamps.
-
-A unicidade do `order_ref` impede duplicatas mesmo que Stripe/MP reenviem o webhook.
-
-### 2. Edge function `nibo-sync`
-Recebe `{ order_ref }` e executa:
-1. Lê venda + perfil do comprador
-2. Busca/cria stakeholder no NIBO (`POST /v1/customers`), deduplicando por CPF
-3. Cria agendamento de recebimento já recebido (`POST /v1/schedules/receivable`) com a categoria 101
-4. Emite NFS-e (`POST /v1/invoices/serviceinvoice`) com o `scheduleId` + `serviceProfileId`
-5. Atualiza `nibo_invoices` com IDs e status. Erro → guarda mensagem para reprocesso
-
-Header padrão: `apitoken: $NIBO_API_TOKEN`. Base URL: `https://api.nibo.com.br/v1/...`
-
-### 3. Disparos automáticos
-- `supabase/functions/stripe-webhook/index.ts` — após gravar venda
-- `supabase/functions/mercadopago-webhook/index.ts` — após gravar venda
-- Cron a cada 15 min reprocessa `status = 'error'` com `attempts < 5`
-
-### 4. CPF
-Lê `profiles.cpf`. Se faltar:
-- Stakeholder criado no NIBO sem CPF
-- Status fica `pending_cpf`
-- Cron tenta novamente quando o usuário completar o CPF no perfil
-
-### 5. Painel admin
-Em `src/pages/admin/AdminOrders.tsx`:
-- Coluna "NIBO" com badge de status
-- Drawer com IDs do NIBO, mensagem de erro e botão "Reenviar"
-
----
-
-## Ordem de implementação
-
-1. Pedir os 4 secrets (NIBO_API_TOKEN, NIBO_ACCOUNT_ID, NIBO_SERVICE_PROFILE_ID, NIBO_CATEGORY_ID)
-2. Migração: tabela `nibo_invoices` + RLS (admin only)
-3. Edge function `nibo-sync` (cliente HTTP, retry, idempotência)
-4. Edge function `nibo-retry-failed` agendada por cron a cada 15 min
-5. Hooks nos webhooks Stripe e Mercado Pago
-6. UI no AdminOrders: coluna + botão reenviar
-7. Teste com 1 venda real em cada provedor
-
----
-
-## Riscos e suposições
-
-- **Suposição:** plano NIBO Premium (necessário para a API).
-- **Suposição:** o `ServiceProfileId` já está configurado no NIBO com tributação correta — ele dita o cálculo de impostos e a descrição padrão da NF.
-- **Risco:** prefeituras às vezes rejeitam NFS-e por dados incompletos do tomador. Esses casos ficam como erro no NIBO; o painel mostra o status, mas a correção fiscal é feita lá no NIBO.
-- **Compras antigas (anteriores à integração):** não enviadas retroativamente. Se quiser, posso adicionar depois um botão "enviar para NIBO" também na lista existente.
-
-Confirme e eu já peço os 4 secrets para começar a implementação.
+1. Criar `get_user_plan_v2` no banco
+2. Atualizar `useUserPlan` (novos campos + hierarquia)
+3. Atualizar `PlanBadge` (4 variantes)
+4. Atualizar copy em `UserClubeManage`, profile e demais pontos que dizem "Clube"
+5. Atualizar testes existentes em `src/hooks/useUserPlan.test.tsx` e `src/test/lifetime-profile.e2e.test.tsx`
+6. Salvar memória `mem://business/plans-hierarchy`
