@@ -39,11 +39,12 @@ export const useUserPlan = () => {
       });
 
       const plan = (effectivePlan as UserPlan) || 'free';
+      const isLifetime = !!lifetimeRow;
       return {
         plan,
-        expires_at: planRow?.expires_at ?? null,
+        expires_at: isLifetime ? null : (planRow?.expires_at ?? null),
         isVip: plan === 'vip',
-        isLifetime: !!lifetimeRow,
+        isLifetime,
       };
     },
   });
