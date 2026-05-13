@@ -176,6 +176,7 @@ const App = () => (
               <Route path="users" element={<AdminUsers />} />
               <Route path="users/:userId" element={<AdminUserDetail />} />
               <Route path="pedidos" element={<AdminOrders />} />
+              <Route path="nibo" element={<AdminNibo />} />
               <Route path="configuracoes" element={<AdminEmailSettings />} />
               <Route path="notificacoes" element={<AdminNotifications />} />
               <Route path="upsell" element={<AdminUpsell />} />
