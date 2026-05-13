@@ -435,6 +435,18 @@ const VipLanding: React.FC = () => {
                   Os <strong className="text-white">melhores do mês</strong> ganham destaque e disputam o título de
                   <strong className="text-white"> melhor drinker do ano</strong>.
                 </p>
+                <p className="mt-3 text-sm text-purple-100 leading-snug">
+                  Todo mês, o <strong className="text-yellow-300">1º lugar do ranking</strong> ganha{' '}
+                  <strong className="text-yellow-300">R$ 200 em voucher</strong> para gastar em bebidas premium no nosso parceiro{' '}
+                  <a
+                    href="https://www.espacoprime.com.br"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white underline underline-offset-2 hover:text-yellow-300"
+                  >
+                    Espaço Prime
+                  </a>.
+                </p>
               </div>
             </div>
 
