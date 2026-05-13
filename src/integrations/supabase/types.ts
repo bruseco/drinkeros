@@ -3220,6 +3220,24 @@ export type Database = {
         }
         Returns: number
       }
+      nibo_get_order: {
+        Args: { p_order_id: string }
+        Returns: {
+          amount: number
+          buyer_email: string
+          buyer_name: string
+          buyer_phone: string
+          currency: string
+          external_ref: string
+          id: string
+          product_id: string
+          product_name: string
+          product_type: string
+          purchased_at: string
+          source: string
+          user_id: string
+        }[]
+      }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
