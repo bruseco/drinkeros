@@ -147,9 +147,28 @@ async function createSchedule(order: OrderRow, customerId: string) {
   };
 }
 
+async function getServiceIdForType(productType: string): Promise<{ id: string | null; name: string | null }> {
+  const { data } = await supabase
+    .from("nibo_service_mappings")
+    .select("nibo_service_id, nibo_service_name")
+    .eq("product_type", productType)
+    .maybeSingle();
+  return { id: data?.nibo_service_id || null, name: data?.nibo_service_name || null };
+}
+
 async function emitInvoice(order: OrderRow, customerId: string) {
+  const mapping = await getServiceIdForType(order.product_type);
+  if (!mapping.id) {
+    return {
+      id: null,
+      status: "failed" as const,
+      error: `Sem mapeamento NIBO para product_type="${order.product_type}". Configure em /admin/nibo.`,
+      raw: null,
+    };
+  }
   const body = {
     stakeholderId: customerId,
+    serviceId: mapping.id,
     serviceDescription: order.product_name,
     serviceValue: Number(order.amount || 0),
     referenceDate: order.purchased_at.slice(0, 10),

@@ -1308,6 +1308,33 @@ export type Database = {
         }
         Relationships: []
       }
+      nibo_service_mappings: {
+        Row: {
+          nibo_service_id: string
+          nibo_service_name: string | null
+          notes: string | null
+          product_type: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          nibo_service_id: string
+          nibo_service_name?: string | null
+          notes?: string | null
+          product_type: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          nibo_service_id?: string
+          nibo_service_name?: string | null
+          notes?: string | null
+          product_type?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       nibo_sync_log: {
         Row: {
           amount: number | null

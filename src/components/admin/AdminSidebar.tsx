@@ -28,6 +28,7 @@ const menuItems = [
 const adminItems = [
   { title: 'Usuários', icon: UserCog, href: '/admin/users' },
   { title: 'Vendas', icon: ShoppingCart, href: '/admin/pedidos' },
+  { title: 'NIBO (NF-e)', icon: FileText, href: '/admin/nibo' },
   { title: 'Equipe', icon: Users, href: '/admin/team' },
   { title: 'Email', icon: Mail, href: '/admin/configuracoes' },
   { title: 'Notificações', icon: Bell, href: '/admin/notificacoes' },
