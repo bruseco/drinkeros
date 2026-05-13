@@ -26,7 +26,7 @@ function normalize(item: any) {
     id: item.id ?? item.serviceProfileId ?? item.serviceId ?? item.productId ?? null,
     name: item.name ?? item.description ?? item.serviceProfileName ?? item.serviceName ?? null,
     cnae: item.cnae ?? item.cnaeCode ?? item.cnae_code ?? item.cnaeId ?? null,
-    lc116: item.lc116 ?? item.lc116Code ?? item.serviceCodeLC116 ?? item.serviceCode ?? item.federalServiceCode ?? null,
+    lc116: item.lc116 ?? item.lc116Code ?? item.serviceListItemLC116 ?? item.serviceCodeLC116 ?? item.serviceCode ?? item.federalServiceCode ?? null,
     municipal_code: item.municipalCode ?? item.cityServiceCode ?? item.municipalServiceCode ?? item.municipal_code ?? null,
     iss_rate: item.issRate ?? item.issAliquot ?? item.issTaxRate ?? item.iss ?? item.aliquotaIss ?? null,
     raw: item,
