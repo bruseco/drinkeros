@@ -56,21 +56,13 @@ async function nibo<T = unknown>(
 }
 
 async function getOrder(orderId: string): Promise<OrderRow | null> {
-  const { data, error } = await supabase.rpc("admin_orders", {
-    p_search: null,
-    p_source: null,
-    p_product_type: null,
-    p_from: null,
-    p_to: null,
-    p_limit: 5000,
-    p_offset: 0,
-  });
+  const { data, error } = await supabase.rpc("nibo_get_order", { p_order_id: orderId });
   if (error) {
-    console.error("admin_orders error", error);
+    console.error("nibo_get_order error", error);
     return null;
   }
   const list = (data as OrderRow[]) || [];
-  return list.find((o) => o.id === orderId) || null;
+  return list[0] || null;
 }
 
 async function upsertCustomer(order: OrderRow): Promise<{
