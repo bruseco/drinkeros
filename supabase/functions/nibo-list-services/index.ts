@@ -81,9 +81,11 @@ serve(async (req) => {
     let services: any[] = [];
     let usedPath: string | null = null;
 
+    const SANITY = new Set(["/organizations", "/companies"]);
     for (const p of candidates) {
       const r = await nibo<any>(p);
       attempts.push({ path: p, status: r.status, ok: r.ok, sample: r.raw.slice(0, 200) });
+      if (SANITY.has(p)) continue; // só diagnóstico de conectividade
       if (!r.ok || !r.data) continue;
       const items: any[] = Array.isArray(r.data?.items)
         ? r.data.items
