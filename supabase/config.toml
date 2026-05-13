@@ -30,3 +30,6 @@ project_id = "pvjlcfhqueibjnkuzzna"
 
   [functions.mercadopago-webhook]
     verify_jwt = false
+
+  [functions.nibo-sync-payment]
+    verify_jwt = true
