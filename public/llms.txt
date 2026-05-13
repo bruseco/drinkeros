@@ -1,0 +1,29 @@
+# Drinkeros
+
+> Drinkeros é a maior área de membros de coquetelaria do Brasil: cursos, receitas, ebooks e o Clube dos Drinkeros para quem ama drinks.
+
+Drinkeros reúne aulas com bartenders profissionais, mais de 1.000 receitas autorais, ebooks especializados e o Clube dos Drinkeros (assinatura) com benefícios exclusivos como Bebida Decifrada, Workshop Além dos Clássicos, Xaropes Artesanais e participação na Batalha dos Drinkeros.
+
+## Pages
+
+- [Login](/login): Acesso à área de membros Drinkeros.
+- [Criar conta](/signup): Cadastro grátis na plataforma.
+- [Clube dos Drinkeros](/clube): Assinatura premium com cursos, receitas e bônus.
+- [Instalar app](/install): Instruções para instalar o PWA no celular ou desktop.
+
+## Cursos
+
+- [Drinkeros Xperience](/drinkeros-xperience): Curso completo de coquetelaria do zero ao avançado.
+- [Mixologia Avançada](/mixologia-avancada): Técnicas avançadas para bartenders e entusiastas.
+- [Bar para Eventos](/bar-p-eventos): Como montar e operar bar para eventos e festas.
+- [Drink Delivery & Engarrafados](/drinkdelivery-engarrafados): Engarrafamento, logística e venda de drinks no delivery.
+- [Ingredientes Artesanais](/ingredientes-artesanais): Xaropes, infusões e ingredientes caseiros para drinks autorais.
+- [Clássicos & Destilados](/classicos-destilados): Estudo dos drinks clássicos e seus destilados.
+- [Workshop Além dos Clássicos](/workshop-alem-dos-classicos): Releituras autorais dos coquetéis mais famosos.
+- [Bartender a Bordo](/bartender-a-bordo): Carreira como bartender em navios e cruzeiros.
+- [Bebida Decifrada](/bebida-decifrada): História e curiosidades das bebidas mais icônicas.
+
+## Optional
+
+- [Migração de conta](/migracao): Para alunos que vieram do sistema antigo.
+- [Recuperar senha](/reset-password): Redefinir senha de acesso.
