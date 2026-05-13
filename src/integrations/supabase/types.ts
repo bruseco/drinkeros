@@ -1308,6 +1308,81 @@ export type Database = {
         }
         Relationships: []
       }
+      nibo_sync_log: {
+        Row: {
+          amount: number | null
+          attempts: number
+          buyer_email: string | null
+          buyer_name: string | null
+          created_at: string
+          currency: string | null
+          customer_status: string | null
+          id: string
+          invoice_status: string | null
+          last_attempt_at: string | null
+          last_error: string | null
+          last_response: Json | null
+          nibo_customer_id: string | null
+          nibo_invoice_id: string | null
+          nibo_schedule_id: string | null
+          order_id: string
+          product_name: string | null
+          product_type: string | null
+          schedule_status: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          attempts?: number
+          buyer_email?: string | null
+          buyer_name?: string | null
+          created_at?: string
+          currency?: string | null
+          customer_status?: string | null
+          id?: string
+          invoice_status?: string | null
+          last_attempt_at?: string | null
+          last_error?: string | null
+          last_response?: Json | null
+          nibo_customer_id?: string | null
+          nibo_invoice_id?: string | null
+          nibo_schedule_id?: string | null
+          order_id: string
+          product_name?: string | null
+          product_type?: string | null
+          schedule_status?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          attempts?: number
+          buyer_email?: string | null
+          buyer_name?: string | null
+          created_at?: string
+          currency?: string | null
+          customer_status?: string | null
+          id?: string
+          invoice_status?: string | null
+          last_attempt_at?: string | null
+          last_error?: string | null
+          last_response?: Json | null
+          nibo_customer_id?: string | null
+          nibo_invoice_id?: string | null
+          nibo_schedule_id?: string | null
+          order_id?: string
+          product_name?: string | null
+          product_type?: string | null
+          schedule_status?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string
