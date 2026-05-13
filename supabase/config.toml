@@ -33,3 +33,6 @@ project_id = "pvjlcfhqueibjnkuzzna"
 
   [functions.nibo-sync-payment]
     verify_jwt = true
+
+  [functions.nibo-list-services]
+    verify_jwt = true
