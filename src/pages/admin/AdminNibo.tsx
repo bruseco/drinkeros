@@ -40,7 +40,7 @@ export default function AdminNibo() {
   const loadMappings = async () => {
     const { data } = await supabase.from('nibo_service_mappings' as any).select('*');
     const map: Record<string, Mapping> = {};
-    (data as Mapping[] | null)?.forEach((m) => { map[m.product_type] = m; });
+    (data as unknown as Mapping[] | null)?.forEach((m) => { map[m.product_type] = m; });
     setMappings(map);
   };
 
