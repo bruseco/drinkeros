@@ -56,12 +56,25 @@ serve(async (req) => {
     const { data: isAdm } = await admin.rpc("is_admin", { _user_id: u.user.id });
     if (!isAdm) throw new Error("Forbidden");
 
-    // Tenta múltiplos endpoints conhecidos do NIBO
+    // Tenta múltiplos endpoints conhecidos do NIBO (variações de path/casing)
     const candidates = [
-      "/services?$top=200",
-      "/products?$filter=type eq 'Service'&$top=200",
-      "/products?$top=200",
-      "/serviceitems?$top=200",
+      // Sanity-check (deve responder com a empresa logada)
+      "/organizations",
+      "/companies",
+      // Possíveis nomes para perfis de serviço fiscais
+      "/services",
+      "/Services",
+      "/serviceitems",
+      "/serviceItems",
+      "/ServiceItems",
+      "/service-items",
+      "/products",
+      "/products?$filter=type eq 'Service'",
+      "/products?$filter=isService eq true",
+      "/items",
+      "/fiscal/services",
+      "/invoices/serviceinvoices/services",
+      "/invoices/services",
     ];
 
     const attempts: Array<{ path: string; status: number; ok: boolean; sample: string }> = [];
