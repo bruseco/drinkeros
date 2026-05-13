@@ -29,7 +29,7 @@ export const NiboSyncCell = ({ orderId }: Props) => {
       .select('status, last_error, nibo_invoice_id, nibo_schedule_id, nibo_customer_id')
       .eq('order_id', orderId)
       .maybeSingle();
-    setRow((data as SyncRow | null) ?? null);
+    setRow((data as unknown as SyncRow | null) ?? null);
     setLoading(false);
   };
 
