@@ -39,6 +39,7 @@ export const UserNavbar: React.FC = () => {
                 size="icon"
                 onClick={() => navigate(-1)}
                 className="h-9 w-9 rounded-full"
+                aria-label="Voltar"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>

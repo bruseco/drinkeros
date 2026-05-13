@@ -818,7 +818,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                 >
                   <img
                     src={t.src}
-                    alt={t.alt ?? `Depoimento ${i + 1}`}
+                    alt={t.alt ?? `Depoimento de aluno do curso ${brand} nº ${i + 1}`}
                     loading="lazy"
                     className="w-full h-auto block"
                   />

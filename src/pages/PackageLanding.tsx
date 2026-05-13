@@ -142,9 +142,9 @@ const PackageLanding: React.FC = () => {
 
           {isCourse && courseModules.length > 0 && (
             <div className="mb-8 max-w-md mx-auto">
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">
+              <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">
                 Módulos inclusos
-              </h3>
+              </h2>
               <div className="space-y-2">
                 {courseModules.map((cp) => (
                   <div key={cp.id} className="flex items-center gap-3 rounded-xl bg-white/60 dark:bg-white/5 p-3 text-left">
