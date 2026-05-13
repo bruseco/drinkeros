@@ -12,7 +12,7 @@ const NIBO_TOKEN = Deno.env.get("NIBO_API_TOKEN") ?? "";
 
 async function nibo<T = any>(path: string): Promise<{ ok: boolean; status: number; data: T | null; raw: string }> {
   const res = await fetch(`${NIBO_BASE}${path}`, {
-    headers: { apitoken: NIBO_TOKEN, Accept: "application/json" },
+    headers: { ApiToken: NIBO_TOKEN, Accept: "application/json" },
   });
   const raw = await res.text();
   let data: T | null = null;
@@ -23,12 +23,12 @@ async function nibo<T = any>(path: string): Promise<{ ok: boolean; status: numbe
 function normalize(item: any) {
   // NIBO usa nomes diferentes em endpoints distintos. Cobre os mais comuns.
   return {
-    id: item.id ?? item.serviceId ?? item.productId ?? null,
-    name: item.name ?? item.description ?? item.serviceName ?? null,
-    cnae: item.cnae ?? item.cnaeCode ?? item.cnae_code ?? null,
-    lc116: item.lc116 ?? item.serviceCodeLC116 ?? item.serviceCode ?? null,
-    municipal_code: item.municipalCode ?? item.cityServiceCode ?? item.municipal_code ?? null,
-    iss_rate: item.issRate ?? item.iss ?? item.aliquotaIss ?? null,
+    id: item.id ?? item.serviceProfileId ?? item.serviceId ?? item.productId ?? null,
+    name: item.name ?? item.description ?? item.serviceProfileName ?? item.serviceName ?? null,
+    cnae: item.cnae ?? item.cnaeCode ?? item.cnae_code ?? item.cnaeId ?? null,
+    lc116: item.lc116 ?? item.lc116Code ?? item.serviceCodeLC116 ?? item.serviceCode ?? item.federalServiceCode ?? null,
+    municipal_code: item.municipalCode ?? item.cityServiceCode ?? item.municipalServiceCode ?? item.municipal_code ?? null,
+    iss_rate: item.issRate ?? item.issAliquot ?? item.issTaxRate ?? item.iss ?? item.aliquotaIss ?? null,
     raw: item,
   };
 }
@@ -56,8 +56,11 @@ serve(async (req) => {
     const { data: isAdm } = await admin.rpc("is_admin", { _user_id: u.user.id });
     if (!isAdm) throw new Error("Forbidden");
 
-    // Tenta múltiplos endpoints conhecidos do NIBO (variações de path/casing)
+    // Endpoint oficial do NIBO para o identificador usado na NFS-e: serviceProfileId.
+    // Docs: "Listar perfis de serviço" => /nfse/serviceprofiles.
     const candidates = [
+      "/nfse/serviceprofiles",
+      "/nfse/serviceprofiles?$top=100&$orderby=name",
       // Sanity-check (deve responder com a empresa logada)
       "/organizations",
       "/companies",
