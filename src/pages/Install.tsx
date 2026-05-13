@@ -257,7 +257,7 @@ const Install: React.FC = () => {
             </Button>
           </Link>
         </div>
-      </div>
+      </main>
     </div>
   );
 };
