@@ -85,7 +85,7 @@ const Install: React.FC = () => {
           <Card className="border-success/30 bg-success/5 mb-8">
             <CardContent className="p-6 text-center">
               <CheckCircle2 className="h-12 w-12 text-success mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-success mb-2">App já instalado!</h3>
+              <h2 className="text-lg font-semibold text-success mb-2">App já instalado!</h2>
               <p className="text-muted-foreground text-sm">Você já pode acessar o app direto da sua tela inicial.</p>
             </CardContent>
           </Card>
@@ -94,10 +94,10 @@ const Install: React.FC = () => {
             {/* Features */}
             <Card className="mb-6">
               <CardContent className="p-6">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <h2 className="font-semibold mb-4 flex items-center gap-2">
                   <Smartphone className="h-5 w-5 text-primary" />
                   Por que instalar?
-                </h3>
+                </h2>
                 <ul className="space-y-3">
                   {features.map((feature, index) => (
                     <li key={index} className="flex items-center gap-3 text-sm">
