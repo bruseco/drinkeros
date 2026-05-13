@@ -294,12 +294,39 @@ serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const orderIds: string[] = body.order_ids || (body.order_id ? [body.order_id] : []);
+    let orderIds: string[] = body.order_ids || (body.order_id ? [body.order_id] : []);
+
+    // Modo automático (cron): processa últimas vendas sem sync com sucesso
+    if (body.auto === true && orderIds.length === 0) {
+      const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString();
+      const { data: orders } = await supabase.rpc("admin_orders", {
+        p_search: null,
+        p_source: null,
+        p_product_type: null,
+        p_from: since,
+        p_to: null,
+        p_limit: 200,
+        p_offset: 0,
+      });
+      const list = (orders as Array<{ id: string }>) || [];
+      const ids = list.map((o) => o.id);
+      if (ids.length > 0) {
+        const { data: synced } = await supabase
+          .from("nibo_sync_log")
+          .select("order_id, status")
+          .in("order_id", ids);
+        const okSet = new Set(
+          (synced || []).filter((s) => s.status === "success").map((s) => s.order_id),
+        );
+        // Limita 50 por execução para não estourar tempo
+        orderIds = ids.filter((id) => !okSet.has(id)).slice(0, 50);
+      }
+    }
 
     if (orderIds.length === 0) {
       return new Response(
-        JSON.stringify({ error: "order_id ou order_ids obrigatório" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        JSON.stringify({ results: [], message: "Nenhuma venda para sincronizar" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
