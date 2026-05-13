@@ -61,15 +61,15 @@ const Install: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
-      <div className="container mx-auto px-4 py-8 max-w-lg">
+      <main className="container mx-auto px-4 py-8 max-w-lg">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <Link to="/">
-            <Button variant="ghost" size="icon" className="rounded-full">
+          <Link to="/" aria-label="Voltar para a página inicial">
+            <Button variant="ghost" size="icon" className="rounded-full" aria-label="Voltar">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-          <h1 className="text-xl font-bold">Instalar App</h1>
+          <h1 className="text-xl font-bold">Instalar App Drinkeros</h1>
         </div>
 
         {/* App Preview */}
