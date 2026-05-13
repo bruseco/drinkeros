@@ -15,6 +15,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { Loader2, Search, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { NiboSyncCell } from '@/components/admin/NiboSyncCell';
 
 const sourceLabel: Record<string, string> = {
   stripe: 'Stripe',
