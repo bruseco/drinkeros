@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2, CheckCircle, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
+import SeoHead from '@/components/SeoHead';
 
 type Step = 'email' | 'password' | 'done';
 
@@ -107,6 +108,12 @@ const Migracao: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 gap-4">
+      <SeoHead
+        title="Migração de Conta — Drinkeros"
+        description="Migre sua conta antiga do Drinkeros para o novo sistema com inteligência artificial. Crie uma nova senha e acesse a plataforma renovada."
+        path="/migracao"
+      />
+      <h1 className="sr-only">Migração de Conta Drinkeros</h1>
       <Card className="w-full max-w-md border-0 shadow-xl">
         <CardHeader className="text-center">
           <Link to="/" className="mx-auto mb-4">

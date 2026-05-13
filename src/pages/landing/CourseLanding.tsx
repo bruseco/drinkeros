@@ -24,6 +24,7 @@ import { useComboBySlug } from '@/hooks/useCombos';
 import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
 import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
 import VipFloatingBanner from '@/components/landing/VipFloatingBanner';
+import SeoHead from '@/components/SeoHead';
 
 /** Total padrão de alunos certificados — usado em todas as landings de curso. */
 export const TOTAL_STUDENTS_CERTIFIED = 22341;
@@ -402,6 +403,38 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
 
   return (
     <div className="min-h-screen bg-[#0b0b0d] text-white overflow-x-hidden">
+      <SeoHead
+        title={`${brand} — ${tagline.length > 80 ? tagline.slice(0, 77) + '...' : tagline}`}
+        description={(subheadline || tagline).slice(0, 160)}
+        path={`/${slug}`}
+        type="product"
+        jsonLd={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Course',
+            name: brand,
+            description: subheadline || tagline,
+            provider: { '@type': 'Organization', name: 'Drinkeros', url: 'https://drinkeros.com' },
+            offers: {
+              '@type': 'Offer',
+              price: String(finalPrice),
+              priceCurrency: 'BRL',
+              url: `https://drinkeros.com/${slug}`,
+              availability: 'https://schema.org/InStock',
+            },
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: faq.map((f) => ({
+              '@type': 'Question',
+              name: f.q,
+              acceptedAnswer: { '@type': 'Answer', text: f.a },
+            })),
+          },
+        ]}
+      />
+      <h1 className="sr-only">{brand} — {tagline}</h1>
       <style>{themeStyles}</style>
 
       {!isVip && !hideVipBanner && (
@@ -818,7 +851,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                 >
                   <img
                     src={t.src}
-                    alt={t.alt ?? `Depoimento ${i + 1}`}
+                    alt={t.alt ?? `Depoimento de aluno do curso ${brand} nº ${i + 1}`}
                     loading="lazy"
                     className="w-full h-auto block"
                   />
