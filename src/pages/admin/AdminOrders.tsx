@@ -299,6 +299,7 @@ const AdminOrders: React.FC = () => {
                   <TableHead>Tipo</TableHead>
                   <TableHead>Origem</TableHead>
                   <TableHead className="text-right">Valor</TableHead>
+                  <TableHead>NIBO</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -321,6 +322,7 @@ const AdminOrders: React.FC = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right font-medium">{fmtBRL(r.amount)}</TableCell>
+                    <TableCell><NiboSyncCell orderId={r.id} /></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
