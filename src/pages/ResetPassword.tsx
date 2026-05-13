@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { useToast } from '@/hooks/use-toast';
+import SeoHead from '@/components/SeoHead';
 
 const ResetPassword: React.FC = () => {
   const [password, setPassword] = useState('');
@@ -132,12 +133,17 @@ const ResetPassword: React.FC = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted p-4">
+      <SeoHead
+        title="Recuperar Senha — Drinkeros"
+        description="Defina uma nova senha para acessar a sua conta Drinkeros e voltar para a sua área de membros de coquetelaria."
+        path="/reset-password"
+      />
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <Link to="/" className="mx-auto mb-4 block">
             <img src={drinkrosLogo} alt="Drinkeros" className="h-14 mx-auto" />
           </Link>
-          <CardTitle className="text-2xl">Nova senha</CardTitle>
+          <h1 className="text-2xl font-semibold">Recuperar Senha</h1>
           <CardDescription>Digite sua nova senha</CardDescription>
         </CardHeader>
         <CardContent>

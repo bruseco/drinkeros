@@ -23,6 +23,7 @@ import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import drinksStrip from '@/assets/1000-drinks.jpg';
 import AnimatedNumber from '@/components/AnimatedNumber';
 import { trackFbEvent } from '@/lib/metaPixel';
+import SeoHead from '@/components/SeoHead';
 
 const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -157,6 +158,12 @@ const Login: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 gap-4">
+      <SeoHead
+        title="Entrar no Drinkeros — Área de Membros"
+        description="Acesse sua conta Drinkeros e entre na maior área de membros de coquetelaria do Brasil: cursos, mais de 1.000 receitas, ebooks e o Clube dos Drinkeros."
+        path="/login"
+      />
+      <h1 className="sr-only">Entrar no Drinkeros</h1>
       {/* Install Banner */}
       <div className="w-full max-w-md">
         <InstallBanner />

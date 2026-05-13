@@ -13,6 +13,7 @@ import { trackFbEvent } from '@/lib/metaPixel';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import SeoHead from '@/components/SeoHead';
 
 const Signup: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -139,6 +140,12 @@ const Signup: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 gap-4">
+      <SeoHead
+        title="Criar conta no Drinkeros — Cadastro grátis"
+        description="Crie sua conta grátis no Drinkeros e tenha acesso a mais de 1.000 receitas, cursos de coquetelaria e benefícios do Clube dos Drinkeros."
+        path="/signup"
+      />
+      <h1 className="sr-only">Criar conta no Drinkeros</h1>
       <Card className="w-full max-w-md border-0 shadow-xl">
         <CardHeader className="text-center">
           <Link to="/" className="mx-auto mb-4">
