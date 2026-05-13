@@ -56,21 +56,36 @@ serve(async (req) => {
     const { data: isAdm } = await admin.rpc("is_admin", { _user_id: u.user.id });
     if (!isAdm) throw new Error("Forbidden");
 
-    // Tenta múltiplos endpoints conhecidos do NIBO
+    // Tenta múltiplos endpoints conhecidos do NIBO (variações de path/casing)
     const candidates = [
-      "/services?$top=200",
-      "/products?$filter=type eq 'Service'&$top=200",
-      "/products?$top=200",
-      "/serviceitems?$top=200",
+      // Sanity-check (deve responder com a empresa logada)
+      "/organizations",
+      "/companies",
+      // Possíveis nomes para perfis de serviço fiscais
+      "/services",
+      "/Services",
+      "/serviceitems",
+      "/serviceItems",
+      "/ServiceItems",
+      "/service-items",
+      "/products",
+      "/products?$filter=type eq 'Service'",
+      "/products?$filter=isService eq true",
+      "/items",
+      "/fiscal/services",
+      "/invoices/serviceinvoices/services",
+      "/invoices/services",
     ];
 
     const attempts: Array<{ path: string; status: number; ok: boolean; sample: string }> = [];
     let services: any[] = [];
     let usedPath: string | null = null;
 
+    const SANITY = new Set(["/organizations", "/companies"]);
     for (const p of candidates) {
       const r = await nibo<any>(p);
       attempts.push({ path: p, status: r.status, ok: r.ok, sample: r.raw.slice(0, 200) });
+      if (SANITY.has(p)) continue; // só diagnóstico de conectividade
       if (!r.ok || !r.data) continue;
       const items: any[] = Array.isArray(r.data?.items)
         ? r.data.items
