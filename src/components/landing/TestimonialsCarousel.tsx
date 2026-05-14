@@ -120,7 +120,8 @@ const TestimonialsCarousel: React.FC = () => {
   };
 
   return (
-    <div className="relative max-w-6xl mx-auto mb-12 px-4">
+    <div className="relative w-screen left-1/2 -translate-x-1/2 mb-12">
+      <div className="px-4">
       <h3 className="text-center text-xl md:text-2xl font-black text-white mb-1">
         O que os <span className="text-yellow-300">Drinkeros</span> dizem
       </h3>
