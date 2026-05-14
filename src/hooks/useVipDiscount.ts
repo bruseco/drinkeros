@@ -46,29 +46,14 @@ export const useVipDiscount = (): VipDiscountState => {
   return useMemo<VipDiscountState>(() => {
     if (!data) return NEUTRAL;
 
-    const { isVip, isLifetime, activated_at } = data;
+    const { isVip, isLifetime, discount_intro_started_at } = data;
     const percent = getVipDiscountPercent({
-      activatedAt: activated_at,
-      isLifetime,
+      introStartedAt: discount_intro_started_at,
       isVip,
     });
 
     if (!isVip) {
       return { ...NEUTRAL, ready: !isLoading };
-    }
-
-    if (isLifetime) {
-      return {
-        percent,
-        isIntroActive: false,
-        isBaseActive: false,
-        isVip: true,
-        isLifetime: true,
-        introExpiresAt: null,
-        daysRemaining: 0,
-        hoursRemaining: 0,
-        ready: !isLoading,
-      };
     }
 
     const isIntroActive = percent === VIP_DISCOUNT_INTRO_PERCENT;
@@ -78,8 +63,8 @@ export const useVipDiscount = (): VipDiscountState => {
     let daysRemaining = 0;
     let hoursRemaining = 0;
 
-    if (activated_at) {
-      const expires = new Date(activated_at);
+    if (discount_intro_started_at) {
+      const expires = new Date(discount_intro_started_at);
       expires.setUTCDate(expires.getUTCDate() + VIP_INTRO_WINDOW_DAYS);
       introExpiresAt = expires;
       const msLeft = expires.getTime() - Date.now();
@@ -94,7 +79,7 @@ export const useVipDiscount = (): VipDiscountState => {
       isIntroActive,
       isBaseActive,
       isVip: true,
-      isLifetime: false,
+      isLifetime,
       introExpiresAt: isIntroActive ? introExpiresAt : null,
       daysRemaining,
       hoursRemaining,

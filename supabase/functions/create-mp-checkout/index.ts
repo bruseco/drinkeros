@@ -53,8 +53,7 @@ serve(async (req) => {
     let userId: string | null = null;
     let userEmail: string | null = null;
     let isVip = false;
-    let isLifetime = false;
-    let activatedAt: string | null = null;
+    let introStartedAt: string | null = null;
     const authHeader = req.headers.get("Authorization");
     if (authHeader) {
       try {
@@ -67,31 +66,28 @@ serve(async (req) => {
         if (data.user) {
           userId = data.user.id;
           userEmail = data.user.email ?? null;
-          const { data: planData } = await supabase.rpc("get_user_plan", { _user_id: userId });
-          isVip = planData === "vip";
+          const { data: planV2 } = await supabase.rpc("get_user_plan_v2", { _user_id: userId });
+          isVip = planV2 === "socio" || planV2 === "vitalicio";
           if (isVip) {
             const { data: planRow } = await supabase
-              .from("user_plans").select("activated_at").eq("user_id", userId).maybeSingle();
-            activatedAt = (planRow as any)?.activated_at ?? null;
-            const { data: lifetimeRow } = await supabase
-              .from("user_lifetime_access").select("user_id").eq("user_id", userId).maybeSingle();
-            isLifetime = !!lifetimeRow;
+              .from("user_plans").select("discount_intro_started_at").eq("user_id", userId).maybeSingle();
+            introStartedAt = (planRow as any)?.discount_intro_started_at ?? null;
           }
         }
       } catch (_) { /* visitante */ }
     }
 
-    // Desconto escalonado do Sócio (sincroniza com src/lib/vipDiscount.ts)
+    // Desconto escalonado (Sócio + Vitalício, sincroniza com src/lib/vipDiscount.ts)
     const VIP_INTRO_PERCENT = 80;
     const VIP_BASE_PERCENT = 50;
     const VIP_INTRO_WINDOW_DAYS = 7;
     let vipPercent = 0;
     if (isVip) {
-      if (isLifetime) vipPercent = VIP_INTRO_PERCENT;
-      else if (activatedAt) {
-        const days = (Date.now() - new Date(activatedAt).getTime()) / 86400000;
+      if (!introStartedAt) vipPercent = VIP_INTRO_PERCENT;
+      else {
+        const days = (Date.now() - new Date(introStartedAt).getTime()) / 86400000;
         vipPercent = days <= VIP_INTRO_WINDOW_DAYS ? VIP_INTRO_PERCENT : VIP_BASE_PERCENT;
-      } else vipPercent = VIP_BASE_PERCENT;
+      }
     }
     const applyDiscount = vipPercent > 0;
     const basePrice = Number(product.price);

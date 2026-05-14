@@ -2462,6 +2462,7 @@ export type Database = {
         Row: {
           activated_at: string
           created_at: string
+          discount_intro_started_at: string | null
           expires_at: string | null
           id: string
           plan: string
@@ -2472,6 +2473,7 @@ export type Database = {
         Insert: {
           activated_at?: string
           created_at?: string
+          discount_intro_started_at?: string | null
           expires_at?: string | null
           id?: string
           plan?: string
@@ -2482,6 +2484,7 @@ export type Database = {
         Update: {
           activated_at?: string
           created_at?: string
+          discount_intro_started_at?: string | null
           expires_at?: string | null
           id?: string
           plan?: string
@@ -3305,6 +3308,7 @@ export type Database = {
         Returns: string
       }
       slugify: { Args: { v: string }; Returns: string }
+      start_vip_discount_window: { Args: never; Returns: string }
       unaccent: { Args: { "": string }; Returns: string }
     }
     Enums: {
