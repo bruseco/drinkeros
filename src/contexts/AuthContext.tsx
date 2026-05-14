@@ -115,6 +115,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             try {
               localStorage.setItem('drinkeros:last_auth_method', provider);
             } catch { /* ignore */ }
+            // Inicia (idempotente) a janela de 7 dias do desconto VIP
+            setTimeout(() => {
+              supabase.rpc('start_vip_discount_window' as any).catch(() => { /* ignore */ });
+            }, 0);
           }
 
           // Use setTimeout to avoid Supabase deadlock
