@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
-import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
+import { applyVipDiscountFor, formatBRL, VIP_DISCOUNT_INTRO_PERCENT } from '@/lib/vipDiscount';
+import { useVipDiscount } from '@/hooks/useVipDiscount';
 import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
 
 interface VipFloatingBannerProps {
@@ -63,7 +64,10 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
 
   if (!visible || dismissed) return null;
 
-  const vipPrice = applyVipDiscount(basePrice);
+  const vip = useVipDiscount();
+  // Banner promocional para VISITANTES (não-sócios) — sempre mostra a oferta máxima (intro 80%)
+  const displayPercent = vip.percent || VIP_DISCOUNT_INTRO_PERCENT;
+  const vipPrice = applyVipDiscountFor(basePrice, displayPercent);
 
   return (
     <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[60] w-[calc(100%-1.5rem)] max-w-md animate-bounce-in pointer-events-auto">
@@ -96,7 +100,7 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
           </div>
           <div className="min-w-0 flex-1">
             <span className="block text-[10px] font-extrabold tracking-[0.18em] uppercase text-yellow-300 mb-0.5">
-              Sócios do Clube · {VIP_DISCOUNT_PERCENT}% OFF
+              Sócios do Clube · até {displayPercent}% OFF
             </span>
             {productName && (
               <p className="text-white/95 text-[11px] leading-tight mb-0.5">
