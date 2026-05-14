@@ -117,7 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             } catch { /* ignore */ }
             // Inicia (idempotente) a janela de 7 dias do desconto VIP
             setTimeout(() => {
-              supabase.rpc('start_vip_discount_window' as any).catch(() => { /* ignore */ });
+              (supabase.rpc('start_vip_discount_window' as any) as unknown as Promise<unknown>).catch(() => { /* ignore */ });
             }, 0);
           }
 
