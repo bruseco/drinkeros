@@ -21,7 +21,9 @@ import { useUserPlan } from '@/hooks/useUserPlan';
 import drinkerosFooterLogo from '@/assets/logotipo-drinkeros.png';
 import { useCourseBySlug } from '@/hooks/useCourses';
 import { useComboBySlug } from '@/hooks/useCombos';
-import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
+import { applyVipDiscountFor, formatBRL } from '@/lib/vipDiscount';
+import { useVipDiscount } from '@/hooks/useVipDiscount';
+import { VipDiscountCountdownBanner } from '@/components/user/VipDiscountCountdownBanner';
 import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
 import VipFloatingBanner from '@/components/landing/VipFloatingBanner';
 import SeoHead from '@/components/SeoHead';
@@ -256,7 +258,8 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
 
   const dbPrice = (course as any)?.price ? Number((course as any).price) : (combo as any)?.price ? Number((combo as any).price) : null;
   const basePrice = dbPrice ?? fallbackPrice;
-  const finalPrice = isVip ? applyVipDiscount(basePrice) : basePrice;
+  const vip = useVipDiscount();
+  const finalPrice = isVip ? applyVipDiscountFor(basePrice, vip.percent) : basePrice;
   // Parcelamento com juros do cliente (Mercado Pago: 4,49% a.m. compostos)
   const INSTALLMENT_RATE = 0.0449;
   const INSTALLMENT_COUNT = 12;
@@ -1004,7 +1007,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                   >
                     <Crown className="h-4 w-4" style={{ color: theme.accent }} />
                     <span className="text-sm font-bold uppercase tracking-wide" style={{ color: theme.accent }}>
-                      Preço exclusivo Sócio do Clube · {VIP_DISCOUNT_PERCENT}% OFF
+                      Preço exclusivo Sócio do Clube · {vip.percent}% OFF
                     </span>
                   </div>
                   <p className="text-lg text-white/60 line-through">{formatBRL(basePrice)}</p>
