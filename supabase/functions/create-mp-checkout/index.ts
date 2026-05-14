@@ -106,8 +106,8 @@ serve(async (req) => {
       items: [
         {
           id: product.id,
-          title: isVip
-            ? `${product.name} (Sócio do Clube -${VIP_DISCOUNT_PERCENT}%)`
+          title: applyDiscount
+            ? `${product.name} (Sócio do Clube -${vipPercent}%)`
             : product.name,
           description: product.description ?? undefined,
           picture_url: product.cover_image_url ?? undefined,
@@ -131,8 +131,8 @@ serve(async (req) => {
         product_id: product.id,
         product_slug: product.slug,
         user_id: userId || "",
-        vip_discount_applied: isVip ? "true" : "false",
-        vip_discount_percent: isVip ? String(VIP_DISCOUNT_PERCENT) : "0",
+        vip_discount_applied: applyDiscount ? "true" : "false",
+        vip_discount_percent: applyDiscount ? String(vipPercent) : "0",
       },
       // Permite até 12x no cartão (juros do emissor)
       payment_methods: {
