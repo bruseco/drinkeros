@@ -35,7 +35,6 @@ export const VipDiscountCountdownBanner: React.FC<Props> = ({ forceShowOnProduct
 
   if (vip.isIntroActive) {
     if (dismissedIntro) return null;
-    const remaining = formatRemaining(vip.daysRemaining, vip.hoursRemaining);
     return (
       <div
         role="status"
@@ -46,9 +45,7 @@ export const VipDiscountCountdownBanner: React.FC<Props> = ({ forceShowOnProduct
           className="block px-4 py-2.5 pr-10 text-center text-sm sm:text-base font-medium hover:bg-yellow-300 transition-colors"
         >
           <Sparkles className="inline-block h-4 w-4 mr-1.5 -mt-0.5" />
-          <span className="font-bold">80% OFF</span> como novo Sócio · restam{' '}
-          <span className="font-bold tabular-nums">{remaining}</span>
-          <span className="hidden sm:inline"> · depois passa a 50% OFF vitalício</span>
+          <span className="font-bold">80% OFF</span> em todos Cursos e E-books — Você tem <span className="font-bold">7 dias</span> para aproveitar essa promoção.
         </Link>
         <button
           type="button"
