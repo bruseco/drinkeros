@@ -35,6 +35,7 @@ export const useUserPlan = () => {
           plan: 'free',
           expires_at: null,
           activated_at: null,
+          discount_intro_started_at: null,
           isSocio: false,
           isLifetime: false,
           isAluno: false,
@@ -44,7 +45,7 @@ export const useUserPlan = () => {
 
       const { data: planRow } = await supabase
         .from('user_plans')
-        .select('plan, expires_at, activated_at')
+        .select('plan, expires_at, activated_at, discount_intro_started_at')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -69,6 +70,7 @@ export const useUserPlan = () => {
         plan: isLifetime ? 'vitalicio' : plan,
         expires_at: isLifetime ? null : (planRow?.expires_at ?? null),
         activated_at: (planRow as any)?.activated_at ?? null,
+        discount_intro_started_at: (planRow as any)?.discount_intro_started_at ?? null,
         isSocio,
         isLifetime,
         isAluno,
