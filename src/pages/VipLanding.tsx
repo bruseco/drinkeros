@@ -17,6 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { trackFbEvent } from '@/lib/metaPixel';
 import { useViewContent } from '@/hooks/useViewContent';
+import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
 
 import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
 import bgTijolos from '@/assets/bg-tijolos-pretos.jpg';
@@ -319,6 +320,9 @@ const VipLanding: React.FC = () => {
             </ul>
           </div>
         </div>
+
+        {/* Carrossel de depoimentos */}
+        <TestimonialsCarousel />
 
         {/* Reativação de cursos expirados */}
         <div className="relative max-w-3xl mx-auto mb-12">
