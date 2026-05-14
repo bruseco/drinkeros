@@ -157,7 +157,7 @@ const TestimonialsCarousel: React.FC = () => {
                 src={src}
                 alt={`Depoimento ${(i % TESTIMONIALS.length) + 1}`}
                 draggable={false}
-                className="block h-[420px] w-auto pointer-events-none"
+                className="block h-[540px] md:h-[420px] w-auto pointer-events-none"
               />
             </div>
           ))}
