@@ -16,10 +16,11 @@ import { useEbookBySlug } from '@/hooks/useEbooks';
 import { useUserEbooks } from '@/hooks/useUserEbooks';
 import { useAuth } from '@/contexts/AuthContext';
 import {
-  VIP_DISCOUNT_PERCENT,
-  applyVipDiscount,
+  applyVipDiscountFor,
   formatBRL,
 } from '@/lib/vipDiscount';
+import { useVipDiscount } from '@/hooks/useVipDiscount';
+import { VipDiscountCountdownBanner } from '@/components/user/VipDiscountCountdownBanner';
 import { EBOOK_CONTENT } from './ebookContent';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { useViewContent } from '@/hooks/useViewContent';
@@ -79,7 +80,8 @@ const EbookLanding: React.FC = () => {
   const content = EBOOK_CONTENT[slug ?? ''];
 
   const basePrice = ebook.price ? Number(ebook.price) : 0;
-  const finalPrice = isVip ? applyVipDiscount(basePrice) : basePrice;
+  const vip = useVipDiscount();
+  const finalPrice = isVip ? applyVipDiscountFor(basePrice, vip.percent) : basePrice;
   const installments = basePrice > 0 ? (finalPrice / 12).toFixed(2).replace('.', ',') : '0,00';
 
   const handleBuy = async () => {
@@ -119,6 +121,7 @@ const EbookLanding: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden font-serif">
+      <VipDiscountCountdownBanner forceShowOnProduct />
       {/* CSS específico — estilo dark/vintage com ornamentos */}
       <style>{`
         @keyframes ebGoldShimmer {
@@ -343,7 +346,7 @@ const EbookLanding: React.FC = () => {
             {isVip && basePrice > 0 && (
               <div className="inline-flex items-center gap-1.5 mb-4 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white text-xs font-bold uppercase tracking-wider px-3 py-1.5 shadow-lg">
                 <Crown className="h-3.5 w-3.5" />
-                Sócio do Clube · {VIP_DISCOUNT_PERCENT}% OFF
+                Sócio do Clube · {vip.percent}% OFF
               </div>
             )}
 
@@ -407,7 +410,7 @@ const EbookLanding: React.FC = () => {
                 <Link to="/login" className="text-amber-300 hover:underline">
                   Entrar
                 </Link>{' '}
-                — Sócios do Clube ganham {VIP_DISCOUNT_PERCENT}% OFF automaticamente.
+                — Sócios do Clube ganham até {vip.percent || 80}% OFF automaticamente.
               </p>
             )}
 

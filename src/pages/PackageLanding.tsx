@@ -10,7 +10,9 @@ import { useEbookBySlug } from '@/hooks/useEbooks';
 import { useUserPlan } from '@/hooks/useUserPlan';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
+import { applyVipDiscountFor, formatBRL } from '@/lib/vipDiscount';
+import { useVipDiscount } from '@/hooks/useVipDiscount';
+import { VipDiscountCountdownBanner } from '@/components/user/VipDiscountCountdownBanner';
 import drinkerosFooterLogo from '@/assets/logotipo-drinkeros.png';
 import { useViewContent } from '@/hooks/useViewContent';
 
@@ -26,6 +28,7 @@ const PackageLanding: React.FC = () => {
   const { data: courseModules = [] } = useCoursePackages(course?.id || '');
   const { data: userPlan } = useUserPlan();
   const isVip = !!userPlan?.isVip;
+  const vip = useVipDiscount();
 
   const isLoading = pkgLoading || courseLoading || ebookLoading;
   const item = pkg || course || ebook;
@@ -97,12 +100,13 @@ const PackageLanding: React.FC = () => {
     (isPackage && (item as any).price)
   );
   const price = (item as any).price ? Number((item as any).price) : null;
-  const finalPrice = price !== null && isVip ? applyVipDiscount(price) : price;
+  const finalPrice = price !== null && isVip ? applyVipDiscountFor(price, vip.percent) : price;
   const formattedPrice = finalPrice !== null ? formatBRL(finalPrice) : null;
   const formattedOriginalPrice = price !== null && isVip ? formatBRL(price) : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-950/20 dark:via-background dark:to-orange-950/20 flex flex-col">
+      <VipDiscountCountdownBanner forceShowOnProduct />
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="max-w-2xl mx-auto text-center">
           <div className="mb-8 inline-flex items-center justify-center">
@@ -169,7 +173,7 @@ const PackageLanding: React.FC = () => {
                 <div className="mb-2 flex items-center justify-center gap-2">
                   <span className="text-lg text-muted-foreground line-through">{formattedOriginalPrice}</span>
                   <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
-                    Sócio do Clube · {VIP_DISCOUNT_PERCENT}% OFF
+                    Sócio do Clube · {vip.percent}% OFF
                   </Badge>
                 </div>
               )}

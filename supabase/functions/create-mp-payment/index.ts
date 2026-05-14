@@ -88,6 +88,8 @@ serve(async (req) => {
     let userId: string | null = null;
     let userEmail: string | null = null;
     let isVip = false;
+    let isLifetime = false;
+    let activatedAt: string | null = null;
     const authHeader = req.headers.get("Authorization");
     if (authHeader) {
       try {
@@ -102,6 +104,14 @@ serve(async (req) => {
           userEmail = data.user.email ?? null;
           const { data: planData } = await supabase.rpc("get_user_plan", { _user_id: userId });
           isVip = planData === "vip";
+          if (isVip) {
+            const { data: planRow } = await supabase
+              .from("user_plans").select("activated_at").eq("user_id", userId).maybeSingle();
+            activatedAt = (planRow as any)?.activated_at ?? null;
+            const { data: lifetimeRow } = await supabase
+              .from("user_lifetime_access").select("user_id").eq("user_id", userId).maybeSingle();
+            isLifetime = !!lifetimeRow;
+          }
         }
       } catch (_) { /* visitante */ }
     }
@@ -110,12 +120,24 @@ serve(async (req) => {
       throw new Error("Faça login para assinar o Clube dos Drinkeros");
     }
 
-    const VIP_DISCOUNT_PERCENT = 80;
+    // Desconto escalonado do Sócio (sincroniza com src/lib/vipDiscount.ts)
+    const VIP_INTRO_PERCENT = 80;
+    const VIP_BASE_PERCENT = 50;
+    const VIP_INTRO_WINDOW_DAYS = 7;
+    let vipPercent = 0;
+    if (isVip && product_type !== "club") {
+      if (isLifetime) vipPercent = VIP_INTRO_PERCENT;
+      else if (activatedAt) {
+        const days = (Date.now() - new Date(activatedAt).getTime()) / 86400000;
+        vipPercent = days <= VIP_INTRO_WINDOW_DAYS ? VIP_INTRO_PERCENT : VIP_BASE_PERCENT;
+      } else vipPercent = VIP_BASE_PERCENT;
+    }
+    const applyDiscount = vipPercent > 0;
     const basePrice = Number(product.price);
     const finalPrice = product_type === "club"
       ? basePrice
-      : isVip
-      ? Math.round(basePrice * (1 - VIP_DISCOUNT_PERCENT / 100) * 100) / 100
+      : applyDiscount
+      ? Math.round(basePrice * (1 - vipPercent / 100) * 100) / 100
       : basePrice;
 
     const externalRef = `${product_type}:${product.id}:${userId || "guest"}:${Date.now()}`;
@@ -125,7 +147,7 @@ serve(async (req) => {
     const isPix = formData.payment_method_id === "pix";
     const paymentBody: Record<string, unknown> = {
       transaction_amount: finalPrice,
-      description: isVip ? `${product.name} (Sócio do Clube -${VIP_DISCOUNT_PERCENT}%)` : product.name,
+      description: applyDiscount ? `${product.name} (Sócio do Clube -${vipPercent}%)` : product.name,
       payment_method_id: formData.payment_method_id,
       external_reference: externalRef,
       notification_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/mercadopago-webhook`,
@@ -135,8 +157,8 @@ serve(async (req) => {
         product_id: product.id,
         product_slug: product.slug,
         user_id: userId || "",
-        vip_discount_applied: isVip ? "true" : "false",
-        vip_discount_percent: isVip ? String(VIP_DISCOUNT_PERCENT) : "0",
+        vip_discount_applied: applyDiscount ? "true" : "false",
+        vip_discount_percent: applyDiscount ? String(vipPercent) : "0",
         access_period_days: product_type === "club" ? String(clubPeriodDays) : "",
       },
       payer: {

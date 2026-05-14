@@ -48,6 +48,8 @@ serve(async (req) => {
     let userId: string | null = null;
     let userEmail: string | null = null;
     let isVip = false;
+    let isLifetime = false;
+    let activatedAt: string | null = null;
     const authHeader = req.headers.get("Authorization");
     if (authHeader) {
       try {
@@ -63,6 +65,20 @@ serve(async (req) => {
           // Verifica se é VIP via função SECURITY DEFINER
           const { data: planData } = await supabase.rpc("get_user_plan", { _user_id: userId });
           isVip = planData === "vip";
+          if (isVip) {
+            const { data: planRow } = await supabase
+              .from("user_plans")
+              .select("activated_at")
+              .eq("user_id", userId)
+              .maybeSingle();
+            activatedAt = (planRow as any)?.activated_at ?? null;
+            const { data: lifetimeRow } = await supabase
+              .from("user_lifetime_access")
+              .select("user_id")
+              .eq("user_id", userId)
+              .maybeSingle();
+            isLifetime = !!lifetimeRow;
+          }
         }
       } catch (_) { /* visitante */ }
     }
@@ -102,13 +118,28 @@ serve(async (req) => {
 
     const origin = req.headers.get("origin") || "https://drinkeros.com";
 
-    // Regra universal: assinantes VIP recebem 80% OFF (cursos e ebooks).
-    // Mantém sincronia com src/lib/vipDiscount.ts.
-    const VIP_DISCOUNT_PERCENT = 80;
+    // Desconto escalonado do Sócio do Clube (mantenha sincronia com src/lib/vipDiscount.ts):
+    //  - Vitalício/admin: 80% OFF permanente
+    //  - Sócio dias 0–7 desde activated_at: 80% OFF
+    //  - Sócio após 7 dias: 50% OFF
+    const VIP_INTRO_PERCENT = 80;
+    const VIP_BASE_PERCENT = 50;
+    const VIP_INTRO_WINDOW_DAYS = 7;
+    let vipPercent = 0;
+    if (isVip) {
+      if (isLifetime) {
+        vipPercent = VIP_INTRO_PERCENT;
+      } else if (activatedAt) {
+        const daysSince = (Date.now() - new Date(activatedAt).getTime()) / (1000 * 60 * 60 * 24);
+        vipPercent = daysSince <= VIP_INTRO_WINDOW_DAYS ? VIP_INTRO_PERCENT : VIP_BASE_PERCENT;
+      } else {
+        vipPercent = VIP_BASE_PERCENT;
+      }
+    }
     const basePrice = Number((product as any).price ?? 0);
-    const applyDiscount = isVip && basePrice > 0;
+    const applyDiscount = vipPercent > 0 && basePrice > 0;
     const discountedAmount = applyDiscount
-      ? Math.round(basePrice * (1 - VIP_DISCOUNT_PERCENT / 100) * 100)
+      ? Math.round(basePrice * (1 - vipPercent / 100) * 100)
       : null;
 
     const lineItem = applyDiscount
@@ -118,7 +149,7 @@ serve(async (req) => {
             currency: "brl",
             unit_amount: discountedAmount!,
             product_data: {
-              name: `${(product as any).name} (Sócio do Clube -${VIP_DISCOUNT_PERCENT}%)`,
+              name: `${(product as any).name} (Sócio do Clube -${vipPercent}%)`,
               description: (product as any).description ?? undefined,
               images: (product as any).cover_image_url ? [(product as any).cover_image_url] : undefined,
               metadata: { source_product_id: (product as any).id },
@@ -150,7 +181,7 @@ serve(async (req) => {
         product_slug: product.slug,
         user_id: userId || "",
         vip_discount_applied: applyDiscount ? "true" : "false",
-        vip_discount_percent: applyDiscount ? String(VIP_DISCOUNT_PERCENT) : "0",
+        vip_discount_percent: applyDiscount ? String(vipPercent) : "0",
       },
     });
 

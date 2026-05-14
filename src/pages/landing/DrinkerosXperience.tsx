@@ -12,7 +12,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUserPlan } from '@/hooks/useUserPlan';
 import { useCourseBySlug } from '@/hooks/useCourses';
-import { VIP_DISCOUNT_PERCENT, applyVipDiscount, formatBRL } from '@/lib/vipDiscount';
+import { applyVipDiscountFor, formatBRL } from '@/lib/vipDiscount';
+import { useVipDiscount } from '@/hooks/useVipDiscount';
+import { VipDiscountCountdownBanner } from '@/components/user/VipDiscountCountdownBanner';
 import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
 import VipFloatingBanner from '@/components/landing/VipFloatingBanner';
 
@@ -137,7 +139,8 @@ const DrinkerosXperience: React.FC = () => {
   // Preço (com fallback para o valor da página antiga: R$ 497)
   const dbPrice = (course as any)?.price ? Number((course as any).price) : null;
   const basePrice = dbPrice ?? 497;
-  const finalPrice = isVip ? applyVipDiscount(basePrice) : basePrice;
+  const vip = useVipDiscount();
+  const finalPrice = isVip ? applyVipDiscountFor(basePrice, vip.percent) : basePrice;
   const installments = (finalPrice / 12).toFixed(2).replace('.', ',');
 
   const handleBuy = async () => {
@@ -171,6 +174,7 @@ const DrinkerosXperience: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0b0b0d] text-white overflow-x-hidden">
+      <VipDiscountCountdownBanner forceShowOnProduct />
       {!isVip && (
         <VipFloatingBanner watchTargetId="dx-matricule-cta" basePrice={basePrice} productName="Drinkeros Xperience" />
       )}
@@ -448,7 +452,7 @@ const DrinkerosXperience: React.FC = () => {
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-pink-500/20 border border-amber-400/40 mb-3">
                     <Crown className="h-4 w-4 text-amber-300" />
                     <span className="text-sm font-bold text-amber-200 uppercase tracking-wide">
-                      Preço exclusivo Sócio do Clube · {VIP_DISCOUNT_PERCENT}% OFF
+                      Preço exclusivo Sócio do Clube · {vip.percent}% OFF
                     </span>
                   </div>
                   <p className="text-lg text-white/60 line-through">{formatBRL(basePrice)}</p>

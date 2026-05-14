@@ -1,63 +1,94 @@
-## Organização Oficial dos Planos
+# Desconto escalonado do Sócio do Clube
 
-A plataforma terá **4 planos oficiais**, com hierarquia clara. Compras avulsas (cursos, ebooks, combos, pacotes) deixam de ser tratadas como "sem plano" e passam a definir automaticamente o plano "Aluno".
+## Regra de negócio
 
-### Os 4 planos
+- Ao se tornar **Sócio do Clube** (plano `vip` ativado em `user_plans.activated_at`):
+  - **Dias 0–7:** 80% OFF em todos os cursos/ebooks/combos/pacotes (atual).
+  - **A partir do dia 8:** 50% OFF permanente enquanto for Sócio.
+- **Vitalício** (concessão manual, lifetime): mantém **80% OFF permanente** (não entra na regra de janela).
+- Admins (super_admin/editor): também 80% permanente (são tratados como sócios "elevados").
 
-| Plano | Quem entra | Acesso | Badge | Cor |
-|---|---|---|---|---|
-| **Grátis** | Cadastro sem nenhuma compra | Conteúdo livre (cursos/módulos com `is_free=true`) | `Grátis` | Lima |
-| **Aluno** | Tem ao menos 1 acesso ativo em `user_courses`, `user_ebooks`, `user_combos` ou `user_packages` (não vencido) e **não** é Sócio nem Vitalício | Apenas o que comprou + conteúdo grátis | `Aluno` | Azul |
-| **Sócio** | Tem `user_plans.plan = 'vip'` ativo (não vencido) e **não** é Vitalício | Receitas exclusivas + Batalha + 2 cursos bônus (Bebida Decifrada, Workshop Além dos Clássicos) + tudo que comprou | `Sócio` | Roxo (gradiente atual) |
-| **Vitalício** | Tem `user_lifetime_access` (concessão manual, sem checkout) | Tudo do Sócio, sem expiração, libera Receitas globais | `Vitalício` | Âmbar |
+## Arquitetura
 
-Hierarquia de prioridade na exibição: **Vitalício > Sócio > Aluno > Grátis** (sempre mostra o mais alto).
+### 1. Constantes e helpers (`src/lib/vipDiscount.ts`)
+```ts
+export const VIP_DISCOUNT_INTRO_PERCENT = 80;     // dias 0–7
+export const VIP_DISCOUNT_BASE_PERCENT  = 50;     // após 7 dias
+export const VIP_INTRO_WINDOW_DAYS      = 7;
 
-### O que renomear (UI / copy apenas)
+// helpers
+getVipDiscountPercent({ activatedAt, isLifetime }) → 80 | 50
+applyVipDiscountFor(price, percent)
+formatBRL (já existe)
+```
+Mantém `VIP_DISCOUNT_PERCENT` exportado como **80** apenas para retrocompat (será marcado deprecated). Todos os call sites passarão a usar o helper dinâmico.
 
-- "Clube" → **"Sócio"** em badges, títulos e textos voltados ao usuário
-- Página `/clube` (gerenciar assinatura) continua existindo, mas o título passa de "Sócio do Clube" para **"Sócio Drinkeros"**; "Sócio Vitalício dos Drinkeros" continua como está
-- E-mails, WhatsApp templates e copy de upsell que mencionam "Clube" passam a usar "Sócio" (texto), mantendo o conceito interno de "Clube" só no banco/legado
+### 2. Hook (`src/hooks/useVipDiscount.ts` — novo)
+Baseado em `useUserPlan` + `user_plans.activated_at`:
+```ts
+useVipDiscount() → {
+  percent: 80 | 50 | 0,
+  isIntroActive: boolean,        // sócio comum dentro dos 7 dias
+  daysRemaining: number,         // arredondado pra cima, 0..7
+  hoursRemaining: number,
+  introExpiresAt: Date | null,
+  isLifetime: boolean,           // 80% permanente
+  isVip: boolean,
+}
+```
+Busca `activated_at` via `useUserPlan` (estender o hook para retornar este campo — ele já lê `user_plans`).
 
-> Nota: o termo legado **"Clube"** continua existindo internamente para Batalha mensal, pontos, ranking (`club_recipes`, `club_monthly_winners`, etc.) — isso é uma **feature do plano Sócio**, não um plano. Vamos esclarecer essa separação na UI.
+### 3. Banner amarelo (`src/components/user/VipDiscountCountdownBanner.tsx` — novo)
+- Renderizado dentro de `UserLayout`, acima do `UserNavbar` (mobile) e na largura cheia do `<main>` no desktop.
+- **Estado intro (80%)** — fundo amarelo (`bg-yellow-400 text-black`):
+  > "🎁 Você tem **80% OFF** como novo Sócio! Restam **{X dias / Y horas}**. Depois disso, seu desconto vitalício passa a ser 50%."
+  - Mostra contagem regressiva (dias se >24h, senão horas).
+  - Botão **X** fecha em memória (sessionStorage só dentro da mesma aba; reabre em nova navegação/refresh — conforme padrão já usado no `VipFloatingBanner`).
+  - **Sempre reabre** após fechar quando o usuário volta para o site.
+- **Estado base (50%)** — fundo amarelo mais suave:
+  > "💎 Como Sócio do Clube, você tem **50% OFF** em todos os cursos e ebooks."
+  - Botão **X** fecha **permanentemente** (`localStorage` flag `vip:base50:dismissed`).
+  - Quando dispensado, **não aparece mais no layout global**, mas reaparece nas **páginas de produto** (CourseLanding, EbookLanding, PackageLanding, DrinkerosXperience) — placement local controlado pelo mesmo componente com prop `forceShowOnProduct`.
+- Vitalício / não-sócio: banner não renderiza.
 
-### Mudanças técnicas
+### 4. Atualizar exibições de preço
+Substituir `applyVipDiscount(price)` por `applyVipDiscountFor(price, percent)` usando `useVipDiscount()` em:
+- `src/pages/PackageLanding.tsx`
+- `src/pages/landing/CourseLanding.tsx`
+- `src/pages/landing/EbookLanding.tsx`
+- `src/pages/landing/DrinkerosXperience.tsx`
+- `src/components/landing/VipFloatingBanner.tsx` (texto: "Sócios pagam X% OFF" dinâmico)
+- Qualquer outro componente que mostre "preço VIP" (varredura final via grep).
 
-**`src/hooks/useUserPlan.ts`**
-- Tipo `UserPlan` passa de `'free' | 'vip'` para `'free' | 'aluno' | 'socio' | 'vitalicio'`
-- Adicionar query para detectar `isAluno` (existe ao menos uma linha em `user_courses`/`user_ebooks`/`user_combos`/`user_packages` com `expires_at IS NULL OR expires_at > now()`)
-- Computar plano final por hierarquia: vitalício > sócio > aluno > grátis
-- Manter `isVip` como alias derivado (`isSocio || isVitalicio`) para retrocompatibilidade
-- Continuar zerando `expires_at` quando vitalício
+### 5. Backend — checkout (crítico)
+O desconto real aplicado no checkout precisa bater com o exibido. Atualizar 3 edge functions:
+- `supabase/functions/create-product-checkout/index.ts`
+- `supabase/functions/create-mp-payment/index.ts`
+- `supabase/functions/create-mp-checkout/index.ts`
 
-**`src/components/user/PlanBadge.tsx`**
-- 4 variantes: Grátis (lima), Aluno (azul, ícone `GraduationCap`), Sócio (roxo, `Crown`), Vitalício (âmbar, `Crown`)
-- `linkOnFree` continua linkando para `/clube`; novo `linkOnAluno` (default true) também leva para `/clube` como upsell
+Em cada uma:
+1. Buscar `user_plans.activated_at` + `user_lifetime_access` do usuário autenticado.
+2. Calcular percent server-side com a mesma lógica do helper (80 dentro de 7 dias OU lifetime/admin; senão 50; senão 0).
+3. Aplicar percent no preço final. **Nunca confiar no client.**
 
-**`src/pages/user/UserClubeManage.tsx`**
-- Trocar "Sócio do Clube" → "Sócio Drinkeros"
-- Mostrar para `Aluno` um card "Vire Sócio" antes do histórico
-- "Sócio Vitalício dos Drinkeros" inalterado
+### 6. Memória
+Atualizar `mem://business/plans-hierarchy` com a nova regra do desconto escalonado para o Sócio.
 
-**Banco — função `get_user_plan`**
-- Atualizar para retornar `'vitalicio'`, `'socio'`, `'aluno'`, `'free'` (texto)
-- Manter retrocompat: criar nova função `get_user_plan_v2` e ajustar `useUserPlan` para usá-la; `get_user_plan` continua devolvendo `'vip'/'free'` para não quebrar RLS/edge functions existentes
+## Layout do banner
 
-**Documentação**
-- Criar `mem://business/plans-hierarchy` com a tabela acima como fonte da verdade
+```text
+┌────────────────────────────────────────────────────────┐
+│ 🎁 80% OFF para novos sócios — restam 4 dias!     [X] │  ← amarelo
+├────────────────────────────────────────────────────────┤
+│ [logo]              Drinkeros               [avatar]   │  ← UserNavbar
+├────────────────────────────────────────────────────────┤
+│                                                        │
+│                    conteúdo da página                  │
+```
 
-### Não-objetivos (fora deste plano)
+Mobile: banner fica entre `PwaInstallGate` e `UserNavbar` no `UserLayout`.
+Desktop: banner aparece no topo do `<main>` (sidebar à esquerda permanece intocada).
 
-- Não mexer em RLS, triggers de propagação de acesso, ou regras de expiração
-- Não criar checkout para Vitalício (continua manual)
-- Não mexer em Batalha, pontos, recipes_published — continuam sendo features do Sócio
-- Não renomear tabelas/colunas do banco (`user_plans.plan = 'vip'` permanece)
-
-### Ordem de implementação
-
-1. Criar `get_user_plan_v2` no banco
-2. Atualizar `useUserPlan` (novos campos + hierarquia)
-3. Atualizar `PlanBadge` (4 variantes)
-4. Atualizar copy em `UserClubeManage`, profile e demais pontos que dizem "Clube"
-5. Atualizar testes existentes em `src/hooks/useUserPlan.test.tsx` e `src/test/lifetime-profile.e2e.test.tsx`
-6. Salvar memória `mem://business/plans-hierarchy`
+## Fora de escopo
+- Notificações push/email avisando que faltam X dias (pode ser fase 2).
+- Animações elaboradas no contador (apenas atualização suave a cada minuto).

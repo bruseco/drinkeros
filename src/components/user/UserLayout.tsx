@@ -7,6 +7,7 @@ import { PushNotificationPrompt } from './PushNotificationPrompt';
 import { PageTransition } from './PageTransition';
 import { WinnerPopup } from './WinnerPopup';
 import { PwaInstallGate } from './PwaInstallGate';
+import { VipDiscountCountdownBanner } from './VipDiscountCountdownBanner';
 
 import { Loader2 } from 'lucide-react';
 
@@ -30,6 +31,7 @@ export const UserLayout: React.FC = () => {
       <UserSidebar />
       <div className="flex flex-1 flex-col min-w-0">
         <PwaInstallGate />
+        <VipDiscountCountdownBanner />
         <UserNavbar />
         <PushNotificationPrompt />
         <WinnerPopup />
