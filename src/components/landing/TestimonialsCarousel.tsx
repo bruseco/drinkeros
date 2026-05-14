@@ -10,9 +10,20 @@ import d08 from '@/assets/depoimentos/d08.jpg';
 import d09 from '@/assets/depoimentos/d09.jpg';
 import d10 from '@/assets/depoimentos/d10.jpg';
 
-const TESTIMONIALS = [d01, d02, d03, d04, d05, d06, d07, d08, d09, d10];
+import d11 from '@/assets/depoimentos/d11.jpg';
+import d12 from '@/assets/depoimentos/d12.jpg';
+import d13 from '@/assets/depoimentos/d13.jpg';
+import d14 from '@/assets/depoimentos/d14.jpg';
+import d15 from '@/assets/depoimentos/d15.jpg';
+import d16 from '@/assets/depoimentos/d16.jpg';
+import d17 from '@/assets/depoimentos/d17.jpg';
+import d18 from '@/assets/depoimentos/d18.jpg';
+import d19 from '@/assets/depoimentos/d19.jpg';
+import d20 from '@/assets/depoimentos/d20.jpg';
 
-const AUTO_SPEED = 30; // px/s para a esquerda
+const TESTIMONIALS = [d01, d02, d03, d04, d05, d06, d07, d08, d09, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20];
+
+const AUTO_SPEED = 12; // px/s para a esquerda (mais lento)
 const FRICTION = 0.94; // decay da inércia
 const MIN_VELOCITY = 0.05;
 
