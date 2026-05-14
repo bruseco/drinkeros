@@ -40,7 +40,7 @@ const UserRecipeDetail: React.FC = () => {
   const isLockedForUser = planData ? !hasFullRecipeAccess : false;
   const { data: related } = useRelatedRecipes(recipe);
 
-  // Plan access guard (Free users: 3/day limit + Xaropes block)
+  // Plan access guard (Free users: 1/day limit + Xaropes block)
   useEffect(() => {
     if (recipe?.id) {
       checkAccess(recipe.id, recipe.characteristics as string[] | null);

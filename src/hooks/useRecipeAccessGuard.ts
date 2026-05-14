@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserPlan } from './useUserPlan';
 import { useHasExclusiveAccess } from './useExclusiveAccess';
 
-const DAILY_LIMIT = 3;
+const DAILY_LIMIT = 1;
 const VIP_ONLY_CHARACTERISTICS = ['Xaropes Artesanais'];
 
 export const isVipOnlyCharacteristic = (chars?: string[] | null) => {
@@ -17,7 +17,7 @@ export const isVipOnlyCharacteristic = (chars?: string[] | null) => {
 /**
  * Garda de acesso à receita para usuário Free.
  * - Se for Xaropes Artesanais → bloqueia e manda pra /vip
- * - Se já viu 3 receitas distintas hoje (e não é uma já vista) → bloqueia e manda pra /vip
+ * - Se já viu 1 receita hoje (e não é a mesma) → bloqueia e manda pra /vip
  * - Caso contrário → registra a visualização do dia e libera
  *
  * Retorna { check } — chame antes de exibir o conteúdo da receita.

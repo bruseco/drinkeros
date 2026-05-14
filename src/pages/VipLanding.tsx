@@ -285,13 +285,13 @@ const VipLanding: React.FC = () => {
           {/* Free */}
           <div className="rounded-2xl bg-white/5 border border-white/10 p-4 md:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 mb-4">
-              <span className="inline-flex items-center gap-1 rounded-full bg-lime-400 text-lime-950 px-2.5 py-1 text-xs font-bold uppercase w-fit">
+              <span className="inline-flex items-center gap-1 rounded-full bg-zinc-400 text-zinc-950 px-2.5 py-1 text-xs font-bold uppercase w-fit">
                 <Sparkles className="h-3 w-3" /> Grátis
               </span>
               <span className="text-purple-300 text-xs sm:text-sm">o que você tem hoje</span>
             </div>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> <span>Você pode ver só <strong>3 drinks por dia</strong></span></li>
+              <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> <span>Você pode ver só <strong>1 drink por dia</strong></span></li>
               <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> <span>Sem acesso aos <strong>Xaropes Artesanais</strong></span></li>
               
               <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> <span>Sem Bebida Decifrada</span></li>
@@ -303,7 +303,7 @@ const VipLanding: React.FC = () => {
           {/* Sócio */}
           <div className="relative rounded-2xl bg-gradient-to-br from-purple-900/60 to-fuchsia-900/40 border border-purple-400/40 p-4 md:p-6 shadow-2xl shadow-purple-500/20">
             <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 mb-4">
-              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white px-2.5 py-1 text-xs font-bold uppercase w-fit">
+              <span className="inline-flex items-center gap-1 rounded-full bg-lime-400 text-lime-950 px-2.5 py-1 text-xs font-bold uppercase w-fit">
                 <Crown className="h-3 w-3" /> Sócio
               </span>
               <span className="text-yellow-300 text-xs sm:text-sm font-medium">o que você merece</span>
