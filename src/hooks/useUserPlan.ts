@@ -8,6 +8,8 @@ export interface UserPlanData {
   /** Plano oficial: free | aluno | socio | vitalicio */
   plan: UserPlan;
   expires_at: string | null;
+  /** Quando o plano (Sócio) foi ativado — usado para janela de desconto intro */
+  activated_at: string | null;
   /** Sócio (assinatura ativa) — não inclui Vitalício */
   isSocio: boolean;
   /** Vitalício (concessão manual, sem expiração) */
@@ -30,6 +32,7 @@ export const useUserPlan = () => {
         return {
           plan: 'free',
           expires_at: null,
+          activated_at: null,
           isSocio: false,
           isLifetime: false,
           isAluno: false,
@@ -39,7 +42,7 @@ export const useUserPlan = () => {
 
       const { data: planRow } = await supabase
         .from('user_plans')
-        .select('plan, expires_at')
+        .select('plan, expires_at, activated_at')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -63,6 +66,7 @@ export const useUserPlan = () => {
       return {
         plan: isLifetime ? 'vitalicio' : plan,
         expires_at: isLifetime ? null : (planRow?.expires_at ?? null),
+        activated_at: (planRow as any)?.activated_at ?? null,
         isSocio,
         isLifetime,
         isAluno,
