@@ -8,8 +8,10 @@ export interface UserPlanData {
   /** Plano oficial: free | aluno | socio | vitalicio */
   plan: UserPlan;
   expires_at: string | null;
-  /** Quando o plano (Sócio) foi ativado — usado para janela de desconto intro */
+  /** Quando o plano (Sócio) foi ativado — controla expiração de acesso */
   activated_at: string | null;
+  /** Início da janela de 7 dias do desconto de 80% (preenchido no primeiro login pós-deploy) */
+  discount_intro_started_at: string | null;
   /** Sócio (assinatura ativa) — não inclui Vitalício */
   isSocio: boolean;
   /** Vitalício (concessão manual, sem expiração) */

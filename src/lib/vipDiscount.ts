@@ -1,7 +1,9 @@
-// Regra escalonada de desconto do Sócio do Clube:
-// - Dias 0–7 após ativação: 80% OFF (intro)
-// - Após 7 dias: 50% OFF permanente enquanto for Sócio
-// - Vitalício / admin: 80% OFF permanente
+// Regra escalonada de desconto do Sócio do Clube (vale também para Vitalício):
+// - Janela inicia em `discount_intro_started_at` (preenchido no primeiro login pós-deploy
+//   via RPC `start_vip_discount_window`).
+// - Dias 0–7 desde essa marca: 80% OFF (intro)
+// - Após 7 dias: 50% OFF permanente
+// - Se ainda não foi marcado (NULL): mostra 80% (estado de boas-vindas).
 // Mantenha esta lógica sincronizada com as edge functions:
 // `create-product-checkout`, `create-mp-payment`, `create-mp-checkout`.
 
@@ -13,22 +15,19 @@ export const VIP_INTRO_WINDOW_DAYS = 7;
 export const VIP_DISCOUNT_PERCENT = VIP_DISCOUNT_INTRO_PERCENT;
 
 export interface VipDiscountInput {
-  activatedAt: string | Date | null | undefined;
-  isLifetime: boolean;
+  /** Marca de início da janela de 7 dias (user_plans.discount_intro_started_at) */
+  introStartedAt: string | Date | null | undefined;
   isVip: boolean;
 }
 
 export const getVipDiscountPercent = ({
-  activatedAt,
-  isLifetime,
+  introStartedAt,
   isVip,
 }: VipDiscountInput): number => {
-  if (isLifetime) return VIP_DISCOUNT_INTRO_PERCENT;
   if (!isVip) return 0;
-  if (!activatedAt) return VIP_DISCOUNT_BASE_PERCENT;
-  const activated = activatedAt instanceof Date ? activatedAt : new Date(activatedAt);
-  const ms = Date.now() - activated.getTime();
-  const days = ms / (1000 * 60 * 60 * 24);
+  if (!introStartedAt) return VIP_DISCOUNT_INTRO_PERCENT;
+  const started = introStartedAt instanceof Date ? introStartedAt : new Date(introStartedAt);
+  const days = (Date.now() - started.getTime()) / (1000 * 60 * 60 * 24);
   return days <= VIP_INTRO_WINDOW_DAYS
     ? VIP_DISCOUNT_INTRO_PERCENT
     : VIP_DISCOUNT_BASE_PERCENT;

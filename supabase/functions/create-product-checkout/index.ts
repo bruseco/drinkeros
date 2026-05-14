@@ -48,8 +48,7 @@ serve(async (req) => {
     let userId: string | null = null;
     let userEmail: string | null = null;
     let isVip = false;
-    let isLifetime = false;
-    let activatedAt: string | null = null;
+    let introStartedAt: string | null = null;
     const authHeader = req.headers.get("Authorization");
     if (authHeader) {
       try {
@@ -62,22 +61,15 @@ serve(async (req) => {
         if (data.user) {
           userId = data.user.id;
           userEmail = data.user.email ?? null;
-          // Verifica se é VIP via função SECURITY DEFINER
-          const { data: planData } = await supabase.rpc("get_user_plan", { _user_id: userId });
-          isVip = planData === "vip";
+          const { data: planV2 } = await supabase.rpc("get_user_plan_v2", { _user_id: userId });
+          isVip = planV2 === "socio" || planV2 === "vitalicio";
           if (isVip) {
             const { data: planRow } = await supabase
               .from("user_plans")
-              .select("activated_at")
+              .select("discount_intro_started_at")
               .eq("user_id", userId)
               .maybeSingle();
-            activatedAt = (planRow as any)?.activated_at ?? null;
-            const { data: lifetimeRow } = await supabase
-              .from("user_lifetime_access")
-              .select("user_id")
-              .eq("user_id", userId)
-              .maybeSingle();
-            isLifetime = !!lifetimeRow;
+            introStartedAt = (planRow as any)?.discount_intro_started_at ?? null;
           }
         }
       } catch (_) { /* visitante */ }
@@ -118,22 +110,20 @@ serve(async (req) => {
 
     const origin = req.headers.get("origin") || "https://drinkeros.com";
 
-    // Desconto escalonado do Sócio do Clube (mantenha sincronia com src/lib/vipDiscount.ts):
-    //  - Vitalício/admin: 80% OFF permanente
-    //  - Sócio dias 0–7 desde activated_at: 80% OFF
-    //  - Sócio após 7 dias: 50% OFF
+    // Desconto escalonado (Sócio + Vitalício, sincroniza com src/lib/vipDiscount.ts):
+    //  - 80% OFF nos dias 0–7 a contar de discount_intro_started_at
+    //  - Após 7 dias: 50% OFF
+    //  - Se discount_intro_started_at IS NULL: ainda não logou após o deploy → 80%
     const VIP_INTRO_PERCENT = 80;
     const VIP_BASE_PERCENT = 50;
     const VIP_INTRO_WINDOW_DAYS = 7;
     let vipPercent = 0;
     if (isVip) {
-      if (isLifetime) {
+      if (!introStartedAt) {
         vipPercent = VIP_INTRO_PERCENT;
-      } else if (activatedAt) {
-        const daysSince = (Date.now() - new Date(activatedAt).getTime()) / (1000 * 60 * 60 * 24);
-        vipPercent = daysSince <= VIP_INTRO_WINDOW_DAYS ? VIP_INTRO_PERCENT : VIP_BASE_PERCENT;
       } else {
-        vipPercent = VIP_BASE_PERCENT;
+        const daysSince = (Date.now() - new Date(introStartedAt).getTime()) / (1000 * 60 * 60 * 24);
+        vipPercent = daysSince <= VIP_INTRO_WINDOW_DAYS ? VIP_INTRO_PERCENT : VIP_BASE_PERCENT;
       }
     }
     const basePrice = Number((product as any).price ?? 0);
