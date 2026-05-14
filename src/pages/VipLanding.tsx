@@ -174,7 +174,7 @@ const VipLanding: React.FC = () => {
 
   return (
     <div
-      className={`fixed inset-0 z-[60] text-white overflow-y-auto overscroll-contain bg-black ${isClosing ? 'animate-[viplanding-fade-out_280ms_ease-in_forwards]' : 'animate-[viplanding-bounce-in_520ms_cubic-bezier(0.34,1.56,0.64,1)_forwards]'}`}
+      className={`fixed inset-0 z-[60] text-white py-0 overflow-y-auto overscroll-contain bg-black ${isClosing ? 'animate-[viplanding-fade-out_280ms_ease-in_forwards]' : 'animate-[viplanding-bounce-in_520ms_cubic-bezier(0.34,1.56,0.64,1)_forwards]'}`}
     >
       {/* Animações de entrada/saída */}
       <style>{`
@@ -257,13 +257,13 @@ const VipLanding: React.FC = () => {
               <span className="bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">
                 sócio
               </span>{' '}
-              <span className="text-white">do Clube dos Drinkeros</span>
+              <span className="text-white">do </span>
             </h1>
             <img
               src={clubeLogo}
               alt="Clube dos Drinkeros"
               aria-hidden="true"
-              className="mx-auto h-32 md:h-44 object-contain [filter:drop-shadow(0_10px_25px_rgba(0,0,0,0.85))_drop-shadow(0_0_40px_rgba(0,0,0,0.7))]"
+              className="h-32 md:h-44 object-contain [filter:drop-shadow(0_10px_25px_rgba(0,0,0,0.85))_drop-shadow(0_0_40px_rgba(0,0,0,0.7))] mx-0 my-0"
             />
           </div>
         </div>
