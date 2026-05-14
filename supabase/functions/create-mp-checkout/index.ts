@@ -53,6 +53,8 @@ serve(async (req) => {
     let userId: string | null = null;
     let userEmail: string | null = null;
     let isVip = false;
+    let isLifetime = false;
+    let activatedAt: string | null = null;
     const authHeader = req.headers.get("Authorization");
     if (authHeader) {
       try {
@@ -67,15 +69,34 @@ serve(async (req) => {
           userEmail = data.user.email ?? null;
           const { data: planData } = await supabase.rpc("get_user_plan", { _user_id: userId });
           isVip = planData === "vip";
+          if (isVip) {
+            const { data: planRow } = await supabase
+              .from("user_plans").select("activated_at").eq("user_id", userId).maybeSingle();
+            activatedAt = (planRow as any)?.activated_at ?? null;
+            const { data: lifetimeRow } = await supabase
+              .from("user_lifetime_access").select("user_id").eq("user_id", userId).maybeSingle();
+            isLifetime = !!lifetimeRow;
+          }
         }
       } catch (_) { /* visitante */ }
     }
 
-    // Aplica desconto VIP (80% OFF) - igual ao Stripe
-    const VIP_DISCOUNT_PERCENT = 80;
+    // Desconto escalonado do Sócio (sincroniza com src/lib/vipDiscount.ts)
+    const VIP_INTRO_PERCENT = 80;
+    const VIP_BASE_PERCENT = 50;
+    const VIP_INTRO_WINDOW_DAYS = 7;
+    let vipPercent = 0;
+    if (isVip) {
+      if (isLifetime) vipPercent = VIP_INTRO_PERCENT;
+      else if (activatedAt) {
+        const days = (Date.now() - new Date(activatedAt).getTime()) / 86400000;
+        vipPercent = days <= VIP_INTRO_WINDOW_DAYS ? VIP_INTRO_PERCENT : VIP_BASE_PERCENT;
+      } else vipPercent = VIP_BASE_PERCENT;
+    }
+    const applyDiscount = vipPercent > 0;
     const basePrice = Number(product.price);
-    const finalPrice = isVip
-      ? Math.round(basePrice * (1 - VIP_DISCOUNT_PERCENT / 100) * 100) / 100
+    const finalPrice = applyDiscount
+      ? Math.round(basePrice * (1 - vipPercent / 100) * 100) / 100
       : basePrice;
 
     const origin = req.headers.get("origin") || "https://drinkeros.com";

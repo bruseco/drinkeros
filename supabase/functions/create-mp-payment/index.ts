@@ -147,7 +147,7 @@ serve(async (req) => {
     const isPix = formData.payment_method_id === "pix";
     const paymentBody: Record<string, unknown> = {
       transaction_amount: finalPrice,
-      description: isVip ? `${product.name} (Sócio do Clube -${VIP_DISCOUNT_PERCENT}%)` : product.name,
+      description: applyDiscount ? `${product.name} (Sócio do Clube -${vipPercent}%)` : product.name,
       payment_method_id: formData.payment_method_id,
       external_reference: externalRef,
       notification_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/mercadopago-webhook`,
@@ -157,8 +157,8 @@ serve(async (req) => {
         product_id: product.id,
         product_slug: product.slug,
         user_id: userId || "",
-        vip_discount_applied: isVip ? "true" : "false",
-        vip_discount_percent: isVip ? String(VIP_DISCOUNT_PERCENT) : "0",
+        vip_discount_applied: applyDiscount ? "true" : "false",
+        vip_discount_percent: applyDiscount ? String(vipPercent) : "0",
         access_period_days: product_type === "club" ? String(clubPeriodDays) : "",
       },
       payer: {
