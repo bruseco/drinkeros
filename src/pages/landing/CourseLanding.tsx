@@ -406,6 +406,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
 
   return (
     <div className="min-h-screen bg-[#0b0b0d] text-white overflow-x-hidden">
+      <VipDiscountCountdownBanner forceShowOnProduct />
       <SeoHead
         title={`${brand} — ${tagline.length > 80 ? tagline.slice(0, 77) + '...' : tagline}`}
         description={(subheadline || tagline).slice(0, 160)}
