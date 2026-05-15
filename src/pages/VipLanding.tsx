@@ -576,17 +576,23 @@ const VipLanding: React.FC = () => {
               Sócio do Clube · Anual
             </h2>
             <div className="text-center mb-6">
-              <div className="text-purple-300 line-through text-sm">de R$ 197</div>
+              {promo.isActive && (
+                <div className="text-purple-300 line-through text-sm">de R$ {promo.fullPrice}</div>
+              )}
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-2xl font-light text-purple-300">R$</span>
                 <span className="text-7xl font-black viplanding-gold-text">
-                  69
+                  {promo.price}
                 </span>
               </div>
-              <div className="text-sm text-purple-300">por ano · menos de R$ 6/mês</div>
-              <div className="mt-1 text-[11px] uppercase tracking-wider font-bold text-yellow-300">
-                Promoção de lançamento do novo app
+              <div className="text-sm text-purple-300">
+                por ano{promo.isActive ? ' · menos de R$ 6/mês' : ''}
               </div>
+              {promo.isActive && (
+                <div className="mt-1 text-[11px] uppercase tracking-wider font-bold text-yellow-300">
+                  Promoção de lançamento do novo app
+                </div>
+              )}
               <LaunchPromoCountdown />
             </div>
 
