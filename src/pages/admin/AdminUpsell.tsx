@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import DOMPurify from 'dompurify';
 import {
   useUpsellSettings,
   useUpdateUpsellSettings,
@@ -1030,7 +1031,7 @@ const AdminUpsell: React.FC = () => {
                                 {expandedStep === step && log.body_html && (
                                   <div
                                     className="mt-2 rounded border bg-white p-3 max-h-[400px] overflow-y-auto prose prose-sm text-foreground"
-                                    dangerouslySetInnerHTML={{ __html: log.body_html }}
+                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(log.body_html) }}
                                   />
                                 )}
                               </>

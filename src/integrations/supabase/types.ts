@@ -3290,6 +3290,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_viewer_access: { Args: { _user_id: string }; Returns: boolean }
       increment_redirect_click: {
         Args: { link_code: string }
         Returns: undefined
@@ -3364,6 +3365,17 @@ export type Database = {
       slugify: { Args: { v: string }; Returns: string }
       start_vip_discount_window: { Args: never; Returns: string }
       unaccent: { Args: { "": string }; Returns: string }
+      validate_certificate: {
+        Args: { _code: string; _cpf: string }
+        Returns: {
+          certificate_type: string
+          completed_at: string
+          reference_name: string
+          student_name: string
+          verification_code: string
+          workload_seconds: number
+        }[]
+      }
     }
     Enums: {
       app_role: "super_admin" | "editor" | "viewer"
