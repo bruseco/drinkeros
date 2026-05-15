@@ -44,3 +44,17 @@ export const applyVipDiscount = (price: number): number =>
 
 export const formatBRL = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+
+/**
+ * Texto curto de expiração da janela de 80% OFF do Sócio do Clube.
+ * Usa horas restantes (≤ 24h => "expira HOJE"), senão "expira em N dias".
+ * Retorna string vazia se não houver janela ativa.
+ */
+export const formatVipIntroExpiry = (
+  daysRemaining: number,
+  hoursRemaining: number,
+): string => {
+  if (hoursRemaining <= 0) return '';
+  if (hoursRemaining <= 24) return 'expira HOJE';
+  return `expira em ${daysRemaining} ${daysRemaining === 1 ? 'dia' : 'dias'}`;
+};
