@@ -58,26 +58,25 @@ const ValidateCertificate: React.FC = () => {
     const cpfDigits = cpf.replace(/\D/g, '');
     const trimmedCode = code.trim().toUpperCase();
 
-    const { data, error } = await supabase
-      .from('certificates')
-      .select('reference_name, certificate_type, completed_at, verification_code, student_name, workload_seconds')
-      .eq('verification_code', trimmedCode)
-      .eq('student_cpf', cpfDigits)
-      .maybeSingle();
+    const { data, error } = await supabase.rpc('validate_certificate', {
+      _code: trimmedCode,
+      _cpf: cpfDigits,
+    });
 
-    if (error || !data) {
+    const row = Array.isArray(data) ? data[0] : null;
+    if (error || !row) {
       setNotFound(true);
       setLoading(false);
       return;
     }
 
     setResult({
-      reference_name: data.reference_name,
-      certificate_type: data.certificate_type,
-      completed_at: data.completed_at,
-      verification_code: data.verification_code,
-      student_name: data.student_name || 'Aluno',
-      workload_seconds: data.workload_seconds || 0,
+      reference_name: row.reference_name,
+      certificate_type: row.certificate_type,
+      completed_at: row.completed_at,
+      verification_code: row.verification_code,
+      student_name: row.student_name || 'Aluno',
+      workload_seconds: row.workload_seconds || 0,
     });
     setLoading(false);
   };
