@@ -217,6 +217,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
         title: 'Compra realizada com sucesso! 🎉',
         description: 'Acesse seu e-mail para ativar sua conta e começar.',
       });
+      import('@/lib/firePurchaseFromBackend').then(m => m.firePurchaseFromBackend({ source: 'course-landing' }));
     } else if (status === 'cancel') {
       toast({
         title: 'Compra cancelada',

@@ -1635,6 +1635,60 @@ export type Database = {
         }
         Relationships: []
       }
+      purchases: {
+        Row: {
+          amount_paid: number
+          created_at: string
+          currency: string
+          gateway: string
+          id: string
+          meta_purchase_sent: boolean
+          meta_purchase_sent_at: string | null
+          metadata: Json | null
+          product_id: string | null
+          product_name: string
+          product_type: string
+          status: string
+          transaction_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_paid: number
+          created_at?: string
+          currency?: string
+          gateway: string
+          id?: string
+          meta_purchase_sent?: boolean
+          meta_purchase_sent_at?: string | null
+          metadata?: Json | null
+          product_id?: string | null
+          product_name: string
+          product_type: string
+          status: string
+          transaction_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number
+          created_at?: string
+          currency?: string
+          gateway?: string
+          id?: string
+          meta_purchase_sent?: boolean
+          meta_purchase_sent_at?: string | null
+          metadata?: Json | null
+          product_id?: string | null
+          product_name?: string
+          product_type?: string
+          status?: string
+          transaction_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth: string

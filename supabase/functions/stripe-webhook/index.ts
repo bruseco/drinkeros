@@ -71,6 +71,36 @@ serve(async (req) => {
     return null;
   };
 
+  const recordPurchase = async (p: {
+    userId: string;
+    productId?: string | null;
+    productName: string;
+    productType: string; // 'club' | 'course' | 'ebook' | 'combo' | 'package'
+    amountPaid: number;  // BRL units
+    currency: string;
+    status: string;      // 'paid' | 'active'
+    transactionId: string;
+    metadata?: Record<string, unknown>;
+  }) => {
+    if (!p.transactionId || p.amountPaid <= 0) return;
+    const { error } = await supabase.from("purchases").upsert(
+      {
+        user_id: p.userId,
+        product_id: p.productId ?? null,
+        product_name: p.productName,
+        product_type: p.productType,
+        gateway: "stripe",
+        amount_paid: p.amountPaid,
+        currency: (p.currency || "BRL").toUpperCase(),
+        status: p.status,
+        transaction_id: p.transactionId,
+        metadata: p.metadata || {},
+      },
+      { onConflict: "gateway,transaction_id" },
+    );
+    if (error) log("purchases-upsert-error", { error: error.message, transactionId: p.transactionId });
+  };
+
   const upsertVipPlan = async (userId: string, periodEndUnix?: number | null) => {
     const expiresAt = periodEndUnix
       ? new Date(periodEndUnix * 1000).toISOString()
@@ -156,6 +186,23 @@ serve(async (req) => {
             );
           if (grantErr) log("grant-access-error", { error: grantErr.message, productType, productId });
 
+          // Busca nome real do produto p/ Meta Pixel
+          const { data: prodRow } = await supabase
+            .from(productType === "course" ? "courses" : "ebooks")
+            .select("name").eq("id", productId).maybeSingle();
+
+          await recordPurchase({
+            userId,
+            productId,
+            productName: (prodRow as any)?.name || (productType === "course" ? "Curso" : "E-book"),
+            productType,
+            amountPaid: (session.amount_total ?? 0) / 100,
+            currency: (session.currency ?? "brl").toUpperCase(),
+            status: "paid",
+            transactionId: (session.payment_intent as string) || session.id,
+            metadata: { session_id: session.id, event_id: event.id },
+          });
+
           break;
         }
 
@@ -206,6 +253,19 @@ serve(async (req) => {
           }, { onConflict: "stripe_payment_intent_id" });
 
           await upsertVipPlan(userId, oneYearFromNow);
+
+          await recordPurchase({
+            userId,
+            productId: null,
+            productName: "Clube dos Drinkeros · Anual",
+            productType: "club",
+            amountPaid: (session.amount_total ?? 0) / 100,
+            currency: (session.currency ?? "brl").toUpperCase(),
+            status: "paid",
+            transactionId: (session.payment_intent as string) || session.id,
+            metadata: { plan_kind: meta.plan_kind, session_id: session.id, event_id: event.id },
+          });
+
           break;
         }
 
@@ -270,6 +330,20 @@ serve(async (req) => {
         }
 
         await upsertVipPlan(userId, periodEnd);
+
+        if (invoiceId) {
+          await recordPurchase({
+            userId,
+            productId: null,
+            productName: "Clube dos Drinkeros",
+            productType: "club",
+            amountPaid: (invoiceAmount ?? session.amount_total ?? 0) / 100,
+            currency: (invoiceCurrency ?? session.currency ?? "brl").toUpperCase(),
+            status: "paid",
+            transactionId: invoiceId,
+            metadata: { subscription_id: subscriptionId, session_id: session.id, event_id: event.id },
+          });
+        }
         break;
       }
 
@@ -316,6 +390,18 @@ serve(async (req) => {
         await supabase.from("vip_renewal_reminders_sent").delete().eq("user_id", userId);
 
         await upsertVipPlan(userId, periodEnd);
+
+        await recordPurchase({
+          userId,
+          productId: null,
+          productName: "Clube dos Drinkeros",
+          productType: "club",
+          amountPaid: (invoice.amount_paid ?? 0) / 100,
+          currency: (invoice.currency ?? "brl").toUpperCase(),
+          status: "paid",
+          transactionId: invoice.id,
+          metadata: { subscription_id: subscriptionId, event_id: event.id },
+        });
         break;
       }
 

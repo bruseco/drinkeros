@@ -17,6 +17,36 @@ const ACCESS_TABLE_MAP: Record<string, { table: string; fk: string }> = {
   package: { table: "user_packages", fk: "package_id" },
 };
 
+async function recordPurchase(supabase: any, p: {
+  userId: string;
+  productId?: string | null;
+  productName: string;
+  productType: string;
+  amountPaid: number;
+  currency: string;
+  status: string;
+  transactionId: string;
+  metadata?: Record<string, unknown>;
+}) {
+  if (!p.transactionId || !(p.amountPaid > 0)) return;
+  const { error } = await supabase.from("purchases").upsert(
+    {
+      user_id: p.userId,
+      product_id: p.productId ?? null,
+      product_name: p.productName,
+      product_type: p.productType,
+      gateway: "mercado_pago",
+      amount_paid: p.amountPaid,
+      currency: (p.currency || "BRL").toUpperCase(),
+      status: p.status,
+      transaction_id: p.transactionId,
+      metadata: p.metadata || {},
+    },
+    { onConflict: "gateway,transaction_id" },
+  );
+  if (error) console.error("[mp-webhook] purchases-upsert-error", error);
+}
+
 async function grantClubAccess(supabase: any, userId: string, payment: any, paymentId: string, periodDays: number) {
   const now = new Date();
   const periodEnd = new Date(now.getTime() + periodDays * 24 * 60 * 60 * 1000);
@@ -168,6 +198,18 @@ serve(async (req) => {
         expires_at: periodEnd.toISOString(),
       }, { onConflict: "user_id" });
 
+      await recordPurchase(supabase, {
+        userId,
+        productId: null,
+        productName: isAnnual ? "Clube dos Drinkeros · Anual" : "Clube dos Drinkeros · Mensal",
+        productType: "club",
+        amountPaid: Number(ap?.transaction_amount || pre?.auto_recurring?.transaction_amount || 0),
+        currency: "BRL",
+        status: "approved",
+        transactionId: String(resourceId),
+        metadata: { mp_preapproval_id: String(preapprovalId) },
+      });
+
       return new Response(JSON.stringify({ ok: true, recurring: true }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -235,6 +277,18 @@ serve(async (req) => {
       const periodDays = Number(metadata.access_period_days) || 365;
       await grantClubAccess(supabase, userId, payment, String(paymentId), periodDays);
 
+      await recordPurchase(supabase, {
+        userId,
+        productId: null,
+        productName: periodDays >= 365 ? "Clube dos Drinkeros · Anual" : "Clube dos Drinkeros · Mensal",
+        productType: "club",
+        amountPaid: Number(payment?.transaction_amount || 0),
+        currency: String(payment?.currency_id || "BRL").toUpperCase(),
+        status: "approved",
+        transactionId: String(paymentId),
+        metadata: { period_days: periodDays },
+      });
+
       return new Response(JSON.stringify({ ok: true, granted: true, club: true, period_days: periodDays }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -256,6 +310,26 @@ serve(async (req) => {
       console.error("[mp-webhook] failed to grant access:", insertErr);
       throw insertErr;
     }
+
+    // Busca nome real do produto p/ Meta Pixel
+    const productTableMap: Record<string, string> = {
+      course: "courses", ebook: "ebooks", combo: "combos", package: "packages",
+    };
+    const { data: prodRow } = await supabase
+      .from(productTableMap[productType])
+      .select("name").eq("id", productId).maybeSingle();
+
+    await recordPurchase(supabase, {
+      userId,
+      productId,
+      productName: (prodRow as any)?.name || productType,
+      productType,
+      amountPaid: Number(payment?.transaction_amount || 0),
+      currency: String(payment?.currency_id || "BRL").toUpperCase(),
+      status: "approved",
+      transactionId: String(paymentId),
+      metadata: {},
+    });
 
     console.log("[mp-webhook] access granted:", { userId, productType, productId, paymentId });
 
