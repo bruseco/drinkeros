@@ -147,6 +147,72 @@ const AdminAccessMetrics: React.FC = () => {
             </Card>
           </div>
 
+          {/* Usuários por categoria (totais da plataforma) */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Users className="h-4 w-4" /> Usuários por categoria
+              </CardTitle>
+              <CardDescription>Total de cadastrados em cada plano (visão atual)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <PlanStat label="Grátis" value={metrics.users_by_plan?.free ?? 0} tone="muted" />
+                <PlanStat label="Alunos" value={metrics.users_by_plan?.aluno ?? 0} tone="info" />
+                <PlanStat label="Sócios" value={metrics.users_by_plan?.socio ?? 0} tone="primary" />
+                <PlanStat label="Vitalícios" value={metrics.users_by_plan?.vitalicio ?? 0} tone="gold" />
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                Total: {(metrics.users_by_plan?.total ?? 0).toLocaleString('pt-BR')} usuários
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Acessos por categoria no período */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Activity className="h-4 w-4" /> Acessos por categoria no período
+              </CardTitle>
+              <CardDescription>
+                Cursos, receitas, e-books e aulas abertos — divididos pelo plano atual do usuário
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <PlanStat
+                  label="Grátis"
+                  value={metrics.accesses_by_plan?.free ?? 0}
+                  subtitle={`${metrics.unique_users_by_plan?.free ?? 0} usuários únicos`}
+                  tone="muted"
+                />
+                <PlanStat
+                  label="Alunos"
+                  value={metrics.accesses_by_plan?.aluno ?? 0}
+                  subtitle={`${metrics.unique_users_by_plan?.aluno ?? 0} usuários únicos`}
+                  tone="info"
+                />
+                <PlanStat
+                  label="Sócios"
+                  value={metrics.accesses_by_plan?.socio ?? 0}
+                  subtitle={`${metrics.unique_users_by_plan?.socio ?? 0} usuários únicos`}
+                  tone="primary"
+                />
+                <PlanStat
+                  label="Vitalícios"
+                  value={metrics.accesses_by_plan?.vitalicio ?? 0}
+                  subtitle={`${metrics.unique_users_by_plan?.vitalicio ?? 0} usuários únicos`}
+                  tone="gold"
+                />
+              </div>
+              {(metrics.accesses_by_plan?.unknown ?? 0) > 0 && (
+                <p className="text-xs text-muted-foreground mt-3">
+                  {(metrics.accesses_by_plan?.unknown ?? 0).toLocaleString('pt-BR')} acessos de usuários sem perfil identificado.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
           <div className="grid md:grid-cols-2 gap-6">
             {/* Cursos mais acessados */}
             <Card>
