@@ -674,7 +674,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
         <div className="container mx-auto px-4 text-center text-white">
           <p className="text-lg sm:text-xl font-semibold uppercase tracking-wider opacity-90">Já certificamos</p>
           <p className="text-6xl sm:text-7xl lg:text-8xl font-black my-2 drop-shadow-lg tabular-nums">
-            <AnimatedStudentCount target={TOTAL_STUDENTS_CERTIFIED} />
+            <AnimatedStudentCount target={totalStudents ?? TOTAL_STUDENTS_CERTIFIED} />
           </p>
           <p className="text-lg sm:text-xl font-semibold uppercase tracking-wider opacity-90">alunos até o momento</p>
         </div>
