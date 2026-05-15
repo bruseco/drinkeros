@@ -242,16 +242,8 @@ export default function Checkout() {
         if (data?.status === "authorized") {
           setPaid(true);
           toast.success("Assinatura ativada! Renovação automática anual.");
-          const subId = data?.id || data?.preapproval_id || `${product.slug}-${Date.now()}`;
-          trackFbEvent(
-            'Subscribe',
-            {
-              value: 69.0,
-              currency: 'BRL',
-              content_name: 'Clube dos Drinkeros Anual',
-              content_type: 'subscription',
-            },
-            { dedupeKey: `subscribe:${subId}` }
+          import('@/lib/firePurchaseFromBackend').then(m =>
+            m.firePurchaseFromBackend({ source: 'checkout-mp-subscription' })
           );
           setTimeout(() => navigate("/clube?clube=success"), 1500);
         } else if (data?.status === "pending") {
@@ -276,32 +268,9 @@ export default function Checkout() {
       } else if (data.status === "approved") {
         setPaid(true);
         toast.success("Pagamento aprovado!");
-        const txId = String(data.id || `${product.slug}-${Date.now()}`);
-        if (isClub) {
-          trackFbEvent(
-            'Subscribe',
-            {
-              value: 69.0,
-              currency: 'BRL',
-              content_name: 'Clube dos Drinkeros Anual',
-              content_type: 'subscription',
-            },
-            { dedupeKey: `subscribe:${txId}` }
-          );
-        } else {
-          trackFbEvent(
-            'Purchase',
-            {
-              value: finalPrice,
-              currency: 'BRL',
-              content_name: product.name,
-              content_type: 'product',
-              content_ids: [product.id],
-              transaction_id: txId,
-            },
-            { dedupeKey: `purchase:${txId}` }
-          );
-        }
+        import('@/lib/firePurchaseFromBackend').then(m =>
+          m.firePurchaseFromBackend({ source: 'checkout-mp-card' })
+        );
         setTimeout(() => navigate(isClub ? "/clube?clube=success" : `/${product.slug}?checkout=success`), 1500);
       } else if (data.status === "in_process" || data.status === "pending") {
         toast.info("Pagamento em análise. Você receberá uma confirmação em breve.");
