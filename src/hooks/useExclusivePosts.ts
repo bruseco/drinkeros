@@ -67,8 +67,6 @@ interface PaginatedPostsParams {
   publishedOnly?: boolean;
   randomOrder?: boolean;
   characteristicFilter?: string;
-  /** IDs to push to the end of the list, preserving the given order. */
-  pinnedToEndIds?: string[];
 }
 
 export const useExclusivePostsPaginated = ({
@@ -77,11 +75,9 @@ export const useExclusivePostsPaginated = ({
   publishedOnly = false,
   randomOrder = false,
   characteristicFilter,
-  pinnedToEndIds,
 }: PaginatedPostsParams = {}) => {
-  const pinnedKey = (pinnedToEndIds ?? []).join(',');
   return useInfiniteQuery({
-    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder, characteristicFilter, seed: randomOrder ? postsSeed : 0, pinnedKey }],
+    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder, characteristicFilter, seed: randomOrder ? postsSeed : 0 }],
     queryFn: async ({ pageParam = 0 }) => {
       const from = pageParam * pageSize;
 
