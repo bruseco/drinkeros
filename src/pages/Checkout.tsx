@@ -274,6 +274,17 @@ export default function Checkout() {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
+      // InitiateCheckout — pagamento MP criado com sucesso (Pix gerado, cartão aprovado/recusado, etc.).
+      trackInitiateCheckout({
+        amount: data.amount,
+        currency: data.currency,
+        product_name: data.product_name,
+        product_type: isClub ? 'subscription' : 'product',
+        product_id: data.product_id,
+        preference_id: String(data.id || ''),
+        id: data.id,
+      });
+
       if (data.pix) {
         setPixResult(data.pix);
         setPixPaymentId(String(data.id));
