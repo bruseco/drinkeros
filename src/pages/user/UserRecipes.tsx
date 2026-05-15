@@ -301,6 +301,7 @@ const UserRecipes: React.FC = () => {
                 <img src={drinkrosLogo} alt="Drinkeros" className="h-5 w-auto object-contain" />
               </Link>
             )}
+          </div>
         </div>
 
         <div className="flex justify-end">
