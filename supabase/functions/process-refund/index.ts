@@ -133,7 +133,7 @@ serve(async (req) => {
       refundId = `manual-${Date.now()}`;
     }
 
-    // Update record + revoke access (delete row for course/combo/ebook/package; mark refunded for vip_payments)
+    // Update record + revoke access
     if (table === 'vip_payments') {
       await (supabase as any).from('vip_payments').update({
         status: 'refunded',
@@ -141,6 +141,25 @@ serve(async (req) => {
         refund_amount: refundAmount,
         refund_id: refundId,
       }).eq('id', recordId);
+
+      // Revoke Clube (Sócio) access: downgrade plan to free and remove vip bonus courses
+      const userId = record.user_id;
+      if (userId) {
+        try {
+          await (supabase as any).from('user_plans').update({
+            plan: 'free',
+            expires_at: null,
+            source: 'refund',
+          }).eq('user_id', userId);
+          await (supabase as any).from('user_courses')
+            .delete()
+            .eq('user_id', userId)
+            .eq('source', 'vip_bonus');
+          console.log('[process-refund] Clube access revoked for user', userId);
+        } catch (revokeErr: any) {
+          console.error('[process-refund] failed to revoke Clube access', revokeErr?.message);
+        }
+      }
     } else {
       // Mark and remove access
       await (supabase as any).from(table).update({
