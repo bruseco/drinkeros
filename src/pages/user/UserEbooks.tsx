@@ -150,19 +150,15 @@ const UserEbooks: React.FC = () => {
 
             if (isExternal) {
               return (
-                <a
+                <button
                   key={ebook.id}
-                  href={cardHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={wrapperClass}
+                  type="button"
+                  onClick={() => handleOpenEbook(ebook.id)}
+                  className={`${wrapperClass} bg-transparent border-0 p-0 text-left`}
                   aria-label={`Abrir e-book ${ebook.name}`}
-                  onClick={() => {
-                    if (user?.id) trackEbookDownload(user.id, ebook.id).catch(() => {});
-                  }}
                 >
                   {cardInner}
-                </a>
+                </button>
               );
             }
 
