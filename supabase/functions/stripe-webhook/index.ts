@@ -390,6 +390,18 @@ serve(async (req) => {
         await supabase.from("vip_renewal_reminders_sent").delete().eq("user_id", userId);
 
         await upsertVipPlan(userId, periodEnd);
+
+        await recordPurchase({
+          userId,
+          productId: null,
+          productName: "Clube dos Drinkeros",
+          productType: "club",
+          amountPaid: (invoice.amount_paid ?? 0) / 100,
+          currency: (invoice.currency ?? "brl").toUpperCase(),
+          status: "paid",
+          transactionId: invoice.id,
+          metadata: { subscription_id: subscriptionId, event_id: event.id },
+        });
         break;
       }
 
