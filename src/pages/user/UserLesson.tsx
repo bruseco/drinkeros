@@ -749,18 +749,14 @@ const UserLesson: React.FC = () => {
                       key={mat.id}
                       variant="outline"
                       className="gap-2 w-full justify-start border-primary/30 hover:bg-primary/10"
-                      onClick={async () => {
-                        try {
-                          const { openSignedFile } = await import('@/lib/signedFileUrl');
-                          await openSignedFile('recipe-material', mat.id);
-                        } catch (err) {
-                          const { toast } = await import('@/hooks/use-toast');
+                      onClick={() => {
+                        openSignedFile('recipe-material', mat.id).catch((err) => {
                           toast({
                             title: 'Não foi possível abrir o material',
                             description: err instanceof Error ? err.message : 'Tente novamente.',
                             variant: 'destructive',
                           });
-                        }
+                        });
                       }}
                     >
                       <File className="h-4 w-4 flex-shrink-0" />
