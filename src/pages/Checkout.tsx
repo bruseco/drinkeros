@@ -196,22 +196,8 @@ export default function Checkout() {
     currency: 'BRL',
   });
 
-  // InitiateCheckout — uma única vez quando o produto carrega
-  useEffect(() => {
-    if (!product) return;
-    trackFbEvent(
-      'InitiateCheckout',
-      {
-        content_name: product.name,
-        content_type: isClub ? 'subscription' : 'product',
-        content_ids: [product.id],
-        value: finalPrice,
-        currency: 'BRL',
-        num_items: 1,
-      },
-      { dedupeKey: `checkout:${productType}:${product.slug}` }
-    );
-  }, [product?.id, finalPrice, isClub, productType]);
+  // InitiateCheckout NÃO dispara no page-load. Ele dispara somente após
+  // a criação efetiva do checkout (Stripe / MP) — ver handleClubCheckout e onSubmit.
 
   // 3. Polling do status do Pix
   useEffect(() => {
