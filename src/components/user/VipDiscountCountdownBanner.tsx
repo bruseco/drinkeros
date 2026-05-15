@@ -45,7 +45,12 @@ export const VipDiscountCountdownBanner: React.FC<Props> = ({ forceShowOnProduct
           className="block px-4 py-2.5 pr-10 text-center text-sm sm:text-base font-medium hover:bg-yellow-300 transition-colors"
         >
           <Sparkles className="inline-block h-4 w-4 mr-1.5 -mt-0.5" />
-          <span className="font-bold">80% OFF</span> em todos Cursos e E-books — Você tem <span className="font-bold">7 dias</span> para aproveitar essa promoção.
+          <span className="font-bold">80% OFF</span> em todos Cursos e E-books —{' '}
+          {vip.hoursRemaining > 0 && vip.hoursRemaining <= 24 ? (
+            <>Sua oferta <span className="font-bold">expira HOJE!</span></>
+          ) : (
+            <>Você tem <span className="font-bold">{vip.daysRemaining} {vip.daysRemaining === 1 ? 'dia' : 'dias'}</span> para aproveitar essa promoção.</>
+          )}
         </Link>
         <button
           type="button"

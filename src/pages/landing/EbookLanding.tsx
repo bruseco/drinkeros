@@ -348,6 +348,11 @@ const EbookLanding: React.FC = () => {
               <div className="inline-flex items-center gap-1.5 mb-4 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white text-xs font-bold uppercase tracking-wider px-3 py-1.5 shadow-lg">
                 <Crown className="h-3.5 w-3.5" />
                 Sócio do Clube · {vip.percent}% OFF
+                {vip.isIntroActive && vip.hoursRemaining > 0 && (
+                  <span className="ml-1 opacity-90">
+                    · {vip.hoursRemaining <= 24 ? 'expira HOJE!' : `expira em ${vip.daysRemaining} ${vip.daysRemaining === 1 ? 'dia' : 'dias'}`}
+                  </span>
+                )}
               </div>
             )}
 
