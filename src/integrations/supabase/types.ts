@@ -3275,12 +3275,20 @@ export type Database = {
           token: string
         }[]
       }
+      has_ebook_access: {
+        Args: { _ebook_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_exclusive_access: {
         Args: { _feature?: string; _user_id: string }
         Returns: boolean
       }
       has_package_access: {
         Args: { _package_id: string; _user_id: string }
+        Returns: boolean
+      }
+      has_recipe_access: {
+        Args: { _recipe_id: string; _user_id: string }
         Returns: boolean
       }
       has_role: {

@@ -8,14 +8,31 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { trackEbookDownload } from '@/hooks/useAccessTracking';
+import { openSignedFile } from '@/lib/signedFileUrl';
+import { useToast } from '@/hooks/use-toast';
 
 const UserEbooks: React.FC = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const { data: ebooks = [], isLoading } = useEbooks();
   const { data: userEbookIds = [], isLoading: userLoading } = useUserEbooks();
   const { data: expiredAccess } = useExpiredAccess();
   const ownedSet = new Set(userEbookIds);
   const expiredSet = expiredAccess?.ebook_ids ?? new Set<string>();
+
+  const handleOpenEbook = async (ebookId: string) => {
+    try {
+      if (user?.id) trackEbookDownload(user.id, ebookId).catch(() => {});
+      await openSignedFile('ebook', ebookId);
+    } catch (err) {
+      toast({
+        title: 'Não foi possível abrir o e-book',
+        description: err instanceof Error ? err.message : 'Tente novamente em instantes.',
+        variant: 'destructive',
+      });
+    }
+  };
+
 
   const activeEbooks = ebooks
     .filter(e => e.is_active)
@@ -133,19 +150,15 @@ const UserEbooks: React.FC = () => {
 
             if (isExternal) {
               return (
-                <a
+                <button
                   key={ebook.id}
-                  href={cardHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={wrapperClass}
+                  type="button"
+                  onClick={() => handleOpenEbook(ebook.id)}
+                  className={`${wrapperClass} bg-transparent border-0 p-0 text-left`}
                   aria-label={`Abrir e-book ${ebook.name}`}
-                  onClick={() => {
-                    if (user?.id) trackEbookDownload(user.id, ebook.id).catch(() => {});
-                  }}
                 >
                   {cardInner}
-                </a>
+                </button>
               );
             }
 
