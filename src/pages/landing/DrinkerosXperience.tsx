@@ -141,6 +141,7 @@ const DrinkerosXperience: React.FC = () => {
   const dbPrice = (course as any)?.price ? Number((course as any).price) : null;
   const basePrice = dbPrice ?? 497;
   const vip = useVipDiscount();
+  const { data: totalStudents } = useTotalStudents();
   const finalPrice = isVip ? applyVipDiscountFor(basePrice, vip.percent) : basePrice;
   const installments = (finalPrice / 12).toFixed(2).replace('.', ',');
 
