@@ -1012,6 +1012,9 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                     <Crown className="h-4 w-4" style={{ color: theme.accent }} />
                     <span className="text-sm font-bold uppercase tracking-wide" style={{ color: theme.accent }}>
                       Preço exclusivo Sócio do Clube · {vip.percent}% OFF
+                      {vip.isIntroActive && vip.hoursRemaining > 0 && (
+                        <> · {vip.hoursRemaining <= 24 ? 'expira HOJE!' : `expira em ${vip.daysRemaining} ${vip.daysRemaining === 1 ? 'dia' : 'dias'}`}</>
+                      )}
                     </span>
                   </div>
                   <p className="text-lg text-white/60 line-through">{formatBRL(basePrice)}</p>
