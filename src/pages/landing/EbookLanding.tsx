@@ -56,6 +56,7 @@ const EbookLanding: React.FC = () => {
         title: 'Compra realizada com sucesso! 🎉',
         description: 'Seu e-book já está disponível em "Meus E-books".',
       });
+      import('@/lib/firePurchaseFromBackend').then(m => m.firePurchaseFromBackend({ source: 'ebook-landing' }));
     } else if (status === 'cancel') {
       toast({
         title: 'Compra cancelada',
