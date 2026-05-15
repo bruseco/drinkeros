@@ -164,6 +164,17 @@ export const useExclusivePostsPaginated = ({
           ordered = [...hits, ...rest];
         }
 
+        // Push viewed/completed recipes to the end, in the given order.
+        if (pinnedToEndIds && pinnedToEndIds.length > 0) {
+          const pinnedSet = new Set(pinnedToEndIds);
+          const rank = new Map(pinnedToEndIds.map((id, i) => [id, i]));
+          const notPinned = ordered.filter((r) => !pinnedSet.has(r.id));
+          const pinned = ordered
+            .filter((r) => pinnedSet.has(r.id))
+            .sort((a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0));
+          ordered = [...notPinned, ...pinned];
+        }
+
         const total = ordered.length;
         const pageIds = ordered.slice(from, from + pageSize).map((r) => r.id);
 
