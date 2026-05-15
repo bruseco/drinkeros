@@ -164,6 +164,38 @@ const UserRecipes: React.FC = () => {
   });
   const limitReached = isLockedForUser && (dailyViews?.count ?? 0) >= dailyLimit;
 
+  // Receitas já visualizadas pelo usuário — vão para o final da lista, ordenadas pela data
+  // de visualização (mais antigas primeiro, mais recentes por último).
+  const { data: viewedIdsOrdered } = useQuery({
+    queryKey: ['exclusive-post-views-ordered', user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('exclusive_post_views')
+        .select('post_id, viewed_at')
+        .eq('user_id', user!.id)
+        .order('viewed_at', { ascending: true });
+      const seen = new Set<string>();
+      const ids: string[] = [];
+      for (const row of data ?? []) {
+        const id = row.post_id as string;
+        if (!seen.has(id)) {
+          seen.add(id);
+          ids.push(id);
+        }
+      }
+      return ids;
+    },
+  });
+
+  // Bump para forçar refetch quando o usuário clica em "Embaralhar"
+  const [shuffleNonce, setShuffleNonce] = useState(0);
+  const handleShuffle = () => {
+    refreshPostsSeed();
+    setShuffleNonce((n) => n + 1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
 
   useEffect(() => {
     const el = stickyRef.current;
