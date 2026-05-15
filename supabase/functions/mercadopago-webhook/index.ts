@@ -17,6 +17,36 @@ const ACCESS_TABLE_MAP: Record<string, { table: string; fk: string }> = {
   package: { table: "user_packages", fk: "package_id" },
 };
 
+async function recordPurchase(supabase: any, p: {
+  userId: string;
+  productId?: string | null;
+  productName: string;
+  productType: string;
+  amountPaid: number;
+  currency: string;
+  status: string;
+  transactionId: string;
+  metadata?: Record<string, unknown>;
+}) {
+  if (!p.transactionId || !(p.amountPaid > 0)) return;
+  const { error } = await supabase.from("purchases").upsert(
+    {
+      user_id: p.userId,
+      product_id: p.productId ?? null,
+      product_name: p.productName,
+      product_type: p.productType,
+      gateway: "mercado_pago",
+      amount_paid: p.amountPaid,
+      currency: (p.currency || "BRL").toUpperCase(),
+      status: p.status,
+      transaction_id: p.transactionId,
+      metadata: p.metadata || {},
+    },
+    { onConflict: "gateway,transaction_id" },
+  );
+  if (error) console.error("[mp-webhook] purchases-upsert-error", error);
+}
+
 async function grantClubAccess(supabase: any, userId: string, payment: any, paymentId: string, periodDays: number) {
   const now = new Date();
   const periodEnd = new Date(now.getTime() + periodDays * 24 * 60 * 60 * 1000);
