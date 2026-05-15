@@ -455,6 +455,9 @@ const DrinkerosXperience: React.FC = () => {
                     <Crown className="h-4 w-4 text-amber-300" />
                     <span className="text-sm font-bold text-amber-200 uppercase tracking-wide">
                       Preço exclusivo Sócio do Clube · {vip.percent}% OFF
+                      {vip.isIntroActive && vip.hoursRemaining > 0 && (
+                        <> · {vip.hoursRemaining <= 24 ? 'expira HOJE!' : `expira em ${vip.daysRemaining} ${vip.daysRemaining === 1 ? 'dia' : 'dias'}`}</>
+                      )}
                     </span>
                   </div>
                   <p className="text-lg text-white/60 line-through">{formatBRL(basePrice)}</p>
