@@ -186,6 +186,23 @@ serve(async (req) => {
             );
           if (grantErr) log("grant-access-error", { error: grantErr.message, productType, productId });
 
+          // Busca nome real do produto p/ Meta Pixel
+          const { data: prodRow } = await supabase
+            .from(productType === "course" ? "courses" : "ebooks")
+            .select("name").eq("id", productId).maybeSingle();
+
+          await recordPurchase({
+            userId,
+            productId,
+            productName: (prodRow as any)?.name || (productType === "course" ? "Curso" : "E-book"),
+            productType,
+            amountPaid: (session.amount_total ?? 0) / 100,
+            currency: (session.currency ?? "brl").toUpperCase(),
+            status: "paid",
+            transactionId: (session.payment_intent as string) || session.id,
+            metadata: { session_id: session.id, event_id: event.id },
+          });
+
           break;
         }
 
