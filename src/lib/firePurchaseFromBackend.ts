@@ -26,7 +26,7 @@ export async function firePurchaseFromBackend(opts?: { source?: string }) {
         value: Number(purchase.amount_paid),
         currency: purchase.currency || 'BRL',
         content_name: purchase.product_name,
-        content_type: purchase.product_type === 'club' ? 'subscription' : purchase.product_type,
+        content_type: purchase.product_type === 'club' ? 'subscription' : 'product',
         content_ids: purchase.product_id ? [purchase.product_id] : undefined,
         order_id: purchase.transaction_id,
         transaction_id: purchase.transaction_id,
