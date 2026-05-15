@@ -96,6 +96,7 @@ export default function Checkout() {
 
   // Clube → redireciona para Stripe Checkout
   const handleClubCheckout = async () => {
+    if (submitting) return; // bloqueia clique duplo
     setSubmitting(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-club-checkout", {
@@ -104,6 +105,19 @@ export default function Checkout() {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       if (!data?.url) throw new Error("URL de checkout não retornada");
+
+      // Dispara InitiateCheckout SOMENTE após sucesso na criação da sessão Stripe,
+      // com dados dinâmicos vindos da edge function — antes do redirect.
+      trackInitiateCheckout({
+        amount: data.amount,
+        currency: data.currency,
+        product_name: data.product_name,
+        product_type: 'subscription',
+        price_id: data.price_id,
+        session_id: data.session_id,
+      });
+      await waitForPixelFlush();
+
       window.location.href = data.url;
     } catch (err: any) {
       toast.error("Erro ao iniciar checkout", { description: err.message });
