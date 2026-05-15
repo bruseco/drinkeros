@@ -15,7 +15,7 @@ import { useHasExclusiveAccess } from '@/hooks/useExclusiveAccess';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { trackFbEvent } from '@/lib/metaPixel';
+import { trackFbEvent, trackInitiateCheckout, waitForPixelFlush } from '@/lib/metaPixel';
 import { useViewContent } from '@/hooks/useViewContent';
 import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
 
