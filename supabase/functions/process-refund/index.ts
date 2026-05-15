@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import { revokeClubeAccess } from "./revoke.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -145,19 +146,11 @@ serve(async (req) => {
       // Revoke Clube (Sócio) access: downgrade plan to free and remove vip bonus courses
       const userId = record.user_id;
       if (userId) {
-        try {
-          await (supabase as any).from('user_plans').update({
-            plan: 'free',
-            expires_at: null,
-            source: 'refund',
-          }).eq('user_id', userId);
-          await (supabase as any).from('user_courses')
-            .delete()
-            .eq('user_id', userId)
-            .eq('source', 'vip_bonus');
+        const result = await revokeClubeAccess(supabase, userId);
+        if (result.errors.length) {
+          console.error('[process-refund] revoke errors', result.errors);
+        } else {
           console.log('[process-refund] Clube access revoked for user', userId);
-        } catch (revokeErr: any) {
-          console.error('[process-refund] failed to revoke Clube access', revokeErr?.message);
         }
       }
     } else {
