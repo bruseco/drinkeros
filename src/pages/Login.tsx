@@ -35,6 +35,10 @@ const Login: React.FC = () => {
   const [magicLinkEmail, setMagicLinkEmail] = useState('');
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [lastMethod, setLastMethod] = useState<string | null>(null);
+  const [isProcessingHash, setIsProcessingHash] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.location.hash.includes('access_token=');
+  });
   const { signIn, user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -44,6 +48,41 @@ const Login: React.FC = () => {
       setLastMethod(localStorage.getItem('drinkeros:last_auth_method'));
     } catch { /* ignore */ }
   }, []);
+
+  // Consome tokens do hash (callback OAuth Apple/Google) caso o
+  // detectSessionInUrl do Supabase não tenha disparado a tempo.
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!hash || !hash.includes('access_token=')) return;
+
+    const params = new URLSearchParams(hash.replace(/^#/, ''));
+    const access_token = params.get('access_token');
+    const refresh_token = params.get('refresh_token');
+
+    if (!access_token || !refresh_token) {
+      setIsProcessingHash(false);
+      return;
+    }
+
+    (async () => {
+      try {
+        const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+        if (error) throw error;
+        // Limpa o hash para não vazar tokens na URL
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        navigate('/app', { replace: true });
+      } catch (err: any) {
+        console.error('[Login] erro ao consumir hash OAuth:', err);
+        toast({
+          title: 'Erro ao concluir login',
+          description: err?.message || 'Tente novamente.',
+          variant: 'destructive',
+        });
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        setIsProcessingHash(false);
+      }
+    })();
+  }, [navigate, toast]);
 
   useEffect(() => {
     if (user && !authLoading) {
