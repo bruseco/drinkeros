@@ -27,9 +27,10 @@ import { VipDiscountCountdownBanner } from '@/components/user/VipDiscountCountdo
 import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
 import VipFloatingBanner from '@/components/landing/VipFloatingBanner';
 import SeoHead from '@/components/SeoHead';
+import { useTotalStudents, TOTAL_STUDENTS_FALLBACK } from '@/hooks/useTotalStudents';
 
-/** Total padrão de alunos certificados — usado em todas as landings de curso. */
-export const TOTAL_STUDENTS_CERTIFIED = 22341;
+/** Total padrão (fallback) — fonte real é o RPC `get_total_students_certified`. */
+export const TOTAL_STUDENTS_CERTIFIED = TOTAL_STUDENTS_FALLBACK;
 
 /**
  * Tema (paleta) por curso. Sempre 3 cores em HSL/HEX para gerar
