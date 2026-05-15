@@ -3260,6 +3260,7 @@ export type Database = {
         Returns: Json
       }
       get_study_reminder_stats: { Args: never; Returns: Json }
+      get_total_students_certified: { Args: never; Returns: number }
       get_user_plan: { Args: { _user_id: string }; Returns: string }
       get_user_plan_v2: { Args: { _user_id: string }; Returns: string }
       get_ux_metrics: { Args: never; Returns: Json }
