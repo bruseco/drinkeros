@@ -67,3 +67,48 @@ export function trackFbEvent(
     console.warn('[MetaPixel] erro ao disparar', event, err);
   }
 }
+
+/**
+ * Dispara InitiateCheckout com dados dinâmicos vindos do backend (Stripe/MP)
+ * imediatamente antes de redirecionar/processar o checkout.
+ * Usa dedupeKey para evitar duplo disparo (clique duplo, retry, etc.).
+ */
+export function trackInitiateCheckout(checkout: {
+  amount?: number;
+  currency?: string;
+  product_name?: string;
+  product_type?: string;
+  product_id?: string;
+  price_id?: string;
+  preference_id?: string;
+  session_id?: string;
+  id?: string | number;
+}) {
+  const contentId =
+    checkout.product_id ||
+    checkout.price_id ||
+    checkout.preference_id ||
+    checkout.session_id ||
+    (checkout.id != null ? String(checkout.id) : undefined);
+
+  trackFbEvent(
+    'InitiateCheckout',
+    {
+      value: typeof checkout.amount === 'number' ? checkout.amount : undefined,
+      currency: checkout.currency || 'BRL',
+      content_name: checkout.product_name,
+      content_type: checkout.product_type || 'product',
+      content_ids: contentId ? [contentId] : undefined,
+      num_items: 1,
+    },
+    { dedupeKey: `ic:${contentId || checkout.product_name || 'unknown'}` },
+  );
+}
+
+/**
+ * Aguarda um pequeno tick para garantir que o fbq foi enfileirado
+ * antes de fazer redirect (window.location.href).
+ */
+export function waitForPixelFlush(ms = 120): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
