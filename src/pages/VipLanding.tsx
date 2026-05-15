@@ -392,28 +392,60 @@ const VipLanding: React.FC = () => {
           </div>
 
           <div className="space-y-10">
-            {/* Bônus 1 - Bebida Decifrada */}
+            {/* Bônus 1 - Xaropes Artesanais */}
             <div className="rounded-2xl bg-gradient-to-br from-purple-900/40 to-black border border-purple-500/30 overflow-hidden p-6">
               <div className="w-[70%] sm:w-full max-w-md aspect-square mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-5 bg-black">
-                <VideoWithPoster src={jackDaniels} poster={bebidaCover} alt="Bebida Decifrada" />
+                <VideoWithPoster src={xaropesVideo} poster={xaropesCover} alt="Xaropes Artesanais" />
               </div>
               <div className="text-center max-w-xl mx-auto">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <PlayCircle className="h-5 w-5 text-yellow-300" />
+                  <GlassWater className="h-5 w-5 text-yellow-300" />
                   <span className="text-xs font-bold uppercase tracking-wider text-yellow-300">Bônus 1</span>
                 </div>
-                <h3 className="text-2xl font-black mb-2">Bebida Decifrada</h3>
+                <h3 className="text-2xl font-black mb-2">Xaropes Artesanais</h3>
                 <p className="text-sm text-purple-200 leading-snug">
-                  Uma minissérie onde você aprende as melhores curiosidades das bebidas mais
-                  famosas do mundo, como <strong className="text-white">Jack Daniels</strong>,{' '}
-                  <strong className="text-white">Tequila José Cuervo</strong>,{' '}
-                  <strong className="text-white">Amarula</strong> e várias outras.
+                  São <strong className="text-white">mais de 40 receitas exclusivas</strong> de xaropes que{' '}
+                  <strong className="text-white">elevam o nível dos seus drinks</strong> e ainda{' '}
+                  <strong className="text-white">geram muita economia</strong> — você para de comprar xaropes industrializados caros e passa a fazer o seu, do seu jeito.
                 </p>
-                <p className="text-xs text-purple-300 mt-3 italic">▶ Acima, a degustação do Jack Daniels.</p>
               </div>
             </div>
 
-            {/* Bônus 2 - Workshop Além dos Clássicos */}
+            {/* Bônus 2 - Batalha dos Drinkeros */}
+            <div className="rounded-2xl bg-gradient-to-br from-yellow-900/30 to-black border border-yellow-500/30 overflow-hidden p-6">
+              <div className="w-[70%] sm:w-full max-w-md aspect-square mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-5 bg-black">
+                <VideoWithPoster src="/vinheta-batalha-dos-drinkeros-web.mp4" poster="/batalha-video-poster.jpg" alt="Batalha dos Drinkeros" />
+              </div>
+              <div className="text-center max-w-xl mx-auto">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Trophy className="h-5 w-5 text-yellow-300" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-yellow-300">Bônus 2</span>
+                </div>
+                <h3 className="text-2xl font-black mb-2">Batalha dos Drinkeros</h3>
+                <p className="text-base sm:text-lg font-bold text-yellow-300 leading-snug mb-3">
+                  Todo mês, o 1º do Ranking leva R$ 200 em voucher.
+                </p>
+                <p className="text-sm text-purple-200 leading-snug">
+                  Toda semana, sócios do Clube competem com seus drinks autorais.
+                  Os <strong className="text-white">melhores do mês</strong> ganham destaque e disputam o título de
+                  <strong className="text-white"> melhor drinker do ano</strong>.
+                </p>
+                <p className="mt-3 text-sm text-purple-100 leading-snug">
+                  O <strong className="text-yellow-300">1º lugar do ranking mensal</strong> ganha{' '}
+                  <strong className="text-yellow-300">R$ 200 em voucher</strong> para gastar em bebidas premium no nosso parceiro{' '}
+                  <a
+                    href="https://www.espacoprime.com.br"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white underline underline-offset-2 hover:text-yellow-300"
+                  >
+                    Espaço Prime
+                  </a>.
+                </p>
+              </div>
+            </div>
+
+            {/* Bônus 3 - Workshop Além dos Clássicos */}
             <div className="rounded-2xl bg-gradient-to-br from-fuchsia-900/40 to-black border border-fuchsia-500/30 overflow-hidden p-6">
               <div className="w-[70%] sm:w-full max-w-md aspect-square mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-5 bg-black">
                 <VideoWithPoster src={workshopVsl} poster={workshopCover} alt="Workshop Além dos Clássicos" />
@@ -421,7 +453,7 @@ const VipLanding: React.FC = () => {
               <div className="text-center max-w-xl mx-auto">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <GraduationCap className="h-5 w-5 text-yellow-300" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-yellow-300">Bônus 2</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-yellow-300">Bônus 3</span>
                 </div>
                 <h3 className="text-2xl font-black mb-2">Workshop Além dos Clássicos</h3>
                 <p className="text-sm text-purple-200 leading-snug">
@@ -445,55 +477,28 @@ const VipLanding: React.FC = () => {
               </div>
             </div>
 
-            {/* Bônus 3 - Batalha dos Drinkeros */}
-            <div className="rounded-2xl bg-gradient-to-br from-yellow-900/30 to-black border border-yellow-500/30 overflow-hidden p-6">
-              <div className="w-[70%] sm:w-full max-w-md aspect-square mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-5 bg-black">
-                <VideoWithPoster src="/vinheta-batalha-dos-drinkeros-web.mp4" poster="/batalha-video-poster.jpg" alt="Batalha dos Drinkeros" />
-              </div>
-              <div className="text-center max-w-xl mx-auto">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Trophy className="h-5 w-5 text-yellow-300" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-yellow-300">Bônus 3</span>
-                </div>
-                <h3 className="text-2xl font-black mb-2">Batalha dos Drinkeros</h3>
-                <p className="text-sm text-purple-200 leading-snug">
-                  Toda semana, sócios do Clube competem com seus drinks autorais.
-                  Os <strong className="text-white">melhores do mês</strong> ganham destaque e disputam o título de
-                  <strong className="text-white"> melhor drinker do ano</strong>.
-                </p>
-                <p className="mt-3 text-sm text-purple-100 leading-snug">
-                  Todo mês, o <strong className="text-yellow-300">1º lugar do ranking</strong> ganha{' '}
-                  <strong className="text-yellow-300">R$ 200 em voucher</strong> para gastar em bebidas premium no nosso parceiro{' '}
-                  <a
-                    href="https://www.espacoprime.com.br"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white underline underline-offset-2 hover:text-yellow-300"
-                  >
-                    Espaço Prime
-                  </a>.
-                </p>
-              </div>
-            </div>
-
-            {/* Bônus 4 - Xaropes Artesanais */}
+            {/* Bônus 4 - Bebida Decifrada */}
             <div className="rounded-2xl bg-gradient-to-br from-purple-900/40 to-black border border-purple-500/30 overflow-hidden p-6">
               <div className="w-[70%] sm:w-full max-w-md aspect-square mx-auto rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl mb-5 bg-black">
-                <VideoWithPoster src={xaropesVideo} poster={xaropesCover} alt="Xaropes Artesanais" />
+                <VideoWithPoster src={jackDaniels} poster={bebidaCover} alt="Bebida Decifrada" />
               </div>
               <div className="text-center max-w-xl mx-auto">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <GlassWater className="h-5 w-5 text-yellow-300" />
+                  <PlayCircle className="h-5 w-5 text-yellow-300" />
                   <span className="text-xs font-bold uppercase tracking-wider text-yellow-300">Bônus 4</span>
                 </div>
-                <h3 className="text-2xl font-black mb-2">Xaropes Artesanais</h3>
+                <h3 className="text-2xl font-black mb-2">Bebida Decifrada</h3>
                 <p className="text-sm text-purple-200 leading-snug">
-                  Aprenda a fazer os <strong className="text-white">xaropes que dão alma aos seus drinks</strong>.
-                  Receitas exclusivas e fáceis pra você levar seus coquetéis pra outro nível.
+                  Uma minissérie onde você aprende as melhores curiosidades das bebidas mais
+                  famosas do mundo, como <strong className="text-white">Jack Daniels</strong>,{' '}
+                  <strong className="text-white">Tequila José Cuervo</strong>,{' '}
+                  <strong className="text-white">Amarula</strong> e várias outras.
                 </p>
+                <p className="text-xs text-purple-300 mt-3 italic">▶ Acima, a degustação do Jack Daniels.</p>
               </div>
             </div>
           </div>
+        </div>
         </div>
 
         {/* Pricing Card — fechamento da página */}
