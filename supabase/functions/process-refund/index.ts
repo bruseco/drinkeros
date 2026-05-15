@@ -81,12 +81,34 @@ serve(async (req) => {
     if (provider === 'stripe') {
       if (!stripeRef) throw new Error('Pagamento Stripe sem ID de transação — não é possível estornar pelo gateway');
       const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, { apiVersion: '2025-08-27.basil' });
-      const refund = await stripe.refunds.create({
-        payment_intent: stripeRef,
-        reason: 'requested_by_customer',
-      });
-      refundId = refund.id;
-      refundAmount = (refund.amount ?? 0) / 100;
+
+      // Try refunding via payment_intent first; fallback to charge if it's actually a charge id
+      try {
+        const refund = stripeRef.startsWith('ch_')
+          ? await stripe.refunds.create({ charge: stripeRef, reason: 'requested_by_customer' })
+          : await stripe.refunds.create({ payment_intent: stripeRef, reason: 'requested_by_customer' });
+        refundId = refund.id;
+        refundAmount = (refund.amount ?? 0) / 100;
+      } catch (refundErr: any) {
+        // If already refunded on Stripe, continue to subscription cancel
+        const msg = String(refundErr?.message || '');
+        if (!/already.*refunded|charge_already_refunded/i.test(msg)) throw refundErr;
+        console.warn('[process-refund] charge already refunded on Stripe, continuing:', msg);
+      }
+
+      // Cancel subscription if this payment is linked to one (Clube)
+      const subId = table === 'vip_payments' ? record.stripe_subscription_id : null;
+      if (subId) {
+        try {
+          const sub = await stripe.subscriptions.retrieve(subId);
+          if (sub.status !== 'canceled') {
+            await stripe.subscriptions.cancel(subId, { invoice_now: false, prorate: false });
+            console.log('[process-refund] subscription canceled:', subId);
+          }
+        } catch (subErr: any) {
+          console.error('[process-refund] failed to cancel subscription', subId, subErr?.message);
+        }
+      }
     } else if (provider === 'mercadopago') {
       if (!mpRef) throw new Error('Pagamento Mercado Pago sem ID de transação — não é possível estornar pelo gateway');
       const mpToken = Deno.env.get('MERCADOPAGO_ACCESS_TOKEN');
