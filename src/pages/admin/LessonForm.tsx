@@ -806,14 +806,19 @@ const LessonForm: React.FC = () => {
                       className="h-8 text-sm flex-1"
                       placeholder="Nome do material"
                     />
-                    <a
-                      href={mat.file_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      type="button"
                       className="text-primary hover:text-primary/80 flex-shrink-0"
+                      onClick={async () => {
+                        try {
+                          const { adminSignedUrlFromPublicUrl } = await import('@/lib/signedFileUrl');
+                          const url = await adminSignedUrlFromPublicUrl('lesson-materials', mat.file_url);
+                          window.open(url, '_blank', 'noopener,noreferrer');
+                        } catch (e) { console.error(e); }
+                      }}
                     >
                       <FileDown className="h-4 w-4" />
-                    </a>
+                    </button>
                     <Button
                       type="button"
                       variant="ghost"
