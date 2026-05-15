@@ -26,6 +26,7 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const timerRef = useRef<number | null>(null);
+  const vip = useVipDiscount();
 
   // Dismiss apenas em memória — refresh ou troca de página reativa o banner
   useEffect(() => {
@@ -64,7 +65,6 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
 
   if (!visible || dismissed) return null;
 
-  const vip = useVipDiscount();
   // Banner promocional para VISITANTES (não-sócios) — sempre mostra a oferta máxima (intro 80%)
   const displayPercent = vip.percent || VIP_DISCOUNT_INTRO_PERCENT;
   const vipPrice = applyVipDiscountFor(basePrice, displayPercent);
