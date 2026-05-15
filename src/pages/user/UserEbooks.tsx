@@ -13,11 +13,26 @@ import { useToast } from '@/hooks/use-toast';
 
 const UserEbooks: React.FC = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const { data: ebooks = [], isLoading } = useEbooks();
   const { data: userEbookIds = [], isLoading: userLoading } = useUserEbooks();
   const { data: expiredAccess } = useExpiredAccess();
   const ownedSet = new Set(userEbookIds);
   const expiredSet = expiredAccess?.ebook_ids ?? new Set<string>();
+
+  const handleOpenEbook = async (ebookId: string) => {
+    try {
+      if (user?.id) trackEbookDownload(user.id, ebookId).catch(() => {});
+      await openSignedFile('ebook', ebookId);
+    } catch (err) {
+      toast({
+        title: 'Não foi possível abrir o e-book',
+        description: err instanceof Error ? err.message : 'Tente novamente em instantes.',
+        variant: 'destructive',
+      });
+    }
+  };
+
 
   const activeEbooks = ebooks
     .filter(e => e.is_active)
