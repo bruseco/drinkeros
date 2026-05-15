@@ -212,32 +212,10 @@ export default function Checkout() {
       if (j.status === "approved") {
           setPaid(true);
           clearInterval(interval);
-          // Clube anual = Subscribe; produto avulso = Purchase
-          if (isClub) {
-            trackFbEvent(
-              'Subscribe',
-              {
-                value: 69.0,
-                currency: 'BRL',
-                content_name: 'Clube dos Drinkeros Anual',
-                content_type: 'subscription',
-              },
-              { dedupeKey: `subscribe:${pixPaymentId}` }
-            );
-          } else {
-            trackFbEvent(
-              'Purchase',
-              {
-                value: finalPrice,
-                currency: 'BRL',
-                content_name: product?.name,
-                content_type: 'product',
-                content_ids: product ? [product.id] : undefined,
-                transaction_id: pixPaymentId,
-              },
-              { dedupeKey: `purchase:${pixPaymentId}` }
-            );
-          }
+          // Dispara Purchase com dados REAIS da transação (vindos do banco via webhook)
+          import('@/lib/firePurchaseFromBackend').then(m =>
+            m.firePurchaseFromBackend({ source: 'checkout-pix' })
+          );
           setTimeout(() => navigate(isClub ? "/clube?clube=success" : `/${product?.slug}?checkout=success`), 2000);
         }
       } catch (_) { /* ignore */ }
