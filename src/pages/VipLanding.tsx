@@ -70,6 +70,9 @@ const VideoWithPoster: React.FC<{ src: string; poster: string; alt: string }> = 
 const VipLanding: React.FC = () => {
   const { user } = useAuth();
   const { data: planData } = useUserPlan();
+  const { data: totalMembers } = useTotalClubMembers();
+  const memberCount = totalMembers ?? TOTAL_CLUB_MEMBERS_FALLBACK;
+  const memberCountRounded = Math.max(100, Math.floor(memberCount / 100) * 100);
   const { data: hasExclusive } = useHasExclusiveAccess('receitas');
   const { data: hasLifetime } = useQuery({
     queryKey: ['lifetime-access-self', user?.id],
