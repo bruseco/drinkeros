@@ -17,6 +17,7 @@ import { useVipDiscount } from '@/hooks/useVipDiscount';
 import { VipDiscountCountdownBanner } from '@/components/user/VipDiscountCountdownBanner';
 import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
 import VipFloatingBanner from '@/components/landing/VipFloatingBanner';
+import { useTotalStudents, TOTAL_STUDENTS_FALLBACK } from '@/hooks/useTotalStudents';
 
 // Imagens
 import logo from '@/assets/landing/dx/logo.png';
