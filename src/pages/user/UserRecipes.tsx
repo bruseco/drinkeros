@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { useExclusivePostsPaginated } from '@/hooks/useExclusivePosts';
-import { Loader2, Search, Wine, GlassWater, Users, Citrus, CupSoda, Martini, IceCream, Snowflake, Droplets, Lock, Coffee, Utensils, Zap } from 'lucide-react';
+import { useExclusivePostsPaginated, refreshPostsSeed } from '@/hooks/useExclusivePosts';
+import { Loader2, Search, Wine, GlassWater, Users, Citrus, CupSoda, Martini, IceCream, Snowflake, Droplets, Lock, Coffee, Utensils, Zap, Shuffle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -164,6 +164,38 @@ const UserRecipes: React.FC = () => {
   });
   const limitReached = isLockedForUser && (dailyViews?.count ?? 0) >= dailyLimit;
 
+  // Receitas já visualizadas pelo usuário — vão para o final da lista, ordenadas pela data
+  // de visualização (mais antigas primeiro, mais recentes por último).
+  const { data: viewedIdsOrdered } = useQuery({
+    queryKey: ['exclusive-post-views-ordered', user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('exclusive_post_views')
+        .select('post_id, viewed_at')
+        .eq('user_id', user!.id)
+        .order('viewed_at', { ascending: true });
+      const seen = new Set<string>();
+      const ids: string[] = [];
+      for (const row of data ?? []) {
+        const id = row.post_id as string;
+        if (!seen.has(id)) {
+          seen.add(id);
+          ids.push(id);
+        }
+      }
+      return ids;
+    },
+  });
+
+  // Bump para forçar refetch quando o usuário clica em "Embaralhar"
+  const [shuffleNonce, setShuffleNonce] = useState(0);
+  const handleShuffle = () => {
+    refreshPostsSeed();
+    setShuffleNonce((n) => n + 1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
 
   useEffect(() => {
     const el = stickyRef.current;
@@ -205,6 +237,7 @@ const UserRecipes: React.FC = () => {
     publishedOnly: true,
     randomOrder: true as const,
     characteristicFilter: selectedCategory || undefined,
+    pinnedToEndIds: viewedIdsOrdered,
   });
 
   const recipes = data?.pages.flatMap((page) => page.posts) ?? [];
@@ -248,7 +281,7 @@ const UserRecipes: React.FC = () => {
           <ScrollBar orientation="horizontal" className="invisible" />
         </ScrollArea>
 
-        <div ref={stickyRef} className="sticky top-0 z-[60] -mx-4 px-4 pt-0 pb-2 -mt-1">
+        <div ref={stickyRef} data-shuffle-nonce={shuffleNonce} className="sticky top-0 z-[60] -mx-4 px-4 pt-0 pb-2 -mt-1">
           <div className="mx-auto flex items-center gap-2 rounded-full border border-border/60 bg-background/95 px-3 py-2 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -269,6 +302,19 @@ const UserRecipes: React.FC = () => {
               </Link>
             )}
           </div>
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={handleShuffle}
+            disabled={isLoading}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+            aria-label="Embaralhar receitas"
+          >
+            <Shuffle className="h-3.5 w-3.5" />
+            Embaralhar
+          </button>
         </div>
 
         {isLoading ? (
