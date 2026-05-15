@@ -27,9 +27,10 @@ import { VipDiscountCountdownBanner } from '@/components/user/VipDiscountCountdo
 import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
 import VipFloatingBanner from '@/components/landing/VipFloatingBanner';
 import SeoHead from '@/components/SeoHead';
+import { useTotalStudents, TOTAL_STUDENTS_FALLBACK } from '@/hooks/useTotalStudents';
 
-/** Total padrão de alunos certificados — usado em todas as landings de curso. */
-export const TOTAL_STUDENTS_CERTIFIED = 22341;
+/** Total padrão (fallback) — fonte real é o RPC `get_total_students_certified`. */
+export const TOTAL_STUDENTS_CERTIFIED = TOTAL_STUDENTS_FALLBACK;
 
 /**
  * Tema (paleta) por curso. Sempre 3 cores em HSL/HEX para gerar
@@ -260,6 +261,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const dbPrice = (course as any)?.price ? Number((course as any).price) : (combo as any)?.price ? Number((combo as any).price) : null;
   const basePrice = dbPrice ?? fallbackPrice;
   const vip = useVipDiscount();
+  const { data: totalStudents } = useTotalStudents();
   const finalPrice = isVip ? applyVipDiscountFor(basePrice, vip.percent) : basePrice;
   // Parcelamento com juros do cliente (Mercado Pago: 4,49% a.m. compostos)
   const INSTALLMENT_RATE = 0.0449;
@@ -672,7 +674,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
         <div className="container mx-auto px-4 text-center text-white">
           <p className="text-lg sm:text-xl font-semibold uppercase tracking-wider opacity-90">Já certificamos</p>
           <p className="text-6xl sm:text-7xl lg:text-8xl font-black my-2 drop-shadow-lg tabular-nums">
-            <AnimatedStudentCount target={TOTAL_STUDENTS_CERTIFIED} />
+            <AnimatedStudentCount target={totalStudents ?? TOTAL_STUDENTS_CERTIFIED} />
           </p>
           <p className="text-lg sm:text-xl font-semibold uppercase tracking-wider opacity-90">alunos até o momento</p>
         </div>

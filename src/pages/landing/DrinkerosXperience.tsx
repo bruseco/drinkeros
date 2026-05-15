@@ -17,6 +17,7 @@ import { useVipDiscount } from '@/hooks/useVipDiscount';
 import { VipDiscountCountdownBanner } from '@/components/user/VipDiscountCountdownBanner';
 import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
 import VipFloatingBanner from '@/components/landing/VipFloatingBanner';
+import { useTotalStudents, TOTAL_STUDENTS_FALLBACK } from '@/hooks/useTotalStudents';
 
 // Imagens
 import logo from '@/assets/landing/dx/logo.png';
@@ -140,6 +141,7 @@ const DrinkerosXperience: React.FC = () => {
   const dbPrice = (course as any)?.price ? Number((course as any).price) : null;
   const basePrice = dbPrice ?? 497;
   const vip = useVipDiscount();
+  const { data: totalStudents } = useTotalStudents();
   const finalPrice = isVip ? applyVipDiscountFor(basePrice, vip.percent) : basePrice;
   const installments = (finalPrice / 12).toFixed(2).replace('.', ',');
 
@@ -344,7 +346,7 @@ const DrinkerosXperience: React.FC = () => {
         <div className="container mx-auto px-4 text-center">
           <p className="text-lg sm:text-xl font-semibold uppercase tracking-wider opacity-90">Já certificamos</p>
           <p className="text-6xl sm:text-7xl lg:text-8xl font-black my-2 drop-shadow-lg tabular-nums">
-            <AnimatedStudentCount target={22341} />
+            <AnimatedStudentCount target={totalStudents ?? TOTAL_STUDENTS_FALLBACK} />
           </p>
           <p className="text-lg sm:text-xl font-semibold uppercase tracking-wider opacity-90">alunos até o momento</p>
         </div>
