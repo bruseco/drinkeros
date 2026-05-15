@@ -197,6 +197,12 @@ const Login: React.FC = () => {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 gap-4">
+      {isProcessingHash && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-background">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Concluindo login...</p>
+        </div>
+      )}
       <SeoHead
         title="Entrar no Drinkeros — Área de Membros"
         description="Acesse sua conta Drinkeros e entre na maior área de membros de coquetelaria do Brasil: cursos, mais de 1.000 receitas, ebooks e o Clube dos Drinkeros."
