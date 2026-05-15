@@ -253,6 +253,19 @@ serve(async (req) => {
           }, { onConflict: "stripe_payment_intent_id" });
 
           await upsertVipPlan(userId, oneYearFromNow);
+
+          await recordPurchase({
+            userId,
+            productId: null,
+            productName: "Clube dos Drinkeros · Anual",
+            productType: "club",
+            amountPaid: (session.amount_total ?? 0) / 100,
+            currency: (session.currency ?? "brl").toUpperCase(),
+            status: "paid",
+            transactionId: (session.payment_intent as string) || session.id,
+            metadata: { plan_kind: meta.plan_kind, session_id: session.id, event_id: event.id },
+          });
+
           break;
         }
 
