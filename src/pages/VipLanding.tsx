@@ -66,6 +66,56 @@ const VideoWithPoster: React.FC<{ src: string; poster: string; alt: string }> = 
   );
 };
 
+/** Countdown de 15 minutos da promoção de lançamento. Persiste por sessão. */
+const LAUNCH_PROMO_KEY = 'clube:launch-promo-start';
+const LAUNCH_PROMO_DURATION_MS = 15 * 60 * 1000;
+
+const LaunchPromoCountdown: React.FC = () => {
+  const [remaining, setRemaining] = useState<number>(LAUNCH_PROMO_DURATION_MS);
+
+  useEffect(() => {
+    let startedAt = 0;
+    try {
+      const saved = sessionStorage.getItem(LAUNCH_PROMO_KEY);
+      startedAt = saved ? Number(saved) : 0;
+      if (!startedAt || Number.isNaN(startedAt)) {
+        startedAt = Date.now();
+        sessionStorage.setItem(LAUNCH_PROMO_KEY, String(startedAt));
+      }
+    } catch {
+      startedAt = Date.now();
+    }
+    const tick = () => {
+      const left = Math.max(0, LAUNCH_PROMO_DURATION_MS - (Date.now() - startedAt));
+      setRemaining(left);
+    };
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const totalSec = Math.ceil(remaining / 1000);
+  const mm = String(Math.floor(totalSec / 60)).padStart(2, '0');
+  const ss = String(totalSec % 60).padStart(2, '0');
+  const expired = remaining <= 0;
+
+  return (
+    <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs font-semibold text-yellow-200">
+      <Timer className="h-3.5 w-3.5" />
+      {expired ? (
+        <span>Promoção encerrando — garanta agora!</span>
+      ) : (
+        <>
+          <span className="text-yellow-100">Promoção de lançamento expira em</span>
+          <span className="font-mono font-bold text-white tabular-nums">
+            {mm}:{ss}
+          </span>
+        </>
+      )}
+    </div>
+  );
+};
+
 
 const VipLanding: React.FC = () => {
   const { user } = useAuth();
