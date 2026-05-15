@@ -235,9 +235,19 @@ const EbookForm: React.FC = () => {
                     <FileText className="h-8 w-8 text-primary flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">Arquivo enviado</p>
-                      <a href={formData.file_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline truncate block">
+                      <button
+                        type="button"
+                        className="text-xs text-primary hover:underline truncate block text-left"
+                        onClick={async () => {
+                          try {
+                            const { adminSignedUrlFromPublicUrl } = await import('@/lib/signedFileUrl');
+                            const url = await adminSignedUrlFromPublicUrl('ebook-files', formData.file_url);
+                            window.open(url, '_blank', 'noopener,noreferrer');
+                          } catch (e) { console.error(e); }
+                        }}
+                      >
                         {formData.file_url.split('/').pop()}
-                      </a>
+                      </button>
                     </div>
                     <Button type="button" variant="ghost" size="icon" onClick={() => setFormData((prev) => ({ ...prev, file_url: '' }))}>
                       <X className="h-4 w-4" />
