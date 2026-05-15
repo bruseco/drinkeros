@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ShieldCheck, ArrowLeft, CheckCircle2, Copy, CreditCard, QrCode, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import drinkerosLogo from "@/assets/logotipo-drinkeros.png";
-import { trackFbEvent } from "@/lib/metaPixel";
+import { trackFbEvent, trackInitiateCheckout, waitForPixelFlush } from "@/lib/metaPixel";
 import { useViewContent } from "@/hooks/useViewContent";
 
 type ClubMethod = "card" | "pix";
@@ -96,6 +96,7 @@ export default function Checkout() {
 
   // Clube → redireciona para Stripe Checkout
   const handleClubCheckout = async () => {
+    if (submitting) return; // bloqueia clique duplo
     setSubmitting(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-club-checkout", {
@@ -104,6 +105,19 @@ export default function Checkout() {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       if (!data?.url) throw new Error("URL de checkout não retornada");
+
+      // Dispara InitiateCheckout SOMENTE após sucesso na criação da sessão Stripe,
+      // com dados dinâmicos vindos da edge function — antes do redirect.
+      trackInitiateCheckout({
+        amount: data.amount,
+        currency: data.currency,
+        product_name: data.product_name,
+        product_type: 'subscription',
+        price_id: data.price_id,
+        session_id: data.session_id,
+      });
+      await waitForPixelFlush();
+
       window.location.href = data.url;
     } catch (err: any) {
       toast.error("Erro ao iniciar checkout", { description: err.message });
@@ -182,22 +196,8 @@ export default function Checkout() {
     currency: 'BRL',
   });
 
-  // InitiateCheckout — uma única vez quando o produto carrega
-  useEffect(() => {
-    if (!product) return;
-    trackFbEvent(
-      'InitiateCheckout',
-      {
-        content_name: product.name,
-        content_type: isClub ? 'subscription' : 'product',
-        content_ids: [product.id],
-        value: finalPrice,
-        currency: 'BRL',
-        num_items: 1,
-      },
-      { dedupeKey: `checkout:${productType}:${product.slug}` }
-    );
-  }, [product?.id, finalPrice, isClub, productType]);
+  // InitiateCheckout NÃO dispara no page-load. Ele dispara somente após
+  // a criação efetiva do checkout (Stripe / MP) — ver handleClubCheckout e onSubmit.
 
   // 3. Polling do status do Pix
   useEffect(() => {
@@ -239,6 +239,18 @@ export default function Checkout() {
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
+
+        // InitiateCheckout — assinatura MP criada com sucesso (qualquer status final).
+        trackInitiateCheckout({
+          amount: data.amount,
+          currency: data.currency,
+          product_name: data.product_name,
+          product_type: 'subscription',
+          product_id: data.product_id,
+          preference_id: String(data.id || ''),
+          id: data.id,
+        });
+
         if (data?.status === "authorized") {
           setPaid(true);
           toast.success("Assinatura ativada! Renovação automática anual.");
@@ -261,6 +273,17 @@ export default function Checkout() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+
+      // InitiateCheckout — pagamento MP criado com sucesso (Pix gerado, cartão aprovado/recusado, etc.).
+      trackInitiateCheckout({
+        amount: data.amount,
+        currency: data.currency,
+        product_name: data.product_name,
+        product_type: isClub ? 'subscription' : 'product',
+        product_id: data.product_id,
+        preference_id: String(data.id || ''),
+        id: data.id,
+      });
 
       if (data.pix) {
         setPixResult(data.pix);

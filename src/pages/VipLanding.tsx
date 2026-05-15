@@ -15,7 +15,7 @@ import { useHasExclusiveAccess } from '@/hooks/useExclusiveAccess';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { trackFbEvent } from '@/lib/metaPixel';
+import { trackFbEvent, trackInitiateCheckout, waitForPixelFlush } from '@/lib/metaPixel';
 import { useViewContent } from '@/hooks/useViewContent';
 import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
 
@@ -143,6 +143,7 @@ const VipLanding: React.FC = () => {
       navigate('/signup?redirect=/clube');
       return;
     }
+    if (loading) return; // bloqueia clique duplo
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-club-checkout', {
@@ -151,6 +152,19 @@ const VipLanding: React.FC = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       if (!data?.url) throw new Error('URL de checkout não retornada');
+
+      // Dispara InitiateCheckout SOMENTE após sucesso na criação da sessão Stripe,
+      // com dados dinâmicos vindos da edge function — antes do redirect.
+      trackInitiateCheckout({
+        amount: data.amount,
+        currency: data.currency,
+        product_name: data.product_name,
+        product_type: 'subscription',
+        price_id: data.price_id,
+        session_id: data.session_id,
+      });
+      await waitForPixelFlush();
+
       window.location.href = data.url;
     } catch (err: any) {
       toast.error('Erro ao iniciar checkout', { description: err.message });

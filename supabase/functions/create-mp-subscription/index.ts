@@ -80,6 +80,10 @@ serve(async (req) => {
         status: data.status, // "authorized" quando aprovado, "pending" caso contrário
         status_detail: data?.status_detail,
         next_payment_date: data?.next_payment_date,
+        amount: plan.amount,
+        currency: "BRL",
+        product_name: plan.reason,
+        product_id: slug,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );

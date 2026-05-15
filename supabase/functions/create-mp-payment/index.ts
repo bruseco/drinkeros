@@ -203,8 +203,12 @@ serve(async (req) => {
         status: mpData.status,
         status_detail: mpData.status_detail,
         payment_method_id: mpData.payment_method_id,
-      installments: mpData.installments,
+        installments: mpData.installments,
         product_slug: product.slug,
+        product_id: product.id,
+        product_name: product.name,
+        amount: finalPrice,
+        currency: "BRL",
         pix: pixData ? {
           qr_code: pixData.qr_code,
           qr_code_base64: pixData.qr_code_base64,

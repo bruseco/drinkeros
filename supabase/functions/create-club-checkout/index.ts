@@ -79,10 +79,26 @@ serve(async (req) => {
           }),
     });
 
-    return new Response(JSON.stringify({ url: session.url }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    // Recupera amount real do price para tracking dinâmico (sem hardcode no front)
+    let amount = 0;
+    let currency = "BRL";
+    try {
+      const priceObj = await stripe.prices.retrieve(isCard ? PRICE_CARD : PRICE_PIX);
+      amount = (priceObj.unit_amount ?? 0) / 100;
+      currency = (priceObj.currency || "brl").toUpperCase();
+    } catch (_) { /* ignore */ }
+
+    return new Response(
+      JSON.stringify({
+        url: session.url,
+        session_id: session.id,
+        amount,
+        currency,
+        product_name: isCard ? "Clube dos Drinkeros · Anual (Cartão)" : "Clube dos Drinkeros · Anual (Pix)",
+        price_id: isCard ? PRICE_CARD : PRICE_PIX,
+      }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   } catch (err) {
     console.error("[create-club-checkout]", err);
     return new Response(
