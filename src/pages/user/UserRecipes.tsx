@@ -301,7 +301,19 @@ const UserRecipes: React.FC = () => {
                 <img src={drinkrosLogo} alt="Drinkeros" className="h-5 w-auto object-contain" />
               </Link>
             )}
-          </div>
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={handleShuffle}
+            disabled={isLoading}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+            aria-label="Embaralhar receitas"
+          >
+            <Shuffle className="h-3.5 w-3.5" />
+            Embaralhar
+          </button>
         </div>
 
         {isLoading ? (
