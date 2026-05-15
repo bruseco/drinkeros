@@ -6,6 +6,9 @@ export interface AccessMetrics {
   unique_users: number;
   total_watch_seconds: number;
   certificates_total: number;
+  users_by_plan: { free: number; aluno: number; socio: number; vitalicio: number; total: number };
+  accesses_by_plan: { free: number; aluno: number; socio: number; vitalicio: number; unknown: number };
+  unique_users_by_plan: { free: number; aluno: number; socio: number; vitalicio: number };
   top_courses_views: Array<{ id: string; name: string; cover_image_url: string | null; views: number }>;
   top_courses_watch_time: Array<{ id: string; name: string; cover_image_url: string | null; total_seconds: number; unique_users: number }>;
   top_exclusive_posts: Array<{ id: string; name: string; cover_image_url: string | null; views: number }>;
