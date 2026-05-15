@@ -101,6 +101,9 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
           <div className="min-w-0 flex-1">
             <span className="block text-[10px] font-extrabold tracking-[0.18em] uppercase text-yellow-300 mb-0.5">
               Sócios do Clube · até {displayPercent}% OFF
+              {vip.isIntroActive && vip.hoursRemaining > 0 && (
+                <> · {vip.hoursRemaining <= 24 ? 'EXPIRA HOJE!' : `EXPIRA EM ${vip.daysRemaining} ${vip.daysRemaining === 1 ? 'DIA' : 'DIAS'}`}</>
+              )}
             </span>
             {productName && (
               <p className="text-white/95 text-[11px] leading-tight mb-0.5">
