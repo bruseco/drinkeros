@@ -414,4 +414,34 @@ const RankList: React.FC<{ items: RankItem[]; emptyText: string }> = ({ items, e
   );
 };
 
+const PlanStat: React.FC<{
+  label: string;
+  value: number;
+  subtitle?: string;
+  tone?: 'muted' | 'info' | 'primary' | 'gold';
+}> = ({ label, value, subtitle, tone = 'muted' }) => {
+  const toneClasses: Record<string, string> = {
+    muted: 'border-border bg-muted/40 text-foreground',
+    info: 'border-blue-500/30 bg-blue-500/5 text-foreground',
+    primary: 'border-primary/40 bg-primary/5 text-foreground',
+    gold: 'border-amber-400/40 bg-amber-400/5 text-foreground',
+  };
+  const dotClasses: Record<string, string> = {
+    muted: 'bg-muted-foreground',
+    info: 'bg-blue-500',
+    primary: 'bg-primary',
+    gold: 'bg-amber-400',
+  };
+  return (
+    <div className={cn('rounded-lg border p-3', toneClasses[tone])}>
+      <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-1">
+        <span className={cn('h-2 w-2 rounded-full', dotClasses[tone])} />
+        {label}
+      </div>
+      <p className="text-2xl font-bold tabular-nums">{value.toLocaleString('pt-BR')}</p>
+      {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
+    </div>
+  );
+};
+
 export default AdminAccessMetrics;
