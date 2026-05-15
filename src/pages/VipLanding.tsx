@@ -332,6 +332,14 @@ const VipLanding: React.FC = () => {
               <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><Trophy className="inline h-3.5 w-3.5 text-yellow-300" /> Participa da <strong className="text-white">Batalha dos Drinkeros</strong></span></li>
               <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span>Sócios ganham <strong className="text-white">80% de desconto</strong> na compra de qualquer produto.</span></li>
             </ul>
+            <Button
+              onClick={() => {
+                document.getElementById('clube-pricing')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              className="viplanding-gold-btn w-full h-11 mt-5 text-sm font-bold border-0 hover:text-black"
+            >
+              <Crown className="mr-1.5 h-4 w-4" /> Quero ser sócio!
+            </Button>
           </div>
         </div>
 
