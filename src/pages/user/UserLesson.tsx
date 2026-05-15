@@ -745,19 +745,28 @@ const UserLesson: React.FC = () => {
                 </h2>
                 <div className="space-y-2">
                   {lessonMaterials.map((mat) => (
-                    <a
+                    <Button
                       key={mat.id}
-                      href={mat.file_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      download
+                      variant="outline"
+                      className="gap-2 w-full justify-start border-primary/30 hover:bg-primary/10"
+                      onClick={async () => {
+                        try {
+                          const { openSignedFile } = await import('@/lib/signedFileUrl');
+                          await openSignedFile('recipe-material', mat.id);
+                        } catch (err) {
+                          const { toast } = await import('@/hooks/use-toast');
+                          toast({
+                            title: 'Não foi possível abrir o material',
+                            description: err instanceof Error ? err.message : 'Tente novamente.',
+                            variant: 'destructive',
+                          });
+                        }
+                      }}
                     >
-                      <Button variant="outline" className="gap-2 w-full justify-start border-primary/30 hover:bg-primary/10">
-                        <File className="h-4 w-4 flex-shrink-0" />
-                        <span className="truncate">{mat.name}</span>
-                        <Download className="h-3 w-3 ml-auto flex-shrink-0" />
-                      </Button>
-                    </a>
+                      <File className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">{mat.name}</span>
+                      <Download className="h-3 w-3 ml-auto flex-shrink-0" />
+                    </Button>
                   ))}
                 </div>
               </CardContent>
