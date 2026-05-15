@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Crown, Check, X, GlassWater, Sparkles, Zap, BookOpen, GraduationCap, Loader2, RefreshCw, Gift, PlayCircle, Trophy } from 'lucide-react';
+import { Crown, Check, X, GlassWater, Sparkles, Zap, BookOpen, GraduationCap, Loader2, RefreshCw, Gift, PlayCircle, Trophy, Timer } from 'lucide-react';
 import jackDaniels from '@/assets/landing/bebida-decifrada/jack-daniels-degustacao.mp4';
 import bebidaCover from '@/assets/landing/bebida-decifrada/cover.jpg';
 import workshopVsl from '@/assets/landing/workshop/vsl.mp4';
@@ -61,6 +61,56 @@ const VideoWithPoster: React.FC<{ src: string; poster: string; alt: string }> = 
             </span>
           </span>
         </button>
+      )}
+    </div>
+  );
+};
+
+/** Countdown de 15 minutos da promoção de lançamento. Persiste por sessão. */
+const LAUNCH_PROMO_KEY = 'clube:launch-promo-start';
+const LAUNCH_PROMO_DURATION_MS = 15 * 60 * 1000;
+
+const LaunchPromoCountdown: React.FC = () => {
+  const [remaining, setRemaining] = useState<number>(LAUNCH_PROMO_DURATION_MS);
+
+  useEffect(() => {
+    let startedAt = 0;
+    try {
+      const saved = sessionStorage.getItem(LAUNCH_PROMO_KEY);
+      startedAt = saved ? Number(saved) : 0;
+      if (!startedAt || Number.isNaN(startedAt)) {
+        startedAt = Date.now();
+        sessionStorage.setItem(LAUNCH_PROMO_KEY, String(startedAt));
+      }
+    } catch {
+      startedAt = Date.now();
+    }
+    const tick = () => {
+      const left = Math.max(0, LAUNCH_PROMO_DURATION_MS - (Date.now() - startedAt));
+      setRemaining(left);
+    };
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const totalSec = Math.ceil(remaining / 1000);
+  const mm = String(Math.floor(totalSec / 60)).padStart(2, '0');
+  const ss = String(totalSec % 60).padStart(2, '0');
+  const expired = remaining <= 0;
+
+  return (
+    <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs font-semibold text-yellow-200">
+      <Timer className="h-3.5 w-3.5" />
+      {expired ? (
+        <span>Promoção encerrando — garanta agora!</span>
+      ) : (
+        <>
+          <span className="text-yellow-100">Promoção de lançamento expira em</span>
+          <span className="font-mono font-bold text-white tabular-nums">
+            {mm}:{ss}
+          </span>
+        </>
       )}
     </div>
   );
@@ -523,7 +573,7 @@ const VipLanding: React.FC = () => {
               Sócio do Clube · Anual
             </h2>
             <div className="text-center mb-6">
-              <div className="text-purple-300 line-through text-sm">de R$ 297</div>
+              <div className="text-purple-300 line-through text-sm">de R$ 197</div>
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-2xl font-light text-purple-300">R$</span>
                 <span className="text-7xl font-black viplanding-gold-text">
@@ -531,6 +581,10 @@ const VipLanding: React.FC = () => {
                 </span>
               </div>
               <div className="text-sm text-purple-300">por ano · menos de R$ 6/mês</div>
+              <div className="mt-1 text-[11px] uppercase tracking-wider font-bold text-yellow-300">
+                Promoção de lançamento do novo app
+              </div>
+              <LaunchPromoCountdown />
             </div>
 
             <Button
