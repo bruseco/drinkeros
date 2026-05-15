@@ -504,6 +504,16 @@ const VipLanding: React.FC = () => {
           </div>
         </div>
 
+        {/* Prova social — total de membros do Clube */}
+        <div className="max-w-md mx-auto mb-5 px-4 text-center">
+          <p className="text-sm md:text-base text-purple-200">
+            Junte-se a mais de{' '}
+            <strong className="text-yellow-300">
+              {memberCountRounded.toLocaleString('pt-BR')}
+            </strong>{' '}
+            membros do Clube.
+          </p>
+        </div>
 
         {/* Pricing Card — fechamento da página */}
         <div id="clube-pricing" className="relative max-w-md mx-auto mb-16 scroll-mt-6">
