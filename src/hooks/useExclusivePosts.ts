@@ -67,8 +67,6 @@ interface PaginatedPostsParams {
   publishedOnly?: boolean;
   randomOrder?: boolean;
   characteristicFilter?: string;
-  /** IDs to push to the end of the list, preserving the given order. */
-  pinnedToEndIds?: string[];
 }
 
 export const useExclusivePostsPaginated = ({
@@ -77,11 +75,9 @@ export const useExclusivePostsPaginated = ({
   publishedOnly = false,
   randomOrder = false,
   characteristicFilter,
-  pinnedToEndIds,
 }: PaginatedPostsParams = {}) => {
-  const pinnedKey = (pinnedToEndIds ?? []).join(',');
   return useInfiniteQuery({
-    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder, characteristicFilter, seed: randomOrder ? postsSeed : 0, pinnedKey }],
+    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder, characteristicFilter, seed: randomOrder ? postsSeed : 0 }],
     queryFn: async ({ pageParam = 0 }) => {
       const from = pageParam * pageSize;
 
@@ -164,16 +160,6 @@ export const useExclusivePostsPaginated = ({
           ordered = [...hits, ...rest];
         }
 
-        // Push viewed/completed recipes to the end, in the given order.
-        if (pinnedToEndIds && pinnedToEndIds.length > 0) {
-          const pinnedSet = new Set(pinnedToEndIds);
-          const rank = new Map(pinnedToEndIds.map((id, i) => [id, i]));
-          const notPinned = ordered.filter((r) => !pinnedSet.has(r.id));
-          const pinned = ordered
-            .filter((r) => pinnedSet.has(r.id))
-            .sort((a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0));
-          ordered = [...notPinned, ...pinned];
-        }
 
         const total = ordered.length;
         const pageIds = ordered.slice(from, from + pageSize).map((r) => r.id);
