@@ -239,6 +239,18 @@ export default function Checkout() {
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
+
+        // InitiateCheckout — assinatura MP criada com sucesso (qualquer status final).
+        trackInitiateCheckout({
+          amount: data.amount,
+          currency: data.currency,
+          product_name: data.product_name,
+          product_type: 'subscription',
+          product_id: data.product_id,
+          preference_id: String(data.id || ''),
+          id: data.id,
+        });
+
         if (data?.status === "authorized") {
           setPaid(true);
           toast.success("Assinatura ativada! Renovação automática anual.");
