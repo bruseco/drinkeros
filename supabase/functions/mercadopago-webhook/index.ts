@@ -277,6 +277,18 @@ serve(async (req) => {
       const periodDays = Number(metadata.access_period_days) || 365;
       await grantClubAccess(supabase, userId, payment, String(paymentId), periodDays);
 
+      await recordPurchase(supabase, {
+        userId,
+        productId: null,
+        productName: periodDays >= 365 ? "Clube dos Drinkeros · Anual" : "Clube dos Drinkeros · Mensal",
+        productType: "club",
+        amountPaid: Number(payment?.transaction_amount || 0),
+        currency: String(payment?.currency_id || "BRL").toUpperCase(),
+        status: "approved",
+        transactionId: String(paymentId),
+        metadata: { period_days: periodDays },
+      });
+
       return new Response(JSON.stringify({ ok: true, granted: true, club: true, period_days: periodDays }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -298,6 +310,26 @@ serve(async (req) => {
       console.error("[mp-webhook] failed to grant access:", insertErr);
       throw insertErr;
     }
+
+    // Busca nome real do produto p/ Meta Pixel
+    const productTableMap: Record<string, string> = {
+      course: "courses", ebook: "ebooks", combo: "combos", package: "packages",
+    };
+    const { data: prodRow } = await supabase
+      .from(productTableMap[productType])
+      .select("name").eq("id", productId).maybeSingle();
+
+    await recordPurchase(supabase, {
+      userId,
+      productId,
+      productName: (prodRow as any)?.name || productType,
+      productType,
+      amountPaid: Number(payment?.transaction_amount || 0),
+      currency: String(payment?.currency_id || "BRL").toUpperCase(),
+      status: "approved",
+      transactionId: String(paymentId),
+      metadata: {},
+    });
 
     console.log("[mp-webhook] access granted:", { userId, productType, productId, paymentId });
 
