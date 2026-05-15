@@ -499,7 +499,7 @@ const VipLanding: React.FC = () => {
             </div>
           </div>
         </div>
-        </div>
+
 
         {/* Pricing Card — fechamento da página */}
         <div id="clube-pricing" className="relative max-w-md mx-auto mb-16 scroll-mt-6">
