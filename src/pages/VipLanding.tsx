@@ -19,6 +19,7 @@ import { trackFbEvent, trackInitiateCheckout, waitForPixelFlush } from '@/lib/me
 import { useViewContent } from '@/hooks/useViewContent';
 import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
 import { useTotalClubMembers, TOTAL_CLUB_MEMBERS_FALLBACK } from '@/hooks/useTotalClubMembers';
+import { useLaunchPromo } from '@/hooks/useLaunchPromo';
 
 import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
 import bgTijolos from '@/assets/bg-tijolos-pretos.jpg';
@@ -66,52 +67,49 @@ const VideoWithPoster: React.FC<{ src: string; poster: string; alt: string }> = 
   );
 };
 
-/** Countdown de 15 minutos da promoção de lançamento. Persiste por sessão. */
-const LAUNCH_PROMO_KEY = 'clube:launch-promo-start';
-const LAUNCH_PROMO_DURATION_MS = 15 * 60 * 1000;
-
+/** Countdown sincronizado com o hook useLaunchPromo (15 min após chegada via UTM). */
 const LaunchPromoCountdown: React.FC = () => {
-  const [remaining, setRemaining] = useState<number>(LAUNCH_PROMO_DURATION_MS);
-
-  useEffect(() => {
-    let startedAt = 0;
-    try {
-      const saved = sessionStorage.getItem(LAUNCH_PROMO_KEY);
-      startedAt = saved ? Number(saved) : 0;
-      if (!startedAt || Number.isNaN(startedAt)) {
-        startedAt = Date.now();
-        sessionStorage.setItem(LAUNCH_PROMO_KEY, String(startedAt));
-      }
-    } catch {
-      startedAt = Date.now();
-    }
-    const tick = () => {
-      const left = Math.max(0, LAUNCH_PROMO_DURATION_MS - (Date.now() - startedAt));
-      setRemaining(left);
-    };
-    tick();
-    const id = window.setInterval(tick, 1000);
-    return () => window.clearInterval(id);
-  }, []);
-
-  const totalSec = Math.ceil(remaining / 1000);
-  const mm = String(Math.floor(totalSec / 60)).padStart(2, '0');
-  const ss = String(totalSec % 60).padStart(2, '0');
-  const expired = remaining <= 0;
-
+  const { isActive, mm, ss } = useLaunchPromo();
+  if (!isActive) return null;
   return (
     <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs font-semibold text-yellow-200">
       <Timer className="h-3.5 w-3.5" />
-      {expired ? (
-        <span>Promoção encerrando — garanta agora!</span>
-      ) : (
-        <>
-          <span className="text-yellow-100">Promoção de lançamento expira em</span>
-          <span className="font-mono font-bold text-white tabular-nums">
-            {mm}:{ss}
+      <span className="text-yellow-100">Promoção de lançamento expira em</span>
+      <span className="font-mono font-bold text-white tabular-nums">
+        {mm}:{ss}
+      </span>
+    </div>
+  );
+};
+
+/** Banner fixo no topo durante a promoção de lançamento. */
+const LaunchPromoTopBanner: React.FC<{ onCta: () => void }> = ({ onCta }) => {
+  const { isActive, mm, ss } = useLaunchPromo();
+  if (!isActive) return null;
+  return (
+    <div className="fixed top-0 inset-x-0 z-[70] bg-black/95 backdrop-blur border-b border-yellow-400/40 shadow-[0_2px_20px_rgba(250,204,21,0.25)]">
+      <div className="container mx-auto max-w-5xl px-3 py-2 flex items-center gap-2 sm:gap-4">
+        <div className="flex-1 min-w-0 flex items-center gap-2 text-yellow-300 text-[11px] sm:text-sm font-bold">
+          <Timer className="h-4 w-4 shrink-0" />
+          <span className="truncate">
+            <span className="hidden sm:inline">PROMOÇÃO DE LANÇAMENTO · </span>
+            <span className="sm:hidden">PROMO · </span>
+            <span className="text-white">R$69/ano</span>
+            <span className="hidden xs:inline"> · expira em </span>
+            <span className="sm:hidden"> · </span>
+            <span className="font-mono tabular-nums text-white ml-1">{mm}:{ss}</span>
           </span>
-        </>
-      )}
+        </div>
+        <button
+          type="button"
+          onClick={onCta}
+          className="shrink-0 viplanding-gold-btn h-8 sm:h-9 px-3 sm:px-4 rounded-md text-[11px] sm:text-sm font-bold border-0 hover:text-black inline-flex items-center gap-1"
+        >
+          <Crown className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Quero ser Sócio</span>
+          <span className="sm:hidden">Assinar</span>
+        </button>
+      </div>
     </div>
   );
 };
@@ -142,6 +140,7 @@ const VipLanding: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const promo = useLaunchPromo();
 
   useViewContent({
     key: 'clube-dos-drinkeros',
@@ -235,7 +234,11 @@ const VipLanding: React.FC = () => {
   return (
     <div
       className={`fixed inset-0 z-[60] text-white py-0 overflow-y-auto overscroll-contain bg-black ${isClosing ? 'animate-[viplanding-fade-out_280ms_ease-in_forwards]' : 'animate-[viplanding-bounce-in_520ms_cubic-bezier(0.34,1.56,0.64,1)_forwards]'}`}
+      style={promo.isActive ? { paddingTop: 44 } : undefined}
     >
+      <LaunchPromoTopBanner
+        onCta={() => document.getElementById('clube-pricing')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+      />
       {/* Animações de entrada/saída */}
       <style>{`
         @keyframes viplanding-bounce-in {
@@ -573,17 +576,23 @@ const VipLanding: React.FC = () => {
               Sócio do Clube · Anual
             </h2>
             <div className="text-center mb-6">
-              <div className="text-purple-300 line-through text-sm">de R$ 197</div>
+              {promo.isActive && (
+                <div className="text-purple-300 line-through text-sm">de R$ {promo.fullPrice}</div>
+              )}
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-2xl font-light text-purple-300">R$</span>
                 <span className="text-7xl font-black viplanding-gold-text">
-                  69
+                  {promo.price}
                 </span>
               </div>
-              <div className="text-sm text-purple-300">por ano · menos de R$ 6/mês</div>
-              <div className="mt-1 text-[11px] uppercase tracking-wider font-bold text-yellow-300">
-                Promoção de lançamento do novo app
+              <div className="text-sm text-purple-300">
+                por ano{promo.isActive ? ' · menos de R$ 6/mês' : ''}
               </div>
+              {promo.isActive && (
+                <div className="mt-1 text-[11px] uppercase tracking-wider font-bold text-yellow-300">
+                  Promoção de lançamento do novo app
+                </div>
+              )}
               <LaunchPromoCountdown />
             </div>
 
