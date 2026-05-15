@@ -71,6 +71,36 @@ serve(async (req) => {
     return null;
   };
 
+  const recordPurchase = async (p: {
+    userId: string;
+    productId?: string | null;
+    productName: string;
+    productType: string; // 'club' | 'course' | 'ebook' | 'combo' | 'package'
+    amountPaid: number;  // BRL units
+    currency: string;
+    status: string;      // 'paid' | 'active'
+    transactionId: string;
+    metadata?: Record<string, unknown>;
+  }) => {
+    if (!p.transactionId || p.amountPaid <= 0) return;
+    const { error } = await supabase.from("purchases").upsert(
+      {
+        user_id: p.userId,
+        product_id: p.productId ?? null,
+        product_name: p.productName,
+        product_type: p.productType,
+        gateway: "stripe",
+        amount_paid: p.amountPaid,
+        currency: (p.currency || "BRL").toUpperCase(),
+        status: p.status,
+        transaction_id: p.transactionId,
+        metadata: p.metadata || {},
+      },
+      { onConflict: "gateway,transaction_id" },
+    );
+    if (error) log("purchases-upsert-error", { error: error.message, transactionId: p.transactionId });
+  };
+
   const upsertVipPlan = async (userId: string, periodEndUnix?: number | null) => {
     const expiresAt = periodEndUnix
       ? new Date(periodEndUnix * 1000).toISOString()
