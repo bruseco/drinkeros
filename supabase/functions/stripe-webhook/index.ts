@@ -330,6 +330,20 @@ serve(async (req) => {
         }
 
         await upsertVipPlan(userId, periodEnd);
+
+        if (invoiceId) {
+          await recordPurchase({
+            userId,
+            productId: null,
+            productName: "Clube dos Drinkeros",
+            productType: "club",
+            amountPaid: (invoiceAmount ?? session.amount_total ?? 0) / 100,
+            currency: (invoiceCurrency ?? session.currency ?? "brl").toUpperCase(),
+            status: "paid",
+            transactionId: invoiceId,
+            metadata: { subscription_id: subscriptionId, session_id: session.id, event_id: event.id },
+          });
+        }
         break;
       }
 
