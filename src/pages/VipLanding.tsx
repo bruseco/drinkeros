@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { trackFbEvent, trackInitiateCheckout, waitForPixelFlush } from '@/lib/metaPixel';
 import { useViewContent } from '@/hooks/useViewContent';
 import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
+import { useTotalClubMembers, TOTAL_CLUB_MEMBERS_FALLBACK } from '@/hooks/useTotalClubMembers';
 
 import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
 import bgTijolos from '@/assets/bg-tijolos-pretos.jpg';
@@ -69,6 +70,9 @@ const VideoWithPoster: React.FC<{ src: string; poster: string; alt: string }> = 
 const VipLanding: React.FC = () => {
   const { user } = useAuth();
   const { data: planData } = useUserPlan();
+  const { data: totalMembers } = useTotalClubMembers();
+  const memberCount = totalMembers ?? TOTAL_CLUB_MEMBERS_FALLBACK;
+  const memberCountRounded = Math.max(100, Math.floor(memberCount / 100) * 100);
   const { data: hasExclusive } = useHasExclusiveAccess('receitas');
   const { data: hasLifetime } = useQuery({
     queryKey: ['lifetime-access-self', user?.id],
@@ -500,6 +504,16 @@ const VipLanding: React.FC = () => {
           </div>
         </div>
 
+        {/* Prova social — total de membros do Clube */}
+        <div className="max-w-md mx-auto mb-5 px-4 text-center">
+          <p className="text-sm md:text-base text-purple-200">
+            Junte-se a mais de{' '}
+            <strong className="text-yellow-300">
+              {memberCountRounded.toLocaleString('pt-BR')}
+            </strong>{' '}
+            membros do Clube.
+          </p>
+        </div>
 
         {/* Pricing Card — fechamento da página */}
         <div id="clube-pricing" className="relative max-w-md mx-auto mb-16 scroll-mt-6">
