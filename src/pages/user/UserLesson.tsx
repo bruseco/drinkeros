@@ -39,6 +39,7 @@ const UserLesson: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, profile } = useAuth();
+  const { toast } = useToast();
   const { data: lesson, isLoading } = useRecipe(id || '');
   const { data: favorites = [] } = useFavorites();
   const toggleFavorite = useToggleFavorite();
