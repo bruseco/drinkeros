@@ -198,6 +198,18 @@ serve(async (req) => {
         expires_at: periodEnd.toISOString(),
       }, { onConflict: "user_id" });
 
+      await recordPurchase(supabase, {
+        userId,
+        productId: null,
+        productName: isAnnual ? "Clube dos Drinkeros · Anual" : "Clube dos Drinkeros · Mensal",
+        productType: "club",
+        amountPaid: Number(ap?.transaction_amount || pre?.auto_recurring?.transaction_amount || 0),
+        currency: "BRL",
+        status: "approved",
+        transactionId: String(resourceId),
+        metadata: { mp_preapproval_id: String(preapprovalId) },
+      });
+
       return new Response(JSON.stringify({ ok: true, recurring: true }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
