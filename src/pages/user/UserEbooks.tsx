@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { trackEbookDownload } from '@/hooks/useAccessTracking';
+import { openSignedFile } from '@/lib/signedFileUrl';
+import { useToast } from '@/hooks/use-toast';
 
 const UserEbooks: React.FC = () => {
   const { user } = useAuth();
