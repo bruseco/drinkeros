@@ -76,7 +76,15 @@ const EbookLanding: React.FC = () => {
   }
 
   if (!ebook) {
-    return <Navigate to="/login" replace />;
+    // Ebook não encontrado → mostra 404 público (NÃO redireciona para login).
+    // A página de venda /ebook/:slug é 100% pública para visitantes.
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0a0a0a] text-white px-6 text-center gap-4">
+        <h1 className="text-2xl font-bold">Ebook não encontrado</h1>
+        <p className="text-white/70">O link pode estar incorreto ou o ebook foi removido.</p>
+        <Link to="/clube" className="underline text-white/90">Conheça o Clube dos Drinkeros</Link>
+      </div>
+    );
   }
 
   const content = EBOOK_CONTENT[slug ?? ''];
