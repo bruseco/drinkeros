@@ -195,6 +195,7 @@ const App = () => (
               <Route path="ux-metrics" element={<AdminUXMetrics />} />
               <Route path="metricas-acesso" element={<AdminAccessMetrics />} />
               <Route path="paginas-venda" element={<AdminSalesPages />} />
+              <Route path="clube" element={<AdminClube />} />
               <Route path="metricas" element={<AdminTracking />} />
               <Route path="checklist-postagens" element={<AdminPostChecklist />} />
             </Route>
