@@ -34,7 +34,7 @@ import payPix from '@/assets/pagamento-pix.png';
 const AnimatedAccessLoop: React.FC = () => {
   const [phase, setPhase] = useState<0 | 1>(0);
   useEffect(() => {
-    const id = setInterval(() => setPhase((p) => (p === 0 ? 1 : 0)), 3800);
+    const id = setInterval(() => setPhase((p) => (p === 0 ? 1 : 0)), 6500);
     return () => clearInterval(id);
   }, []);
   return (
