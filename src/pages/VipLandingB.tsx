@@ -24,6 +24,7 @@ import { useClubeSettings } from '@/hooks/useClubeSettings';
 import { useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
 
 import bgTijolos from '@/assets/bg-tijolos-pretos.jpg';
+import drinksStrip from '@/assets/1000-drinks.jpg';
 import payVisa from '@/assets/pagamento-visa.png';
 import payMaster from '@/assets/pagamento-mastercard.png';
 import payApple from '@/assets/pagamento-apple.png';
