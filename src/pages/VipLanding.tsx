@@ -142,6 +142,7 @@ const VipLanding: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const promo = useLaunchPromo();
+  useAbTest('clube');
 
   useViewContent({
     key: 'clube-dos-drinkeros',
