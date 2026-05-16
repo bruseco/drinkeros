@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCourses } from '@/hooks/useCourses';
 import { useEbooks } from '@/hooks/useEbooks';
+import { useClubeSettings } from '@/hooks/useClubeSettings';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -246,6 +247,7 @@ const AdminSalesPages: React.FC = () => {
   const queryClient = useQueryClient();
   const { data: courses = [], isLoading: coursesLoading } = useCourses();
   const { data: ebooks = [], isLoading: ebooksLoading } = useEbooks();
+  const { data: clubeSettings } = useClubeSettings();
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
@@ -271,10 +273,11 @@ const AdminSalesPages: React.FC = () => {
       original_path: '/clube',
       variant_path: '/clube-b',
       cover: null,
-      price: 197,
+      price: clubeSettings?.full_price ?? 197,
       is_available_for_sale: true,
       stripe_price_id: 'managed',
       type: 'club' as const,
+      edit_path: '/admin/clube',
     },
     ...courses.map((c: any) => ({
       id: c.id,
@@ -379,7 +382,7 @@ const AdminSalesPages: React.FC = () => {
                 const synced = !!row.stripe_price_id;
                 const test = testByKey.get(row.page_key);
                 const isOpen = !!expanded[row.page_key] || !!test;
-                const typeLabel = row.type === 'club' ? 'Clube' : row.type === 'course' ? 'Curso' : 'E-book';
+                const typeLabel = row.type === 'club' ? 'Assinatura' : 'Compra';
 
                 return (
                   <React.Fragment key={row.page_key}>

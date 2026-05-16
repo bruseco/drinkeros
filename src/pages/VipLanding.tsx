@@ -20,6 +20,7 @@ import { useViewContent } from '@/hooks/useViewContent';
 import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
 import { useTotalClubMembers, TOTAL_CLUB_MEMBERS_FALLBACK } from '@/hooks/useTotalClubMembers';
 import { useLaunchPromo } from '@/hooks/useLaunchPromo';
+import { useClubeSettings } from '@/hooks/useClubeSettings';
 import { useAbTest, trackAbConversion } from '@/hooks/useAbTest';
 
 import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
@@ -70,7 +71,11 @@ const VideoWithPoster: React.FC<{ src: string; poster: string; alt: string }> = 
 
 /** Countdown sincronizado com o hook useLaunchPromo (15 min após chegada via UTM). */
 const LaunchPromoCountdown: React.FC = () => {
-  const { isActive, mm, ss } = useLaunchPromo();
+  const { data: settings } = useClubeSettings();
+  const { isActive, mm, ss } = useLaunchPromo({
+    promoPrice: settings?.promo_price,
+    fullPrice: settings?.full_price,
+  });
   if (!isActive) return null;
   return (
     <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs font-semibold text-yellow-200">
@@ -85,7 +90,11 @@ const LaunchPromoCountdown: React.FC = () => {
 
 /** Banner fixo no topo durante a promoção de lançamento. */
 const LaunchPromoTopBanner: React.FC<{ onCta: () => void }> = ({ onCta }) => {
-  const { isActive, mm, ss } = useLaunchPromo();
+  const { data: settings } = useClubeSettings();
+  const { isActive, mm, ss, promoPrice } = useLaunchPromo({
+    promoPrice: settings?.promo_price,
+    fullPrice: settings?.full_price,
+  });
   if (!isActive) return null;
   return (
     <div className="fixed top-0 inset-x-0 z-[70] bg-black/95 backdrop-blur border-b border-yellow-400/40 shadow-[0_2px_20px_rgba(250,204,21,0.25)]">
@@ -95,7 +104,7 @@ const LaunchPromoTopBanner: React.FC<{ onCta: () => void }> = ({ onCta }) => {
           <span className="truncate">
             <span className="hidden sm:inline">PROMOÇÃO DE LANÇAMENTO · </span>
             <span className="sm:hidden">PROMO · </span>
-            <span className="text-white">R$69/ano</span>
+            <span className="text-white">R${promoPrice}/ano</span>
             <span className="hidden xs:inline"> · expira em </span>
             <span className="sm:hidden"> · </span>
             <span className="font-mono tabular-nums text-white ml-1">{mm}:{ss}</span>
@@ -141,7 +150,11 @@ const VipLanding: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const promo = useLaunchPromo();
+  const { data: clubeSettings } = useClubeSettings();
+  const promo = useLaunchPromo({
+    promoPrice: clubeSettings?.promo_price,
+    fullPrice: clubeSettings?.full_price,
+  });
   useAbTest('clube');
 
   useViewContent({
@@ -384,13 +397,15 @@ const VipLanding: React.FC = () => {
               <span className="text-yellow-300 text-xs sm:text-sm font-medium">o que você merece</span>
             </div>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><strong className="text-white">Veja quantos Drinks você quiser.</strong></span></li>
-              <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><GlassWater className="inline h-3.5 w-3.5 text-yellow-300" /> <strong className="text-white">Xaropes Artesanais</strong> liberados</span></li>
-              
-              <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span>Acesso a minissérie <strong className="text-white">Bebida Decifrada</strong></span></li>
-              <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><GraduationCap className="inline h-3.5 w-3.5 text-yellow-300" /> Acesso ao <strong className="text-white">Workshop Além dos Clássicos</strong> (com certificado)</span></li>
-              <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><Trophy className="inline h-3.5 w-3.5 text-yellow-300" /> Participa da <strong className="text-white">Batalha dos Drinkeros</strong></span></li>
-              <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span>Sócios ganham <strong className="text-white">80% de desconto</strong> na compra de qualquer produto.</span></li>
+              {(clubeSettings?.benefits ?? []).map((b, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                  <span
+                    className="[&_strong]:text-white"
+                    dangerouslySetInnerHTML={{ __html: b.text }}
+                  />
+                </li>
+              ))}
             </ul>
             <Button
               onClick={() => {

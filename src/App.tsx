@@ -55,6 +55,7 @@ import AdminNibo from "./pages/admin/AdminNibo";
 import AdminEmailSettings from "./pages/admin/AdminEmailSettings";
 import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminUpsell from "./pages/admin/AdminUpsell";
+import AdminClube from "./pages/admin/AdminClube";
 import AdminWhatsApp from "./pages/admin/AdminWhatsApp";
 import AdminWhatsAppQueue from "./pages/admin/AdminWhatsAppQueue";
 import AdminWhatsAppConnections from "./pages/admin/AdminWhatsAppConnections";
@@ -194,6 +195,7 @@ const App = () => (
               <Route path="ux-metrics" element={<AdminUXMetrics />} />
               <Route path="metricas-acesso" element={<AdminAccessMetrics />} />
               <Route path="paginas-venda" element={<AdminSalesPages />} />
+              <Route path="clube" element={<AdminClube />} />
               <Route path="metricas" element={<AdminTracking />} />
               <Route path="checklist-postagens" element={<AdminPostChecklist />} />
             </Route>

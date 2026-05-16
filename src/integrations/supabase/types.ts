@@ -403,6 +403,36 @@ export type Database = {
           },
         ]
       }
+      clube_settings: {
+        Row: {
+          benefits: Json
+          created_at: string
+          full_price: number
+          id: string
+          promo_price: number
+          singleton: boolean
+          updated_at: string
+        }
+        Insert: {
+          benefits?: Json
+          created_at?: string
+          full_price?: number
+          id?: string
+          promo_price?: number
+          singleton?: boolean
+          updated_at?: string
+        }
+        Update: {
+          benefits?: Json
+          created_at?: string
+          full_price?: number
+          id?: string
+          promo_price?: number
+          singleton?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       collection_recipes: {
         Row: {
           collection_id: string
