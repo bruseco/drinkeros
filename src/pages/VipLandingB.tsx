@@ -382,7 +382,7 @@ const VipLandingB: React.FC = () => {
                 onClick={scrollToPricing}
                 className="viplanding-gold-btn w-full h-11 mt-5 text-sm font-bold border-0 hover:text-black"
               >
-                <Crown className="mr-1.5 h-4 w-4" /> Desbloquear o app completo
+                <Crown className="mr-1.5 h-4 w-4" /> Desbloquear acesso ilimitado
               </Button>
             </div>
           </div>
