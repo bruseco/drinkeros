@@ -70,7 +70,9 @@ export interface LaunchPromoState {
   fullPrice: number;
 }
 
-export function useLaunchPromo(): LaunchPromoState {
+export function useLaunchPromo(opts?: { promoPrice?: number; fullPrice?: number }): LaunchPromoState {
+  const promoPrice = opts?.promoPrice ?? PRICE_PROMO;
+  const fullPrice = opts?.fullPrice ?? PRICE_FULL;
   const [startedAt, setStartedAt] = useState<number>(() => readStart());
   const [now, setNow] = useState<number>(() => Date.now());
 
