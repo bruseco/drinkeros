@@ -150,7 +150,11 @@ const VipLanding: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const promo = useLaunchPromo();
+  const { data: clubeSettings } = useClubeSettings();
+  const promo = useLaunchPromo({
+    promoPrice: clubeSettings?.promo_price,
+    fullPrice: clubeSettings?.full_price,
+  });
   useAbTest('clube');
 
   useViewContent({
