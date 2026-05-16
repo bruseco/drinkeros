@@ -20,6 +20,7 @@ import { useViewContent } from '@/hooks/useViewContent';
 import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
 import { useTotalClubMembers, TOTAL_CLUB_MEMBERS_FALLBACK } from '@/hooks/useTotalClubMembers';
 import { useLaunchPromo } from '@/hooks/useLaunchPromo';
+import { useClubeSettings } from '@/hooks/useClubeSettings';
 import { useAbTest, trackAbConversion } from '@/hooks/useAbTest';
 
 import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
