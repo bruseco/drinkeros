@@ -86,40 +86,6 @@ const LaunchPromoCountdown: React.FC = () => {
   );
 };
 
-const LaunchPromoTopBanner: React.FC<{ onCta: () => void }> = ({ onCta }) => {
-  const { data: settings } = useClubeSettings();
-  const { isActive, mm, ss, promoPrice } = useLaunchPromo({
-    promoPrice: settings?.promo_price,
-    fullPrice: settings?.full_price,
-  });
-  if (!isActive) return null;
-  return (
-    <div className="fixed top-0 inset-x-0 z-[70] bg-black/95 backdrop-blur border-b border-yellow-400/40 shadow-[0_2px_20px_rgba(250,204,21,0.25)]">
-      <div className="container mx-auto max-w-5xl px-3 py-2 flex items-center gap-2 sm:gap-4">
-        <div className="flex-1 min-w-0 flex items-center gap-2 text-yellow-300 text-[11px] sm:text-sm font-bold">
-          <Timer className="h-4 w-4 shrink-0" />
-          <span className="truncate">
-            <span className="hidden sm:inline">PROMOÇÃO DE LANÇAMENTO · </span>
-            <span className="sm:hidden">PROMO · </span>
-            <span className="text-white">R${promoPrice}/ano</span>
-            <span className="hidden xs:inline"> · expira em </span>
-            <span className="sm:hidden"> · </span>
-            <span className="font-mono tabular-nums text-white ml-1">{mm}:{ss}</span>
-          </span>
-        </div>
-        <button
-          type="button"
-          onClick={onCta}
-          className="shrink-0 viplanding-gold-btn h-8 sm:h-9 px-3 sm:px-4 rounded-md text-[11px] sm:text-sm font-bold border-0 hover:text-black inline-flex items-center gap-1"
-        >
-          <Crown className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Desbloquear acesso</span>
-          <span className="sm:hidden">Desbloquear</span>
-        </button>
-      </div>
-    </div>
-  );
-};
 
 const TrustLine: React.FC = () => (
   <p className="text-center text-[11px] text-purple-300 mt-2 leading-relaxed">
