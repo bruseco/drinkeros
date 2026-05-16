@@ -23,7 +23,7 @@ import { useLaunchPromo } from '@/hooks/useLaunchPromo';
 import { useClubeSettings } from '@/hooks/useClubeSettings';
 import { useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
 
-import bgTijolos from '@/assets/bg-tijolos-pretos.jpg';
+
 import drinksStrip from '@/assets/1000-drinks.jpg';
 import payVisa from '@/assets/pagamento-visa.png';
 import payMaster from '@/assets/pagamento-mastercard.png';
@@ -280,10 +280,7 @@ const VipLandingB: React.FC = () => {
       <div
         className="relative"
         style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.78) 60%, #000 100%), url(${bgTijolos})`,
-          backgroundSize: '200% auto',
-          backgroundPosition: 'center top',
-          backgroundRepeat: 'no-repeat',
+          backgroundImage: 'linear-gradient(to bottom, hsl(0 0% 8%) 0%, hsl(0 0% 8%) 70%, hsl(0 0% 4%) 100%)',
         }}
       >
         <div className="relative z-30 container mx-auto max-w-3xl px-4 pt-12 pb-10 text-center space-y-5">
