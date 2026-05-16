@@ -42,6 +42,14 @@ function writeVariant(pageKey: string, v: 'a' | 'b') {
   document.cookie = `ab:${pageKey}=${v}; path=/; max-age=${COOKIE_MAX_AGE}; samesite=lax`;
 }
 
+function trackVisitOnce(pageKey: string, variant: 'a' | 'b') {
+  if (typeof window === 'undefined') return;
+  const key = `ab-visit:${pageKey}:${variant}`;
+  if (window.sessionStorage.getItem(key)) return;
+  window.sessionStorage.setItem(key, '1');
+  supabase.rpc('ab_increment_visit' as any, { _page_key: pageKey, _variant: variant });
+}
+
 function clearVariant(pageKey: string) {
   if (typeof document === 'undefined') return;
   document.cookie = `ab:${pageKey}=; path=/; max-age=0`;
@@ -87,9 +95,10 @@ export function useAbTest(pageKey: string) {
     if (!variant) {
       variant = pickVariant(test.traffic_split_pct);
       writeVariant(pageKey, variant);
-      // conta visita (somente no 1º sorteio do visitante)
-      supabase.rpc('ab_increment_visit' as any, { _page_key: pageKey, _variant: variant });
     }
+
+    // conta uma visita real por sessão, mesmo para visitantes que já tinham cookie antigo
+    trackVisitOnce(pageKey, variant);
 
     if (variant === 'b' && location.pathname === test.original_path) {
       navigate(test.variant_path + location.search + location.hash, { replace: true });
@@ -103,8 +112,8 @@ export function useAbVariantTrack(pageKey: string, variant: 'b' = 'b') {
     const current = readVariant(pageKey);
     if (current !== variant) {
       writeVariant(pageKey, variant);
-      supabase.rpc('ab_increment_visit' as any, { _page_key: pageKey, _variant: variant });
     }
+    trackVisitOnce(pageKey, variant);
   }, [pageKey, variant]);
 }
 

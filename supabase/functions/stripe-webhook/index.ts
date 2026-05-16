@@ -238,7 +238,7 @@ serve(async (req) => {
           await supabase.from("vip_renewal_reminders_sent").delete().eq("user_id", userId);
 
           const isClubPix = meta.plan_kind === "club_pix_annual";
-          await supabase.from("vip_payments").upsert({
+          const { error: vipPaymentErr } = await supabase.from("vip_payments").upsert({
             user_id: userId,
             amount: (session.amount_total ?? 0) / 100,
             currency: (session.currency ?? "brl").toUpperCase(),
@@ -251,6 +251,7 @@ serve(async (req) => {
             period_end: new Date(oneYearFromNow * 1000).toISOString(),
             metadata: { event_id: event.id, session_id: session.id, plan_kind: meta.plan_kind },
           }, { onConflict: "stripe_payment_intent_id" });
+          if (vipPaymentErr) log("vip-payments-upsert-error-annual", { error: vipPaymentErr.message, sessionId: session.id });
 
           await upsertVipPlan(userId, oneYearFromNow);
 
@@ -312,7 +313,7 @@ serve(async (req) => {
         // Antes era feito apenas em invoice.paid, mas esse evento pode falhar/atrasar,
         // deixando assinaturas ativas SEM registro de venda no histórico.
         if (invoiceId) {
-          await supabase.from("vip_payments").upsert({
+          const { error: vipPaymentErr } = await supabase.from("vip_payments").upsert({
             user_id: userId,
             amount: (invoiceAmount ?? session.amount_total ?? 0) / 100,
             currency: (invoiceCurrency ?? session.currency ?? "brl").toUpperCase(),
@@ -327,6 +328,7 @@ serve(async (req) => {
             period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
             metadata: { event_id: event.id, session_id: session.id, recorded_from: "checkout.session.completed" },
           }, { onConflict: "stripe_invoice_id" });
+          if (vipPaymentErr) log("vip-payments-upsert-error-checkout", { error: vipPaymentErr.message, sessionId: session.id, invoiceId });
         }
 
         await upsertVipPlan(userId, periodEnd);
@@ -368,7 +370,7 @@ serve(async (req) => {
           periodEnd = sub.current_period_end ?? null;
         }
 
-        await supabase.from("vip_payments").upsert({
+        const { error: vipPaymentErr } = await supabase.from("vip_payments").upsert({
           user_id: userId,
           amount: (invoice.amount_paid ?? 0) / 100,
           currency: (invoice.currency ?? "brl").toUpperCase(),
@@ -385,6 +387,7 @@ serve(async (req) => {
           period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
           metadata: { event_id: event.id },
         }, { onConflict: "stripe_invoice_id" });
+        if (vipPaymentErr) log("vip-payments-upsert-error-invoice", { error: vipPaymentErr.message, invoiceId: invoice.id });
 
         // Reset lembretes ao renovar
         await supabase.from("vip_renewal_reminders_sent").delete().eq("user_id", userId);
