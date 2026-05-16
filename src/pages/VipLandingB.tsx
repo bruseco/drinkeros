@@ -259,9 +259,8 @@ const VipLandingB: React.FC = () => {
             <span className="text-white"> as Receitas da </span>
             <span className="bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">Drinkeros</span>
           </h1>
-          <p className="text-base md:text-lg text-purple-100 leading-snug max-w-2xl mx-auto">
-            No grátis, você acessa <strong className="text-white">1 receita completa por dia</strong>. Como sócio, você libera <strong className="text-white">acesso ilimitado</strong> às receitas, xaropes artesanais, bônus exclusivos, workshops e benefícios do Clube.
-          </p>
+          <AnimatedAccessLoop />
+
           <p className="text-sm md:text-base text-yellow-200/90">
             Mais de <strong className="text-yellow-300">1.000 drinks</strong>, xaropes artesanais, minisséries e conteúdos exclusivos no seu bolso.
           </p>
