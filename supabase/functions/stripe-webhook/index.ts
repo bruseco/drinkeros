@@ -282,16 +282,36 @@ serve(async (req) => {
           break;
         }
 
-        // Caso original: assinatura VIP recorrente
+        // Caso original: assinatura VIP recorrente (ex.: plan_kind=club_card_subscription)
+        // Gate de validação: só processa pagamento válido.
+        if (
+          session.mode === "subscription" &&
+          (session.status !== "complete" || session.payment_status !== "paid")
+        ) {
+          log("checkout-subscription-not-paid", {
+            sessionId: session.id,
+            status: session.status,
+            payment_status: session.payment_status,
+          });
+          break;
+        }
+
         const userId = await resolveUserId({
+          metadataUserId: meta.user_id,
           customerId,
           email: session.customer_details?.email ?? session.customer_email,
           clientReferenceId: session.client_reference_id,
         });
         if (!userId) {
-          log("user-not-found", { sessionId: session.id });
+          log("user-not-found", {
+            sessionId: session.id,
+            metadataUserId: meta.user_id,
+            clientReferenceId: session.client_reference_id,
+            email: session.customer_details?.email ?? session.customer_email,
+          });
           break;
         }
+        log("user-resolved", { userId, sessionId: session.id, plan_kind: meta.plan_kind });
 
         let periodEnd: number | null = null;
         let periodStart: number | null = null;
@@ -302,30 +322,47 @@ serve(async (req) => {
         let invoicePaidAt: number | null = null;
 
         if (subscriptionId) {
-          const sub = await stripe.subscriptions.retrieve(subscriptionId, {
-            expand: ["latest_invoice"],
-          });
-          periodEnd = sub.current_period_end ?? null;
-          periodStart = sub.current_period_start ?? null;
+          try {
+            const sub = await stripe.subscriptions.retrieve(subscriptionId, {
+              expand: ["latest_invoice"],
+            });
+            periodEnd = sub.current_period_end ?? null;
+            periodStart = sub.current_period_start ?? null;
 
-          const latestInvoice = sub.latest_invoice as Stripe.Invoice | null;
-          if (latestInvoice && typeof latestInvoice === "object") {
-            invoiceId = latestInvoice.id ?? null;
-            invoicePaymentIntent = (latestInvoice.payment_intent as string) || null;
-            invoiceAmount = latestInvoice.amount_paid ?? null;
-            invoiceCurrency = latestInvoice.currency ?? null;
-            invoicePaidAt = latestInvoice.status_transitions?.paid_at ?? null;
+            const latestInvoice = sub.latest_invoice as Stripe.Invoice | null;
+            if (latestInvoice && typeof latestInvoice === "object") {
+              invoiceId = latestInvoice.id ?? null;
+              invoicePaymentIntent = (latestInvoice.payment_intent as string) || null;
+              invoiceAmount = latestInvoice.amount_paid ?? null;
+              invoiceCurrency = latestInvoice.currency ?? null;
+              invoicePaidAt = latestInvoice.status_transitions?.paid_at ?? null;
+            }
+          } catch (e) {
+            log("stripe-subscription-retrieve-error", {
+              error: (e as Error).message,
+              subscriptionId,
+              sessionId: session.id,
+            });
           }
         }
+
+        // Fallback: usa o invoice direto da session se não conseguimos pela subscription
+        if (!invoiceId && (session as any).invoice) {
+          invoiceId = (session as any).invoice as string;
+        }
+
+        // Idempotência: se já gravamos esse event_id, não duplica.
+        const { data: existingEvt } = await supabase
+          .from("vip_payments")
+          .select("id")
+          .eq("metadata->>event_id", event.id)
+          .maybeSingle();
 
         // Reset de lembretes ao renovar/ativar
         await supabase.from("vip_renewal_reminders_sent").delete().eq("user_id", userId);
 
-        // Grava a venda em vip_payments (idempotente via stripe_invoice_id).
-        // Antes era feito apenas em invoice.paid, mas esse evento pode falhar/atrasar,
-        // deixando assinaturas ativas SEM registro de venda no histórico.
-        if (invoiceId) {
-          const { error: vipPaymentErr } = await supabase.from("vip_payments").upsert({
+        if (!existingEvt) {
+          const vipPayload = {
             user_id: userId,
             amount: (invoiceAmount ?? session.amount_total ?? 0) / 100,
             currency: (invoiceCurrency ?? session.currency ?? "brl").toUpperCase(),
@@ -334,30 +371,76 @@ serve(async (req) => {
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
             stripe_invoice_id: invoiceId,
-            stripe_payment_intent_id: invoicePaymentIntent || (session.payment_intent as string) || null,
+            stripe_payment_intent_id:
+              invoicePaymentIntent || ((session.payment_intent as string) || null),
             paid_at: new Date((invoicePaidAt ?? Math.floor(Date.now() / 1000)) * 1000).toISOString(),
-            period_start: periodStart ? new Date(periodStart * 1000).toISOString() : new Date().toISOString(),
+            period_start: periodStart
+              ? new Date(periodStart * 1000).toISOString()
+              : new Date().toISOString(),
             period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
-            metadata: { event_id: event.id, session_id: session.id, recorded_from: "checkout.session.completed" },
-          }, { onConflict: "stripe_invoice_id" });
-          if (vipPaymentErr) log("vip-payments-upsert-error-checkout", { error: vipPaymentErr.message, sessionId: session.id, invoiceId });
+            metadata: {
+              event_id: event.id,
+              session_id: session.id,
+              plan_kind: meta.plan_kind || null,
+              customer_email:
+                session.customer_details?.email ?? session.customer_email ?? null,
+              recorded_from: "checkout.session.completed",
+            },
+          };
+
+          // Upsert idempotente: usa stripe_invoice_id quando existir, senão subscription_id, senão payment_intent_id.
+          const onConflict = invoiceId
+            ? "stripe_invoice_id"
+            : (vipPayload.stripe_payment_intent_id ? "stripe_payment_intent_id" : undefined);
+
+          let upsertErr: any = null;
+          if (onConflict) {
+            const { error } = await supabase
+              .from("vip_payments")
+              .upsert(vipPayload, { onConflict });
+            upsertErr = error;
+          } else {
+            const { error } = await supabase.from("vip_payments").insert(vipPayload);
+            upsertErr = error;
+          }
+
+          if (upsertErr) {
+            log("vip-payments-upsert-error-checkout", {
+              error: upsertErr.message,
+              code: upsertErr.code,
+              details: upsertErr.details,
+              hint: upsertErr.hint,
+              userId,
+              sessionId: session.id,
+              invoiceId,
+              subscriptionId,
+              payload: vipPayload,
+            });
+          } else {
+            log("vip-payments-recorded", { userId, invoiceId, subscriptionId, sessionId: session.id });
+          }
+        } else {
+          log("vip-payments-already-recorded", { eventId: event.id, sessionId: session.id });
         }
 
         await upsertVipPlan(userId, periodEnd);
 
-        if (invoiceId) {
-          await recordPurchase({
-            userId,
-            productId: null,
-            productName: "Clube dos Drinkeros",
-            productType: "club",
-            amountPaid: (invoiceAmount ?? session.amount_total ?? 0) / 100,
-            currency: (invoiceCurrency ?? session.currency ?? "brl").toUpperCase(),
-            status: "paid",
-            transactionId: invoiceId,
-            metadata: { subscription_id: subscriptionId, session_id: session.id, event_id: event.id },
-          });
-        }
+        await recordPurchase({
+          userId,
+          productId: null,
+          productName: "Clube dos Drinkeros",
+          productType: "club",
+          amountPaid: (invoiceAmount ?? session.amount_total ?? 0) / 100,
+          currency: (invoiceCurrency ?? session.currency ?? "brl").toUpperCase(),
+          status: "paid",
+          transactionId: invoiceId || subscriptionId || session.id,
+          metadata: {
+            subscription_id: subscriptionId,
+            session_id: session.id,
+            event_id: event.id,
+            plan_kind: meta.plan_kind || null,
+          },
+        });
         break;
       }
 
