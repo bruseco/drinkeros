@@ -285,7 +285,7 @@ const VipLandingB: React.FC = () => {
       >
         <div className="relative z-30 container mx-auto max-w-3xl px-4 pt-12 pb-10 text-center space-y-5">
           <div className="inline-flex items-center gap-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest text-yellow-300">
-            <Lock className="h-3.5 w-3.5" /> Acesso completo ao app Drinkeros
+            <Lock className="h-3.5 w-3.5" /> Acesso ilimitado ao app Drinkeros
           </div>
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-black leading-[1.05]">
             <span className="text-white">Desbloqueie </span>
@@ -382,7 +382,7 @@ const VipLandingB: React.FC = () => {
                 onClick={scrollToPricing}
                 className="viplanding-gold-btn w-full h-11 mt-5 text-sm font-bold border-0 hover:text-black"
               >
-                <Crown className="mr-1.5 h-4 w-4" /> Desbloquear o app completo
+                <Crown className="mr-1.5 h-4 w-4" /> Desbloquear acesso ilimitado
               </Button>
             </div>
           </div>
