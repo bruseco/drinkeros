@@ -397,13 +397,15 @@ const VipLanding: React.FC = () => {
               <span className="text-yellow-300 text-xs sm:text-sm font-medium">o que você merece</span>
             </div>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><strong className="text-white">Veja quantos Drinks você quiser.</strong></span></li>
-              <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><GlassWater className="inline h-3.5 w-3.5 text-yellow-300" /> <strong className="text-white">Xaropes Artesanais</strong> liberados</span></li>
-              
-              <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span>Acesso a minissérie <strong className="text-white">Bebida Decifrada</strong></span></li>
-              <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><GraduationCap className="inline h-3.5 w-3.5 text-yellow-300" /> Acesso ao <strong className="text-white">Workshop Além dos Clássicos</strong> (com certificado)</span></li>
-              <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><Trophy className="inline h-3.5 w-3.5 text-yellow-300" /> Participa da <strong className="text-white">Batalha dos Drinkeros</strong></span></li>
-              <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span>Sócios ganham <strong className="text-white">80% de desconto</strong> na compra de qualquer produto.</span></li>
+              {(clubeSettings?.benefits ?? []).map((b, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                  <span
+                    className="[&_strong]:text-white"
+                    dangerouslySetInnerHTML={{ __html: b.text }}
+                  />
+                </li>
+              ))}
             </ul>
             <Button
               onClick={() => {
