@@ -273,10 +273,11 @@ const AdminSalesPages: React.FC = () => {
       original_path: '/clube',
       variant_path: '/clube-b',
       cover: null,
-      price: 197,
+      price: clubeSettings?.full_price ?? 197,
       is_available_for_sale: true,
       stripe_price_id: 'managed',
       type: 'club' as const,
+      edit_path: '/admin/clube',
     },
     ...courses.map((c: any) => ({
       id: c.id,
