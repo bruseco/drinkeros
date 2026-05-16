@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      ab_tests: {
+        Row: {
+          conversions_a: number
+          conversions_b: number
+          created_at: string
+          finished_at: string | null
+          id: string
+          original_path: string
+          page_key: string
+          page_label: string
+          status: string
+          traffic_split_pct: number
+          updated_at: string
+          variant_path: string
+          visits_a: number
+          visits_b: number
+          winner: string | null
+        }
+        Insert: {
+          conversions_a?: number
+          conversions_b?: number
+          created_at?: string
+          finished_at?: string | null
+          id?: string
+          original_path: string
+          page_key: string
+          page_label: string
+          status?: string
+          traffic_split_pct?: number
+          updated_at?: string
+          variant_path: string
+          visits_a?: number
+          visits_b?: number
+          winner?: string | null
+        }
+        Update: {
+          conversions_a?: number
+          conversions_b?: number
+          created_at?: string
+          finished_at?: string | null
+          id?: string
+          original_path?: string
+          page_key?: string
+          page_label?: string
+          status?: string
+          traffic_split_pct?: number
+          updated_at?: string
+          variant_path?: string
+          visits_a?: number
+          visits_b?: number
+          winner?: string | null
+        }
+        Relationships: []
+      }
       certificate_layout_settings: {
         Row: {
           date_font_size: number
@@ -3155,6 +3209,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ab_increment_conversion: {
+        Args: { _page_key: string; _variant: string }
+        Returns: undefined
+      }
+      ab_increment_visit: {
+        Args: { _page_key: string; _variant: string }
+        Returns: undefined
+      }
       admin_orders: {
         Args: {
           p_from?: string

@@ -20,6 +20,7 @@ import { useViewContent } from '@/hooks/useViewContent';
 import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
 import { useTotalClubMembers, TOTAL_CLUB_MEMBERS_FALLBACK } from '@/hooks/useTotalClubMembers';
 import { useLaunchPromo } from '@/hooks/useLaunchPromo';
+import { useAbTest, trackAbConversion } from '@/hooks/useAbTest';
 
 import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
 import bgTijolos from '@/assets/bg-tijolos-pretos.jpg';
@@ -141,6 +142,7 @@ const VipLanding: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const promo = useLaunchPromo();
+  useAbTest('clube');
 
   useViewContent({
     key: 'clube-dos-drinkeros',
@@ -216,6 +218,7 @@ const VipLanding: React.FC = () => {
         price_id: data.price_id,
         session_id: data.session_id,
       });
+      trackAbConversion('clube');
       await waitForPixelFlush();
 
       window.location.href = data.url;
