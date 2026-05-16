@@ -71,7 +71,11 @@ const VideoWithPoster: React.FC<{ src: string; poster: string; alt: string }> = 
 
 /** Countdown sincronizado com o hook useLaunchPromo (15 min após chegada via UTM). */
 const LaunchPromoCountdown: React.FC = () => {
-  const { isActive, mm, ss } = useLaunchPromo();
+  const { data: settings } = useClubeSettings();
+  const { isActive, mm, ss } = useLaunchPromo({
+    promoPrice: settings?.promo_price,
+    fullPrice: settings?.full_price,
+  });
   if (!isActive) return null;
   return (
     <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs font-semibold text-yellow-200">
@@ -86,7 +90,11 @@ const LaunchPromoCountdown: React.FC = () => {
 
 /** Banner fixo no topo durante a promoção de lançamento. */
 const LaunchPromoTopBanner: React.FC<{ onCta: () => void }> = ({ onCta }) => {
-  const { isActive, mm, ss } = useLaunchPromo();
+  const { data: settings } = useClubeSettings();
+  const { isActive, mm, ss, promoPrice } = useLaunchPromo({
+    promoPrice: settings?.promo_price,
+    fullPrice: settings?.full_price,
+  });
   if (!isActive) return null;
   return (
     <div className="fixed top-0 inset-x-0 z-[70] bg-black/95 backdrop-blur border-b border-yellow-400/40 shadow-[0_2px_20px_rgba(250,204,21,0.25)]">
@@ -96,7 +104,7 @@ const LaunchPromoTopBanner: React.FC<{ onCta: () => void }> = ({ onCta }) => {
           <span className="truncate">
             <span className="hidden sm:inline">PROMOÇÃO DE LANÇAMENTO · </span>
             <span className="sm:hidden">PROMO · </span>
-            <span className="text-white">R$69/ano</span>
+            <span className="text-white">R${promoPrice}/ano</span>
             <span className="hidden xs:inline"> · expira em </span>
             <span className="sm:hidden"> · </span>
             <span className="font-mono tabular-nums text-white ml-1">{mm}:{ss}</span>
