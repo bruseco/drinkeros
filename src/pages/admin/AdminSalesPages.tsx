@@ -247,6 +247,7 @@ const AdminSalesPages: React.FC = () => {
   const queryClient = useQueryClient();
   const { data: courses = [], isLoading: coursesLoading } = useCourses();
   const { data: ebooks = [], isLoading: ebooksLoading } = useEbooks();
+  const { data: clubeSettings } = useClubeSettings();
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
