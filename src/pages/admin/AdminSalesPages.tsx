@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCourses } from '@/hooks/useCourses';
 import { useEbooks } from '@/hooks/useEbooks';
+import { useClubeSettings } from '@/hooks/useClubeSettings';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
