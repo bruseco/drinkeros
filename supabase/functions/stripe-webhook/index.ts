@@ -46,7 +46,19 @@ serve(async (req) => {
     customerId?: string | null;
     email?: string | null;
     clientReferenceId?: string | null;
+    metadataUserId?: string | null;
   }): Promise<string | null> => {
+    // 1) metadata.user_id (preferido — definido no create-checkout)
+    if (opts.metadataUserId) {
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("user_id", opts.metadataUserId)
+        .maybeSingle();
+      if (prof?.user_id) return prof.user_id;
+      // mesmo sem profile, confia no metadata (foi setado pelo nosso checkout)
+      return opts.metadataUserId;
+    }
     if (opts.clientReferenceId) return opts.clientReferenceId;
 
     if (opts.customerId) {
