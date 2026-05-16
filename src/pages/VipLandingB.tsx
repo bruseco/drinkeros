@@ -34,7 +34,7 @@ import payPix from '@/assets/pagamento-pix.png';
 const AnimatedAccessLoop: React.FC = () => {
   const [phase, setPhase] = useState<0 | 1>(0);
   useEffect(() => {
-    const id = setInterval(() => setPhase((p) => (p === 0 ? 1 : 0)), 3800);
+    const id = setInterval(() => setPhase((p) => (p === 0 ? 1 : 0)), 6500);
     return () => clearInterval(id);
   }, []);
   return (
@@ -50,18 +50,16 @@ const AnimatedAccessLoop: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div key="club" className="w-full flex flex-col items-center gap-3 animate-fade-in">
+        <div key="club" className="w-full flex flex-col items-center gap-4 animate-fade-in">
           <p className="text-base md:text-lg text-purple-100 leading-snug text-center">
             <span className="block text-yellow-300/90 font-bold tracking-wide text-xs sm:text-sm uppercase mb-1">Como sócio do clube</span>
             <strong className="text-white">Acesso ilimitado</strong> a receitas, xaropes, bônus e workshops
           </p>
-          <div className="relative w-full max-w-md overflow-hidden rounded-lg border border-yellow-300/20">
+          <div className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden">
             <div className="flex w-max animate-drinks-marquee-fast">
-              <img src={drinksStrip} alt="" aria-hidden className="h-14 w-auto max-w-none object-cover shrink-0" />
-              <img src={drinksStrip} alt="" aria-hidden className="h-14 w-auto max-w-none object-cover shrink-0" />
+              <img src={drinksStrip} alt="" aria-hidden className="h-16 sm:h-20 w-auto max-w-none object-cover shrink-0" />
+              <img src={drinksStrip} alt="" aria-hidden className="h-16 sm:h-20 w-auto max-w-none object-cover shrink-0" />
             </div>
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-[#1a0a2e] to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#1a0a2e] to-transparent" />
           </div>
         </div>
       )}
