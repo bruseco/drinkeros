@@ -382,7 +382,7 @@ const AdminSalesPages: React.FC = () => {
                 const synced = !!row.stripe_price_id;
                 const test = testByKey.get(row.page_key);
                 const isOpen = !!expanded[row.page_key] || !!test;
-                const typeLabel = row.type === 'club' ? 'Clube' : row.type === 'course' ? 'Curso' : 'E-book';
+                const typeLabel = row.type === 'club' ? 'Assinatura' : 'Compra';
 
                 return (
                   <React.Fragment key={row.page_key}>
