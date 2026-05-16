@@ -127,6 +127,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/clube" element={<VipLanding />} />
+            <Route path="/clube-b" element={<VipLandingB />} />
             <Route path="/vip" element={<Navigate to="/clube" replace />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/install" element={<Install />} />
