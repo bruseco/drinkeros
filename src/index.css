@@ -239,6 +239,10 @@ All colors MUST be HSL.
   animation: drinks-marquee 70s linear infinite;
   will-change: transform;
 }
+.animate-drinks-marquee-fast {
+  animation: drinks-marquee 12s linear infinite;
+  will-change: transform;
+}
 
 /* Gold shine animation for premium badges */
 @keyframes goldShine {
