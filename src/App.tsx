@@ -55,6 +55,7 @@ import AdminNibo from "./pages/admin/AdminNibo";
 import AdminEmailSettings from "./pages/admin/AdminEmailSettings";
 import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminUpsell from "./pages/admin/AdminUpsell";
+import AdminClube from "./pages/admin/AdminClube";
 import AdminWhatsApp from "./pages/admin/AdminWhatsApp";
 import AdminWhatsAppQueue from "./pages/admin/AdminWhatsAppQueue";
 import AdminWhatsAppConnections from "./pages/admin/AdminWhatsAppConnections";
