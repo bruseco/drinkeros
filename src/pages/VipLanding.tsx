@@ -218,6 +218,7 @@ const VipLanding: React.FC = () => {
         price_id: data.price_id,
         session_id: data.session_id,
       });
+      trackAbConversion('clube');
       await waitForPixelFlush();
 
       window.location.href = data.url;
