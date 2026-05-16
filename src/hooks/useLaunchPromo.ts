@@ -131,8 +131,8 @@ export function useLaunchPromo(opts?: { promoPrice?: number; fullPrice?: number 
     remainingMs,
     mm,
     ss,
-    price: isActive ? PRICE_PROMO : PRICE_FULL,
-    promoPrice: PRICE_PROMO,
-    fullPrice: PRICE_FULL,
+    price: isActive ? promoPrice : fullPrice,
+    promoPrice,
+    fullPrice,
   };
 }
