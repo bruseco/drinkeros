@@ -11,6 +11,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import VipLanding from "./pages/VipLanding";
+import VipLandingB from "./pages/VipLandingB";
 import ResetPassword from "./pages/ResetPassword";
 import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
