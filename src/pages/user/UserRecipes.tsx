@@ -210,9 +210,9 @@ const UserRecipes: React.FC = () => {
   // Dedupe defensivo por id — caso o backend devolva a mesma receita em páginas
   // diferentes (boundary do shuffle), evita que o card apareça repetido no feed.
   const recipes = (() => {
+    const recipesRaw = data?.pages.flatMap((page) => page.posts) ?? [];
     const seen = new Set<string>();
     const out: typeof recipesRaw = [];
-    const recipesRaw = data?.pages.flatMap((page) => page.posts) ?? [];
     for (const r of recipesRaw) {
       if (seen.has(r.id)) continue;
       seen.add(r.id);
