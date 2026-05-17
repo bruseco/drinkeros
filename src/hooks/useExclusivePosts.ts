@@ -9,6 +9,7 @@ import { getPrimaryPhase, matchesPhase, isOutOfSeason } from '@/lib/seasonalPhas
 // same seed even if the module is re-evaluated (HMR, code-split, etc.) —
 // otherwise the shuffle changes mid-pagination and items overlap across pages.
 const SEED_KEY = 'exclusive-posts:seed';
+const RANDOM_FEED_VERSION = 2;
 function getOrCreateSeed(): number {
   try {
     const raw = sessionStorage.getItem(SEED_KEY);
@@ -38,6 +39,15 @@ function seededShuffle<T>(arr: T[], seed: number): T[] {
     [result[i], result[j]] = [result[j], result[i]];
   }
   return result;
+}
+
+function normalizeRecipeIdentity(value: string | null | undefined): string {
+  return (value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 export interface ExclusivePost {
@@ -99,7 +109,7 @@ export const useExclusivePostsPaginated = ({
   const seed = seedRef.current;
 
   return useInfiniteQuery({
-    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder, characteristicFilter, seed }],
+    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder, characteristicFilter, seed, version: RANDOM_FEED_VERSION }],
     queryFn: async ({ pageParam = 0 }) => {
       const from = pageParam * pageSize;
 
@@ -143,7 +153,7 @@ export const useExclusivePostsPaginated = ({
         // e por fim faz fetch dos detalhes apenas da página atual.
         let allQuery = supabase
           .from('exclusive_posts')
-          .select('id, characteristics')
+          .select('id, title, cover_image_url, characteristics')
           // ORDER estável é obrigatório: o shuffle só é determinístico se a
           // entrada também for. Sem isso o Postgres pode devolver as linhas em
           // ordem diferente entre páginas e o feed acaba repetindo drinks.
@@ -163,9 +173,19 @@ export const useExclusivePostsPaginated = ({
         // Festa Junina, Verão, Inverno só aparecem dentro de suas janelas).
         // Quando o usuário aplica QUALQUER filtro de característica, liberamos
         // todas as tags (busca também libera, mas vai por outro branch via RPC).
+        const uniqueRows = ((allRows || []) as { id: string; title: string | null; cover_image_url: string | null; characteristics: string[] | null }[])
+          .reduce((acc, row) => {
+            const identity = normalizeRecipeIdentity(row.title) || normalizeRecipeIdentity(row.cover_image_url) || row.id;
+            if (!acc.seen.has(identity)) {
+              acc.seen.add(identity);
+              acc.rows.push(row);
+            }
+            return acc;
+          }, { seen: new Set<string>(), rows: [] as { id: string; title: string | null; cover_image_url: string | null; characteristics: string[] | null }[] }).rows;
+
         const inSeason = characteristicFilter
-          ? ((allRows || []) as { id: string; characteristics: string[] | null }[])
-          : ((allRows || []) as { id: string; characteristics: string[] | null }[]).filter(
+          ? uniqueRows
+          : uniqueRows.filter(
               (r) => !isOutOfSeason(r.characteristics)
             );
 
