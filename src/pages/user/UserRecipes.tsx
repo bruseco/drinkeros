@@ -18,6 +18,8 @@ import { Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePwaStatus } from '@/hooks/usePwaStatus';
 import { shouldShowPwaGate } from '@/components/user/PwaInstallGate';
+import { getPrimaryPhase } from '@/lib/seasonalPhases';
+import { Sparkles } from 'lucide-react';
 
 const CATEGORY_FILTERS = [
   { label: 'Xaropes Artesanais', value: 'Xaropes Artesanais', icon: GlassWater },
