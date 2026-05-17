@@ -121,7 +121,11 @@ export const useExclusivePostsPaginated = ({
         // e por fim faz fetch dos detalhes apenas da página atual.
         let allQuery = supabase
           .from('exclusive_posts')
-          .select('id, characteristics');
+          .select('id, characteristics')
+          // ORDER estável é obrigatório: o shuffle só é determinístico se a
+          // entrada também for. Sem isso o Postgres pode devolver as linhas em
+          // ordem diferente entre páginas e o feed acaba repetindo drinks.
+          .order('id', { ascending: true });
 
         if (publishedOnly) {
           allQuery = allQuery.eq('is_published', true);
