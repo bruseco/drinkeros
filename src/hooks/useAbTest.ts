@@ -46,8 +46,15 @@ function trackVisitOnce(pageKey: string, variant: 'a' | 'b') {
   if (typeof window === 'undefined') return;
   const key = `ab-visit:${pageKey}:${variant}`;
   if (window.sessionStorage.getItem(key)) return;
-  window.sessionStorage.setItem(key, '1');
-  supabase.rpc('ab_increment_visit' as any, { _page_key: pageKey, _variant: variant });
+  // PostgrestBuilder é thenable preguiçoso: precisa de .then() pra disparar a request.
+  // Marca como visitado SOMENTE após sucesso, evitando perder eventos se a request falhar.
+  Promise.resolve(
+    supabase.rpc('ab_increment_visit' as any, { _page_key: pageKey, _variant: variant }),
+  )
+    .then(() => {
+      try { window.sessionStorage.setItem(key, '1'); } catch { /* ignore */ }
+    })
+    .catch(() => { /* fire-and-forget */ });
 }
 
 function clearVariant(pageKey: string) {
@@ -121,7 +128,10 @@ export function useAbVariantTrack(pageKey: string, variant: 'b' = 'b') {
 export function trackAbConversion(pageKey: string) {
   const variant = readVariant(pageKey);
   if (!variant) return;
-  supabase.rpc('ab_increment_conversion' as any, { _page_key: pageKey, _variant: variant });
+  // PostgrestBuilder é thenable preguiçoso: precisa de .then() pra disparar a request.
+  Promise.resolve(
+    supabase.rpc('ab_increment_conversion' as any, { _page_key: pageKey, _variant: variant }),
+  ).catch(() => { /* fire-and-forget */ });
 }
 
 export const _ab = { readVariant, writeVariant, clearVariant };
