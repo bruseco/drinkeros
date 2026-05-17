@@ -1,12 +1,29 @@
+import { useRef } from 'react';
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getPrimaryPhase, matchesPhase, isOutOfSeason } from '@/lib/seasonalPhases';
 
-// Seed that changes on every call to refreshPostsSeed()
-let postsSeed = Math.floor(Math.random() * 2147483647);
+// Persistent seed across navigation within the same tab/session.
+// Stored in sessionStorage so all pages of the infinite query use the EXACT
+// same seed even if the module is re-evaluated (HMR, code-split, etc.) —
+// otherwise the shuffle changes mid-pagination and items overlap across pages.
+const SEED_KEY = 'exclusive-posts:seed';
+function getOrCreateSeed(): number {
+  try {
+    const raw = sessionStorage.getItem(SEED_KEY);
+    if (raw) {
+      const n = Number(raw);
+      if (Number.isFinite(n) && n > 0) return n;
+    }
+  } catch {}
+  const fresh = Math.floor(Math.random() * 2147483647) || 1;
+  try { sessionStorage.setItem(SEED_KEY, String(fresh)); } catch {}
+  return fresh;
+}
 export function refreshPostsSeed() {
-  postsSeed = Math.floor(Math.random() * 2147483647);
+  const fresh = Math.floor(Math.random() * 2147483647) || 1;
+  try { sessionStorage.setItem(SEED_KEY, String(fresh)); } catch {}
 }
 
 function seededShuffle<T>(arr: T[], seed: number): T[] {
@@ -76,8 +93,13 @@ export const useExclusivePostsPaginated = ({
   randomOrder = false,
   characteristicFilter,
 }: PaginatedPostsParams = {}) => {
+  // Stable seed for this hook instance — captured once on mount so all pages
+  // of the infinite query use the SAME seed (no overlap between page 1 and 2).
+  const seedRef = useRef<number>(randomOrder ? getOrCreateSeed() : 0);
+  const seed = seedRef.current;
+
   return useInfiniteQuery({
-    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder, characteristicFilter, seed: randomOrder ? postsSeed : 0 }],
+    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder, characteristicFilter, seed }],
     queryFn: async ({ pageParam = 0 }) => {
       const from = pageParam * pageSize;
 
@@ -147,7 +169,7 @@ export const useExclusivePostsPaginated = ({
               (r) => !isOutOfSeason(r.characteristics)
             );
 
-        const shuffled = seededShuffle(inSeason, postsSeed);
+        const shuffled = seededShuffle(inSeason, seed);
 
         // Boost sazonal: drinks que casam com a fase ativa primária vão para o topo
         // (mantendo ordem aleatória entre si). Quando o usuário filtra por categoria,

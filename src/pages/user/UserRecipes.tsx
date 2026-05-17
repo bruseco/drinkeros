@@ -207,7 +207,19 @@ const UserRecipes: React.FC = () => {
     characteristicFilter: selectedCategory || undefined,
   });
 
-  const recipes = data?.pages.flatMap((page) => page.posts) ?? [];
+  // Dedupe defensivo por id — caso o backend devolva a mesma receita em páginas
+  // diferentes (boundary do shuffle), evita que o card apareça repetido no feed.
+  const recipes = (() => {
+    const recipesRaw = data?.pages.flatMap((page) => page.posts) ?? [];
+    const seen = new Set<string>();
+    const out: typeof recipesRaw = [];
+    for (const r of recipesRaw) {
+      if (seen.has(r.id)) continue;
+      seen.add(r.id);
+      out.push(r);
+    }
+    return out;
+  })();
 
   useEffect(() => {
     const el = loadMoreRef.current;
