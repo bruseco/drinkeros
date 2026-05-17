@@ -491,7 +491,7 @@ export default function Checkout() {
             </div>
             {isVip && !isClub && (
               <div className="flex justify-between text-sm text-primary">
-                <span>Desconto Sócio do Clube (-80%)</span>
+                <span>Desconto Sócio do Clube (-{vipPercent}%)</span>
                 <span>−R$ {(Number(product.price) - finalPrice).toFixed(2).replace(".", ",")}</span>
               </div>
             )}
