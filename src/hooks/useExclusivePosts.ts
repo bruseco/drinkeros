@@ -93,8 +93,13 @@ export const useExclusivePostsPaginated = ({
   randomOrder = false,
   characteristicFilter,
 }: PaginatedPostsParams = {}) => {
+  // Stable seed for this hook instance — captured once on mount so all pages
+  // of the infinite query use the SAME seed (no overlap between page 1 and 2).
+  const seedRef = useRef<number>(randomOrder ? getOrCreateSeed() : 0);
+  const seed = seedRef.current;
+
   return useInfiniteQuery({
-    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder, characteristicFilter, seed: randomOrder ? postsSeed : 0 }],
+    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder, characteristicFilter, seed }],
     queryFn: async ({ pageParam = 0 }) => {
       const from = pageParam * pageSize;
 
