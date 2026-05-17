@@ -64,7 +64,6 @@ export default function Checkout() {
   const [publicKeyReady, setPublicKeyReady] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isVip, setIsVip] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [pixResult, setPixResult] = useState<PixData | null>(null);
   const [pixPaymentId, setPixPaymentId] = useState<string | null>(null);
@@ -72,7 +71,11 @@ export default function Checkout() {
   const [payerEmail, setPayerEmail] = useState<string | null>(null);
   const [clubMethod, setClubMethod] = useState<ClubMethod>("card");
 
+  const vip = useVipDiscount();
   const isClub = productType === "club";
+  // Sócio/Vitalício recebem desconto escalonado (80% por 7d → 50% depois) apenas em produtos avulsos.
+  const vipPercent = !isClub && vip.ready && vip.isVip ? vip.percent : 0;
+  const isVip = vipPercent > 0;
 
   // 1. Carrega Public Key e inicializa MP SDK (apenas p/ produtos avulsos no MP; Clube agora usa Stripe)
   useEffect(() => {
