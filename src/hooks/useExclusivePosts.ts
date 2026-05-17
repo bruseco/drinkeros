@@ -169,7 +169,7 @@ export const useExclusivePostsPaginated = ({
               (r) => !isOutOfSeason(r.characteristics)
             );
 
-        const shuffled = seededShuffle(inSeason, postsSeed);
+        const shuffled = seededShuffle(inSeason, seed);
 
         // Boost sazonal: drinks que casam com a fase ativa primária vão para o topo
         // (mantendo ordem aleatória entre si). Quando o usuário filtra por categoria,
