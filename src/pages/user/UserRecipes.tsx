@@ -111,6 +111,14 @@ const useTypingPlaceholder = (texts: string[], typingSpeed = 80, pauseMs = 2000)
 
 const RECIPES_STATE_KEY = 'user-recipes:list-state';
 
+const normalizeRecipeIdentity = (value: string | null | undefined) =>
+  (value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+
 const UserRecipes: React.FC = () => {
   // Seed persists across navigation within the session — only re-shuffles on full page refresh
   // so users can return to a recipe they had eyed without losing their place.
@@ -207,15 +215,17 @@ const UserRecipes: React.FC = () => {
     characteristicFilter: selectedCategory || undefined,
   });
 
-  // Dedupe defensivo por id — caso o backend devolva a mesma receita em páginas
-  // diferentes (boundary do shuffle), evita que o card apareça repetido no feed.
+  // Dedupe defensivo por id e título normalizado — caso o cache/hidratação misture
+  // páginas antigas com novas, evita que o mesmo drink apareça repetido no feed.
   const recipes = (() => {
     const recipesRaw = data?.pages.flatMap((page) => page.posts) ?? [];
     const seen = new Set<string>();
     const out: typeof recipesRaw = [];
     for (const r of recipesRaw) {
-      if (seen.has(r.id)) continue;
+      const identity = normalizeRecipeIdentity(r.title) || r.id;
+      if (seen.has(r.id) || seen.has(identity)) continue;
       seen.add(r.id);
+      seen.add(identity);
       out.push(r);
     }
     return out;
