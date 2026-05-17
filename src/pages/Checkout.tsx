@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import drinkerosLogo from "@/assets/logotipo-drinkeros.png";
 import { trackFbEvent, trackInitiateCheckout, waitForPixelFlush } from "@/lib/metaPixel";
 import { useViewContent } from "@/hooks/useViewContent";
+import { useVipDiscount } from "@/hooks/useVipDiscount";
+import { applyVipDiscountFor } from "@/lib/vipDiscount";
 
 type ClubMethod = "card" | "pix";
 
