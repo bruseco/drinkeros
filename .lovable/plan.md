@@ -1,84 +1,75 @@
+## Problema confirmado
 
-## Problema
+A landing/UI mostra **R$ 139,40 (80% OFF)**, mas o Pix gerado vem com **R$ 697,00** (preço cheio). O desconto está se perdendo entre o clique "Matricule-se" e a geração do pagamento.
 
-O usuário Luis (e provavelmente vários outros migrados) tem acesso manual à categoria **Receitas** via `user_exclusive_access` (feature=`receitas`, expira em 2027), mas está classificado como **Aluno** pela `get_user_plan_v2`. Como o desconto VIP só é liberado para `isVip = isSocio || isLifetime`, ele não vê os 80%/50%.
+## Causa raiz
 
-Confirmado no banco para o caso reportado:
-- `user_plans.plan` = `free`, `discount_intro_started_at` = NULL
-- `user_lifetime_access` = vazio
-- `user_exclusive_access` = 1 linha ativa, feature `receitas`, válida até 15/05/2027
+A página `src/pages/Checkout.tsx` (a tela "Finalizar compra" das imagens) ainda usa a lógica **antiga** de VIP, que ficou incompatível com o novo modelo de planos:
 
-## Decisão
+```ts
+// linha 171-172
+const { data: planData } = await supabase.rpc("get_user_plan", { _user_id: user.id });
+setIsVip(planData === "vip");
 
-Quem tem acesso ativo à feature **receitas** em `user_exclusive_access` é um **Sócio legacy** (vinha do sistema antigo do Clube). Vamos reconhecê-lo como Sócio em um só ponto — a RPC `get_user_plan_v2` — para o efeito cascatar automaticamente em:
+// linha 185 — sempre 80% hardcoded, ignora janela de 7 dias
+return isVip ? Math.round(Number(product.price) * 0.2 * 100) / 100 : Number(product.price);
+```
 
-- `useUserPlan` (isSocio / isVip)
-- `useVipDiscount` (80% por 7d → 50%)
-- Banner `VipDiscountCountdownBanner`
-- Edge functions que calculam preço (`create-product-checkout`, `create-mp-payment`, `create-mp-checkout`) — todas já usam o mesmo `getVipDiscountPercent` baseado em `isVip` + `discount_intro_started_at`
-- Badge de plano na UI
+Problemas:
+
+1. Chama `get_user_plan` (v1) em vez de `get_user_plan_v2`. O v1 não conhece "socio"/"vitalicio" nem o sócio legacy (`user_exclusive_access.feature='receitas'`). Resultado: **isVip volta `false` para todo Sócio novo, Vitalício e legacy** → preço cheio na tela.
+2. Mesmo se `isVip` fosse true, o cálculo é hardcoded em `* 0.2` (80%). Não respeita a regra 80% → 50% após a janela de 7 dias.
+3. Como a tela mostra preço cheio, o usuário gera o Pix nesse preço.
+
+Para o legacy sócio que **não passou pela tela ainda**, há também um agravante: a edge function `create-mp-payment` aplica o desconto certo via `get_user_plan_v2` (já corrigida na migration anterior), mas o Pix precisa ser igual ao valor exibido — então a UI continua sendo a fonte da verdade para o usuário.
+
+## Auditoria do caminho do desconto
+
+| Camada | Onde | Status |
+|---|---|---|
+| Banner promo | `VipDiscountCountdownBanner` + `useVipDiscount` | OK — já usa `get_user_plan_v2` via `useUserPlan` |
+| Landing do produto | (qualquer página que usa `useVipDiscount`) | OK |
+| **Tela /checkout** | `src/pages/Checkout.tsx` | **QUEBRADA** — usa RPC antiga e `* 0.2` |
+| Edge `create-mp-payment` | `supabase/functions/create-mp-payment` | OK — usa v2 + janela 7d |
+| Edge `create-mp-checkout` | `supabase/functions/create-mp-checkout` | OK — usa v2 + janela 7d |
+| Edge `create-product-checkout` | `supabase/functions/create-product-checkout` | OK — usa v2 + janela 7d |
+| RPC `get_user_plan_v2` | banco | OK — já reconhece Sócio + Vitalício + legacy |
+
+Conclusão: o único ponto a corrigir para o desconto chegar até o Pix/cartão é a **tela de checkout**.
 
 ## Implementação
 
-### 1. Migration — atualizar `get_user_plan_v2`
+### Único arquivo alterado: `src/pages/Checkout.tsx`
 
-Adicionar mais uma cláusula antes da de Aluno: se existir linha ativa em `user_exclusive_access` com feature `receitas`, retorna `socio`.
+1. Remover o estado local `isVip` e a chamada a `supabase.rpc("get_user_plan", ...)`.
+2. Trocar por `useVipDiscount()` (já existente em `src/hooks/useVipDiscount.ts`), que internamente usa `useUserPlan` → `get_user_plan_v2` e aplica a regra escalonada **80% nos primeiros 7 dias → 50% depois** (com fallback de 80% quando `discount_intro_started_at` ainda é NULL).
+3. Trocar o `useMemo` do `finalPrice` para usar `applyVipDiscountFor(price, vip.percent)` de `src/lib/vipDiscount.ts`, em vez do `* 0.2` hardcoded. Continua não aplicando desconto quando `productType === 'club'` (mesma regra do back).
+4. Exibir o preço correto (com desconto) em todos os pontos da tela: badge "Sócio do Clube", "Total: R$ ..." do Pix, resumo do pedido. Tudo passa a derivar do mesmo `finalPrice` recalculado.
+5. Manter os eventos de tracking (ViewContent / InitiateCheckout) com o `finalPrice` já descontado — nenhum evento muda de nome ou momento de disparo.
 
-```sql
-CREATE OR REPLACE FUNCTION public.get_user_plan_v2(_user_id uuid)
-RETURNS text
-LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'
-AS $$
-  SELECT CASE
-    WHEN EXISTS (SELECT 1 FROM public.user_lifetime_access WHERE user_id = _user_id) THEN 'vitalicio'
-    WHEN public.is_admin(_user_id) THEN 'socio'
-    WHEN EXISTS (
-      SELECT 1 FROM public.user_plans
-      WHERE user_id = _user_id AND plan = 'vip'
-        AND (expires_at IS NULL OR expires_at > now())
-    ) THEN 'socio'
-    -- NOVO: Sócio legacy — acesso manual à categoria Receitas (vinha do Clube antigo)
-    WHEN EXISTS (
-      SELECT 1 FROM public.user_exclusive_access
-      WHERE user_id = _user_id AND feature = 'receitas'
-        AND (expires_at IS NULL OR expires_at > now())
-    ) THEN 'socio'
-    WHEN EXISTS (SELECT 1 FROM public.user_courses WHERE user_id = _user_id AND (expires_at IS NULL OR expires_at > now()))
-      OR EXISTS (SELECT 1 FROM public.user_ebooks WHERE user_id = _user_id AND (expires_at IS NULL OR expires_at > now()))
-      OR EXISTS (SELECT 1 FROM public.user_combos WHERE user_id = _user_id AND (expires_at IS NULL OR expires_at > now()))
-      OR EXISTS (SELECT 1 FROM public.user_packages WHERE user_id = _user_id AND (expires_at IS NULL OR expires_at > now()))
-    THEN 'aluno'
-    ELSE 'free'
-  END;
-$$;
-```
+Resultado: ao abrir `/checkout/course/bar-para-eventos`:
+- Sócio novo dentro de 7 dias → R$ 697 × 0,2 = **R$ 139,40**
+- Sócio após 7 dias (e Vitalício pós-7d) → R$ 697 × 0,5 = **R$ 348,50**
+- Sócio legacy (Luis e demais com `user_exclusive_access.feature='receitas'`) → mesmo tratamento, porque `get_user_plan_v2` já devolve `socio` pra eles
+- Free / Aluno → R$ 697,00 (sem mudança)
 
-### 2. Janela de 7 dias para o Sócio legacy
+### Fora de escopo (não mexer)
 
-A janela do desconto 80% é gravada em `user_plans.discount_intro_started_at` pela RPC `start_vip_discount_window`, disparada no `AuthContext` quando o usuário é detectado como Sócio. Como o Luis não tem linha em `user_plans`, vou conferir se essa RPC já faz `UPSERT` na tabela. Se ela só faz `UPDATE`, precisa virar `INSERT … ON CONFLICT` para criar o registro do legacy no primeiro login pós-deploy.
-
-Se necessário, ajusto a RPC `start_vip_discount_window` para fazer upsert garantindo:
-- `user_id` único
-- `plan = 'free'` (não sobrescreve nada do `user_plans`)
-- `discount_intro_started_at = COALESCE(existing, now())`
-
-### 3. Atualizar memória
-
-Atualizar `mem://business/vip-tiered-discount` e o core do índice para refletir: "Sócio inclui também legacy via `user_exclusive_access(feature=receitas)`".
-
-## Fora de escopo (não mexer)
-
-- Mercado Pago, Stripe, checkout, Meta Pixel, páginas públicas
-- Lógica de upsell / mensagens (continuam classificando esses usuários como sócios — comportamento desejado, já que efetivamente são)
-- UI do banner / textos
+- Edge functions de checkout (já corretas)
+- `useCourses`/`useCombos` que checam `plan === 'vip'` para **acesso a conteúdo**: é outro fluxo (gating de cursos), e o usuário pediu pra focar no desconto. Anoto como follow-up, não toco agora.
+- Mercado Pago, Stripe, Meta Pixel, páginas públicas, fluxo de webhook.
 
 ## Como testar
 
-1. Logar como `luisebrito@yahoo.com.br` no preview → o `AuthContext` chama `start_vip_discount_window`, grava `discount_intro_started_at = now()`, e o banner amarelo de **80% OFF expira em 7 dias** aparece no topo.
-2. Conferir badge do plano no menu/perfil mostrando **Sócio**.
-3. Abrir um curso pago → preço com 80% de desconto aplicado.
-4. Conferir admin → o `useAdminUsers` continua mostrando o usuário (sem regressão).
+1. Logar como `luisebrito@yahoo.com.br` (sócio legacy) → abrir `/checkout/course/bar-para-eventos`.
+2. Conferir que aparece **R$ 139,40** no resumo e no botão de pagar.
+3. Gerar Pix → o "Total" do Pix deve ser **R$ 139,40** (não R$ 697,00).
+4. Pagar com cartão → MP recebe `transaction_amount=139.40` (a edge já faz isso, agora o UI bate).
+5. Repetir com um Sócio cuja janela de 7 dias já expirou → preço deve ser R$ 348,50.
+6. Repetir como Free → R$ 697,00 (sem regressão).
 
-## Riscos
+## Impacto e risco
 
-- Usuários com `user_exclusive_access` ativo deixarão de aparecer como "Aluno" e passarão a contar como "Sócio" em métricas/filtros do admin. Considero isso a correção certa, mas vale confirmar antes de aplicar.
+- Risco baixo: mudança isolada em uma página, sem mexer em banco, edge functions, Stripe/MP ou tracking.
+- Tracking InitiateCheckout/Purchase continuam disparando como hoje, só com `value` correto.
+- Nada muda para usuários sem direito a desconto.

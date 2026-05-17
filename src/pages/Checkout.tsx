@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import drinkerosLogo from "@/assets/logotipo-drinkeros.png";
 import { trackFbEvent, trackInitiateCheckout, waitForPixelFlush } from "@/lib/metaPixel";
 import { useViewContent } from "@/hooks/useViewContent";
+import { useVipDiscount } from "@/hooks/useVipDiscount";
+import { applyVipDiscountFor } from "@/lib/vipDiscount";
 
 type ClubMethod = "card" | "pix";
 
@@ -62,7 +64,6 @@ export default function Checkout() {
   const [publicKeyReady, setPublicKeyReady] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isVip, setIsVip] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [pixResult, setPixResult] = useState<PixData | null>(null);
   const [pixPaymentId, setPixPaymentId] = useState<string | null>(null);
@@ -70,7 +71,11 @@ export default function Checkout() {
   const [payerEmail, setPayerEmail] = useState<string | null>(null);
   const [clubMethod, setClubMethod] = useState<ClubMethod>("card");
 
+  const vip = useVipDiscount();
   const isClub = productType === "club";
+  // Sócio/Vitalício recebem desconto escalonado (80% por 7d → 50% depois) apenas em produtos avulsos.
+  const vipPercent = !isClub && vip.ready && vip.isVip ? vip.percent : 0;
+  const isVip = vipPercent > 0;
 
   // 1. Carrega Public Key e inicializa MP SDK (apenas p/ produtos avulsos no MP; Clube agora usa Stripe)
   useEffect(() => {
@@ -144,7 +149,6 @@ export default function Checkout() {
           const clubProd = CLUB_PRODUCTS[slug as string] || CLUB_PRODUCTS["clube-anual"];
           setProduct(clubProd);
           setPayerEmail(user.email ?? "");
-          setIsVip(false);
           setLoading(false);
           return;
         }
@@ -168,8 +172,6 @@ export default function Checkout() {
 
         if (user) {
           setPayerEmail(user.email ?? "");
-          const { data: planData } = await supabase.rpc("get_user_plan", { _user_id: user.id });
-          setIsVip(planData === "vip");
         } else {
           setPayerEmail("");
         }
@@ -182,8 +184,10 @@ export default function Checkout() {
   const finalPrice = useMemo(() => {
     if (!product) return 0;
     if (isClub) return Number(product.price);
-    return isVip ? Math.round(Number(product.price) * 0.2 * 100) / 100 : Number(product.price);
-  }, [product, isVip, isClub]);
+    return vipPercent > 0
+      ? applyVipDiscountFor(Number(product.price), vipPercent)
+      : Number(product.price);
+  }, [product, vipPercent, isClub]);
 
   // ViewContent da tela de checkout
   useViewContent({
@@ -487,7 +491,7 @@ export default function Checkout() {
             </div>
             {isVip && !isClub && (
               <div className="flex justify-between text-sm text-primary">
-                <span>Desconto Sócio do Clube (-80%)</span>
+                <span>Desconto Sócio do Clube (-{vipPercent}%)</span>
                 <span>−R$ {(Number(product.price) - finalPrice).toFixed(2).replace(".", ",")}</span>
               </div>
             )}
