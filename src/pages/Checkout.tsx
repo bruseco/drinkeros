@@ -149,7 +149,6 @@ export default function Checkout() {
           const clubProd = CLUB_PRODUCTS[slug as string] || CLUB_PRODUCTS["clube-anual"];
           setProduct(clubProd);
           setPayerEmail(user.email ?? "");
-          setIsVip(false);
           setLoading(false);
           return;
         }
@@ -173,8 +172,6 @@ export default function Checkout() {
 
         if (user) {
           setPayerEmail(user.email ?? "");
-          const { data: planData } = await supabase.rpc("get_user_plan", { _user_id: user.id });
-          setIsVip(planData === "vip");
         } else {
           setPayerEmail("");
         }
@@ -187,8 +184,10 @@ export default function Checkout() {
   const finalPrice = useMemo(() => {
     if (!product) return 0;
     if (isClub) return Number(product.price);
-    return isVip ? Math.round(Number(product.price) * 0.2 * 100) / 100 : Number(product.price);
-  }, [product, isVip, isClub]);
+    return vipPercent > 0
+      ? applyVipDiscountFor(Number(product.price), vipPercent)
+      : Number(product.price);
+  }, [product, vipPercent, isClub]);
 
   // ViewContent da tela de checkout
   useViewContent({
