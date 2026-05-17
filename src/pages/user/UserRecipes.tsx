@@ -18,6 +18,8 @@ import { Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePwaStatus } from '@/hooks/usePwaStatus';
 import { shouldShowPwaGate } from '@/components/user/PwaInstallGate';
+import { getPrimaryPhase } from '@/lib/seasonalPhases';
+import { Sparkles } from 'lucide-react';
 
 const CATEGORY_FILTERS = [
   { label: 'Xaropes Artesanais', value: 'Xaropes Artesanais', icon: GlassWater },
@@ -242,9 +244,24 @@ const UserRecipes: React.FC = () => {
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  const seasonalPhase = getPrimaryPhase();
+  const seasonalLabel = seasonalPhase
+    ? seasonalPhase.id === 'verao'
+      ? 'O Verão chegou!'
+      : seasonalPhase.id === 'inverno'
+        ? 'O Inverno chegou!'
+        : `${seasonalPhase.label} está chegando!`
+    : null;
+
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
       <div className="space-y-3">
+        {seasonalLabel && (
+          <div className="flex items-center justify-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent-foreground">
+            <Sparkles className="h-3.5 w-3.5 text-accent" />
+            <span>{seasonalLabel}</span>
+          </div>
+        )}
         {/* Category filter chips */}
         <ScrollArea className="w-[100vw] -ml-4 whitespace-nowrap">
           <div className="flex gap-2 pb-1 px-4">
