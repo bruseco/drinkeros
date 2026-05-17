@@ -124,7 +124,10 @@ export function useAbVariantTrack(pageKey: string, variant: 'b' = 'b') {
 export function trackAbConversion(pageKey: string) {
   const variant = readVariant(pageKey);
   if (!variant) return;
-  supabase.rpc('ab_increment_conversion' as any, { _page_key: pageKey, _variant: variant });
+  // PostgrestBuilder é thenable preguiçoso: precisa de .then() pra disparar a request.
+  Promise.resolve(
+    supabase.rpc('ab_increment_conversion' as any, { _page_key: pageKey, _variant: variant }),
+  ).catch(() => { /* fire-and-forget */ });
 }
 
 export const _ab = { readVariant, writeVariant, clearVariant };
