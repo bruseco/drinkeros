@@ -46,11 +46,15 @@ function trackVisitOnce(pageKey: string, variant: 'a' | 'b') {
   if (typeof window === 'undefined') return;
   const key = `ab-visit:${pageKey}:${variant}`;
   if (window.sessionStorage.getItem(key)) return;
-  window.sessionStorage.setItem(key, '1');
   // PostgrestBuilder é thenable preguiçoso: precisa de .then() pra disparar a request.
+  // Marca como visitado SOMENTE após sucesso, evitando perder eventos se a request falhar.
   Promise.resolve(
     supabase.rpc('ab_increment_visit' as any, { _page_key: pageKey, _variant: variant }),
-  ).catch(() => { /* fire-and-forget */ });
+  )
+    .then(() => {
+      try { window.sessionStorage.setItem(key, '1'); } catch { /* ignore */ }
+    })
+    .catch(() => { /* fire-and-forget */ });
 }
 
 function clearVariant(pageKey: string) {
