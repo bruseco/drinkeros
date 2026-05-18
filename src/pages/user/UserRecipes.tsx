@@ -121,6 +121,23 @@ const normalizeRecipeIdentity = (value: string | null | undefined) =>
     .replace(/\s+/g, ' ')
     .trim();
 
+const normalizeRecipeCoverIdentity = (value: string | null | undefined) => {
+  const raw = value || '';
+  try {
+    const url = new URL(raw);
+    return normalizeRecipeIdentity(decodeURIComponent(url.pathname.split('/').pop() || raw));
+  } catch {
+    return normalizeRecipeIdentity(raw.split('/').pop() || raw);
+  }
+};
+
+const getRecipeIdentityKeys = (recipe: { id?: string | null; title?: string | null; slug?: string | null; cover_image_url?: string | null }) => [
+  recipe.id || '',
+  normalizeRecipeIdentity(recipe.title),
+  normalizeRecipeIdentity(recipe.slug),
+  normalizeRecipeCoverIdentity(recipe.cover_image_url),
+].filter(Boolean);
+
 const UserRecipes: React.FC = () => {
   // Seed persists across navigation within the session — only re-shuffles on full page refresh
   // so users can return to a recipe they had eyed without losing their place.
@@ -224,10 +241,9 @@ const UserRecipes: React.FC = () => {
     const seen = new Set<string>();
     const out: typeof recipesRaw = [];
     for (const r of recipesRaw) {
-      const identity = normalizeRecipeIdentity(r.title) || r.id;
-      if (seen.has(r.id) || seen.has(identity)) continue;
-      seen.add(r.id);
-      seen.add(identity);
+      const keys = getRecipeIdentityKeys(r);
+      if (keys.some((key) => seen.has(key))) continue;
+      keys.forEach((key) => seen.add(key));
       out.push(r);
     }
     return out;
