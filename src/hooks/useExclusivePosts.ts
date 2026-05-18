@@ -173,7 +173,7 @@ export const useExclusivePostsPaginated = ({
         // e por fim faz fetch dos detalhes apenas da página atual.
         let allQuery = supabase
           .from('exclusive_posts')
-          .select('id, title, cover_image_url, characteristics')
+          .select('id, title, slug, cover_image_url, characteristics')
           // ORDER estável é obrigatório: o shuffle só é determinístico se a
           // entrada também for. Sem isso o Postgres pode devolver as linhas em
           // ordem diferente entre páginas e o feed acaba repetindo drinks.
@@ -193,15 +193,14 @@ export const useExclusivePostsPaginated = ({
         // Festa Junina, Verão, Inverno só aparecem dentro de suas janelas).
         // Quando o usuário aplica QUALQUER filtro de característica, liberamos
         // todas as tags (busca também libera, mas vai por outro branch via RPC).
-        const uniqueRows = ((allRows || []) as { id: string; title: string | null; cover_image_url: string | null; characteristics: string[] | null }[])
+        const uniqueRows = ((allRows || []) as { id: string; title: string | null; slug: string | null; cover_image_url: string | null; characteristics: string[] | null }[])
           .reduce((acc, row) => {
-            const identity = normalizeRecipeIdentity(row.title) || normalizeRecipeIdentity(row.cover_image_url) || row.id;
-            if (!acc.seen.has(identity)) {
-              acc.seen.add(identity);
-              acc.rows.push(row);
-            }
+            const keys = getRecipeIdentityKeys(row);
+            if (keys.some((key) => acc.seen.has(key))) return acc;
+            keys.forEach((key) => acc.seen.add(key));
+            acc.rows.push(row);
             return acc;
-          }, { seen: new Set<string>(), rows: [] as { id: string; title: string | null; cover_image_url: string | null; characteristics: string[] | null }[] }).rows;
+          }, { seen: new Set<string>(), rows: [] as { id: string; title: string | null; slug: string | null; cover_image_url: string | null; characteristics: string[] | null }[] }).rows;
 
         const inSeason = characteristicFilter
           ? uniqueRows
@@ -247,8 +246,16 @@ export const useExclusivePostsPaginated = ({
           (a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)
         );
 
+        const seenPageRows = new Set<string>();
+        const uniqueSorted = sorted.filter((row) => {
+          const keys = getRecipeIdentityKeys(row);
+          if (keys.some((key) => seenPageRows.has(key))) return false;
+          keys.forEach((key) => seenPageRows.add(key));
+          return true;
+        });
+
         return {
-          posts: sorted,
+          posts: uniqueSorted,
           total,
           hasMore: from + pageSize < total,
         };
