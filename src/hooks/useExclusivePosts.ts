@@ -9,7 +9,7 @@ import { getPrimaryPhase, matchesPhase, isOutOfSeason } from '@/lib/seasonalPhas
 // same seed even if the module is re-evaluated (HMR, code-split, etc.) —
 // otherwise the shuffle changes mid-pagination and items overlap across pages.
 const SEED_KEY = 'exclusive-posts:seed';
-const RANDOM_FEED_VERSION = 2;
+const RANDOM_FEED_VERSION = 3;
 function getOrCreateSeed(): number {
   try {
     const raw = sessionStorage.getItem(SEED_KEY);
@@ -50,8 +50,28 @@ function normalizeRecipeIdentity(value: string | null | undefined): string {
     .trim();
 }
 
+function normalizeRecipeCoverIdentity(value: string | null | undefined): string {
+  const raw = value || '';
+  try {
+    const url = new URL(raw);
+    return normalizeRecipeIdentity(decodeURIComponent(url.pathname.split('/').pop() || raw));
+  } catch {
+    return normalizeRecipeIdentity(raw.split('/').pop() || raw);
+  }
+}
+
+function getRecipeIdentityKeys(row: { id?: string | null; title?: string | null; slug?: string | null; cover_image_url?: string | null }) {
+  return [
+    row.id || '',
+    normalizeRecipeIdentity(row.title),
+    normalizeRecipeIdentity(row.slug),
+    normalizeRecipeCoverIdentity(row.cover_image_url),
+  ].filter(Boolean);
+}
+
 export interface ExclusivePost {
   id: string;
+  slug?: string | null;
   title: string;
   description: string | null;
   youtube_url: string | null;
