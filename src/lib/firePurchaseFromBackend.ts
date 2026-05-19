@@ -20,6 +20,7 @@ export async function firePurchaseFromBackend(opts?: { source?: string }) {
       console.log('[firePurchaseFromBackend] nenhuma compra pendente para enviar');
       return;
     }
+    const eventId = `purchase:${purchase.gateway}:${purchase.transaction_id}`;
     trackFbEvent(
       'Purchase',
       {
@@ -31,7 +32,7 @@ export async function firePurchaseFromBackend(opts?: { source?: string }) {
         order_id: purchase.transaction_id,
         transaction_id: purchase.transaction_id,
       },
-      { dedupeKey: `purchase:${purchase.gateway}:${purchase.transaction_id}` },
+      { dedupeKey: eventId, eventId },
     );
     console.log('[firePurchaseFromBackend] Purchase disparado', { source: opts?.source, purchase });
   } catch (e) {
