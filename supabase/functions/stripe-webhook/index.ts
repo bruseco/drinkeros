@@ -4,6 +4,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { fireCapiPurchaseFromWebhook } from "../_shared/metaCapi.ts";
 
 const log = (step: string, details?: unknown) => {
   console.log(`[stripe-webhook] ${step}${details ? " — " + JSON.stringify(details) : ""}`);
