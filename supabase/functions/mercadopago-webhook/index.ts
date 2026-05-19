@@ -2,6 +2,7 @@
 // registra evento e libera acesso ao produto (curso/ebook/combo/pacote) quando approved.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { fireCapiPurchaseFromWebhook } from "../_shared/metaCapi.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -45,6 +46,18 @@ async function recordPurchase(supabase: any, p: {
     { onConflict: "gateway,transaction_id" },
   );
   if (error) console.error("[mp-webhook] purchases-upsert-error", error);
+
+  // Dispara Purchase via Meta Conversions API (server-side, à prova de adblock/ITP)
+  await fireCapiPurchaseFromWebhook(supabase, {
+    userId: p.userId,
+    transactionId: p.transactionId,
+    gateway: "mercado_pago",
+    amount: p.amountPaid,
+    currency: p.currency || "BRL",
+    productName: p.productName,
+    productType: p.productType,
+    productId: p.productId ?? null,
+  });
 }
 
 async function grantClubAccess(supabase: any, userId: string, payment: any, paymentId: string, periodDays: number) {

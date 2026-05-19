@@ -27,7 +27,7 @@ const firedOnce = new Set<string>();
 export function trackFbEvent(
   event: FbEvent,
   params?: Record<string, any>,
-  options?: { dedupeKey?: string }
+  options?: { dedupeKey?: string; eventId?: string }
 ) {
   if (typeof window === 'undefined') return;
 
@@ -57,12 +57,15 @@ export function trackFbEvent(
   }
 
   try {
+    const eventOpts = options?.eventId ? { eventID: options.eventId } : undefined;
     if (params && Object.keys(params).length > 0) {
-      window.fbq('track', event, params);
+      if (eventOpts) window.fbq('track', event, params, eventOpts);
+      else window.fbq('track', event, params);
     } else {
-      window.fbq('track', event);
+      if (eventOpts) window.fbq('track', event, {}, eventOpts);
+      else window.fbq('track', event);
     }
-    console.log('[MetaPixel] track', event, params || '');
+    console.log('[MetaPixel] track', event, params || '', eventOpts || '');
   } catch (err) {
     console.warn('[MetaPixel] erro ao disparar', event, err);
   }
