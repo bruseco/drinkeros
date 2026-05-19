@@ -112,6 +112,18 @@ serve(async (req) => {
       { onConflict: "gateway,transaction_id" },
     );
     if (error) log("purchases-upsert-error", { error: error.message, transactionId: p.transactionId });
+
+    // Dispara Purchase via Meta Conversions API (server-side, à prova de adblock/ITP)
+    await fireCapiPurchaseFromWebhook(supabase, {
+      userId: p.userId,
+      transactionId: p.transactionId,
+      gateway: "stripe",
+      amount: p.amountPaid,
+      currency: p.currency || "BRL",
+      productName: p.productName,
+      productType: p.productType,
+      productId: p.productId ?? null,
+    });
   };
 
   const upsertVipPlan = async (userId: string, periodEndUnix?: number | null) => {
