@@ -254,7 +254,17 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
   );
 };
 
+const PasswordInput = ({ id, value, onChange, show, toggleShow, placeholder }: any) => (
+  <div className="relative">
+    <Input id={id} type={show ? 'text' : 'password'} value={value} onChange={onChange} placeholder={placeholder} />
+    <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3" onClick={toggleShow}>
+      {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+    </Button>
+  </div>
+);
+
 const ChangePasswordSection: React.FC = () => {
+
   const { user } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
