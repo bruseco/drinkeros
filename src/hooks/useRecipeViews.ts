@@ -24,33 +24,30 @@ export const useTrackRecipeView = () => {
   return useMutation({
     mutationFn: async (recipeId: string) => {
       if (!user) return;
-      // 1 write a cada 30min por (user, recipe) — antes era 1-2 round trips por load.
+      // Throttle agressivo: 1 write a cada 30min por (user, recipe).
+      // Antes: SELECT + UPDATE/INSERT em todo carregamento de aula.
       if (!shouldTrackView(user.id, recipeId)) return;
 
-      // Upsert direto preserva completed=true existente porque só atualiza viewed_at.
-      // Index único (user_id, recipe_id) garante conflito correto.
-      const { error } = await supabase
+      const { data: existing } = await supabase
         .from('recipe_views')
-        .upsert(
-          {
-            user_id: user.id,
-            recipe_id: recipeId,
-            viewed_at: new Date().toISOString(),
-            completed: false,
-          },
-          { onConflict: 'user_id,recipe_id', ignoreDuplicates: false }
-        );
-      // ignoreDuplicates:false faz UPDATE no conflito; como não passamos completed
-      // no SET dinâmico, o postgrest sobrescreve completed=false. Para evitar isso,
-      // refazemos como UPDATE-only quando linha existe (caso raro: completed=true).
-      // Simplificação segura: tratar erros silenciosamente — tracking é best-effort.
-      if (error) {
-        // Fallback: tentar apenas update de viewed_at sem mexer em completed
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('recipe_id', recipeId)
+        .maybeSingle();
+
+      if (existing) {
         await supabase
           .from('recipe_views')
           .update({ viewed_at: new Date().toISOString() })
           .eq('user_id', user.id)
           .eq('recipe_id', recipeId);
+      } else {
+        await supabase.from('recipe_views').insert({
+          user_id: user.id,
+          recipe_id: recipeId,
+          viewed_at: new Date().toISOString(),
+          completed: false,
+        });
       }
     },
   });
