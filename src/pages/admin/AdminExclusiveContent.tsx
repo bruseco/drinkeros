@@ -18,7 +18,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, MoreHorizontal, Pencil, Trash2, Loader2, Wine, Upload, Search } from 'lucide-react';
+import { Plus, MoreHorizontal, Pencil, Trash2, Loader2, Wine, Upload, Search, Sparkles, Droplet } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { parseRecipeCsv } from '@/lib/recipeCsv';
@@ -29,6 +29,8 @@ const AdminExclusiveContent: React.FC = () => {
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analyzeProgress, setAnalyzeProgress] = useState<{ done: number; remaining: number } | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 300);
@@ -162,6 +164,35 @@ const AdminExclusiveContent: React.FC = () => {
     }
   };
 
+  const handleAnalyzeYield = async (force = false) => {
+    setIsAnalyzing(true);
+    setAnalyzeProgress({ done: 0, remaining: 0 });
+    try {
+      let totalDone = 0;
+      // Loop em lotes até zerar pendentes
+      while (true) {
+        const { data, error } = await supabase.functions.invoke('analyze-recipe-yield', {
+          body: { batch_size: 10, force },
+        });
+        if (error) throw error;
+        const processed = data?.processed ?? 0;
+        const remaining = data?.remaining ?? 0;
+        totalDone += processed;
+        setAnalyzeProgress({ done: totalDone, remaining });
+        if (processed === 0 || (force && totalDone >= 1000)) break;
+        // pequena pausa entre lotes
+        await new Promise((r) => setTimeout(r, 500));
+      }
+      toast({ title: `Análise concluída`, description: `${totalDone} receita(s) atualizada(s).` });
+      window.location.reload();
+    } catch (err: any) {
+      toast({ title: 'Erro ao analisar rendimento', description: err.message, variant: 'destructive' });
+    } finally {
+      setIsAnalyzing(false);
+      setAnalyzeProgress(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -169,11 +200,17 @@ const AdminExclusiveContent: React.FC = () => {
           <h1 className="text-3xl font-bold text-foreground">Receitas</h1>
           <p className="text-muted-foreground">Gerencie as receitas de drinks</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <input ref={fileInputRef} type="file" accept=".csv" onChange={handleCSVImport} className="hidden" />
           <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isImporting}>
             {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
             Importar CSV
+          </Button>
+          <Button variant="outline" onClick={() => handleAnalyzeYield(false)} disabled={isAnalyzing} title="Analisa via IA o rendimento (ml, drinks, pessoas) das receitas pendentes">
+            {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {isAnalyzing && analyzeProgress
+              ? `Analisando... ${analyzeProgress.done} feitas, ${analyzeProgress.remaining} restantes`
+              : 'Analisar rendimento (IA)'}
           </Button>
           <Button asChild>
             <Link to="/admin/receitas/nova">

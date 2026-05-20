@@ -12,6 +12,7 @@ import { Loader2, ArrowLeft, Heart, Share2, Wine } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import FavoriteDialog from '@/components/user/FavoriteDialog';
 import RelatedRecipesSection from '@/components/user/RelatedRecipesSection';
+import RecipeYieldLine from '@/components/user/RecipeYieldLine';
 import { useTrackExclusivePostView } from '@/hooks/useAccessTracking';
 import { useViewContent } from '@/hooks/useViewContent';
 
@@ -160,7 +161,14 @@ const UserRecipeDetail: React.FC = () => {
 
       {/* Content */}
       <div className="container mx-auto px-4 space-y-6">
-        <h1 className="text-3xl font-bold text-foreground">{recipe.title}</h1>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold text-foreground">{recipe.title}</h1>
+          <RecipeYieldLine
+            yieldMl={(recipe as any).yield_ml}
+            drinksCount={(recipe as any).drinks_count}
+            servesPeople={(recipe as any).serves_people}
+          />
+        </div>
 
         {recipe.ingredients && recipe.ingredients.length > 0 && (
           <div>
