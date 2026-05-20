@@ -12,6 +12,7 @@ import { Loader2, ArrowLeft, Heart, Share2, Wine } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import FavoriteDialog from '@/components/user/FavoriteDialog';
 import RelatedRecipesSection from '@/components/user/RelatedRecipesSection';
+import RecipeYieldLine from '@/components/user/RecipeYieldLine';
 import { useTrackExclusivePostView } from '@/hooks/useAccessTracking';
 import { useViewContent } from '@/hooks/useViewContent';
 
