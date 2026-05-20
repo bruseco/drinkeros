@@ -162,6 +162,11 @@ const UserRecipeDetail: React.FC = () => {
       {/* Content */}
       <div className="container mx-auto px-4 space-y-6">
         <h1 className="text-3xl font-bold text-foreground">{recipe.title}</h1>
+        <RecipeYieldLine
+          yieldMl={(recipe as any).yield_ml}
+          drinksCount={(recipe as any).drinks_count}
+          servesPeople={(recipe as any).serves_people}
+        />
 
         {recipe.ingredients && recipe.ingredients.length > 0 && (
           <div>
