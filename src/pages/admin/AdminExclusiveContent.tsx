@@ -164,6 +164,35 @@ const AdminExclusiveContent: React.FC = () => {
     }
   };
 
+  const handleAnalyzeYield = async (force = false) => {
+    setIsAnalyzing(true);
+    setAnalyzeProgress({ done: 0, remaining: 0 });
+    try {
+      let totalDone = 0;
+      // Loop em lotes até zerar pendentes
+      while (true) {
+        const { data, error } = await supabase.functions.invoke('analyze-recipe-yield', {
+          body: { batch_size: 10, force },
+        });
+        if (error) throw error;
+        const processed = data?.processed ?? 0;
+        const remaining = data?.remaining ?? 0;
+        totalDone += processed;
+        setAnalyzeProgress({ done: totalDone, remaining });
+        if (processed === 0 || (force && totalDone >= 1000)) break;
+        // pequena pausa entre lotes
+        await new Promise((r) => setTimeout(r, 500));
+      }
+      toast({ title: `Análise concluída`, description: `${totalDone} receita(s) atualizada(s).` });
+      window.location.reload();
+    } catch (err: any) {
+      toast({ title: 'Erro ao analisar rendimento', description: err.message, variant: 'destructive' });
+    } finally {
+      setIsAnalyzing(false);
+      setAnalyzeProgress(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
