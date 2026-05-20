@@ -83,6 +83,10 @@ export interface ExclusivePost {
   characteristics: string[];
   created_at: string;
   updated_at: string;
+  yield_ml?: number | null;
+  drinks_count?: number | null;
+  serves_people?: number | null;
+  yield_analyzed_at?: string | null;
 }
 
 export type ExclusivePostInsert = Omit<ExclusivePost, 'id' | 'created_at' | 'updated_at'>;
