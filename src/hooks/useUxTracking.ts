@@ -81,23 +81,25 @@ export const useUxTracking = (upsellPosition: number, totalCarousels: number) =>
 
       const observer = new IntersectionObserver(
         (entries) => {
-          if (entries[0]?.isIntersecting && !upsellViewLoggedRef.current) {
-            upsellViewLoggedRef.current = true;
-            supabase.from('ux_interactions').insert({
-              user_id: user.id,
-              event_type: 'upsell_view',
-              metadata: { position: upsellPosition, total_carousels: totalCarousels },
-            }).then(() => {});
-            observer.disconnect();
-          }
-        },
-        { threshold: 0.5 }
-      );
+            if (entries[0]?.isIntersecting && !upsellViewLoggedRef.current) {
+              upsellViewLoggedRef.current = true;
+              if (shouldLogUx(`uxv:${user.id}:${upsellPosition}`, UX_TTL_MS)) {
+                supabase.from('ux_interactions').insert({
+                  user_id: user.id,
+                  event_type: 'upsell_view',
+                  metadata: { position: upsellPosition, total_carousels: totalCarousels },
+                }).then(() => {});
+              }
+              observer.disconnect();
+            }
+          },
+          { threshold: 0.5 }
+        );
 
-      observer.observe(node);
-    },
-    [user?.id, upsellPosition, totalCarousels]
-  );
+        observer.observe(node);
+      },
+      [user?.id, upsellPosition, totalCarousels]
+    );
 
   // Track upsell click
   const trackUpsellClick = useCallback(
