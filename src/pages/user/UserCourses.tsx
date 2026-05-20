@@ -271,7 +271,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, owned, expired = false,
             </Link>
           ) : (
             <div
-              className={`flex items-center gap-1 text-white/90 text-xs ${owned ? '' : 'animate-wiggle-x'}`}
+              className={`flex items-center gap-1 text-white/90 text-xs ${owned ? '' : 'animate-wiggle-x lg:animate-none'}`}
               style={owned ? undefined : { ['--wiggle-amp' as any]: wiggleAmp }}
             >
               <span>{expired ? 'Reativar no Clube' : owned ? 'Ver módulos' : 'Saiba mais'}</span>
