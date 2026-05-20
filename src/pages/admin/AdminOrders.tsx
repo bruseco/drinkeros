@@ -45,12 +45,20 @@ const PAGE_SIZE = 50;
 
 type PresetKey = 'today' | '7d' | '30d' | 'mtd' | 'lastMonth' | 'ytd' | 'clear';
 
+// Formata uma Date como YYYY-MM-DD no fuso LOCAL (evita o bug de toISOString
+// que converte para UTC e, em BRT, retorna o dia anterior para horários da manhã).
+const fmtLocalYMD = (d: Date) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
 const initialMtd = () => {
   const now = new Date();
-  const fmt = (d: Date) => d.toISOString().slice(0, 10);
   return {
-    from: fmt(new Date(now.getFullYear(), now.getMonth(), 1)),
-    to: fmt(now),
+    from: fmtLocalYMD(new Date(now.getFullYear(), now.getMonth(), 1)),
+    to: fmtLocalYMD(now),
   };
 };
 
