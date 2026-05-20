@@ -1290,14 +1290,18 @@ export type Database = {
           created_at: string
           description: string | null
           display_order: number | null
+          drinks_count: number | null
           id: string
           ingredients: string[] | null
           instructions: string | null
           is_published: boolean
           posted_checked_at: string | null
+          serves_people: number | null
           slug: string | null
           title: string
           updated_at: string
+          yield_analyzed_at: string | null
+          yield_ml: number | null
           youtube_url: string | null
         }
         Insert: {
@@ -1307,14 +1311,18 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number | null
+          drinks_count?: number | null
           id?: string
           ingredients?: string[] | null
           instructions?: string | null
           is_published?: boolean
           posted_checked_at?: string | null
+          serves_people?: number | null
           slug?: string | null
           title: string
           updated_at?: string
+          yield_analyzed_at?: string | null
+          yield_ml?: number | null
           youtube_url?: string | null
         }
         Update: {
@@ -1324,14 +1332,18 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number | null
+          drinks_count?: number | null
           id?: string
           ingredients?: string[] | null
           instructions?: string | null
           is_published?: boolean
           posted_checked_at?: string | null
+          serves_people?: number | null
           slug?: string | null
           title?: string
           updated_at?: string
+          yield_analyzed_at?: string | null
+          yield_ml?: number | null
           youtube_url?: string | null
         }
         Relationships: [
