@@ -104,7 +104,8 @@ const AdminOrders: React.FC = () => {
 
   const applyPreset = (preset: PresetKey) => {
     const now = new Date();
-    const fmt = (d: Date) => d.toISOString().slice(0, 10);
+    const fmt = fmtLocalYMD;
+
     setPage(0);
     setActivePreset(preset);
     if (preset === 'clear') { setFrom(''); setTo(''); return; }
