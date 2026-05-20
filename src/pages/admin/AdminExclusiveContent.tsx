@@ -18,7 +18,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, MoreHorizontal, Pencil, Trash2, Loader2, Wine, Upload, Search } from 'lucide-react';
+import { Plus, MoreHorizontal, Pencil, Trash2, Loader2, Wine, Upload, Search, Sparkles, Droplet } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { parseRecipeCsv } from '@/lib/recipeCsv';
