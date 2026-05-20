@@ -9,7 +9,8 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, ChevronRight, Package, Camera, Crown, Bell, BellOff } from 'lucide-react';
+import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, ChevronRight, Package, Camera, Crown, Bell, BellOff, Shield, ArrowLeftRight } from 'lucide-react';
+import { isAdminModeOn, setAdminMode } from '@/lib/adminMode';
 import { Switch } from '@/components/ui/switch';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -457,8 +458,10 @@ const NotificationsSection: React.FC = () => {
 };
 
 const UserProfile: React.FC = () => {
-  const { signOut } = useAuth();
+  const { signOut, isSuperAdmin } = useAuth();
+  const navigate = useNavigate();
   const [openSection, setOpenSection] = useState<string | null>(null);
+  const [adminMode, setAdminModeState] = useState<boolean>(() => isAdminModeOn());
   const { missingCount, missingFields, isComplete } = useProfileCompleteness();
   const { data: planData } = useUserPlan();
   const isVip = !!planData?.isVip;
@@ -476,6 +479,18 @@ const UserProfile: React.FC = () => {
         : 'bg-lime-400 text-lime-950 shadow-sm';
 
   const toggle = (key: string) => setOpenSection(prev => prev === key ? null : key);
+
+  const handleAdminToggle = () => {
+    if (adminMode) {
+      setAdminMode(false);
+      setAdminModeState(false);
+      navigate('/app/receitas');
+    } else {
+      setAdminMode(true);
+      setAdminModeState(true);
+      navigate('/admin');
+    }
+  };
 
   return (
     <div className="container mx-auto max-w-2xl py-6 px-4 pb-24 md:pb-6 space-y-2">
@@ -574,6 +589,20 @@ const UserProfile: React.FC = () => {
         </span>
         <ChevronRight className="h-5 w-5 text-muted-foreground" />
       </button>
+
+      {/* Painel de Administração (mobile, super admin only) */}
+      {isSuperAdmin && (
+        <button
+          onClick={handleAdminToggle}
+          className="lg:hidden flex w-full items-center justify-between rounded-lg border border-accent/40 bg-accent/5 px-4 h-14 hover:bg-accent/10 transition-colors"
+        >
+          <span className="flex items-center gap-3 text-sm font-semibold text-accent">
+            {adminMode ? <ArrowLeftRight className="h-5 w-5" /> : <Shield className="h-5 w-5" />}
+            {adminMode ? 'Acessar como Cliente' : 'Painel de Administração'}
+          </span>
+          <ChevronRight className="h-5 w-5 text-accent" />
+        </button>
+      )}
 
       {/* Sair */}
       <button
