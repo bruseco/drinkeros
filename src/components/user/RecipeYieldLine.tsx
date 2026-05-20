@@ -33,12 +33,14 @@ export const RecipeYieldLine: React.FC<Props> = ({ yieldMl, drinksCount, servesP
     parts.push({ icon: <Droplet className="h-4 w-4" />, label: formatVolume(yieldMl) });
   }
   parts.push({ icon: <Wine className="h-4 w-4" />, label: `${drinksCount} Drinks` });
-  if (servesPeople && servesPeople > 0) {
-    parts.push({
-      icon: <Users className="h-4 w-4" />,
-      label: `Serve até ${servesPeople} ${servesPeople === 1 ? 'pessoa' : 'pessoas'}`,
-    });
-  }
+  // Serve: Y = todos bebem 1 (= drinksCount); X = todos bebem 2 (= ceil(drinksCount/2))
+  const maxPeople = drinksCount;
+  const minPeople = Math.max(1, Math.ceil(drinksCount / 2));
+  const peopleLabel =
+    minPeople === maxPeople
+      ? `Serve ${maxPeople} ${maxPeople === 1 ? 'pessoa' : 'pessoas'}`
+      : `Serve de ${minPeople} a ${maxPeople} pessoas`;
+  parts.push({ icon: <Users className="h-4 w-4" />, label: peopleLabel });
 
   if (parts.length === 0) return null;
 
