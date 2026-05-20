@@ -95,7 +95,21 @@ import UserBatalhaNew from "./pages/user/UserBatalhaNew";
 import UserBatalhaRanking from "./pages/user/UserBatalhaRanking";
 import UserBatalhaRecipeDetail from "./pages/user/UserBatalhaRecipeDetail";
 
-const queryClient = new QueryClient();
+// Sensible defaults to reduce DB read pressure (Disk IO):
+// - staleTime 60s evita refetch a cada navegação dentro de 1min
+// - refetchOnWindowFocus desabilitado: aba focar não dispara query
+// - retry: 1 evita tempestade de retentativas em falhas transitórias
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000,
+      gcTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      retry: 1,
+    },
+  },
+});
 
 // Componente que preserva tokens OAuth na URL
 const RootRedirect = () => {
