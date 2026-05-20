@@ -20,19 +20,48 @@ interface YieldResult {
 }
 
 async function analyzeRecipe(recipe: RecipeRow): Promise<YieldResult> {
-  const prompt = `Você é um especialista em mixologia. Analise a receita abaixo e calcule:
-1. yield_ml: volume TOTAL final do(s) drink(s) em mililitros (somar todos os ingredientes líquidos + gelo derretido estimado ~30ml por drink se houver gelo).
-2. drinks_count: quantos drinks/porções essa receita rende (se for receita de 1 copo, retornar 1; se for jarra/batch, calcular pelo volume / ~250ml).
-3. serves_people: quantas pessoas serve (geralmente igual a drinks_count, exceto em batches onde cada pessoa toma mais de 1).
+  const prompt = `Você é um especialista em mixologia brasileira. Analise a receita abaixo e calcule o rendimento.
 
-Se não conseguir inferir com confiança, retorne null no campo.
+REGRAS DE CONVERSÃO DE MEDIDAS (use sempre que aparecerem, mesmo em descrição/modo de preparo):
+- 1 dose = 50 ml
+- 1/2 dose = 25 ml
+- 1 shot = 40 ml
+- 1 colher de sopa = 15 ml
+- 1 colher de chá = 5 ml
+- 1 xícara = 240 ml
+- 1 copo (americano/médio) = 200 ml
+- 1 copo de cachaça = 200 ml
+- 1 taça = 150 ml
+- 1 lata (refrigerante/cerveja padrão BR, ex: Schweppes, Coca, Antarctica) = 350 ml
+- 1 latão = 473 ml
+- 1 garrafa long neck = 355 ml
+- 1 garrafa de cerveja 600ml = 600 ml
+- 1 garrafa de destilado padrão = 750 ml
+- 1 litro = 1000 ml
+- 1/2 melancia média = ~2000 ml de polpa líquida
+- 1 melancia inteira = ~4000 ml
+- 1 caixa de morango/frutas vermelhas = ~250 ml de fruta
+- 1 abacaxi médio (suco) = ~800 ml
+- 1 limão (suco) = ~30 ml
+- 1 laranja (suco) = ~100 ml
+- Suco de "2 limões" = 60 ml, "5 limões" = 150 ml, etc.
+- Gelo: somar ~50 ml de gelo derretido por drink final servido
+- Frutas em cubos/decoração: contar volume aproximado da fruta inteira
+- Ignore guarnições simples (folhas de hortelã, rodelas decorativas) no cálculo de volume
+
+CALCULE:
+1. yield_ml: volume TOTAL final da receita em ml (some TODOS os líquidos + frutas batidas + gelo derretido estimado). Seja generoso com batches grandes (jarras, ponches, melancia recheada normalmente passam de 3000 ml).
+2. drinks_count: quantos drinks/porções rende. Para batches grandes: divida o volume total por ~250 ml (tamanho médio de uma porção servida). Receita de copo único = 1.
+3. serves_people: geralmente IGUAL a drinks_count.
+
+IMPORTANTE: Leia TODO o modo de preparo procurando medidas. Se a receita menciona "1 melancia", "2 copos", "1 lata", "1 jarra", "rende X pessoas", "para a festa" → é BATCH, não 1 drink. NUNCA retorne null se houver QUALQUER pista de volume; estime com base nas regras acima.
 
 RECEITA: ${recipe.title}
 INGREDIENTES: ${(recipe.ingredients || []).join(' | ')}
 MODO DE PREPARO: ${recipe.instructions || '(sem instruções)'}
 DESCRIÇÃO: ${recipe.description || '(sem descrição)'}
 
-Responda APENAS com JSON válido no formato: {"yield_ml": number|null, "drinks_count": number|null, "serves_people": number|null}`;
+Responda APENAS com JSON válido: {"yield_ml": number|null, "drinks_count": number|null, "serves_people": number|null}`;
 
   const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
     method: 'POST',
