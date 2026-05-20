@@ -64,7 +64,7 @@ const UserEbooks: React.FC = () => {
           <p className="text-muted-foreground">Nenhum e-book disponível no momento</p>
         </div>
       ) : (
-        <div className="grid gap-8 grid-cols-1">
+        <div className="grid gap-8 grid-cols-1 lg:grid-cols-3">
           {activeEbooks.map((ebook) => {
             const owned = ownedSet.has(ebook.id);
             const expired = expiredSet.has(ebook.id);
