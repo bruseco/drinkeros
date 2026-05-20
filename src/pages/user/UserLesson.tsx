@@ -276,14 +276,18 @@ const UserLesson: React.FC = () => {
 
   // Get completed lessons (only those explicitly marked as completed)
   const { data: viewedLessons = [] } = useQuery({
-    queryKey: ['viewed-lessons'],
+    queryKey: ['viewed-lessons', user?.id],
     queryFn: async () => {
+      if (!user?.id) return [];
       const { data } = await supabase
         .from('recipe_views')
         .select('recipe_id')
+        .eq('user_id', user.id)
         .eq('completed', true);
       return data?.map(v => v.recipe_id) || [];
     },
+    enabled: !!user?.id,
+    staleTime: 60 * 1000,
   });
 
   // Fetch materials for this lesson

@@ -2,6 +2,21 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Throttle por sessão: evita re-tracking da mesma receita repetidamente
+const VIEW_SESSION_TTL_MS = 30 * 60 * 1000; // 30min
+function shouldTrackView(userId: string, recipeId: string): boolean {
+  try {
+    const key = `rv:${userId}:${recipeId}`;
+    const raw = sessionStorage.getItem(key);
+    const last = raw ? Number(raw) : 0;
+    if (Number.isFinite(last) && Date.now() - last < VIEW_SESSION_TTL_MS) return false;
+    sessionStorage.setItem(key, String(Date.now()));
+    return true;
+  } catch {
+    return true;
+  }
+}
+
 // Track when a user views a recipe (does NOT mark as completed)
 export const useTrackRecipeView = () => {
   const { user } = useAuth();
@@ -9,9 +24,10 @@ export const useTrackRecipeView = () => {
   return useMutation({
     mutationFn: async (recipeId: string) => {
       if (!user) return;
+      // Throttle agressivo: 1 write a cada 30min por (user, recipe).
+      // Antes: SELECT + UPDATE/INSERT em todo carregamento de aula.
+      if (!shouldTrackView(user.id, recipeId)) return;
 
-      // Insert view record if it doesn't exist, or just update viewed_at
-      // Use ignoreDuplicates: false to update viewed_at but we handle completed separately
       const { data: existing } = await supabase
         .from('recipe_views')
         .select('id')
@@ -20,24 +36,18 @@ export const useTrackRecipeView = () => {
         .maybeSingle();
 
       if (existing) {
-        // Update only viewed_at, preserve completed status
-        const { error } = await supabase
+        await supabase
           .from('recipe_views')
           .update({ viewed_at: new Date().toISOString() })
           .eq('user_id', user.id)
           .eq('recipe_id', recipeId);
-        if (error) throw error;
       } else {
-        // Insert new record with completed = false
-        const { error } = await supabase
-          .from('recipe_views')
-          .insert({
-            user_id: user.id,
-            recipe_id: recipeId,
-            viewed_at: new Date().toISOString(),
-            completed: false,
-          });
-        if (error) throw error;
+        await supabase.from('recipe_views').insert({
+          user_id: user.id,
+          recipe_id: recipeId,
+          viewed_at: new Date().toISOString(),
+          completed: false,
+        });
       }
     },
   });

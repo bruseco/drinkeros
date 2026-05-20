@@ -2,6 +2,20 @@ import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Throttle por sessão para evitar centenas de ux_interactions duplicadas por usuário/dia.
+function shouldLogUx(key: string, ttlMs: number): boolean {
+  try {
+    const raw = sessionStorage.getItem(key);
+    const last = raw ? Number(raw) : 0;
+    if (Number.isFinite(last) && Date.now() - last < ttlMs) return false;
+    sessionStorage.setItem(key, String(Date.now()));
+    return true;
+  } catch {
+    return true;
+  }
+}
+const UX_TTL_MS = 30 * 60 * 1000; // 30min
+
 export const useUxTracking = (upsellPosition: number, totalCarousels: number) => {
   const { user } = useAuth();
   const maxScrollRef = useRef(0);
@@ -67,23 +81,25 @@ export const useUxTracking = (upsellPosition: number, totalCarousels: number) =>
 
       const observer = new IntersectionObserver(
         (entries) => {
-          if (entries[0]?.isIntersecting && !upsellViewLoggedRef.current) {
-            upsellViewLoggedRef.current = true;
-            supabase.from('ux_interactions').insert({
-              user_id: user.id,
-              event_type: 'upsell_view',
-              metadata: { position: upsellPosition, total_carousels: totalCarousels },
-            }).then(() => {});
-            observer.disconnect();
-          }
-        },
-        { threshold: 0.5 }
-      );
+            if (entries[0]?.isIntersecting && !upsellViewLoggedRef.current) {
+              upsellViewLoggedRef.current = true;
+              if (shouldLogUx(`uxv:${user.id}:${upsellPosition}`, UX_TTL_MS)) {
+                supabase.from('ux_interactions').insert({
+                  user_id: user.id,
+                  event_type: 'upsell_view',
+                  metadata: { position: upsellPosition, total_carousels: totalCarousels },
+                }).then(() => {});
+              }
+              observer.disconnect();
+            }
+          },
+          { threshold: 0.5 }
+        );
 
-      observer.observe(node);
-    },
-    [user?.id, upsellPosition, totalCarousels]
-  );
+        observer.observe(node);
+      },
+      [user?.id, upsellPosition, totalCarousels]
+    );
 
   // Track upsell click
   const trackUpsellClick = useCallback(
