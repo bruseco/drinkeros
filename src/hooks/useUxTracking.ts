@@ -2,6 +2,20 @@ import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Throttle por sessão para evitar centenas de ux_interactions duplicadas por usuário/dia.
+function shouldLogUx(key: string, ttlMs: number): boolean {
+  try {
+    const raw = sessionStorage.getItem(key);
+    const last = raw ? Number(raw) : 0;
+    if (Number.isFinite(last) && Date.now() - last < ttlMs) return false;
+    sessionStorage.setItem(key, String(Date.now()));
+    return true;
+  } catch {
+    return true;
+  }
+}
+const UX_TTL_MS = 30 * 60 * 1000; // 30min
+
 export const useUxTracking = (upsellPosition: number, totalCarousels: number) => {
   const { user } = useAuth();
   const maxScrollRef = useRef(0);
