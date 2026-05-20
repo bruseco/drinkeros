@@ -200,11 +200,17 @@ const AdminExclusiveContent: React.FC = () => {
           <h1 className="text-3xl font-bold text-foreground">Receitas</h1>
           <p className="text-muted-foreground">Gerencie as receitas de drinks</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <input ref={fileInputRef} type="file" accept=".csv" onChange={handleCSVImport} className="hidden" />
           <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isImporting}>
             {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
             Importar CSV
+          </Button>
+          <Button variant="outline" onClick={() => handleAnalyzeYield(false)} disabled={isAnalyzing} title="Analisa via IA o rendimento (ml, drinks, pessoas) das receitas pendentes">
+            {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {isAnalyzing && analyzeProgress
+              ? `Analisando... ${analyzeProgress.done} feitas, ${analyzeProgress.remaining} restantes`
+              : 'Analisar rendimento (IA)'}
           </Button>
           <Button asChild>
             <Link to="/admin/receitas/nova">
