@@ -117,6 +117,35 @@ const AdminTracking: React.FC = () => {
                 </p>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="capiToken">Token da Conversions API (CAPI)</Label>
+                <Input
+                  id="capiToken"
+                  type="password"
+                  value={capiToken}
+                  onChange={(e) => setCapiToken(e.target.value)}
+                  placeholder="EAAG... (token de longa duração)"
+                  autoComplete="off"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Usado para enviar eventos server-side (Purchase) direto para a Meta. Gere em Eventos → Configurações → Conversions API.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="testEventCode">Código de Evento de Teste (opcional)</Label>
+                <Input
+                  id="testEventCode"
+                  value={testEventCode}
+                  onChange={(e) => setTestEventCode(e.target.value)}
+                  placeholder="TEST12345"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Quando preenchido, eventos via CAPI aparecem em "Eventos de teste" no Gerenciador de Eventos. Deixe em branco para desativar o modo de teste.
+                </p>
+              </div>
+
+
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertDescription>
