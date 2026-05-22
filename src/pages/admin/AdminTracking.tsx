@@ -15,6 +15,8 @@ interface TrackingSettings {
   id: string;
   facebook_pixel_id: string | null;
   facebook_pixel_enabled: boolean;
+  meta_capi_access_token: string | null;
+  meta_test_event_code: string | null;
 }
 
 const AdminTracking: React.FC = () => {
