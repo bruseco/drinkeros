@@ -8,8 +8,9 @@ import { useRelatedRecipes } from '@/hooks/useRelatedRecipes';
 import { useUserPlan } from '@/hooks/useUserPlan';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, ArrowLeft, Heart, Share2, Wine } from 'lucide-react';
+import { Loader2, ArrowLeft, Heart, Share2, Wine, Pencil } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import FavoriteDialog from '@/components/user/FavoriteDialog';
 import RelatedRecipesSection from '@/components/user/RelatedRecipesSection';
 import RecipeYieldLine from '@/components/user/RecipeYieldLine';
@@ -33,6 +34,7 @@ const UserRecipeDetail: React.FC = () => {
   const navigate = useNavigate();
   const [showFavoriteDialog, setShowFavoriteDialog] = useState(false);
   const { check: checkAccess } = useRecipeAccessGuard();
+  const { isSuperAdmin } = useAuth();
 
   const recipeId = recipe?.id;
   const isFavorite = favorites.some((f) => f.recipe_id === recipeId);
@@ -262,6 +264,17 @@ const UserRecipeDetail: React.FC = () => {
           />
         )}
       </div>
+
+      {isSuperAdmin && recipeId && (
+        <button
+          onClick={() => navigate(`/admin/receitas/${recipeId}`)}
+          aria-label="Editar receita"
+          className="fixed right-4 z-40 h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:opacity-90 transition"
+          style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 5rem)' }}
+        >
+          <Pencil className="h-5 w-5" />
+        </button>
+      )}
 
       {recipeId && (
         <FavoriteDialog
