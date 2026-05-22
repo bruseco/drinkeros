@@ -2100,6 +2100,8 @@ export type Database = {
           facebook_pixel_enabled: boolean
           facebook_pixel_id: string | null
           id: string
+          meta_capi_access_token: string | null
+          meta_test_event_code: string | null
           updated_at: string
         }
         Insert: {
@@ -2107,6 +2109,8 @@ export type Database = {
           facebook_pixel_enabled?: boolean
           facebook_pixel_id?: string | null
           id?: string
+          meta_capi_access_token?: string | null
+          meta_test_event_code?: string | null
           updated_at?: string
         }
         Update: {
@@ -2114,6 +2118,8 @@ export type Database = {
           facebook_pixel_enabled?: boolean
           facebook_pixel_id?: string | null
           id?: string
+          meta_capi_access_token?: string | null
+          meta_test_event_code?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -3357,6 +3363,13 @@ export type Database = {
           id: string
           image_url: string
           name: string
+        }[]
+      }
+      get_public_tracking_settings: {
+        Args: never
+        Returns: {
+          facebook_pixel_enabled: boolean
+          facebook_pixel_id: string
         }[]
       }
       get_retention_metrics: {
