@@ -156,6 +156,7 @@ export async function fireCapiPurchaseFromWebhook(supabase: any, args: {
     accessToken,
     eventId,
     eventSourceUrl: args.eventSourceUrl,
+    testEventCode,
     value: Number(args.amount) || 0,
     currency: args.currency || "BRL",
     contentName: args.productName,
