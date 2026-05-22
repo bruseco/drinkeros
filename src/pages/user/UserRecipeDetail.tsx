@@ -34,6 +34,7 @@ const UserRecipeDetail: React.FC = () => {
   const navigate = useNavigate();
   const [showFavoriteDialog, setShowFavoriteDialog] = useState(false);
   const { check: checkAccess } = useRecipeAccessGuard();
+  const { isSuperAdmin } = useAuth();
 
   const recipeId = recipe?.id;
   const isFavorite = favorites.some((f) => f.recipe_id === recipeId);
