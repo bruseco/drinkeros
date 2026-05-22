@@ -124,22 +124,23 @@ export async function fireCapiPurchaseFromWebhook(supabase: any, args: {
   productId?: string | null;
   eventSourceUrl?: string | null;
 }) {
-  const accessToken = Deno.env.get("META_CAPI_ACCESS_TOKEN");
-  if (!accessToken) {
-    console.log("[meta-capi] META_CAPI_ACCESS_TOKEN não configurado — skip");
-    return;
-  }
-
-  // Pixel ID vem do tracking_settings (mesmo usado no client)
+  // Pixel ID + CAPI token + test event code vêm do tracking_settings (editáveis pelo admin)
   const { data: ts } = await supabase
     .from("tracking_settings")
-    .select("facebook_pixel_id, facebook_pixel_enabled")
+    .select("facebook_pixel_id, facebook_pixel_enabled, meta_capi_access_token, meta_test_event_code")
     .limit(1)
     .maybeSingle();
   if (!ts?.facebook_pixel_enabled || !ts?.facebook_pixel_id) {
     console.log("[meta-capi] pixel desativado/sem ID — skip");
     return;
   }
+
+  const accessToken = ts.meta_capi_access_token || Deno.env.get("META_CAPI_ACCESS_TOKEN");
+  if (!accessToken) {
+    console.log("[meta-capi] token CAPI não configurado — skip");
+    return;
+  }
+  const testEventCode = ts.meta_test_event_code || null;
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -155,6 +156,7 @@ export async function fireCapiPurchaseFromWebhook(supabase: any, args: {
     accessToken,
     eventId,
     eventSourceUrl: args.eventSourceUrl,
+    testEventCode,
     value: Number(args.amount) || 0,
     currency: args.currency || "BRL",
     contentName: args.productName,

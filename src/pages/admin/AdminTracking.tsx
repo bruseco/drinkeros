@@ -15,6 +15,8 @@ interface TrackingSettings {
   id: string;
   facebook_pixel_id: string | null;
   facebook_pixel_enabled: boolean;
+  meta_capi_access_token: string | null;
+  meta_test_event_code: string | null;
 }
 
 const AdminTracking: React.FC = () => {
@@ -34,11 +36,15 @@ const AdminTracking: React.FC = () => {
 
   const [pixelId, setPixelId] = useState('');
   const [enabled, setEnabled] = useState(false);
+  const [capiToken, setCapiToken] = useState('');
+  const [testEventCode, setTestEventCode] = useState('');
 
   useEffect(() => {
     if (data) {
       setPixelId(data.facebook_pixel_id ?? '');
       setEnabled(data.facebook_pixel_enabled);
+      setCapiToken(data.meta_capi_access_token ?? '');
+      setTestEventCode(data.meta_test_event_code ?? '');
     }
   }, [data]);
 
@@ -50,6 +56,8 @@ const AdminTracking: React.FC = () => {
         .update({
           facebook_pixel_id: pixelId.trim() || null,
           facebook_pixel_enabled: enabled,
+          meta_capi_access_token: capiToken.trim() || null,
+          meta_test_event_code: testEventCode.trim() || null,
         })
         .eq('id', data.id);
       if (error) throw error;
@@ -108,6 +116,35 @@ const AdminTracking: React.FC = () => {
                   Você encontra o ID em business.facebook.com → Eventos → Fontes de dados.
                 </p>
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="capiToken">Token da Conversions API (CAPI)</Label>
+                <Input
+                  id="capiToken"
+                  type="password"
+                  value={capiToken}
+                  onChange={(e) => setCapiToken(e.target.value)}
+                  placeholder="EAAG... (token de longa duração)"
+                  autoComplete="off"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Usado para enviar eventos server-side (Purchase) direto para a Meta. Gere em Eventos → Configurações → Conversions API.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="testEventCode">Código de Evento de Teste (opcional)</Label>
+                <Input
+                  id="testEventCode"
+                  value={testEventCode}
+                  onChange={(e) => setTestEventCode(e.target.value)}
+                  placeholder="TEST12345"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Quando preenchido, eventos via CAPI aparecem em "Eventos de teste" no Gerenciador de Eventos. Deixe em branco para desativar o modo de teste.
+                </p>
+              </div>
+
 
               <Alert>
                 <Info className="h-4 w-4" />
