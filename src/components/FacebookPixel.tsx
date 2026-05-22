@@ -88,19 +88,16 @@ export const FacebookPixel: React.FC = () => {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase
-        .from('tracking_settings')
-        .select('facebook_pixel_id, facebook_pixel_enabled')
-        .limit(1)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc('get_public_tracking_settings');
 
       if (cancelled) return;
       if (error) {
         console.warn('[FacebookPixel] Erro lendo tracking_settings', error);
         return;
       }
-      if (data?.facebook_pixel_enabled && data.facebook_pixel_id) {
-        setPixelReady(injectPixel(data.facebook_pixel_id));
+      const row = Array.isArray(data) ? data[0] : data;
+      if (row?.facebook_pixel_enabled && row.facebook_pixel_id) {
+        setPixelReady(injectPixel(row.facebook_pixel_id));
       } else {
         console.log('[FacebookPixel] Desativado ou sem ID configurado.');
       }
