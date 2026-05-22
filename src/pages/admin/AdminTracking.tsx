@@ -36,11 +36,15 @@ const AdminTracking: React.FC = () => {
 
   const [pixelId, setPixelId] = useState('');
   const [enabled, setEnabled] = useState(false);
+  const [capiToken, setCapiToken] = useState('');
+  const [testEventCode, setTestEventCode] = useState('');
 
   useEffect(() => {
     if (data) {
       setPixelId(data.facebook_pixel_id ?? '');
       setEnabled(data.facebook_pixel_enabled);
+      setCapiToken(data.meta_capi_access_token ?? '');
+      setTestEventCode(data.meta_test_event_code ?? '');
     }
   }, [data]);
 
@@ -52,6 +56,8 @@ const AdminTracking: React.FC = () => {
         .update({
           facebook_pixel_id: pixelId.trim() || null,
           facebook_pixel_enabled: enabled,
+          meta_capi_access_token: capiToken.trim() || null,
+          meta_test_event_code: testEventCode.trim() || null,
         })
         .eq('id', data.id);
       if (error) throw error;
