@@ -266,15 +266,16 @@ const UserRecipeDetail: React.FC = () => {
         )}
       </div>
 
-      {isSuperAdmin && recipeId && (
+      {isSuperAdmin && recipeId && createPortal(
         <button
           onClick={() => navigate(`/admin/receitas/${recipeId}`)}
           aria-label="Editar receita"
-          className="fixed right-4 z-40 h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:opacity-90 transition"
+          className="fixed right-4 z-50 h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:opacity-90 transition lg:bottom-6"
           style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 5rem)' }}
         >
           <Pencil className="h-5 w-5" />
-        </button>
+        </button>,
+        document.body
       )}
 
       {recipeId && (
