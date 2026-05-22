@@ -18,10 +18,13 @@ const formatRemaining = (days: number, hours: number) => {
   return `${days} ${days === 1 ? 'dia' : 'dias'}`;
 };
 
+const pad = (n: number) => String(n).padStart(2, '0');
+
 export const VipDiscountCountdownBanner: React.FC<Props> = ({ forceShowOnProduct = false }) => {
   const vip = useVipDiscount();
   const [dismissedIntro, setDismissedIntro] = useState(false);
   const [dismissedBase, setDismissedBase] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
 
   // Intro: dismiss apenas em sessão (sessionStorage). Reabre em refresh/nova aba.
   useEffect(() => {
@@ -31,10 +34,31 @@ export const VipDiscountCountdownBanner: React.FC<Props> = ({ forceShowOnProduct
     } catch { /* ignore */ }
   }, []);
 
+  // Tick a cada 1s quando entra na reta final (≤ 24h) para o timer correr ao vivo
+  const msLeft = vip.introExpiresAt ? vip.introExpiresAt.getTime() - now : 0;
+  const inFinalDay = vip.isIntroActive && msLeft > 0 && msLeft <= 24 * 60 * 60 * 1000;
+  useEffect(() => {
+    if (!inFinalDay) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [inFinalDay]);
+
   if (!vip.ready || !vip.isVip || vip.isLifetime) return null;
 
   if (vip.isIntroActive) {
     if (dismissedIntro) return null;
+
+    // Timer ao vivo no último dia
+    let liveTimer: string | null = null;
+    if (inFinalDay) {
+      const totalSec = Math.max(0, Math.floor(msLeft / 1000));
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      // ≤ 59 min → MM:SS (segundos esgotando). Caso contrário HH:MM:SS.
+      liveTimer = h === 0 ? `${pad(m)}:${pad(s)}` : `${pad(h)}:${pad(m)}:${pad(s)}`;
+    }
+
     return (
       <div
         role="status"
@@ -46,7 +70,9 @@ export const VipDiscountCountdownBanner: React.FC<Props> = ({ forceShowOnProduct
         >
           <Sparkles className="inline-block h-4 w-4 mr-1.5 -mt-0.5" />
           <span className="font-bold">80% OFF</span> em todos Cursos e E-books —{' '}
-          {vip.hoursRemaining > 0 && vip.hoursRemaining <= 24 ? (
+          {liveTimer ? (
+            <>Sua oferta expira em <span className="font-bold tabular-nums">{liveTimer}</span></>
+          ) : vip.hoursRemaining > 0 && vip.hoursRemaining <= 24 ? (
             <>Sua oferta <span className="font-bold">expira HOJE!</span></>
           ) : (
             <>Você tem <span className="font-bold">{vip.daysRemaining} {vip.daysRemaining === 1 ? 'dia' : 'dias'}</span> para aproveitar essa promoção.</>
