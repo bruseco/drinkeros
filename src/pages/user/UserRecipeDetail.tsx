@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { FullscreenVideo } from '@/components/user/FullscreenVideo';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useExclusivePost } from '@/hooks/useExclusivePosts';
