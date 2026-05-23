@@ -30,6 +30,7 @@ import EbookLanding from "./pages/landing/EbookLanding";
 import Checkout from "./pages/Checkout";
 import SSO from "./pages/SSO";
 import Migracao from "./pages/Migracao";
+import CompleteProfile from "./pages/CompleteProfile";
 
 // Admin pages
 import { AdminLayout } from "./components/admin/AdminLayout";
@@ -148,6 +149,7 @@ const App = () => (
             <Route path="/install" element={<Install />} />
             <Route path="/sso" element={<SSO />} />
             <Route path="/migracao" element={<Migracao />} />
+            <Route path="/complete-profile" element={<CompleteProfile />} />
             
             {/* Custom landing pages (must come before the catch-all :packageSlug) */}
             <Route path="/drinkeros-xperience" element={<DrinkerosXperience />} />
