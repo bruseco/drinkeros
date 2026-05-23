@@ -30,6 +30,7 @@ import EbookLanding from "./pages/landing/EbookLanding";
 import Checkout from "./pages/Checkout";
 import SSO from "./pages/SSO";
 import Migracao from "./pages/Migracao";
+import CompleteProfile from "./pages/CompleteProfile";
 
 // Admin pages
 import { AdminLayout } from "./components/admin/AdminLayout";
