@@ -149,6 +149,7 @@ const App = () => (
             <Route path="/install" element={<Install />} />
             <Route path="/sso" element={<SSO />} />
             <Route path="/migracao" element={<Migracao />} />
+            <Route path="/complete-profile" element={<CompleteProfile />} />
             
             {/* Custom landing pages (must come before the catch-all :packageSlug) */}
             <Route path="/drinkeros-xperience" element={<DrinkerosXperience />} />
