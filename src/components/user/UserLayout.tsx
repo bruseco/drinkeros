@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { UserNavbar } from './UserNavbar';
 import { UserSidebar } from './UserSidebar';
 import { PushNotificationPrompt } from './PushNotificationPrompt';
@@ -13,8 +14,24 @@ import { Loader2 } from 'lucide-react';
 
 export const UserLayout: React.FC = () => {
   const { user, isLoading } = useAuth();
+  const [phoneCheck, setPhoneCheck] = useState<'pending' | 'ok' | 'missing'>('pending');
 
-  if (isLoading) {
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('phone')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      setPhoneCheck(data?.phone ? 'ok' : 'missing');
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
+
+  if (isLoading || (user && phoneCheck === 'pending')) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -24,6 +41,10 @@ export const UserLayout: React.FC = () => {
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (phoneCheck === 'missing') {
+    return <Navigate to="/complete-profile" replace />;
   }
 
   return (
