@@ -51,18 +51,18 @@ export const PwaSplashScreen: React.FC = () => {
         fadingOut ? 'opacity-0' : 'opacity-100'
       }`}
     >
-      {/* Ondas de fundo - curvas grandes, looping em velocidades diferentes */}
-      <div className="pointer-events-none absolute inset-0 flex flex-col items-stretch justify-center gap-8">
-        <SplashWave speedClass="animate-splash-wave-slow" opacityClass="opacity-25" amplitude={70} />
-        <SplashWave speedClass="animate-splash-wave-med" opacityClass="opacity-20" amplitude={110} />
-        <SplashWave speedClass="animate-splash-wave-fast" opacityClass="opacity-30" amplitude={55} />
+      {/* Ondas de fundo - sobrepostas, centralizadas verticalmente */}
+      <div className="pointer-events-none absolute inset-0">
+        <SplashWave speedClass="animate-splash-wave-slow" opacityClass="opacity-15" amplitude={70} />
+        <SplashWave speedClass="animate-splash-wave-med" opacityClass="opacity-10" amplitude={110} />
+        <SplashWave speedClass="animate-splash-wave-fast" opacityClass="opacity-20" amplitude={55} />
       </div>
 
       {/* Logo */}
       <img
         src={drinkerosLogo}
         alt="Drinkeros"
-        className="relative z-10 w-[50vw] md:w-[20vw] max-w-[260px] h-auto animate-splash-logo"
+        className="relative z-10 w-[38vw] md:w-[14vw] max-w-[180px] h-auto animate-splash-logo"
         draggable={false}
       />
     </div>
@@ -76,7 +76,10 @@ const SplashWave: React.FC<{ speedClass: string; opacityClass: string; amplitude
 }) => {
   const h = amplitude * 2 + 6;
   return (
-    <div className={`relative w-full overflow-hidden ${opacityClass} ${speedClass}`} style={{ height: `${h}px` }}>
+    <div
+      className={`absolute left-0 right-0 top-1/2 -translate-y-1/2 overflow-hidden ${opacityClass} ${speedClass}`}
+      style={{ height: `${h}px` }}
+    >
       <div className="absolute inset-y-0 left-0 w-[400%] flex">
         <WaveSvg amplitude={amplitude} />
         <WaveSvg amplitude={amplitude} />
