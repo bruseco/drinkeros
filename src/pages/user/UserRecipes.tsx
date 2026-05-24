@@ -114,6 +114,25 @@ const useTypingPlaceholder = (texts: string[], typingSpeed = 80, pauseMs = 2000)
 
 const RECIPES_STATE_KEY = 'user-recipes:list-state';
 
+const RecipeCover: React.FC<{ src: string; alt: string }> = ({ src, alt }) => {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <>
+      {!loaded && <Skeleton className="absolute inset-0 h-full w-full rounded-2xl" />}
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+        className={cn(
+          'h-full w-full object-cover transition-all duration-500 group-hover:scale-105',
+          loaded ? 'opacity-100' : 'opacity-0'
+        )}
+      />
+    </>
+  );
+};
+
 const normalizeRecipeIdentity = (value: string | null | undefined) =>
   (value || '')
     .normalize('NFD')
