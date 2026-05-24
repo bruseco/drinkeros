@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 import { useRecipeAccessGuard, isVipOnlyCharacteristic } from '@/hooks/useRecipeAccessGuard';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
