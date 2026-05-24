@@ -354,12 +354,8 @@ const UserRecipes: React.FC = () => {
                     <div className="group overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative">
                       {recipe.cover_image_url ? (
                         <div className="aspect-video overflow-hidden rounded-2xl relative">
-                          <img
-                            src={recipe.cover_image_url}
-                            alt={recipe.title}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            loading="lazy"
-                          />
+                          <RecipeCover src={recipe.cover_image_url} alt={recipe.title} />
+
                           {showLockOverlay && (
                             <>
                               {/* Degradê preto (esquerda) → transparente (direita) para destacar o xarope no lado direito */}
