@@ -8,6 +8,7 @@ import { PushNotificationPrompt } from './PushNotificationPrompt';
 import { PageTransition } from './PageTransition';
 import { WinnerPopup } from './WinnerPopup';
 import { PwaInstallGate } from './PwaInstallGate';
+import { PwaSplashScreen } from './PwaSplashScreen';
 import { VipDiscountCountdownBanner } from './VipDiscountCountdownBanner';
 
 import { Loader2 } from 'lucide-react';
