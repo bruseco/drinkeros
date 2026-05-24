@@ -265,6 +265,6 @@ All colors MUST be HSL.
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
-.animate-splash-wave-slow > div { animation: splash-wave-move 3.2s linear infinite; }
-.animate-splash-wave-med  > div { animation: splash-wave-move 2.2s linear infinite; }
-.animate-splash-wave-fast > div { animation: splash-wave-move 1.4s linear infinite; }
+.animate-splash-wave-slow > div { animation: splash-wave-move 18s linear infinite; }
+.animate-splash-wave-med  > div { animation: splash-wave-move 11s linear infinite; }
+.animate-splash-wave-fast > div { animation: splash-wave-move 6s linear infinite; }
