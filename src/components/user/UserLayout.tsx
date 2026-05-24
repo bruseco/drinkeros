@@ -50,6 +50,7 @@ export const UserLayout: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-background">
+      <PwaSplashScreen />
       <UserSidebar />
       <div className="flex flex-1 flex-col min-w-0">
         <PwaInstallGate />
