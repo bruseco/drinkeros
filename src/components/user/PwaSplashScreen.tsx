@@ -51,11 +51,11 @@ export const PwaSplashScreen: React.FC = () => {
         fadingOut ? 'opacity-0' : 'opacity-100'
       }`}
     >
-      {/* Ondas de fundo */}
-      <div className="pointer-events-none absolute inset-0 flex flex-col justify-between py-[18vh]">
-        <SplashWave className="animate-splash-wave-slow opacity-20" />
-        <SplashWave className="animate-splash-wave-med opacity-15" />
-        <SplashWave className="animate-splash-wave-fast opacity-25" />
+      {/* Ondas de fundo - curvas grandes, looping em velocidades diferentes */}
+      <div className="pointer-events-none absolute inset-0 flex flex-col justify-around py-[10vh]">
+        <SplashWave speedClass="animate-splash-wave-slow" opacityClass="opacity-25" amplitude={70} />
+        <SplashWave speedClass="animate-splash-wave-med" opacityClass="opacity-20" amplitude={110} />
+        <SplashWave speedClass="animate-splash-wave-fast" opacityClass="opacity-30" amplitude={55} />
       </div>
 
       {/* Logo */}
@@ -69,27 +69,36 @@ export const PwaSplashScreen: React.FC = () => {
   );
 };
 
-const SplashWave: React.FC<{ className?: string }> = ({ className }) => (
-  <div className={`relative w-full h-[2px] overflow-hidden ${className ?? ''}`}>
-    <div className="absolute inset-y-0 left-0 w-[200%] flex">
-      <WaveSvg />
-      <WaveSvg />
+const SplashWave: React.FC<{ speedClass: string; opacityClass: string; amplitude: number }> = ({
+  speedClass,
+  opacityClass,
+  amplitude,
+}) => {
+  const h = amplitude * 2 + 6;
+  return (
+    <div className={`relative w-full overflow-hidden ${opacityClass} ${speedClass}`} style={{ height: `${h}px` }}>
+      <div className="absolute inset-y-0 left-0 w-[400%] flex">
+        <WaveSvg amplitude={amplitude} />
+        <WaveSvg amplitude={amplitude} />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
-const WaveSvg: React.FC = () => (
-  <svg
-    viewBox="0 0 1200 20"
-    preserveAspectRatio="none"
-    className="w-1/2 h-[20px] -mt-[9px] text-muted-foreground"
-    aria-hidden="true"
-  >
-    <path
-      d="M0 10 Q 75 0 150 10 T 300 10 T 450 10 T 600 10 T 750 10 T 900 10 T 1050 10 T 1200 10"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      fill="none"
-    />
-  </svg>
-);
+const WaveSvg: React.FC<{ amplitude: number }> = ({ amplitude }) => {
+  const h = amplitude * 2 + 6;
+  const mid = h / 2;
+  const a = amplitude;
+  // Curvas largas e suaves ao longo de 2400 unidades
+  const d = `M0 ${mid} C 400 ${mid - a}, 800 ${mid + a}, 1200 ${mid} S 2000 ${mid - a}, 2400 ${mid}`;
+  return (
+    <svg
+      viewBox={`0 0 2400 ${h}`}
+      preserveAspectRatio="none"
+      className="w-1/2 h-full text-muted-foreground"
+      aria-hidden="true"
+    >
+      <path d={d} stroke="currentColor" strokeWidth="2" fill="none" />
+    </svg>
+  );
+};
