@@ -265,57 +265,42 @@ const PasswordInput = ({ id, value, onChange, show, toggleShow, placeholder }: a
 );
 
 const ChangePasswordSection: React.FC = () => {
-
   const { user } = useAuth();
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [showCurrent, setShowCurrent] = useState(false);
-  const [showNew, setShowNew] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
 
-  const handleChange = async () => {
-    if (!newPassword || !confirmPassword) { toast.error('Preencha todos os campos de senha.'); return; }
-    if (newPassword.length < 6) { toast.error('A nova senha deve ter pelo menos 6 caracteres.'); return; }
-    if (newPassword !== confirmPassword) { toast.error('As senhas não coincidem.'); return; }
-    if (!currentPassword) { toast.error('Informe a senha atual.'); return; }
-
-    setSaving(true);
+  const handleSendReset = async () => {
+    if (!user?.email) { toast.error('E-mail não encontrado.'); return; }
+    setSending(true);
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email: user?.email || '', password: currentPassword });
-      if (signInError) { toast.error('Senha atual incorreta.'); return; }
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
       if (error) throw error;
-      toast.success('Senha alterada com sucesso!');
-      setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
+      setSent(true);
+      toast.success('Enviamos um link para o seu e-mail.');
     } catch (err: any) {
-      toast.error('Erro ao alterar senha: ' + err.message);
+      toast.error('Erro ao enviar e-mail: ' + err.message);
     } finally {
-      setSaving(false);
+      setSending(false);
     }
   };
 
-
   return (
     <div className="space-y-4 p-4">
-      <div className="space-y-2">
-        <Label>Senha atual</Label>
-        <PasswordInput id="cur" value={currentPassword} onChange={(e: any) => setCurrentPassword(e.target.value)} show={showCurrent} toggleShow={() => setShowCurrent(!showCurrent)} placeholder="••••••••" />
-      </div>
-      <Separator />
-      <div className="space-y-2">
-        <Label>Nova senha</Label>
-        <PasswordInput id="new" value={newPassword} onChange={(e: any) => setNewPassword(e.target.value)} show={showNew} toggleShow={() => setShowNew(!showNew)} placeholder="Mínimo 6 caracteres" />
-      </div>
-      <div className="space-y-2">
-        <Label>Confirmar nova senha</Label>
-        <PasswordInput id="conf" value={confirmPassword} onChange={(e: any) => setConfirmPassword(e.target.value)} show={showConfirm} toggleShow={() => setShowConfirm(!showConfirm)} placeholder="Repita a nova senha" />
-      </div>
-      <Button onClick={handleChange} disabled={saving} className="w-full">
+      <p className="text-sm text-muted-foreground">
+        Para sua segurança, a troca de senha é feita por e-mail. Vamos enviar um link para{' '}
+        <strong className="text-foreground">{user?.email}</strong> com instruções para criar uma nova senha — sem precisar lembrar da senha atual.
+      </p>
+      <Button onClick={handleSendReset} disabled={sending || sent} className="w-full">
         <Lock className="mr-2 h-4 w-4" />
-        {saving ? 'Alterando...' : 'Alterar Senha'}
+        {sending ? 'Enviando...' : sent ? 'Link enviado!' : 'Enviar link por e-mail'}
       </Button>
+      {sent && (
+        <p className="text-xs text-muted-foreground text-center">
+          Não recebeu? Verifique a caixa de spam ou tente novamente em alguns minutos.
+        </p>
+      )}
     </div>
   );
 };
