@@ -250,3 +250,21 @@ All colors MUST be HSL.
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+
+/* PWA Splash Screen */
+@keyframes splash-logo-pop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-splash-logo {
+  animation: splash-logo-pop 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity;
+}
+@keyframes splash-wave-move {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-splash-wave-slow > div { animation: splash-wave-move 3.2s linear infinite; }
+.animate-splash-wave-med  > div { animation: splash-wave-move 2.2s linear infinite; }
+.animate-splash-wave-fast > div { animation: splash-wave-move 1.4s linear infinite; }

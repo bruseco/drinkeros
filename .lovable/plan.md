@@ -1,75 +1,59 @@
-## Problema confirmado
+## Splash screen do PWA Drinkeros
 
-A landing/UI mostra **R$ 139,40 (80% OFF)**, mas o Pix gerado vem com **R$ 697,00** (preço cheio). O desconto está se perdendo entre o clique "Matricule-se" e a geração do pagamento.
+Criar uma tela de splash animada que aparece ao abrir o app instalado (PWA standalone), enquanto as primeiras receitas carregam em background.
 
-## Causa raiz
+### Comportamento
 
-A página `src/pages/Checkout.tsx` (a tela "Finalizar compra" das imagens) ainda usa a lógica **antiga** de VIP, que ficou incompatível com o novo modelo de planos:
+- Aparece **apenas em modo PWA standalone** (não no browser comum) — usa `detectStandalone()` do `usePwaStatus.ts`.
+- Mostrada uma vez por sessão (controlada via `sessionStorage`), para não reaparecer em cada navegação interna.
+- Bloqueia a renderização do app por baixo até que:
+  1. As 3 primeiras receitas sejam pré-carregadas com sucesso (via `supabase.from('recipes')... .limit(5)`), **ou**
+  2. Um timeout de segurança de 3.5s seja atingido (para nunca travar o usuário se a rede falhar).
+- Fade-out suave (≈300ms) ao revelar o app.
 
-```ts
-// linha 171-172
-const { data: planData } = await supabase.rpc("get_user_plan", { _user_id: user.id });
-setIsVip(planData === "vip");
+### Visual
 
-// linha 185 — sempre 80% hardcoded, ignora janela de 7 dias
-return isVip ? Math.round(Number(product.price) * 0.2 * 100) / 100 : Number(product.price);
-```
+- Tela cheia, `bg-background` (preto Drinkeros `0 0% 4%`).
+- **Logotipo Drinkeros centralizado** (`src/assets/logotipo-drinkeros.png`), entra com animação de escala de `0` → largura final ≈ **20vw** (no mobile aumenta para ~50vw, no desktop fica ~20vw), duração ~700ms com easing `cubic-bezier(.22,1,.36,1)`.
+- **Background:** 3 linhas cinzas horizontais (ondas SVG suaves) que correm da direita para a esquerda em loop infinito (~2.5s), em z-index abaixo do logo, com opacidade baixa (~15–25%) para não competir com o logo.
+  - Implementadas como 3 elementos absolutos com SVG wave + `@keyframes` `translateX(0)` → `translateX(-50%)`.
+  - Cada linha em altura diferente (topo, meio, base) e velocidades levemente distintas para sensação orgânica.
 
-Problemas:
+### Arquivos a criar/alterar
 
-1. Chama `get_user_plan` (v1) em vez de `get_user_plan_v2`. O v1 não conhece "socio"/"vitalicio" nem o sócio legacy (`user_exclusive_access.feature='receitas'`). Resultado: **isVip volta `false` para todo Sócio novo, Vitalício e legacy** → preço cheio na tela.
-2. Mesmo se `isVip` fosse true, o cálculo é hardcoded em `* 0.2` (80%). Não respeita a regra 80% → 50% após a janela de 7 dias.
-3. Como a tela mostra preço cheio, o usuário gera o Pix nesse preço.
+1. **`src/components/user/PwaSplashScreen.tsx`** (novo)
+   - Componente que renderiza o overlay full-screen.
+   - Recebe `onReady` callback; faz o prefetch das receitas dentro dele.
+   - Usa `detectStandalone()` para decidir se monta.
+   - Guarda flag em `sessionStorage` (`pwa-splash-shown`) após exibir uma vez.
 
-Para o legacy sócio que **não passou pela tela ainda**, há também um agravante: a edge function `create-mp-payment` aplica o desconto certo via `get_user_plan_v2` (já corrigida na migration anterior), mas o Pix precisa ser igual ao valor exibido — então a UI continua sendo a fonte da verdade para o usuário.
+2. **`src/index.css`** (adicionar keyframes)
+   - `@keyframes splash-logo-pop` (scale 0 → 1)
+   - `@keyframes splash-wave` (translateX 0 → -50%)
+   - Classes utilitárias: `.animate-splash-logo`, `.animate-splash-wave-slow/med/fast`.
 
-## Auditoria do caminho do desconto
+3. **`src/components/user/UserLayout.tsx`** (montar o splash)
+   - Renderiza `<PwaSplashScreen />` por cima do layout do app autenticado.
+   - O splash gerencia a própria visibilidade; não bloqueia o tree por baixo (assim o React Query já pode hidratar).
 
-| Camada | Onde | Status |
-|---|---|---|
-| Banner promo | `VipDiscountCountdownBanner` + `useVipDiscount` | OK — já usa `get_user_plan_v2` via `useUserPlan` |
-| Landing do produto | (qualquer página que usa `useVipDiscount`) | OK |
-| **Tela /checkout** | `src/pages/Checkout.tsx` | **QUEBRADA** — usa RPC antiga e `* 0.2` |
-| Edge `create-mp-payment` | `supabase/functions/create-mp-payment` | OK — usa v2 + janela 7d |
-| Edge `create-mp-checkout` | `supabase/functions/create-mp-checkout` | OK — usa v2 + janela 7d |
-| Edge `create-product-checkout` | `supabase/functions/create-product-checkout` | OK — usa v2 + janela 7d |
-| RPC `get_user_plan_v2` | banco | OK — já reconhece Sócio + Vitalício + legacy |
+### Detalhes técnicos
 
-Conclusão: o único ponto a corrigir para o desconto chegar até o Pix/cartão é a **tela de checkout**.
+- **Não afetar SEO/landing** — splash só monta no `UserLayout` (área logada do PWA), nunca em landing pages.
+- **Não interferir com OAuth/PWA install flow** — só ativa quando `detectStandalone() === true` E há sessão (usuário logado).
+- **Safe-area iOS**: o overlay é full-screen com `inset-0`, não precisa de padding extra; logo fica centralizado com flexbox.
+- **Acessibilidade**: `role="status"` + `aria-label="Carregando Drinkeros"` no overlay.
+- **Performance**: prefetch usa o mesmo client supabase; resultado é descartado (não cacheia em estado), apenas serve para "esquentar" a conexão antes de revelar.
 
-## Implementação
+### Fluxo de teste
 
-### Único arquivo alterado: `src/pages/Checkout.tsx`
+1. Instalar o PWA (Add to Home Screen) em mobile ou Chrome desktop.
+2. Abrir o app instalado → ver splash com logo crescendo + ondas atrás.
+3. Após ~1–3s (carregamento das receitas), splash some com fade.
+4. Reabrir na mesma sessão → splash não aparece de novo (flag em sessionStorage).
+5. Browser normal (não instalado) → splash **não** aparece.
 
-1. Remover o estado local `isVip` e a chamada a `supabase.rpc("get_user_plan", ...)`.
-2. Trocar por `useVipDiscount()` (já existente em `src/hooks/useVipDiscount.ts`), que internamente usa `useUserPlan` → `get_user_plan_v2` e aplica a regra escalonada **80% nos primeiros 7 dias → 50% depois** (com fallback de 80% quando `discount_intro_started_at` ainda é NULL).
-3. Trocar o `useMemo` do `finalPrice` para usar `applyVipDiscountFor(price, vip.percent)` de `src/lib/vipDiscount.ts`, em vez do `* 0.2` hardcoded. Continua não aplicando desconto quando `productType === 'club'` (mesma regra do back).
-4. Exibir o preço correto (com desconto) em todos os pontos da tela: badge "Sócio do Clube", "Total: R$ ..." do Pix, resumo do pedido. Tudo passa a derivar do mesmo `finalPrice` recalculado.
-5. Manter os eventos de tracking (ViewContent / InitiateCheckout) com o `finalPrice` já descontado — nenhum evento muda de nome ou momento de disparo.
+### Impactos
 
-Resultado: ao abrir `/checkout/course/bar-para-eventos`:
-- Sócio novo dentro de 7 dias → R$ 697 × 0,2 = **R$ 139,40**
-- Sócio após 7 dias (e Vitalício pós-7d) → R$ 697 × 0,5 = **R$ 348,50**
-- Sócio legacy (Luis e demais com `user_exclusive_access.feature='receitas'`) → mesmo tratamento, porque `get_user_plan_v2` já devolve `socio` pra eles
-- Free / Aluno → R$ 697,00 (sem mudança)
-
-### Fora de escopo (não mexer)
-
-- Edge functions de checkout (já corretas)
-- `useCourses`/`useCombos` que checam `plan === 'vip'` para **acesso a conteúdo**: é outro fluxo (gating de cursos), e o usuário pediu pra focar no desconto. Anoto como follow-up, não toco agora.
-- Mercado Pago, Stripe, Meta Pixel, páginas públicas, fluxo de webhook.
-
-## Como testar
-
-1. Logar como `luisebrito@yahoo.com.br` (sócio legacy) → abrir `/checkout/course/bar-para-eventos`.
-2. Conferir que aparece **R$ 139,40** no resumo e no botão de pagar.
-3. Gerar Pix → o "Total" do Pix deve ser **R$ 139,40** (não R$ 697,00).
-4. Pagar com cartão → MP recebe `transaction_amount=139.40` (a edge já faz isso, agora o UI bate).
-5. Repetir com um Sócio cuja janela de 7 dias já expirou → preço deve ser R$ 348,50.
-6. Repetir como Free → R$ 697,00 (sem regressão).
-
-## Impacto e risco
-
-- Risco baixo: mudança isolada em uma página, sem mexer em banco, edge functions, Stripe/MP ou tracking.
-- Tracking InitiateCheckout/Purchase continuam disparando como hoje, só com `value` correto.
-- Nada muda para usuários sem direito a desconto.
+- **Auth/Pagamentos/Tracking/PWA install**: nenhum impacto.
+- **Banco de dados**: nenhum (apenas SELECT em `recipes` que já existe).
+- **CSS global**: apenas keyframes novos, sem alterar tokens existentes.
