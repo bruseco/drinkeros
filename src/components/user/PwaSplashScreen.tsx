@@ -52,7 +52,7 @@ export const PwaSplashScreen: React.FC = () => {
       }`}
     >
       {/* Ondas de fundo - curvas grandes, looping em velocidades diferentes */}
-      <div className="pointer-events-none absolute inset-0 flex flex-col justify-around py-[10vh]">
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-stretch justify-center gap-8">
         <SplashWave speedClass="animate-splash-wave-slow" opacityClass="opacity-25" amplitude={70} />
         <SplashWave speedClass="animate-splash-wave-med" opacityClass="opacity-20" amplitude={110} />
         <SplashWave speedClass="animate-splash-wave-fast" opacityClass="opacity-30" amplitude={55} />
