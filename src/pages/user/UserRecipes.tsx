@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 import { useRecipeAccessGuard, isVipOnlyCharacteristic } from '@/hooks/useRecipeAccessGuard';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -112,6 +113,25 @@ const useTypingPlaceholder = (texts: string[], typingSpeed = 80, pauseMs = 2000)
 };
 
 const RECIPES_STATE_KEY = 'user-recipes:list-state';
+
+const RecipeCover: React.FC<{ src: string; alt: string }> = ({ src, alt }) => {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <>
+      {!loaded && <Skeleton className="absolute inset-0 h-full w-full rounded-2xl" />}
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+        className={cn(
+          'h-full w-full object-cover transition-all duration-500 group-hover:scale-105',
+          loaded ? 'opacity-100' : 'opacity-0'
+        )}
+      />
+    </>
+  );
+};
 
 const normalizeRecipeIdentity = (value: string | null | undefined) =>
   (value || '')
@@ -353,12 +373,8 @@ const UserRecipes: React.FC = () => {
                     <div className="group overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative">
                       {recipe.cover_image_url ? (
                         <div className="aspect-video overflow-hidden rounded-2xl relative">
-                          <img
-                            src={recipe.cover_image_url}
-                            alt={recipe.title}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            loading="lazy"
-                          />
+                          <RecipeCover src={recipe.cover_image_url} alt={recipe.title} />
+
                           {showLockOverlay && (
                             <>
                               {/* Degradê preto (esquerda) → transparente (direita) para destacar o xarope no lado direito */}
