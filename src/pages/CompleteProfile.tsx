@@ -58,10 +58,17 @@ const CompleteProfile: React.FC = () => {
       return;
     }
     setIsSaving(true);
+    const trimmedName = fullName.trim();
     const { error } = await supabase
       .from('profiles')
-      .update({ phone, full_name: fullName.trim() })
-      .eq('user_id', user!.id);
+      .upsert(
+        { user_id: user!.id, email: user!.email ?? '', phone, full_name: trimmedName },
+        { onConflict: 'user_id' }
+      );
+    if (!error) {
+      // Mantém o metadata do auth.users sincronizado com nome e telefone
+      await supabase.auth.updateUser({ data: { full_name: trimmedName, phone } }).catch(() => {});
+    }
     setIsSaving(false);
     if (error) {
       toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
