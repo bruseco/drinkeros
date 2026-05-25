@@ -3,6 +3,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { fireCapiPurchaseFromWebhook } from "../_shared/metaCapi.ts";
+import {
+  resolveBuyerUser,
+  logPurchaseResolutionFailure,
+  sendWelcomeRecoveryEmail,
+} from "../_shared/resolveBuyerUser.ts";
+
+const SITE_URL = Deno.env.get("SITE_URL") || "https://drinkeros.lovable.app";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
