@@ -283,23 +283,23 @@ serve(async (req) => {
           (meta.plan_kind === "vip_annual_one_time" || meta.plan_kind === "club_pix_annual")
         ) {
           const email = session.customer_details?.email ?? session.customer_email ?? null;
-          let userId: string | null = await resolveUserId({
+          const fullName = session.customer_details?.name || null;
+          const preResolved = await resolveUserId({
             customerId,
             email,
             clientReferenceId: session.client_reference_id,
           });
-
-          if (!userId && email) {
-            const { data: created, error: createErr } = await supabase.auth.admin.createUser({
-              email: email.toLowerCase(),
-              email_confirm: true,
-              user_metadata: { full_name: session.customer_details?.name || "" },
-            });
-            if (createErr) log("auto-create-user-error-annual", { error: createErr.message, email });
-            else if (created.user) userId = created.user.id;
-          }
-
-          if (!userId) { log("user-not-found-annual", { sessionId: session.id }); break; }
+          const resolved = await resolveOrCreate({
+            email,
+            fullName,
+            knownUserId: preResolved,
+            transactionId: (session.payment_intent as string) || session.id,
+            productType: "club",
+            productId: null,
+            rawPayload: { event_id: event.id, session_id: session.id, plan_kind: meta.plan_kind },
+          });
+          if (!resolved) break;
+          const userId = resolved.userId;
 
           // 1 ano a partir de agora
           const oneYearFromNow = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60;
@@ -335,6 +335,9 @@ serve(async (req) => {
             status: "paid",
             transactionId: (session.payment_intent as string) || session.id,
             metadata: { plan_kind: meta.plan_kind, session_id: session.id, event_id: event.id },
+            buyerEmail: email,
+            buyerName: fullName,
+            userWasCreated: resolved.wasCreated,
           });
 
           break;
