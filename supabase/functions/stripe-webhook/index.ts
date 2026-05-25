@@ -212,33 +212,26 @@ serve(async (req) => {
           if (!productId) { log("missing-product-id", { sessionId: session.id }); break; }
 
           const email = session.customer_details?.email ?? session.customer_email ?? null;
+          const fullName = session.customer_details?.name || null;
 
-          // Resolve user_id (logged-in via client_reference_id, ou via email, ou cria conta)
-          let userId: string | null = await resolveUserId({
+          // Resolve via metadata/customer/email, depois cai para o helper (cria conta se preciso)
+          const preResolved = await resolveUserId({
             customerId,
             email,
             clientReferenceId: session.client_reference_id,
           });
 
-          if (!userId && email) {
-            // Cria conta automaticamente
-            const { data: created, error: createErr } = await supabase.auth.admin.createUser({
-              email: email.toLowerCase(),
-              email_confirm: true,
-              user_metadata: { full_name: session.customer_details?.name || "" },
-            });
-            if (createErr) {
-              log("auto-create-user-error", { error: createErr.message, email });
-            } else if (created.user) {
-              userId = created.user.id;
-              log("auto-created-user", { userId, email });
-            }
-          }
-
-          if (!userId) {
-            log("user-not-found-product-purchase", { sessionId: session.id, email });
-            break;
-          }
+          const resolved = await resolveOrCreate({
+            email,
+            fullName,
+            knownUserId: preResolved,
+            transactionId: (session.payment_intent as string) || session.id,
+            productType,
+            productId,
+            rawPayload: { event_id: event.id, session_id: session.id, type: event.type },
+          });
+          if (!resolved) break;
+          const userId = resolved.userId;
 
           const targetTable = productType === "course" ? "user_courses" : "user_ebooks";
           const idCol = productType === "course" ? "course_id" : "ebook_id";
@@ -275,6 +268,9 @@ serve(async (req) => {
             status: "paid",
             transactionId: (session.payment_intent as string) || session.id,
             metadata: { session_id: session.id, event_id: event.id },
+            buyerEmail: email,
+            buyerName: fullName,
+            userWasCreated: resolved.wasCreated,
           });
 
           break;
