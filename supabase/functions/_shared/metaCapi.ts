@@ -171,3 +171,98 @@ export async function fireCapiPurchaseFromWebhook(supabase: any, args: {
     },
   });
 }
+
+// ============================================================
+// Genérico: envio de qualquer evento Meta CAPI (Lead, CompleteRegistration,
+// InitiateCheckout, ViewContent, Subscribe, Purchase). Usado pela edge
+// function `meta-capi-track` que recebe disparos do client com event_id
+// já gerado, garantindo deduplicação com o Pixel.
+// ============================================================
+
+export type MetaCapiEventName =
+  | "Lead"
+  | "CompleteRegistration"
+  | "InitiateCheckout"
+  | "ViewContent"
+  | "Subscribe"
+  | "Purchase";
+
+export interface MetaCapiUserInput {
+  email?: string | null;
+  phone?: string | null;
+  fullName?: string | null;
+  externalId?: string | null;
+  fbp?: string | null;
+  fbc?: string | null;
+  clientIp?: string | null;
+  clientUserAgent?: string | null;
+}
+
+export interface MetaCapiEventInput {
+  pixelId: string;
+  accessToken: string;
+  eventName: MetaCapiEventName;
+  eventId: string;
+  eventSourceUrl?: string | null;
+  testEventCode?: string | null;
+  customData?: Record<string, unknown>;
+  user: MetaCapiUserInput;
+}
+
+export async function sendMetaCapiEvent(
+  input: MetaCapiEventInput,
+): Promise<{ ok: boolean; status?: number; json?: unknown }> {
+  try {
+    if (!input.pixelId || !input.accessToken) {
+      console.log("[meta-capi] missing pixelId/accessToken — skip", input.eventName);
+      return { ok: false };
+    }
+
+    const { fn, ln } = splitName(input.user.fullName);
+    const phoneDigits = onlyDigits(input.user.phone);
+    const emailNorm = (input.user.email || "").trim().toLowerCase();
+
+    const user_data: Record<string, unknown> = {};
+    if (emailNorm)             user_data.em = [await sha256Hex(emailNorm)];
+    if (phoneDigits)           user_data.ph = [await sha256Hex(phoneDigits)];
+    if (fn)                    user_data.fn = [await sha256Hex(fn)];
+    if (ln)                    user_data.ln = [await sha256Hex(ln)];
+    if (input.user.externalId) user_data.external_id = [await sha256Hex(input.user.externalId)];
+    if (input.user.fbp)        user_data.fbp = input.user.fbp;
+    if (input.user.fbc)        user_data.fbc = input.user.fbc;
+    if (input.user.clientIp)   user_data.client_ip_address = input.user.clientIp;
+    if (input.user.clientUserAgent) user_data.client_user_agent = input.user.clientUserAgent;
+
+    const body: Record<string, unknown> = {
+      data: [
+        {
+          event_name: input.eventName,
+          event_time: Math.floor(Date.now() / 1000),
+          event_id: input.eventId,
+          action_source: "website",
+          event_source_url: input.eventSourceUrl || undefined,
+          user_data,
+          custom_data: input.customData || {},
+        },
+      ],
+    };
+    if (input.testEventCode) body.test_event_code = input.testEventCode;
+
+    const url = `https://graph.facebook.com/${META_API_VERSION}/${input.pixelId}/events?access_token=${encodeURIComponent(input.accessToken)}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      console.error("[meta-capi] FAILED", input.eventName, { status: res.status, json, eventId: input.eventId });
+    } else {
+      console.log("[meta-capi] sent", input.eventName, { eventId: input.eventId, json });
+    }
+    return { ok: res.ok, status: res.status, json };
+  } catch (e) {
+    console.error("[meta-capi] exception", input.eventName, (e as Error).message);
+    return { ok: false };
+  }
+}
