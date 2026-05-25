@@ -35,6 +35,9 @@ async function recordPurchase(supabase: any, p: {
   status: string;
   transactionId: string;
   metadata?: Record<string, unknown>;
+  buyerEmail?: string | null;
+  buyerName?: string | null;
+  userWasCreated?: boolean;
 }) {
   if (!p.transactionId || !(p.amountPaid > 0)) return;
   const { error } = await supabase.from("purchases").upsert(
@@ -49,6 +52,9 @@ async function recordPurchase(supabase: any, p: {
       status: p.status,
       transaction_id: p.transactionId,
       metadata: p.metadata || {},
+      buyer_email: p.buyerEmail ?? null,
+      buyer_name: p.buyerName ?? null,
+      user_was_created: !!p.userWasCreated,
     },
     { onConflict: "gateway,transaction_id" },
   );
@@ -65,6 +71,41 @@ async function recordPurchase(supabase: any, p: {
     productType: p.productType,
     productId: p.productId ?? null,
   });
+}
+
+/** Resolve ou cria conta do comprador. Em caso de falha, loga e retorna null. */
+async function resolveOrCreateBuyer(supabase: any, args: {
+  email?: string | null;
+  fullName?: string | null;
+  knownUserId?: string | null;
+  transactionId?: string | null;
+  productType?: string | null;
+  productId?: string | null;
+  rawPayload?: Record<string, unknown>;
+}) {
+  const res = await resolveBuyerUser(supabase, {
+    email: args.email,
+    fullName: args.fullName,
+    knownUserId: args.knownUserId,
+  });
+  if (!res.userId) {
+    await logPurchaseResolutionFailure(supabase, {
+      gateway: "mercado_pago",
+      transactionId: args.transactionId,
+      payerEmail: args.email ?? null,
+      payerName: args.fullName ?? null,
+      productType: args.productType ?? null,
+      productId: args.productId ?? null,
+      errorMessage: (res as any).error || "unknown",
+      rawPayload: args.rawPayload || {},
+    });
+    console.warn("[mp-webhook] buyer-resolve-failed:", { email: args.email, error: (res as any).error });
+    return null;
+  }
+  if (res.wasCreated && res.email) {
+    sendWelcomeRecoveryEmail(supabase, res.email, SITE_URL).catch(() => { /* ignore */ });
+  }
+  return res;
 }
 
 async function grantClubAccess(supabase: any, userId: string, payment: any, paymentId: string, periodDays: number) {
