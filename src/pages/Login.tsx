@@ -22,7 +22,7 @@ import { WhatsAppFloatingButton } from '@/components/user/WhatsAppFloatingButton
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import drinksStrip from '@/assets/1000-drinks.jpg';
 import AnimatedNumber from '@/components/AnimatedNumber';
-import { trackFbEvent } from '@/lib/metaPixel';
+
 import SeoHead from '@/components/SeoHead';
 
 const Login: React.FC = () => {
