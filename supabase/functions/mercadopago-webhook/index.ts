@@ -211,18 +211,24 @@ serve(async (req) => {
       const pre = await preR.json();
       const externalRef = pre?.external_reference as string | undefined;
       const payerEmail = pre?.payer_email;
-      let userId: string | null = null;
-      if (externalRef?.startsWith("club:")) userId = externalRef.split(":")[1] || null;
-      if (!userId && payerEmail) {
-        const { data: profile } = await supabase
-          .from("profiles").select("user_id").eq("email", payerEmail).maybeSingle();
-        userId = profile?.user_id || null;
-      }
-      if (!userId) {
+      const payerName = pre?.payer_first_name || null;
+      const knownUserId = externalRef?.startsWith("club:") ? (externalRef.split(":")[1] || null) : null;
+
+      const resolved = await resolveOrCreateBuyer(supabase, {
+        email: payerEmail,
+        fullName: payerName,
+        knownUserId,
+        transactionId: String(resourceId),
+        productType: "club",
+        productId: null,
+        rawPayload: { topic, resourceId, preapprovalId, externalRef },
+      });
+      if (!resolved) {
         return new Response(JSON.stringify({ ok: true, pending_user: true }), {
           status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      const userId = resolved.userId;
 
       const isAnnual = pre?.auto_recurring?.frequency === 12;
       const now = new Date();
@@ -269,6 +275,9 @@ serve(async (req) => {
         status: "approved",
         transactionId: String(resourceId),
         metadata: { mp_preapproval_id: String(preapprovalId) },
+        buyerEmail: payerEmail,
+        buyerName: payerName,
+        userWasCreated: resolved.wasCreated,
       });
 
       return new Response(JSON.stringify({ ok: true, recurring: true }), {
