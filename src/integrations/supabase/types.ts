@@ -1734,6 +1734,8 @@ export type Database = {
       purchases: {
         Row: {
           amount_paid: number
+          buyer_email: string | null
+          buyer_name: string | null
           created_at: string
           currency: string
           gateway: string
@@ -1748,9 +1750,12 @@ export type Database = {
           transaction_id: string
           updated_at: string
           user_id: string
+          user_was_created: boolean
         }
         Insert: {
           amount_paid: number
+          buyer_email?: string | null
+          buyer_name?: string | null
           created_at?: string
           currency?: string
           gateway: string
@@ -1765,9 +1770,12 @@ export type Database = {
           transaction_id: string
           updated_at?: string
           user_id: string
+          user_was_created?: boolean
         }
         Update: {
           amount_paid?: number
+          buyer_email?: string | null
+          buyer_name?: string | null
           created_at?: string
           currency?: string
           gateway?: string
@@ -1782,6 +1790,7 @@ export type Database = {
           transaction_id?: string
           updated_at?: string
           user_id?: string
+          user_was_created?: boolean
         }
         Relationships: []
       }
@@ -2818,6 +2827,60 @@ export type Database = {
           sent_at?: string
           template?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      webhook_purchase_logs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          gateway: string
+          id: string
+          payer_email: string | null
+          payer_name: string | null
+          product_id: string | null
+          product_type: string | null
+          raw_payload: Json
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          transaction_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          gateway: string
+          id?: string
+          payer_email?: string | null
+          payer_name?: string | null
+          product_id?: string | null
+          product_type?: string | null
+          raw_payload?: Json
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          gateway?: string
+          id?: string
+          payer_email?: string | null
+          payer_name?: string | null
+          product_id?: string | null
+          product_type?: string | null
+          raw_payload?: Json
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
         }
         Relationships: []
       }

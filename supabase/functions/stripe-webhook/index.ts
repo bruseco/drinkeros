@@ -5,6 +5,11 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { fireCapiPurchaseFromWebhook } from "../_shared/metaCapi.ts";
+import {
+  resolveBuyerUser,
+  logPurchaseResolutionFailure,
+  sendWelcomeRecoveryEmail,
+} from "../_shared/resolveBuyerUser.ts";
 
 const log = (step: string, details?: unknown) => {
   console.log(`[stripe-webhook] ${step}${details ? " — " + JSON.stringify(details) : ""}`);
@@ -94,6 +99,9 @@ serve(async (req) => {
     status: string;      // 'paid' | 'active'
     transactionId: string;
     metadata?: Record<string, unknown>;
+    buyerEmail?: string | null;
+    buyerName?: string | null;
+    userWasCreated?: boolean;
   }) => {
     if (!p.transactionId || p.amountPaid <= 0) return;
     const { error } = await supabase.from("purchases").upsert(
@@ -108,6 +116,9 @@ serve(async (req) => {
         status: p.status,
         transaction_id: p.transactionId,
         metadata: p.metadata || {},
+        buyer_email: p.buyerEmail ?? null,
+        buyer_name: p.buyerName ?? null,
+        user_was_created: !!p.userWasCreated,
       },
       { onConflict: "gateway,transaction_id" },
     );
@@ -124,6 +135,44 @@ serve(async (req) => {
       productType: p.productType,
       productId: p.productId ?? null,
     });
+  };
+
+  const SITE_URL = Deno.env.get("SITE_URL") || "https://drinkeros.lovable.app";
+
+  // Resolve user via helper compartilhado + envia boas-vindas se conta foi criada agora.
+  const resolveOrCreate = async (args: {
+    email?: string | null;
+    fullName?: string | null;
+    knownUserId?: string | null;
+    transactionId?: string | null;
+    productType?: string | null;
+    productId?: string | null;
+    rawPayload?: Record<string, unknown>;
+  }) => {
+    const res = await resolveBuyerUser(supabase, {
+      email: args.email,
+      fullName: args.fullName,
+      knownUserId: args.knownUserId,
+    });
+    if (!res.userId) {
+      await logPurchaseResolutionFailure(supabase, {
+        gateway: "stripe",
+        transactionId: args.transactionId,
+        payerEmail: args.email ?? null,
+        payerName: args.fullName ?? null,
+        productType: args.productType ?? null,
+        productId: args.productId ?? null,
+        errorMessage: (res as any).error || "unknown",
+        rawPayload: args.rawPayload || {},
+      });
+      log("buyer-resolve-failed", { email: args.email, error: (res as any).error });
+      return null;
+    }
+    if (res.wasCreated && res.email) {
+      // não bloqueia o webhook
+      sendWelcomeRecoveryEmail(supabase, res.email, SITE_URL).catch(() => { /* ignore */ });
+    }
+    return res;
   };
 
   const upsertVipPlan = async (userId: string, periodEndUnix?: number | null) => {
@@ -163,33 +212,26 @@ serve(async (req) => {
           if (!productId) { log("missing-product-id", { sessionId: session.id }); break; }
 
           const email = session.customer_details?.email ?? session.customer_email ?? null;
+          const fullName = session.customer_details?.name || null;
 
-          // Resolve user_id (logged-in via client_reference_id, ou via email, ou cria conta)
-          let userId: string | null = await resolveUserId({
+          // Resolve via metadata/customer/email, depois cai para o helper (cria conta se preciso)
+          const preResolved = await resolveUserId({
             customerId,
             email,
             clientReferenceId: session.client_reference_id,
           });
 
-          if (!userId && email) {
-            // Cria conta automaticamente
-            const { data: created, error: createErr } = await supabase.auth.admin.createUser({
-              email: email.toLowerCase(),
-              email_confirm: true,
-              user_metadata: { full_name: session.customer_details?.name || "" },
-            });
-            if (createErr) {
-              log("auto-create-user-error", { error: createErr.message, email });
-            } else if (created.user) {
-              userId = created.user.id;
-              log("auto-created-user", { userId, email });
-            }
-          }
-
-          if (!userId) {
-            log("user-not-found-product-purchase", { sessionId: session.id, email });
-            break;
-          }
+          const resolved = await resolveOrCreate({
+            email,
+            fullName,
+            knownUserId: preResolved,
+            transactionId: (session.payment_intent as string) || session.id,
+            productType,
+            productId,
+            rawPayload: { event_id: event.id, session_id: session.id, type: event.type },
+          });
+          if (!resolved) break;
+          const userId = resolved.userId;
 
           const targetTable = productType === "course" ? "user_courses" : "user_ebooks";
           const idCol = productType === "course" ? "course_id" : "ebook_id";
@@ -226,6 +268,9 @@ serve(async (req) => {
             status: "paid",
             transactionId: (session.payment_intent as string) || session.id,
             metadata: { session_id: session.id, event_id: event.id },
+            buyerEmail: email,
+            buyerName: fullName,
+            userWasCreated: resolved.wasCreated,
           });
 
           break;
@@ -238,23 +283,23 @@ serve(async (req) => {
           (meta.plan_kind === "vip_annual_one_time" || meta.plan_kind === "club_pix_annual")
         ) {
           const email = session.customer_details?.email ?? session.customer_email ?? null;
-          let userId: string | null = await resolveUserId({
+          const fullName = session.customer_details?.name || null;
+          const preResolved = await resolveUserId({
             customerId,
             email,
             clientReferenceId: session.client_reference_id,
           });
-
-          if (!userId && email) {
-            const { data: created, error: createErr } = await supabase.auth.admin.createUser({
-              email: email.toLowerCase(),
-              email_confirm: true,
-              user_metadata: { full_name: session.customer_details?.name || "" },
-            });
-            if (createErr) log("auto-create-user-error-annual", { error: createErr.message, email });
-            else if (created.user) userId = created.user.id;
-          }
-
-          if (!userId) { log("user-not-found-annual", { sessionId: session.id }); break; }
+          const resolved = await resolveOrCreate({
+            email,
+            fullName,
+            knownUserId: preResolved,
+            transactionId: (session.payment_intent as string) || session.id,
+            productType: "club",
+            productId: null,
+            rawPayload: { event_id: event.id, session_id: session.id, plan_kind: meta.plan_kind },
+          });
+          if (!resolved) break;
+          const userId = resolved.userId;
 
           // 1 ano a partir de agora
           const oneYearFromNow = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60;
@@ -290,6 +335,9 @@ serve(async (req) => {
             status: "paid",
             transactionId: (session.payment_intent as string) || session.id,
             metadata: { plan_kind: meta.plan_kind, session_id: session.id, event_id: event.id },
+            buyerEmail: email,
+            buyerName: fullName,
+            userWasCreated: resolved.wasCreated,
           });
 
           break;

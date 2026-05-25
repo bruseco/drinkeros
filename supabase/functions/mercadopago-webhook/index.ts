@@ -3,6 +3,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { fireCapiPurchaseFromWebhook } from "../_shared/metaCapi.ts";
+import {
+  resolveBuyerUser,
+  logPurchaseResolutionFailure,
+  sendWelcomeRecoveryEmail,
+} from "../_shared/resolveBuyerUser.ts";
+
+const SITE_URL = Deno.env.get("SITE_URL") || "https://drinkeros.lovable.app";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,6 +35,9 @@ async function recordPurchase(supabase: any, p: {
   status: string;
   transactionId: string;
   metadata?: Record<string, unknown>;
+  buyerEmail?: string | null;
+  buyerName?: string | null;
+  userWasCreated?: boolean;
 }) {
   if (!p.transactionId || !(p.amountPaid > 0)) return;
   const { error } = await supabase.from("purchases").upsert(
@@ -42,6 +52,9 @@ async function recordPurchase(supabase: any, p: {
       status: p.status,
       transaction_id: p.transactionId,
       metadata: p.metadata || {},
+      buyer_email: p.buyerEmail ?? null,
+      buyer_name: p.buyerName ?? null,
+      user_was_created: !!p.userWasCreated,
     },
     { onConflict: "gateway,transaction_id" },
   );
@@ -58,6 +71,41 @@ async function recordPurchase(supabase: any, p: {
     productType: p.productType,
     productId: p.productId ?? null,
   });
+}
+
+/** Resolve ou cria conta do comprador. Em caso de falha, loga e retorna null. */
+async function resolveOrCreateBuyer(supabase: any, args: {
+  email?: string | null;
+  fullName?: string | null;
+  knownUserId?: string | null;
+  transactionId?: string | null;
+  productType?: string | null;
+  productId?: string | null;
+  rawPayload?: Record<string, unknown>;
+}) {
+  const res = await resolveBuyerUser(supabase, {
+    email: args.email,
+    fullName: args.fullName,
+    knownUserId: args.knownUserId,
+  });
+  if (!res.userId) {
+    await logPurchaseResolutionFailure(supabase, {
+      gateway: "mercado_pago",
+      transactionId: args.transactionId,
+      payerEmail: args.email ?? null,
+      payerName: args.fullName ?? null,
+      productType: args.productType ?? null,
+      productId: args.productId ?? null,
+      errorMessage: (res as any).error || "unknown",
+      rawPayload: args.rawPayload || {},
+    });
+    console.warn("[mp-webhook] buyer-resolve-failed:", { email: args.email, error: (res as any).error });
+    return null;
+  }
+  if (res.wasCreated && res.email) {
+    sendWelcomeRecoveryEmail(supabase, res.email, SITE_URL).catch(() => { /* ignore */ });
+  }
+  return res;
 }
 
 async function grantClubAccess(supabase: any, userId: string, payment: any, paymentId: string, periodDays: number) {
@@ -163,18 +211,24 @@ serve(async (req) => {
       const pre = await preR.json();
       const externalRef = pre?.external_reference as string | undefined;
       const payerEmail = pre?.payer_email;
-      let userId: string | null = null;
-      if (externalRef?.startsWith("club:")) userId = externalRef.split(":")[1] || null;
-      if (!userId && payerEmail) {
-        const { data: profile } = await supabase
-          .from("profiles").select("user_id").eq("email", payerEmail).maybeSingle();
-        userId = profile?.user_id || null;
-      }
-      if (!userId) {
+      const payerName = pre?.payer_first_name || null;
+      const knownUserId = externalRef?.startsWith("club:") ? (externalRef.split(":")[1] || null) : null;
+
+      const resolved = await resolveOrCreateBuyer(supabase, {
+        email: payerEmail,
+        fullName: payerName,
+        knownUserId,
+        transactionId: String(resourceId),
+        productType: "club",
+        productId: null,
+        rawPayload: { topic, resourceId, preapprovalId, externalRef },
+      });
+      if (!resolved) {
         return new Response(JSON.stringify({ ok: true, pending_user: true }), {
           status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      const userId = resolved.userId;
 
       const isAnnual = pre?.auto_recurring?.frequency === 12;
       const now = new Date();
@@ -221,6 +275,9 @@ serve(async (req) => {
         status: "approved",
         transactionId: String(resourceId),
         metadata: { mp_preapproval_id: String(preapprovalId) },
+        buyerEmail: payerEmail,
+        buyerName: payerName,
+        userWasCreated: resolved.wasCreated,
       });
 
       return new Response(JSON.stringify({ ok: true, recurring: true }), {
@@ -250,6 +307,7 @@ serve(async (req) => {
     const externalRef = payment?.external_reference as string | undefined;
     const metadata = payment?.metadata || {};
     const payerEmail = payment?.payer?.email;
+    const payerName = [payment?.payer?.first_name, payment?.payer?.last_name].filter(Boolean).join(" ") || null;
 
     if (status !== "approved") {
       console.log("[mp-webhook] payment not approved, status:", status);
@@ -262,29 +320,40 @@ serve(async (req) => {
     // ============ Pagamento aprovado: liberar acesso ============
     const productType = metadata.product_type as string | undefined;
     const productId = metadata.product_id as string | undefined;
-    let userId = (metadata.user_id as string | undefined) || null;
+    const knownUserId = (metadata.user_id as string | undefined) || null;
 
     if (!productType || !productId || (productType !== "club" && !ACCESS_TABLE_MAP[productType])) {
+      await logPurchaseResolutionFailure(supabase, {
+        gateway: "mercado_pago",
+        transactionId: String(paymentId),
+        payerEmail,
+        payerName,
+        productType: productType || null,
+        productId: productId || null,
+        errorMessage: `metadata_invalid: type=${productType} id=${productId}`,
+        rawPayload: { externalRef, metadata },
+      });
       throw new Error(`Metadata inválido: type=${productType} id=${productId}`);
     }
 
-    // Se não tinha user_id (visitante), tenta achar pelo email do pagador
-    if (!userId && payerEmail) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("user_id")
-        .eq("email", payerEmail)
-        .maybeSingle();
-      userId = profile?.user_id || null;
-    }
-
-    if (!userId) {
-      console.log("[mp-webhook] approved but no user_id (guest checkout). Email:", payerEmail);
+    // Resolve OU cria conta via helper compartilhado (mesma regra do Stripe)
+    const resolved = await resolveOrCreateBuyer(supabase, {
+      email: payerEmail,
+      fullName: payerName,
+      knownUserId,
+      transactionId: String(paymentId),
+      productType,
+      productId,
+      rawPayload: { externalRef, metadata, payment_id: paymentId },
+    });
+    if (!resolved) {
+      // Não considera compra resolvida; admin verá em webhook_purchase_logs.
       return new Response(JSON.stringify({ ok: true, pending_user: true }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const userId = resolved.userId;
 
     if (productType === "club") {
       const periodDays = Number(metadata.access_period_days) || 365;
@@ -300,6 +369,9 @@ serve(async (req) => {
         status: "approved",
         transactionId: String(paymentId),
         metadata: { period_days: periodDays },
+        buyerEmail: payerEmail,
+        buyerName: payerName,
+        userWasCreated: resolved.wasCreated,
       });
 
       return new Response(JSON.stringify({ ok: true, granted: true, club: true, period_days: periodDays }), {
@@ -321,6 +393,16 @@ serve(async (req) => {
 
     if (insertErr) {
       console.error("[mp-webhook] failed to grant access:", insertErr);
+      await logPurchaseResolutionFailure(supabase, {
+        gateway: "mercado_pago",
+        transactionId: String(paymentId),
+        payerEmail,
+        payerName,
+        productType,
+        productId,
+        errorMessage: `grant_access_failed: ${insertErr.message}`,
+        rawPayload: { externalRef, metadata },
+      });
       throw insertErr;
     }
 
@@ -342,6 +424,9 @@ serve(async (req) => {
       status: "approved",
       transactionId: String(paymentId),
       metadata: {},
+      buyerEmail: payerEmail,
+      buyerName: payerName,
+      userWasCreated: resolved.wasCreated,
     });
 
     console.log("[mp-webhook] access granted:", { userId, productType, productId, paymentId });
