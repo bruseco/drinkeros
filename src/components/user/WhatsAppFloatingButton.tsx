@@ -1,16 +1,11 @@
 import React from 'react';
-import { trackFbEvent } from '@/lib/metaPixel';
 
 export const WhatsAppFloatingButton: React.FC = () => {
-  const handleClick = () => {
-    trackFbEvent('Lead', { source: 'whatsapp_floating_button', content_name: 'WhatsApp Suporte' });
-  };
   return (
     <a
       href="https://wa.me/5548991601025?text=Ol%C3%A1!%20Preciso%20de%20ajuda."
       target="_blank"
       rel="noopener noreferrer"
-      onClick={handleClick}
       className="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-110 md:bottom-6 md:right-6 md:h-16 md:w-16"
       style={{ backgroundColor: '#25D366' }}
       aria-label="Falar no WhatsApp"

@@ -22,7 +22,7 @@ import { WhatsAppFloatingButton } from '@/components/user/WhatsAppFloatingButton
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import drinksStrip from '@/assets/1000-drinks.jpg';
 import AnimatedNumber from '@/components/AnimatedNumber';
-import { trackFbEvent } from '@/lib/metaPixel';
+
 import SeoHead from '@/components/SeoHead';
 
 const Login: React.FC = () => {
@@ -342,7 +342,6 @@ const Login: React.FC = () => {
             <Link
               to="/signup"
               className="font-semibold text-foreground underline"
-              onClick={() => trackFbEvent('Lead', { source: 'login_page', content_name: 'Criar conta' })}
             >
               Crie agora mesmo!
             </Link>
