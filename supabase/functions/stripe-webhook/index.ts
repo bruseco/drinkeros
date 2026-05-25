@@ -99,6 +99,9 @@ serve(async (req) => {
     status: string;      // 'paid' | 'active'
     transactionId: string;
     metadata?: Record<string, unknown>;
+    buyerEmail?: string | null;
+    buyerName?: string | null;
+    userWasCreated?: boolean;
   }) => {
     if (!p.transactionId || p.amountPaid <= 0) return;
     const { error } = await supabase.from("purchases").upsert(
@@ -113,6 +116,9 @@ serve(async (req) => {
         status: p.status,
         transaction_id: p.transactionId,
         metadata: p.metadata || {},
+        buyer_email: p.buyerEmail ?? null,
+        buyer_name: p.buyerName ?? null,
+        user_was_created: !!p.userWasCreated,
       },
       { onConflict: "gateway,transaction_id" },
     );
@@ -129,6 +135,44 @@ serve(async (req) => {
       productType: p.productType,
       productId: p.productId ?? null,
     });
+  };
+
+  const SITE_URL = Deno.env.get("SITE_URL") || "https://drinkeros.lovable.app";
+
+  // Resolve user via helper compartilhado + envia boas-vindas se conta foi criada agora.
+  const resolveOrCreate = async (args: {
+    email?: string | null;
+    fullName?: string | null;
+    knownUserId?: string | null;
+    transactionId?: string | null;
+    productType?: string | null;
+    productId?: string | null;
+    rawPayload?: Record<string, unknown>;
+  }) => {
+    const res = await resolveBuyerUser(supabase, {
+      email: args.email,
+      fullName: args.fullName,
+      knownUserId: args.knownUserId,
+    });
+    if (!res.userId) {
+      await logPurchaseResolutionFailure(supabase, {
+        gateway: "stripe",
+        transactionId: args.transactionId,
+        payerEmail: args.email ?? null,
+        payerName: args.fullName ?? null,
+        productType: args.productType ?? null,
+        productId: args.productId ?? null,
+        errorMessage: (res as any).error || "unknown",
+        rawPayload: args.rawPayload || {},
+      });
+      log("buyer-resolve-failed", { email: args.email, error: (res as any).error });
+      return null;
+    }
+    if (res.wasCreated && res.email) {
+      // não bloqueia o webhook
+      sendWelcomeRecoveryEmail(supabase, res.email, SITE_URL).catch(() => { /* ignore */ });
+    }
+    return res;
   };
 
   const upsertVipPlan = async (userId: string, periodEndUnix?: number | null) => {
