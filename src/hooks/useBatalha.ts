@@ -194,14 +194,15 @@ export interface MonthlyRankingItem {
   author_avatar: string | null;
 }
 
-// Ranking do mês corrente: receitas postadas no mês, ordenadas por nota
-export const useMonthlyRanking = () => {
+export const getCurrentMonthYearBRT = currentMonthYearBRT;
+
+// Ranking de um mês (YYYY-MM). Default = mês corrente.
+export const useMonthlyRanking = (monthYear?: string) => {
+  const my = monthYear || currentMonthYearBRT();
   return useQuery({
-    queryKey: ['club-monthly-ranking', currentMonthYearBRT()],
+    queryKey: ['club-monthly-ranking', my],
     queryFn: async (): Promise<MonthlyRankingItem[]> => {
-      const my = currentMonthYearBRT();
       const [year, month] = my.split('-').map(Number);
-      // Início do mês em BRT = início do mês UTC + 3h
       const startBrt = new Date(Date.UTC(year, month - 1, 1, 3, 0, 0)).toISOString();
       const endBrt = new Date(Date.UTC(year, month, 1, 3, 0, 0)).toISOString();
 
@@ -239,6 +240,21 @@ export const useMonthlyRanking = () => {
           };
         })
         .sort((a, b) => b.avg_rating - a.avg_rating || b.total_votes - a.total_votes);
+    },
+  });
+};
+
+// Lista de meses anteriores que já tiveram campeã encerrada (do mais recente p/ o mais antigo)
+export const useClosedMonths = () => {
+  return useQuery({
+    queryKey: ['club-closed-months'],
+    queryFn: async (): Promise<string[]> => {
+      const { data, error } = await supabase
+        .from('club_monthly_winners')
+        .select('month_year')
+        .order('month_year', { ascending: false });
+      if (error) throw error;
+      return [...new Set((data || []).map(d => d.month_year as string))];
     },
   });
 };
