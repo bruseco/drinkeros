@@ -1738,6 +1738,7 @@ export type Database = {
           buyer_name: string | null
           created_at: string
           currency: string
+          emails_dispatched_at: string | null
           gateway: string
           id: string
           meta_purchase_sent: boolean
@@ -1758,6 +1759,7 @@ export type Database = {
           buyer_name?: string | null
           created_at?: string
           currency?: string
+          emails_dispatched_at?: string | null
           gateway: string
           id?: string
           meta_purchase_sent?: boolean
@@ -1778,6 +1780,7 @@ export type Database = {
           buyer_name?: string | null
           created_at?: string
           currency?: string
+          emails_dispatched_at?: string | null
           gateway?: string
           id?: string
           meta_purchase_sent?: boolean
