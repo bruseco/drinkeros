@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useBatalhaFeed, useBatalhaMyPoints, tierColor } from '@/hooks/useBatalha';
+import { useBatalhaFeed, useBatalhaMyPoints } from '@/hooks/useBatalha';
 import { BatalhaIntro, hasSeenBatalhaIntro } from '@/components/user/BatalhaIntro';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -56,14 +56,10 @@ const UserBatalha: React.FC = () => {
       </div>
 
       {myPoints && (
-        <Card className={`p-4 bg-gradient-to-r ${tierColor(myPoints.tier)} text-white`}>
-          <div className="flex items-center justify-between">
+        <Card className="p-4">
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs opacity-90">Seu nível</p>
-              <p className="text-lg font-bold">{myPoints.tier}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-xs opacity-90">Pontos</p>
+              <p className="text-xs text-muted-foreground">Seus pontos</p>
               <p className="text-2xl font-bold">{myPoints.points}</p>
             </div>
             <Button asChild variant="secondary" size="sm">
