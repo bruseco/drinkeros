@@ -6,8 +6,8 @@ import { fireCapiPurchaseFromWebhook } from "../_shared/metaCapi.ts";
 import {
   resolveBuyerUser,
   logPurchaseResolutionFailure,
-  sendWelcomeRecoveryEmail,
 } from "../_shared/resolveBuyerUser.ts";
+import { sendPurchaseEmails } from "../_shared/sendPurchaseEmails.ts";
 
 const SITE_URL = Deno.env.get("SITE_URL") || "https://drinkeros.lovable.app";
 
@@ -71,6 +71,24 @@ async function recordPurchase(supabase: any, p: {
     productType: p.productType,
     productId: p.productId ?? null,
   });
+
+  // E-mails pós-compra (account-created se conta criada agora + purchase-confirmed sempre).
+  // Lock atômico via purchases.emails_dispatched_at garante envio único em reenvios.
+  if (!error && p.buyerEmail) {
+    await sendPurchaseEmails(supabase, {
+      gateway: "mercado_pago",
+      transactionId: p.transactionId,
+      userId: p.userId,
+      email: p.buyerEmail,
+      fullName: p.buyerName ?? null,
+      wasCreated: !!p.userWasCreated,
+      productName: p.productName,
+      productType: p.productType,
+      amountPaid: p.amountPaid,
+      currency: p.currency || "BRL",
+      siteUrl: SITE_URL,
+    });
+  }
 }
 
 /** Resolve ou cria conta do comprador. Em caso de falha, loga e retorna null. */
@@ -102,9 +120,7 @@ async function resolveOrCreateBuyer(supabase: any, args: {
     console.warn("[mp-webhook] buyer-resolve-failed:", { email: args.email, error: (res as any).error });
     return null;
   }
-  if (res.wasCreated && res.email) {
-    sendWelcomeRecoveryEmail(supabase, res.email, SITE_URL).catch(() => { /* ignore */ });
-  }
+  // Emails pós-compra são disparados após recordPurchase ter sucesso (via sendPurchaseEmails).
   return res;
 }
 
