@@ -126,18 +126,18 @@ export const BatalhaIntro: React.FC<Props> = ({ onFinish, initialStage = 'loadin
             </div>
           </div>
 
-          <div className="w-full bg-white/5 border border-white/10 rounded-lg p-4 mb-8">
+          <div className="w-full bg-white/5 border border-white/10 rounded-lg p-4 mb-4">
             <p className="text-sm text-center text-white/90">
               🏆 Todo mês, a receita com a <strong>maior média de avaliação</strong> vence e é destacada para todos os Drinkeros.
             </p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-2 mb-8 text-xs">
-            <span className="px-3 py-1 rounded-full bg-amber-700/40 border border-amber-500/40">🥉 Bronze</span>
-            <span className="px-3 py-1 rounded-full bg-slate-400/30 border border-slate-300/40">🥈 Prata 50+</span>
-            <span className="px-3 py-1 rounded-full bg-yellow-500/30 border border-yellow-400/40">🥇 Ouro 200+</span>
-            <span className="px-3 py-1 rounded-full bg-fuchsia-500/30 border border-fuchsia-400/40">👑 Mestre 500+</span>
+          <div className="w-full bg-yellow-400/10 border border-yellow-400/30 rounded-lg p-4 mb-8">
+            <p className="text-sm text-center text-yellow-100">
+              ⚠️ Para concorrer ao prêmio do mês, o autor da receita precisa ter avaliado <strong>pelo menos 3 receitas</strong> de outros sócios.
+            </p>
           </div>
+
 
           <button
             type="button"
