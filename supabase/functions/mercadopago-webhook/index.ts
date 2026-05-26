@@ -6,8 +6,8 @@ import { fireCapiPurchaseFromWebhook } from "../_shared/metaCapi.ts";
 import {
   resolveBuyerUser,
   logPurchaseResolutionFailure,
-  sendWelcomeRecoveryEmail,
 } from "../_shared/resolveBuyerUser.ts";
+import { sendPurchaseEmails } from "../_shared/sendPurchaseEmails.ts";
 
 const SITE_URL = Deno.env.get("SITE_URL") || "https://drinkeros.lovable.app";
 
@@ -102,9 +102,7 @@ async function resolveOrCreateBuyer(supabase: any, args: {
     console.warn("[mp-webhook] buyer-resolve-failed:", { email: args.email, error: (res as any).error });
     return null;
   }
-  if (res.wasCreated && res.email) {
-    sendWelcomeRecoveryEmail(supabase, res.email, SITE_URL).catch(() => { /* ignore */ });
-  }
+  // Emails pós-compra são disparados após recordPurchase ter sucesso (via sendPurchaseEmails).
   return res;
 }
 

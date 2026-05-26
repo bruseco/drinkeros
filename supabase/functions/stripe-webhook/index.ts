@@ -8,8 +8,8 @@ import { fireCapiPurchaseFromWebhook } from "../_shared/metaCapi.ts";
 import {
   resolveBuyerUser,
   logPurchaseResolutionFailure,
-  sendWelcomeRecoveryEmail,
 } from "../_shared/resolveBuyerUser.ts";
+import { sendPurchaseEmails } from "../_shared/sendPurchaseEmails.ts";
 
 const log = (step: string, details?: unknown) => {
   console.log(`[stripe-webhook] ${step}${details ? " — " + JSON.stringify(details) : ""}`);
@@ -168,10 +168,7 @@ serve(async (req) => {
       log("buyer-resolve-failed", { email: args.email, error: (res as any).error });
       return null;
     }
-    if (res.wasCreated && res.email) {
-      // não bloqueia o webhook
-      sendWelcomeRecoveryEmail(supabase, res.email, SITE_URL).catch(() => { /* ignore */ });
-    }
+    // Emails pós-compra são disparados após recordPurchase ter sucesso (via sendPurchaseEmails).
     return res;
   };
 
