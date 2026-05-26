@@ -1,32 +1,28 @@
-## Problema
+## Mudança
 
-No `src/App.tsx`, as rotas da Batalha estão como redirect para `/app/receitas`:
+No card colorido da home `/app/batalha`, remover o sistema de níveis (Bronze/Prata/Ouro/Mestre Mixologista). Manter apenas os pontos do usuário e o botão de Ranking.
 
-```tsx
-<Route path="batalha" element={<Navigate to="/app/receitas" replace />} />
-<Route path="batalha/*" element={<Navigate to="/app/receitas" replace />} />
-```
+## Como ficará o card
 
-Por isso ao acessar `/app/batalha` o app manda pra Receitas.
+- Esquerda: "Seus pontos" + número grande (ex: `0`)
+- Direita: botão `Ranking`
+- Fundo: cor sólida neutra do tema (ex: `bg-card` com borda) em vez do gradiente que dependia do tier
 
-## Correção
+## Arquivo alterado
 
-Em `src/App.tsx`, substituir os dois redirects pelas rotas reais já existentes (componentes já importados no topo do arquivo):
+- `src/pages/user/UserBatalha.tsx` — bloco do card (linhas 58–74):
+  - Remover `tierColor` do import (e do hook `useBatalha` se não for mais usado em nenhum outro lugar — confirmado, só esse arquivo usa).
+  - Trocar o `Card` com `bg-gradient-to-r ${tierColor(...)}` por um card neutro mostrando só pontos.
+  - Remover a coluna "Seu nível / {tier}".
 
-```tsx
-<Route path="batalha" element={<UserBatalha />} />
-<Route path="batalha/nova" element={<UserBatalhaNew />} />
-<Route path="batalha/ranking" element={<UserBatalhaRanking />} />
-<Route path="batalha/receita/:id" element={<UserBatalhaRecipeDetail />} />
-```
+## Não mexer
 
-## Arquivos alterados
-- `src/App.tsx` (apenas as 2 linhas dos redirects)
+- O hook `tierFromPoints` continua existindo (pode ser usado internamente), mas deixa de ser exibido na UI.
+- Nenhuma mudança em banco de dados, pagamentos, tracking ou PWA.
+- Página `/app/batalha/ranking` permanece como está (só mês vigente + histórico).
 
 ## Como testar
-1. Acessar `/app/batalha` → feed da Batalha carrega.
-2. `/app/batalha/ranking` → ranking.
-3. `/app/batalha/nova` → formulário (bloqueia se não for Sócio).
-4. `/app/batalha/receita/:id` → detalhe.
 
-Nenhum impacto em auth, pagamentos, tracking, PWA ou banco.
+1. Acessar `/app/batalha` logado.
+2. Card deve mostrar "Seus pontos: 0" e o botão Ranking, sem texto "Bronze" nem gradiente marrom/laranja.
+3. Postar uma receita e votar em outra → pontos aumentam, sem aparecer tier.

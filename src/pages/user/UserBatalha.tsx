@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useBatalhaFeed, useBatalhaMyPoints, tierColor } from '@/hooks/useBatalha';
+import { useBatalhaFeed, useBatalhaMyPoints } from '@/hooks/useBatalha';
 import { BatalhaIntro, hasSeenBatalhaIntro } from '@/components/user/BatalhaIntro';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
