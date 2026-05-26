@@ -109,8 +109,9 @@ const UserBatalhaRanking: React.FC = () => {
       )}
 
       <p className="text-[11px] text-muted-foreground text-center pt-2">
-        Toda virada de mês a classificação zera e uma nova disputa começa.
+        Toda virada de mês a classificação zera e uma nova disputa começa. Para concorrer ao prêmio, o autor precisa ter avaliado pelo menos 3 receitas de outros sócios.
       </p>
+
     </div>
   );
 };
