@@ -135,6 +135,24 @@ serve(async (req) => {
       productType: p.productType,
       productId: p.productId ?? null,
     });
+
+    // E-mails pós-compra (account-created se conta criada agora + purchase-confirmed sempre).
+    // Lock atômico via purchases.emails_dispatched_at garante envio único em reenvios.
+    if (!error && p.buyerEmail) {
+      await sendPurchaseEmails(supabase, {
+        gateway: "stripe",
+        transactionId: p.transactionId,
+        userId: p.userId,
+        email: p.buyerEmail,
+        fullName: p.buyerName ?? null,
+        wasCreated: !!p.userWasCreated,
+        productName: p.productName,
+        productType: p.productType,
+        amountPaid: p.amountPaid,
+        currency: p.currency || "BRL",
+        siteUrl: SITE_URL,
+      });
+    }
   };
 
   const SITE_URL = Deno.env.get("SITE_URL") || "https://drinkeros.lovable.app";
