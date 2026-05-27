@@ -19,6 +19,7 @@ const CompleteProfile: React.FC = () => {
   const { toast } = useToast();
   const [phone, setPhone] = useState<string | undefined>(undefined);
   const [fullName, setFullName] = useState('');
+  const [birthDate, setBirthDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [checking, setChecking] = useState(true);
 
