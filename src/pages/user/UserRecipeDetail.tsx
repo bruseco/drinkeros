@@ -222,8 +222,24 @@ const UserRecipeDetail: React.FC = () => {
     ? recipe.instructions.split('\n').filter(l => l.trim())
     : [];
 
+  const showSwipe = isMobile && feedOrder.length > 1 && currentIndex >= 0;
+
   return (
-    <div className="pb-24">
+    <div className="pb-24 overflow-x-hidden">
+      <div
+        ref={swipeContainerRef}
+        onTouchStart={showSwipe ? onTouchStart : undefined}
+        onTouchMove={showSwipe ? onTouchMove : undefined}
+        onTouchEnd={showSwipe ? onTouchEnd : undefined}
+        onTouchCancel={showSwipe ? onTouchEnd : undefined}
+        style={{
+          transform: `translate3d(${dragX}px, 0, 0)`,
+          transition: isDragging
+            ? 'none'
+            : 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)',
+          willChange: 'transform',
+        }}
+      >
 
       {/* Video / Cover */}
       {embedUrl ? (
