@@ -168,6 +168,11 @@ const UserRecipeDetail: React.FC = () => {
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [committing, setCommitting] = useState<'prev' | 'next' | null>(null);
+  // When we navigate to a neighbor via swipe, we need to snap the strip back
+  // to the centered (0px) transform WITHOUT a transition — otherwise the new
+  // recipe (now centered) animates from the edge, looking like a duplicate
+  // slide-in. We turn transitions off for one frame after the route changes.
+  const [snap, setSnap] = useState(false);
   const dragStartRef = useRef<{ x: number; y: number; t: number; locked: 'h' | 'v' | null } | null>(null);
 
   const commitNavigate = useCallback(
@@ -181,9 +186,15 @@ const UserRecipeDetail: React.FC = () => {
 
   // Reset transform whenever the route changes (new recipe is rendered)
   useEffect(() => {
+    setSnap(true);
     setDragX(0);
     setIsDragging(false);
     setCommitting(null);
+    // Re-enable transitions on the next frame so future drags animate normally.
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setSnap(false));
+    });
+    return () => cancelAnimationFrame(raf);
   }, [idOrSlug]);
 
   // Axis-locked touch handlers attached natively so we can call preventDefault
