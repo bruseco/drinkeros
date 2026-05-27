@@ -115,8 +115,10 @@ const Signup: React.FC = () => {
         fullName,
         method: 'email',
       });
-      // garante que o fbq enfileirou antes do redirect
-      await waitForPixelFlush(200);
+      console.log('[Signup] CompleteRegistration enfileirado, aguardando flush...');
+      // garante que o fbq enfileirou e a request CAPI iniciou antes do redirect
+      await waitForPixelFlush(600);
+      console.log('[Signup] redirect after signup → /app');
     } catch (err) {
       console.warn('[Signup] CompleteRegistration falhou', err);
     }
