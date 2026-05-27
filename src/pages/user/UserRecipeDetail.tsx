@@ -139,6 +139,10 @@ const UserRecipeDetail: React.FC = () => {
     () => findRecipeIndex(feedOrder, idOrSlug || ''),
     [feedOrder, idOrSlug]
   );
+  const feedOrderRef = useRef<RecipeFeedItem[]>([]);
+  useEffect(() => {
+    feedOrderRef.current = feedOrder;
+  }, [feedOrder]);
 
   // Looping helpers: when there are no more pages to load, wrapping around
   // (last → first, first → last) gives the user the looping behaviour they
@@ -188,7 +192,10 @@ const UserRecipeDetail: React.FC = () => {
     (target: typeof prevItem) => {
       if (!target) return;
       setRecipeScrollTarget(recipeKey(target));
-      navigate(recipeRoute(target), { replace: true });
+      navigate(recipeRoute(target), {
+        replace: true,
+        state: { recipeFeedOrder: feedOrderRef.current },
+      });
     },
     [navigate]
   );
