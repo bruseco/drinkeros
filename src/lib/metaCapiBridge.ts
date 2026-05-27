@@ -80,3 +80,81 @@ export async function trackLead(opts: TrackLeadOptions): Promise<string> {
 
   return eventId;
 }
+
+// ---------------------------------------------------------------------------
+// CompleteRegistration — dispara após signup bem-sucedido (email ou OAuth).
+// ---------------------------------------------------------------------------
+export interface TrackCompleteRegistrationOptions {
+  userId?: string;
+  email?: string;
+  phone?: string;
+  fullName?: string;
+  method: string; // 'email' | 'google' | 'apple' | 'oauth' | ...
+  content_name?: string;
+}
+
+export async function trackCompleteRegistration(
+  opts: TrackCompleteRegistrationOptions,
+): Promise<string> {
+  const eventId = `signup:${opts.userId || opts.email || 'anon'}`;
+
+  const customData: Record<string, unknown> = {
+    content_name: opts.content_name || 'Drinkeros Account Registration',
+    status: 'success',
+    method: opts.method,
+  };
+
+  trackFbEvent('CompleteRegistration', customData, {
+    eventId,
+    dedupeKey: `user:${opts.userId || opts.email}`,
+  });
+
+  supabase.functions
+    .invoke('meta-capi-track', {
+      body: {
+        event_name: 'CompleteRegistration',
+        event_id: eventId,
+        event_source_url: typeof window !== 'undefined' ? window.location.href : undefined,
+        custom_data: customData,
+        user_data: {
+          email: opts.email,
+          phone: opts.phone,
+          fbp: getCookie('_fbp'),
+          fbc: getCookie('_fbc'),
+        },
+      },
+    })
+    .then((r) => {
+      if (r.error) console.warn('[meta-capi-bridge] CompleteRegistration CAPI erro:', r.error);
+      else console.log('[meta-capi-bridge] CompleteRegistration CAPI ok', eventId, r.data);
+    })
+    .catch((e) => console.warn('[meta-capi-bridge] CompleteRegistration exception:', e));
+
+  return eventId;
+}
+
+// ---------------------------------------------------------------------------
+// PageView — espelha no CAPI para aparecer em "Eventos de teste" (test_event_code).
+// O Pixel client-side já dispara PageView; aqui usamos o MESMO event_id p/ dedupe.
+// Fire-and-forget; usado pelo FacebookPixel a cada troca de rota.
+// ---------------------------------------------------------------------------
+export function trackPageViewCapi(pathname: string, eventId: string) {
+  supabase.functions
+    .invoke('meta-capi-track', {
+      body: {
+        event_name: 'PageView',
+        event_id: eventId,
+        event_source_url: typeof window !== 'undefined' ? window.location.href : undefined,
+        custom_data: { path: pathname },
+        user_data: {
+          fbp: getCookie('_fbp'),
+          fbc: getCookie('_fbc'),
+        },
+      },
+    })
+    .then((r) => {
+      if (r.error) console.warn('[meta-capi-bridge] PageView CAPI erro:', r.error);
+      else console.log('[meta-capi-bridge] PageView CAPI ok', eventId);
+    })
+    .catch((e) => console.warn('[meta-capi-bridge] PageView exception:', e));
+}

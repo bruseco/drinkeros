@@ -70,15 +70,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Novo cadastro via OAuth/Magic Link → CompleteRegistration
           const provider = (userObj.app_metadata as any)?.provider || 'oauth';
           console.log('[AuthContext] disparando CompleteRegistration', { userId, provider });
-          trackFbEvent(
-            'CompleteRegistration',
-            {
-              content_name: 'Drinkeros Account Registration',
-              status: 'success',
+          import('@/lib/metaCapiBridge').then(({ trackCompleteRegistration }) => {
+            trackCompleteRegistration({
+              userId,
+              email: userObj.email || undefined,
+              phone: (userObj.user_metadata as any)?.phone,
+              fullName,
               method: provider,
-            },
-            { dedupeKey: `user:${userId}` }
-          );
+            }).catch(() => undefined);
+          });
+
 
         }
         return;
