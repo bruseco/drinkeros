@@ -389,7 +389,9 @@ const UserRecipeDetail: React.FC = () => {
           />
         )}
       </div>
+      </div>
       {/* /swipe wrapper */}
+
 
       {isSuperAdmin && recipeId && createPortal(
         <button
