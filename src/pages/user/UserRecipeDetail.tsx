@@ -395,7 +395,7 @@ const UserRecipeDetail: React.FC = () => {
                 display: 'flex',
                 width: '300vw',
                 transform: `translate3d(calc(-33.3333% + ${dragX}px), 0, 0)`,
-                transition: isDragging
+                transition: isDragging || snap
                   ? 'none'
                   : 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1)',
                 willChange: 'transform',
