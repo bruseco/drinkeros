@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { FullscreenVideo } from '@/components/user/FullscreenVideo';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useExclusivePost, useExclusivePostsPaginated } from '@/hooks/useExclusivePosts';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
 import { useRecipeAccessGuard } from '@/hooks/useRecipeAccessGuard';
@@ -73,6 +73,7 @@ const UserRecipeDetail: React.FC = () => {
   const toggleFavorite = useToggleFavorite();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showFavoriteDialog, setShowFavoriteDialog] = useState(false);
   const { check: checkAccess } = useRecipeAccessGuard();
   const { isSuperAdmin } = useAuth();
@@ -110,7 +111,11 @@ const UserRecipeDetail: React.FC = () => {
   // carousel is ready on the very first render. Then append any newly fetched
   // pages that aren't already in the list (preserves saved order — avoids
   // re-seeding random and losing the current recipe's index).
-  const savedOrder = useMemo(() => getRecipeFeedOrder(), []);
+  const savedOrder = useMemo(() => {
+    const stateOrder = (location.state as { recipeFeedOrder?: RecipeFeedItem[] } | null)?.recipeFeedOrder;
+    if (Array.isArray(stateOrder) && stateOrder.length > 0) return stateOrder;
+    return getRecipeFeedOrder();
+  }, [location.state]);
   const feedOrder = useMemo(() => {
     const seen = new Set<string>();
     const out: RecipeFeedItem[] = [];
