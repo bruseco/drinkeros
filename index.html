@@ -67,9 +67,31 @@
     "url": "https://drinkeros.com/"
   }
   </script>
+
+  <!-- Meta Pixel Code (carregado direto para garantir detecção pelo Pixel Helper) -->
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('set', 'autoConfig', 'false', '1013268998816669');
+    fbq('init', '1013268998816669');
+    fbq('track', 'PageView');
+    window.__META_PIXEL_INITIALIZED_ID__ = '1013268998816669';
+    window.__META_PIXEL_READY__ = true;
+    window.__META_PIXEL_LAST_PAGEVIEW_PATH__ = window.location.pathname;
+    window.__META_PIXEL_LAST_PAGEVIEW_TIME__ = Date.now();
+  </script>
+  <!-- End Meta Pixel Code -->
 </head>
 
   <body>
+    <noscript><img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=1013268998816669&ev=PageView&noscript=1"/></noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
