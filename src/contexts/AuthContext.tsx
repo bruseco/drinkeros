@@ -69,11 +69,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setProfile(newProfile as UserProfile);
           // Novo cadastro via OAuth/Magic Link → CompleteRegistration
           const provider = (userObj.app_metadata as any)?.provider || 'oauth';
+          console.log('[AuthContext] disparando CompleteRegistration', { userId, provider });
           trackFbEvent(
             'CompleteRegistration',
-            { method: provider },
+            {
+              content_name: 'Drinkeros Account Registration',
+              status: 'success',
+              method: provider,
+            },
             { dedupeKey: `user:${userId}` }
           );
+
         }
         return;
       }
