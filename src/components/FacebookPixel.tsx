@@ -72,12 +72,20 @@ const injectPixel = (pixelId: string) => {
   // para que apenas eventos disparados manualmente apareçam no Pixel Helper.
   window.fbq('set', 'autoConfig', 'false', pixelId);
   window.fbq('init', pixelId);
+  // IMPORTANTE: fbq('init') dispara um PageView automaticamente.
+  // Marcamos a flag global imediatamente para que o useEffect de rota
+  // NÃO dispare um segundo PageView com a mesma pathname (anti-duplicata).
+  if (typeof window.location !== 'undefined') {
+    window.__META_PIXEL_LAST_PAGEVIEW_PATH__ = window.location.pathname;
+    window.__META_PIXEL_LAST_PAGEVIEW_TIME__ = Date.now();
+  }
   injected = true;
   window.__META_PIXEL_INITIALIZED_ID__ = pixelId;
   window.__META_PIXEL_READY__ = true;
-  console.log('[FacebookPixel] init (autoConfig off)', pixelId);
+  console.log('[FacebookPixel] init (autoConfig off) — PageView automático contabilizado', pixelId);
   return true;
 };
+
 
 export const FacebookPixel: React.FC = () => {
   const location = useLocation();
