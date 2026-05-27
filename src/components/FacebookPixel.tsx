@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { trackPageViewCapi } from '@/lib/metaCapiBridge';
+
 
 declare global {
   interface Window {
@@ -24,14 +26,17 @@ const firePageViewFromGlobalRoute = (pathname: string) => {
   const lastTime = window.__META_PIXEL_LAST_PAGEVIEW_TIME__ ?? 0;
 
   if (lastPath === pathname && now - lastTime < PAGEVIEW_LOCK_MS) {
-    console.warn('[MetaPixel] PageView blocked by dedupe', pathname, now, new Error().stack);
+    console.warn('[MetaPixel] PageView blocked by dedupe', pathname, now);
     return false;
   }
 
+  const eventId = `pv:${pathname}:${now}`;
   window.__META_PIXEL_LAST_PAGEVIEW_PATH__ = pathname;
   window.__META_PIXEL_LAST_PAGEVIEW_TIME__ = now;
-  window.fbq('track', 'PageView');
-  console.log('[MetaPixel] PageView fired', pathname, now, new Error().stack);
+  window.fbq('track', 'PageView', {}, { eventID: eventId });
+  console.log('[MetaPixel] PageView fired', pathname, eventId);
+  // Espelha no CAPI (mesmo event_id p/ deduplicação + aparece em "Eventos de teste")
+  trackPageViewCapi(pathname, eventId);
   return true;
 };
 

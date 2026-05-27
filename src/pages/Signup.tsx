@@ -107,15 +107,14 @@ const Signup: React.FC = () => {
     try {
       const { data: { user: createdUser } } = await supabase.auth.getUser();
       console.log('[Signup] disparando CompleteRegistration', { userId: createdUser?.id, method: 'email' });
-      trackFbEvent(
-        'CompleteRegistration',
-        {
-          content_name: 'Drinkeros Account Registration',
-          status: 'success',
-          method: 'email',
-        },
-        { dedupeKey: `user:${createdUser?.id || email}` }
-      );
+      const { trackCompleteRegistration } = await import('@/lib/metaCapiBridge');
+      await trackCompleteRegistration({
+        userId: createdUser?.id,
+        email,
+        phone,
+        fullName,
+        method: 'email',
+      });
       // garante que o fbq enfileirou antes do redirect
       await waitForPixelFlush(200);
     } catch (err) {

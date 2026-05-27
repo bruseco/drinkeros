@@ -180,6 +180,7 @@ export async function fireCapiPurchaseFromWebhook(supabase: any, args: {
 // ============================================================
 
 export type MetaCapiEventName =
+  | "PageView"
   | "Lead"
   | "CompleteRegistration"
   | "InitiateCheckout"
