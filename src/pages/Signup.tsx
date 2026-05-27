@@ -295,6 +295,18 @@ const Signup: React.FC = () => {
                 )}
               </div>
               <div className="space-y-2">
+                <Label htmlFor="birthDate">Data de nascimento</Label>
+                <Input
+                  id="birthDate"
+                  type="date"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">Você precisa ter 18 anos ou mais.</p>
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="password">Senha</Label>
                 <Input
                   id="password"
