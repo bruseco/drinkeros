@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { createPortal } from 'react-dom';
 import { FullscreenVideo } from '@/components/user/FullscreenVideo';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useExclusivePost } from '@/hooks/useExclusivePosts';
+import { useExclusivePost, useExclusivePostsPaginated } from '@/hooks/useExclusivePosts';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
 import { useRecipeAccessGuard } from '@/hooks/useRecipeAccessGuard';
 import { useRelatedRecipes } from '@/hooks/useRelatedRecipes';
