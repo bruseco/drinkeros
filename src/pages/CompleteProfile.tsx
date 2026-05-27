@@ -19,6 +19,7 @@ const CompleteProfile: React.FC = () => {
   const { toast } = useToast();
   const [phone, setPhone] = useState<string | undefined>(undefined);
   const [fullName, setFullName] = useState('');
+  const [birthDate, setBirthDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [checking, setChecking] = useState(true);
 
@@ -31,17 +32,28 @@ const CompleteProfile: React.FC = () => {
     (async () => {
       const { data } = await supabase
         .from('profiles')
-        .select('phone, full_name')
+        .select('phone, full_name, birth_date')
         .eq('user_id', user.id)
         .maybeSingle();
-      if (data?.phone) {
+      if (data?.phone && data?.birth_date) {
         navigate('/app', { replace: true });
         return;
       }
       setFullName(data?.full_name || (user.user_metadata as any)?.full_name || (user.user_metadata as any)?.name || '');
+      if (data?.birth_date) setBirthDate(data.birth_date);
       setChecking(false);
     })();
   }, [user, authLoading, navigate]);
+
+  const calcAge = (iso: string) => {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return -1;
+    const today = new Date();
+    let age = today.getFullYear() - d.getFullYear();
+    const m = today.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+    return age;
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,17 +69,26 @@ const CompleteProfile: React.FC = () => {
       toast({ title: 'Nome obrigatório', description: 'Informe seu nome completo.', variant: 'destructive' });
       return;
     }
+    const age = calcAge(birthDate);
+    if (!birthDate || age < 0) {
+      toast({ title: 'Data de nascimento inválida', description: 'Informe sua data de nascimento.', variant: 'destructive' });
+      return;
+    }
+    if (age < 18) {
+      toast({ title: 'Idade mínima 18 anos', description: 'O Drinkeros é exclusivo para maiores de 18 anos.', variant: 'destructive' });
+      return;
+    }
     setIsSaving(true);
     const trimmedName = fullName.trim();
     const { error } = await supabase
       .from('profiles')
       .upsert(
-        { user_id: user!.id, email: user!.email ?? '', phone, full_name: trimmedName },
+        { user_id: user!.id, email: user!.email ?? '', phone, full_name: trimmedName, birth_date: birthDate },
         { onConflict: 'user_id' }
       );
     if (!error) {
-      // Mantém o metadata do auth.users sincronizado com nome e telefone
-      await supabase.auth.updateUser({ data: { full_name: trimmedName, phone } }).catch(() => {});
+      // Mantém o metadata do auth.users sincronizado com nome, telefone e nascimento
+      await supabase.auth.updateUser({ data: { full_name: trimmedName, phone, birth_date: birthDate } }).catch(() => {});
     }
     setIsSaving(false);
     if (error) {
@@ -133,6 +154,19 @@ const CompleteProfile: React.FC = () => {
               {phone && !isValidPhoneNumber(phone) && (
                 <p className="text-xs text-destructive">Número inválido para o país selecionado.</p>
               )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="birthDate">Data de nascimento</Label>
+              <input
+                id="birthDate"
+                type="date"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                max={new Date().toISOString().split('T')[0]}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                required
+              />
+              <p className="text-xs text-muted-foreground">Você precisa ter 18 anos ou mais.</p>
             </div>
             <Button type="submit" className="w-full" disabled={isSaving}>
               {isSaving ? (

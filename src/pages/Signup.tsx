@@ -24,8 +24,19 @@ const Signup: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState<string | undefined>(undefined);
+  const [birthDate, setBirthDate] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  const calcAge = (iso: string) => {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return -1;
+    const today = new Date();
+    let age = today.getFullYear() - d.getFullYear();
+    const m = today.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+    return age;
+  };
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -43,6 +54,16 @@ const Signup: React.FC = () => {
         description: 'Informe um número de WhatsApp válido com o código do país.',
         variant: 'destructive',
       });
+      return;
+    }
+
+    const age = calcAge(birthDate);
+    if (!birthDate || age < 0) {
+      toast({ title: 'Data de nascimento inválida', description: 'Informe sua data de nascimento.', variant: 'destructive' });
+      return;
+    }
+    if (age < 18) {
+      toast({ title: 'Idade mínima 18 anos', description: 'O Drinkeros é exclusivo para maiores de 18 anos.', variant: 'destructive' });
       return;
     }
 
@@ -72,7 +93,7 @@ const Signup: React.FC = () => {
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: { full_name: fullName, phone },
+        data: { full_name: fullName, phone, birth_date: birthDate },
       },
     });
 
@@ -93,7 +114,7 @@ const Signup: React.FC = () => {
       if (newUser) {
         await supabase
           .from('profiles')
-          .update({ phone, full_name: fullName })
+          .update({ phone, full_name: fullName, birth_date: birthDate })
           .eq('user_id', newUser.id);
       }
     } catch {
@@ -272,6 +293,18 @@ const Signup: React.FC = () => {
                 {phone && !isValidPhoneNumber(phone) && (
                   <p className="text-xs text-destructive">Número inválido para o país selecionado.</p>
                 )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="birthDate">Data de nascimento</Label>
+                <Input
+                  id="birthDate"
+                  type="date"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">Você precisa ter 18 anos ou mais.</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Senha</Label>
