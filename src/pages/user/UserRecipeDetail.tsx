@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { FullscreenVideo } from '@/components/user/FullscreenVideo';
 import { useParams, Link, useNavigate } from 'react-router-dom';
@@ -17,6 +17,14 @@ import RelatedRecipesSection from '@/components/user/RelatedRecipesSection';
 import RecipeYieldLine from '@/components/user/RecipeYieldLine';
 import { useTrackExclusivePostView } from '@/hooks/useAccessTracking';
 import { useViewContent } from '@/hooks/useViewContent';
+import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  getRecipeFeedOrder,
+  findRecipeIndex,
+  recipeKey,
+  recipeRoute,
+  setRecipeScrollTarget,
+} from '@/lib/recipesFeedNav';
 
 const UserRecipeDetail: React.FC = () => {
   const { id: idOrSlug } = useParams<{ id: string }>();
