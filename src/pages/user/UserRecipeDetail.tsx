@@ -251,6 +251,55 @@ const UserRecipeDetail: React.FC = () => {
     }
   }, [commitNavigate]);
 
+  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (!isMobile || commitRef.current || event.pointerType === 'mouse') return;
+    dragStartRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+      t: Date.now(),
+      pointerId: event.pointerId,
+      locked: null,
+    };
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  }, [isMobile]);
+
+  const handlePointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const start = dragStartRef.current;
+    if (!start || commitRef.current || event.pointerId !== start.pointerId) return;
+
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
+
+    if (!start.locked) {
+      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      start.locked = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
+      if (start.locked === 'v') {
+        dragStartRef.current = null;
+        event.currentTarget.releasePointerCapture?.(event.pointerId);
+        return;
+      }
+    }
+
+    if (start.locked !== 'h') return;
+    event.preventDefault();
+
+    let effective = dx;
+    if ((dx < 0 && !nextItemRef.current) || (dx > 0 && !prevItemRef.current)) {
+      effective = dx * 0.25;
+    }
+    dragXRef.current = effective;
+    setIsDragging(true);
+    setDragX(effective);
+  }, []);
+
+  const handlePointerEnd = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const start = dragStartRef.current;
+    if (start && event.pointerId === start.pointerId) {
+      event.currentTarget.releasePointerCapture?.(event.pointerId);
+    }
+    finishSwipe();
+  }, [finishSwipe]);
+
 
   const handleBackToFeed = () => {
     if (feedOrder.length > 0 && idOrSlug) {
