@@ -19,13 +19,19 @@ export interface Ebook {
 export type EbookInsert = Omit<Ebook, 'id' | 'created_at' | 'updated_at'>;
 export type EbookUpdate = Partial<EbookInsert>;
 
+// Non-sensitive columns visible to clients. `file_url` is intentionally
+// excluded — restricted to admins via admin_get_ebook_file_url RPC,
+// and users download via the get-signed-file-url edge function.
+const EBOOK_PUBLIC_COLS =
+  'id, name, slug, description, cover_image_url, price, is_active, display_order, created_at, updated_at';
+
 export const useEbooks = (activeOnly = false) => {
   return useQuery({
     queryKey: ['ebooks', { activeOnly }],
     queryFn: async () => {
       let query = supabase
         .from('ebooks')
-        .select('*')
+        .select(EBOOK_PUBLIC_COLS)
         .order('display_order', { ascending: true });
 
       if (activeOnly) {
@@ -45,7 +51,7 @@ export const useEbook = (id: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('ebooks')
-        .select('*')
+        .select(EBOOK_PUBLIC_COLS)
         .eq('id', id)
         .single();
 
@@ -62,7 +68,7 @@ export const useEbookBySlug = (slug: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('ebooks')
-        .select('*')
+        .select(EBOOK_PUBLIC_COLS)
         .eq('slug', slug)
         .eq('is_active', true)
         .maybeSingle();
@@ -83,11 +89,11 @@ export const useCreateEbook = () => {
       const { data, error } = await supabase
         .from('ebooks')
         .insert(ebook)
-        .select()
+        .select('id')
         .single();
 
       if (error) throw error;
-      return data as Ebook;
+      return data as { id: string };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ebooks'] });
@@ -109,11 +115,11 @@ export const useUpdateEbook = () => {
         .from('ebooks')
         .update(data)
         .eq('id', id)
-        .select()
+        .select('id')
         .single();
 
       if (error) throw error;
-      return updated as Ebook;
+      return updated as { id: string };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ebooks'] });

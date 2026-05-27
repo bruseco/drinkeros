@@ -74,18 +74,31 @@ const EbookForm: React.FC = () => {
 
   useEffect(() => {
     if (ebook) {
-      setFormData({
+      setFormData((prev) => ({
+        ...prev,
         name: ebook.name,
         slug: ebook.slug || '',
         description: ebook.description || '',
         cover_image_url: ebook.cover_image_url || '',
-        file_url: ebook.file_url || '',
         price: ebook.price ? String(ebook.price) : '',
         is_active: ebook.is_active ?? true,
         display_order: ebook.display_order ?? 0,
-      });
+      }));
     }
   }, [ebook]);
+
+  // file_url is column-restricted and fetched separately via admin RPC
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase.rpc('admin_get_ebook_file_url', { _ebook_id: id });
+      if (!cancelled && !error && typeof data === 'string') {
+        setFormData((prev) => ({ ...prev, file_url: data }));
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [id]);
 
   const generateSlug = (name: string) => {
     return name

@@ -3331,6 +3331,7 @@ export type Database = {
         Args: { _page_key: string; _variant: string }
         Returns: undefined
       }
+      admin_get_ebook_file_url: { Args: { _ebook_id: string }; Returns: string }
       admin_orders: {
         Args: {
           p_from?: string
