@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { FullscreenVideo } from '@/components/user/FullscreenVideo';
 import { useParams, Link, useNavigate } from 'react-router-dom';
@@ -17,6 +17,14 @@ import RelatedRecipesSection from '@/components/user/RelatedRecipesSection';
 import RecipeYieldLine from '@/components/user/RecipeYieldLine';
 import { useTrackExclusivePostView } from '@/hooks/useAccessTracking';
 import { useViewContent } from '@/hooks/useViewContent';
+import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  getRecipeFeedOrder,
+  findRecipeIndex,
+  recipeKey,
+  recipeRoute,
+  setRecipeScrollTarget,
+} from '@/lib/recipesFeedNav';
 
 const UserRecipeDetail: React.FC = () => {
   const { id: idOrSlug } = useParams<{ id: string }>();
@@ -36,6 +44,112 @@ const UserRecipeDetail: React.FC = () => {
   const [showFavoriteDialog, setShowFavoriteDialog] = useState(false);
   const { check: checkAccess } = useRecipeAccessGuard();
   const { isSuperAdmin } = useAuth();
+  const isMobile = useIsMobile();
+
+  // ---- Swipe navigation between recipes (mobile only) ----
+  const feedOrder = useMemo(() => getRecipeFeedOrder(), []);
+  const currentIndex = useMemo(
+    () => findRecipeIndex(feedOrder, idOrSlug || ''),
+    [feedOrder, idOrSlug]
+  );
+  const prevItem = currentIndex > 0 ? feedOrder[currentIndex - 1] : null;
+  const nextItem =
+    currentIndex >= 0 && currentIndex < feedOrder.length - 1
+      ? feedOrder[currentIndex + 1]
+      : null;
+
+  const swipeContainerRef = useRef<HTMLDivElement>(null);
+  const [dragX, setDragX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [committing, setCommitting] = useState<'prev' | 'next' | null>(null);
+  const dragStartRef = useRef<{ x: number; y: number; t: number; locked: 'h' | 'v' | null } | null>(null);
+
+  const commitNavigate = useCallback(
+    (target: typeof prevItem) => {
+      if (!target) return;
+      setRecipeScrollTarget(recipeKey(target));
+      navigate(recipeRoute(target), { replace: true });
+    },
+    [navigate]
+  );
+
+  // Reset transform whenever the route changes (new recipe is rendered)
+  useEffect(() => {
+    setDragX(0);
+    setIsDragging(false);
+    setCommitting(null);
+  }, [idOrSlug]);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (!isMobile || committing) return;
+    const t = e.touches[0];
+    dragStartRef.current = { x: t.clientX, y: t.clientY, t: Date.now(), locked: null };
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    const start = dragStartRef.current;
+    if (!start || committing) return;
+    const t = e.touches[0];
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+
+    if (!start.locked) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      start.locked = Math.abs(dx) > Math.abs(dy) * 1.2 ? 'h' : 'v';
+    }
+    if (start.locked !== 'h') return;
+
+    // Rubber-band when there's no neighbor in that direction (glue resistance)
+    let effective = dx;
+    if ((dx < 0 && !nextItem) || (dx > 0 && !prevItem)) {
+      effective = dx * 0.25;
+    }
+    setIsDragging(true);
+    setDragX(effective);
+  };
+
+  const onTouchEnd = () => {
+    const start = dragStartRef.current;
+    dragStartRef.current = null;
+    if (!start || start.locked !== 'h') {
+      setIsDragging(false);
+      return;
+    }
+    const width = swipeContainerRef.current?.clientWidth || window.innerWidth;
+    const elapsed = Date.now() - start.t;
+    const velocity = Math.abs(dragX) / Math.max(elapsed, 1); // px/ms
+    const threshold = width * 0.28;
+    const fastFlick = velocity > 0.5 && Math.abs(dragX) > 40;
+
+    if (dragX < 0 && nextItem && (Math.abs(dragX) > threshold || fastFlick)) {
+      setCommitting('next');
+      setDragX(-width);
+      setIsDragging(false);
+      window.setTimeout(() => commitNavigate(nextItem), 260);
+    } else if (dragX > 0 && prevItem && (Math.abs(dragX) > threshold || fastFlick)) {
+      setCommitting('prev');
+      setDragX(width);
+      setIsDragging(false);
+      window.setTimeout(() => commitNavigate(prevItem), 260);
+    } else {
+      setIsDragging(false);
+      setDragX(0);
+    }
+  };
+
+  const handleBackToFeed = () => {
+    if (feedOrder.length > 0 && idOrSlug) {
+      setRecipeScrollTarget(recipeKey({ id: recipe?.id || idOrSlug, slug: recipe?.slug ?? idOrSlug }));
+      navigate('/app/receitas');
+      return;
+    }
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/app/receitas');
+    }
+  };
+
 
   const recipeId = recipe?.id;
   const isFavorite = favorites.some((f) => f.recipe_id === recipeId);
@@ -108,8 +222,24 @@ const UserRecipeDetail: React.FC = () => {
     ? recipe.instructions.split('\n').filter(l => l.trim())
     : [];
 
+  const showSwipe = isMobile && feedOrder.length > 1 && currentIndex >= 0;
+
   return (
-    <div className="pb-24">
+    <div className="pb-24 overflow-x-hidden">
+      <div
+        ref={swipeContainerRef}
+        onTouchStart={showSwipe ? onTouchStart : undefined}
+        onTouchMove={showSwipe ? onTouchMove : undefined}
+        onTouchEnd={showSwipe ? onTouchEnd : undefined}
+        onTouchCancel={showSwipe ? onTouchEnd : undefined}
+        style={{
+          transform: `translate3d(${dragX}px, 0, 0)`,
+          transition: isDragging
+            ? 'none'
+            : 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)',
+          willChange: 'transform',
+        }}
+      >
 
       {/* Video / Cover */}
       {embedUrl ? (
@@ -131,13 +261,7 @@ const UserRecipeDetail: React.FC = () => {
             variant="ghost"
             size="icon"
             className="rounded-full"
-            onClick={() => {
-              if (window.history.length > 1) {
-                navigate(-1);
-              } else {
-                navigate('/app/receitas');
-              }
-            }}
+            onClick={handleBackToFeed}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -265,6 +389,9 @@ const UserRecipeDetail: React.FC = () => {
           />
         )}
       </div>
+      </div>
+      {/* /swipe wrapper */}
+
 
       {isSuperAdmin && recipeId && createPortal(
         <button
