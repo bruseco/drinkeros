@@ -106,13 +106,23 @@ const Signup: React.FC = () => {
     });
     try {
       const { data: { user: createdUser } } = await supabase.auth.getUser();
+      console.log('[Signup] disparando CompleteRegistration', { userId: createdUser?.id, method: 'email' });
       trackFbEvent(
         'CompleteRegistration',
-        { method: 'email' },
+        {
+          content_name: 'Drinkeros Account Registration',
+          status: 'success',
+          method: 'email',
+        },
         { dedupeKey: `user:${createdUser?.id || email}` }
       );
-    } catch { /* ignore */ }
+      // garante que o fbq enfileirou antes do redirect
+      await waitForPixelFlush(200);
+    } catch (err) {
+      console.warn('[Signup] CompleteRegistration falhou', err);
+    }
     navigate('/app');
+
     setIsLoading(false);
   };
 
