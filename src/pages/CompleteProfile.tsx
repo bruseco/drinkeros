@@ -69,17 +69,26 @@ const CompleteProfile: React.FC = () => {
       toast({ title: 'Nome obrigatório', description: 'Informe seu nome completo.', variant: 'destructive' });
       return;
     }
+    const age = calcAge(birthDate);
+    if (!birthDate || age < 0) {
+      toast({ title: 'Data de nascimento inválida', description: 'Informe sua data de nascimento.', variant: 'destructive' });
+      return;
+    }
+    if (age < 18) {
+      toast({ title: 'Idade mínima 18 anos', description: 'O Drinkeros é exclusivo para maiores de 18 anos.', variant: 'destructive' });
+      return;
+    }
     setIsSaving(true);
     const trimmedName = fullName.trim();
     const { error } = await supabase
       .from('profiles')
       .upsert(
-        { user_id: user!.id, email: user!.email ?? '', phone, full_name: trimmedName },
+        { user_id: user!.id, email: user!.email ?? '', phone, full_name: trimmedName, birth_date: birthDate },
         { onConflict: 'user_id' }
       );
     if (!error) {
-      // Mantém o metadata do auth.users sincronizado com nome e telefone
-      await supabase.auth.updateUser({ data: { full_name: trimmedName, phone } }).catch(() => {});
+      // Mantém o metadata do auth.users sincronizado com nome, telefone e nascimento
+      await supabase.auth.updateUser({ data: { full_name: trimmedName, phone, birth_date: birthDate } }).catch(() => {});
     }
     setIsSaving(false);
     if (error) {
