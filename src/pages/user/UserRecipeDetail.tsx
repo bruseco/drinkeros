@@ -261,13 +261,7 @@ const UserRecipeDetail: React.FC = () => {
             variant="ghost"
             size="icon"
             className="rounded-full"
-            onClick={() => {
-              if (window.history.length > 1) {
-                navigate(-1);
-              } else {
-                navigate('/app/receitas');
-              }
-            }}
+            onClick={handleBackToFeed}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -395,6 +389,7 @@ const UserRecipeDetail: React.FC = () => {
           />
         )}
       </div>
+      {/* /swipe wrapper */}
 
       {isSuperAdmin && recipeId && createPortal(
         <button
