@@ -470,7 +470,12 @@ const UserRecipeDetail: React.FC = () => {
         )}
       </div>
       </div>
-      {/* /swipe wrapper */}
+      {/* /current panel */}
+      {showSwipe && <NeighborPreview item={nextItem} />}
+      </div>
+      {/* /strip */}
+      </div>
+      {/* /swipe container */}
 
 
       {isSuperAdmin && recipeId && createPortal(
