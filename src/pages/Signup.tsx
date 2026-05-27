@@ -93,7 +93,7 @@ const Signup: React.FC = () => {
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: { full_name: fullName, phone },
+        data: { full_name: fullName, phone, birth_date: birthDate },
       },
     });
 
