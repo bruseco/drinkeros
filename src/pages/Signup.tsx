@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { trackFbEvent } from '@/lib/metaPixel';
+import { trackFbEvent, waitForPixelFlush } from '@/lib/metaPixel';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import drinksStrip from '@/assets/1000-drinks.jpg';
 import AnimatedNumber from '@/components/AnimatedNumber';
@@ -106,13 +106,23 @@ const Signup: React.FC = () => {
     });
     try {
       const { data: { user: createdUser } } = await supabase.auth.getUser();
+      console.log('[Signup] disparando CompleteRegistration', { userId: createdUser?.id, method: 'email' });
       trackFbEvent(
         'CompleteRegistration',
-        { method: 'email' },
+        {
+          content_name: 'Drinkeros Account Registration',
+          status: 'success',
+          method: 'email',
+        },
         { dedupeKey: `user:${createdUser?.id || email}` }
       );
-    } catch { /* ignore */ }
+      // garante que o fbq enfileirou antes do redirect
+      await waitForPixelFlush(200);
+    } catch (err) {
+      console.warn('[Signup] CompleteRegistration falhou', err);
+    }
     navigate('/app');
+
     setIsLoading(false);
   };
 
