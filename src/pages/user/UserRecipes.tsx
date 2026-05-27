@@ -21,6 +21,7 @@ import { usePwaStatus } from '@/hooks/usePwaStatus';
 import { shouldShowPwaGate } from '@/components/user/PwaInstallGate';
 import { getPrimaryPhase } from '@/lib/seasonalPhases';
 import { Sparkles } from 'lucide-react';
+import { saveRecipeFeedOrder, consumeRecipeScrollTarget, recipeKey } from '@/lib/recipesFeedNav';
 
 const CATEGORY_FILTERS = [
   { label: 'Xaropes Artesanais', value: 'Xaropes Artesanais', icon: GlassWater },
@@ -280,6 +281,26 @@ const UserRecipes: React.FC = () => {
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  // Persist current feed order so the recipe detail page can swipe between drinks
+  useEffect(() => {
+    if (recipes.length > 0) {
+      saveRecipeFeedOrder(recipes.map((r: any) => ({ id: r.id, slug: r.slug ?? null })));
+    }
+  }, [recipes]);
+
+  // Restore scroll position to the recipe the user was just viewing (after swiping back)
+  useEffect(() => {
+    if (recipes.length === 0) return;
+    const target = consumeRecipeScrollTarget();
+    if (!target) return;
+    requestAnimationFrame(() => {
+      const el = document.querySelector(`[data-recipe-key="${CSS.escape(target)}"]`);
+      if (el) {
+        (el as HTMLElement).scrollIntoView({ block: 'center', behavior: 'auto' });
+      }
+    });
+  }, [recipes]);
+
   const seasonalPhase = getPrimaryPhase();
   const seasonalLabel = seasonalPhase
     ? seasonalPhase.id === 'verao'
@@ -369,7 +390,7 @@ const UserRecipes: React.FC = () => {
                 const showLockOverlay = isVipOnly;
                 const target = (isVipOnly || blockedByLimit) ? '/clube' : `/app/receita/${(recipe as any).slug || recipe.id}`;
                 return (
-                  <Link key={recipe.id} to={target}>
+                  <Link key={recipe.id} to={target} data-recipe-key={recipeKey({ id: recipe.id, slug: (recipe as any).slug ?? null })}>
                     <div className="group overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative">
                       {recipe.cover_image_url ? (
                         <div className="aspect-video overflow-hidden rounded-2xl relative">
