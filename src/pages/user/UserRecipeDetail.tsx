@@ -392,11 +392,17 @@ const UserRecipeDetail: React.FC = () => {
     <div className="pb-24 overflow-x-hidden">
       <div
         ref={swipeContainerRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        onPointerCancel={handlePointerEnd}
         style={{
-          touchAction: showSwipe ? 'pan-y' : undefined,
+          touchAction: showSwipe ? 'pan-y pinch-zoom' : undefined,
+          overscrollBehaviorX: showSwipe ? 'contain' : undefined,
         }}
       >
       <div
+        data-recipe-swipe-strip
         style={
           showSwipe
             ? {
@@ -405,7 +411,7 @@ const UserRecipeDetail: React.FC = () => {
                 transform: `translate3d(calc(-33.3333% + ${dragX}px), 0, 0)`,
                 transition: isDragging || snap
                   ? 'none'
-                  : 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1)',
+                  : 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)',
                 willChange: 'transform',
               }
             : undefined
