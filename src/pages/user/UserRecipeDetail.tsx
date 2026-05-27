@@ -24,7 +24,39 @@ import {
   recipeKey,
   recipeRoute,
   setRecipeScrollTarget,
+  type RecipeFeedItem,
 } from '@/lib/recipesFeedNav';
+
+/**
+ * Lightweight preview of a neighbor recipe used on the swipe strip.
+ * Fetches the data via the same react-query key as the detail page so
+ * once the user commits, the next page renders instantly.
+ */
+const NeighborPreview: React.FC<{ item: RecipeFeedItem | null }> = ({ item }) => {
+  const { data } = useExclusivePost(item ? (item.slug || item.id) : '');
+  if (!item) return <div className="w-screen shrink-0" />;
+  return (
+    <div className="w-screen shrink-0">
+      {data?.cover_image_url ? (
+        <div className="w-full aspect-video bg-black">
+          <img
+            src={data.cover_image_url}
+            alt={data.title}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ) : (
+        <div className="w-full aspect-video bg-black" />
+      )}
+      <div className="px-4 py-3 h-12" />
+      <div className="px-4">
+        <h1 className="text-3xl font-bold text-foreground">
+          {data?.title || ''}
+        </h1>
+      </div>
+    </div>
+  );
+};
 
 const UserRecipeDetail: React.FC = () => {
   const { id: idOrSlug } = useParams<{ id: string }>();
