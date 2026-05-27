@@ -18,6 +18,7 @@ const corsHeaders = {
 
 const BodySchema = z.object({
   event_name: z.enum([
+    "PageView",
     "Lead",
     "CompleteRegistration",
     "InitiateCheckout",
