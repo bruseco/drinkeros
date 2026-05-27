@@ -106,12 +106,21 @@ const UserRecipeDetail: React.FC = () => {
   // Live feed order — prefer the paginated cache (so newly fetched pages flow
   // straight into the swipe carousel). Fall back to the sessionStorage snapshot
   // (used when arriving via deep link / no listing in cache).
+  // Start from the sessionStorage snapshot saved by the listing so the swipe
+  // carousel is ready on the very first render. Then append any newly fetched
+  // pages that aren't already in the list (preserves saved order — avoids
+  // re-seeding random and losing the current recipe's index).
   const savedOrder = useMemo(() => getRecipeFeedOrder(), []);
   const feedOrder = useMemo(() => {
-    const rows = pagedData?.pages.flatMap((p) => p.posts) ?? [];
-    if (rows.length === 0) return savedOrder;
     const seen = new Set<string>();
     const out: RecipeFeedItem[] = [];
+    for (const r of savedOrder) {
+      const key = r.slug || r.id;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(r);
+    }
+    const rows = pagedData?.pages.flatMap((p) => p.posts) ?? [];
     for (const r of rows) {
       const key = (r as any).slug || r.id;
       if (seen.has(key)) continue;
@@ -159,6 +168,11 @@ const UserRecipeDetail: React.FC = () => {
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [committing, setCommitting] = useState<'prev' | 'next' | null>(null);
+  // When we navigate to a neighbor via swipe, we need to snap the strip back
+  // to the centered (0px) transform WITHOUT a transition — otherwise the new
+  // recipe (now centered) animates from the edge, looking like a duplicate
+  // slide-in. We turn transitions off for one frame after the route changes.
+  const [snap, setSnap] = useState(false);
   const dragStartRef = useRef<{ x: number; y: number; t: number; locked: 'h' | 'v' | null } | null>(null);
 
   const commitNavigate = useCallback(
@@ -172,9 +186,15 @@ const UserRecipeDetail: React.FC = () => {
 
   // Reset transform whenever the route changes (new recipe is rendered)
   useEffect(() => {
+    setSnap(true);
     setDragX(0);
     setIsDragging(false);
     setCommitting(null);
+    // Re-enable transitions on the next frame so future drags animate normally.
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setSnap(false));
+    });
+    return () => cancelAnimationFrame(raf);
   }, [idOrSlug]);
 
   // Axis-locked touch handlers attached natively so we can call preventDefault
@@ -375,7 +395,7 @@ const UserRecipeDetail: React.FC = () => {
                 display: 'flex',
                 width: '300vw',
                 transform: `translate3d(calc(-33.3333% + ${dragX}px), 0, 0)`,
-                transition: isDragging
+                transition: isDragging || snap
                   ? 'none'
                   : 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1)',
                 willChange: 'transform',
