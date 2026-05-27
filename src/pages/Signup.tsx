@@ -114,7 +114,7 @@ const Signup: React.FC = () => {
       if (newUser) {
         await supabase
           .from('profiles')
-          .update({ phone, full_name: fullName })
+          .update({ phone, full_name: fullName, birth_date: birthDate })
           .eq('user_id', newUser.id);
       }
     } catch {
