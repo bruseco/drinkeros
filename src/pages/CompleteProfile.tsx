@@ -32,17 +32,28 @@ const CompleteProfile: React.FC = () => {
     (async () => {
       const { data } = await supabase
         .from('profiles')
-        .select('phone, full_name')
+        .select('phone, full_name, birth_date')
         .eq('user_id', user.id)
         .maybeSingle();
-      if (data?.phone) {
+      if (data?.phone && data?.birth_date) {
         navigate('/app', { replace: true });
         return;
       }
       setFullName(data?.full_name || (user.user_metadata as any)?.full_name || (user.user_metadata as any)?.name || '');
+      if (data?.birth_date) setBirthDate(data.birth_date);
       setChecking(false);
     })();
   }, [user, authLoading, navigate]);
+
+  const calcAge = (iso: string) => {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return -1;
+    const today = new Date();
+    let age = today.getFullYear() - d.getFullYear();
+    const m = today.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+    return age;
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
