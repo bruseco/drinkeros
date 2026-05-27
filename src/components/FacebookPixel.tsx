@@ -23,15 +23,15 @@ const firePageViewFromGlobalRoute = (pathname: string) => {
   const lastPath = window.__META_PIXEL_LAST_PAGEVIEW_PATH__;
   const lastTime = window.__META_PIXEL_LAST_PAGEVIEW_TIME__ ?? 0;
 
-  if (lastPath === pathname || now - lastTime < PAGEVIEW_LOCK_MS) {
-    console.warn('[MetaPixel] PageView BLOCKED duplicate', pathname, now, new Error().stack);
+  if (lastPath === pathname && now - lastTime < PAGEVIEW_LOCK_MS) {
+    console.warn('[MetaPixel] PageView blocked by dedupe', pathname, now, new Error().stack);
     return false;
   }
 
   window.__META_PIXEL_LAST_PAGEVIEW_PATH__ = pathname;
   window.__META_PIXEL_LAST_PAGEVIEW_TIME__ = now;
   window.fbq('track', 'PageView');
-  console.log('[MetaPixel] PageView FIRED', pathname, now, new Error().stack);
+  console.log('[MetaPixel] PageView fired', pathname, now, new Error().stack);
   return true;
 };
 
@@ -72,17 +72,11 @@ const injectPixel = (pixelId: string) => {
   // para que apenas eventos disparados manualmente apareçam no Pixel Helper.
   window.fbq('set', 'autoConfig', 'false', pixelId);
   window.fbq('init', pixelId);
-  // IMPORTANTE: fbq('init') dispara um PageView automaticamente.
-  // Marcamos a flag global imediatamente para que o useEffect de rota
-  // NÃO dispare um segundo PageView com a mesma pathname (anti-duplicata).
-  if (typeof window.location !== 'undefined') {
-    window.__META_PIXEL_LAST_PAGEVIEW_PATH__ = window.location.pathname;
-    window.__META_PIXEL_LAST_PAGEVIEW_TIME__ = Date.now();
-  }
   injected = true;
   window.__META_PIXEL_INITIALIZED_ID__ = pixelId;
   window.__META_PIXEL_READY__ = true;
-  console.log('[FacebookPixel] init (autoConfig off) — PageView automático contabilizado', pixelId);
+  console.log('[FacebookPixel] fbq init called (autoConfig off)', pixelId);
+  firePageViewFromGlobalRoute(window.location.pathname);
   return true;
 };
 
