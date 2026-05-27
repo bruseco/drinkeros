@@ -57,6 +57,16 @@ const Signup: React.FC = () => {
       return;
     }
 
+    const age = calcAge(birthDate);
+    if (!birthDate || age < 0) {
+      toast({ title: 'Data de nascimento inválida', description: 'Informe sua data de nascimento.', variant: 'destructive' });
+      return;
+    }
+    if (age < 18) {
+      toast({ title: 'Idade mínima 18 anos', description: 'O Drinkeros é exclusivo para maiores de 18 anos.', variant: 'destructive' });
+      return;
+    }
+
     if (password.length < 6) {
       toast({
         title: 'Senha muito curta',
