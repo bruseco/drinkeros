@@ -106,12 +106,21 @@ const UserRecipeDetail: React.FC = () => {
   // Live feed order — prefer the paginated cache (so newly fetched pages flow
   // straight into the swipe carousel). Fall back to the sessionStorage snapshot
   // (used when arriving via deep link / no listing in cache).
+  // Start from the sessionStorage snapshot saved by the listing so the swipe
+  // carousel is ready on the very first render. Then append any newly fetched
+  // pages that aren't already in the list (preserves saved order — avoids
+  // re-seeding random and losing the current recipe's index).
   const savedOrder = useMemo(() => getRecipeFeedOrder(), []);
   const feedOrder = useMemo(() => {
-    const rows = pagedData?.pages.flatMap((p) => p.posts) ?? [];
-    if (rows.length === 0) return savedOrder;
     const seen = new Set<string>();
     const out: RecipeFeedItem[] = [];
+    for (const r of savedOrder) {
+      const key = r.slug || r.id;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(r);
+    }
+    const rows = pagedData?.pages.flatMap((p) => p.posts) ?? [];
     for (const r of rows) {
       const key = (r as any).slug || r.id;
       if (seen.has(key)) continue;
