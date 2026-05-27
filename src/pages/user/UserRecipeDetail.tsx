@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { FullscreenVideo } from '@/components/user/FullscreenVideo';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useExclusivePost, useExclusivePostsPaginated } from '@/hooks/useExclusivePosts';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
 import { useRecipeAccessGuard } from '@/hooks/useRecipeAccessGuard';
@@ -73,6 +73,7 @@ const UserRecipeDetail: React.FC = () => {
   const toggleFavorite = useToggleFavorite();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showFavoriteDialog, setShowFavoriteDialog] = useState(false);
   const { check: checkAccess } = useRecipeAccessGuard();
   const { isSuperAdmin } = useAuth();
@@ -110,7 +111,11 @@ const UserRecipeDetail: React.FC = () => {
   // carousel is ready on the very first render. Then append any newly fetched
   // pages that aren't already in the list (preserves saved order — avoids
   // re-seeding random and losing the current recipe's index).
-  const savedOrder = useMemo(() => getRecipeFeedOrder(), []);
+  const savedOrder = useMemo(() => {
+    const stateOrder = (location.state as { recipeFeedOrder?: RecipeFeedItem[] } | null)?.recipeFeedOrder;
+    if (Array.isArray(stateOrder) && stateOrder.length > 0) return stateOrder;
+    return getRecipeFeedOrder();
+  }, [location.state]);
   const feedOrder = useMemo(() => {
     const seen = new Set<string>();
     const out: RecipeFeedItem[] = [];
@@ -134,6 +139,10 @@ const UserRecipeDetail: React.FC = () => {
     () => findRecipeIndex(feedOrder, idOrSlug || ''),
     [feedOrder, idOrSlug]
   );
+  const feedOrderRef = useRef<RecipeFeedItem[]>([]);
+  useEffect(() => {
+    feedOrderRef.current = feedOrder;
+  }, [feedOrder]);
 
   // Looping helpers: when there are no more pages to load, wrapping around
   // (last → first, first → last) gives the user the looping behaviour they
@@ -168,25 +177,39 @@ const UserRecipeDetail: React.FC = () => {
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [committing, setCommitting] = useState<'prev' | 'next' | null>(null);
+  const dragXRef = useRef(0);
+  const commitRef = useRef<typeof committing>(null);
+  const prevItemRef = useRef<typeof prevItem>(null);
+  const nextItemRef = useRef<typeof nextItem>(null);
   // When we navigate to a neighbor via swipe, we need to snap the strip back
   // to the centered (0px) transform WITHOUT a transition — otherwise the new
   // recipe (now centered) animates from the edge, looking like a duplicate
   // slide-in. We turn transitions off for one frame after the route changes.
   const [snap, setSnap] = useState(false);
-  const dragStartRef = useRef<{ x: number; y: number; t: number; locked: 'h' | 'v' | null } | null>(null);
+  const dragStartRef = useRef<{ x: number; y: number; t: number; pointerId: number; locked: 'h' | 'v' | null } | null>(null);
 
   const commitNavigate = useCallback(
     (target: typeof prevItem) => {
       if (!target) return;
       setRecipeScrollTarget(recipeKey(target));
-      navigate(recipeRoute(target), { replace: true });
+      navigate(recipeRoute(target), {
+        replace: true,
+        state: { recipeFeedOrder: feedOrderRef.current },
+      });
     },
     [navigate]
   );
 
-  // Reset transform whenever the route changes (new recipe is rendered)
   useEffect(() => {
+    prevItemRef.current = prevItem;
+    nextItemRef.current = nextItem;
+  }, [prevItem, nextItem]);
+
+  // Reset transform before the browser paints a route change. This prevents the
+  // newly loaded recipe from animating back from the edge after a successful swipe.
+  useLayoutEffect(() => {
     setSnap(true);
+    dragXRef.current = 0;
     setDragX(0);
     setIsDragging(false);
     setCommitting(null);
@@ -197,100 +220,97 @@ const UserRecipeDetail: React.FC = () => {
     return () => cancelAnimationFrame(raf);
   }, [idOrSlug]);
 
-  // Axis-locked touch handlers attached natively so we can call preventDefault
-  // on the locked horizontal axis (needed because React's onTouchMove is passive).
-  const dragXRef = useRef(0);
   useEffect(() => {
     dragXRef.current = dragX;
   }, [dragX]);
 
-  const commitRef = useRef<typeof committing>(null);
   useEffect(() => {
     commitRef.current = committing;
   }, [committing]);
 
-  useEffect(() => {
-    const el = swipeContainerRef.current;
-    if (!el || !isMobile) return;
+  const finishSwipe = useCallback(() => {
+    const start = dragStartRef.current;
+    dragStartRef.current = null;
+    if (!start || start.locked !== 'h') {
+      setIsDragging(false);
+      return;
+    }
+    const width = swipeContainerRef.current?.clientWidth || window.innerWidth;
+    const elapsed = Date.now() - start.t;
+    const currentDx = dragXRef.current;
+    const velocity = Math.abs(currentDx) / Math.max(elapsed, 1);
+    const threshold = width * 0.22;
+    const fastFlick = velocity > 0.35 && Math.abs(currentDx) > 28;
+    const next = nextItemRef.current;
+    const prev = prevItemRef.current;
 
-    const handleStart = (e: TouchEvent) => {
-      if (commitRef.current) return;
-      const t = e.touches[0];
-      dragStartRef.current = { x: t.clientX, y: t.clientY, t: Date.now(), locked: null };
+    if (currentDx < 0 && next && (Math.abs(currentDx) > threshold || fastFlick)) {
+      setCommitting('next');
+      dragXRef.current = -width;
+      setDragX(-width);
+      setIsDragging(false);
+      window.setTimeout(() => commitNavigate(next), 260);
+    } else if (currentDx > 0 && prev && (Math.abs(currentDx) > threshold || fastFlick)) {
+      setCommitting('prev');
+      dragXRef.current = width;
+      setDragX(width);
+      setIsDragging(false);
+      window.setTimeout(() => commitNavigate(prev), 260);
+    } else {
+      dragXRef.current = 0;
+      setIsDragging(false);
+      setDragX(0);
+    }
+  }, [commitNavigate]);
+
+  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (!isMobile || commitRef.current || event.pointerType === 'mouse') return;
+    dragStartRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+      t: Date.now(),
+      pointerId: event.pointerId,
+      locked: null,
     };
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  }, [isMobile]);
 
-    const handleMove = (e: TouchEvent) => {
-      const start = dragStartRef.current;
-      if (!start || commitRef.current) return;
-      const t = e.touches[0];
-      const dx = t.clientX - start.x;
-      const dy = t.clientY - start.y;
+  const handlePointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const start = dragStartRef.current;
+    if (!start || commitRef.current || event.pointerId !== start.pointerId) return;
 
-      if (!start.locked) {
-        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
-        // Stronger horizontal bias: if user moves more sideways than down,
-        // lock to horizontal. Otherwise lock to vertical and let the page scroll.
-        start.locked = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
-        if (start.locked === 'v') {
-          // Once locked vertically, stop tracking — native scroll handles it.
-          dragStartRef.current = null;
-          return;
-        }
-      }
-      if (start.locked !== 'h') return;
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
 
-      // Prevent native vertical scroll once we own the gesture
-      if (e.cancelable) e.preventDefault();
-
-      let effective = dx;
-      if ((dx < 0 && !nextItem) || (dx > 0 && !prevItem)) {
-        effective = dx * 0.25;
-      }
-      setIsDragging(true);
-      setDragX(effective);
-    };
-
-    const handleEnd = () => {
-      const start = dragStartRef.current;
-      dragStartRef.current = null;
-      if (!start || start.locked !== 'h') {
-        setIsDragging(false);
+    if (!start.locked) {
+      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      start.locked = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
+      if (start.locked === 'v') {
+        dragStartRef.current = null;
+        event.currentTarget.releasePointerCapture?.(event.pointerId);
         return;
       }
-      const width = el.clientWidth || window.innerWidth;
-      const elapsed = Date.now() - start.t;
-      const currentDx = dragXRef.current;
-      const velocity = Math.abs(currentDx) / Math.max(elapsed, 1);
-      const threshold = width * 0.25;
-      const fastFlick = velocity > 0.4 && Math.abs(currentDx) > 30;
+    }
 
-      if (currentDx < 0 && nextItem && (Math.abs(currentDx) > threshold || fastFlick)) {
-        setCommitting('next');
-        setDragX(-width);
-        setIsDragging(false);
-        window.setTimeout(() => commitNavigate(nextItem), 280);
-      } else if (currentDx > 0 && prevItem && (Math.abs(currentDx) > threshold || fastFlick)) {
-        setCommitting('prev');
-        setDragX(width);
-        setIsDragging(false);
-        window.setTimeout(() => commitNavigate(prevItem), 280);
-      } else {
-        setIsDragging(false);
-        setDragX(0);
-      }
-    };
+    if (start.locked !== 'h') return;
+    event.preventDefault();
 
-    el.addEventListener('touchstart', handleStart, { passive: true });
-    el.addEventListener('touchmove', handleMove, { passive: false });
-    el.addEventListener('touchend', handleEnd, { passive: true });
-    el.addEventListener('touchcancel', handleEnd, { passive: true });
-    return () => {
-      el.removeEventListener('touchstart', handleStart);
-      el.removeEventListener('touchmove', handleMove);
-      el.removeEventListener('touchend', handleEnd);
-      el.removeEventListener('touchcancel', handleEnd);
-    };
-  }, [isMobile, prevItem, nextItem, commitNavigate]);
+    let effective = dx;
+    if ((dx < 0 && !nextItemRef.current) || (dx > 0 && !prevItemRef.current)) {
+      effective = dx * 0.25;
+    }
+    dragXRef.current = effective;
+    setIsDragging(true);
+    setDragX(effective);
+  }, []);
+
+  const handlePointerEnd = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const start = dragStartRef.current;
+    if (start && event.pointerId === start.pointerId) {
+      event.currentTarget.releasePointerCapture?.(event.pointerId);
+    }
+    finishSwipe();
+  }, [finishSwipe]);
 
 
   const handleBackToFeed = () => {
@@ -384,11 +404,17 @@ const UserRecipeDetail: React.FC = () => {
     <div className="pb-24 overflow-x-hidden">
       <div
         ref={swipeContainerRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        onPointerCancel={handlePointerEnd}
         style={{
-          touchAction: showSwipe ? 'pan-y' : undefined,
+          touchAction: showSwipe ? 'pan-y pinch-zoom' : undefined,
+          overscrollBehaviorX: showSwipe ? 'contain' : undefined,
         }}
       >
       <div
+        data-recipe-swipe-strip
         style={
           showSwipe
             ? {
@@ -397,7 +423,7 @@ const UserRecipeDetail: React.FC = () => {
                 transform: `translate3d(calc(-33.3333% + ${dragX}px), 0, 0)`,
                 transition: isDragging || snap
                   ? 'none'
-                  : 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1)',
+                  : 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)',
                 willChange: 'transform',
               }
             : undefined
