@@ -94,6 +94,13 @@ export const FacebookPixel: React.FC = () => {
   );
 
   useEffect(() => {
+    console.log('[FacebookPixel] component mounted');
+    return () => console.log('[FacebookPixel] component unmounted');
+  }, []);
+
+
+
+  useEffect(() => {
     let cancelled = false;
     (async () => {
       const { data, error } = await supabase.rpc('get_public_tracking_settings');
