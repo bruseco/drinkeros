@@ -299,18 +299,27 @@ const UserRecipeDetail: React.FC = () => {
     <div className="pb-24 overflow-x-hidden">
       <div
         ref={swipeContainerRef}
-        onTouchStart={showSwipe ? onTouchStart : undefined}
-        onTouchMove={showSwipe ? onTouchMove : undefined}
-        onTouchEnd={showSwipe ? onTouchEnd : undefined}
-        onTouchCancel={showSwipe ? onTouchEnd : undefined}
         style={{
-          transform: `translate3d(${dragX}px, 0, 0)`,
-          transition: isDragging
-            ? 'none'
-            : 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)',
-          willChange: 'transform',
+          touchAction: showSwipe ? 'pan-y' : undefined,
         }}
       >
+      <div
+        style={
+          showSwipe
+            ? {
+                display: 'flex',
+                width: '300vw',
+                transform: `translate3d(calc(-33.3333% + ${dragX}px), 0, 0)`,
+                transition: isDragging
+                  ? 'none'
+                  : 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1)',
+                willChange: 'transform',
+              }
+            : undefined
+        }
+      >
+      {showSwipe && <NeighborPreview item={prevItem} />}
+      <div className={showSwipe ? 'w-screen shrink-0' : undefined}>
 
       {/* Video / Cover */}
       {embedUrl ? (
