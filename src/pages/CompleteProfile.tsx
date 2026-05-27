@@ -155,6 +155,19 @@ const CompleteProfile: React.FC = () => {
                 <p className="text-xs text-destructive">Número inválido para o país selecionado.</p>
               )}
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="birthDate">Data de nascimento</Label>
+              <input
+                id="birthDate"
+                type="date"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                max={new Date().toISOString().split('T')[0]}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                required
+              />
+              <p className="text-xs text-muted-foreground">Você precisa ter 18 anos ou mais.</p>
+            </div>
             <Button type="submit" className="w-full" disabled={isSaving}>
               {isSaving ? (
                 <>
