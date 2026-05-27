@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { FullscreenVideo } from '@/components/user/FullscreenVideo';
 import { useParams, Link, useNavigate } from 'react-router-dom';
@@ -168,12 +168,16 @@ const UserRecipeDetail: React.FC = () => {
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [committing, setCommitting] = useState<'prev' | 'next' | null>(null);
+  const dragXRef = useRef(0);
+  const commitRef = useRef<typeof committing>(null);
+  const prevItemRef = useRef<typeof prevItem>(null);
+  const nextItemRef = useRef<typeof nextItem>(null);
   // When we navigate to a neighbor via swipe, we need to snap the strip back
   // to the centered (0px) transform WITHOUT a transition — otherwise the new
   // recipe (now centered) animates from the edge, looking like a duplicate
   // slide-in. We turn transitions off for one frame after the route changes.
   const [snap, setSnap] = useState(false);
-  const dragStartRef = useRef<{ x: number; y: number; t: number; locked: 'h' | 'v' | null } | null>(null);
+  const dragStartRef = useRef<{ x: number; y: number; t: number; pointerId: number; locked: 'h' | 'v' | null } | null>(null);
 
   const commitNavigate = useCallback(
     (target: typeof prevItem) => {
@@ -184,9 +188,16 @@ const UserRecipeDetail: React.FC = () => {
     [navigate]
   );
 
-  // Reset transform whenever the route changes (new recipe is rendered)
   useEffect(() => {
+    prevItemRef.current = prevItem;
+    nextItemRef.current = nextItem;
+  }, [prevItem, nextItem]);
+
+  // Reset transform before the browser paints a route change. This prevents the
+  // newly loaded recipe from animating back from the edge after a successful swipe.
+  useLayoutEffect(() => {
     setSnap(true);
+    dragXRef.current = 0;
     setDragX(0);
     setIsDragging(false);
     setCommitting(null);
@@ -197,100 +208,48 @@ const UserRecipeDetail: React.FC = () => {
     return () => cancelAnimationFrame(raf);
   }, [idOrSlug]);
 
-  // Axis-locked touch handlers attached natively so we can call preventDefault
-  // on the locked horizontal axis (needed because React's onTouchMove is passive).
-  const dragXRef = useRef(0);
   useEffect(() => {
     dragXRef.current = dragX;
   }, [dragX]);
 
-  const commitRef = useRef<typeof committing>(null);
   useEffect(() => {
     commitRef.current = committing;
   }, [committing]);
 
-  useEffect(() => {
-    const el = swipeContainerRef.current;
-    if (!el || !isMobile) return;
+  const finishSwipe = useCallback(() => {
+    const start = dragStartRef.current;
+    dragStartRef.current = null;
+    if (!start || start.locked !== 'h') {
+      setIsDragging(false);
+      return;
+    }
+    const width = swipeContainerRef.current?.clientWidth || window.innerWidth;
+    const elapsed = Date.now() - start.t;
+    const currentDx = dragXRef.current;
+    const velocity = Math.abs(currentDx) / Math.max(elapsed, 1);
+    const threshold = width * 0.22;
+    const fastFlick = velocity > 0.35 && Math.abs(currentDx) > 28;
+    const next = nextItemRef.current;
+    const prev = prevItemRef.current;
 
-    const handleStart = (e: TouchEvent) => {
-      if (commitRef.current) return;
-      const t = e.touches[0];
-      dragStartRef.current = { x: t.clientX, y: t.clientY, t: Date.now(), locked: null };
-    };
-
-    const handleMove = (e: TouchEvent) => {
-      const start = dragStartRef.current;
-      if (!start || commitRef.current) return;
-      const t = e.touches[0];
-      const dx = t.clientX - start.x;
-      const dy = t.clientY - start.y;
-
-      if (!start.locked) {
-        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
-        // Stronger horizontal bias: if user moves more sideways than down,
-        // lock to horizontal. Otherwise lock to vertical and let the page scroll.
-        start.locked = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
-        if (start.locked === 'v') {
-          // Once locked vertically, stop tracking — native scroll handles it.
-          dragStartRef.current = null;
-          return;
-        }
-      }
-      if (start.locked !== 'h') return;
-
-      // Prevent native vertical scroll once we own the gesture
-      if (e.cancelable) e.preventDefault();
-
-      let effective = dx;
-      if ((dx < 0 && !nextItem) || (dx > 0 && !prevItem)) {
-        effective = dx * 0.25;
-      }
-      setIsDragging(true);
-      setDragX(effective);
-    };
-
-    const handleEnd = () => {
-      const start = dragStartRef.current;
-      dragStartRef.current = null;
-      if (!start || start.locked !== 'h') {
-        setIsDragging(false);
-        return;
-      }
-      const width = el.clientWidth || window.innerWidth;
-      const elapsed = Date.now() - start.t;
-      const currentDx = dragXRef.current;
-      const velocity = Math.abs(currentDx) / Math.max(elapsed, 1);
-      const threshold = width * 0.25;
-      const fastFlick = velocity > 0.4 && Math.abs(currentDx) > 30;
-
-      if (currentDx < 0 && nextItem && (Math.abs(currentDx) > threshold || fastFlick)) {
-        setCommitting('next');
-        setDragX(-width);
-        setIsDragging(false);
-        window.setTimeout(() => commitNavigate(nextItem), 280);
-      } else if (currentDx > 0 && prevItem && (Math.abs(currentDx) > threshold || fastFlick)) {
-        setCommitting('prev');
-        setDragX(width);
-        setIsDragging(false);
-        window.setTimeout(() => commitNavigate(prevItem), 280);
-      } else {
-        setIsDragging(false);
-        setDragX(0);
-      }
-    };
-
-    el.addEventListener('touchstart', handleStart, { passive: true });
-    el.addEventListener('touchmove', handleMove, { passive: false });
-    el.addEventListener('touchend', handleEnd, { passive: true });
-    el.addEventListener('touchcancel', handleEnd, { passive: true });
-    return () => {
-      el.removeEventListener('touchstart', handleStart);
-      el.removeEventListener('touchmove', handleMove);
-      el.removeEventListener('touchend', handleEnd);
-      el.removeEventListener('touchcancel', handleEnd);
-    };
-  }, [isMobile, prevItem, nextItem, commitNavigate]);
+    if (currentDx < 0 && next && (Math.abs(currentDx) > threshold || fastFlick)) {
+      setCommitting('next');
+      dragXRef.current = -width;
+      setDragX(-width);
+      setIsDragging(false);
+      window.setTimeout(() => commitNavigate(next), 260);
+    } else if (currentDx > 0 && prev && (Math.abs(currentDx) > threshold || fastFlick)) {
+      setCommitting('prev');
+      dragXRef.current = width;
+      setDragX(width);
+      setIsDragging(false);
+      window.setTimeout(() => commitNavigate(prev), 260);
+    } else {
+      dragXRef.current = 0;
+      setIsDragging(false);
+      setDragX(0);
+    }
+  }, [commitNavigate]);
 
 
   const handleBackToFeed = () => {
