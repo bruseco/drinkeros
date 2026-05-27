@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { createPortal } from 'react-dom';
 import { FullscreenVideo } from '@/components/user/FullscreenVideo';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useExclusivePost } from '@/hooks/useExclusivePosts';
+import { useExclusivePost, useExclusivePostsPaginated } from '@/hooks/useExclusivePosts';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
 import { useRecipeAccessGuard } from '@/hooks/useRecipeAccessGuard';
 import { useRelatedRecipes } from '@/hooks/useRelatedRecipes';
@@ -79,16 +79,81 @@ const UserRecipeDetail: React.FC = () => {
   const isMobile = useIsMobile();
 
   // ---- Swipe navigation between recipes (mobile only) ----
-  const feedOrder = useMemo(() => getRecipeFeedOrder(), []);
+  // Read the same filters the listing page is using so we can rehydrate the
+  // exact same react-query cache and keep extending it with fetchNextPage.
+  const listState = useMemo(() => {
+    try {
+      const raw = sessionStorage.getItem('user-recipes:list-state');
+      return raw ? (JSON.parse(raw) as { search?: string; category?: string | null }) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const {
+    data: pagedData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useExclusivePostsPaginated({
+    search: listState?.search || '',
+    pageSize: 15,
+    publishedOnly: true,
+    randomOrder: true as const,
+    characteristicFilter: listState?.category || undefined,
+  });
+
+  // Live feed order — prefer the paginated cache (so newly fetched pages flow
+  // straight into the swipe carousel). Fall back to the sessionStorage snapshot
+  // (used when arriving via deep link / no listing in cache).
+  const savedOrder = useMemo(() => getRecipeFeedOrder(), []);
+  const feedOrder = useMemo(() => {
+    const rows = pagedData?.pages.flatMap((p) => p.posts) ?? [];
+    if (rows.length === 0) return savedOrder;
+    const seen = new Set<string>();
+    const out: RecipeFeedItem[] = [];
+    for (const r of rows) {
+      const key = (r as any).slug || r.id;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ id: r.id, slug: (r as any).slug ?? null });
+    }
+    return out;
+  }, [pagedData, savedOrder]);
+
   const currentIndex = useMemo(
     () => findRecipeIndex(feedOrder, idOrSlug || ''),
     [feedOrder, idOrSlug]
   );
-  const prevItem = currentIndex > 0 ? feedOrder[currentIndex - 1] : null;
+
+  // Looping helpers: when there are no more pages to load, wrapping around
+  // (last → first, first → last) gives the user the looping behaviour they
+  // expect on filtered lists.
+  const canLoop = feedOrder.length > 1 && !hasNextPage;
+  const prevItem =
+    currentIndex > 0
+      ? feedOrder[currentIndex - 1]
+      : canLoop && currentIndex === 0
+        ? feedOrder[feedOrder.length - 1]
+        : null;
   const nextItem =
     currentIndex >= 0 && currentIndex < feedOrder.length - 1
       ? feedOrder[currentIndex + 1]
-      : null;
+      : canLoop && currentIndex === feedOrder.length - 1
+        ? feedOrder[0]
+        : null;
+
+  // Prefetch the next page when the user is approaching the tail of the
+  // loaded feed (within 3 items). Keeps swiping right uninterrupted on the
+  // unfiltered Home feed.
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+    if (currentIndex < 0) return;
+    if (currentIndex >= feedOrder.length - 3) {
+      fetchNextPage();
+    }
+  }, [currentIndex, feedOrder.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
 
   const swipeContainerRef = useRef<HTMLDivElement>(null);
   const [dragX, setDragX] = useState(0);
