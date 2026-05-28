@@ -142,9 +142,9 @@ const App = () => (
             <Route path="/" element={<RootRedirect />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/clube" element={<VipLanding />} />
+            <Route path="/clube" element={<Navigate to="/clube-b" replace />} />
             <Route path="/clube-b" element={<VipLandingB />} />
-            <Route path="/vip" element={<Navigate to="/clube" replace />} />
+            <Route path="/vip" element={<Navigate to="/clube-b" replace />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/install" element={<Install />} />
             <Route path="/sso" element={<SSO />} />
