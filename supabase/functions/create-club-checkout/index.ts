@@ -86,8 +86,8 @@ serve(async (req) => {
       line_items: [{ price: priceId, quantity: 1 }],
       payment_method_types: isCard ? ["card"] : ["pix"],
       locale: "pt-BR",
-      success_url: `${origin}/clube?clube=success`,
-      cancel_url: `${origin}/clube?clube=cancel`,
+      success_url: `${origin}/clube-b?clube=success`,
+      cancel_url: `${origin}/clube-b?clube=cancel`,
       metadata: {
         user_id: user.id,
         plan_kind: isCard ? "club_card_subscription" : "club_pix_annual",

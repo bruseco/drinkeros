@@ -20,6 +20,7 @@ import { useViewContent } from '@/hooks/useViewContent';
 import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
 import { useTotalClubMembers, TOTAL_CLUB_MEMBERS_FALLBACK } from '@/hooks/useTotalClubMembers';
 import { useClubeIntroOffer } from '@/hooks/useClubeIntroOffer';
+import { useClubeExitOffer } from '@/hooks/useClubeExitOffer';
 import { useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
 import ClubeExitOffer from '@/components/user/ClubeExitOffer';
 
@@ -149,6 +150,7 @@ const VipLandingB: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [isClosing] = useState(false);
   const promo = useClubeIntroOffer();
+  const exitOffer = useClubeExitOffer();
   const [exitOpen, setExitOpen] = useState(false);
   const [exitOfferDismissed, setExitOfferDismissed] = useState(false);
 
@@ -192,9 +194,10 @@ const VipLandingB: React.FC = () => {
       return;
     }
     if (loading) return;
-    // offer derivada do estado atual da UI — garante que o valor exibido = cobrado
+    // offer derivada do estado atual da UI — garante que o valor exibido = cobrado.
+    // Se a janela exit (10min) está ativa, sempre vale R$69.
     const offer: 'intro' | 'exit' | 'full' =
-      chosenOffer ?? (exitOpen ? 'exit' : promo.isActive ? 'intro' : 'full');
+      chosenOffer ?? (exitOpen || exitOffer.isActive ? 'exit' : promo.isActive ? 'intro' : 'full');
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-club-checkout', {
@@ -235,6 +238,8 @@ const VipLandingB: React.FC = () => {
     const onPopState = () => {
       if (sessionStorage.getItem('clube:exit-offer-shown') === '1') return;
       sessionStorage.setItem('clube:exit-offer-shown', '1');
+      // Inicia a janela de 10 min da oferta extra (persistida em localStorage)
+      exitOffer.start();
       // Re-empilha pra continuar interceptando enquanto o overlay está aberto
       window.history.pushState({ clubeExitSentinel: true }, '');
       setExitOpen(true);
@@ -242,7 +247,7 @@ const VipLandingB: React.FC = () => {
 
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
-  }, [user, exitOfferDismissed]);
+  }, [user, exitOfferDismissed, exitOffer]);
 
   const handleExitAccept = () => handleSubscribe('card', 'exit');
   const handleExitDismiss = () => {
