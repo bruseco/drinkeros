@@ -308,6 +308,24 @@ const VipLandingB: React.FC = () => {
         .viplanding-gold-btn:hover { filter: brightness(1.05); }
       `}</style>
 
+      {promo.isActive && (
+        <div
+          role="status"
+          className="sticky top-0 z-[70] w-full bg-yellow-400 text-black shadow-md"
+        >
+          <div className="px-4 py-2 text-center text-[13px] sm:text-sm font-medium leading-tight">
+            <div className="font-extrabold uppercase tracking-wide">
+              Oferta p/ novo cadastrado!{' '}
+              <span className="tabular-nums">{promo.mm}:{promo.ss}</span>
+            </div>
+            <div className="text-[11px] sm:text-xs mt-0.5 normal-case font-medium">
+              Essa oferta só vale <strong>AGORA</strong> pra você que acabou de se cadastrar. APROVEITE!
+            </div>
+          </div>
+        </div>
+      )}
+
+
       {/* HERO — foco em desbloquear acesso ao app */}
       <div
         className="relative"
