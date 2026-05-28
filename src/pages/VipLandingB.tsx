@@ -150,6 +150,7 @@ const VipLandingB: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [isClosing] = useState(false);
   const promo = useClubeIntroOffer();
+  const exitOffer = useClubeExitOffer();
   const [exitOpen, setExitOpen] = useState(false);
   const [exitOfferDismissed, setExitOfferDismissed] = useState(false);
 
