@@ -183,16 +183,22 @@ const VipLandingB: React.FC = () => {
     }
   }, [searchParams, setSearchParams, queryClient]);
 
-  const handleSubscribe = async (chosenMethod: 'card' | 'pix' = 'card') => {
+  const handleSubscribe = async (
+    chosenMethod: 'card' | 'pix' = 'card',
+    chosenOffer?: 'intro' | 'exit' | 'full',
+  ) => {
     if (!user) {
       navigate('/signup?redirect=/clube');
       return;
     }
     if (loading) return;
+    // offer derivada do estado atual da UI — garante que o valor exibido = cobrado
+    const offer: 'intro' | 'exit' | 'full' =
+      chosenOffer ?? (exitOpen ? 'exit' : promo.isActive ? 'intro' : 'full');
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-club-checkout', {
-        body: { method: chosenMethod },
+        body: { method: chosenMethod, offer },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -215,6 +221,37 @@ const VipLandingB: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Exit-intent: intercepta tentativa de fechar/voltar para mostrar oferta R$ 69.
+  // Dispara apenas 1x por sessão.
+  useEffect(() => {
+    if (!user) return; // não-logado já é mandado pra /signup pelo CTA
+    if (exitOfferDismissed) return;
+    if (sessionStorage.getItem('clube:exit-offer-shown') === '1') return;
+
+    // Empilha um estado sentinela para capturar o popstate (back button)
+    window.history.pushState({ clubeExitSentinel: true }, '');
+
+    const onPopState = () => {
+      if (sessionStorage.getItem('clube:exit-offer-shown') === '1') return;
+      sessionStorage.setItem('clube:exit-offer-shown', '1');
+      // Re-empilha pra continuar interceptando enquanto o overlay está aberto
+      window.history.pushState({ clubeExitSentinel: true }, '');
+      setExitOpen(true);
+    };
+
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [user, exitOfferDismissed]);
+
+  const handleExitAccept = () => handleSubscribe('card', 'exit');
+  const handleExitDismiss = () => {
+    setExitOpen(false);
+    setExitOfferDismissed(true);
+    // Libera a saída: volta de verdade desta vez
+    window.history.back();
+  };
+
 
   if (user && (planData?.isVip || hasLifetime || hasExclusive)) {
     return <Navigate to="/app/receitas" replace />;
