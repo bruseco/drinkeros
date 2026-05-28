@@ -194,9 +194,10 @@ const VipLandingB: React.FC = () => {
       return;
     }
     if (loading) return;
-    // offer derivada do estado atual da UI — garante que o valor exibido = cobrado
+    // offer derivada do estado atual da UI — garante que o valor exibido = cobrado.
+    // Se a janela exit (10min) está ativa, sempre vale R$69.
     const offer: 'intro' | 'exit' | 'full' =
-      chosenOffer ?? (exitOpen ? 'exit' : promo.isActive ? 'intro' : 'full');
+      chosenOffer ?? (exitOpen || exitOffer.isActive ? 'exit' : promo.isActive ? 'intro' : 'full');
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-club-checkout', {
