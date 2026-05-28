@@ -20,9 +20,9 @@ const corsHeaders = {
 const PRICE_CARD_197 = "price_1TbyKYGlXZFgg9244vr2jrTS";
 const PRICE_PIX_197 = "price_1TbyL1GlXZFgg924wxKo7wVc";
 
-// Coupons (duration: once)
-const COUPON_INTRO_100 = "JmWxUHCj"; // R$100 off → R$97
-const COUPON_EXIT_128 = "xINKTcyf";  // R$128 off → R$69
+// Coupons (duration: forever) — desconto persiste em todas as renovações anuais
+const COUPON_INTRO_100 = "xEg5vViJ"; // R$100 off → R$97 forever
+const COUPON_EXIT_128 = "Hy11JuxP";  // R$128 off → R$69 forever
 
 type Offer = "intro" | "exit" | "full";
 
