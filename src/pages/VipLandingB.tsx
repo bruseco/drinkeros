@@ -656,15 +656,16 @@ const VipLandingB: React.FC = () => {
                   </span>
                 </div>
                 <div className="text-sm text-purple-300">
-                  por ano{promo.isActive ? ' · menos de R$ 6/mês' : ' · menos de R$ 17/mês'}
+                  por ano{promo.isActive ? ' · economize R$ 100' : ' · menos de R$ 17/mês'}
                 </div>
                 {promo.isActive && (
                   <div className="mt-1 text-[11px] uppercase tracking-wider font-bold text-yellow-300">
                     Promoção de lançamento do novo app
                   </div>
                 )}
-                <LaunchPromoCountdown />
+                {promo.isActive && <IntroCountdownPill mm={promo.mm} ss={promo.ss} />}
               </div>
+
 
               <Button
                 onClick={() => handleSubscribe('card')}
@@ -703,8 +704,15 @@ const VipLandingB: React.FC = () => {
           </div>
         </div>
       </div>
+      <ClubeExitOffer
+        open={exitOpen}
+        loading={loading}
+        onAccept={handleExitAccept}
+        onDismiss={handleExitDismiss}
+      />
     </div>
   );
 };
+
 
 export default VipLandingB;
