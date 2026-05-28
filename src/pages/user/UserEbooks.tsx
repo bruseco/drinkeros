@@ -70,10 +70,10 @@ const UserEbooks: React.FC = () => {
             const expired = expiredSet.has(ebook.id);
 
             // Define a ação única do card
-            const canDownload = owned && !expired && !!ebook.file_url;
-            const cardHref = canDownload
-              ? ebook.file_url!
-              : `/ebook/${ebook.slug}`;
+            // file_url é column-restricted (apenas admin lê); para o usuário,
+            // basta ter acesso ativo — a edge function valida e gera signed URL.
+            const canDownload = owned && !expired;
+            const cardHref = canDownload ? '#' : `/ebook/${ebook.slug}`;
             const isExternal = canDownload;
 
             const cardInner = (
