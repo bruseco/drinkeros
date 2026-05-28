@@ -238,6 +238,8 @@ const VipLandingB: React.FC = () => {
     const onPopState = () => {
       if (sessionStorage.getItem('clube:exit-offer-shown') === '1') return;
       sessionStorage.setItem('clube:exit-offer-shown', '1');
+      // Inicia a janela de 10 min da oferta extra (persistida em localStorage)
+      exitOffer.start();
       // Re-empilha pra continuar interceptando enquanto o overlay está aberto
       window.history.pushState({ clubeExitSentinel: true }, '');
       setExitOpen(true);
@@ -245,7 +247,7 @@ const VipLandingB: React.FC = () => {
 
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
-  }, [user, exitOfferDismissed]);
+  }, [user, exitOfferDismissed, exitOffer]);
 
   const handleExitAccept = () => handleSubscribe('card', 'exit');
   const handleExitDismiss = () => {
