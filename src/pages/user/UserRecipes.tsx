@@ -500,8 +500,5 @@ const ClubeUpsellBanner: React.FC = () => {
     </div>
   );
 };
-    </div>
-  );
-};
 
 export default UserRecipes;
