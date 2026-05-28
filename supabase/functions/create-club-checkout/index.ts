@@ -1,6 +1,12 @@
 // Creates a Stripe Checkout Session for the Clube dos Drinkeros.
 // - method=card  -> mode=subscription (recurring yearly, silent renewal)
 // - method=pix   -> mode=payment      (one-time, grants 12 months of access)
+//
+// Offers (sempre cobra a partir de R$197 + cupom para que o valor exibido na
+// landing seja EXATAMENTE o valor cobrado no Stripe):
+// - offer=intro -> R$197 + cupom CLUBE_INTRO_100 (R$100 off) = R$ 97
+// - offer=exit  -> R$197 + cupom CLUBE_EXIT_128  (R$128 off) = R$ 69
+// - offer=full  -> R$197 sem cupom
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
@@ -10,8 +16,31 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const PRICE_CARD = "price_1TOEs9GlXZFgg9244Xs7Bloe"; // R$ 69 / ano (recurring) — prod_UMyp07z2Rx5wUF
-const PRICE_PIX = "price_1TT4AHGlXZFgg924s0NVsKIV";  // R$ 69 (one-time, live) — prod_UMyp07z2Rx5wUF
+// Prices R$197 (cartão recorrente / Pix avulso) — produto prod_UMyp07z2Rx5wUF
+const PRICE_CARD_197 = "price_1TbyKYGlXZFgg9244vr2jrTS";
+const PRICE_PIX_197 = "price_1TbyL1GlXZFgg924wxKo7wVc";
+
+// Coupons (duration: once)
+const COUPON_INTRO_100 = "JmWxUHCj"; // R$100 off → R$97
+const COUPON_EXIT_128 = "xINKTcyf";  // R$128 off → R$69
+
+type Offer = "intro" | "exit" | "full";
+
+function resolveOffer(input: unknown): Offer {
+  return input === "exit" || input === "full" ? input : "intro";
+}
+
+function couponFor(offer: Offer): string | null {
+  if (offer === "intro") return COUPON_INTRO_100;
+  if (offer === "exit") return COUPON_EXIT_128;
+  return null;
+}
+
+function expectedAmount(offer: Offer): number {
+  if (offer === "intro") return 97;
+  if (offer === "exit") return 69;
+  return 197;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -36,6 +65,8 @@ serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const method: "card" | "pix" = body?.method === "pix" ? "pix" : "card";
+    const offer: Offer = resolveOffer(body?.offer);
+    const coupon = couponFor(offer);
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
@@ -45,13 +76,14 @@ serve(async (req) => {
     const origin = req.headers.get("origin") || "https://drinkeros.com";
 
     const isCard = method === "card";
+    const priceId = isCard ? PRICE_CARD_197 : PRICE_PIX_197;
 
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams: any = {
       mode: isCard ? "subscription" : "payment",
       customer: customerId,
       customer_email: customerId ? undefined : user.email!,
       client_reference_id: user.id,
-      line_items: [{ price: isCard ? PRICE_CARD : PRICE_PIX, quantity: 1 }],
+      line_items: [{ price: priceId, quantity: 1 }],
       payment_method_types: isCard ? ["card"] : ["pix"],
       locale: "pt-BR",
       success_url: `${origin}/clube?clube=success`,
@@ -59,34 +91,36 @@ serve(async (req) => {
       metadata: {
         user_id: user.id,
         plan_kind: isCard ? "club_card_subscription" : "club_pix_annual",
+        offer,
       },
-      ...(isCard
-        ? {
-            subscription_data: {
-              metadata: {
-                user_id: user.id,
-                plan_kind: "club_card_subscription",
-              },
-            },
-          }
-        : {
-            payment_intent_data: {
-              metadata: {
-                user_id: user.id,
-                plan_kind: "club_pix_annual",
-              },
-            },
-          }),
-    });
+    };
 
-    // Recupera amount real do price para tracking dinâmico (sem hardcode no front)
-    let amount = 0;
-    let currency = "BRL";
-    try {
-      const priceObj = await stripe.prices.retrieve(isCard ? PRICE_CARD : PRICE_PIX);
-      amount = (priceObj.unit_amount ?? 0) / 100;
-      currency = (priceObj.currency || "brl").toUpperCase();
-    } catch (_) { /* ignore */ }
+    if (coupon) {
+      sessionParams.discounts = [{ coupon }];
+    }
+
+    if (isCard) {
+      sessionParams.subscription_data = {
+        metadata: {
+          user_id: user.id,
+          plan_kind: "club_card_subscription",
+          offer,
+        },
+      };
+    } else {
+      sessionParams.payment_intent_data = {
+        metadata: {
+          user_id: user.id,
+          plan_kind: "club_pix_annual",
+          offer,
+        },
+      };
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
+
+    const amount = expectedAmount(offer);
+    const currency = "BRL";
 
     return new Response(
       JSON.stringify({
@@ -94,8 +128,10 @@ serve(async (req) => {
         session_id: session.id,
         amount,
         currency,
-        product_name: isCard ? "Clube dos Drinkeros · Anual (Cartão)" : "Clube dos Drinkeros · Anual (Pix)",
-        price_id: isCard ? PRICE_CARD : PRICE_PIX,
+        offer,
+        product_name: `Clube dos Drinkeros · Anual (${isCard ? "Cartão" : "Pix"}) · R$${amount}`,
+        price_id: priceId,
+        coupon,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
