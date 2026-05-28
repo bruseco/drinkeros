@@ -19,9 +19,9 @@ import { trackInitiateCheckout, waitForPixelFlush } from '@/lib/metaPixel';
 import { useViewContent } from '@/hooks/useViewContent';
 import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
 import { useTotalClubMembers, TOTAL_CLUB_MEMBERS_FALLBACK } from '@/hooks/useTotalClubMembers';
-import { useLaunchPromo } from '@/hooks/useLaunchPromo';
-import { useClubeSettings } from '@/hooks/useClubeSettings';
+import { useClubeIntroOffer } from '@/hooks/useClubeIntroOffer';
 import { useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
+import ClubeExitOffer from '@/components/user/ClubeExitOffer';
 
 
 import drinksStrip from '@/assets/1000-drinks.jpg';
@@ -105,23 +105,15 @@ const VideoWithPoster: React.FC<{ src: string; poster: string; alt: string }> = 
   );
 };
 
-const LaunchPromoCountdown: React.FC = () => {
-  const { data: settings } = useClubeSettings();
-  const { isActive, mm, ss } = useLaunchPromo({
-    promoPrice: settings?.promo_price,
-    fullPrice: settings?.full_price,
-  });
-  if (!isActive) return null;
-  return (
-    <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs font-semibold text-yellow-200">
-      <Timer className="h-3.5 w-3.5" />
-      <span className="text-yellow-100">Promoção de lançamento expira em</span>
-      <span className="font-mono font-bold text-white tabular-nums">
-        {mm}:{ss}
-      </span>
-    </div>
-  );
-};
+const IntroCountdownPill: React.FC<{ mm: string; ss: string }> = ({ mm, ss }) => (
+  <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs font-semibold text-yellow-200">
+    <Timer className="h-3.5 w-3.5" />
+    <span className="text-yellow-100">Desconto de R$ 100 expira em</span>
+    <span className="font-mono font-bold text-white tabular-nums">
+      {mm}:{ss}
+    </span>
+  </div>
+);
 
 
 const TrustLine: React.FC = () => (
@@ -156,18 +148,16 @@ const VipLandingB: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [isClosing] = useState(false);
-  const { data: clubeSettings } = useClubeSettings();
-  const promo = useLaunchPromo({
-    promoPrice: clubeSettings?.promo_price,
-    fullPrice: clubeSettings?.full_price,
-  });
+  const promo = useClubeIntroOffer();
+  const [exitOpen, setExitOpen] = useState(false);
+  const [exitOfferDismissed, setExitOfferDismissed] = useState(false);
 
   useViewContent({
     key: 'clube-dos-drinkeros',
     content_name: 'Clube dos Drinkeros',
     content_category: 'clube',
     content_type: 'product',
-    value: 69,
+    value: promo.price,
     currency: 'BRL',
   });
 
