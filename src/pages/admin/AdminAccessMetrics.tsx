@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { useAccessMetrics } from '@/hooks/useAccessMetrics';
+import { useSignupsCount } from '@/hooks/useSignupsCount';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Loader2, Users, TrendingUp, Clock, Award, Wine, Download, BookOpen, Activity, User as UserIcon, CalendarIcon } from 'lucide-react';
+import { Loader2, Users, TrendingUp, Clock, Award, Wine, Download, BookOpen, Activity, User as UserIcon, UserPlus, CalendarIcon } from 'lucide-react';
 import { ptBR } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -67,6 +68,7 @@ const AdminAccessMetrics: React.FC = () => {
   }, [preset, customFrom, customTo]);
 
   const { data: metrics, isLoading } = useAccessMetrics(from, to);
+  const { data: signupsCount } = useSignupsCount(from, to);
 
   return (
     <div className="space-y-6">
@@ -108,7 +110,7 @@ const AdminAccessMetrics: React.FC = () => {
       ) : metrics ? (
         <>
           {/* KPIs */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <Card>
               <CardContent className="pt-4 pb-3 px-4">
                 <div className="flex items-center gap-2 text-muted-foreground mb-1">
@@ -143,6 +145,15 @@ const AdminAccessMetrics: React.FC = () => {
                   <span className="text-xs font-medium">Certificados</span>
                 </div>
                 <p className="text-2xl font-bold">{metrics.certificates_total.toLocaleString('pt-BR')}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4 pb-3 px-4">
+                <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                  <UserPlus className="h-4 w-4" />
+                  <span className="text-xs font-medium">Cadastros</span>
+                </div>
+                <p className="text-2xl font-bold">{(signupsCount ?? 0).toLocaleString('pt-BR')}</p>
               </CardContent>
             </Card>
           </div>
