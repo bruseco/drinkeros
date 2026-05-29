@@ -67,21 +67,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setProfile(null);
         } else {
           setProfile(newProfile as UserProfile);
-          // Novo cadastro via OAuth/Magic Link → CompleteRegistration
-          const provider = (userObj.app_metadata as any)?.provider || 'oauth';
-          console.log('[AuthContext] disparando CompleteRegistration', { userId, provider });
-          import('@/lib/metaCapiBridge').then(({ trackCompleteRegistration }) => {
-            trackCompleteRegistration({
-              userId,
-              email: userObj.email || undefined,
-              phone: (userObj.user_metadata as any)?.phone,
-              fullName,
-              method: provider,
-            }).catch(() => undefined);
-          });
-
-
+          // CompleteRegistration agora é disparado no onAuthStateChange (SIGNED_IN)
+          // baseado em user.created_at — funciona mesmo quando o profile é
+          // criado pelo trigger do DB (caso comum em OAuth).
         }
+
         return;
       }
 
@@ -126,6 +116,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setTimeout(() => {
               Promise.resolve(supabase.rpc('start_vip_discount_window' as any)).catch(() => { /* ignore */ });
             }, 0);
+
+            // CompleteRegistration para signups via OAuth/Magic Link.
+            // O profile é criado por trigger no DB, então não dá pra confiar no
+            // fluxo de auto-insert. Aqui detectamos cadastro novo comparando
+            // created_at com agora e dedupando por userId no localStorage.
+            try {
+              const u = session.user;
+              const createdAt = u.created_at ? new Date(u.created_at).getTime() : 0;
+              const isNew = createdAt > 0 && (Date.now() - createdAt) < 5 * 60 * 1000;
+              const dedupeKey = `drinkeros:cr_fired:${u.id}`;
+              const alreadyFired = localStorage.getItem(dedupeKey) === '1';
+              if (isNew && !alreadyFired && provider !== 'email') {
+                localStorage.setItem(dedupeKey, '1');
+                console.log('[AuthContext] disparando CompleteRegistration (SIGNED_IN novo)', { userId: u.id, provider });
+                const meta = (u.user_metadata as any) || {};
+                import('@/lib/metaCapiBridge').then(({ trackCompleteRegistration }) => {
+                  trackCompleteRegistration({
+                    userId: u.id,
+                    email: u.email || undefined,
+                    phone: meta.phone,
+                    fullName: meta.full_name || meta.name || null,
+                    method: provider,
+                  }).catch(() => undefined);
+                });
+              }
+            } catch (e) {
+              console.warn('[AuthContext] CompleteRegistration detect falhou', e);
+            }
           }
 
           // Use setTimeout to avoid Supabase deadlock
@@ -133,6 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             fetchProfile(session.user.id, session.user);
             fetchRoles(session.user.id);
           }, 0);
+
         } else {
           setProfile(null);
           setRoles([]);
