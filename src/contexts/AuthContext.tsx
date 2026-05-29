@@ -67,21 +67,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setProfile(null);
         } else {
           setProfile(newProfile as UserProfile);
-          // Novo cadastro via OAuth/Magic Link → CompleteRegistration
-          const provider = (userObj.app_metadata as any)?.provider || 'oauth';
-          console.log('[AuthContext] disparando CompleteRegistration', { userId, provider });
-          import('@/lib/metaCapiBridge').then(({ trackCompleteRegistration }) => {
-            trackCompleteRegistration({
-              userId,
-              email: userObj.email || undefined,
-              phone: (userObj.user_metadata as any)?.phone,
-              fullName,
-              method: provider,
-            }).catch(() => undefined);
-          });
-
-
+          // CompleteRegistration agora é disparado no onAuthStateChange (SIGNED_IN)
+          // baseado em user.created_at — funciona mesmo quando o profile é
+          // criado pelo trigger do DB (caso comum em OAuth).
         }
+
         return;
       }
 
