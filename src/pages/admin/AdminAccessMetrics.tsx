@@ -147,6 +147,15 @@ const AdminAccessMetrics: React.FC = () => {
                 <p className="text-2xl font-bold">{metrics.certificates_total.toLocaleString('pt-BR')}</p>
               </CardContent>
             </Card>
+            <Card>
+              <CardContent className="pt-4 pb-3 px-4">
+                <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                  <UserPlus className="h-4 w-4" />
+                  <span className="text-xs font-medium">Cadastros</span>
+                </div>
+                <p className="text-2xl font-bold">{(signupsCount ?? 0).toLocaleString('pt-BR')}</p>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Usuários por categoria (totais da plataforma) */}
