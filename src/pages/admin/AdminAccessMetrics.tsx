@@ -68,6 +68,7 @@ const AdminAccessMetrics: React.FC = () => {
   }, [preset, customFrom, customTo]);
 
   const { data: metrics, isLoading } = useAccessMetrics(from, to);
+  const { data: signupsCount } = useSignupsCount(from, to);
 
   return (
     <div className="space-y-6">
