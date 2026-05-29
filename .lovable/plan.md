@@ -1,37 +1,26 @@
-## Problema
+## Objetivo
+Adicionar um novo KPI "Cadastros" no painel `/admin/metricas` mostrando o número de novos usuários cadastrados no período do filtro (mesmo range de datas já usado pelos outros cards).
 
-Em `/app/ebooks`, ebooks já adquiridos estão abrindo a página de venda (`/ebook/{slug}`) em vez de abrir o PDF direto.
+## Mudanças
 
-## Causa
+### 1. Hook novo: `src/hooks/useSignupsCount.ts`
+- Recebe `from` e `to` (Date).
+- Faz `supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', from).lte('created_at', to)`.
+- Retorna `{ data: number, isLoading }` via `useQuery` com `staleTime: 30_000`.
+- Usa a tabela `profiles` (criada automaticamente via trigger em todo signup, inclusive OAuth Google/Apple), garantindo paridade com o evento `CompleteRegistration`.
 
-Em `src/pages/user/UserEbooks.tsx`, a condição que decide a ação do card é:
+### 2. `src/pages/admin/AdminAccessMetrics.tsx`
+- Importar `useSignupsCount` e o ícone `UserPlus` do lucide.
+- Chamar o hook com o mesmo `from`/`to` que alimenta `useAccessMetrics`.
+- Mudar a grid de KPIs de `md:grid-cols-4` para `md:grid-cols-5` (mantém 2 cols no mobile).
+- Adicionar novo `<Card>` "Cadastros" exibindo o número formatado em pt-BR, posicionado entre "Usuários únicos" e "Tempo assistido" (ou ao final — pode ficar ao final para não desalinhar leitura existente).
 
-```ts
-const canDownload = owned && !expired && !!ebook.file_url;
-```
-
-Mas o campo `ebook.file_url` é **column-restricted** no Supabase — só admin tem acesso via RPC `admin_get_ebook_file_url` (ver `src/hooks/useEbooks.ts` linhas 22-23). Para usuários comuns, `file_url` vem sempre `null`, então `canDownload` é sempre `false`, mesmo quem comprou cai no fallback de página de venda.
-
-O download em si já é seguro: usa `openSignedFile('ebook', ebookId)` que chama a edge function `get-signed-file-url`, que valida acesso no servidor antes de gerar a URL assinada. Ou seja, não precisamos do `file_url` no cliente para decidir o botão.
-
-## Correção
-
-Arquivo: `src/pages/user/UserEbooks.tsx`
-
-1. Remover a checagem `!!ebook.file_url` da condição `canDownload`:
-   ```ts
-   const canDownload = owned && !expired;
-   ```
-2. Simplificar `cardHref` / `isExternal` para refletir: se `canDownload` → ação é abrir via `handleOpenEbook` (signed URL); senão → link para página de venda `/ebook/{slug}`. Expirado continua indo para `/clube`.
-
-Nenhuma alteração em backend, RLS, tracking, pagamentos ou PWA.
+## Fluxo impactado
+- Apenas leitura. Painel admin de métricas de acesso.
+- Nenhum impacto em tracking, pagamentos, auth ou PWA.
 
 ## Como testar
-
-1. Logar com usuário que **possui** um ebook (não expirado) → card mostra "Abrir e-book" e clicar abre o PDF em nova aba.
-2. Logar com usuário que **não possui** → card mostra "Saiba Mais" e leva para `/ebook/{slug}`.
-3. Usuário com acesso **expirado** → continua mostrando "Renovar no Clube" e indo para `/clube`.
-
-## Arquivos alterados
-
-- `src/pages/user/UserEbooks.tsx`
+1. Acessar `/admin/metricas` como admin.
+2. Conferir que aparece o card "Cadastros" com o total do período.
+3. Mudar o filtro de datas e verificar se o número atualiza.
+4. Comparar com `SELECT count(*) FROM profiles WHERE created_at BETWEEN ...`.
