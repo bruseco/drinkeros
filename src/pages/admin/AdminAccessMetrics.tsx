@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useAccessMetrics } from '@/hooks/useAccessMetrics';
+import { useSignupsCount } from '@/hooks/useSignupsCount';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
