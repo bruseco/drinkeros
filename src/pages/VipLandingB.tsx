@@ -165,8 +165,10 @@ const VipLandingB: React.FC = () => {
   // abre overlay com a animação. Ao fechar, rola o preço de 197 → 97 e marca
   // `clube_intro_revealed_at` no banco para não repetir.
   const priceCardEls = React.useRef<Set<HTMLDivElement>>(new Set());
+  const landingScrollRef = React.useRef<HTMLDivElement | null>(null);
   const [revealOpen, setRevealOpen] = useState(false);
   const [revealScheduled, setRevealScheduled] = useState(false);
+  const [priceCardVersion, setPriceCardVersion] = useState(0);
   // unlocked = exibir UI com R$97 + strikethrough. Antes do reveal fica false
   // mesmo que `promo.isActive` seja true, para mostrar R$197 primeiro.
   const [unlocked, setUnlocked] = useState<boolean>(
@@ -223,8 +225,20 @@ const VipLandingB: React.FC = () => {
 
   // Callback ref usado nos cards com o valor R$197 — registra cada elemento.
   const registerPriceCard = React.useCallback((el: HTMLDivElement | null) => {
-    if (el) priceCardEls.current.add(el);
+    if (!el) return;
+    priceCardEls.current.add(el);
+    setPriceCardVersion((v) => v + 1);
   }, []);
+
+  const checkPriceCardInView = React.useCallback(() => {
+    if (!canRevealIntro || revealScheduledRef.current) return;
+    const hit = Array.from(priceCardEls.current).some((el) => {
+      const r = el.getBoundingClientRect();
+      const center = r.top + r.height / 2;
+      return center > 0 && center < window.innerHeight * 0.82;
+    });
+    if (hit) scheduleReveal();
+  }, [canRevealIntro, scheduleReveal]);
 
   // IntersectionObserver nos cards de assinatura — agenda reveal após 2s
   // quando o usuário rolar até o valor R$197.
@@ -244,7 +258,15 @@ const VipLandingB: React.FC = () => {
     return () => {
       obs.disconnect();
     };
-  }, [canRevealIntro, revealScheduled, scheduleReveal]);
+  }, [canRevealIntro, revealScheduled, scheduleReveal, priceCardVersion]);
+
+  React.useEffect(() => {
+    const scroller = landingScrollRef.current;
+    if (!scroller || !canRevealIntro || revealScheduled) return;
+    const onScroll = () => window.requestAnimationFrame(checkPriceCardInView);
+    scroller.addEventListener('scroll', onScroll, { passive: true });
+    return () => scroller.removeEventListener('scroll', onScroll);
+  }, [canRevealIntro, revealScheduled, checkPriceCardInView]);
 
   // Ao fechar overlay → roll-down 197 → 97 + marca revealed no banco.
   const handleRevealClose = React.useCallback(() => {
