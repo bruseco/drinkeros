@@ -164,7 +164,7 @@ const VipLandingB: React.FC = () => {
   // Mostra R$197 no card de preço; quando o usuário rola até o card, espera 2s,
   // abre overlay com a animação. Ao fechar, rola o preço de 197 → 97 e marca
   // `clube_intro_revealed_at` no banco para não repetir.
-  const priceCardEl = React.useRef<HTMLDivElement | null>(null);
+  const priceCardEls = React.useRef<Set<HTMLDivElement>>(new Set());
   const [revealOpen, setRevealOpen] = useState(false);
   const [revealScheduled, setRevealScheduled] = useState(false);
   // unlocked = exibir UI com R$97 + strikethrough. Antes do reveal fica false
@@ -221,17 +221,17 @@ const VipLandingB: React.FC = () => {
     }
   }, [promo.isLoading, promo.isActive, promo.hasRevealed, promo.promoPrice, promo.fullPrice]);
 
-  // Callback ref usado em múltiplos cards de preço — registra cada elemento.
+  // Callback ref usado nos cards com o valor R$197 — registra cada elemento.
   const registerPriceCard = React.useCallback((el: HTMLDivElement | null) => {
-    priceCardEl.current = el;
+    if (el) priceCardEls.current.add(el);
   }, []);
 
-  // IntersectionObserver no card final de assinatura — agenda reveal após 2s
+  // IntersectionObserver nos cards de assinatura — agenda reveal após 2s
   // quando o usuário rolar até o valor R$197.
   React.useEffect(() => {
     if (!canRevealIntro || revealScheduled) return;
-    const el = priceCardEl.current;
-    if (!el) return;
+    const els = Array.from(priceCardEls.current);
+    if (els.length === 0) return;
 
     const obs = new IntersectionObserver(
       (entries) => {
@@ -239,7 +239,7 @@ const VipLandingB: React.FC = () => {
       },
       { threshold: 0.55 },
     );
-    obs.observe(el);
+    els.forEach((el) => obs.observe(el));
 
     return () => {
       obs.disconnect();
