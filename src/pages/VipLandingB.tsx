@@ -299,19 +299,17 @@ const VipLandingB: React.FC = () => {
   };
 
   // Exit-intent: intercepta tentativa de fechar/voltar para mostrar oferta R$ 69.
-  // Dispara apenas 1x por sessão.
+  // Só libera a segunda oferta depois que a primeira revelação (R$100 off) já aconteceu.
   useEffect(() => {
     if (!user) return; // não-logado já é mandado pra /signup pelo CTA
     if (exitOfferDismissed) return;
-    if (sessionStorage.getItem('clube:exit-offer-shown') === '1') return;
+    if (!exitOffer.canStart || exitOffer.isActive) return;
 
     // Empilha um estado sentinela para capturar o popstate (back button)
     window.history.pushState({ clubeExitSentinel: true }, '');
 
     const onPopState = () => {
-      if (sessionStorage.getItem('clube:exit-offer-shown') === '1') return;
-      sessionStorage.setItem('clube:exit-offer-shown', '1');
-      // Inicia a janela de 10 min da oferta extra (persistida em localStorage)
+      // Inicia a janela de 10 min da oferta extra no perfil do usuário.
       exitOffer.start();
       // Re-empilha pra continuar interceptando enquanto o overlay está aberto
       window.history.pushState({ clubeExitSentinel: true }, '');
