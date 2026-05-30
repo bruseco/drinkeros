@@ -216,7 +216,7 @@ const UserRecipes: React.FC = () => {
   // Garante que ao entrar na página (signup, navegação direta) o scroll inicia no topo.
   // O restore de scroll após visitar uma receita acontece depois, via consumeRecipeScrollTarget.
   useEffect(() => {
-    const hasReturnTarget = !!sessionStorage.getItem('user-recipes:scroll-target');
+    const hasReturnTarget = !!sessionStorage.getItem('user-recipes:scroll-to-key');
     if (!hasReturnTarget) {
       window.scrollTo({ top: 0, left: 0 });
     }
