@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useExclusivePostsPaginated } from '@/hooks/useExclusivePosts';
@@ -115,6 +115,8 @@ const useTypingPlaceholder = (texts: string[], typingSpeed = 80, pauseMs = 2000)
 };
 
 const RECIPES_STATE_KEY = 'user-recipes:list-state';
+const FORCE_RECIPES_TOP_KEY = 'drinkeros:recipes_force_top';
+const RECIPE_SCROLL_TARGET_KEY = 'user-recipes:scroll-to-key';
 
 const RecipeCover: React.FC<{ src: string; alt: string }> = ({ src, alt }) => {
   const [loaded, setLoaded] = useState(false);
@@ -164,6 +166,7 @@ const UserRecipes: React.FC = () => {
   // Seed persists across navigation within the session — only re-shuffles on full page refresh
   // so users can return to a recipe they had eyed without losing their place.
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const persisted = (() => {
     try {
       const raw = sessionStorage.getItem(RECIPES_STATE_KEY);
@@ -214,31 +217,54 @@ const UserRecipes: React.FC = () => {
   const limitReached = isLockedForUser && (dailyViews?.count ?? 0) >= dailyLimit;
 
   // Garante que ao entrar na página (signup, navegação direta) o scroll inicia no topo.
-  // O restore de scroll após visitar uma receita acontece depois, via consumeRecipeScrollTarget.
-  useEffect(() => {
-    const hasReturnTarget = !!sessionStorage.getItem('user-recipes:scroll-to-key');
-    if (hasReturnTarget) return;
+  // No pós-cadastro, ignora qualquer restauração antiga do iOS/Safari e de receitas anteriores.
+  useLayoutEffect(() => {
+    const forceTop =
+      sessionStorage.getItem(FORCE_RECIPES_TOP_KEY) === '1' ||
+      (location.state as { justSignedUp?: boolean } | null)?.justSignedUp === true;
+    const hasReturnTarget = !!sessionStorage.getItem(RECIPE_SCROLL_TARGET_KEY);
+    if (hasReturnTarget && !forceTop) return;
+
+    if (forceTop) {
+      sessionStorage.removeItem(FORCE_RECIPES_TOP_KEY);
+      sessionStorage.removeItem(RECIPE_SCROLL_TARGET_KEY);
+    }
 
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
 
+    const previousHtmlOverflowAnchor = document.documentElement.style.getPropertyValue('overflow-anchor');
+    const previousBodyOverflowAnchor = document.body.style.getPropertyValue('overflow-anchor');
+    document.documentElement.style.setProperty('overflow-anchor', 'none');
+    document.body.style.setProperty('overflow-anchor', 'none');
+
     const resetToTop = () => {
       window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
+      document.scrollingElement?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      document.getElementById('root')?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      document.querySelector('main')?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     };
     resetToTop();
-    const frameId = window.requestAnimationFrame(resetToTop);
-    const timers = [50, 150, 350, 700, 1200, 2000].map((ms) =>
+    const frameIds = [
+      window.requestAnimationFrame(resetToTop),
+      window.requestAnimationFrame(() => window.requestAnimationFrame(resetToTop)),
+    ];
+    const timers = [50, 150, 350, 700, 1200, 2000, 3200].map((ms) =>
       window.setTimeout(resetToTop, ms)
     );
+    window.visualViewport?.addEventListener('resize', resetToTop);
 
     return () => {
-      window.cancelAnimationFrame(frameId);
+      frameIds.forEach((id) => window.cancelAnimationFrame(id));
       timers.forEach((t) => window.clearTimeout(t));
+      window.visualViewport?.removeEventListener('resize', resetToTop);
+      document.documentElement.style.setProperty('overflow-anchor', previousHtmlOverflowAnchor);
+      document.body.style.setProperty('overflow-anchor', previousBodyOverflowAnchor);
     };
-  }, []);
+  }, [location.state]);
 
 
 
