@@ -179,11 +179,6 @@ const VipLandingB: React.FC = () => {
   const revealScheduledRef = React.useRef(false);
   const canRevealIntro = promo.isActive && !promo.hasRevealed && !promo.isLoading;
 
-  const isPriceCardVisible = React.useCallback((el: HTMLDivElement) => {
-    const r = el.getBoundingClientRect();
-    return r.top < window.innerHeight && r.bottom > 0;
-  }, []);
-
   const scheduleReveal = React.useCallback(() => {
     if (!canRevealIntro || revealScheduledRef.current || revealTimerRef.current !== null) return;
     revealScheduledRef.current = true;
@@ -229,7 +224,7 @@ const VipLandingB: React.FC = () => {
   // Callback ref usado em múltiplos cards de preço — registra cada elemento.
   const registerPriceCard = React.useCallback((el: HTMLDivElement | null) => {
     priceCardEl.current = el;
-  }, [isPriceCardVisible, scheduleReveal]);
+  }, []);
 
   // IntersectionObserver no card final de assinatura — agenda reveal após 2s
   // quando o usuário rolar até o valor R$197.
