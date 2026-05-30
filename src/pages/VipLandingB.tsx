@@ -485,6 +485,10 @@ const VipLandingB: React.FC = () => {
           0%, 100% { box-shadow: 0 6px 18px rgba(250, 204, 21, 0.30); }
           50% { box-shadow: 0 8px 28px rgba(250, 204, 21, 0.56), 0 0 18px rgba(250, 204, 21, 0.30); }
         }
+        @keyframes viplanding-btn-glow-green {
+          0%, 100% { box-shadow: 0 6px 18px rgba(34, 197, 94, 0.35); }
+          50% { box-shadow: 0 8px 30px rgba(34, 197, 94, 0.65), 0 0 22px rgba(74, 222, 128, 0.55); }
+        }
         .viplanding-gold-text {
           color: #fde047;
         }
@@ -499,10 +503,19 @@ const VipLandingB: React.FC = () => {
           animation: viplanding-btn-shimmer 3.2s linear infinite, viplanding-btn-glow 2.6s ease-in-out infinite;
           will-change: background-position;
         }
+        .viplanding-green-btn {
+          background-image: linear-gradient(110deg, #166534 0%, #4ade80 25%, #22c55e 50%, #4ade80 75%, #166534 100%);
+          background-size: 220% auto;
+          color: #052e16;
+          animation: viplanding-btn-shimmer 3.2s linear infinite, viplanding-btn-glow-green 2.6s ease-in-out infinite;
+          will-change: background-position;
+        }
+        .viplanding-green-btn:hover { filter: brightness(1.08); color: #052e16; }
         .viplanding-gold-btn:hover { filter: brightness(1.05); }
         @media (prefers-reduced-motion: reduce) {
-          .viplanding-price-btn-ready { animation: none; }
+          .viplanding-price-btn-ready, .viplanding-green-btn { animation: none; }
         }
+
       `}</style>
 
       {/* Banner sticky global (ClubeIntroStickyBar) cobre o app inteiro,
