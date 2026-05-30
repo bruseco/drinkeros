@@ -23,6 +23,7 @@ import { useClubeIntroOffer } from '@/hooks/useClubeIntroOffer';
 import { useClubeExitOffer } from '@/hooks/useClubeExitOffer';
 import { useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
 import ClubeExitOffer from '@/components/user/ClubeExitOffer';
+import ClubeDiscountReveal from '@/components/user/ClubeDiscountReveal';
 
 
 import drinksStrip from '@/assets/1000-drinks.jpg';
@@ -153,6 +154,78 @@ const VipLandingB: React.FC = () => {
   const exitOffer = useClubeExitOffer();
   const [exitOpen, setExitOpen] = useState(false);
   const [exitOfferDismissed, setExitOfferDismissed] = useState(false);
+
+  // ===== Reveal cinematográfico do desconto de R$100 =====
+  // Mostra R$197 no card de preço; quando o card entra no viewport, espera 2s,
+  // abre overlay com a animação. Ao fechar, rola o preço de 197 → 97 e marca
+  // `clube_intro_revealed_at` no banco para não repetir.
+  const priceCardRef = React.useRef<HTMLDivElement | null>(null);
+  const [revealOpen, setRevealOpen] = useState(false);
+  const [revealScheduled, setRevealScheduled] = useState(false);
+  // unlocked = exibir UI com R$97 + strikethrough. Antes do reveal fica false
+  // mesmo que `promo.isActive` seja true, para mostrar R$197 primeiro.
+  const [unlocked, setUnlocked] = useState<boolean>(
+    promo.isActive && promo.hasRevealed,
+  );
+  const [displayPrice, setDisplayPrice] = useState<number>(
+    promo.isActive && promo.hasRevealed ? promo.promoPrice : promo.fullPrice,
+  );
+
+  // Sincroniza quando o hook termina de carregar / muda elegibilidade.
+  React.useEffect(() => {
+    if (promo.isLoading) return;
+    if (promo.isActive && promo.hasRevealed) {
+      setUnlocked(true);
+      setDisplayPrice(promo.promoPrice);
+    } else if (!promo.isActive) {
+      setUnlocked(false);
+      setDisplayPrice(promo.fullPrice);
+    }
+  }, [promo.isLoading, promo.isActive, promo.hasRevealed, promo.promoPrice, promo.fullPrice]);
+
+  // IntersectionObserver no card de preço — agenda reveal após 2s.
+  React.useEffect(() => {
+    if (revealScheduled) return;
+    if (!promo.isActive || promo.hasRevealed || promo.isLoading) return;
+    const el = priceCardRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !revealScheduled) {
+          setRevealScheduled(true);
+          obs.disconnect();
+          window.setTimeout(() => setRevealOpen(true), 2000);
+        }
+      },
+      { threshold: 0.4 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [promo.isActive, promo.hasRevealed, promo.isLoading, revealScheduled]);
+
+  // Ao fechar overlay → roll-down 197 → 97 + marca revealed no banco.
+  const handleRevealClose = React.useCallback(() => {
+    setRevealOpen(false);
+    const start = performance.now();
+    const from = promo.fullPrice;
+    const to = promo.promoPrice;
+    const duration = 1200;
+    const step = (t: number) => {
+      const elapsed = t - start;
+      const p = Math.min(1, elapsed / duration);
+      // easeOutCubic
+      const eased = 1 - Math.pow(1 - p, 3);
+      const v = Math.round(from - (from - to) * eased);
+      setDisplayPrice(v);
+      if (p < 1) requestAnimationFrame(step);
+      else {
+        setDisplayPrice(to);
+        setUnlocked(true);
+        promo.markRevealed();
+      }
+    };
+    requestAnimationFrame(step);
+  }, [promo]);
 
   useViewContent({
     key: 'clube-dos-drinkeros',
@@ -308,22 +381,9 @@ const VipLandingB: React.FC = () => {
         .viplanding-gold-btn:hover { filter: brightness(1.05); }
       `}</style>
 
-      {promo.isActive && (
-        <div
-          role="status"
-          className="sticky top-0 z-[70] w-full bg-yellow-400 text-black shadow-md"
-        >
-          <div className="px-4 py-2 text-center text-[13px] sm:text-sm font-medium leading-tight">
-            <div className="font-extrabold uppercase tracking-wide">
-              Oferta p/ novo cadastrado!{' '}
-              <span className="tabular-nums">{promo.mm}:{promo.ss}</span>
-            </div>
-            <div className="text-[11px] sm:text-xs mt-0.5 normal-case font-medium">
-              Essa oferta só vale <strong>AGORA</strong> pra você que acabou de se cadastrar. APROVEITE!
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Banner sticky global (ClubeIntroStickyBar) cobre o app inteiro,
+          inclusive ao navegar — não duplicamos aqui. */}
+      <ClubeDiscountReveal open={revealOpen} onClose={handleRevealClose} />
 
 
       {/* HERO — foco em desbloquear acesso ao app */}
@@ -437,23 +497,23 @@ const VipLandingB: React.FC = () => {
           </div>
 
           {/* PREÇO ANTECIPADO */}
-          <div className="relative max-w-md mx-auto mb-12 px-4">
+          <div ref={priceCardRef} className="relative max-w-md mx-auto mb-12 px-4">
             <div className="rounded-3xl bg-gradient-to-br from-purple-900/50 to-black border border-yellow-400/30 p-6 text-center">
               <div className="text-xs uppercase tracking-widest font-bold text-yellow-300 mb-2">
                 Sócio do Clube · Anual
               </div>
-              {promo.isActive && (
+              {unlocked && (
                 <div className="text-purple-300 line-through text-sm">
                   de R$ {promo.fullPrice}
                 </div>
               )}
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-xl font-light text-purple-300">R$</span>
-                <span className="text-6xl font-black viplanding-gold-text">{promo.price}</span>
+                <span className="text-6xl font-black viplanding-gold-text tabular-nums">{displayPrice}</span>
                 <span className="text-sm text-purple-300 ml-1">/ ano</span>
               </div>
               <p className="text-sm text-purple-200 mt-1">
-                {promo.isActive ? (
+                {unlocked ? (
                   <>Você economiza <strong className="text-yellow-300">R$ 100</strong> agora.</>
                 ) : (
                   <>Equivale a menos de <strong className="text-white">R$ 17 por mês</strong>.</>
@@ -462,7 +522,7 @@ const VipLandingB: React.FC = () => {
               <p className="text-[11px] text-purple-300 mt-1">
                 Acesso anual · renovação automática · cancele quando quiser
               </p>
-              {promo.isActive && <IntroCountdownPill mm={promo.mm} ss={promo.ss} />}
+              {unlocked && <IntroCountdownPill mm={promo.mm} ss={promo.ss} />}
               <Button
                 onClick={() => handleSubscribe('card')}
                 disabled={loading}
@@ -669,24 +729,24 @@ const VipLandingB: React.FC = () => {
                 Desbloqueie o App · Anual
               </h2>
               <div className="text-center mb-6">
-                {promo.isActive && (
+                {unlocked && (
                   <div className="text-purple-300 line-through text-sm">de R$ {promo.fullPrice}</div>
                 )}
                 <div className="flex items-baseline justify-center gap-1">
                   <span className="text-2xl font-light text-purple-300">R$</span>
-                  <span className="text-7xl font-black viplanding-gold-text">
-                    {promo.price}
+                  <span className="text-7xl font-black viplanding-gold-text tabular-nums">
+                    {displayPrice}
                   </span>
                 </div>
                 <div className="text-sm text-purple-300">
-                  por ano{promo.isActive ? ' · economize R$ 100' : ' · menos de R$ 17/mês'}
+                  por ano{unlocked ? ' · economize R$ 100' : ' · menos de R$ 17/mês'}
                 </div>
-                {promo.isActive && (
+                {unlocked && (
                   <div className="mt-1 text-[11px] uppercase tracking-wider font-bold text-yellow-300">
                     Promoção de lançamento do novo app
                   </div>
                 )}
-                {promo.isActive && <IntroCountdownPill mm={promo.mm} ss={promo.ss} />}
+                {unlocked && <IntroCountdownPill mm={promo.mm} ss={promo.ss} />}
               </div>
 
 

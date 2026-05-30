@@ -65,7 +65,29 @@ serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const method: "card" | "pix" = body?.method === "pix" ? "pix" : "card";
-    const offer: Offer = resolveOffer(body?.offer);
+    let offer: Offer = resolveOffer(body?.offer);
+
+    // Valida no servidor a elegibilidade ao desconto INTRO (R$100 off).
+    // Só usuários com `profiles.clube_intro_eligible_until` no futuro recebem.
+    if (offer === "intro") {
+      const adminClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      );
+      const { data: prof } = await adminClient
+        .from("profiles")
+        .select("clube_intro_eligible_until")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const until = (prof as { clube_intro_eligible_until: string | null } | null)
+        ?.clube_intro_eligible_until;
+      const eligible = until ? new Date(until).getTime() > Date.now() : false;
+      if (!eligible) {
+        console.log("[create-club-checkout] intro requested but user not eligible", user.id);
+        offer = "full";
+      }
+    }
+
     const coupon = couponFor(offer);
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
