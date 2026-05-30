@@ -268,3 +268,13 @@ All colors MUST be HSL.
 .animate-splash-wave-slow > div { animation: splash-wave-move 18s linear infinite; }
 .animate-splash-wave-med  > div { animation: splash-wave-move 11s linear infinite; }
 .animate-splash-wave-fast > div { animation: splash-wave-move 6s linear infinite; }
+
+/* Native date input: keep calendar icon white on dark background across browsers */
+input[type="date"] {
+  color-scheme: dark;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(2);
+  opacity: 0.9;
+  cursor: pointer;
+}
