@@ -831,7 +831,7 @@ const VipLandingB: React.FC = () => {
                     Promoção de lançamento do novo app
                   </div>
                 )}
-                {unlocked && <IntroCountdownPill mm={promo.mm} ss={promo.ss} />}
+                {unlocked && <IntroCountdownPill untilMs={promo.eligibleUntilMs} />}
               </div>
 
 
