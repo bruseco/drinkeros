@@ -159,7 +159,7 @@ const VipLandingB: React.FC = () => {
   // Mostra R$197 no card de preço; quando o card entra no viewport, espera 2s,
   // abre overlay com a animação. Ao fechar, rola o preço de 197 → 97 e marca
   // `clube_intro_revealed_at` no banco para não repetir.
-  const priceCardRef = React.useRef<HTMLDivElement | null>(null);
+  const priceCardEls = React.useRef<Set<HTMLDivElement>>(new Set());
   const [revealOpen, setRevealOpen] = useState(false);
   const [revealScheduled, setRevealScheduled] = useState(false);
   // unlocked = exibir UI com R$97 + strikethrough. Antes do reveal fica false
@@ -183,23 +183,45 @@ const VipLandingB: React.FC = () => {
     }
   }, [promo.isLoading, promo.isActive, promo.hasRevealed, promo.promoPrice, promo.fullPrice]);
 
-  // IntersectionObserver no card de preço — agenda reveal após 2s.
+  // Callback ref usado em múltiplos cards de preço — registra cada elemento.
+  const registerPriceCard = React.useCallback((el: HTMLDivElement | null) => {
+    if (el) priceCardEls.current.add(el);
+  }, []);
+
+  // IntersectionObserver em TODOS os cards de preço — agenda reveal após 2s
+  // assim que qualquer um aparecer no viewport. Também dispara fallback caso
+  // o primeiro card já esteja visível no load inicial.
   React.useEffect(() => {
     if (revealScheduled) return;
     if (!promo.isActive || promo.hasRevealed || promo.isLoading) return;
-    const el = priceCardRef.current;
-    if (!el) return;
+    const els = Array.from(priceCardEls.current);
+    if (els.length === 0) return;
+
+    let fired = false;
+    const trigger = () => {
+      if (fired || revealScheduled) return;
+      fired = true;
+      setRevealScheduled(true);
+      obs.disconnect();
+      window.setTimeout(() => setRevealOpen(true), 2000);
+    };
+
     const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !revealScheduled) {
-          setRevealScheduled(true);
-          obs.disconnect();
-          window.setTimeout(() => setRevealOpen(true), 2000);
-        }
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) trigger();
       },
-      { threshold: 0.4 },
+      { threshold: 0.3 },
     );
-    obs.observe(el);
+    els.forEach((el) => obs.observe(el));
+
+    // Fallback: se algum card já estiver no viewport (acima da dobra),
+    // dispara imediatamente sem esperar scroll.
+    const inView = els.some((el) => {
+      const r = el.getBoundingClientRect();
+      return r.top < window.innerHeight && r.bottom > 0;
+    });
+    if (inView) trigger();
+
     return () => obs.disconnect();
   }, [promo.isActive, promo.hasRevealed, promo.isLoading, revealScheduled]);
 
@@ -495,7 +517,7 @@ const VipLandingB: React.FC = () => {
           </div>
 
           {/* PREÇO ANTECIPADO */}
-          <div ref={priceCardRef} className="relative max-w-md mx-auto mb-12 px-4">
+          <div ref={registerPriceCard} className="relative max-w-md mx-auto mb-12 px-4">
             <div className="rounded-3xl bg-gradient-to-br from-purple-900/50 to-black border border-yellow-400/30 p-6 text-center">
               <div className="text-xs uppercase tracking-widest font-bold text-yellow-300 mb-2">
                 Sócio do Clube · Anual
@@ -720,7 +742,7 @@ const VipLandingB: React.FC = () => {
           </div>
 
           {/* Pricing Card — fechamento */}
-          <div ref={priceCardRef} id="clube-pricing" className="relative max-w-md mx-auto mb-16 scroll-mt-6 px-4">
+          <div ref={registerPriceCard} id="clube-pricing" className="relative max-w-md mx-auto mb-16 scroll-mt-6 px-4">
             <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-yellow-400 rounded-3xl blur opacity-60" />
             <div className="relative bg-black rounded-3xl p-8 border border-purple-500/30">
               <h2 className="text-center text-3xl md:text-4xl font-black mb-3 viplanding-gold-text">
