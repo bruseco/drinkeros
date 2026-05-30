@@ -37,6 +37,7 @@ const TestimonialsCarousel: React.FC = () => {
   const lastTRef = useRef(0);
   const halfWidthRef = useRef(0);
   const rafRef = useRef<number | null>(null);
+  const visibleRef = useRef(false);
 
   const items = [...TESTIMONIALS, ...TESTIMONIALS];
 
@@ -81,13 +82,31 @@ const TestimonialsCarousel: React.FC = () => {
       }
 
       track.style.transform = `translate3d(${offsetRef.current}px, 0, 0)`;
+      if (visibleRef.current) rafRef.current = requestAnimationFrame(tick);
+    };
+
+    const start = () => {
+      if (visibleRef.current) return;
+      visibleRef.current = true;
+      lastFrame = performance.now();
       rafRef.current = requestAnimationFrame(tick);
     };
-    rafRef.current = requestAnimationFrame(tick);
+    const stop = () => {
+      visibleRef.current = false;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => (entry.isIntersecting ? start() : stop()),
+      { rootMargin: '220px 0px' },
+    );
+    if (viewportRef.current) io.observe(viewportRef.current);
 
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       ro.disconnect();
+      io.disconnect();
     };
   }, []);
 
@@ -156,6 +175,8 @@ const TestimonialsCarousel: React.FC = () => {
               <img
                 src={src}
                 alt={`Depoimento ${(i % TESTIMONIALS.length) + 1}`}
+                loading="lazy"
+                decoding="async"
                 draggable={false}
                 className="block h-[540px] md:h-[420px] w-auto pointer-events-none"
               />
