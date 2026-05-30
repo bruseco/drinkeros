@@ -127,6 +127,54 @@ const TrustLine: React.FC = () => (
   </p>
 );
 
+const PriceAmount = React.memo(({ value, className = '' }: { value: number; className?: string }) => {
+  const [current, setCurrent] = useState(value);
+  const [previous, setPrevious] = useState<number | null>(null);
+  const [animating, setAnimating] = useState(false);
+  const currentRef = React.useRef(value);
+  const timeoutRef = React.useRef<number | null>(null);
+
+  useEffect(() => {
+    if (value === currentRef.current) return;
+    if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);
+    setPrevious(currentRef.current);
+    currentRef.current = value;
+    setCurrent(value);
+    setAnimating(false);
+    const frame = window.requestAnimationFrame(() => setAnimating(true));
+    timeoutRef.current = window.setTimeout(() => {
+      setAnimating(false);
+      setPrevious(null);
+    }, 520);
+    return () => window.cancelAnimationFrame(frame);
+  }, [value]);
+
+  useEffect(() => () => {
+    if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);
+  }, []);
+
+  return (
+    <span className={`relative inline-grid min-w-[2.25ch] overflow-hidden tabular-nums ${className}`}>
+      {previous !== null && (
+        <span
+          aria-hidden="true"
+          className="col-start-1 row-start-1 transition-transform duration-500 ease-out"
+          style={{ transform: animating ? 'translateY(115%)' : 'translateY(0)' }}
+        >
+          {previous}
+        </span>
+      )}
+      <span
+        className="col-start-1 row-start-1 transition-transform duration-500 ease-out"
+        style={{ transform: animating || previous === null ? 'translateY(0)' : 'translateY(-115%)' }}
+      >
+        {current}
+      </span>
+    </span>
+  );
+});
+PriceAmount.displayName = 'PriceAmount';
+
 const VipLandingB: React.FC = () => {
   useAbVariantTrack('clube', 'b');
   const { user } = useAuth();
@@ -291,23 +339,7 @@ const VipLandingB: React.FC = () => {
     setRevealOpen(false);
     setUnlocked(true);
     promo.markRevealed();
-    const start = performance.now();
-    const from = promo.fullPrice;
-    const to = promo.promoPrice;
-    const duration = 1200;
-    const step = (t: number) => {
-      const elapsed = t - start;
-      const p = Math.min(1, elapsed / duration);
-      // easeOutCubic
-      const eased = 1 - Math.pow(1 - p, 3);
-      const v = Math.round(from - (from - to) * eased);
-      setDisplayPrice(v);
-      if (p < 1) requestAnimationFrame(step);
-      else {
-        setDisplayPrice(to);
-      }
-    };
-    requestAnimationFrame(step);
+    setDisplayPrice(promo.promoPrice);
   }, [promo]);
 
   useViewContent({
@@ -451,6 +483,7 @@ const VipLandingB: React.FC = () => {
           background-clip: text;
           color: transparent;
           animation: viplanding-gold-shimmer 4s linear infinite;
+          will-change: background-position;
         }
         /* Botão dourado ESTÁTICO — sem shimmer e sem box-shadow pulsante
            (essas animações forçavam repaint contínuo de áreas grandes no
@@ -592,7 +625,7 @@ const VipLandingB: React.FC = () => {
               )}
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-xl font-light text-purple-300">R$</span>
-                <span className="text-6xl font-black viplanding-gold-text tabular-nums">{displayPrice}</span>
+                <PriceAmount value={displayPrice} className="text-6xl font-black viplanding-gold-text" />
                 <span className="text-sm text-purple-300 ml-1">/ ano</span>
               </div>
               <p className="text-sm text-purple-200 mt-1">
@@ -817,9 +850,7 @@ const VipLandingB: React.FC = () => {
                 )}
                 <div className="flex items-baseline justify-center gap-1">
                   <span className="text-2xl font-light text-purple-300">R$</span>
-                  <span className="text-7xl font-black viplanding-gold-text tabular-nums">
-                    {displayPrice}
-                  </span>
+                  <PriceAmount value={displayPrice} className="text-7xl font-black viplanding-gold-text" />
                 </div>
                 <div className="text-sm text-purple-300">
                   por ano{unlocked ? ' · economize R$ 100' : ' · menos de R$ 17/mês'}
