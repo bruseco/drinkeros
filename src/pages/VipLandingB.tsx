@@ -729,24 +729,24 @@ const VipLandingB: React.FC = () => {
                 Desbloqueie o App · Anual
               </h2>
               <div className="text-center mb-6">
-                {promo.isActive && (
+                {unlocked && (
                   <div className="text-purple-300 line-through text-sm">de R$ {promo.fullPrice}</div>
                 )}
                 <div className="flex items-baseline justify-center gap-1">
                   <span className="text-2xl font-light text-purple-300">R$</span>
-                  <span className="text-7xl font-black viplanding-gold-text">
-                    {promo.price}
+                  <span className="text-7xl font-black viplanding-gold-text tabular-nums">
+                    {displayPrice}
                   </span>
                 </div>
                 <div className="text-sm text-purple-300">
-                  por ano{promo.isActive ? ' · economize R$ 100' : ' · menos de R$ 17/mês'}
+                  por ano{unlocked ? ' · economize R$ 100' : ' · menos de R$ 17/mês'}
                 </div>
-                {promo.isActive && (
+                {unlocked && (
                   <div className="mt-1 text-[11px] uppercase tracking-wider font-bold text-yellow-300">
                     Promoção de lançamento do novo app
                   </div>
                 )}
-                {promo.isActive && <IntroCountdownPill mm={promo.mm} ss={promo.ss} />}
+                {unlocked && <IntroCountdownPill mm={promo.mm} ss={promo.ss} />}
               </div>
 
 
