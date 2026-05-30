@@ -76,17 +76,30 @@ serve(async (req) => {
       );
       const { data: prof } = await adminClient
         .from("profiles")
-        .select("clube_intro_eligible_until, clube_intro_revealed_at, clube_exit_eligible_until")
+        .select("created_at, clube_intro_eligible_until, clube_intro_revealed_at, clube_exit_eligible_until")
         .eq("user_id", user.id)
         .maybeSingle();
       const p = prof as {
+        created_at: string | null;
         clube_intro_eligible_until: string | null;
         clube_intro_revealed_at: string | null;
         clube_exit_eligible_until: string | null;
       } | null;
-      const introEligible = p?.clube_intro_eligible_until
+      let introEligible = p?.clube_intro_eligible_until
         ? new Date(p.clube_intro_eligible_until).getTime() > Date.now()
         : false;
+      const userCreatedAt = user.created_at ? new Date(user.created_at).getTime() : 0;
+      const profileCreatedAt = p?.created_at ? new Date(p.created_at).getTime() : 0;
+      const isRecentSignup = Math.max(userCreatedAt, profileCreatedAt) > Date.now() - 24 * 60 * 60 * 1000;
+
+      if (offer === "intro" && !introEligible && !p?.clube_intro_revealed_at && isRecentSignup) {
+        const until = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+        await adminClient
+          .from("profiles")
+          .update({ clube_intro_eligible_until: until })
+          .eq("user_id", user.id);
+        introEligible = true;
+      }
       const exitEligible = !!p?.clube_intro_revealed_at && p?.clube_exit_eligible_until
         ? new Date(p.clube_exit_eligible_until).getTime() > Date.now()
         : false;
