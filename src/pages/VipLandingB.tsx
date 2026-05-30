@@ -164,7 +164,7 @@ const VipLandingB: React.FC = () => {
   // Mostra R$197 no card de preço; quando o usuário rola até o card, espera 2s,
   // abre overlay com a animação. Ao fechar, rola o preço de 197 → 97 e marca
   // `clube_intro_revealed_at` no banco para não repetir.
-  const priceCardEls = React.useRef<Set<HTMLDivElement>>(new Set());
+  const priceCardEl = React.useRef<HTMLDivElement | null>(null);
   const [revealOpen, setRevealOpen] = useState(false);
   const [revealScheduled, setRevealScheduled] = useState(false);
   // unlocked = exibir UI com R$97 + strikethrough. Antes do reveal fica false
@@ -228,39 +228,28 @@ const VipLandingB: React.FC = () => {
 
   // Callback ref usado em múltiplos cards de preço — registra cada elemento.
   const registerPriceCard = React.useCallback((el: HTMLDivElement | null) => {
-    if (!el) return;
-    priceCardEls.current.add(el);
-    window.requestAnimationFrame(() => {
-      if (isPriceCardVisible(el)) scheduleReveal();
-    });
+    priceCardEl.current = el;
   }, [isPriceCardVisible, scheduleReveal]);
 
-  // IntersectionObserver em TODOS os cards de preço — agenda reveal após 2s
-  // assim que qualquer um aparecer no viewport.
+  // IntersectionObserver no card final de assinatura — agenda reveal após 2s
+  // quando o usuário rolar até o valor R$197.
   React.useEffect(() => {
     if (!canRevealIntro || revealScheduled) return;
-    const els = Array.from(priceCardEls.current);
-    if (els.length === 0) return;
+    const el = priceCardEl.current;
+    if (!el) return;
 
     const obs = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) scheduleReveal();
       },
-      { threshold: 0.3 },
+      { threshold: 0.55 },
     );
-    els.forEach((el) => obs.observe(el));
-
-    // Fallback: se algum card já estiver no viewport (acima da dobra),
-    // dispara imediatamente sem esperar scroll.
-    const frame = window.requestAnimationFrame(() => {
-      if (els.some(isPriceCardVisible)) scheduleReveal();
-    });
+    obs.observe(el);
 
     return () => {
       obs.disconnect();
-      window.cancelAnimationFrame(frame);
     };
-  }, [canRevealIntro, isPriceCardVisible, revealScheduled, scheduleReveal]);
+  }, [canRevealIntro, revealScheduled, scheduleReveal]);
 
   // Ao fechar overlay → roll-down 197 → 97 + marca revealed no banco.
   const handleRevealClose = React.useCallback(() => {
