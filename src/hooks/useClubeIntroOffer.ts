@@ -48,10 +48,13 @@ export function useClubeIntroOffer(): ClubeIntroOfferState {
   const [now, setNow] = useState<number>(() => Date.now());
 
   useEffect(() => {
+    // A oferta intro (R$97) deve estar SEMPRE ativa quando o usuário visita a /clube-b.
+    // Se a janela de 30min já expirou (ou nunca existiu), reiniciamos para manter
+    // o preço promocional + countdown de urgência sempre visível.
     const existing = readStart();
     const nowTs = Date.now();
-    const weekExpired = !existing || nowTs - existing >= CLUBE_INTRO_WEEK_MS;
-    if (weekExpired) {
+    const windowExpired = !existing || nowTs - existing >= CLUBE_INTRO_WINDOW_MS;
+    if (windowExpired) {
       writeStart(nowTs);
       setStartedAt(nowTs);
     } else {
