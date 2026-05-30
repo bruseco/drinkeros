@@ -240,14 +240,18 @@ const VipLandingB: React.FC = () => {
     const vh = window.innerHeight || document.documentElement.clientHeight || 800;
     const hit = Array.from(priceCardEls.current).some((el) => {
       const r = el.getBoundingClientRect();
-      // qualquer parte visível do card conta (permissivo p/ Safari iOS)
-      return r.bottom > 80 && r.top < vh - 80;
+      if (r.height === 0) return false;
+      // Dispara apenas quando o card de preço está realmente na tela:
+      // topo do card já entrou na viewport (acima de 85% da altura) E
+      // ainda não rolou pra fora por cima.
+      const topInView = r.top < vh * 0.85 && r.bottom > vh * 0.15;
+      return topInView;
     });
     if (hit) scheduleReveal('rect-check');
   }, [canRevealIntro, scheduleReveal]);
 
-  // IntersectionObserver — threshold baixo + rootMargin para o Safari iOS dentro
-  // de um container fixed/overflow-auto disparar de forma confiável.
+  // IntersectionObserver — exige 40% do card visível, sem rootMargin negativo
+  // para não disparar antes do usuário chegar no preço.
   React.useEffect(() => {
     if (!canRevealIntro || revealScheduled) return;
     const els = Array.from(priceCardEls.current);
@@ -255,17 +259,17 @@ const VipLandingB: React.FC = () => {
 
     const obs = new IntersectionObserver(
       (entries) => {
-        if (entries.some((e) => e.isIntersecting || e.intersectionRatio > 0)) {
+        if (entries.some((e) => e.isIntersecting && e.intersectionRatio >= 0.4)) {
           scheduleReveal('intersection-observer');
         }
       },
-      { threshold: [0, 0.1, 0.25], rootMargin: '0px 0px -10% 0px' },
+      { threshold: [0.4, 0.6] },
     );
     els.forEach((el) => obs.observe(el));
     return () => obs.disconnect();
   }, [canRevealIntro, revealScheduled, scheduleReveal, priceCardVersion]);
 
-  // Fallback 1: scroll listener (container fixed + window + touchmove).
+  // Fallback scroll/touch — usa o mesmo critério estrito do rect-check.
   React.useEffect(() => {
     if (!canRevealIntro || revealScheduled) return;
     const scroller = landingScrollRef.current;
@@ -273,8 +277,6 @@ const VipLandingB: React.FC = () => {
     if (scroller) scroller.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('touchmove', onScroll, { passive: true });
-    // Checa imediatamente caso o card já esteja visível
-    checkPriceCardInView();
     return () => {
       if (scroller) scroller.removeEventListener('scroll', onScroll);
       window.removeEventListener('scroll', onScroll);
@@ -282,20 +284,7 @@ const VipLandingB: React.FC = () => {
     };
   }, [canRevealIntro, revealScheduled, checkPriceCardInView, priceCardVersion]);
 
-  // Fallback 2: polling a cada 600ms enquanto o reveal estiver pendente.
-  React.useEffect(() => {
-    if (!canRevealIntro || revealScheduled) return;
-    const id = window.setInterval(checkPriceCardInView, 600);
-    return () => window.clearInterval(id);
-  }, [canRevealIntro, revealScheduled, checkPriceCardInView]);
 
-  // Fallback 3 (garantia final): após 12s de elegibilidade carregada, agenda
-  // mesmo sem detectar scroll — usuário não fica preso no R$197.
-  React.useEffect(() => {
-    if (!canRevealIntro || revealScheduled) return;
-    const id = window.setTimeout(() => scheduleReveal('safety-timeout'), 12000);
-    return () => window.clearTimeout(id);
-  }, [canRevealIntro, revealScheduled, scheduleReveal]);
 
   // Diagnóstico — facilita depurar no iPhone via Web Inspector.
   React.useEffect(() => {
