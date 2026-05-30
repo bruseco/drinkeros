@@ -330,23 +330,7 @@ const VipLandingB: React.FC = () => {
     setRevealOpen(false);
     setUnlocked(true);
     promo.markRevealed();
-    const start = performance.now();
-    const from = promo.fullPrice;
-    const to = promo.promoPrice;
-    const duration = 1200;
-    const step = (t: number) => {
-      const elapsed = t - start;
-      const p = Math.min(1, elapsed / duration);
-      // easeOutCubic
-      const eased = 1 - Math.pow(1 - p, 3);
-      const v = Math.round(from - (from - to) * eased);
-      setDisplayPrice(v);
-      if (p < 1) requestAnimationFrame(step);
-      else {
-        setDisplayPrice(to);
-      }
-    };
-    requestAnimationFrame(step);
+    setDisplayPrice(promo.promoPrice);
   }, [promo]);
 
   useViewContent({
