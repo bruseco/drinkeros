@@ -65,9 +65,9 @@ export const PwaInstallGate: React.FC = () => {
   return (
     <div
       className={
-        // Mobile: colado em cima do menu inferior (que tem ~64px + pb-[7px] + safe-area).
-        // Desktop (lg): volta para o topo do conteúdo.
-        'fixed bottom-[calc(71px+env(safe-area-inset-bottom))] left-0 right-0 z-40 lg:static lg:bottom-auto bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg lg:shadow-none'
+        // Mobile: flutua acima do menu inferior, com respiro lateral e cantos arredondados.
+        // Desktop (lg): volta para o topo do conteúdo, sem fixar.
+        'fixed bottom-[calc(75px+env(safe-area-inset-bottom))] left-3 right-3 z-40 rounded-2xl overflow-hidden lg:static lg:left-auto lg:right-auto lg:bottom-auto lg:rounded-none bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg lg:shadow-none'
       }
     >
       <div className="mx-auto flex max-w-5xl items-center gap-3 px-3 py-2.5">
