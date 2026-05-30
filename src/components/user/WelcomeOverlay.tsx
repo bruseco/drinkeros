@@ -27,8 +27,8 @@ export const WelcomeOverlay: React.FC = () => {
       setFirstName(name);
       setVisible(true);
 
-      window.setTimeout(() => setClosing(true), 2800);
-      window.setTimeout(() => setVisible(false), 3400);
+      window.setTimeout(() => setClosing(true), 4400);
+      window.setTimeout(() => setVisible(false), 5000);
     })();
   }, [user]);
 
@@ -49,7 +49,7 @@ export const WelcomeOverlay: React.FC = () => {
           {firstName ? `Bem-vindo, ${firstName}!` : 'Bem-vindo aos Drinkeros!'}
         </h2>
         <p className="mt-3 text-white/80 text-base leading-snug">
-          Sua jornada na mixologia começa agora. Explore receitas, cursos e muito mais. 🍹
+          Sua jornada no mundo dos drinks começa agora! Você está no plano <span className="font-semibold text-green-400">grátis</span>. 🍹
         </p>
       </div>
     </div>
