@@ -56,15 +56,16 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
   const showAmount = ['amount', 'discount', 'hold'].includes(phase);
   const showDiscount = ['discount', 'hold'].includes(phase);
 
-  return (
+  const content = (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/58 px-5"
+      className="fixed inset-0 z-[2147483600] flex items-center justify-center bg-black/70 px-5"
       style={{
         opacity: phase === 'out' ? 0 : 1,
         transition: 'opacity 600ms ease',
       }}
       aria-live="polite"
     >
+
       <div className="relative w-full max-w-[360px] px-5 py-12 text-center select-none">
         {/* "Você ganhou" */}
         <div
