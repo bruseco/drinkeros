@@ -228,7 +228,11 @@ const VipLandingB: React.FC = () => {
   const [displayPrice, setDisplayPrice] = useState<number>(
     promo.isActive && promo.hasRevealed ? promo.promoPrice : promo.fullPrice,
   );
+  const [priceSettled, setPriceSettled] = useState<boolean>(
+    promo.isActive && promo.hasRevealed,
+  );
   const revealTimerRef = React.useRef<number | null>(null);
+  const priceSettleTimerRef = React.useRef<number | null>(null);
   const revealScheduledRef = React.useRef(false);
   const canRevealIntro = promo.isActive && !promo.hasRevealed && !promo.isLoading;
 
@@ -263,6 +267,7 @@ const VipLandingB: React.FC = () => {
     setRevealOpen(false);
     setRevealScheduled(false);
     setUnlocked(false);
+    setPriceSettled(false);
     setDisplayPrice(promo.fullPrice);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
@@ -272,9 +277,11 @@ const VipLandingB: React.FC = () => {
     if (promo.isLoading) return;
     if (promo.isActive && promo.hasRevealed) {
       setUnlocked(true);
+      setPriceSettled(true);
       setDisplayPrice(promo.promoPrice);
     } else if (!promo.isActive) {
       setUnlocked(false);
+      setPriceSettled(false);
       setDisplayPrice(promo.fullPrice);
     }
   }, [promo.isLoading, promo.isActive, promo.hasRevealed, promo.promoPrice, promo.fullPrice]);
@@ -338,8 +345,11 @@ const VipLandingB: React.FC = () => {
   const handleRevealClose = React.useCallback(() => {
     setRevealOpen(false);
     setUnlocked(true);
+    setPriceSettled(false);
     promo.markRevealed();
     setDisplayPrice(promo.promoPrice);
+    if (priceSettleTimerRef.current !== null) window.clearTimeout(priceSettleTimerRef.current);
+    priceSettleTimerRef.current = window.setTimeout(() => setPriceSettled(true), 620);
   }, [promo]);
 
   useViewContent({
