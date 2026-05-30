@@ -10,6 +10,7 @@ import { WinnerPopup } from './WinnerPopup';
 import { PwaInstallGate } from './PwaInstallGate';
 import { PwaSplashScreen } from './PwaSplashScreen';
 import { VipDiscountCountdownBanner } from './VipDiscountCountdownBanner';
+import { WelcomeOverlay } from './WelcomeOverlay';
 
 import { Loader2 } from 'lucide-react';
 
@@ -50,6 +51,7 @@ export const UserLayout: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-background">
+      <WelcomeOverlay />
       <PwaSplashScreen />
       <UserSidebar />
       <div className="flex flex-1 flex-col min-w-0">

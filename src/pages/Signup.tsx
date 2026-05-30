@@ -143,6 +143,7 @@ const Signup: React.FC = () => {
     } catch (err) {
       console.warn('[Signup] CompleteRegistration falhou', err);
     }
+    try { sessionStorage.setItem('drinkeros:just_signed_up', '1'); } catch {}
     navigate('/app');
 
     setIsLoading(false);

@@ -96,6 +96,7 @@ const CompleteProfile: React.FC = () => {
       return;
     }
     toast({ title: 'Tudo certo! 🍹', description: 'Bem-vindo ao Drinkeros!' });
+    try { sessionStorage.setItem('drinkeros:just_signed_up', '1'); } catch {}
     navigate('/app', { replace: true });
   };
 
