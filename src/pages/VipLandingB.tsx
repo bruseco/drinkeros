@@ -444,10 +444,6 @@ const VipLandingB: React.FC = () => {
           0% { background-position: -200% 0; }
           100% { background-position: 200% 0; }
         }
-        @keyframes viplanding-gold-glow {
-          0%, 100% { box-shadow: 0 0 20px 0 rgba(250, 204, 21, 0.45), 0 0 40px 0 rgba(250, 204, 21, 0.25); }
-          50% { box-shadow: 0 0 35px 6px rgba(250, 204, 21, 0.75), 0 0 70px 12px rgba(250, 204, 21, 0.45); }
-        }
         .viplanding-gold-text {
           background-image: linear-gradient(110deg, #b8860b 0%, #fde68a 25%, #fbbf24 50%, #fde68a 75%, #b8860b 100%);
           background-size: 200% auto;
@@ -455,13 +451,15 @@ const VipLandingB: React.FC = () => {
           background-clip: text;
           color: transparent;
           animation: viplanding-gold-shimmer 4s linear infinite;
-          filter: drop-shadow(0 0 14px rgba(250, 204, 21, 0.55));
         }
+        /* Botão dourado ESTÁTICO — sem shimmer e sem box-shadow pulsante
+           (essas animações forçavam repaint contínuo de áreas grandes no
+           Safari mobile e travavam a página). A animação dourada vive
+           apenas no valor (.viplanding-gold-text). */
         .viplanding-gold-btn {
           background-image: linear-gradient(110deg, #b8860b 0%, #fde68a 25%, #fbbf24 50%, #fde68a 75%, #b8860b 100%);
-          background-size: 200% auto;
-          animation: viplanding-gold-shimmer 3.5s linear infinite, viplanding-gold-glow 2.4s ease-in-out infinite;
           color: #1a1206;
+          box-shadow: 0 4px 16px rgba(250, 204, 21, 0.28);
         }
         .viplanding-gold-btn:hover { filter: brightness(1.05); }
       `}</style>
