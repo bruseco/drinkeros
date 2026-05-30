@@ -18,6 +18,8 @@ interface Props {
  */
 export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
   const [phase, setPhase] = useState<'idle' | 'won' | 'amount' | 'discount' | 'hold' | 'out'>('idle');
+  const onCloseRef = React.useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 
   useEffect(() => {
     if (!open) {
@@ -29,7 +31,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
     const tDiscount = window.setTimeout(() => setPhase('discount'), 1650);
     const tHold = window.setTimeout(() => setPhase('hold'), 2300);
     const tOut = window.setTimeout(() => setPhase('out'), 4650);
-    const tClose = window.setTimeout(() => onClose(), 5250);
+    const tClose = window.setTimeout(() => onCloseRef.current(), 5250);
     return () => {
       window.clearTimeout(tAmount);
       window.clearTimeout(tDiscount);
@@ -37,19 +39,19 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
       window.clearTimeout(tOut);
       window.clearTimeout(tClose);
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open && phase === 'idle') return null;
 
-  const sparkles = Array.from({ length: 22 }).map((_, i) => {
-    const angle = (i / 22) * Math.PI * 2 + (i % 2 === 0 ? 0 : 0.16);
-    const dist = 72 + (i % 4) * 34;
+  const sparkles = Array.from({ length: 28 }).map((_, i) => {
+    const angle = (i / 28) * Math.PI * 2 + (i % 2 === 0 ? 0 : 0.16);
+    const dist = 90 + (i % 4) * 42;
     return {
       key: i,
       x: Math.cos(angle) * dist,
       y: Math.sin(angle) * dist,
       delay: (i % 5) * 28,
-      size: 4 + (i % 3) * 2,
+      size: 9 + (i % 3) * 4,
     };
   });
 
@@ -58,7 +60,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
 
   const content = (
     <div
-      className="fixed inset-0 z-[2147483600] flex items-center justify-center bg-black/70 px-5"
+      className="fixed inset-0 z-[2147483600] flex items-center justify-center bg-black/90 px-5"
       style={{
         opacity: phase === 'out' ? 0 : 1,
         transition: 'opacity 600ms ease',
@@ -90,7 +92,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
                 height: s.size,
                 background:
                   'radial-gradient(circle, hsl(45 95% 70%) 0%, hsl(40 90% 55%) 60%, transparent 100%)',
-                boxShadow: '0 0 12px hsl(45 95% 70% / 0.9)',
+                boxShadow: '0 0 22px hsl(45 95% 70% / 0.95), 0 0 6px hsl(45 95% 85% / 0.9)',
                 '--sparkle-x': `${s.x}px`,
                 '--sparkle-y': `${s.y}px`,
                 opacity: 0,
