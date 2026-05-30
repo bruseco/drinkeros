@@ -92,7 +92,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
                 height: s.size,
                 background:
                   'radial-gradient(circle, hsl(45 95% 70%) 0%, hsl(40 90% 55%) 60%, transparent 100%)',
-                boxShadow: '0 0 12px hsl(45 95% 70% / 0.9)',
+                boxShadow: '0 0 22px hsl(45 95% 70% / 0.95), 0 0 6px hsl(45 95% 85% / 0.9)',
                 '--sparkle-x': `${s.x}px`,
                 '--sparkle-y': `${s.y}px`,
                 opacity: 0,
