@@ -15,17 +15,23 @@ interface Props {
  *  4.4s  onClose()
  */
 export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
-  const [phase, setPhase] = useState<'idle' | 'in' | 'out'>('idle');
+  const [phase, setPhase] = useState<'idle' | 'won' | 'amount' | 'discount' | 'hold' | 'out'>('idle');
 
   useEffect(() => {
     if (!open) {
       setPhase('idle');
       return;
     }
-    setPhase('in');
-    const tOut = window.setTimeout(() => setPhase('out'), 3800);
-    const tClose = window.setTimeout(() => onClose(), 4400);
+    setPhase('won');
+    const tAmount = window.setTimeout(() => setPhase('amount'), 700);
+    const tDiscount = window.setTimeout(() => setPhase('discount'), 1650);
+    const tHold = window.setTimeout(() => setPhase('hold'), 2300);
+    const tOut = window.setTimeout(() => setPhase('out'), 5300);
+    const tClose = window.setTimeout(() => onClose(), 5900);
     return () => {
+      window.clearTimeout(tAmount);
+      window.clearTimeout(tDiscount);
+      window.clearTimeout(tHold);
       window.clearTimeout(tOut);
       window.clearTimeout(tClose);
     };
@@ -33,35 +39,38 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
 
   if (!open && phase === 'idle') return null;
 
-  // 14 sparkles em direções aleatórias mas determinísticas
-  const sparkles = Array.from({ length: 14 }).map((_, i) => {
-    const angle = (i / 14) * Math.PI * 2 + (i % 2 === 0 ? 0 : 0.2);
-    const dist = 140 + (i % 3) * 40;
+  const sparkles = Array.from({ length: 22 }).map((_, i) => {
+    const angle = (i / 22) * Math.PI * 2 + (i % 2 === 0 ? 0 : 0.16);
+    const dist = 72 + (i % 4) * 34;
     return {
       key: i,
       x: Math.cos(angle) * dist,
       y: Math.sin(angle) * dist,
-      delay: 700 + (i % 5) * 40,
+      delay: (i % 5) * 28,
+      size: 4 + (i % 3) * 2,
     };
   });
 
+  const showAmount = ['amount', 'discount', 'hold'].includes(phase);
+  const showDiscount = ['discount', 'hold'].includes(phase);
+
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/72 px-5"
       style={{
         opacity: phase === 'out' ? 0 : 1,
         transition: 'opacity 600ms ease',
       }}
       aria-live="polite"
     >
-      <div className="relative text-center px-6 select-none">
+      <div className="relative w-full max-w-[360px] rounded-[2rem] border border-yellow-300/20 bg-black/55 px-5 py-12 text-center shadow-[0_0_80px_rgba(245,199,38,0.2)] select-none">
         {/* "Você ganhou" */}
         <div
           className="text-white text-2xl sm:text-3xl font-light tracking-wide"
           style={{
-            opacity: phase === 'in' ? 1 : 0,
-            transform: phase === 'in' ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 600ms ease 100ms, transform 600ms ease 100ms',
+            opacity: ['won', 'amount', 'discount', 'hold'].includes(phase) ? 1 : 0,
+            transform: ['won', 'amount', 'discount', 'hold'].includes(phase) ? 'translateY(0)' : 'translateY(18px)',
+            transition: 'opacity 450ms ease, transform 450ms ease',
           }}
         >
           Você ganhou
@@ -74,19 +83,19 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
               key={s.key}
               className="absolute left-1/2 top-1/2 block h-2 w-2 rounded-full"
               style={{
+                width: s.size,
+                height: s.size,
                 background:
                   'radial-gradient(circle, hsl(45 95% 70%) 0%, hsl(40 90% 55%) 60%, transparent 100%)',
                 boxShadow: '0 0 12px hsl(45 95% 70% / 0.9)',
-                transform:
-                  phase === 'in'
-                    ? `translate(calc(-50% + ${s.x}px), calc(-50% + ${s.y}px)) scale(0)`
-                    : 'translate(-50%, -50%) scale(0)',
-                opacity: phase === 'in' ? 0 : 0,
+                '--sparkle-x': `${s.x}px`,
+                '--sparkle-y': `${s.y}px`,
+                opacity: 0,
                 animation:
-                  phase === 'in'
-                    ? `clube-sparkle 1100ms ease-out ${s.delay}ms forwards`
+                  phase === 'amount'
+                    ? `clube-sparkle 900ms cubic-bezier(.16,1,.3,1) ${s.delay}ms forwards`
                     : 'none',
-              }}
+              } as React.CSSProperties}
             />
           ))}
           <div
@@ -97,17 +106,16 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              transform:
-                phase === 'in' ? 'scale(1)' : 'scale(0)',
-              opacity: phase === 'in' ? 1 : 0,
+              transform: showAmount ? 'scale(1)' : 'scale(0)',
+              opacity: showAmount ? 1 : 0,
               transition:
-                phase === 'in'
-                  ? 'transform 800ms cubic-bezier(.34,1.56,.64,1) 700ms, opacity 400ms ease 700ms'
+                showAmount
+                  ? 'transform 680ms cubic-bezier(.08,1.65,.22,1), opacity 160ms ease'
                   : 'opacity 400ms ease',
-              filter: 'drop-shadow(0 0 30px rgba(241,196,15,0.4))',
+              filter: 'drop-shadow(0 0 32px rgba(241,196,15,0.58))',
             }}
           >
-            R$100
+            R$ 100
           </div>
         </div>
 
@@ -115,9 +123,9 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
         <div
           className="text-white text-2xl sm:text-3xl font-light tracking-wide"
           style={{
-            opacity: phase === 'in' ? 1 : 0,
-            transform: phase === 'in' ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 600ms ease 1800ms, transform 600ms ease 1800ms',
+            opacity: showDiscount ? 1 : 0,
+            transform: showDiscount ? 'translateY(0)' : 'translateY(18px)',
+            transition: 'opacity 450ms ease, transform 450ms ease',
           }}
         >
           de desconto.
@@ -127,15 +135,16 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
       <style>{`
         @keyframes clube-sparkle {
           0% {
-            opacity: 1;
+            opacity: 0;
             transform: translate(-50%, -50%) scale(0);
           }
+          12% { opacity: 1; }
           60% {
             opacity: 1;
           }
           100% {
             opacity: 0;
-            transform: var(--sparkle-end);
+            transform: translate(calc(-50% + var(--sparkle-x)), calc(-50% + var(--sparkle-y))) scale(0.15);
           }
         }
       `}</style>
