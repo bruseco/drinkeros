@@ -176,6 +176,7 @@ const VipLandingB: React.FC = () => {
     promo.isActive && promo.hasRevealed ? promo.promoPrice : promo.fullPrice,
   );
   const revealTimerRef = React.useRef<number | null>(null);
+  const revealScheduledRef = React.useRef(false);
   const canRevealIntro = promo.isActive && !promo.hasRevealed && !promo.isLoading;
 
   const isPriceCardVisible = React.useCallback((el: HTMLDivElement) => {
@@ -184,13 +185,14 @@ const VipLandingB: React.FC = () => {
   }, []);
 
   const scheduleReveal = React.useCallback(() => {
-    if (!canRevealIntro || revealScheduled || revealTimerRef.current !== null) return;
+    if (!canRevealIntro || revealScheduledRef.current || revealTimerRef.current !== null) return;
+    revealScheduledRef.current = true;
     setRevealScheduled(true);
     revealTimerRef.current = window.setTimeout(() => {
       revealTimerRef.current = null;
       setRevealOpen(true);
     }, 2000);
-  }, [canRevealIntro, revealScheduled]);
+  }, [canRevealIntro]);
 
   React.useEffect(() => {
     return () => {
@@ -199,6 +201,18 @@ const VipLandingB: React.FC = () => {
       }
     };
   }, []);
+
+  React.useEffect(() => {
+    revealScheduledRef.current = false;
+    if (revealTimerRef.current !== null) {
+      window.clearTimeout(revealTimerRef.current);
+      revealTimerRef.current = null;
+    }
+    setRevealOpen(false);
+    setRevealScheduled(false);
+    setUnlocked(false);
+    setDisplayPrice(promo.fullPrice);
+  }, [user?.id, promo.fullPrice]);
 
   // Sincroniza quando o hook termina de carregar / muda elegibilidade.
   React.useEffect(() => {
@@ -220,6 +234,18 @@ const VipLandingB: React.FC = () => {
       if (isPriceCardVisible(el)) scheduleReveal();
     });
   }, [isPriceCardVisible, scheduleReveal]);
+
+  // Fallback principal: em conta nova, dispara assim que a elegibilidade carrega,
+  // mesmo se o card já estava no viewport antes do observer começar a observar.
+  React.useEffect(() => {
+    if (!canRevealIntro) return;
+    const immediate = window.setTimeout(scheduleReveal, 250);
+    const retry = window.setTimeout(scheduleReveal, 1200);
+    return () => {
+      window.clearTimeout(immediate);
+      window.clearTimeout(retry);
+    };
+  }, [canRevealIntro, scheduleReveal, user?.id]);
 
   // IntersectionObserver em TODOS os cards de preço — agenda reveal após 2s
   // assim que qualquer um aparecer no viewport. Também dispara fallback caso
