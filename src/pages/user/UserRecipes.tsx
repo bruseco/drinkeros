@@ -213,6 +213,16 @@ const UserRecipes: React.FC = () => {
   });
   const limitReached = isLockedForUser && (dailyViews?.count ?? 0) >= dailyLimit;
 
+  // Garante que ao entrar na página (signup, navegação direta) o scroll inicia no topo.
+  // O restore de scroll após visitar uma receita acontece depois, via consumeRecipeScrollTarget.
+  useEffect(() => {
+    const hasReturnTarget = !!sessionStorage.getItem('user-recipes:scroll-target');
+    if (!hasReturnTarget) {
+      window.scrollTo({ top: 0, left: 0 });
+    }
+  }, []);
+
+
 
   useEffect(() => {
     const el = stickyRef.current;
