@@ -181,12 +181,14 @@ const VipLandingB: React.FC = () => {
   const revealScheduledRef = React.useRef(false);
   const canRevealIntro = promo.isActive && !promo.hasRevealed && !promo.isLoading;
 
-  const scheduleReveal = React.useCallback(() => {
+  const scheduleReveal = React.useCallback((trigger: string) => {
     if (!canRevealIntro || revealScheduledRef.current || revealTimerRef.current !== null) return;
     revealScheduledRef.current = true;
     setRevealScheduled(true);
+    console.log('[clube-reveal] scheduleReveal trigger=', trigger);
     revealTimerRef.current = window.setTimeout(() => {
       revealTimerRef.current = null;
+      console.log('[clube-reveal] opening overlay');
       setRevealOpen(true);
     }, 2000);
   }, [canRevealIntro]);
@@ -199,6 +201,8 @@ const VipLandingB: React.FC = () => {
     };
   }, []);
 
+  // Reset apenas quando o user troca (login/logout). Evita cancelar reveal já
+  // agendado por reexecuções desnecessárias.
   React.useEffect(() => {
     revealScheduledRef.current = false;
     if (revealTimerRef.current !== null) {
@@ -209,7 +213,8 @@ const VipLandingB: React.FC = () => {
     setRevealScheduled(false);
     setUnlocked(false);
     setDisplayPrice(promo.fullPrice);
-  }, [user?.id, promo.fullPrice]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   // Sincroniza quando o hook termina de carregar / muda elegibilidade.
   React.useEffect(() => {
@@ -232,16 +237,17 @@ const VipLandingB: React.FC = () => {
 
   const checkPriceCardInView = React.useCallback(() => {
     if (!canRevealIntro || revealScheduledRef.current) return;
+    const vh = window.innerHeight || document.documentElement.clientHeight || 800;
     const hit = Array.from(priceCardEls.current).some((el) => {
       const r = el.getBoundingClientRect();
-      const center = r.top + r.height / 2;
-      return center > 0 && center < window.innerHeight * 0.82;
+      // qualquer parte visível do card conta (permissivo p/ Safari iOS)
+      return r.bottom > 80 && r.top < vh - 80;
     });
-    if (hit) scheduleReveal();
+    if (hit) scheduleReveal('rect-check');
   }, [canRevealIntro, scheduleReveal]);
 
-  // IntersectionObserver nos cards de assinatura — agenda reveal após 2s
-  // quando o usuário rolar até o valor R$197.
+  // IntersectionObserver — threshold baixo + rootMargin para o Safari iOS dentro
+  // de um container fixed/overflow-auto disparar de forma confiável.
   React.useEffect(() => {
     if (!canRevealIntro || revealScheduled) return;
     const els = Array.from(priceCardEls.current);
@@ -249,24 +255,63 @@ const VipLandingB: React.FC = () => {
 
     const obs = new IntersectionObserver(
       (entries) => {
-        if (entries.some((e) => e.isIntersecting)) scheduleReveal();
+        if (entries.some((e) => e.isIntersecting || e.intersectionRatio > 0)) {
+          scheduleReveal('intersection-observer');
+        }
       },
-      { threshold: 0.55 },
+      { threshold: [0, 0.1, 0.25], rootMargin: '0px 0px -10% 0px' },
     );
     els.forEach((el) => obs.observe(el));
-
-    return () => {
-      obs.disconnect();
-    };
+    return () => obs.disconnect();
   }, [canRevealIntro, revealScheduled, scheduleReveal, priceCardVersion]);
 
+  // Fallback 1: scroll listener (container fixed + window + touchmove).
   React.useEffect(() => {
+    if (!canRevealIntro || revealScheduled) return;
     const scroller = landingScrollRef.current;
-    if (!scroller || !canRevealIntro || revealScheduled) return;
     const onScroll = () => window.requestAnimationFrame(checkPriceCardInView);
-    scroller.addEventListener('scroll', onScroll, { passive: true });
-    return () => scroller.removeEventListener('scroll', onScroll);
+    if (scroller) scroller.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('touchmove', onScroll, { passive: true });
+    // Checa imediatamente caso o card já esteja visível
+    checkPriceCardInView();
+    return () => {
+      if (scroller) scroller.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('touchmove', onScroll);
+    };
+  }, [canRevealIntro, revealScheduled, checkPriceCardInView, priceCardVersion]);
+
+  // Fallback 2: polling a cada 600ms enquanto o reveal estiver pendente.
+  React.useEffect(() => {
+    if (!canRevealIntro || revealScheduled) return;
+    const id = window.setInterval(checkPriceCardInView, 600);
+    return () => window.clearInterval(id);
   }, [canRevealIntro, revealScheduled, checkPriceCardInView]);
+
+  // Fallback 3 (garantia final): após 12s de elegibilidade carregada, agenda
+  // mesmo sem detectar scroll — usuário não fica preso no R$197.
+  React.useEffect(() => {
+    if (!canRevealIntro || revealScheduled) return;
+    const id = window.setTimeout(() => scheduleReveal('safety-timeout'), 12000);
+    return () => window.clearTimeout(id);
+  }, [canRevealIntro, revealScheduled, scheduleReveal]);
+
+  // Diagnóstico — facilita depurar no iPhone via Web Inspector.
+  React.useEffect(() => {
+    console.log('[clube-reveal] state', {
+      isLoading: promo.isLoading,
+      isActive: promo.isActive,
+      hasRevealed: promo.hasRevealed,
+      remainingMs: promo.remainingMs,
+      canRevealIntro,
+      revealScheduled,
+      revealOpen,
+      unlocked,
+      displayPrice,
+      priceCards: priceCardEls.current.size,
+    });
+  }, [promo.isLoading, promo.isActive, promo.hasRevealed, promo.remainingMs, canRevealIntro, revealScheduled, revealOpen, unlocked, displayPrice, priceCardVersion]);
 
   // Ao fechar overlay → roll-down 197 → 97 + marca revealed no banco.
   const handleRevealClose = React.useCallback(() => {
