@@ -127,6 +127,45 @@ const TrustLine: React.FC = () => (
   </p>
 );
 
+const PriceAmount = React.memo(({ value, className = '' }: { value: number; className?: string }) => {
+  const [current, setCurrent] = useState(value);
+  const [previous, setPrevious] = useState<number | null>(null);
+  const [animating, setAnimating] = useState(false);
+
+  useEffect(() => {
+    if (value === current) return;
+    setPrevious(current);
+    setCurrent(value);
+    setAnimating(true);
+    const id = window.setTimeout(() => {
+      setAnimating(false);
+      setPrevious(null);
+    }, 520);
+    return () => window.clearTimeout(id);
+  }, [value, current]);
+
+  return (
+    <span className={`relative inline-grid min-w-[2.25ch] overflow-hidden tabular-nums ${className}`}>
+      {previous !== null && (
+        <span
+          aria-hidden="true"
+          className="col-start-1 row-start-1 transition-transform duration-500 ease-out"
+          style={{ transform: animating ? 'translateY(115%)' : 'translateY(0)' }}
+        >
+          {previous}
+        </span>
+      )}
+      <span
+        className="col-start-1 row-start-1 transition-transform duration-500 ease-out"
+        style={{ transform: animating ? 'translateY(0)' : 'translateY(0)' }}
+      >
+        {current}
+      </span>
+    </span>
+  );
+});
+PriceAmount.displayName = 'PriceAmount';
+
 const VipLandingB: React.FC = () => {
   useAbVariantTrack('clube', 'b');
   const { user } = useAuth();
