@@ -128,52 +128,44 @@ const TrustLine: React.FC = () => (
 );
 
 const PriceAmount = React.memo(({ value, className = '' }: { value: number; className?: string }) => {
-  const [current, setCurrent] = useState(value);
-  const [previous, setPrevious] = useState<number | null>(null);
-  const [animating, setAnimating] = useState(false);
-  const currentRef = React.useRef(value);
-  const timeoutRef = React.useRef<number | null>(null);
+  const [display, setDisplay] = useState(value);
+  const fromRef = React.useRef(value);
+  const rafRef = React.useRef<number | null>(null);
 
   useEffect(() => {
-    if (value === currentRef.current) return;
-    if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);
-    setPrevious(currentRef.current);
-    currentRef.current = value;
-    setCurrent(value);
-    setAnimating(false);
-    const frame = window.requestAnimationFrame(() => setAnimating(true));
-    timeoutRef.current = window.setTimeout(() => {
-      setAnimating(false);
-      setPrevious(null);
-    }, 520);
-    return () => window.cancelAnimationFrame(frame);
+    if (value === fromRef.current) return;
+    const from = fromRef.current;
+    const to = value;
+    fromRef.current = value;
+    const duration = 900;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      // easeOutCubic
+      const eased = 1 - Math.pow(1 - t, 3);
+      const next = Math.round(from + (to - from) * eased);
+      setDisplay(next);
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        rafRef.current = null;
+        setDisplay(to);
+      }
+    };
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    };
   }, [value]);
 
-  useEffect(() => () => {
-    if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);
-  }, []);
-
   return (
-    <span className={`relative inline-grid min-w-[2.25ch] overflow-hidden tabular-nums ${className}`}>
-      {previous !== null && (
-        <span
-          aria-hidden="true"
-          className="col-start-1 row-start-1 transition-transform duration-500 ease-out"
-          style={{ transform: animating ? 'translateY(115%)' : 'translateY(0)' }}
-        >
-          {previous}
-        </span>
-      )}
-      <span
-        className="col-start-1 row-start-1 transition-transform duration-500 ease-out"
-        style={{ transform: animating || previous === null ? 'translateY(0)' : 'translateY(-115%)' }}
-      >
-        {current}
-      </span>
-    </span>
+    <span className={`tabular-nums ${className}`}>{display}</span>
   );
 });
 PriceAmount.displayName = 'PriceAmount';
+
 
 const VipLandingB: React.FC = () => {
   useAbVariantTrack('clube', 'b');
