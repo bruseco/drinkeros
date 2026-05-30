@@ -121,7 +121,11 @@ const Signup: React.FC = () => {
       /* non-blocking */
     }
 
-    try { sessionStorage.setItem('drinkeros:just_signed_up', '1'); } catch {}
+    try {
+      sessionStorage.setItem('drinkeros:just_signed_up', '1');
+      sessionStorage.setItem('drinkeros:recipes_force_top', '1');
+      sessionStorage.removeItem('user-recipes:scroll-to-key');
+    } catch {}
     try {
       const { data: { user: createdUser } } = await supabase.auth.getUser();
       console.log('[Signup] disparando CompleteRegistration', { userId: createdUser?.id, method: 'email' });
