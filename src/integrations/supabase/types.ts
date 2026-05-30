@@ -1679,6 +1679,7 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           birth_date: string | null
+          clube_exit_eligible_until: string | null
           clube_intro_eligible_until: string | null
           clube_intro_revealed_at: string | null
           cpf: string | null
@@ -1699,6 +1700,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           birth_date?: string | null
+          clube_exit_eligible_until?: string | null
           clube_intro_eligible_until?: string | null
           clube_intro_revealed_at?: string | null
           cpf?: string | null
@@ -1719,6 +1721,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           birth_date?: string | null
+          clube_exit_eligible_until?: string | null
           clube_intro_eligible_until?: string | null
           clube_intro_revealed_at?: string | null
           cpf?: string | null
