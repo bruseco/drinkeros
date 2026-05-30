@@ -13,24 +13,6 @@ export const CLUBE_EXIT_WINDOW_MS = 10 * 60 * 1000; // 10 min
 export const CLUBE_EXIT_PRICE = 69;
 export const CLUBE_EXIT_DISCOUNT = 28; // R$28 a mais que a oferta intro (97 → 69)
 
-function readStart(): number {
-  try {
-    const v = localStorage.getItem(CLUBE_EXIT_KEY);
-    const n = v ? Number(v) : 0;
-    return Number.isFinite(n) && n > 0 ? n : 0;
-  } catch {
-    return 0;
-  }
-}
-
-function writeStart(ts: number) {
-  try {
-    localStorage.setItem(CLUBE_EXIT_KEY, String(ts));
-  } catch {
-    /* ignore */
-  }
-}
-
 export interface ClubeExitOfferState {
   isActive: boolean;
   canStart: boolean;
@@ -58,7 +40,7 @@ export function useClubeExitOffer(): ClubeExitOfferState {
         .select('clube_intro_revealed_at, clube_exit_eligible_until')
         .eq('user_id', user.id)
         .maybeSingle();
-      return data as { clube_intro_revealed_at: string | null; clube_exit_eligible_until: string | null } | null;
+      return data as unknown as { clube_intro_revealed_at: string | null; clube_exit_eligible_until: string | null } | null;
     },
   });
 
