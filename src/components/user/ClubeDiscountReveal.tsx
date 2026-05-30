@@ -153,6 +153,10 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
       `}</style>
     </div>
   );
+
+  if (typeof document === 'undefined') return null;
+  return createPortal(content, document.body);
 };
+
 
 export default ClubeDiscountReveal;
