@@ -474,6 +474,7 @@ const VipLandingB: React.FC = () => {
           background-clip: text;
           color: transparent;
           animation: viplanding-gold-shimmer 4s linear infinite;
+          will-change: background-position;
         }
         /* Botão dourado ESTÁTICO — sem shimmer e sem box-shadow pulsante
            (essas animações forçavam repaint contínuo de áreas grandes no
@@ -615,7 +616,7 @@ const VipLandingB: React.FC = () => {
               )}
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-xl font-light text-purple-300">R$</span>
-                <span className="text-6xl font-black viplanding-gold-text tabular-nums">{displayPrice}</span>
+                <PriceAmount value={displayPrice} className="text-6xl font-black viplanding-gold-text" />
                 <span className="text-sm text-purple-300 ml-1">/ ano</span>
               </div>
               <p className="text-sm text-purple-200 mt-1">
@@ -840,9 +841,7 @@ const VipLandingB: React.FC = () => {
                 )}
                 <div className="flex items-baseline justify-center gap-1">
                   <span className="text-2xl font-light text-purple-300">R$</span>
-                  <span className="text-7xl font-black viplanding-gold-text tabular-nums">
-                    {displayPrice}
-                  </span>
+                  <PriceAmount value={displayPrice} className="text-7xl font-black viplanding-gold-text" />
                 </div>
                 <div className="text-sm text-purple-300">
                   por ano{unlocked ? ' · economize R$ 100' : ' · menos de R$ 17/mês'}
