@@ -517,7 +517,7 @@ const VipLandingB: React.FC = () => {
           </div>
 
           {/* PREÇO ANTECIPADO */}
-          <div ref={priceCardRef} className="relative max-w-md mx-auto mb-12 px-4">
+          <div ref={registerPriceCard} className="relative max-w-md mx-auto mb-12 px-4">
             <div className="rounded-3xl bg-gradient-to-br from-purple-900/50 to-black border border-yellow-400/30 p-6 text-center">
               <div className="text-xs uppercase tracking-widest font-bold text-yellow-300 mb-2">
                 Sócio do Clube · Anual
@@ -742,7 +742,7 @@ const VipLandingB: React.FC = () => {
           </div>
 
           {/* Pricing Card — fechamento */}
-          <div ref={priceCardRef} id="clube-pricing" className="relative max-w-md mx-auto mb-16 scroll-mt-6 px-4">
+          <div ref={registerPriceCard} id="clube-pricing" className="relative max-w-md mx-auto mb-16 scroll-mt-6 px-4">
             <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-yellow-400 rounded-3xl blur opacity-60" />
             <div className="relative bg-black rounded-3xl p-8 border border-purple-500/30">
               <h2 className="text-center text-3xl md:text-4xl font-black mb-3 viplanding-gold-text">
