@@ -831,7 +831,7 @@ const VipLandingB: React.FC = () => {
                     Promoção de lançamento do novo app
                   </div>
                 )}
-                {unlocked && <IntroCountdownPill untilMs={promo.eligibleUntilMs} />}
+                {/* Countdown removido — já existe sticky no topo */}
               </div>
 
 
