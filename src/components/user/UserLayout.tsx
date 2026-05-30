@@ -10,6 +10,7 @@ import { WinnerPopup } from './WinnerPopup';
 import { PwaInstallGate } from './PwaInstallGate';
 import { PwaSplashScreen } from './PwaSplashScreen';
 import { VipDiscountCountdownBanner } from './VipDiscountCountdownBanner';
+import { WelcomeOverlay } from './WelcomeOverlay';
 
 import { Loader2 } from 'lucide-react';
 
