@@ -43,15 +43,15 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
 
   if (!open && phase === 'idle') return null;
 
-  const sparkles = Array.from({ length: 22 }).map((_, i) => {
-    const angle = (i / 22) * Math.PI * 2 + (i % 2 === 0 ? 0 : 0.16);
-    const dist = 72 + (i % 4) * 34;
+  const sparkles = Array.from({ length: 28 }).map((_, i) => {
+    const angle = (i / 28) * Math.PI * 2 + (i % 2 === 0 ? 0 : 0.16);
+    const dist = 90 + (i % 4) * 42;
     return {
       key: i,
       x: Math.cos(angle) * dist,
       y: Math.sin(angle) * dist,
       delay: (i % 5) * 28,
-      size: 4 + (i % 3) * 2,
+      size: 9 + (i % 3) * 4,
     };
   });
 
