@@ -19,7 +19,7 @@ import { trackInitiateCheckout, waitForPixelFlush } from '@/lib/metaPixel';
 import { useViewContent } from '@/hooks/useViewContent';
 import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
 import { useTotalClubMembers, TOTAL_CLUB_MEMBERS_FALLBACK } from '@/hooks/useTotalClubMembers';
-import { useClubeIntroOffer } from '@/hooks/useClubeIntroOffer';
+import { useClubeIntroOffer, useIntroCountdown } from '@/hooks/useClubeIntroOffer';
 import { useClubeExitOffer } from '@/hooks/useClubeExitOffer';
 import { useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
 import ClubeExitOffer from '@/components/user/ClubeExitOffer';
