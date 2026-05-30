@@ -95,7 +95,11 @@ const CompleteProfile: React.FC = () => {
       toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
       return;
     }
-    try { sessionStorage.setItem('drinkeros:just_signed_up', '1'); } catch {}
+    try {
+      sessionStorage.setItem('drinkeros:just_signed_up', '1');
+      sessionStorage.setItem('drinkeros:recipes_force_top', '1');
+      sessionStorage.removeItem('user-recipes:scroll-to-key');
+    } catch {}
     navigate('/app', { replace: true, state: { justSignedUp: true } });
   };
 
