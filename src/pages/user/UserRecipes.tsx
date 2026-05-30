@@ -223,16 +223,23 @@ const UserRecipes: React.FC = () => {
       window.history.scrollRestoration = 'manual';
     }
 
-    const resetToTop = () => window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    const resetToTop = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
     resetToTop();
     const frameId = window.requestAnimationFrame(resetToTop);
-    const timeoutId = window.setTimeout(resetToTop, 250);
+    const timers = [50, 150, 350, 700, 1200, 2000].map((ms) =>
+      window.setTimeout(resetToTop, ms)
+    );
 
     return () => {
       window.cancelAnimationFrame(frameId);
-      window.clearTimeout(timeoutId);
+      timers.forEach((t) => window.clearTimeout(t));
     };
   }, []);
+
 
 
 
