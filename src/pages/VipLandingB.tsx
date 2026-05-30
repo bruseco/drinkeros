@@ -161,7 +161,7 @@ const VipLandingB: React.FC = () => {
   const [exitOfferDismissed, setExitOfferDismissed] = useState(false);
 
   // ===== Reveal cinematográfico do desconto de R$100 =====
-  // Mostra R$197 no card de preço; quando o card entra no viewport, espera 2s,
+  // Mostra R$197 no card de preço; quando o usuário rola até o card, espera 2s,
   // abre overlay com a animação. Ao fechar, rola o preço de 197 → 97 e marca
   // `clube_intro_revealed_at` no banco para não repetir.
   const priceCardEls = React.useRef<Set<HTMLDivElement>>(new Set());
@@ -235,21 +235,8 @@ const VipLandingB: React.FC = () => {
     });
   }, [isPriceCardVisible, scheduleReveal]);
 
-  // Fallback principal: em conta nova, dispara assim que a elegibilidade carrega,
-  // mesmo se o card já estava no viewport antes do observer começar a observar.
-  React.useEffect(() => {
-    if (!canRevealIntro) return;
-    const immediate = window.setTimeout(scheduleReveal, 250);
-    const retry = window.setTimeout(scheduleReveal, 1200);
-    return () => {
-      window.clearTimeout(immediate);
-      window.clearTimeout(retry);
-    };
-  }, [canRevealIntro, scheduleReveal, user?.id]);
-
   // IntersectionObserver em TODOS os cards de preço — agenda reveal após 2s
-  // assim que qualquer um aparecer no viewport. Também dispara fallback caso
-  // o primeiro card já esteja visível no load inicial.
+  // assim que qualquer um aparecer no viewport.
   React.useEffect(() => {
     if (!canRevealIntro || revealScheduled) return;
     const els = Array.from(priceCardEls.current);
@@ -278,6 +265,8 @@ const VipLandingB: React.FC = () => {
   // Ao fechar overlay → roll-down 197 → 97 + marca revealed no banco.
   const handleRevealClose = React.useCallback(() => {
     setRevealOpen(false);
+    setUnlocked(true);
+    promo.markRevealed();
     const start = performance.now();
     const from = promo.fullPrice;
     const to = promo.promoPrice;
@@ -292,8 +281,6 @@ const VipLandingB: React.FC = () => {
       if (p < 1) requestAnimationFrame(step);
       else {
         setDisplayPrice(to);
-        setUnlocked(true);
-        promo.markRevealed();
       }
     };
     requestAnimationFrame(step);
