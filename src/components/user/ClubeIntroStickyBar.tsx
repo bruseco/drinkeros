@@ -15,10 +15,40 @@ const Countdown: React.FC<{ untilMs: number }> = ({ untilMs }) => {
 
 export const ClubeIntroStickyBar: React.FC = () => {
   const { isActive, eligibleUntilMs, hasRevealed } = useClubeIntroOffer();
-  if (!isActive || !hasRevealed) return null;
+  const barRef = React.useRef<HTMLDivElement>(null);
+  const visible = isActive && hasRevealed;
+
+  // Mede a altura real da barra (inclui safe-area) e expõe como --top-banner-h
+  // para que o body ganhe padding-top equivalente e nada fique coberto.
+  React.useLayoutEffect(() => {
+    const root = document.documentElement;
+    if (!visible) {
+      root.style.removeProperty('--top-banner-h');
+      root.classList.remove('has-top-banner');
+      return;
+    }
+    const apply = () => {
+      const h = barRef.current?.offsetHeight ?? 0;
+      root.style.setProperty('--top-banner-h', `${h}px`);
+      root.classList.add('has-top-banner');
+    };
+    apply();
+    const ro = new ResizeObserver(apply);
+    if (barRef.current) ro.observe(barRef.current);
+    window.addEventListener('resize', apply);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', apply);
+      root.style.removeProperty('--top-banner-h');
+      root.classList.remove('has-top-banner');
+    };
+  }, [visible]);
+
+  if (!visible) return null;
 
   return (
     <div
+      ref={barRef}
       className="fixed inset-x-0 top-0 z-[190]"
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
