@@ -131,18 +131,27 @@ const PriceAmount = React.memo(({ value, className = '' }: { value: number; clas
   const [current, setCurrent] = useState(value);
   const [previous, setPrevious] = useState<number | null>(null);
   const [animating, setAnimating] = useState(false);
+  const currentRef = React.useRef(value);
+  const timeoutRef = React.useRef<number | null>(null);
 
   useEffect(() => {
-    if (value === current) return;
-    setPrevious(current);
+    if (value === currentRef.current) return;
+    if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);
+    setPrevious(currentRef.current);
+    currentRef.current = value;
     setCurrent(value);
-    setAnimating(true);
-    const id = window.setTimeout(() => {
+    setAnimating(false);
+    const frame = window.requestAnimationFrame(() => setAnimating(true));
+    timeoutRef.current = window.setTimeout(() => {
       setAnimating(false);
       setPrevious(null);
     }, 520);
-    return () => window.clearTimeout(id);
-  }, [value, current]);
+    return () => window.cancelAnimationFrame(frame);
+  }, [value]);
+
+  useEffect(() => () => {
+    if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);
+  }, []);
 
   return (
     <span className={`relative inline-grid min-w-[2.25ch] overflow-hidden tabular-nums ${className}`}>
@@ -157,7 +166,7 @@ const PriceAmount = React.memo(({ value, className = '' }: { value: number; clas
       )}
       <span
         className="col-start-1 row-start-1 transition-transform duration-500 ease-out"
-        style={{ transform: animating ? 'translateY(0)' : 'translateY(0)' }}
+        style={{ transform: 'translateY(0)' }}
       >
         {current}
       </span>
