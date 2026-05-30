@@ -170,6 +170,30 @@ const VipLandingB: React.FC = () => {
   const [displayPrice, setDisplayPrice] = useState<number>(
     promo.isActive && promo.hasRevealed ? promo.promoPrice : promo.fullPrice,
   );
+  const revealTimerRef = React.useRef<number | null>(null);
+  const canRevealIntro = promo.isActive && !promo.hasRevealed && !promo.isLoading;
+
+  const isPriceCardVisible = React.useCallback((el: HTMLDivElement) => {
+    const r = el.getBoundingClientRect();
+    return r.top < window.innerHeight && r.bottom > 0;
+  }, []);
+
+  const scheduleReveal = React.useCallback(() => {
+    if (!canRevealIntro || revealScheduled || revealTimerRef.current !== null) return;
+    setRevealScheduled(true);
+    revealTimerRef.current = window.setTimeout(() => {
+      revealTimerRef.current = null;
+      setRevealOpen(true);
+    }, 2000);
+  }, [canRevealIntro, revealScheduled]);
+
+  React.useEffect(() => {
+    return () => {
+      if (revealTimerRef.current !== null) {
+        window.clearTimeout(revealTimerRef.current);
+      }
+    };
+  }, []);
 
   // Sincroniza quando o hook termina de carregar / muda elegibilidade.
   React.useEffect(() => {
@@ -185,30 +209,24 @@ const VipLandingB: React.FC = () => {
 
   // Callback ref usado em múltiplos cards de preço — registra cada elemento.
   const registerPriceCard = React.useCallback((el: HTMLDivElement | null) => {
-    if (el) priceCardEls.current.add(el);
-  }, []);
+    if (!el) return;
+    priceCardEls.current.add(el);
+    window.requestAnimationFrame(() => {
+      if (isPriceCardVisible(el)) scheduleReveal();
+    });
+  }, [isPriceCardVisible, scheduleReveal]);
 
   // IntersectionObserver em TODOS os cards de preço — agenda reveal após 2s
   // assim que qualquer um aparecer no viewport. Também dispara fallback caso
   // o primeiro card já esteja visível no load inicial.
   React.useEffect(() => {
-    if (revealScheduled) return;
-    if (!promo.isActive || promo.hasRevealed || promo.isLoading) return;
+    if (!canRevealIntro || revealScheduled) return;
     const els = Array.from(priceCardEls.current);
     if (els.length === 0) return;
 
-    let fired = false;
-    const trigger = () => {
-      if (fired || revealScheduled) return;
-      fired = true;
-      setRevealScheduled(true);
-      obs.disconnect();
-      window.setTimeout(() => setRevealOpen(true), 2000);
-    };
-
     const obs = new IntersectionObserver(
       (entries) => {
-        if (entries.some((e) => e.isIntersecting)) trigger();
+        if (entries.some((e) => e.isIntersecting)) scheduleReveal();
       },
       { threshold: 0.3 },
     );
@@ -216,14 +234,15 @@ const VipLandingB: React.FC = () => {
 
     // Fallback: se algum card já estiver no viewport (acima da dobra),
     // dispara imediatamente sem esperar scroll.
-    const inView = els.some((el) => {
-      const r = el.getBoundingClientRect();
-      return r.top < window.innerHeight && r.bottom > 0;
+    const frame = window.requestAnimationFrame(() => {
+      if (els.some(isPriceCardVisible)) scheduleReveal();
     });
-    if (inView) trigger();
 
-    return () => obs.disconnect();
-  }, [promo.isActive, promo.hasRevealed, promo.isLoading, revealScheduled]);
+    return () => {
+      obs.disconnect();
+      window.cancelAnimationFrame(frame);
+    };
+  }, [canRevealIntro, isPriceCardVisible, revealScheduled, scheduleReveal]);
 
   // Ao fechar overlay → roll-down 197 → 97 + marca revealed no banco.
   const handleRevealClose = React.useCallback(() => {
