@@ -51,6 +51,11 @@ export function useClubeIntroOffer(): ClubeIntroOfferState {
     staleTime: 30_000,
     queryFn: async () => {
       if (!user?.id) return null;
+      const { data: ensured, error: ensureError } = await supabase.rpc('ensure_clube_intro_offer' as any);
+      if (!ensureError && Array.isArray(ensured) && ensured[0]) {
+        return ensured[0] as IntroRow;
+      }
+
       const { data } = await supabase
         .from('profiles')
         .select('clube_intro_eligible_until, clube_intro_revealed_at')
