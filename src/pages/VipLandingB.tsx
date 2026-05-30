@@ -152,6 +152,11 @@ const VipLandingB: React.FC = () => {
   const [isClosing] = useState(false);
   const promo = useClubeIntroOffer();
   const exitOffer = useClubeExitOffer();
+  const {
+    canStart: canStartExitOffer,
+    isActive: isExitOfferActive,
+    start: startExitOffer,
+  } = exitOffer;
   const [exitOpen, setExitOpen] = useState(false);
   const [exitOfferDismissed, setExitOfferDismissed] = useState(false);
 
@@ -170,6 +175,30 @@ const VipLandingB: React.FC = () => {
   const [displayPrice, setDisplayPrice] = useState<number>(
     promo.isActive && promo.hasRevealed ? promo.promoPrice : promo.fullPrice,
   );
+  const revealTimerRef = React.useRef<number | null>(null);
+  const canRevealIntro = promo.isActive && !promo.hasRevealed && !promo.isLoading;
+
+  const isPriceCardVisible = React.useCallback((el: HTMLDivElement) => {
+    const r = el.getBoundingClientRect();
+    return r.top < window.innerHeight && r.bottom > 0;
+  }, []);
+
+  const scheduleReveal = React.useCallback(() => {
+    if (!canRevealIntro || revealScheduled || revealTimerRef.current !== null) return;
+    setRevealScheduled(true);
+    revealTimerRef.current = window.setTimeout(() => {
+      revealTimerRef.current = null;
+      setRevealOpen(true);
+    }, 2000);
+  }, [canRevealIntro, revealScheduled]);
+
+  React.useEffect(() => {
+    return () => {
+      if (revealTimerRef.current !== null) {
+        window.clearTimeout(revealTimerRef.current);
+      }
+    };
+  }, []);
 
   // Sincroniza quando o hook termina de carregar / muda elegibilidade.
   React.useEffect(() => {
@@ -185,30 +214,24 @@ const VipLandingB: React.FC = () => {
 
   // Callback ref usado em múltiplos cards de preço — registra cada elemento.
   const registerPriceCard = React.useCallback((el: HTMLDivElement | null) => {
-    if (el) priceCardEls.current.add(el);
-  }, []);
+    if (!el) return;
+    priceCardEls.current.add(el);
+    window.requestAnimationFrame(() => {
+      if (isPriceCardVisible(el)) scheduleReveal();
+    });
+  }, [isPriceCardVisible, scheduleReveal]);
 
   // IntersectionObserver em TODOS os cards de preço — agenda reveal após 2s
   // assim que qualquer um aparecer no viewport. Também dispara fallback caso
   // o primeiro card já esteja visível no load inicial.
   React.useEffect(() => {
-    if (revealScheduled) return;
-    if (!promo.isActive || promo.hasRevealed || promo.isLoading) return;
+    if (!canRevealIntro || revealScheduled) return;
     const els = Array.from(priceCardEls.current);
     if (els.length === 0) return;
 
-    let fired = false;
-    const trigger = () => {
-      if (fired || revealScheduled) return;
-      fired = true;
-      setRevealScheduled(true);
-      obs.disconnect();
-      window.setTimeout(() => setRevealOpen(true), 2000);
-    };
-
     const obs = new IntersectionObserver(
       (entries) => {
-        if (entries.some((e) => e.isIntersecting)) trigger();
+        if (entries.some((e) => e.isIntersecting)) scheduleReveal();
       },
       { threshold: 0.3 },
     );
@@ -216,14 +239,15 @@ const VipLandingB: React.FC = () => {
 
     // Fallback: se algum card já estiver no viewport (acima da dobra),
     // dispara imediatamente sem esperar scroll.
-    const inView = els.some((el) => {
-      const r = el.getBoundingClientRect();
-      return r.top < window.innerHeight && r.bottom > 0;
+    const frame = window.requestAnimationFrame(() => {
+      if (els.some(isPriceCardVisible)) scheduleReveal();
     });
-    if (inView) trigger();
 
-    return () => obs.disconnect();
-  }, [promo.isActive, promo.hasRevealed, promo.isLoading, revealScheduled]);
+    return () => {
+      obs.disconnect();
+      window.cancelAnimationFrame(frame);
+    };
+  }, [canRevealIntro, isPriceCardVisible, revealScheduled, scheduleReveal]);
 
   // Ao fechar overlay → roll-down 197 → 97 + marca revealed no banco.
   const handleRevealClose = React.useCallback(() => {
@@ -314,8 +338,9 @@ const VipLandingB: React.FC = () => {
       await waitForPixelFlush();
 
       window.location.href = data.url;
-    } catch (err: any) {
-      toast.error('Erro ao iniciar checkout', { description: err.message });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Tente novamente em alguns instantes.';
+      toast.error('Erro ao iniciar checkout', { description: message });
       setLoading(false);
     }
   };
@@ -325,14 +350,14 @@ const VipLandingB: React.FC = () => {
   useEffect(() => {
     if (!user) return; // não-logado já é mandado pra /signup pelo CTA
     if (exitOfferDismissed) return;
-    if (!exitOffer.canStart || exitOffer.isActive) return;
+    if (!canStartExitOffer || isExitOfferActive) return;
 
     // Empilha um estado sentinela para capturar o popstate (back button)
     window.history.pushState({ clubeExitSentinel: true }, '');
 
     const onPopState = () => {
       // Inicia a janela de 10 min da oferta extra no perfil do usuário.
-      exitOffer.start();
+      startExitOffer();
       // Re-empilha pra continuar interceptando enquanto o overlay está aberto
       window.history.pushState({ clubeExitSentinel: true }, '');
       setExitOpen(true);
@@ -340,7 +365,7 @@ const VipLandingB: React.FC = () => {
 
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
-  }, [user, exitOfferDismissed, exitOffer.canStart, exitOffer.isActive, exitOffer.start]);
+  }, [user, exitOfferDismissed, canStartExitOffer, isExitOfferActive, startExitOffer]);
 
   const handleExitAccept = () => handleSubscribe('card', 'exit');
   const handleExitDismiss = () => {
