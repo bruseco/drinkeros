@@ -175,6 +175,8 @@ const TestimonialsCarousel: React.FC = () => {
               <img
                 src={src}
                 alt={`Depoimento ${(i % TESTIMONIALS.length) + 1}`}
+                width={886}
+                height={1920}
                 loading="lazy"
                 decoding="async"
                 draggable={false}
