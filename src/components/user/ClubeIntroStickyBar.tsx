@@ -10,7 +10,7 @@ import { useClubeIntroOffer, useIntroCountdown } from '@/hooks/useClubeIntroOffe
  */
 const Countdown: React.FC<{ untilMs: number }> = ({ untilMs }) => {
   const { mm, ss } = useIntroCountdown(untilMs);
-  return <span className="tabular-nums">{mm}:{ss}</span>;
+  return <span className="tabular-nums font-black text-yellow-300">{mm}:{ss}</span>;
 };
 
 export const ClubeIntroStickyBar: React.FC = () => {
