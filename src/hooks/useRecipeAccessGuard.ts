@@ -7,6 +7,7 @@ import { useUserPlan } from './useUserPlan';
 import { useHasExclusiveAccess } from './useExclusiveAccess';
 
 const DAILY_LIMIT = 1;
+const FIRST_ACCESS_BONUS = 3; // primeiro acesso libera 3 receitas, depois 1/dia
 const VIP_ONLY_CHARACTERISTICS = ['Xaropes Artesanais'];
 
 export const isVipOnlyCharacteristic = (chars?: string[] | null) => {
@@ -81,7 +82,17 @@ export const useRecipeAccessGuard = () => {
       });
       const count = (countData as number) ?? 0;
 
-      if (count >= DAILY_LIMIT) {
+      // Verifica total histórico de receitas vistas (lifetime) para liberar bônus do primeiro acesso
+      const { count: lifetimeCount } = await supabase
+        .from('daily_recipe_views')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      const lifetime = lifetimeCount ?? 0;
+
+      // Se ainda está no primeiro acesso (menos de 3 receitas no histórico), libera
+      // Caso contrário, aplica limite diário de 1
+      const withinFirstAccess = lifetime < FIRST_ACCESS_BONUS;
+      if (!withinFirstAccess && count >= DAILY_LIMIT) {
         navigate('/clube', { replace: true, state: { from: '/app/receitas' } });
         return false;
       }
