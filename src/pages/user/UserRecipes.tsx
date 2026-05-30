@@ -345,7 +345,7 @@ const UserRecipes: React.FC = () => {
           <ScrollBar orientation="horizontal" className="invisible" />
         </ScrollArea>
 
-        <div ref={stickyRef} className="sticky top-0 z-[60] -mx-4 px-4 pt-0 pb-2 -mt-1">
+        <div ref={stickyRef} className="sticky top-0 z-[60] -mx-4 px-4 pt-3 pb-2 bg-background">
           <div className="mx-auto flex items-center gap-2 rounded-full border border-border/60 bg-background/95 px-3 py-2 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
