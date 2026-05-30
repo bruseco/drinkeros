@@ -26,8 +26,8 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
     const tAmount = window.setTimeout(() => setPhase('amount'), 700);
     const tDiscount = window.setTimeout(() => setPhase('discount'), 1650);
     const tHold = window.setTimeout(() => setPhase('hold'), 2300);
-    const tOut = window.setTimeout(() => setPhase('out'), 5300);
-    const tClose = window.setTimeout(() => onClose(), 5900);
+    const tOut = window.setTimeout(() => setPhase('out'), 4650);
+    const tClose = window.setTimeout(() => onClose(), 5250);
     return () => {
       window.clearTimeout(tAmount);
       window.clearTimeout(tDiscount);
@@ -56,14 +56,14 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/72 px-5"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/58 px-5"
       style={{
         opacity: phase === 'out' ? 0 : 1,
         transition: 'opacity 600ms ease',
       }}
       aria-live="polite"
     >
-      <div className="relative w-full max-w-[360px] rounded-[2rem] border border-yellow-300/20 bg-black/55 px-5 py-12 text-center shadow-[0_0_80px_rgba(245,199,38,0.2)] select-none">
+      <div className="relative w-full max-w-[360px] px-5 py-12 text-center select-none">
         {/* "Você ganhou" */}
         <div
           className="text-white text-2xl sm:text-3xl font-light tracking-wide"
