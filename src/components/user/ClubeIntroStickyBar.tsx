@@ -54,17 +54,17 @@ export const ClubeIntroStickyBar: React.FC = () => {
     >
       <Link
         to="/clube-b#clube-pricing"
-        className="flex items-center justify-center gap-2 px-3 py-2 text-xs sm:text-sm font-semibold text-black"
+        className="flex items-center justify-center gap-2 px-3 py-2 text-xs sm:text-sm font-semibold text-white"
         style={{
           backgroundImage:
-            'linear-gradient(90deg, #f5d76e 0%, #f1c40f 50%, #c69214 100%)',
-          boxShadow: '0 4px 16px rgba(241,196,15,0.35)',
+            'linear-gradient(90deg, #ec4899 0%, #db2777 50%, #be185d 100%)',
+          boxShadow: '0 4px 16px rgba(236,72,153,0.35)',
         }}
       >
         <Crown className="h-4 w-4" />
         <span className="hidden sm:inline">Desconto R$100 ativo · Sócio do Clube por</span>
         <span className="sm:hidden">R$100 OFF · Clube por</span>
-        <span className="font-black tabular-nums">R$97</span>
+        <span className="font-black tabular-nums text-yellow-300">R$97</span>
         <span className="opacity-80">·</span>
         <Countdown untilMs={eligibleUntilMs} />
       </Link>
