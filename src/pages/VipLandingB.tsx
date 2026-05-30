@@ -334,8 +334,10 @@ const VipLandingB: React.FC = () => {
     if (loading) return;
     // offer derivada do estado atual da UI — garante que o valor exibido = cobrado.
     // Se a janela exit (10min) está ativa, sempre vale R$69.
+    // Enquanto a elegibilidade ainda carrega, pedimos intro; o backend valida e evita
+    // cair em R$197 por corrida de rede no iPhone/PWA.
     const offer: 'intro' | 'exit' | 'full' =
-      chosenOffer ?? (exitOpen || exitOffer.isActive ? 'exit' : promo.isActive ? 'intro' : 'full');
+      chosenOffer ?? (exitOpen || exitOffer.isActive ? 'exit' : (promo.isLoading || promo.isActive) ? 'intro' : 'full');
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-club-checkout', {
