@@ -18,6 +18,8 @@ interface Props {
  */
 export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
   const [phase, setPhase] = useState<'idle' | 'won' | 'amount' | 'discount' | 'hold' | 'out'>('idle');
+  const onCloseRef = React.useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 
   useEffect(() => {
     if (!open) {
@@ -29,7 +31,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
     const tDiscount = window.setTimeout(() => setPhase('discount'), 1650);
     const tHold = window.setTimeout(() => setPhase('hold'), 2300);
     const tOut = window.setTimeout(() => setPhase('out'), 4650);
-    const tClose = window.setTimeout(() => onClose(), 5250);
+    const tClose = window.setTimeout(() => onCloseRef.current(), 5250);
     return () => {
       window.clearTimeout(tAmount);
       window.clearTimeout(tDiscount);
@@ -37,7 +39,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
       window.clearTimeout(tOut);
       window.clearTimeout(tClose);
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open && phase === 'idle') return null;
 
