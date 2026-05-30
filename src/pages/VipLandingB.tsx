@@ -497,23 +497,23 @@ const VipLandingB: React.FC = () => {
           </div>
 
           {/* PREÇO ANTECIPADO */}
-          <div className="relative max-w-md mx-auto mb-12 px-4">
+          <div ref={priceCardRef} className="relative max-w-md mx-auto mb-12 px-4">
             <div className="rounded-3xl bg-gradient-to-br from-purple-900/50 to-black border border-yellow-400/30 p-6 text-center">
               <div className="text-xs uppercase tracking-widest font-bold text-yellow-300 mb-2">
                 Sócio do Clube · Anual
               </div>
-              {promo.isActive && (
+              {unlocked && (
                 <div className="text-purple-300 line-through text-sm">
                   de R$ {promo.fullPrice}
                 </div>
               )}
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-xl font-light text-purple-300">R$</span>
-                <span className="text-6xl font-black viplanding-gold-text">{promo.price}</span>
+                <span className="text-6xl font-black viplanding-gold-text tabular-nums">{displayPrice}</span>
                 <span className="text-sm text-purple-300 ml-1">/ ano</span>
               </div>
               <p className="text-sm text-purple-200 mt-1">
-                {promo.isActive ? (
+                {unlocked ? (
                   <>Você economiza <strong className="text-yellow-300">R$ 100</strong> agora.</>
                 ) : (
                   <>Equivale a menos de <strong className="text-white">R$ 17 por mês</strong>.</>
@@ -522,7 +522,7 @@ const VipLandingB: React.FC = () => {
               <p className="text-[11px] text-purple-300 mt-1">
                 Acesso anual · renovação automática · cancele quando quiser
               </p>
-              {promo.isActive && <IntroCountdownPill mm={promo.mm} ss={promo.ss} />}
+              {unlocked && <IntroCountdownPill mm={promo.mm} ss={promo.ss} />}
               <Button
                 onClick={() => handleSubscribe('card')}
                 disabled={loading}
