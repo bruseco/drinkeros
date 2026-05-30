@@ -1,15 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Crown } from 'lucide-react';
-import { useClubeIntroOffer } from '@/hooks/useClubeIntroOffer';
+import { useClubeIntroOffer, useIntroCountdown } from '@/hooks/useClubeIntroOffer';
 
 /**
  * Barra fixa no topo do app exibindo countdown do desconto de R$100.
- * Aparece somente enquanto `promo.isActive` (eligível e dentro dos 30 min)
- * e a animação de reveal já tiver rodado (hasRevealed).
+ * O tick de 1s fica isolado em um componente filho para não re-renderizar
+ * a árvore inteira do app a cada segundo.
  */
+const Countdown: React.FC<{ untilMs: number }> = ({ untilMs }) => {
+  const { mm, ss } = useIntroCountdown(untilMs);
+  return <span className="tabular-nums">{mm}:{ss}</span>;
+};
+
 export const ClubeIntroStickyBar: React.FC = () => {
-  const { isActive, mm, ss, hasRevealed } = useClubeIntroOffer();
+  const { isActive, eligibleUntilMs, hasRevealed } = useClubeIntroOffer();
   if (!isActive || !hasRevealed) return null;
 
   return (
@@ -31,7 +36,7 @@ export const ClubeIntroStickyBar: React.FC = () => {
         <span className="sm:hidden">R$100 OFF · Clube por</span>
         <span className="font-black tabular-nums">R$97</span>
         <span className="opacity-80">·</span>
-        <span className="tabular-nums">{mm}:{ss}</span>
+        <Countdown untilMs={eligibleUntilMs} />
       </Link>
     </div>
   );
