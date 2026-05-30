@@ -279,31 +279,12 @@ const VipLandingB: React.FC = () => {
     const onScroll = () => window.requestAnimationFrame(checkPriceCardInView);
     if (scroller) scroller.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('touchmove', onScroll, { passive: true });
     return () => {
       if (scroller) scroller.removeEventListener('scroll', onScroll);
       window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('touchmove', onScroll);
     };
   }, [canRevealIntro, revealScheduled, checkPriceCardInView, priceCardVersion]);
 
-
-
-  // Diagnóstico — facilita depurar no iPhone via Web Inspector.
-  React.useEffect(() => {
-    console.log('[clube-reveal] state', {
-      isLoading: promo.isLoading,
-      isActive: promo.isActive,
-      hasRevealed: promo.hasRevealed,
-      remainingMs: promo.remainingMs,
-      canRevealIntro,
-      revealScheduled,
-      revealOpen,
-      unlocked,
-      displayPrice,
-      priceCards: priceCardEls.current.size,
-    });
-  }, [promo.isLoading, promo.isActive, promo.hasRevealed, promo.remainingMs, canRevealIntro, revealScheduled, revealOpen, unlocked, displayPrice, priceCardVersion]);
 
   // Ao fechar overlay → roll-down 197 → 97 + marca revealed no banco.
   const handleRevealClose = React.useCallback(() => {
