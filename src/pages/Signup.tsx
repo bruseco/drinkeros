@@ -42,7 +42,13 @@ const Signup: React.FC = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user && !authLoading) navigate('/app');
+    if (user && !authLoading) {
+      try {
+        sessionStorage.setItem('drinkeros:recipes_force_top', '1');
+        sessionStorage.removeItem('user-recipes:scroll-to-key');
+      } catch {}
+      navigate('/app', { replace: true });
+    }
   }, [user, authLoading, navigate]);
 
   const handleSignup = async (e: React.FormEvent) => {
