@@ -228,7 +228,11 @@ const VipLandingB: React.FC = () => {
   const [displayPrice, setDisplayPrice] = useState<number>(
     promo.isActive && promo.hasRevealed ? promo.promoPrice : promo.fullPrice,
   );
+  const [priceSettled, setPriceSettled] = useState<boolean>(
+    promo.isActive && promo.hasRevealed,
+  );
   const revealTimerRef = React.useRef<number | null>(null);
+  const priceSettleTimerRef = React.useRef<number | null>(null);
   const revealScheduledRef = React.useRef(false);
   const canRevealIntro = promo.isActive && !promo.hasRevealed && !promo.isLoading;
 
@@ -249,6 +253,9 @@ const VipLandingB: React.FC = () => {
       if (revealTimerRef.current !== null) {
         window.clearTimeout(revealTimerRef.current);
       }
+      if (priceSettleTimerRef.current !== null) {
+        window.clearTimeout(priceSettleTimerRef.current);
+      }
     };
   }, []);
 
@@ -263,6 +270,7 @@ const VipLandingB: React.FC = () => {
     setRevealOpen(false);
     setRevealScheduled(false);
     setUnlocked(false);
+    setPriceSettled(false);
     setDisplayPrice(promo.fullPrice);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
@@ -272,9 +280,11 @@ const VipLandingB: React.FC = () => {
     if (promo.isLoading) return;
     if (promo.isActive && promo.hasRevealed) {
       setUnlocked(true);
+      setPriceSettled(true);
       setDisplayPrice(promo.promoPrice);
     } else if (!promo.isActive) {
       setUnlocked(false);
+      setPriceSettled(false);
       setDisplayPrice(promo.fullPrice);
     }
   }, [promo.isLoading, promo.isActive, promo.hasRevealed, promo.promoPrice, promo.fullPrice]);
@@ -338,8 +348,11 @@ const VipLandingB: React.FC = () => {
   const handleRevealClose = React.useCallback(() => {
     setRevealOpen(false);
     setUnlocked(true);
+    setPriceSettled(false);
     promo.markRevealed();
     setDisplayPrice(promo.promoPrice);
+    if (priceSettleTimerRef.current !== null) window.clearTimeout(priceSettleTimerRef.current);
+    priceSettleTimerRef.current = window.setTimeout(() => setPriceSettled(true), 620);
   }, [promo]);
 
   useViewContent({
@@ -457,7 +470,7 @@ const VipLandingB: React.FC = () => {
   return (
     <div
       ref={landingScrollRef}
-      className={`fixed inset-0 z-[60] text-white py-0 overflow-y-auto overscroll-contain bg-black ${isClosing ? 'animate-[viplanding-fade-out_280ms_ease-in_forwards]' : 'animate-[viplanding-bounce-in_520ms_cubic-bezier(0.34,1.56,0.64,1)_forwards]'}`}
+      className={`fixed inset-0 z-[60] text-white py-0 overflow-y-auto overscroll-contain bg-black ${isClosing ? 'animate-[viplanding-fade-out_280ms_ease-in_forwards]' : ''}`}
       
     >
       {/* Promo top banner disabled on this variant */}
@@ -472,29 +485,32 @@ const VipLandingB: React.FC = () => {
           0% { opacity: 1; transform: scale(1); }
           100% { opacity: 0; transform: scale(0.96); }
         }
-        @keyframes viplanding-gold-shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
+        @keyframes viplanding-btn-shimmer {
+          0% { background-position: 120% 0; }
+          100% { background-position: -120% 0; }
+        }
+        @keyframes viplanding-btn-glow {
+          0%, 100% { box-shadow: 0 6px 18px rgba(250, 204, 21, 0.30); }
+          50% { box-shadow: 0 8px 28px rgba(250, 204, 21, 0.56), 0 0 18px rgba(250, 204, 21, 0.30); }
         }
         .viplanding-gold-text {
-          background-image: linear-gradient(110deg, #b8860b 0%, #fde68a 25%, #fbbf24 50%, #fde68a 75%, #b8860b 100%);
-          background-size: 200% auto;
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-          animation: viplanding-gold-shimmer 4s linear infinite;
-          will-change: background-position;
+          color: #fde047;
         }
-        /* Botão dourado ESTÁTICO — sem shimmer e sem box-shadow pulsante
-           (essas animações forçavam repaint contínuo de áreas grandes no
-           Safari mobile e travavam a página). A animação dourada vive
-           apenas no valor (.viplanding-gold-text). */
+        /* Botão dourado padrão fica estático; animação só entra nos CTAs do box de preço após chegar em R$97. */
         .viplanding-gold-btn {
           background-image: linear-gradient(110deg, #b8860b 0%, #fde68a 25%, #fbbf24 50%, #fde68a 75%, #b8860b 100%);
           color: #1a1206;
           box-shadow: 0 4px 16px rgba(250, 204, 21, 0.28);
         }
+        .viplanding-price-btn-ready {
+          background-size: 220% auto;
+          animation: viplanding-btn-shimmer 3.2s linear infinite, viplanding-btn-glow 2.6s ease-in-out infinite;
+          will-change: background-position;
+        }
         .viplanding-gold-btn:hover { filter: brightness(1.05); }
+        @media (prefers-reduced-motion: reduce) {
+          .viplanding-price-btn-ready { animation: none; }
+        }
       `}</style>
 
       {/* Banner sticky global (ClubeIntroStickyBar) cobre o app inteiro,
@@ -551,12 +567,7 @@ const VipLandingB: React.FC = () => {
 
       {/* Parte inferior com degradês */}
       <div className="relative overflow-hidden">
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-0">
-          <div className="absolute top-[5%] -left-32 w-[480px] h-[480px] rounded-full bg-purple-700/30 blur-[120px]" />
-          <div className="absolute top-[25%] -right-40 w-[520px] h-[520px] rounded-full bg-fuchsia-600/25 blur-[130px]" />
-          <div className="absolute top-[55%] -left-24 w-[420px] h-[420px] rounded-full bg-pink-600/25 blur-[120px]" />
-          <div className="absolute bottom-[5%] -right-32 w-[460px] h-[460px] rounded-full bg-purple-600/30 blur-[130px]" />
-        </div>
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-0 bg-[linear-gradient(180deg,rgba(88,28,135,0.20)_0%,rgba(0,0,0,0)_34%,rgba(112,26,117,0.14)_68%,rgba(0,0,0,0)_100%)]" />
 
         <div className="relative z-10 container mx-auto max-w-4xl">
 
@@ -642,7 +653,7 @@ const VipLandingB: React.FC = () => {
               <Button
                 onClick={() => handleSubscribe('card')}
                 disabled={loading}
-                className="viplanding-gold-btn w-full h-12 mt-4 text-sm font-bold border-0 hover:text-black"
+                className={`viplanding-gold-btn ${priceSettled ? 'viplanding-price-btn-ready' : ''} w-full h-12 mt-4 text-sm font-bold border-0 hover:text-black`}
               >
                 {loading ? (
                   <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Abrindo checkout...</>
@@ -867,7 +878,7 @@ const VipLandingB: React.FC = () => {
               <Button
                 onClick={() => handleSubscribe('card')}
                 disabled={loading}
-                className="viplanding-gold-btn w-full h-14 text-base font-bold border-0 hover:text-black"
+                className={`viplanding-gold-btn ${priceSettled ? 'viplanding-price-btn-ready' : ''} w-full h-14 text-base font-bold border-0 hover:text-black`}
               >
                 {loading ? (
                   <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Abrindo checkout...</>
