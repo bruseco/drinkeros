@@ -14,7 +14,7 @@ export const ClubeIntroStickyBar: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-x-0 top-0 z-[60]"
+      className="fixed inset-x-0 top-0 z-[190]"
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       <Link

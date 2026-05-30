@@ -161,12 +161,14 @@ const VipLandingB: React.FC = () => {
   const [exitOfferDismissed, setExitOfferDismissed] = useState(false);
 
   // ===== Reveal cinematográfico do desconto de R$100 =====
-  // Mostra R$197 no card de preço; quando o card entra no viewport, espera 2s,
+  // Mostra R$197 no card de preço; quando o usuário rola até o card, espera 2s,
   // abre overlay com a animação. Ao fechar, rola o preço de 197 → 97 e marca
   // `clube_intro_revealed_at` no banco para não repetir.
   const priceCardEls = React.useRef<Set<HTMLDivElement>>(new Set());
+  const landingScrollRef = React.useRef<HTMLDivElement | null>(null);
   const [revealOpen, setRevealOpen] = useState(false);
   const [revealScheduled, setRevealScheduled] = useState(false);
+  const [priceCardVersion, setPriceCardVersion] = useState(0);
   // unlocked = exibir UI com R$97 + strikethrough. Antes do reveal fica false
   // mesmo que `promo.isActive` seja true, para mostrar R$197 primeiro.
   const [unlocked, setUnlocked] = useState<boolean>(
@@ -178,11 +180,6 @@ const VipLandingB: React.FC = () => {
   const revealTimerRef = React.useRef<number | null>(null);
   const revealScheduledRef = React.useRef(false);
   const canRevealIntro = promo.isActive && !promo.hasRevealed && !promo.isLoading;
-
-  const isPriceCardVisible = React.useCallback((el: HTMLDivElement) => {
-    const r = el.getBoundingClientRect();
-    return r.top < window.innerHeight && r.bottom > 0;
-  }, []);
 
   const scheduleReveal = React.useCallback(() => {
     if (!canRevealIntro || revealScheduledRef.current || revealTimerRef.current !== null) return;
@@ -226,30 +223,25 @@ const VipLandingB: React.FC = () => {
     }
   }, [promo.isLoading, promo.isActive, promo.hasRevealed, promo.promoPrice, promo.fullPrice]);
 
-  // Callback ref usado em múltiplos cards de preço — registra cada elemento.
+  // Callback ref usado nos cards com o valor R$197 — registra cada elemento.
   const registerPriceCard = React.useCallback((el: HTMLDivElement | null) => {
     if (!el) return;
     priceCardEls.current.add(el);
-    window.requestAnimationFrame(() => {
-      if (isPriceCardVisible(el)) scheduleReveal();
+    setPriceCardVersion((v) => v + 1);
+  }, []);
+
+  const checkPriceCardInView = React.useCallback(() => {
+    if (!canRevealIntro || revealScheduledRef.current) return;
+    const hit = Array.from(priceCardEls.current).some((el) => {
+      const r = el.getBoundingClientRect();
+      const center = r.top + r.height / 2;
+      return center > 0 && center < window.innerHeight * 0.82;
     });
-  }, [isPriceCardVisible, scheduleReveal]);
+    if (hit) scheduleReveal();
+  }, [canRevealIntro, scheduleReveal]);
 
-  // Fallback principal: em conta nova, dispara assim que a elegibilidade carrega,
-  // mesmo se o card já estava no viewport antes do observer começar a observar.
-  React.useEffect(() => {
-    if (!canRevealIntro) return;
-    const immediate = window.setTimeout(scheduleReveal, 250);
-    const retry = window.setTimeout(scheduleReveal, 1200);
-    return () => {
-      window.clearTimeout(immediate);
-      window.clearTimeout(retry);
-    };
-  }, [canRevealIntro, scheduleReveal, user?.id]);
-
-  // IntersectionObserver em TODOS os cards de preço — agenda reveal após 2s
-  // assim que qualquer um aparecer no viewport. Também dispara fallback caso
-  // o primeiro card já esteja visível no load inicial.
+  // IntersectionObserver nos cards de assinatura — agenda reveal após 2s
+  // quando o usuário rolar até o valor R$197.
   React.useEffect(() => {
     if (!canRevealIntro || revealScheduled) return;
     const els = Array.from(priceCardEls.current);
@@ -259,25 +251,28 @@ const VipLandingB: React.FC = () => {
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) scheduleReveal();
       },
-      { threshold: 0.3 },
+      { threshold: 0.55 },
     );
     els.forEach((el) => obs.observe(el));
 
-    // Fallback: se algum card já estiver no viewport (acima da dobra),
-    // dispara imediatamente sem esperar scroll.
-    const frame = window.requestAnimationFrame(() => {
-      if (els.some(isPriceCardVisible)) scheduleReveal();
-    });
-
     return () => {
       obs.disconnect();
-      window.cancelAnimationFrame(frame);
     };
-  }, [canRevealIntro, isPriceCardVisible, revealScheduled, scheduleReveal]);
+  }, [canRevealIntro, revealScheduled, scheduleReveal, priceCardVersion]);
+
+  React.useEffect(() => {
+    const scroller = landingScrollRef.current;
+    if (!scroller || !canRevealIntro || revealScheduled) return;
+    const onScroll = () => window.requestAnimationFrame(checkPriceCardInView);
+    scroller.addEventListener('scroll', onScroll, { passive: true });
+    return () => scroller.removeEventListener('scroll', onScroll);
+  }, [canRevealIntro, revealScheduled, checkPriceCardInView]);
 
   // Ao fechar overlay → roll-down 197 → 97 + marca revealed no banco.
   const handleRevealClose = React.useCallback(() => {
     setRevealOpen(false);
+    setUnlocked(true);
+    promo.markRevealed();
     const start = performance.now();
     const from = promo.fullPrice;
     const to = promo.promoPrice;
@@ -292,8 +287,6 @@ const VipLandingB: React.FC = () => {
       if (p < 1) requestAnimationFrame(step);
       else {
         setDisplayPrice(to);
-        setUnlocked(true);
-        promo.markRevealed();
       }
     };
     requestAnimationFrame(step);
@@ -411,6 +404,7 @@ const VipLandingB: React.FC = () => {
 
   return (
     <div
+      ref={landingScrollRef}
       className={`fixed inset-0 z-[60] text-white py-0 overflow-y-auto overscroll-contain bg-black ${isClosing ? 'animate-[viplanding-fade-out_280ms_ease-in_forwards]' : 'animate-[viplanding-bounce-in_520ms_cubic-bezier(0.34,1.56,0.64,1)_forwards]'}`}
       
     >
