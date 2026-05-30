@@ -166,7 +166,7 @@ const PriceAmount = React.memo(({ value, className = '' }: { value: number; clas
       )}
       <span
         className="col-start-1 row-start-1 transition-transform duration-500 ease-out"
-        style={{ transform: 'translateY(0)' }}
+        style={{ transform: animating || previous === null ? 'translateY(0)' : 'translateY(-115%)' }}
       >
         {current}
       </span>
