@@ -137,6 +137,7 @@ const App = () => (
         <AuthProvider>
           <ScrollToTop />
           <FacebookPixel />
+          <ClubeIntroStickyBar />
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<RootRedirect />} />
