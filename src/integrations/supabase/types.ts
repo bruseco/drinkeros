@@ -3427,6 +3427,13 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      ensure_clube_intro_offer: {
+        Args: never
+        Returns: {
+          clube_intro_eligible_until: string
+          clube_intro_revealed_at: string
+        }[]
+      }
       get_access_metrics: {
         Args: { p_from: string; p_to: string }
         Returns: Json
