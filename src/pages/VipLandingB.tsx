@@ -159,7 +159,7 @@ const VipLandingB: React.FC = () => {
   // Mostra R$197 no card de preço; quando o card entra no viewport, espera 2s,
   // abre overlay com a animação. Ao fechar, rola o preço de 197 → 97 e marca
   // `clube_intro_revealed_at` no banco para não repetir.
-  const priceCardRef = React.useRef<HTMLDivElement | null>(null);
+  const priceCardEls = React.useRef<Set<HTMLDivElement>>(new Set());
   const [revealOpen, setRevealOpen] = useState(false);
   const [revealScheduled, setRevealScheduled] = useState(false);
   // unlocked = exibir UI com R$97 + strikethrough. Antes do reveal fica false
@@ -183,23 +183,45 @@ const VipLandingB: React.FC = () => {
     }
   }, [promo.isLoading, promo.isActive, promo.hasRevealed, promo.promoPrice, promo.fullPrice]);
 
-  // IntersectionObserver no card de preço — agenda reveal após 2s.
+  // Callback ref usado em múltiplos cards de preço — registra cada elemento.
+  const registerPriceCard = React.useCallback((el: HTMLDivElement | null) => {
+    if (el) priceCardEls.current.add(el);
+  }, []);
+
+  // IntersectionObserver em TODOS os cards de preço — agenda reveal após 2s
+  // assim que qualquer um aparecer no viewport. Também dispara fallback caso
+  // o primeiro card já esteja visível no load inicial.
   React.useEffect(() => {
     if (revealScheduled) return;
     if (!promo.isActive || promo.hasRevealed || promo.isLoading) return;
-    const el = priceCardRef.current;
-    if (!el) return;
+    const els = Array.from(priceCardEls.current);
+    if (els.length === 0) return;
+
+    let fired = false;
+    const trigger = () => {
+      if (fired || revealScheduled) return;
+      fired = true;
+      setRevealScheduled(true);
+      obs.disconnect();
+      window.setTimeout(() => setRevealOpen(true), 2000);
+    };
+
     const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !revealScheduled) {
-          setRevealScheduled(true);
-          obs.disconnect();
-          window.setTimeout(() => setRevealOpen(true), 2000);
-        }
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) trigger();
       },
-      { threshold: 0.4 },
+      { threshold: 0.3 },
     );
-    obs.observe(el);
+    els.forEach((el) => obs.observe(el));
+
+    // Fallback: se algum card já estiver no viewport (acima da dobra),
+    // dispara imediatamente sem esperar scroll.
+    const inView = els.some((el) => {
+      const r = el.getBoundingClientRect();
+      return r.top < window.innerHeight && r.bottom > 0;
+    });
+    if (inView) trigger();
+
     return () => obs.disconnect();
   }, [promo.isActive, promo.hasRevealed, promo.isLoading, revealScheduled]);
 
