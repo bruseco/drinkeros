@@ -67,23 +67,32 @@ serve(async (req) => {
     const method: "card" | "pix" = body?.method === "pix" ? "pix" : "card";
     let offer: Offer = resolveOffer(body?.offer);
 
-    // Valida no servidor a elegibilidade ao desconto INTRO (R$100 off).
-    // Só usuários com `profiles.clube_intro_eligible_until` no futuro recebem.
-    if (offer === "intro") {
+    // Valida no servidor a elegibilidade aos descontos do Clube.
+    // Intro: janela de 30min após cadastro. Exit: só depois do reveal e dentro da janela de 10min.
+    if (offer === "intro" || offer === "exit") {
       const adminClient = createClient(
         Deno.env.get("SUPABASE_URL")!,
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
       );
       const { data: prof } = await adminClient
         .from("profiles")
-        .select("clube_intro_eligible_until")
+        .select("clube_intro_eligible_until, clube_intro_revealed_at, clube_exit_eligible_until")
         .eq("user_id", user.id)
         .maybeSingle();
-      const until = (prof as { clube_intro_eligible_until: string | null } | null)
-        ?.clube_intro_eligible_until;
-      const eligible = until ? new Date(until).getTime() > Date.now() : false;
+      const p = prof as {
+        clube_intro_eligible_until: string | null;
+        clube_intro_revealed_at: string | null;
+        clube_exit_eligible_until: string | null;
+      } | null;
+      const introEligible = p?.clube_intro_eligible_until
+        ? new Date(p.clube_intro_eligible_until).getTime() > Date.now()
+        : false;
+      const exitEligible = !!p?.clube_intro_revealed_at && p?.clube_exit_eligible_until
+        ? new Date(p.clube_exit_eligible_until).getTime() > Date.now()
+        : false;
+      const eligible = offer === "intro" ? introEligible : exitEligible;
       if (!eligible) {
-        console.log("[create-club-checkout] intro requested but user not eligible", user.id);
+        console.log("[create-club-checkout] discount requested but user not eligible", { user_id: user.id, offer });
         offer = "full";
       }
     }

@@ -84,6 +84,7 @@ export function useClubeIntroOffer(): ClubeIntroOfferState {
       .update({ clube_intro_revealed_at: new Date().toISOString() })
       .eq('user_id', user.id);
     queryClient.invalidateQueries({ queryKey: ['clube-intro', user.id] });
+    queryClient.invalidateQueries({ queryKey: ['clube-exit', user.id] });
   };
 
   return {

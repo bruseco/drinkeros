@@ -299,19 +299,17 @@ const VipLandingB: React.FC = () => {
   };
 
   // Exit-intent: intercepta tentativa de fechar/voltar para mostrar oferta R$ 69.
-  // Dispara apenas 1x por sessão.
+  // Só libera a segunda oferta depois que a primeira revelação (R$100 off) já aconteceu.
   useEffect(() => {
     if (!user) return; // não-logado já é mandado pra /signup pelo CTA
     if (exitOfferDismissed) return;
-    if (sessionStorage.getItem('clube:exit-offer-shown') === '1') return;
+    if (!exitOffer.canStart || exitOffer.isActive) return;
 
     // Empilha um estado sentinela para capturar o popstate (back button)
     window.history.pushState({ clubeExitSentinel: true }, '');
 
     const onPopState = () => {
-      if (sessionStorage.getItem('clube:exit-offer-shown') === '1') return;
-      sessionStorage.setItem('clube:exit-offer-shown', '1');
-      // Inicia a janela de 10 min da oferta extra (persistida em localStorage)
+      // Inicia a janela de 10 min da oferta extra no perfil do usuário.
       exitOffer.start();
       // Re-empilha pra continuar interceptando enquanto o overlay está aberto
       window.history.pushState({ clubeExitSentinel: true }, '');
@@ -320,7 +318,7 @@ const VipLandingB: React.FC = () => {
 
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
-  }, [user, exitOfferDismissed, exitOffer]);
+  }, [user, exitOfferDismissed, exitOffer.canStart, exitOffer.isActive, exitOffer.start]);
 
   const handleExitAccept = () => handleSubscribe('card', 'exit');
   const handleExitDismiss = () => {
@@ -722,7 +720,7 @@ const VipLandingB: React.FC = () => {
           </div>
 
           {/* Pricing Card — fechamento */}
-          <div id="clube-pricing" className="relative max-w-md mx-auto mb-16 scroll-mt-6 px-4">
+          <div ref={priceCardRef} id="clube-pricing" className="relative max-w-md mx-auto mb-16 scroll-mt-6 px-4">
             <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-yellow-400 rounded-3xl blur opacity-60" />
             <div className="relative bg-black rounded-3xl p-8 border border-purple-500/30">
               <h2 className="text-center text-3xl md:text-4xl font-black mb-3 viplanding-gold-text">
