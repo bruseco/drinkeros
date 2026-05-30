@@ -720,7 +720,7 @@ const VipLandingB: React.FC = () => {
           </div>
 
           {/* Pricing Card — fechamento */}
-          <div id="clube-pricing" className="relative max-w-md mx-auto mb-16 scroll-mt-6 px-4">
+          <div ref={priceCardRef} id="clube-pricing" className="relative max-w-md mx-auto mb-16 scroll-mt-6 px-4">
             <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-fuchsia-500 to-yellow-400 rounded-3xl blur opacity-60" />
             <div className="relative bg-black rounded-3xl p-8 border border-purple-500/30">
               <h2 className="text-center text-3xl md:text-4xl font-black mb-3 viplanding-gold-text">
