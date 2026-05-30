@@ -658,7 +658,7 @@ const VipLandingB: React.FC = () => {
               <Button
                 onClick={() => handleSubscribe('card')}
                 disabled={loading}
-                className={`viplanding-gold-btn ${priceSettled ? 'viplanding-price-btn-ready' : ''} w-full h-12 mt-4 text-sm font-bold border-0 hover:text-black`}
+                className={`${priceSettled ? 'viplanding-green-btn' : 'viplanding-gold-btn'} w-full h-12 mt-4 text-sm font-bold border-0`}
               >
                 {loading ? (
                   <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Abrindo checkout...</>
