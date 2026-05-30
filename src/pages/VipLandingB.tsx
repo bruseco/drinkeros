@@ -107,15 +107,18 @@ const VideoWithPoster: React.FC<{ src: string; poster: string; alt: string }> = 
   );
 };
 
-const IntroCountdownPill: React.FC<{ mm: string; ss: string }> = ({ mm, ss }) => (
-  <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs font-semibold text-yellow-200">
-    <Timer className="h-3.5 w-3.5" />
-    <span className="text-yellow-100">Desconto de R$ 100 expira em</span>
-    <span className="font-mono font-bold text-white tabular-nums">
-      {mm}:{ss}
-    </span>
-  </div>
-);
+const IntroCountdownPill: React.FC<{ untilMs: number }> = ({ untilMs }) => {
+  const { mm, ss } = useIntroCountdown(untilMs);
+  return (
+    <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs font-semibold text-yellow-200">
+      <Timer className="h-3.5 w-3.5" />
+      <span className="text-yellow-100">Desconto de R$ 100 expira em</span>
+      <span className="font-mono font-bold text-white tabular-nums">
+        {mm}:{ss}
+      </span>
+    </div>
+  );
+};
 
 
 const TrustLine: React.FC = () => (
