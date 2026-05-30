@@ -95,9 +95,8 @@ const CompleteProfile: React.FC = () => {
       toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
       return;
     }
-    toast({ title: 'Tudo certo! 🍹', description: 'Bem-vindo ao Drinkeros!' });
     try { sessionStorage.setItem('drinkeros:just_signed_up', '1'); } catch {}
-    navigate('/app', { replace: true });
+    navigate('/app', { replace: true, state: { justSignedUp: true } });
   };
 
   if (authLoading || checking) {
