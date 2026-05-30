@@ -19,7 +19,7 @@ import { trackInitiateCheckout, waitForPixelFlush } from '@/lib/metaPixel';
 import { useViewContent } from '@/hooks/useViewContent';
 import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
 import { useTotalClubMembers, TOTAL_CLUB_MEMBERS_FALLBACK } from '@/hooks/useTotalClubMembers';
-import { useClubeIntroOffer } from '@/hooks/useClubeIntroOffer';
+import { useClubeIntroOffer, useIntroCountdown } from '@/hooks/useClubeIntroOffer';
 import { useClubeExitOffer } from '@/hooks/useClubeExitOffer';
 import { useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
 import ClubeExitOffer from '@/components/user/ClubeExitOffer';
@@ -107,15 +107,18 @@ const VideoWithPoster: React.FC<{ src: string; poster: string; alt: string }> = 
   );
 };
 
-const IntroCountdownPill: React.FC<{ mm: string; ss: string }> = ({ mm, ss }) => (
-  <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs font-semibold text-yellow-200">
-    <Timer className="h-3.5 w-3.5" />
-    <span className="text-yellow-100">Desconto de R$ 100 expira em</span>
-    <span className="font-mono font-bold text-white tabular-nums">
-      {mm}:{ss}
-    </span>
-  </div>
-);
+const IntroCountdownPill: React.FC<{ untilMs: number }> = ({ untilMs }) => {
+  const { mm, ss } = useIntroCountdown(untilMs);
+  return (
+    <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs font-semibold text-yellow-200">
+      <Timer className="h-3.5 w-3.5" />
+      <span className="text-yellow-100">Desconto de R$ 100 expira em</span>
+      <span className="font-mono font-bold text-white tabular-nums">
+        {mm}:{ss}
+      </span>
+    </div>
+  );
+};
 
 
 const TrustLine: React.FC = () => (
@@ -276,31 +279,12 @@ const VipLandingB: React.FC = () => {
     const onScroll = () => window.requestAnimationFrame(checkPriceCardInView);
     if (scroller) scroller.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('touchmove', onScroll, { passive: true });
     return () => {
       if (scroller) scroller.removeEventListener('scroll', onScroll);
       window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('touchmove', onScroll);
     };
   }, [canRevealIntro, revealScheduled, checkPriceCardInView, priceCardVersion]);
 
-
-
-  // Diagnóstico — facilita depurar no iPhone via Web Inspector.
-  React.useEffect(() => {
-    console.log('[clube-reveal] state', {
-      isLoading: promo.isLoading,
-      isActive: promo.isActive,
-      hasRevealed: promo.hasRevealed,
-      remainingMs: promo.remainingMs,
-      canRevealIntro,
-      revealScheduled,
-      revealOpen,
-      unlocked,
-      displayPrice,
-      priceCards: priceCardEls.current.size,
-    });
-  }, [promo.isLoading, promo.isActive, promo.hasRevealed, promo.remainingMs, canRevealIntro, revealScheduled, revealOpen, unlocked, displayPrice, priceCardVersion]);
 
   // Ao fechar overlay → roll-down 197 → 97 + marca revealed no banco.
   const handleRevealClose = React.useCallback(() => {
@@ -623,7 +607,7 @@ const VipLandingB: React.FC = () => {
               <p className="text-[11px] text-purple-300 mt-1">
                 Acesso anual · renovação automática · cancele quando quiser
               </p>
-              {unlocked && <IntroCountdownPill mm={promo.mm} ss={promo.ss} />}
+              {unlocked && <IntroCountdownPill untilMs={promo.eligibleUntilMs} />}
               <Button
                 onClick={() => handleSubscribe('card')}
                 disabled={loading}
@@ -847,7 +831,7 @@ const VipLandingB: React.FC = () => {
                     Promoção de lançamento do novo app
                   </div>
                 )}
-                {unlocked && <IntroCountdownPill mm={promo.mm} ss={promo.ss} />}
+                {unlocked && <IntroCountdownPill untilMs={promo.eligibleUntilMs} />}
               </div>
 
 
