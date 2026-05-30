@@ -23,6 +23,7 @@ import { useClubeIntroOffer } from '@/hooks/useClubeIntroOffer';
 import { useClubeExitOffer } from '@/hooks/useClubeExitOffer';
 import { useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
 import ClubeExitOffer from '@/components/user/ClubeExitOffer';
+import ClubeDiscountReveal from '@/components/user/ClubeDiscountReveal';
 
 
 import drinksStrip from '@/assets/1000-drinks.jpg';
