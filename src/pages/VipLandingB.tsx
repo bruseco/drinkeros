@@ -607,7 +607,7 @@ const VipLandingB: React.FC = () => {
               <p className="text-[11px] text-purple-300 mt-1">
                 Acesso anual · renovação automática · cancele quando quiser
               </p>
-              {unlocked && <IntroCountdownPill mm={promo.mm} ss={promo.ss} />}
+              {unlocked && <IntroCountdownPill untilMs={promo.eligibleUntilMs} />}
               <Button
                 onClick={() => handleSubscribe('card')}
                 disabled={loading}
