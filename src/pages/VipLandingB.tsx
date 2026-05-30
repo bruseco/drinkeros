@@ -318,7 +318,7 @@ const VipLandingB: React.FC = () => {
 
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
-  }, [user, exitOfferDismissed, exitOffer]);
+  }, [user, exitOfferDismissed, exitOffer.canStart, exitOffer.isActive, exitOffer.start]);
 
   const handleExitAccept = () => handleSubscribe('card', 'exit');
   const handleExitDismiss = () => {
