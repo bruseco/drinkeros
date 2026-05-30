@@ -404,6 +404,7 @@ const VipLandingB: React.FC = () => {
 
   return (
     <div
+      ref={landingScrollRef}
       className={`fixed inset-0 z-[60] text-white py-0 overflow-y-auto overscroll-contain bg-black ${isClosing ? 'animate-[viplanding-fade-out_280ms_ease-in_forwards]' : 'animate-[viplanding-bounce-in_520ms_cubic-bezier(0.34,1.56,0.64,1)_forwards]'}`}
       
     >
