@@ -278,3 +278,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   opacity: 0.9;
   cursor: pointer;
 }
+
+/* Banner global no topo (ex.: ClubeIntroStickyBar): empurra o body para baixo
+   pela altura real do banner, evitando que o conteúdo do topo fique coberto.
+   A variável --top-banner-h é setada via JS quando o banner está visível. */
+html.has-top-banner body {
+  padding-top: var(--top-banner-h, 0px);
+}
