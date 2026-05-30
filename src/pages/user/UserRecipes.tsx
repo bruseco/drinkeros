@@ -222,13 +222,14 @@ const UserRecipes: React.FC = () => {
     const forceTop =
       sessionStorage.getItem(FORCE_RECIPES_TOP_KEY) === '1' ||
       (location.state as { justSignedUp?: boolean } | null)?.justSignedUp === true;
-    const hasReturnTarget = !!sessionStorage.getItem(RECIPE_SCROLL_TARGET_KEY);
-    if (hasReturnTarget && !forceTop) return;
 
-    if (forceTop) {
-      sessionStorage.removeItem(FORCE_RECIPES_TOP_KEY);
-      sessionStorage.removeItem(RECIPE_SCROLL_TARGET_KEY);
-    }
+    // Sem forceTop: deixa o ScrollToTop global cuidar do scroll inicial e NÃO
+    // agenda resets atrasados — eles estavam disparando depois que o usuário
+    // já tinha começado a rolar, jogando a página de volta pro topo.
+    if (!forceTop) return;
+
+    sessionStorage.removeItem(FORCE_RECIPES_TOP_KEY);
+    sessionStorage.removeItem(RECIPE_SCROLL_TARGET_KEY);
 
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
@@ -239,7 +240,16 @@ const UserRecipes: React.FC = () => {
     document.documentElement.style.setProperty('overflow-anchor', 'none');
     document.body.style.setProperty('overflow-anchor', 'none');
 
+    let userScrolled = false;
+    const markUserScroll = () => { userScrolled = true; };
+    // Qualquer interação do usuário cancela os resets agendados — assim, mesmo
+    // no fluxo pós-signup, se o usuário começar a rolar, paramos de forçar o topo.
+    window.addEventListener('wheel', markUserScroll, { passive: true, once: true });
+    window.addEventListener('touchstart', markUserScroll, { passive: true, once: true });
+    window.addEventListener('keydown', markUserScroll, { once: true });
+
     const resetToTop = () => {
+      if (userScrolled) return;
       window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
@@ -261,6 +271,9 @@ const UserRecipes: React.FC = () => {
       frameIds.forEach((id) => window.cancelAnimationFrame(id));
       timers.forEach((t) => window.clearTimeout(t));
       window.visualViewport?.removeEventListener('resize', resetToTop);
+      window.removeEventListener('wheel', markUserScroll);
+      window.removeEventListener('touchstart', markUserScroll);
+      window.removeEventListener('keydown', markUserScroll);
       document.documentElement.style.setProperty('overflow-anchor', previousHtmlOverflowAnchor);
       document.body.style.setProperty('overflow-anchor', previousBodyOverflowAnchor);
     };
