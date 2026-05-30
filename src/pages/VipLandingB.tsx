@@ -152,6 +152,11 @@ const VipLandingB: React.FC = () => {
   const [isClosing] = useState(false);
   const promo = useClubeIntroOffer();
   const exitOffer = useClubeExitOffer();
+  const {
+    canStart: canStartExitOffer,
+    isActive: isExitOfferActive,
+    start: startExitOffer,
+  } = exitOffer;
   const [exitOpen, setExitOpen] = useState(false);
   const [exitOfferDismissed, setExitOfferDismissed] = useState(false);
 
@@ -333,8 +338,9 @@ const VipLandingB: React.FC = () => {
       await waitForPixelFlush();
 
       window.location.href = data.url;
-    } catch (err: any) {
-      toast.error('Erro ao iniciar checkout', { description: err.message });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Tente novamente em alguns instantes.';
+      toast.error('Erro ao iniciar checkout', { description: message });
       setLoading(false);
     }
   };
@@ -344,14 +350,14 @@ const VipLandingB: React.FC = () => {
   useEffect(() => {
     if (!user) return; // não-logado já é mandado pra /signup pelo CTA
     if (exitOfferDismissed) return;
-    if (!exitOffer.canStart || exitOffer.isActive) return;
+    if (!canStartExitOffer || isExitOfferActive) return;
 
     // Empilha um estado sentinela para capturar o popstate (back button)
     window.history.pushState({ clubeExitSentinel: true }, '');
 
     const onPopState = () => {
       // Inicia a janela de 10 min da oferta extra no perfil do usuário.
-      exitOffer.start();
+      startExitOffer();
       // Re-empilha pra continuar interceptando enquanto o overlay está aberto
       window.history.pushState({ clubeExitSentinel: true }, '');
       setExitOpen(true);
@@ -359,7 +365,7 @@ const VipLandingB: React.FC = () => {
 
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
-  }, [user, exitOfferDismissed, exitOffer.canStart, exitOffer.isActive, exitOffer.start]);
+  }, [user, exitOfferDismissed, canStartExitOffer, isExitOfferActive, startExitOffer]);
 
   const handleExitAccept = () => handleSubscribe('card', 'exit');
   const handleExitDismiss = () => {
