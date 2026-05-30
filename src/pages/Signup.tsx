@@ -121,10 +121,7 @@ const Signup: React.FC = () => {
       /* non-blocking */
     }
 
-    toast({
-      title: 'Conta criada! 🍹',
-      description: 'Bem-vindo ao Drinkeros! Você está no plano Grátis.',
-    });
+    try { sessionStorage.setItem('drinkeros:just_signed_up', '1'); } catch {}
     try {
       const { data: { user: createdUser } } = await supabase.auth.getUser();
       console.log('[Signup] disparando CompleteRegistration', { userId: createdUser?.id, method: 'email' });
@@ -143,8 +140,7 @@ const Signup: React.FC = () => {
     } catch (err) {
       console.warn('[Signup] CompleteRegistration falhou', err);
     }
-    try { sessionStorage.setItem('drinkeros:just_signed_up', '1'); } catch {}
-    navigate('/app');
+    navigate('/app', { replace: true, state: { justSignedUp: true } });
 
     setIsLoading(false);
   };
