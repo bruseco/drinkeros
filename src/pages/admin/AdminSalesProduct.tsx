@@ -137,12 +137,21 @@ const AdminSalesProduct: React.FC = () => {
     );
   }
 
-  const pages = useMemo(() => {
-    const base = [{
+  type PageRow = {
+    label: string;
+    path: string;
+    pageKey: string;
+    variant: 'a' | 'b';
+    visits: number;
+    conversions: number;
+    isWinner: boolean;
+  };
+  const pages = useMemo<PageRow[]>(() => {
+    const base: PageRow[] = [{
       label: 'Variante A (original)',
       path: info.originalPath,
       pageKey: info.pageKeyA,
-      variant: 'a' as const,
+      variant: 'a',
       visits: test?.visits_a ?? 0,
       conversions: test?.conversions_a ?? 0,
       isWinner: test?.winner === 'a',
@@ -152,7 +161,7 @@ const AdminSalesProduct: React.FC = () => {
         label: 'Variante B',
         path: test.variant_path,
         pageKey: info.pageKeyB,
-        variant: 'b' as const,
+        variant: 'b',
         visits: test.visits_b,
         conversions: test.conversions_b,
         isWinner: test.winner === 'b',
