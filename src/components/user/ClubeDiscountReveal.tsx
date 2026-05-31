@@ -410,7 +410,15 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
         }
         @keyframes clube-btn-shimmer {
           0% { background-position: 0% 50%; }
-          100% { background-position: 200% 50%; }
+          100% { background-position: 300% 50%; }
+        }
+        @keyframes clube-btn-glow {
+          0%, 100% { box-shadow: 0 10px 26px hsl(var(--primary) / 0.55), 0 0 40px hsl(var(--primary) / 0.4); }
+          50% { box-shadow: 0 10px 32px hsl(var(--primary) / 0.7), 0 0 60px hsl(45 95% 65% / 0.55); }
+        }
+        @keyframes clube-beam-spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
       `}</style>
     </div>
