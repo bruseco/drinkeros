@@ -587,9 +587,24 @@ const UserProfile: React.FC = () => {
         </CollapsibleContent>
       </Collapsible>
 
+      {/* Preferências de interesse */}
+      <Collapsible open={openSection === 'interesses'} onOpenChange={() => toggle('interesses')}>
+        <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 h-14 hover:bg-accent/50 transition-colors">
+          <span className="flex items-center gap-3 text-sm font-medium">
+            <Heart className="h-5 w-5 text-muted-foreground" />
+            Preferências
+          </span>
+          <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-200", openSection === 'interesses' && "rotate-180")} />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="rounded-b-lg border border-t-0 border-border bg-card overflow-hidden">
+          <InterestsSection />
+        </CollapsibleContent>
+      </Collapsible>
+
       {/* Produtos adquiridos - collapsible */}
       <Collapsible open={openSection === 'produtos'} onOpenChange={() => toggle('produtos')}>
         <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 h-14 hover:bg-accent/50 transition-colors">
+
           <span className="flex items-center gap-3 text-sm font-medium">
             <Package className="h-5 w-5 text-muted-foreground" />
             Produtos Adquiridos
