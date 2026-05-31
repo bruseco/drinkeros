@@ -9,7 +9,10 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, ChevronRight, Package, Camera, Crown, Bell, BellOff, Shield, ArrowLeftRight } from 'lucide-react';
+import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, ChevronRight, Package, Camera, Crown, Bell, BellOff, Shield, ArrowLeftRight, Heart, Briefcase, PartyPopper } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useInterests, useUpdateInterests, type Interest } from '@/hooks/useInterests';
+
 import { isAdminModeOn, setAdminMode } from '@/lib/adminMode';
 import { Switch } from '@/components/ui/switch';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
@@ -442,7 +445,70 @@ const NotificationsSection: React.FC = () => {
   );
 };
 
+const InterestsSection: React.FC = () => {
+  const { data: interests } = useInterests();
+  const updateInterests = useUpdateInterests();
+  const [profissional, setProfissional] = useState(false);
+  const [curticao, setCurticao] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setProfissional(!!interests?.includes('profissional'));
+    setCurticao(!!interests?.includes('curticao'));
+  }, [interests]);
+
+  const handleSave = async () => {
+    const next: Interest[] = [];
+    if (profissional) next.push('profissional');
+    if (curticao) next.push('curticao');
+    setSaving(true);
+    try {
+      await updateInterests.mutateAsync(next);
+      toast.success('Preferências atualizadas!');
+    } catch (err: any) {
+      toast.error('Erro ao salvar: ' + (err?.message ?? 'tente novamente'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4 p-4">
+      <p className="text-sm text-muted-foreground">
+        Marque seu interesse com drinks. Isso ajusta a ordem das receitas que aparecem no feed pra você. Fases sazonais (Natal, Carnaval, etc.) continuam aparecendo independente da escolha.
+      </p>
+      <label className="flex items-start gap-3 rounded-lg border border-border p-3 cursor-pointer hover:bg-accent/30 transition-colors">
+        <Checkbox checked={profissional} onCheckedChange={(v) => setProfissional(!!v)} className="mt-0.5" />
+        <span className="flex-1">
+          <span className="flex items-center gap-2 text-sm font-semibold">
+            <Briefcase className="h-4 w-4 text-accent" /> Profissional
+          </span>
+          <span className="block text-xs text-muted-foreground mt-1">
+            Sou ou quero ser bartender, trabalho com bar/eventos. Prioriza clássicos e amargos.
+          </span>
+        </span>
+      </label>
+      <label className="flex items-start gap-3 rounded-lg border border-border p-3 cursor-pointer hover:bg-accent/30 transition-colors">
+        <Checkbox checked={curticao} onCheckedChange={(v) => setCurticao(!!v)} className="mt-0.5" />
+        <span className="flex-1">
+          <span className="flex items-center gap-2 text-sm font-semibold">
+            <PartyPopper className="h-4 w-4 text-accent" /> Curtição
+          </span>
+          <span className="block text-xs text-muted-foreground mt-1">
+            É hobby, faço drinks pra mim e pra galera. Feed misturado, como está hoje.
+          </span>
+        </span>
+      </label>
+      <Button onClick={handleSave} disabled={saving} className="w-full">
+        <Save className="mr-2 h-4 w-4" />
+        {saving ? 'Salvando...' : 'Salvar Preferências'}
+      </Button>
+    </div>
+  );
+};
+
 const UserProfile: React.FC = () => {
+
   const { signOut, isSuperAdmin } = useAuth();
   const navigate = useNavigate();
   const [openSection, setOpenSection] = useState<string | null>(null);
@@ -521,9 +587,24 @@ const UserProfile: React.FC = () => {
         </CollapsibleContent>
       </Collapsible>
 
+      {/* Preferências de interesse */}
+      <Collapsible open={openSection === 'interesses'} onOpenChange={() => toggle('interesses')}>
+        <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 h-14 hover:bg-accent/50 transition-colors">
+          <span className="flex items-center gap-3 text-sm font-medium">
+            <Heart className="h-5 w-5 text-muted-foreground" />
+            Preferências
+          </span>
+          <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform duration-200", openSection === 'interesses' && "rotate-180")} />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="rounded-b-lg border border-t-0 border-border bg-card overflow-hidden">
+          <InterestsSection />
+        </CollapsibleContent>
+      </Collapsible>
+
       {/* Produtos adquiridos - collapsible */}
       <Collapsible open={openSection === 'produtos'} onOpenChange={() => toggle('produtos')}>
         <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 h-14 hover:bg-accent/50 transition-colors">
+
           <span className="flex items-center gap-3 text-sm font-medium">
             <Package className="h-5 w-5 text-muted-foreground" />
             Produtos Adquiridos

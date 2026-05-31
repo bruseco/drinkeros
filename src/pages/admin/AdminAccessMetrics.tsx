@@ -1,15 +1,17 @@
 import React, { useMemo, useState } from 'react';
 import { useAccessMetrics } from '@/hooks/useAccessMetrics';
 import { useSignupsCount } from '@/hooks/useSignupsCount';
+import { useInterestsMetrics } from '@/hooks/useInterestsMetrics';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Loader2, Users, TrendingUp, Clock, Award, Wine, Download, BookOpen, Activity, User as UserIcon, UserPlus, CalendarIcon } from 'lucide-react';
+import { Loader2, Users, TrendingUp, Clock, Award, Wine, Download, BookOpen, Activity, User as UserIcon, UserPlus, CalendarIcon, Heart } from 'lucide-react';
 import { ptBR } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import defaultCover from '@/assets/default-cover.png';
+
 
 type Preset = 'today' | '7d' | '30d' | 'mtd' | 'custom';
 
@@ -66,6 +68,8 @@ const AdminAccessMetrics: React.FC = () => {
     const t = customTo ?? now;
     return { from: startOfDay(f), to: endOfDay(t) };
   }, [preset, customFrom, customTo]);
+  const { data: interestsMetrics } = useInterestsMetrics();
+
 
   const { data: metrics, isLoading } = useAccessMetrics(from, to);
   const { data: signupsCount } = useSignupsCount(from, to);
@@ -178,6 +182,29 @@ const AdminAccessMetrics: React.FC = () => {
               </p>
             </CardContent>
           </Card>
+
+          {/* Interesses dos usuários */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Heart className="h-4 w-4" /> Interesses dos usuários
+              </CardTitle>
+              <CardDescription>Preferência escolhida no onboarding (ou ajustada no perfil)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <PlanStat label="Profissional" value={interestsMetrics?.profissional ?? 0} tone="primary" />
+                <PlanStat label="Curtição" value={interestsMetrics?.curticao ?? 0} tone="info" />
+                <PlanStat label="Ambos" value={interestsMetrics?.ambos ?? 0} tone="gold" />
+                <PlanStat label="Não informou" value={interestsMetrics?.nenhum ?? 0} tone="muted" />
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                Total: {(interestsMetrics?.total ?? 0).toLocaleString('pt-BR')} usuários
+              </p>
+            </CardContent>
+          </Card>
+
+
 
           {/* Acessos por categoria no período */}
           <Card>
