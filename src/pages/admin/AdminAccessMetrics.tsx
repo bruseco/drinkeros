@@ -183,6 +183,29 @@ const AdminAccessMetrics: React.FC = () => {
             </CardContent>
           </Card>
 
+          {/* Interesses dos usuários */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Heart className="h-4 w-4" /> Interesses dos usuários
+              </CardTitle>
+              <CardDescription>Preferência escolhida no onboarding (ou ajustada no perfil)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <PlanStat label="Profissional" value={interestsMetrics?.profissional ?? 0} tone="primary" />
+                <PlanStat label="Curtição" value={interestsMetrics?.curticao ?? 0} tone="info" />
+                <PlanStat label="Ambos" value={interestsMetrics?.ambos ?? 0} tone="gold" />
+                <PlanStat label="Não informou" value={interestsMetrics?.nenhum ?? 0} tone="muted" />
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                Total: {(interestsMetrics?.total ?? 0).toLocaleString('pt-BR')} usuários
+              </p>
+            </CardContent>
+          </Card>
+
+
+
           {/* Acessos por categoria no período */}
           <Card>
             <CardHeader>
