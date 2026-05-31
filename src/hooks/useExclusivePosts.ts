@@ -248,10 +248,36 @@ export const useExclusivePostsPaginated = ({
           }
           ordered = [...hits, ...rest];
         }
+        // Modo "profissional": empurra clássicos+amargos pro topo (mantendo a
+        // ordem aleatória entre si) e joga drinks de galera/universitário/
+        // carnaval/batidas pro final. As fases sazonais já foram boostadas acima
+        // e continuam acima de tudo (regra: sazonais sempre aparecem).
+        if (professionalMode && !characteristicFilter) {
+          const seasonalTop: typeof ordered = [];
+          const pro: typeof ordered = [];
+          const mid: typeof ordered = [];
+          const bottom: typeof ordered = [];
+          const phaseForCheck = phase;
+          for (const r of ordered) {
+            if (phaseForCheck && matchesPhase(r.characteristics, phaseForCheck)) {
+              seasonalTop.push(r);
+              continue;
+            }
+            if (hasAnyTag(r.characteristics, PROFESSIONAL_DEPRIORITIZE_TAGS)) {
+              bottom.push(r);
+            } else if (hasAnyTag(r.characteristics, PROFESSIONAL_BOOST_TAGS)) {
+              pro.push(r);
+            } else {
+              mid.push(r);
+            }
+          }
+          ordered = [...seasonalTop, ...pro, ...mid, ...bottom];
+        }
 
 
         const total = ordered.length;
         const pageIds = ordered.slice(from, from + pageSize).map((r) => r.id);
+
 
         if (pageIds.length === 0) {
           return { posts: [] as ExclusivePost[], total, hasMore: false };
