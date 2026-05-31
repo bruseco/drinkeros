@@ -459,6 +459,13 @@ const VipLandingB: React.FC = () => {
     return () => window.removeEventListener('popstate', onPopState);
   }, [user, exitOfferDismissed, canStartExitOffer, isExitOfferActive, startExitOffer]);
 
+  // Funil: 2ª oferta (R$69) revelada quando o exit popup abre
+  useEffect(() => {
+    if (exitOpen) {
+      trackFunnel('clube-b', 'offer_2_revealed', { amountCents: 6900, userId: user?.id ?? null });
+    }
+  }, [exitOpen, user?.id]);
+
   const handleExitAccept = () => handleSubscribe('card', 'exit');
   const handleExitDismiss = () => {
     setExitOpen(false);
