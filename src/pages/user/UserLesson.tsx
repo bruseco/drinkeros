@@ -391,6 +391,7 @@ const UserLesson: React.FC = () => {
             <Card className="mb-4 overflow-hidden rounded-xl border-0 shadow-lg">
               <FullscreenVideo
                 embedUrl={getVideoEmbedUrl(lesson.video_url)}
+                sourceUrl={lesson.video_url}
                 title={lesson.name}
                 thumbnailUrl={lesson.image_url || undefined}
               />
