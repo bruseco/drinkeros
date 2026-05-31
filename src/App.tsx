@@ -71,6 +71,8 @@ import AdminCRM from "./pages/admin/AdminCRM";
 import AdminUXMetrics from "./pages/admin/AdminUXMetrics";
 import AdminAccessMetrics from "./pages/admin/AdminAccessMetrics";
 import AdminSalesPages from "./pages/admin/AdminSalesPages";
+import AdminSalesProduct from "./pages/admin/AdminSalesProduct";
+import AdminSalesPage from "./pages/admin/AdminSalesPage";
 import AdminTracking from "./pages/admin/AdminTracking";
 import AdminPostChecklist from "./pages/admin/AdminPostChecklist";
 import { FacebookPixel } from "./components/FacebookPixel";
@@ -213,6 +215,8 @@ const App = () => (
               <Route path="ux-metrics" element={<AdminUXMetrics />} />
               <Route path="metricas-acesso" element={<AdminAccessMetrics />} />
               <Route path="paginas-venda" element={<AdminSalesPages />} />
+              <Route path="paginas-venda/:productKey" element={<AdminSalesProduct />} />
+              <Route path="paginas-venda/:productKey/:pageKey" element={<AdminSalesPage />} />
               <Route path="clube" element={<AdminClube />} />
               <Route path="metricas" element={<AdminTracking />} />
               <Route path="checklist-postagens" element={<AdminPostChecklist />} />
