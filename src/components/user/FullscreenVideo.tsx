@@ -1,10 +1,9 @@
 import React, { useRef, useCallback, useEffect } from 'react';
-import { Play, ExternalLink } from 'lucide-react';
+import { Play } from 'lucide-react';
 import {
   extractYouTubeId,
   buildYouTubeEmbedUrl,
   getYouTubeThumbnail,
-  getYouTubeWatchUrl,
   isYouTubeUrl,
 } from '@/lib/youtube';
 
@@ -117,7 +116,6 @@ export const FullscreenVideo: React.FC<FullscreenVideoProps> = ({
           </button>
         )}
       </div>
-
-}
+    </div>
   );
 };
