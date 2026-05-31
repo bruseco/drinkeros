@@ -64,12 +64,10 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
     window.setTimeout(() => onCloseRef.current(), 350);
   };
 
-  if (!open && phase === 'idle') return null;
-
   // Sparkles para fundo (ambiente, contínuos)
   const bgSparkles = React.useMemo(
     () =>
-      Array.from({ length: 22 }).map((_, i) => ({
+      Array.from({ length: 10 }).map((_, i) => ({
         key: i,
         left: `${(i * 47) % 100}%`,
         top: `${(i * 73) % 100}%`,
@@ -83,9 +81,9 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
   // Sparkles que explodem no momento do "amount"
   const sparkles = React.useMemo(
     () =>
-      Array.from({ length: 28 }).map((_, i) => {
-        const angle = (i / 28) * Math.PI * 2 + (i % 2 === 0 ? 0 : 0.16);
-        const dist = 90 + (i % 4) * 42;
+      Array.from({ length: 14 }).map((_, i) => {
+        const angle = (i / 14) * Math.PI * 2 + (i % 2 === 0 ? 0 : 0.16);
+        const dist = 72 + (i % 3) * 28;
         return {
           key: i,
           x: Math.cos(angle) * dist,
@@ -97,18 +95,24 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
     [],
   );
 
-  const showAmount = ['amount', 'discount', 'hold'].includes(phase);
-  const showDiscount = ['discount', 'hold'].includes(phase);
-  const showWon = ['won', 'amount', 'discount', 'hold'].includes(phase);
-  const isRevealing = ['lidOff', 'won', 'amount', 'discount', 'hold'].includes(phase);
-  const isIntro = phase === 'intro';
+  // Evita um frame preto no Safari: quando `open` vira true, mostramos a intro
+  // imediatamente, sem esperar o useEffect atualizar `phase`.
+  const activePhase: Phase = open && phase === 'idle' ? 'intro' : phase;
+  const showAmount = ['amount', 'discount', 'hold'].includes(activePhase);
+  const showDiscount = ['discount', 'hold'].includes(activePhase);
+  const showWon = ['won', 'amount', 'discount', 'hold'].includes(activePhase);
+  const isRevealing = ['lidOff', 'won', 'amount', 'discount', 'hold'].includes(activePhase);
+  const isIntro = activePhase === 'intro';
+
+  if (!open && phase === 'idle') return null;
 
   const content = (
     <div
-      className="fixed inset-0 z-[2147483600] flex items-center justify-center px-5 overflow-hidden"
+      className="fixed inset-0 z-[100] flex items-center justify-center px-5 overflow-hidden"
       style={{
-        opacity: phase === 'out' ? 0 : 1,
-        transition: 'opacity 600ms ease',
+        opacity: activePhase === 'out' ? 0 : 1,
+        transition: 'opacity 420ms ease',
+        transform: 'translateZ(0)',
       }}
       aria-live="polite"
     >
@@ -117,7 +121,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse at 50% 35%, #6b1f5e 0%, #2a0a3a 45%, #0a0418 100%)',
+            'radial-gradient(ellipse at 50% 35%, hsl(310 55% 27%) 0%, hsl(280 70% 13%) 45%, hsl(260 70% 5%) 100%)',
         }}
       />
       {/* brilho rosa pulsante */}
@@ -125,7 +129,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'radial-gradient(circle at 50% 45%, rgba(236,72,153,0.35) 0%, transparent 55%)',
+            'radial-gradient(circle at 50% 45%, hsl(var(--primary) / 0.32) 0%, transparent 55%)',
           animation: 'clube-bg-pulse 3.6s ease-in-out infinite',
         }}
       />
@@ -142,8 +146,8 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
               width: s.size,
               height: s.size,
               background:
-                'radial-gradient(circle, #fff 0%, rgba(255,255,255,0.6) 50%, transparent 100%)',
-              boxShadow: '0 0 8px rgba(255,255,255,0.9), 0 0 14px rgba(236,72,153,0.6)',
+                'radial-gradient(circle, hsl(var(--foreground)) 0%, hsl(var(--foreground) / 0.55) 50%, transparent 100%)',
+              boxShadow: '0 0 8px hsl(var(--foreground) / 0.8), 0 0 12px hsl(var(--primary) / 0.45)',
               animation: `clube-twinkle ${s.dur}ms ease-in-out ${s.delay}ms infinite`,
             }}
           />
@@ -151,7 +155,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
       </div>
 
       {/* Botão fechar (sempre visível durante intro/reveal) */}
-      {phase !== 'out' && (
+      {activePhase !== 'out' && (
         <button
           type="button"
           onClick={handleClose}
@@ -178,8 +182,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[260px] w-[260px] rounded-full pointer-events-none"
               style={{
                 background:
-                  'radial-gradient(circle, rgba(236,72,153,0.6) 0%, rgba(168,85,247,0.3) 45%, transparent 75%)',
-                filter: 'blur(8px)',
+                  'radial-gradient(circle, hsl(var(--primary) / 0.55) 0%, hsl(280 70% 55% / 0.22) 48%, transparent 72%)',
                 animation: 'clube-glow-pulse 2.2s ease-in-out infinite',
               }}
             />
@@ -187,18 +190,20 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
             <img
               src={giftBody}
               alt=""
-              width={1024}
-              height={1024}
-              className="absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 h-[180px] sm:h-[210px] w-auto drop-shadow-[0_18px_28px_rgba(236,72,153,0.45)]"
+              width={512}
+              height={512}
+              decoding="async"
+              className="absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 h-[180px] sm:h-[210px] w-auto"
               style={{ animation: 'clube-gift-in 720ms cubic-bezier(.18,1.5,.3,1) both' }}
             />
             {/* Tampa */}
             <img
               src={giftLid}
               alt=""
-              width={1024}
-              height={1024}
-              className="absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 h-[150px] sm:h-[175px] w-auto drop-shadow-[0_10px_18px_rgba(236,72,153,0.55)]"
+              width={512}
+              height={512}
+              decoding="async"
+              className="absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 h-[150px] sm:h-[175px] w-auto"
               style={{
                 animation:
                   'clube-gift-in 720ms cubic-bezier(.18,1.5,.3,1) 120ms both, clube-lid-bob 2.4s ease-in-out 900ms infinite',
@@ -219,11 +224,12 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
           <button
             type="button"
             onClick={startReveal}
-            className="mt-7 inline-flex items-center justify-center rounded-full px-9 py-3.5 text-white font-bold text-lg shadow-[0_10px_30px_rgba(236,72,153,0.55)] hover:scale-[1.03] active:scale-[0.98] transition-transform"
+            className="mt-7 inline-flex items-center justify-center rounded-full px-9 py-3.5 text-primary-foreground font-bold text-lg hover:scale-[1.03] active:scale-[0.98] transition-transform"
             style={{
               backgroundImage:
-                'linear-gradient(90deg, #ec4899 0%, #f43f5e 50%, #ec4899 100%)',
+                'linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(350 90% 58%) 50%, hsl(var(--primary)) 100%)',
               backgroundSize: '200% 100%',
+              boxShadow: '0 10px 26px hsl(var(--primary) / 0.48)',
               animation:
                 'clube-fade-up 520ms ease 380ms both, clube-btn-shimmer 2.4s linear 900ms infinite',
             }}
@@ -241,8 +247,9 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
             src={giftLid}
             alt=""
             aria-hidden
-            width={1024}
-            height={1024}
+            width={512}
+            height={512}
+            decoding="async"
             className="pointer-events-none absolute left-1/2 top-[10%] -translate-x-1/2 h-[150px] w-auto"
             style={{
               animation: 'clube-lid-off 700ms cubic-bezier(.4,.0,.2,1) forwards',
@@ -278,7 +285,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
                   '--sparkle-y': `${s.y}px`,
                   opacity: 0,
                   animation:
-                    phase === 'amount'
+                    activePhase === 'amount'
                       ? `clube-sparkle 900ms cubic-bezier(.16,1,.3,1) ${s.delay}ms forwards`
                       : 'none',
                 } as React.CSSProperties}
@@ -324,6 +331,9 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
           12% { opacity: 1; }
           60% { opacity: 1; }
           100% { opacity: 0; transform: translate(calc(-50% + var(--sparkle-x)), calc(-50% + var(--sparkle-y))) scale(0.15); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          * { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; }
         }
         @keyframes clube-fade-up {
           0% { opacity: 0; transform: translateY(16px); }
