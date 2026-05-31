@@ -121,7 +121,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse at 50% 35%, #6b1f5e 0%, #2a0a3a 45%, #0a0418 100%)',
+            'radial-gradient(ellipse at 50% 35%, hsl(310 55% 27%) 0%, hsl(280 70% 13%) 45%, hsl(260 70% 5%) 100%)',
         }}
       />
       {/* brilho rosa pulsante */}
@@ -129,7 +129,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'radial-gradient(circle at 50% 45%, rgba(236,72,153,0.35) 0%, transparent 55%)',
+            'radial-gradient(circle at 50% 45%, hsl(var(--primary) / 0.32) 0%, transparent 55%)',
           animation: 'clube-bg-pulse 3.6s ease-in-out infinite',
         }}
       />
@@ -146,8 +146,8 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
               width: s.size,
               height: s.size,
               background:
-                'radial-gradient(circle, #fff 0%, rgba(255,255,255,0.6) 50%, transparent 100%)',
-              boxShadow: '0 0 8px rgba(255,255,255,0.9), 0 0 14px rgba(236,72,153,0.6)',
+                'radial-gradient(circle, hsl(var(--foreground)) 0%, hsl(var(--foreground) / 0.55) 50%, transparent 100%)',
+              boxShadow: '0 0 8px hsl(var(--foreground) / 0.8), 0 0 12px hsl(var(--primary) / 0.45)',
               animation: `clube-twinkle ${s.dur}ms ease-in-out ${s.delay}ms infinite`,
             }}
           />
@@ -224,11 +224,12 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
           <button
             type="button"
             onClick={startReveal}
-            className="mt-7 inline-flex items-center justify-center rounded-full px-9 py-3.5 text-white font-bold text-lg shadow-[0_10px_30px_rgba(236,72,153,0.55)] hover:scale-[1.03] active:scale-[0.98] transition-transform"
+            className="mt-7 inline-flex items-center justify-center rounded-full px-9 py-3.5 text-primary-foreground font-bold text-lg hover:scale-[1.03] active:scale-[0.98] transition-transform"
             style={{
               backgroundImage:
-                'linear-gradient(90deg, #ec4899 0%, #f43f5e 50%, #ec4899 100%)',
+                'linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(350 90% 58%) 50%, hsl(var(--primary)) 100%)',
               backgroundSize: '200% 100%',
+              boxShadow: '0 10px 26px hsl(var(--primary) / 0.48)',
               animation:
                 'clube-fade-up 520ms ease 380ms both, clube-btn-shimmer 2.4s linear 900ms infinite',
             }}
