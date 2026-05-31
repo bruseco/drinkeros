@@ -416,9 +416,10 @@ const UserRecipeDetail: React.FC = () => {
       <div className={showSwipe ? 'w-screen shrink-0' : undefined}>
 
       {/* Video / Cover */}
-      {embedUrl ? (
+      {youtubeSourceUrl ? (
         <FullscreenVideo
-          embedUrl={embedUrl}
+          embedUrl={youtubeSourceUrl}
+          sourceUrl={youtubeSourceUrl}
           title={recipe.title}
           thumbnailUrl={recipe.cover_image_url || undefined}
         />
