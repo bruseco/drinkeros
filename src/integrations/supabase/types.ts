@@ -1688,6 +1688,7 @@ export type Database = {
           full_name: string | null
           gender: string | null
           id: string
+          interests: string[]
           is_admin: boolean | null
           last_pwa_open_at: string | null
           last_sign_in_provider: string | null
@@ -1709,6 +1710,7 @@ export type Database = {
           full_name?: string | null
           gender?: string | null
           id?: string
+          interests?: string[]
           is_admin?: boolean | null
           last_pwa_open_at?: string | null
           last_sign_in_provider?: string | null
@@ -1730,6 +1732,7 @@ export type Database = {
           full_name?: string | null
           gender?: string | null
           id?: string
+          interests?: string[]
           is_admin?: boolean | null
           last_pwa_open_at?: string | null
           last_sign_in_provider?: string | null
