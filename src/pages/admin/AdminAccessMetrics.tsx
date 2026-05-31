@@ -68,6 +68,8 @@ const AdminAccessMetrics: React.FC = () => {
     const t = customTo ?? now;
     return { from: startOfDay(f), to: endOfDay(t) };
   }, [preset, customFrom, customTo]);
+  const { data: interestsMetrics } = useInterestsMetrics();
+
 
   const { data: metrics, isLoading } = useAccessMetrics(from, to);
   const { data: signupsCount } = useSignupsCount(from, to);
