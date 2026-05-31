@@ -22,6 +22,7 @@ import { useTotalClubMembers, TOTAL_CLUB_MEMBERS_FALLBACK } from '@/hooks/useTot
 import { useClubeIntroOffer, useIntroCountdown } from '@/hooks/useClubeIntroOffer';
 import { useClubeExitOffer } from '@/hooks/useClubeExitOffer';
 import { useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
+import { trackFunnel } from '@/lib/funnelTracking';
 import ClubeExitOffer from '@/components/user/ClubeExitOffer';
 import ClubeDiscountReveal from '@/components/user/ClubeDiscountReveal';
 
