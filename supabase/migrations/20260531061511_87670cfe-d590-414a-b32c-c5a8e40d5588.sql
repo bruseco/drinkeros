@@ -1,0 +1,1 @@
+REVOKE SELECT (file_url) ON public.ebooks FROM anon, authenticated;
