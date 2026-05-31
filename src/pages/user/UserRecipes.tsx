@@ -23,6 +23,8 @@ import { getPrimaryPhase } from '@/lib/seasonalPhases';
 import { Sparkles } from 'lucide-react';
 import { saveRecipeFeedOrder, consumeRecipeScrollTarget, recipeKey } from '@/lib/recipesFeedNav';
 import { useClubeExitOffer } from '@/hooks/useClubeExitOffer';
+import { useInterests, isProfessionalOnly } from '@/hooks/useInterests';
+
 
 const CATEGORY_FILTERS = [
   { label: 'Xaropes Artesanais', value: 'Xaropes Artesanais', icon: GlassWater },
@@ -310,6 +312,9 @@ const UserRecipes: React.FC = () => {
     } catch {}
   }, [search, selectedCategory]);
 
+  const { data: interests } = useInterests();
+  const professionalMode = isProfessionalOnly(interests);
+
   const {
     data,
     isLoading,
@@ -322,7 +327,9 @@ const UserRecipes: React.FC = () => {
     publishedOnly: true,
     randomOrder: true as const,
     characteristicFilter: selectedCategory || undefined,
+    professionalMode,
   });
+
 
   // Dedupe defensivo por id e título normalizado — caso o cache/hidratação misture
   // páginas antigas com novas, evita que o mesmo drink apareça repetido no feed.
