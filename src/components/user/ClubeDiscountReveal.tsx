@@ -328,6 +328,9 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
           60% { opacity: 1; }
           100% { opacity: 0; transform: translate(calc(-50% + var(--sparkle-x)), calc(-50% + var(--sparkle-y))) scale(0.15); }
         }
+        @media (prefers-reduced-motion: reduce) {
+          * { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; }
+        }
         @keyframes clube-fade-up {
           0% { opacity: 0; transform: translateY(16px); }
           100% { opacity: 1; transform: translateY(0); }
