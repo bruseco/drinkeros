@@ -64,8 +64,6 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
     window.setTimeout(() => onCloseRef.current(), 350);
   };
 
-  if (!open && phase === 'idle') return null;
-
   // Sparkles para fundo (ambiente, contínuos)
   const bgSparkles = React.useMemo(
     () =>
@@ -105,6 +103,8 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
   const showWon = ['won', 'amount', 'discount', 'hold'].includes(activePhase);
   const isRevealing = ['lidOff', 'won', 'amount', 'discount', 'hold'].includes(activePhase);
   const isIntro = activePhase === 'intro';
+
+  if (!open && phase === 'idle') return null;
 
   const content = (
     <div
