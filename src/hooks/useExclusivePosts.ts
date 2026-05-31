@@ -118,6 +118,24 @@ interface PaginatedPostsParams {
   publishedOnly?: boolean;
   randomOrder?: boolean;
   characteristicFilter?: string;
+  /** Quando true, reordena: clássicos+amargos primeiro; galera/universitário/carnaval/batidas por último (fases sazonais sempre vencem). */
+  professionalMode?: boolean;
+}
+
+// Tags que recebem boost quando o usuário marcou interesse "profissional".
+const PROFESSIONAL_BOOST_TAGS = new Set(['Clássico', 'Amargo']);
+// Tags que ficam por último para o usuário "profissional".
+const PROFESSIONAL_DEPRIORITIZE_TAGS = new Set([
+  'Drinks de Galera',
+  'Universitário',
+  'Carnaval',
+  'Batida',
+]);
+
+function hasAnyTag(characteristics: string[] | null | undefined, set: Set<string>): boolean {
+  if (!characteristics || characteristics.length === 0) return false;
+  for (const c of characteristics) if (set.has(c)) return true;
+  return false;
 }
 
 export const useExclusivePostsPaginated = ({
@@ -126,6 +144,7 @@ export const useExclusivePostsPaginated = ({
   publishedOnly = false,
   randomOrder = false,
   characteristicFilter,
+  professionalMode = false,
 }: PaginatedPostsParams = {}) => {
   // Stable seed for this hook instance — captured once on mount so all pages
   // of the infinite query use the SAME seed (no overlap between page 1 and 2).
@@ -133,7 +152,8 @@ export const useExclusivePostsPaginated = ({
   const seed = seedRef.current;
 
   return useInfiniteQuery({
-    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder, characteristicFilter, seed, version: RANDOM_FEED_VERSION }],
+    queryKey: ['exclusive-posts-paginated', { search, pageSize, publishedOnly, randomOrder, characteristicFilter, professionalMode, seed, version: RANDOM_FEED_VERSION }],
+
     queryFn: async ({ pageParam = 0 }) => {
       const from = pageParam * pageSize;
 
