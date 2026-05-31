@@ -118,19 +118,6 @@ export const FullscreenVideo: React.FC<FullscreenVideoProps> = ({
         )}
       </div>
 
-      {isYouTube && ytId && (
-        <div className="flex justify-center py-2">
-          <a
-            href={getYouTubeWatchUrl(ytId)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ExternalLink className="h-3.5 w-3.5" />
-            Problemas para assistir? Abrir no YouTube
-          </a>
-        </div>
-      )}
-    </div>
+}
   );
 };
