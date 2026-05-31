@@ -375,7 +375,7 @@ const UserRecipeDetail: React.FC = () => {
     );
   }
 
-  const embedUrl = recipe.youtube_url ? getYouTubeEmbedUrl(recipe.youtube_url) : null;
+  const youtubeSourceUrl = recipe.youtube_url || null;
 
   const instructionLines = recipe.instructions
     ? recipe.instructions.split('\n').filter(l => l.trim())
