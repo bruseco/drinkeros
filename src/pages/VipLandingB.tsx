@@ -171,6 +171,8 @@ PriceAmount.displayName = 'PriceAmount';
 const VipLandingB: React.FC = () => {
   useAbVariantTrack('clube', 'b');
   const { user } = useAuth();
+  // Funil: pageview da página /clube-b (dedup por sessão).
+  useEffect(() => { trackFunnel('clube-b', 'pageview', { userId: user?.id ?? null }); }, [user?.id]);
   const { data: planData } = useUserPlan();
   const { data: totalMembers } = useTotalClubMembers();
   const memberCount = (totalMembers ?? TOTAL_CLUB_MEMBERS_FALLBACK) + 1000;
