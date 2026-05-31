@@ -170,22 +170,69 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
       {isIntro && (
         <div className="relative z-[1] w-full max-w-[380px] text-center select-none">
           <div
-            className="text-white text-2xl sm:text-3xl font-light tracking-wide"
-            style={{ animation: 'clube-fade-up 520ms ease 80ms both' }}
+            className="text-white text-base sm:text-lg font-bold tracking-wide px-2"
+            style={{
+              animation: 'clube-fade-up 520ms ease 80ms both',
+              textShadow: '0 2px 18px rgba(236,72,153,0.55)',
+            }}
           >
-            O que tem dentro?
+            SUPER OFERTA PARA <span className="text-yellow-300">NOVOS CADASTRADOS!</span>
           </div>
 
-          <div className="relative mx-auto mt-6 mb-7 h-[260px] sm:h-[300px] w-full">
+          <div className="relative mx-auto mt-7 mb-6 h-[300px] sm:h-[340px] w-full">
+            {/* Faixos de luz girando atrás do presente */}
+            {[
+              { w: 540, h: 10, dur: '7s', dir: 'normal', op: 0.55, delay: '0s', color: 'hsl(320 95% 65%)' },
+              { w: 600, h: 8, dur: '11s', dir: 'reverse', op: 0.4, delay: '-2s', color: 'hsl(280 90% 70%)' },
+              { w: 500, h: 14, dur: '9s', dir: 'normal', op: 0.35, delay: '-4s', color: 'hsl(45 95% 70%)' },
+            ].map((b, i) => (
+              <div
+                key={i}
+                className="absolute left-1/2 top-1/2 pointer-events-none"
+                style={{
+                  width: b.w,
+                  height: b.h,
+                  marginLeft: -b.w / 2,
+                  marginTop: -b.h / 2,
+                  background: `radial-gradient(ellipse at center, ${b.color} 0%, transparent 75%)`,
+                  opacity: b.op,
+                  filter: 'blur(2px)',
+                  animation: `clube-beam-spin ${b.dur} linear ${b.delay} infinite`,
+                  animationDirection: b.dir as any,
+                  mixBlendMode: 'screen',
+                }}
+              />
+            ))}
+
             {/* Glow atrás do presente */}
             <div
               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[260px] w-[260px] rounded-full pointer-events-none"
               style={{
                 background:
-                  'radial-gradient(circle, hsl(var(--primary) / 0.55) 0%, hsl(280 70% 55% / 0.22) 48%, transparent 72%)',
+                  'radial-gradient(circle, hsl(var(--primary) / 0.45) 0%, hsl(280 70% 55% / 0.2) 48%, transparent 72%)',
                 animation: 'clube-glow-pulse 2.2s ease-in-out infinite',
               }}
             />
+
+            {/* Explosão de estrelas ao aparecer */}
+            {sparkles.map((s) => (
+              <span
+                key={`burst-${s.key}`}
+                className="absolute left-1/2 top-1/2 block rounded-full pointer-events-none"
+                style={{
+                  width: s.size,
+                  height: s.size,
+                  background:
+                    'radial-gradient(circle, #fff 0%, hsl(45 95% 70%) 55%, transparent 100%)',
+                  boxShadow: '0 0 16px hsl(45 95% 70% / 0.95)',
+                  '--sparkle-x': `${s.x * 1.7}px`,
+                  '--sparkle-y': `${s.y * 1.7}px`,
+                  opacity: 0,
+                  animation: `clube-sparkle 1100ms cubic-bezier(.16,1,.3,1) ${300 + s.delay}ms forwards`,
+                } as React.CSSProperties}
+              />
+            ))}
+
             {/* Corpo */}
             <img
               src={giftBody}
@@ -193,8 +240,8 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
               width={512}
               height={512}
               decoding="async"
-              className="absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 h-[180px] sm:h-[210px] w-auto"
-              style={{ animation: 'clube-gift-in 720ms cubic-bezier(.18,1.5,.3,1) both' }}
+              className="absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 h-[200px] sm:h-[230px] w-auto"
+              style={{ animation: 'clube-gift-in 720ms cubic-bezier(.18,1.5,.3,1) 200ms both' }}
             />
             {/* Tampa */}
             <img
@@ -203,22 +250,19 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
               width={512}
               height={512}
               decoding="async"
-              className="absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 h-[150px] sm:h-[175px] w-auto"
+              className="absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 h-[165px] sm:h-[190px] w-auto"
               style={{
                 animation:
-                  'clube-gift-in 720ms cubic-bezier(.18,1.5,.3,1) 120ms both, clube-lid-bob 2.4s ease-in-out 900ms infinite',
+                  'clube-gift-in 720ms cubic-bezier(.18,1.5,.3,1) 320ms both, clube-lid-bob 2.4s ease-in-out 1100ms infinite',
               }}
             />
           </div>
 
           <div
-            className="text-white text-base sm:text-lg font-bold tracking-wide px-2"
-            style={{
-              animation: 'clube-fade-up 520ms ease 260ms both',
-              textShadow: '0 2px 18px rgba(236,72,153,0.55)',
-            }}
+            className="text-white text-2xl sm:text-3xl font-light tracking-wide"
+            style={{ animation: 'clube-fade-up 520ms ease 480ms both' }}
           >
-            SUPER OFERTA PARA <span className="text-yellow-300">NOVOS CADASTRADOS!</span>
+            O que tem dentro?
           </div>
 
           <button
@@ -227,11 +271,11 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
             className="mt-7 inline-flex items-center justify-center rounded-full px-9 py-3.5 text-primary-foreground font-bold text-lg hover:scale-[1.03] active:scale-[0.98] transition-transform"
             style={{
               backgroundImage:
-                'linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(350 90% 58%) 50%, hsl(var(--primary)) 100%)',
-              backgroundSize: '200% 100%',
-              boxShadow: '0 10px 26px hsl(var(--primary) / 0.48)',
+                'linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(350 90% 58%) 25%, hsl(45 95% 65%) 50%, hsl(350 90% 58%) 75%, hsl(var(--primary)) 100%)',
+              backgroundSize: '300% 100%',
+              boxShadow: '0 10px 26px hsl(var(--primary) / 0.55), 0 0 40px hsl(var(--primary) / 0.4)',
               animation:
-                'clube-fade-up 520ms ease 380ms both, clube-btn-shimmer 2.4s linear 900ms infinite',
+                'clube-fade-up 520ms ease 640ms both, clube-btn-shimmer 2.6s linear 1100ms infinite, clube-btn-glow 2.2s ease-in-out 1100ms infinite',
             }}
           >
             Ver oferta!
@@ -366,7 +410,15 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
         }
         @keyframes clube-btn-shimmer {
           0% { background-position: 0% 50%; }
-          100% { background-position: 200% 50%; }
+          100% { background-position: 300% 50%; }
+        }
+        @keyframes clube-btn-glow {
+          0%, 100% { box-shadow: 0 10px 26px hsl(var(--primary) / 0.55), 0 0 40px hsl(var(--primary) / 0.4); }
+          50% { box-shadow: 0 10px 32px hsl(var(--primary) / 0.7), 0 0 60px hsl(45 95% 65% / 0.55); }
+        }
+        @keyframes clube-beam-spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
       `}</style>
     </div>
