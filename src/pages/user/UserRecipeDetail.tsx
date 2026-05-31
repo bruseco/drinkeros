@@ -343,24 +343,7 @@ const UserRecipeDetail: React.FC = () => {
   }, [recipe?.id]);
 
 
-  const getYouTubeEmbedUrl = (url: string) => {
-    try {
-      let videoId = '';
-      if (url.includes('youtu.be/')) {
-        videoId = url.split('youtu.be/')[1]?.split(/[?&#]/)[0] || '';
-      } else if (url.includes('youtube.com')) {
-        const urlObj = new URL(url);
-        videoId = urlObj.searchParams.get('v') || '';
-        if (!videoId && url.includes('/shorts/')) {
-          videoId = url.split('/shorts/')[1]?.split(/[?&#]/)[0] || '';
-        }
-      }
-      if (videoId) {
-        return `https://www.youtube-nocookie.com/embed/${videoId}?modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`;
-      }
-    } catch {}
-    return null;
-  };
+  // YouTube embed handling moved to FullscreenVideo + src/lib/youtube.ts
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -392,7 +375,7 @@ const UserRecipeDetail: React.FC = () => {
     );
   }
 
-  const embedUrl = recipe.youtube_url ? getYouTubeEmbedUrl(recipe.youtube_url) : null;
+  const youtubeSourceUrl = recipe.youtube_url || null;
 
   const instructionLines = recipe.instructions
     ? recipe.instructions.split('\n').filter(l => l.trim())
@@ -433,9 +416,10 @@ const UserRecipeDetail: React.FC = () => {
       <div className={showSwipe ? 'w-screen shrink-0' : undefined}>
 
       {/* Video / Cover */}
-      {embedUrl ? (
+      {youtubeSourceUrl ? (
         <FullscreenVideo
-          embedUrl={embedUrl}
+          embedUrl={youtubeSourceUrl}
+          sourceUrl={youtubeSourceUrl}
           title={recipe.title}
           thumbnailUrl={recipe.cover_image_url || undefined}
         />
