@@ -445,7 +445,70 @@ const NotificationsSection: React.FC = () => {
   );
 };
 
+const InterestsSection: React.FC = () => {
+  const { data: interests } = useInterests();
+  const updateInterests = useUpdateInterests();
+  const [profissional, setProfissional] = useState(false);
+  const [curticao, setCurticao] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setProfissional(!!interests?.includes('profissional'));
+    setCurticao(!!interests?.includes('curticao'));
+  }, [interests]);
+
+  const handleSave = async () => {
+    const next: Interest[] = [];
+    if (profissional) next.push('profissional');
+    if (curticao) next.push('curticao');
+    setSaving(true);
+    try {
+      await updateInterests.mutateAsync(next);
+      toast.success('Preferências atualizadas!');
+    } catch (err: any) {
+      toast.error('Erro ao salvar: ' + (err?.message ?? 'tente novamente'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4 p-4">
+      <p className="text-sm text-muted-foreground">
+        Marque seu interesse com drinks. Isso ajusta a ordem das receitas que aparecem no feed pra você. Fases sazonais (Natal, Carnaval, etc.) continuam aparecendo independente da escolha.
+      </p>
+      <label className="flex items-start gap-3 rounded-lg border border-border p-3 cursor-pointer hover:bg-accent/30 transition-colors">
+        <Checkbox checked={profissional} onCheckedChange={(v) => setProfissional(!!v)} className="mt-0.5" />
+        <span className="flex-1">
+          <span className="flex items-center gap-2 text-sm font-semibold">
+            <Briefcase className="h-4 w-4 text-accent" /> Profissional
+          </span>
+          <span className="block text-xs text-muted-foreground mt-1">
+            Sou ou quero ser bartender, trabalho com bar/eventos. Prioriza clássicos e amargos.
+          </span>
+        </span>
+      </label>
+      <label className="flex items-start gap-3 rounded-lg border border-border p-3 cursor-pointer hover:bg-accent/30 transition-colors">
+        <Checkbox checked={curticao} onCheckedChange={(v) => setCurticao(!!v)} className="mt-0.5" />
+        <span className="flex-1">
+          <span className="flex items-center gap-2 text-sm font-semibold">
+            <PartyPopper className="h-4 w-4 text-accent" /> Curtição
+          </span>
+          <span className="block text-xs text-muted-foreground mt-1">
+            É hobby, faço drinks pra mim e pra galera. Feed misturado, como está hoje.
+          </span>
+        </span>
+      </label>
+      <Button onClick={handleSave} disabled={saving} className="w-full">
+        <Save className="mr-2 h-4 w-4" />
+        {saving ? 'Salvando...' : 'Salvar Preferências'}
+      </Button>
+    </div>
+  );
+};
+
 const UserProfile: React.FC = () => {
+
   const { signOut, isSuperAdmin } = useAuth();
   const navigate = useNavigate();
   const [openSection, setOpenSection] = useState<string | null>(null);
