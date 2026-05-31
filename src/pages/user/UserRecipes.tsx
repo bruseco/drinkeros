@@ -413,7 +413,14 @@ const UserRecipes: React.FC = () => {
           <ScrollBar orientation="horizontal" className="invisible" />
         </ScrollArea>
 
-        <div ref={stickyRef} className="sticky top-0 z-[60] -mx-4 px-4 pt-4 pb-2 bg-background supports-[padding:max(0px)]:pt-[max(1rem,env(safe-area-inset-top))]">
+        <div
+          ref={stickyRef}
+          className="sticky z-[60] -mx-4 px-4 pt-4 pb-2 bg-background"
+          style={{
+            top: 'var(--top-banner-h, 0px)',
+            paddingTop: 'max(1rem, calc(env(safe-area-inset-top) - var(--top-banner-h, 0px)))',
+          }}
+        >
           <div className="mx-auto flex items-center gap-2 rounded-full border border-border/60 bg-background/95 px-3 py-2 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -430,7 +437,7 @@ const UserRecipes: React.FC = () => {
 
             {isStuck && (
               <Link to="/app" className="shrink-0 animate-fade-in mr-[7px]" aria-label="Ir para a página inicial">
-                <img src={drinkrosLogo} alt="Drinkeros" className="h-5 w-auto object-contain" />
+                <img src={drinkrosLogo} alt="Drinkeros" className="h-[21px] w-auto object-contain" />
               </Link>
             )}
           </div>
