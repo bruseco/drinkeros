@@ -348,7 +348,9 @@ const VipLandingB: React.FC = () => {
     setDisplayPrice(promo.promoPrice);
     if (priceSettleTimerRef.current !== null) window.clearTimeout(priceSettleTimerRef.current);
     priceSettleTimerRef.current = window.setTimeout(() => setPriceSettled(true), 620);
-  }, [promo]);
+    // Funil: 1ª oferta (R$97) revelada
+    trackFunnel('clube-b', 'offer_1_revealed', { amountCents: 9700, userId: user?.id ?? null });
+  }, [promo, user?.id]);
 
   useViewContent({
     key: 'clube-dos-drinkeros',
@@ -364,6 +366,7 @@ const VipLandingB: React.FC = () => {
     if (status === 'success') {
       toast.success('🎉 Acesso desbloqueado! Bem-vindo ao Clube dos Drinkeros.');
       queryClient.invalidateQueries({ queryKey: ['user-plan'] });
+      trackFunnel('clube-b', 'subscription_confirmed', { userId: user?.id ?? null });
       import('@/lib/firePurchaseFromBackend').then(m => m.firePurchaseFromBackend({ source: 'clube-success' }));
       searchParams.delete('vip');
       searchParams.delete('clube');
@@ -414,6 +417,16 @@ const VipLandingB: React.FC = () => {
         session_id: data.session_id,
       });
       trackAbConversion('clube');
+      // Funil: registra checkout iniciado por oferta
+      trackFunnel(
+        'clube-b',
+        offer === 'exit' ? 'checkout_2_started' : 'checkout_1_started',
+        {
+          amountCents: Math.round(Number(data.amount || 0) * 100),
+          userId: user?.id ?? null,
+          metadata: { offer, method: chosenMethod },
+        },
+      );
       await waitForPixelFlush();
 
       window.location.href = data.url;
