@@ -69,7 +69,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
   // Sparkles para fundo (ambiente, contínuos)
   const bgSparkles = React.useMemo(
     () =>
-      Array.from({ length: 22 }).map((_, i) => ({
+      Array.from({ length: 10 }).map((_, i) => ({
         key: i,
         left: `${(i * 47) % 100}%`,
         top: `${(i * 73) % 100}%`,
@@ -83,9 +83,9 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
   // Sparkles que explodem no momento do "amount"
   const sparkles = React.useMemo(
     () =>
-      Array.from({ length: 28 }).map((_, i) => {
-        const angle = (i / 28) * Math.PI * 2 + (i % 2 === 0 ? 0 : 0.16);
-        const dist = 90 + (i % 4) * 42;
+      Array.from({ length: 14 }).map((_, i) => {
+        const angle = (i / 14) * Math.PI * 2 + (i % 2 === 0 ? 0 : 0.16);
+        const dist = 72 + (i % 3) * 28;
         return {
           key: i,
           x: Math.cos(angle) * dist,
@@ -105,10 +105,11 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
 
   const content = (
     <div
-      className="fixed inset-0 z-[2147483600] flex items-center justify-center px-5 overflow-hidden"
+      className="fixed inset-0 z-[100] flex items-center justify-center px-5 overflow-hidden"
       style={{
         opacity: phase === 'out' ? 0 : 1,
-        transition: 'opacity 600ms ease',
+        transition: 'opacity 420ms ease',
+        transform: 'translateZ(0)',
       }}
       aria-live="polite"
     >
@@ -178,8 +179,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[260px] w-[260px] rounded-full pointer-events-none"
               style={{
                 background:
-                  'radial-gradient(circle, rgba(236,72,153,0.6) 0%, rgba(168,85,247,0.3) 45%, transparent 75%)',
-                filter: 'blur(8px)',
+                  'radial-gradient(circle, hsl(var(--primary) / 0.55) 0%, hsl(280 70% 55% / 0.22) 48%, transparent 72%)',
                 animation: 'clube-glow-pulse 2.2s ease-in-out infinite',
               }}
             />
@@ -187,18 +187,20 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
             <img
               src={giftBody}
               alt=""
-              width={1024}
-              height={1024}
-              className="absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 h-[180px] sm:h-[210px] w-auto drop-shadow-[0_18px_28px_rgba(236,72,153,0.45)]"
+              width={512}
+              height={512}
+              decoding="async"
+              className="absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 h-[180px] sm:h-[210px] w-auto"
               style={{ animation: 'clube-gift-in 720ms cubic-bezier(.18,1.5,.3,1) both' }}
             />
             {/* Tampa */}
             <img
               src={giftLid}
               alt=""
-              width={1024}
-              height={1024}
-              className="absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 h-[150px] sm:h-[175px] w-auto drop-shadow-[0_10px_18px_rgba(236,72,153,0.55)]"
+              width={512}
+              height={512}
+              decoding="async"
+              className="absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 h-[150px] sm:h-[175px] w-auto"
               style={{
                 animation:
                   'clube-gift-in 720ms cubic-bezier(.18,1.5,.3,1) 120ms both, clube-lid-bob 2.4s ease-in-out 900ms infinite',
@@ -241,8 +243,9 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
             src={giftLid}
             alt=""
             aria-hidden
-            width={1024}
-            height={1024}
+            width={512}
+            height={512}
+            decoding="async"
             className="pointer-events-none absolute left-1/2 top-[10%] -translate-x-1/2 h-[150px] w-auto"
             style={{
               animation: 'clube-lid-off 700ms cubic-bezier(.4,.0,.2,1) forwards',
