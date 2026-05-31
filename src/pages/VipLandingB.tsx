@@ -506,11 +506,11 @@ const VipLandingB: React.FC = () => {
         .viplanding-green-btn {
           background-image: linear-gradient(110deg, #166534 0%, #4ade80 25%, #22c55e 50%, #4ade80 75%, #166534 100%);
           background-size: 220% auto;
-          color: #052e16;
+          color: #ffffff;
           animation: viplanding-btn-shimmer 3.2s linear infinite, viplanding-btn-glow-green 2.6s ease-in-out infinite;
           will-change: background-position;
         }
-        .viplanding-green-btn:hover { filter: brightness(1.08); color: #052e16; }
+        .viplanding-green-btn:hover { filter: brightness(1.08); color: #ffffff; }
         .viplanding-gold-btn:hover { filter: brightness(1.05); }
         @media (prefers-reduced-motion: reduce) {
           .viplanding-price-btn-ready, .viplanding-green-btn { animation: none; }

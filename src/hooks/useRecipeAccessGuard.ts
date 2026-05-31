@@ -58,7 +58,7 @@ export const useRecipeAccessGuard = () => {
       // Xaropes: liberado para qualquer um com acesso pleno (inclui usuários importados com acesso manual)
       if (isVipOnlyCharacteristic(characteristics)) {
         if (hasFullRecipeAccess) return true;
-        navigate('/clube', { replace: true, state: { from: '/app/receitas' } });
+        navigate('/clube-b', { replace: true, state: { from: '/app/receitas' } });
         return false;
       }
 
@@ -93,7 +93,7 @@ export const useRecipeAccessGuard = () => {
       // Caso contrário, aplica limite diário de 1
       const withinFirstAccess = lifetime < FIRST_ACCESS_BONUS;
       if (!withinFirstAccess && count >= DAILY_LIMIT) {
-        navigate('/clube', { replace: true, state: { from: '/app/receitas' } });
+        navigate('/clube-b', { replace: true, state: { from: '/app/receitas' } });
         return false;
       }
 
