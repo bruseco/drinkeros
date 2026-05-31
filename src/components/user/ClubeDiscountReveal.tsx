@@ -97,17 +97,20 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
     [],
   );
 
-  const showAmount = ['amount', 'discount', 'hold'].includes(phase);
-  const showDiscount = ['discount', 'hold'].includes(phase);
-  const showWon = ['won', 'amount', 'discount', 'hold'].includes(phase);
-  const isRevealing = ['lidOff', 'won', 'amount', 'discount', 'hold'].includes(phase);
-  const isIntro = phase === 'intro';
+  // Evita um frame preto no Safari: quando `open` vira true, mostramos a intro
+  // imediatamente, sem esperar o useEffect atualizar `phase`.
+  const activePhase: Phase = open && phase === 'idle' ? 'intro' : phase;
+  const showAmount = ['amount', 'discount', 'hold'].includes(activePhase);
+  const showDiscount = ['discount', 'hold'].includes(activePhase);
+  const showWon = ['won', 'amount', 'discount', 'hold'].includes(activePhase);
+  const isRevealing = ['lidOff', 'won', 'amount', 'discount', 'hold'].includes(activePhase);
+  const isIntro = activePhase === 'intro';
 
   const content = (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center px-5 overflow-hidden"
       style={{
-        opacity: phase === 'out' ? 0 : 1,
+        opacity: activePhase === 'out' ? 0 : 1,
         transition: 'opacity 420ms ease',
         transform: 'translateZ(0)',
       }}
@@ -152,7 +155,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
       </div>
 
       {/* Botão fechar (sempre visível durante intro/reveal) */}
-      {phase !== 'out' && (
+      {activePhase !== 'out' && (
         <button
           type="button"
           onClick={handleClose}
@@ -281,7 +284,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
                   '--sparkle-y': `${s.y}px`,
                   opacity: 0,
                   animation:
-                    phase === 'amount'
+                    activePhase === 'amount'
                       ? `clube-sparkle 900ms cubic-bezier(.16,1,.3,1) ${s.delay}ms forwards`
                       : 'none',
                 } as React.CSSProperties}
