@@ -22,6 +22,7 @@ import { useTotalClubMembers, TOTAL_CLUB_MEMBERS_FALLBACK } from '@/hooks/useTot
 import { useClubeIntroOffer, useIntroCountdown } from '@/hooks/useClubeIntroOffer';
 import { useClubeExitOffer } from '@/hooks/useClubeExitOffer';
 import { useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
+import { trackFunnel } from '@/lib/funnelTracking';
 import ClubeExitOffer from '@/components/user/ClubeExitOffer';
 import ClubeDiscountReveal from '@/components/user/ClubeDiscountReveal';
 
@@ -170,6 +171,8 @@ PriceAmount.displayName = 'PriceAmount';
 const VipLandingB: React.FC = () => {
   useAbVariantTrack('clube', 'b');
   const { user } = useAuth();
+  // Funil: pageview da página /clube-b (dedup por sessão).
+  useEffect(() => { trackFunnel('clube-b', 'pageview', { userId: user?.id ?? null }); }, [user?.id]);
   const { data: planData } = useUserPlan();
   const { data: totalMembers } = useTotalClubMembers();
   const memberCount = (totalMembers ?? TOTAL_CLUB_MEMBERS_FALLBACK) + 1000;
@@ -345,7 +348,9 @@ const VipLandingB: React.FC = () => {
     setDisplayPrice(promo.promoPrice);
     if (priceSettleTimerRef.current !== null) window.clearTimeout(priceSettleTimerRef.current);
     priceSettleTimerRef.current = window.setTimeout(() => setPriceSettled(true), 620);
-  }, [promo]);
+    // Funil: 1ª oferta (R$97) revelada
+    trackFunnel('clube-b', 'offer_1_revealed', { amountCents: 9700, userId: user?.id ?? null });
+  }, [promo, user?.id]);
 
   useViewContent({
     key: 'clube-dos-drinkeros',
@@ -361,6 +366,7 @@ const VipLandingB: React.FC = () => {
     if (status === 'success') {
       toast.success('🎉 Acesso desbloqueado! Bem-vindo ao Clube dos Drinkeros.');
       queryClient.invalidateQueries({ queryKey: ['user-plan'] });
+      trackFunnel('clube-b', 'subscription_confirmed', { userId: user?.id ?? null });
       import('@/lib/firePurchaseFromBackend').then(m => m.firePurchaseFromBackend({ source: 'clube-success' }));
       searchParams.delete('vip');
       searchParams.delete('clube');
@@ -411,6 +417,16 @@ const VipLandingB: React.FC = () => {
         session_id: data.session_id,
       });
       trackAbConversion('clube');
+      // Funil: registra checkout iniciado por oferta
+      trackFunnel(
+        'clube-b',
+        offer === 'exit' ? 'checkout_2_started' : 'checkout_1_started',
+        {
+          amountCents: Math.round(Number(data.amount || 0) * 100),
+          userId: user?.id ?? null,
+          metadata: { offer, method: chosenMethod },
+        },
+      );
       await waitForPixelFlush();
 
       window.location.href = data.url;
@@ -442,6 +458,13 @@ const VipLandingB: React.FC = () => {
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
   }, [user, exitOfferDismissed, canStartExitOffer, isExitOfferActive, startExitOffer]);
+
+  // Funil: 2ª oferta (R$69) revelada quando o exit popup abre
+  useEffect(() => {
+    if (exitOpen) {
+      trackFunnel('clube-b', 'offer_2_revealed', { amountCents: 6900, userId: user?.id ?? null });
+    }
+  }, [exitOpen, user?.id]);
 
   const handleExitAccept = () => handleSubscribe('card', 'exit');
   const handleExitDismiss = () => {

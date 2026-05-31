@@ -1,100 +1,92 @@
-# Promo R$97 por usuário + reveal cinematográfico do desconto
+# Reestruturar Páginas de Venda em 3 níveis
 
-## 1. Elegibilidade por usuário (banco, não browser)
+## Objetivo
+Transformar a tela atual de `Páginas de Venda` (que mistura tudo numa lista única) num drill-down de 3 níveis, com funil completo por página.
 
-### Banco
-Adicionar em `profiles`:
-- `clube_intro_eligible_until timestamptz` — quando a janela de 30 min expira para esse usuário
-- `clube_intro_revealed_at timestamptz` — quando a animação já rodou (pra não repetir)
+## Nível 1 — Lista de Produtos (`/admin/paginas-venda`)
+Vira uma grade/lista enxuta de **produtos** (não páginas):
+- Clube dos Drinkeros, Mixologia Avançada, Bar p/ Eventos, etc.
+- Cada card mostra: capa, nome, tipo (Assinatura/Compra), preço, status Stripe, e nº de páginas/variantes ativas.
+- Clicar no card abre o Nível 2.
+- Removo daqui a coluna Link público e o painel A/B (vai pro Nível 2).
 
-Atualizar trigger `handle_new_user` para setar, em todo cadastro novo (email, Google, Apple):
-```
-clube_intro_eligible_until := now() + interval '30 minutes'
-```
-Usuários antigos ficam `NULL` → nunca veem R$97.
+## Nível 2 — Páginas do Produto (`/admin/paginas-venda/:productKey`)
+Mostra todas as **páginas/variantes** desse produto:
+- Para o Clube: linhas para `/clube` (Variante A) e `/clube-b` (Variante B) — com badge "Ativa" baseado no `ab_tests` (split + winner).
+- Para cursos/ebooks sem A/B: só uma página (`/slug`); botão "Criar variante B" se quiser ativar teste.
+- Cada linha: caminho, status (Ativa/Pausada/Vencedora), visitas, conversões resumidas, % tráfego.
+- Controles de teste A/B (split, pausar, declarar vencedor, remover) ficam aqui no topo.
+- Clicar numa página abre o Nível 3.
 
-### Backend `create-club-checkout`
-Antes de aplicar o cupom `CLUBE_INTRO_100`, validar:
-```
-if offer === 'intro' && (eligible_until is null || eligible_until < now())
-  → forçar offer = 'full' (cobra R$197)
-```
-Impede manipulação do front.
-
-### Hook `useClubeIntroOffer`
-- Remover `localStorage` como fonte de verdade.
-- Buscar `clube_intro_eligible_until` do `profiles` do usuário logado (via React Query).
-- `isActive = eligible_until && now < eligible_until`
-- `remainingMs = eligible_until - now`
-- Countdown derivado disso.
-- Para visitante deslogado: `isActive = false` (mostra R$197 como base; cadastro vai disparar).
-
-## 2. Reveal cinematográfico
-
-### Componente novo: `src/components/user/ClubeDiscountReveal.tsx`
-Overlay fullscreen `fixed inset-0 z-[100] bg-black/95 backdrop-blur` com 3 fases:
+## Nível 3 — Funil da Página (`/admin/paginas-venda/:productKey/:pageSlug`)
+Mostra o funil completo de conversão da página específica. Para `/clube-b`:
 
 ```text
-fase 1 (0.0s – 0.8s):  "Você ganhou" fade-in + slide-up
-fase 2 (0.8s – 1.8s):  "R$100" scale 0 → 1 com spring + sparkles explodindo
-                        (Framer Motion + sparkles via partículas CSS/SVG)
-fase 3 (1.8s – 2.4s):  "de desconto." fade-in abaixo
-fase 4 (2.4s – 4.4s):  segura tudo na tela
-fase 5 (4.4s – 5.0s):  fade-out do overlay
-fase 6 (após fechar):   preço 197 faz roll-down (CountUp de 197 → 97 em ~1s)
-fase 7:                 barra fixa de countdown aparece no topo (slide-down)
+PageViews                  ████████████████  N
+↓
+1ª Oferta revelada (R$97)  ████████████      N (% da etapa anterior)
+↓
+1º Checkout (R$97/ano)     ████████          N (%)
+↓
+2ª Oferta revelada (R$69)  ██████            N (%)
+↓
+2º Checkout (R$69/ano)     ████              N (%)
+↓
+Assinaturas confirmadas    ██                N (%)
 ```
 
-Sparkles: 12–16 partículas douradas (`hsl(var(--accent))` ou tom gold já usado em viplanding-gold-text) saindo do centro do "R$100" com `transform: translate(rx, ry) scale(0)` → `(rx*8, ry*8) scale(1) opacity:0`.
+Visual: barras horizontais decrescentes + número absoluto + % da etapa anterior + % do topo. Filtro de período (Hoje / 7d / 30d / Tudo).
 
-### Gatilho na VipLandingB
-- Quando o card de preço entrar no viewport (IntersectionObserver) **E** `promo.isActive` for true **E** `clube_intro_revealed_at` for null:
-  - Esperar 2s
-  - Disparar reveal
-  - Ao final, marcar `clube_intro_revealed_at = now()` no banco (pra não repetir em refresh)
-  - Trigger do roll-down do preço (CountUp animado de 197 → 97)
-  - Mostrar barra sticky de countdown
+## Tracking necessário (novo)
 
-### Roll-down do preço (197 → 97)
-Componente `AnimatedNumber` já existe no projeto. Usar com easing por ~1s após o overlay fechar. Antes do reveal o card mostra 197 sem riscado; depois do reveal mostra "de R$ 197" riscado + "R$97" com countdown.
+Hoje só existe `ab_track_visit` e `ab_track_conversion` (que conta clique de checkout). Pro funil acima preciso de eventos nomeados por página.
 
-## 3. Barra sticky de countdown global
+**Nova tabela** `page_funnel_events`:
+- `page_key` (text) — ex: `clube-b`
+- `event` (text) — `pageview` | `offer_1_revealed` | `checkout_1_started` | `offer_2_revealed` | `checkout_2_started` | `subscription_confirmed`
+- `session_id` (text) — pra deduplicar por sessão
+- `user_id` (uuid, nullable)
+- `amount_cents` (int, nullable) — pra registrar 9700 / 6900
+- `created_at` (timestamptz)
 
-### Componente novo: `src/components/user/ClubeIntroStickyBar.tsx`
-- `fixed top-0 inset-x-0 z-50` com safe-area-inset-top.
-- Fundo gradient roxo→dourado, texto branco com countdown `mm:ss`.
-- CTA "Aproveitar R$97" → leva pra `/clube-b#clube-pricing`.
-- Some quando `remainingMs <= 0`.
+**RPC** `track_funnel_event(page_key, event, session_id, user_id, amount_cents)` com dedup (não conta o mesmo `event+session_id` duas vezes).
 
-### Montagem global
-Adicionar no `UserLayout.tsx` (e talvez no `App.tsx` pra cobrir landing também) — só renderiza se `promo.isActive`. Como navega entre páginas, fica visível continuamente até o tempo zerar. Adicionar `padding-top` dinâmico no layout pra não cobrir conteúdo.
+**RPC** `get_page_funnel(page_key, since)` que retorna contagens agregadas por etapa.
 
-### Persistência ao navegar
-Como a fonte é o banco (`eligible_until`), o React Query mantém o valor em cache; ao trocar de rota a barra continua com a contagem correta.
+## Pontos de instrumentação no código
 
-## 4. Reverter
+1. `VipLanding.tsx` e `VipLandingB.tsx`:
+   - `useEffect` no mount → `pageview` (já existe `ab_track_visit`, adicionar funnel também).
+   - Quando `ClubeDiscountReveal` abre pela 1ª vez → `offer_1_revealed` (amount 9700).
+   - Quando usuário clica checkout R$97 → `checkout_1_started` (já dispara `ab_track_conversion`, adicionar funnel).
+   - Quando `ClubeExitOffer` abre → `offer_2_revealed` (amount 6900).
+   - Quando clica checkout R$69 → `checkout_2_started`.
+2. Webhook Stripe (`stripe-webhook` edge function) → ao confirmar assinatura do Clube, insere `subscription_confirmed` com `page_key` lido do `metadata.page_key` da sessão (passar no `createCheckoutSession`).
 
-- `src/hooks/useClubeIntroOffer.ts`: remover toda a lógica de `localStorage` e do reset por visita.
-- Mantém apenas `CLUBE_PRICE_INTRO/FULL` como constantes.
+Para cursos/ebooks o funil simplifica para: PageViews → Checkout iniciado → Compra confirmada.
 
-## Fluxos impactados
+## Arquivos
 
-- **Cadastro novo** (qualquer método): chega em `/clube-b` → vê R$197 → 2s depois animação → R$97 + countdown 30min sticky.
-- **Mesmo usuário voltando**: vê R$97 direto + countdown (sem animação, pois `revealed_at` já está setado), até zerar a janela.
-- **Usuário antigo / janela expirada**: vê R$197, sem animação, sem countdown.
-- **Visitante deslogado**: vê R$197. CTA leva pra signup; após cadastrar, ganha os 30 min.
-- **Backend**: cupom só aplicado quando elegível.
+**Criar:**
+- `supabase/migrations/<timestamp>_page_funnel.sql` — tabela + RPCs + grants.
+- `src/hooks/usePageFunnel.ts` — query agregada.
+- `src/hooks/useFunnelTracking.ts` — helper client-side com dedup por sessionStorage.
+- `src/pages/admin/AdminSalesProduct.tsx` — Nível 2.
+- `src/pages/admin/AdminSalesPage.tsx` — Nível 3 (funil).
+
+**Editar:**
+- `src/pages/admin/AdminSalesPages.tsx` — vira só Nível 1 (lista de produtos).
+- `src/App.tsx` — adicionar rotas dos níveis 2 e 3.
+- `src/pages/VipLanding.tsx` / `src/pages/VipLandingB.tsx` — disparar eventos do funil.
+- `src/components/user/ClubeExitOffer.tsx` — disparar `offer_2_revealed` / `checkout_2_started`.
+- `supabase/functions/stripe-webhook/index.ts` — registrar `subscription_confirmed`.
+- `supabase/functions/create-checkout-session/index.ts` (ou equivalente) — propagar `page_key` no metadata.
+
+## Não muda
+- Banco de pagamentos, RLS de outras tabelas, autenticação, tracking de Meta Pixel, rotas públicas, PWA.
+- `ab_tests` continua existindo (split de tráfego). Só ganha uma "irmã" pro funil detalhado.
 
 ## Como testar
-
-1. Criar conta nova → ir pra `/clube-b` → ver animação completa → preço cai pra 97 → barra sticky aparece.
-2. Navegar pelo app → barra continua no topo com countdown decrementando.
-3. F5 na página → vê 97 + countdown direto, sem animação.
-4. Avançar `clube_intro_eligible_until` pro passado no DB → recarregar → vira 197, barra some.
-5. Logar com `teste@teste.com.br` antigo → 197 direto.
-6. Tentar forçar `offer:'intro'` no checkout sem elegibilidade → backend cobra 197.
-
-## Perguntas
-
-1. **Quem perde a janela** (fechou o app antes de 30 min sem comprar): perde de vez ou ganha mais alguma chance? Sugestão: perde — quem volta vê só a oferta de saída de R$69.
-2. **Barra sticky deve aparecer também na landing pública `/clube-b` no topo, ou só nas páginas internas (`/app/*`)?** Atualmente o topo da `/clube-b` já tem um banner próprio; podem coexistir ou a sticky substitui o banner enquanto ativa.
+1. `/admin/paginas-venda` → mostra só produtos.
+2. Clicar em "Clube dos Drinkeros" → lista `/clube` e `/clube-b` com controles A/B.
+3. Clicar em `/clube-b` → ver funil. Abrir `/clube-b` numa aba anônima, fechar overlay, clicar checkout — números sobem em tempo real (refetch a cada 30s).

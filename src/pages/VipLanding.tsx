@@ -156,6 +156,10 @@ const VipLanding: React.FC = () => {
     fullPrice: clubeSettings?.full_price,
   });
   useAbTest('clube');
+  // Funil: pageview da página /clube
+  useEffect(() => {
+    import('@/lib/funnelTracking').then((m) => m.trackFunnel('clube', 'pageview', { userId: user?.id ?? null }));
+  }, [user?.id]);
 
   useViewContent({
     key: 'clube-dos-drinkeros',
@@ -188,6 +192,7 @@ const VipLanding: React.FC = () => {
     if (status === 'success') {
       toast.success('🎉 Bem-vindo ao Clube dos Drinkeros! Seu acesso já está liberado.');
       queryClient.invalidateQueries({ queryKey: ['user-plan'] });
+      import('@/lib/funnelTracking').then((m) => m.trackFunnel('clube', 'subscription_confirmed', { userId: user?.id ?? null }));
       // Dispara Purchase com dados REAIS da transação (Stripe ou Mercado Pago)
       import('@/lib/firePurchaseFromBackend').then(m => m.firePurchaseFromBackend({ source: 'clube-success' }));
       searchParams.delete('vip');
@@ -232,6 +237,11 @@ const VipLanding: React.FC = () => {
         session_id: data.session_id,
       });
       trackAbConversion('clube');
+      import('@/lib/funnelTracking').then((m) => m.trackFunnel('clube', 'checkout_1_started', {
+        amountCents: Math.round(Number(data.amount || 0) * 100),
+        userId: user?.id ?? null,
+        metadata: { method: chosenMethod },
+      }));
       await waitForPixelFlush();
 
       window.location.href = data.url;

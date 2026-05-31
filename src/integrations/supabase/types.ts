@@ -1674,6 +1674,39 @@ export type Database = {
         }
         Relationships: []
       }
+      page_funnel_events: {
+        Row: {
+          amount_cents: number | null
+          created_at: string
+          event: string
+          id: number
+          metadata: Json | null
+          page_key: string
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          amount_cents?: number | null
+          created_at?: string
+          event: string
+          id?: number
+          metadata?: Json | null
+          page_key: string
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          amount_cents?: number | null
+          created_at?: string
+          event?: string
+          id?: number
+          metadata?: Json | null
+          page_key?: string
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -3451,6 +3484,13 @@ export type Database = {
           name: string
         }[]
       }
+      get_page_funnel: {
+        Args: { _page_key: string; _since?: string }
+        Returns: {
+          count: number
+          event: string
+        }[]
+      }
       get_public_tracking_settings: {
         Args: never
         Returns: {
@@ -3577,6 +3617,17 @@ export type Database = {
       }
       slugify: { Args: { v: string }; Returns: string }
       start_vip_discount_window: { Args: never; Returns: string }
+      track_funnel_event: {
+        Args: {
+          _amount_cents?: number
+          _event: string
+          _metadata?: Json
+          _page_key: string
+          _session_id: string
+          _user_id?: string
+        }
+        Returns: undefined
+      }
       unaccent: { Args: { "": string }; Returns: string }
       validate_certificate: {
         Args: { _code: string; _cpf: string }
