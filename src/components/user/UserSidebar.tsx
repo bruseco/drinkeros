@@ -11,7 +11,7 @@ import batalhaIconAtivo from '@/assets/ico-batalha-ativo.png';
 const navItems = [
   { icon: Wine, label: 'Receitas', href: '/app/receitas' },
   { icon: GraduationCap, label: 'Cursos', href: '/app/cursos' },
-  { label: 'Batalha', href: '/app/batalha', img: batalhaIcon, imgActive: batalhaIconAtivo, comingSoon: true },
+  { label: 'Batalha', href: '/app/batalha', img: batalhaIcon, imgActive: batalhaIconAtivo, isNew: true },
   { icon: BookOpen, label: 'Ebooks', href: '/app/ebooks' },
   { icon: Heart, label: 'Favoritos', href: '/app/favoritos' },
 ];
@@ -42,25 +42,15 @@ export const UserSidebar: React.FC = () => {
                 <item.icon className="h-5 w-5 shrink-0" />
               )}
               <span>{item.label}</span>
-              {item.comingSoon && (
-                <span className="ml-auto text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-muted-foreground/20 text-muted-foreground">
-                  Em breve
+              {item.isNew && (
+                <span className="ml-auto text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
+                  Novo
                 </span>
               )}
             </>
           );
 
-          if (item.comingSoon) {
-            return (
-              <div
-                key={item.href}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground/60 cursor-not-allowed"
-                aria-disabled="true"
-              >
-                {content}
-              </div>
-            );
-          }
+
 
           return (
             <Link

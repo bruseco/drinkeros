@@ -20,7 +20,7 @@ export const UserNavbar: React.FC = () => {
   const navItems = [
     { icon: Wine, label: 'Receitas', href: '/app/receitas' },
     { icon: GraduationCap, label: 'Cursos', href: '/app/cursos' },
-    { label: 'Batalha', href: '/app/batalha', img: batalhaIcon, imgActive: batalhaIconAtivo, comingSoon: true },
+    { label: 'Batalha', href: '/app/batalha', img: batalhaIcon, imgActive: batalhaIconAtivo, isNew: true },
     { icon: BookOpen, label: 'Ebooks', href: '/app/ebooks' },
     { icon: Heart, label: 'Favoritos', href: '/app/favoritos' },
   ];
@@ -70,25 +70,15 @@ export const UserNavbar: React.FC = () => {
                 <span className={cn("text-[10px] font-medium transition-all duration-300", isActive && "font-semibold")}>
                   {item.label}
                 </span>
-                {item.comingSoon && (
-                  <span className="absolute -top-1 right-0 text-[8px] font-bold uppercase tracking-wide px-1 py-0.5 rounded-full bg-muted-foreground/20 text-muted-foreground leading-none">
-                    Breve
+                {item.isNew && (
+                  <span className="absolute -top-1 right-0 text-[8px] font-bold uppercase tracking-wide px-1 py-0.5 rounded-full bg-primary text-primary-foreground leading-none">
+                    Novo
                   </span>
                 )}
               </>
             );
 
-            if (item.comingSoon) {
-              return (
-                <div
-                  key={item.href}
-                  className="relative flex flex-col items-center gap-1 px-3 py-2 text-muted-foreground/60 cursor-not-allowed"
-                  aria-disabled="true"
-                >
-                  {inner}
-                </div>
-              );
-            }
+
 
             return (
               <Link
