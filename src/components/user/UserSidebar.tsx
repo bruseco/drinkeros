@@ -42,25 +42,15 @@ export const UserSidebar: React.FC = () => {
                 <item.icon className="h-5 w-5 shrink-0" />
               )}
               <span>{item.label}</span>
-              {item.comingSoon && (
-                <span className="ml-auto text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-muted-foreground/20 text-muted-foreground">
-                  Em breve
+              {item.isNew && (
+                <span className="ml-auto text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
+                  Novo
                 </span>
               )}
             </>
           );
 
-          if (item.comingSoon) {
-            return (
-              <div
-                key={item.href}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground/60 cursor-not-allowed"
-                aria-disabled="true"
-              >
-                {content}
-              </div>
-            );
-          }
+
 
           return (
             <Link
