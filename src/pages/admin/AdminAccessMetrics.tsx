@@ -241,7 +241,7 @@ const AdminAccessMetrics: React.FC = () => {
               <CardTitle className="text-base flex items-center gap-2">
                 <Repeat className="h-4 w-4" /> Recorrência de uso do app
               </CardTitle>
-              <CardDescription>Quantos usuários voltaram ao app — agrupados por número total de sessões</CardDescription>
+              <CardDescription>Quantos dias distintos cada usuário logado retornou ao site (qualquer atividade conta)</CardDescription>
             </CardHeader>
             <CardContent>
               <RecurrenceChart data={demographics?.recurrence} />
