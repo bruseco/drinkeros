@@ -528,4 +528,88 @@ const PlanStat: React.FC<{
   );
 };
 
+interface PieDatum { name: string; value: number; color: string }
+
+const DemoPie: React.FC<{ title: string; data: PieDatum[]; total: number }> = ({ title, data, total }) => {
+  const filtered = data.filter((d) => d.value > 0);
+  const hasData = filtered.length > 0;
+  return (
+    <div className="rounded-lg border border-border bg-muted/20 p-4">
+      <div className="flex items-baseline justify-between mb-2">
+        <h4 className="text-sm font-semibold text-foreground">{title}</h4>
+        <span className="text-xs text-muted-foreground tabular-nums">{total.toLocaleString('pt-BR')}</span>
+      </div>
+      <div className="h-44">
+        {hasData ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={filtered} dataKey="value" nameKey="name" innerRadius={36} outerRadius={64} paddingAngle={2} stroke="none">
+                {filtered.map((entry, i) => (
+                  <Cell key={i} fill={entry.color} />
+                ))}
+              </Pie>
+              <RTooltip
+                contentStyle={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
+                formatter={(v: number, n) => [`${v.toLocaleString('pt-BR')} (${total > 0 ? ((v / total) * 100).toFixed(1) : 0}%)`, n]}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex items-center justify-center h-full text-xs text-muted-foreground">Sem dados</div>
+        )}
+      </div>
+      <ul className="mt-2 space-y-1">
+        {data.map((d) => (
+          <li key={d.name} className="flex items-center gap-2 text-xs">
+            <span className="h-2 w-2 rounded-full shrink-0" style={{ background: d.color }} />
+            <span className="text-muted-foreground flex-1 truncate">{d.name}</span>
+            <span className="tabular-nums font-medium text-foreground">{d.value.toLocaleString('pt-BR')}</span>
+            <span className="tabular-nums text-muted-foreground w-10 text-right">
+              {total > 0 ? `${((d.value / total) * 100).toFixed(0)}%` : '—'}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+const RecurrenceChart: React.FC<{ data?: DemographicsMetricsRecurrence }> = ({ data }) => {
+  const rows = [
+    { label: '1 acesso', value: data?.b_1 ?? 0 },
+    { label: '2–4 acessos', value: data?.b_2_4 ?? 0 },
+    { label: '+5 acessos', value: data?.b_5_plus ?? 0 },
+    { label: '+50 acessos', value: data?.b_50_plus ?? 0 },
+    { label: '+100 acessos', value: data?.b_100_plus ?? 0 },
+    { label: '+500 acessos', value: data?.b_500_plus ?? 0 },
+    { label: '+1000 acessos', value: data?.b_1000_plus ?? 0 },
+  ];
+  return (
+    <div>
+      <div className="h-72">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={rows} margin={{ top: 16, right: 16, left: 0, bottom: 8 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+            <XAxis dataKey="label" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} tickLine={false} axisLine={false} interval={0} angle={-15} textAnchor="end" height={50} />
+            <YAxis tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} tickLine={false} axisLine={false} allowDecimals={false} />
+            <RTooltip
+              contentStyle={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
+              formatter={(v: number) => [v.toLocaleString('pt-BR'), 'Usuários']}
+            />
+            <Bar dataKey="value" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]}>
+              <LabelList dataKey="value" position="top" style={{ fill: 'hsl(var(--foreground))', fontSize: 11, fontWeight: 600 }} />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      <p className="text-xs text-muted-foreground mt-2">
+        Total de usuários com pelo menos 1 sessão registrada: {(data?.total ?? 0).toLocaleString('pt-BR')}
+      </p>
+    </div>
+  );
+};
+
+type DemographicsMetricsRecurrence = NonNullable<ReturnType<typeof useDemographicsMetrics>['data']>['recurrence'];
+
 export default AdminAccessMetrics;
+
