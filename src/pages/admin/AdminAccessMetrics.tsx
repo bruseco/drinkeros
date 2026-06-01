@@ -188,26 +188,67 @@ const AdminAccessMetrics: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Interesses dos usuários */}
+          {/* Demografia: Sexo, Idade, Interesse */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <Heart className="h-4 w-4" /> Interesses dos usuários
+                <Heart className="h-4 w-4" /> Demografia dos usuários
               </CardTitle>
-              <CardDescription>Preferência escolhida no onboarding (ou ajustada no perfil)</CardDescription>
+              <CardDescription>Distribuição por sexo, faixa etária e interesse declarado</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <PlanStat label="Profissional" value={interestsMetrics?.profissional ?? 0} tone="primary" />
-                <PlanStat label="Curtição" value={interestsMetrics?.curticao ?? 0} tone="info" />
-                <PlanStat label="Ambos" value={interestsMetrics?.ambos ?? 0} tone="gold" />
-                <PlanStat label="Não informou" value={interestsMetrics?.nenhum ?? 0} tone="muted" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <DemoPie
+                  title="Sexo"
+                  data={[
+                    { name: 'Masculino', value: demographics?.gender.masculino ?? 0, color: 'hsl(217 91% 60%)' },
+                    { name: 'Feminino', value: demographics?.gender.feminino ?? 0, color: 'hsl(330 81% 60%)' },
+                    { name: 'Outro', value: demographics?.gender.outro ?? 0, color: 'hsl(45 93% 58%)' },
+                    { name: 'Não informou', value: demographics?.gender.nao_informado ?? 0, color: 'hsl(220 9% 46%)' },
+                  ]}
+                  total={demographics?.gender.total ?? 0}
+                />
+                <DemoPie
+                  title="Idade"
+                  data={[
+                    { name: '< 18', value: demographics?.age.menor_18 ?? 0, color: 'hsl(280 70% 60%)' },
+                    { name: '18-24', value: demographics?.age.de_18_24 ?? 0, color: 'hsl(217 91% 60%)' },
+                    { name: '25-34', value: demographics?.age.de_25_34 ?? 0, color: 'hsl(160 65% 45%)' },
+                    { name: '35-44', value: demographics?.age.de_35_44 ?? 0, color: 'hsl(45 93% 58%)' },
+                    { name: '45-54', value: demographics?.age.de_45_54 ?? 0, color: 'hsl(20 90% 55%)' },
+                    { name: '55+', value: demographics?.age.mais_55 ?? 0, color: 'hsl(0 75% 55%)' },
+                    { name: 'Não informou', value: demographics?.age.nao_informado ?? 0, color: 'hsl(220 9% 46%)' },
+                  ]}
+                  total={demographics?.age.total ?? 0}
+                />
+                <DemoPie
+                  title="Interesse"
+                  data={[
+                    { name: 'Profissional', value: demographics?.interests.profissional ?? 0, color: 'hsl(var(--primary))' },
+                    { name: 'Curtição', value: demographics?.interests.curticao ?? 0, color: 'hsl(217 91% 60%)' },
+                    { name: 'Ambos', value: demographics?.interests.ambos ?? 0, color: 'hsl(45 93% 58%)' },
+                    { name: 'Não informou', value: demographics?.interests.nenhum ?? 0, color: 'hsl(220 9% 46%)' },
+                  ]}
+                  total={demographics?.interests.total ?? 0}
+                />
               </div>
-              <p className="text-xs text-muted-foreground mt-3">
-                Total: {(interestsMetrics?.total ?? 0).toLocaleString('pt-BR')} usuários
-              </p>
             </CardContent>
           </Card>
+
+          {/* Recorrência de uso */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Repeat className="h-4 w-4" /> Recorrência de uso do app
+              </CardTitle>
+              <CardDescription>Quantos usuários voltaram ao app — agrupados por número total de sessões</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RecurrenceChart data={demographics?.recurrence} />
+            </CardContent>
+          </Card>
+
+
 
 
 
