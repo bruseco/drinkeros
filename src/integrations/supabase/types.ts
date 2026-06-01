@@ -3475,6 +3475,7 @@ export type Database = {
         Returns: Json
       }
       get_current_battle_recipe_ids: { Args: never; Returns: string[] }
+      get_demographics_metrics: { Args: never; Returns: Json }
       get_package_recipe_metadata: {
         Args: { p_package_id: string }
         Returns: {

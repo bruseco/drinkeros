@@ -1,16 +1,21 @@
 import React, { useMemo, useState } from 'react';
 import { useAccessMetrics } from '@/hooks/useAccessMetrics';
 import { useSignupsCount } from '@/hooks/useSignupsCount';
-import { useInterestsMetrics } from '@/hooks/useInterestsMetrics';
+import { useDemographicsMetrics } from '@/hooks/useDemographicsMetrics';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Loader2, Users, TrendingUp, Clock, Award, Wine, Download, BookOpen, Activity, User as UserIcon, UserPlus, CalendarIcon, Heart } from 'lucide-react';
+import { Loader2, Users, TrendingUp, Clock, Award, Wine, Download, BookOpen, Activity, User as UserIcon, UserPlus, CalendarIcon, Heart, BarChart3, Repeat } from 'lucide-react';
 import { ptBR } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import defaultCover from '@/assets/default-cover.png';
+import {
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RTooltip,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList,
+} from 'recharts';
+
 
 
 type Preset = 'today' | '7d' | '30d' | 'mtd' | 'custom';
@@ -68,7 +73,7 @@ const AdminAccessMetrics: React.FC = () => {
     const t = customTo ?? now;
     return { from: startOfDay(f), to: endOfDay(t) };
   }, [preset, customFrom, customTo]);
-  const { data: interestsMetrics } = useInterestsMetrics();
+  const { data: demographics } = useDemographicsMetrics();
 
 
   const { data: metrics, isLoading } = useAccessMetrics(from, to);
@@ -183,26 +188,67 @@ const AdminAccessMetrics: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Interesses dos usuários */}
+          {/* Demografia: Sexo, Idade, Interesse */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <Heart className="h-4 w-4" /> Interesses dos usuários
+                <Heart className="h-4 w-4" /> Demografia dos usuários
               </CardTitle>
-              <CardDescription>Preferência escolhida no onboarding (ou ajustada no perfil)</CardDescription>
+              <CardDescription>Distribuição por sexo, faixa etária e interesse declarado</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <PlanStat label="Profissional" value={interestsMetrics?.profissional ?? 0} tone="primary" />
-                <PlanStat label="Curtição" value={interestsMetrics?.curticao ?? 0} tone="info" />
-                <PlanStat label="Ambos" value={interestsMetrics?.ambos ?? 0} tone="gold" />
-                <PlanStat label="Não informou" value={interestsMetrics?.nenhum ?? 0} tone="muted" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <DemoPie
+                  title="Sexo"
+                  data={[
+                    { name: 'Masculino', value: demographics?.gender.masculino ?? 0, color: 'hsl(217 91% 60%)' },
+                    { name: 'Feminino', value: demographics?.gender.feminino ?? 0, color: 'hsl(330 81% 60%)' },
+                    { name: 'Outro', value: demographics?.gender.outro ?? 0, color: 'hsl(45 93% 58%)' },
+                    { name: 'Não informou', value: demographics?.gender.nao_informado ?? 0, color: 'hsl(220 9% 46%)' },
+                  ]}
+                  total={demographics?.gender.total ?? 0}
+                />
+                <DemoPie
+                  title="Idade"
+                  data={[
+                    { name: '< 18', value: demographics?.age.menor_18 ?? 0, color: 'hsl(280 70% 60%)' },
+                    { name: '18-24', value: demographics?.age.de_18_24 ?? 0, color: 'hsl(217 91% 60%)' },
+                    { name: '25-34', value: demographics?.age.de_25_34 ?? 0, color: 'hsl(160 65% 45%)' },
+                    { name: '35-44', value: demographics?.age.de_35_44 ?? 0, color: 'hsl(45 93% 58%)' },
+                    { name: '45-54', value: demographics?.age.de_45_54 ?? 0, color: 'hsl(20 90% 55%)' },
+                    { name: '55+', value: demographics?.age.mais_55 ?? 0, color: 'hsl(0 75% 55%)' },
+                    { name: 'Não informou', value: demographics?.age.nao_informado ?? 0, color: 'hsl(220 9% 46%)' },
+                  ]}
+                  total={demographics?.age.total ?? 0}
+                />
+                <DemoPie
+                  title="Interesse"
+                  data={[
+                    { name: 'Profissional', value: demographics?.interests.profissional ?? 0, color: 'hsl(var(--primary))' },
+                    { name: 'Curtição', value: demographics?.interests.curticao ?? 0, color: 'hsl(217 91% 60%)' },
+                    { name: 'Ambos', value: demographics?.interests.ambos ?? 0, color: 'hsl(45 93% 58%)' },
+                    { name: 'Não informou', value: demographics?.interests.nenhum ?? 0, color: 'hsl(220 9% 46%)' },
+                  ]}
+                  total={demographics?.interests.total ?? 0}
+                />
               </div>
-              <p className="text-xs text-muted-foreground mt-3">
-                Total: {(interestsMetrics?.total ?? 0).toLocaleString('pt-BR')} usuários
-              </p>
             </CardContent>
           </Card>
+
+          {/* Recorrência de uso */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Repeat className="h-4 w-4" /> Recorrência de uso do app
+              </CardTitle>
+              <CardDescription>Quantos usuários voltaram ao app — agrupados por número total de sessões</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RecurrenceChart data={demographics?.recurrence} />
+            </CardContent>
+          </Card>
+
+
 
 
 
@@ -482,4 +528,88 @@ const PlanStat: React.FC<{
   );
 };
 
+interface PieDatum { name: string; value: number; color: string }
+
+const DemoPie: React.FC<{ title: string; data: PieDatum[]; total: number }> = ({ title, data, total }) => {
+  const filtered = data.filter((d) => d.value > 0);
+  const hasData = filtered.length > 0;
+  return (
+    <div className="rounded-lg border border-border bg-muted/20 p-4">
+      <div className="flex items-baseline justify-between mb-2">
+        <h4 className="text-sm font-semibold text-foreground">{title}</h4>
+        <span className="text-xs text-muted-foreground tabular-nums">{total.toLocaleString('pt-BR')}</span>
+      </div>
+      <div className="h-44">
+        {hasData ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={filtered} dataKey="value" nameKey="name" innerRadius={36} outerRadius={64} paddingAngle={2} stroke="none">
+                {filtered.map((entry, i) => (
+                  <Cell key={i} fill={entry.color} />
+                ))}
+              </Pie>
+              <RTooltip
+                contentStyle={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
+                formatter={(v: number, n) => [`${v.toLocaleString('pt-BR')} (${total > 0 ? ((v / total) * 100).toFixed(1) : 0}%)`, n]}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex items-center justify-center h-full text-xs text-muted-foreground">Sem dados</div>
+        )}
+      </div>
+      <ul className="mt-2 space-y-1">
+        {data.map((d) => (
+          <li key={d.name} className="flex items-center gap-2 text-xs">
+            <span className="h-2 w-2 rounded-full shrink-0" style={{ background: d.color }} />
+            <span className="text-muted-foreground flex-1 truncate">{d.name}</span>
+            <span className="tabular-nums font-medium text-foreground">{d.value.toLocaleString('pt-BR')}</span>
+            <span className="tabular-nums text-muted-foreground w-10 text-right">
+              {total > 0 ? `${((d.value / total) * 100).toFixed(0)}%` : '—'}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+const RecurrenceChart: React.FC<{ data?: DemographicsMetricsRecurrence }> = ({ data }) => {
+  const rows = [
+    { label: '1 acesso', value: data?.b_1 ?? 0 },
+    { label: '2–4 acessos', value: data?.b_2_4 ?? 0 },
+    { label: '+5 acessos', value: data?.b_5_plus ?? 0 },
+    { label: '+50 acessos', value: data?.b_50_plus ?? 0 },
+    { label: '+100 acessos', value: data?.b_100_plus ?? 0 },
+    { label: '+500 acessos', value: data?.b_500_plus ?? 0 },
+    { label: '+1000 acessos', value: data?.b_1000_plus ?? 0 },
+  ];
+  return (
+    <div>
+      <div className="h-72">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={rows} margin={{ top: 16, right: 16, left: 0, bottom: 8 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+            <XAxis dataKey="label" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} tickLine={false} axisLine={false} interval={0} angle={-15} textAnchor="end" height={50} />
+            <YAxis tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} tickLine={false} axisLine={false} allowDecimals={false} />
+            <RTooltip
+              contentStyle={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
+              formatter={(v: number) => [v.toLocaleString('pt-BR'), 'Usuários']}
+            />
+            <Bar dataKey="value" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]}>
+              <LabelList dataKey="value" position="top" style={{ fill: 'hsl(var(--foreground))', fontSize: 11, fontWeight: 600 }} />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      <p className="text-xs text-muted-foreground mt-2">
+        Total de usuários com pelo menos 1 sessão registrada: {(data?.total ?? 0).toLocaleString('pt-BR')}
+      </p>
+    </div>
+  );
+};
+
+type DemographicsMetricsRecurrence = NonNullable<ReturnType<typeof useDemographicsMetrics>['data']>['recurrence'];
+
 export default AdminAccessMetrics;
+
