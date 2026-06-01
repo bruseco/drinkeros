@@ -241,7 +241,7 @@ const AdminAccessMetrics: React.FC = () => {
               <CardTitle className="text-base flex items-center gap-2">
                 <Repeat className="h-4 w-4" /> Recorrência de uso do app
               </CardTitle>
-              <CardDescription>Quantos usuários voltaram ao app — agrupados por número total de sessões</CardDescription>
+              <CardDescription>Quantos dias distintos cada usuário logado retornou ao site (qualquer atividade conta)</CardDescription>
             </CardHeader>
             <CardContent>
               <RecurrenceChart data={demographics?.recurrence} />
@@ -603,7 +603,7 @@ const RecurrenceChart: React.FC<{ data?: DemographicsMetricsRecurrence }> = ({ d
         </ResponsiveContainer>
       </div>
       <p className="text-xs text-muted-foreground mt-2">
-        Total de usuários com pelo menos 1 sessão registrada: {(data?.total ?? 0).toLocaleString('pt-BR')}
+        Total de usuários com pelo menos 1 dia de atividade logada: {(data?.total ?? 0).toLocaleString('pt-BR')}
       </p>
     </div>
   );
