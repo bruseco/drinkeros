@@ -351,7 +351,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
                 filter: 'drop-shadow(0 0 32px rgba(241,196,15,0.58))',
               }}
             >
-              R$ 100
+              R$ 128
             </div>
           </div>
 
