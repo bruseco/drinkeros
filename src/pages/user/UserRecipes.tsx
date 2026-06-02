@@ -534,8 +534,8 @@ const UserRecipes: React.FC = () => {
 };
 
 const ClubeUpsellBanner: React.FC = () => {
-  const exit = useClubeExitOffer();
-  if (exit.isActive) {
+  const intro = useClubeIntroOffer();
+  if (intro.isActive) {
     return (
       <div className="fixed bottom-[84px] left-0 right-0 z-40 px-3 pb-2 lg:bottom-6 pointer-events-none">
         <div className="mx-auto max-w-md pointer-events-auto rounded-2xl bg-gradient-to-r from-purple-700 to-fuchsia-600 p-3 shadow-lg shadow-purple-500/30 text-white flex items-center gap-3 border border-yellow-300/60">
@@ -544,13 +544,10 @@ const ClubeUpsellBanner: React.FC = () => {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[12.5px] leading-snug font-extrabold text-yellow-300 uppercase tracking-wide">
-              Atenção! Você ganhou mais R$28 de desconto e sua assinatura pode ficar por apenas R$69 anual.
+              Atenção! Você ganhou R$128 de desconto e sua assinatura pode ficar por apenas R$69 anual.
             </p>
             <p className="text-[12px] leading-snug text-white/95 mt-1">
               Acesse receitas ilimitadas, + de 40 receitas de Xaropes Artesanais e muito mais.
-            </p>
-            <p className="text-[11px] leading-snug text-yellow-200 mt-1 font-semibold tabular-nums">
-              Oferta válida só por {exit.mm}:{exit.ss}
             </p>
           </div>
           <Link to="/clube-b" className="shrink-0">
