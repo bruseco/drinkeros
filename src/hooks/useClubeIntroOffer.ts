@@ -8,8 +8,9 @@ import { useAuth } from '@/contexts/AuthContext';
  * Mantém apenas dados estáveis (não re-renderiza a cada segundo).
  * Para mostrar countdown vivo, use `useIntroCountdown()`.
  */
-export const CLUBE_PRICE_INTRO = 97;
+export const CLUBE_PRICE_INTRO = 69;
 export const CLUBE_PRICE_FULL = 197;
+export const CLUBE_PRICE_DISCOUNT = CLUBE_PRICE_FULL - CLUBE_PRICE_INTRO; // 128
 
 export interface ClubeIntroOfferState {
   isActive: boolean;

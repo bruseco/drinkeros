@@ -20,10 +20,8 @@ import { useViewContent } from '@/hooks/useViewContent';
 import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
 import { useTotalClubMembers, TOTAL_CLUB_MEMBERS_FALLBACK } from '@/hooks/useTotalClubMembers';
 import { useClubeIntroOffer, useIntroCountdown } from '@/hooks/useClubeIntroOffer';
-import { useClubeExitOffer } from '@/hooks/useClubeExitOffer';
 import { useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
 import { trackFunnel } from '@/lib/funnelTracking';
-import ClubeExitOffer from '@/components/user/ClubeExitOffer';
 import ClubeDiscountReveal from '@/components/user/ClubeDiscountReveal';
 
 
@@ -113,7 +111,7 @@ const IntroCountdownPill: React.FC<{ untilMs: number }> = ({ untilMs }) => {
   return (
     <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs font-semibold text-yellow-200">
       <Timer className="h-3.5 w-3.5" />
-      <span className="text-yellow-100">Desconto de R$ 100 expira em</span>
+      <span className="text-yellow-100">Desconto de R$ 128 expira em</span>
       <span className="font-mono font-bold text-white tabular-nums">
         {mm}:{ss}
       </span>
@@ -197,14 +195,6 @@ const VipLandingB: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [isClosing] = useState(false);
   const promo = useClubeIntroOffer();
-  const exitOffer = useClubeExitOffer();
-  const {
-    canStart: canStartExitOffer,
-    isActive: isExitOfferActive,
-    start: startExitOffer,
-  } = exitOffer;
-  const [exitOpen, setExitOpen] = useState(false);
-  const [exitOfferDismissed, setExitOfferDismissed] = useState(false);
 
   // ===== Reveal cinematográfico do desconto de R$100 =====
   // Mostra R$197 no card de preço; quando o usuário rola até o card, espera 2s,
@@ -349,7 +339,7 @@ const VipLandingB: React.FC = () => {
     if (priceSettleTimerRef.current !== null) window.clearTimeout(priceSettleTimerRef.current);
     priceSettleTimerRef.current = window.setTimeout(() => setPriceSettled(true), 620);
     // Funil: 1ª oferta (R$97) revelada
-    trackFunnel('clube-b', 'offer_1_revealed', { amountCents: 9700, userId: user?.id ?? null });
+    trackFunnel('clube-b', 'offer_1_revealed', { amountCents: 6900, userId: user?.id ?? null });
   }, [promo, user?.id]);
 
   useViewContent({
@@ -386,19 +376,16 @@ const VipLandingB: React.FC = () => {
 
   const handleSubscribe = async (
     chosenMethod: 'card' | 'pix' = 'card',
-    chosenOffer?: 'intro' | 'exit' | 'full',
+    chosenOffer?: 'intro' | 'full',
   ) => {
     if (!user) {
       navigate('/signup?redirect=/clube');
       return;
     }
     if (loading) return;
-    // offer derivada do estado atual da UI — garante que o valor exibido = cobrado.
-    // Se a janela exit (10min) está ativa, sempre vale R$69.
-    // Enquanto a elegibilidade ainda carrega, pedimos intro; o backend valida e evita
-    // cair em R$197 por corrida de rede no iPhone/PWA.
-    const offer: 'intro' | 'exit' | 'full' =
-      chosenOffer ?? (exitOpen || exitOffer.isActive ? 'exit' : (promo.isLoading || promo.isActive) ? 'intro' : 'full');
+    // Sem fluxo de exit: enquanto a intro está ativa (ou carregando) pedimos R$69.
+    const offer: 'intro' | 'full' =
+      chosenOffer ?? ((promo.isLoading || promo.isActive) ? 'intro' : 'full');
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-club-checkout', {
@@ -417,10 +404,9 @@ const VipLandingB: React.FC = () => {
         session_id: data.session_id,
       });
       trackAbConversion('clube');
-      // Funil: registra checkout iniciado por oferta
       trackFunnel(
         'clube-b',
-        offer === 'exit' ? 'checkout_2_started' : 'checkout_1_started',
+        'checkout_1_started',
         {
           amountCents: Math.round(Number(data.amount || 0) * 100),
           userId: user?.id ?? null,
@@ -437,42 +423,6 @@ const VipLandingB: React.FC = () => {
     }
   };
 
-  // Exit-intent: intercepta tentativa de fechar/voltar para mostrar oferta R$ 69.
-  // Só libera a segunda oferta depois que a primeira revelação (R$100 off) já aconteceu.
-  useEffect(() => {
-    if (!user) return; // não-logado já é mandado pra /signup pelo CTA
-    if (exitOfferDismissed) return;
-    if (!canStartExitOffer || isExitOfferActive) return;
-
-    // Empilha um estado sentinela para capturar o popstate (back button)
-    window.history.pushState({ clubeExitSentinel: true }, '');
-
-    const onPopState = () => {
-      // Inicia a janela de 10 min da oferta extra no perfil do usuário.
-      startExitOffer();
-      // Re-empilha pra continuar interceptando enquanto o overlay está aberto
-      window.history.pushState({ clubeExitSentinel: true }, '');
-      setExitOpen(true);
-    };
-
-    window.addEventListener('popstate', onPopState);
-    return () => window.removeEventListener('popstate', onPopState);
-  }, [user, exitOfferDismissed, canStartExitOffer, isExitOfferActive, startExitOffer]);
-
-  // Funil: 2ª oferta (R$69) revelada quando o exit popup abre
-  useEffect(() => {
-    if (exitOpen) {
-      trackFunnel('clube-b', 'offer_2_revealed', { amountCents: 6900, userId: user?.id ?? null });
-    }
-  }, [exitOpen, user?.id]);
-
-  const handleExitAccept = () => handleSubscribe('card', 'exit');
-  const handleExitDismiss = () => {
-    setExitOpen(false);
-    setExitOfferDismissed(true);
-    // Libera a saída: volta de verdade desta vez
-    window.history.back();
-  };
 
 
   if (user && (planData?.isVip || hasLifetime || hasExclusive)) {
@@ -669,9 +619,9 @@ const VipLandingB: React.FC = () => {
               </div>
               <p className="text-sm text-purple-200 mt-1">
                 {unlocked ? (
-                  <>Você economiza <strong className="text-yellow-300">R$ 100</strong> agora.</>
+                  <>Você economiza <strong className="text-yellow-300">R$ 128</strong> agora.</>
                 ) : (
-                  <>Equivale a menos de <strong className="text-white">R$ 17 por mês</strong>.</>
+                  <>Equivale a menos de <strong className="text-white">R$ 6 por mês</strong>.</>
                 )}
               </p>
               <p className="text-[11px] text-purple-300 mt-1">
@@ -892,7 +842,7 @@ const VipLandingB: React.FC = () => {
                   <PriceAmount value={displayPrice} className="text-7xl font-black viplanding-gold-text" />
                 </div>
                 <div className="text-sm text-purple-300">
-                  por ano{unlocked ? ' · economize R$ 100' : ' · menos de R$ 17/mês'}
+                  por ano{unlocked ? ' · economize R$ 128' : ' · menos de R$ 6/mês'}
                 </div>
                 {unlocked && (
                   <div className="mt-1 text-[11px] uppercase tracking-wider font-bold text-yellow-300">
@@ -940,12 +890,6 @@ const VipLandingB: React.FC = () => {
           </div>
         </div>
       </div>
-      <ClubeExitOffer
-        open={exitOpen}
-        loading={loading}
-        onAccept={handleExitAccept}
-        onDismiss={handleExitDismiss}
-      />
     </div>
   );
 };

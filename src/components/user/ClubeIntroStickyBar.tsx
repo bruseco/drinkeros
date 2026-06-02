@@ -62,9 +62,9 @@ export const ClubeIntroStickyBar: React.FC = () => {
         }}
       >
         <Crown className="h-4 w-4" />
-        <span className="hidden sm:inline">Desconto R$100 ativo · Sócio do Clube por</span>
-        <span className="sm:hidden">R$100 OFF · Clube por</span>
-        <span className="font-black tabular-nums text-yellow-300">R$97</span>
+        <span className="hidden sm:inline">Desconto R$128 ativo · Sócio do Clube por</span>
+        <span className="sm:hidden">R$128 OFF · Clube por</span>
+        <span className="font-black tabular-nums text-yellow-300">R$69</span>
         <span className="opacity-80">·</span>
         <Countdown untilMs={eligibleUntilMs} />
       </Link>
