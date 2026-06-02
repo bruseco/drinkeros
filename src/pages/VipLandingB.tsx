@@ -195,14 +195,6 @@ const VipLandingB: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [isClosing] = useState(false);
   const promo = useClubeIntroOffer();
-  const exitOffer = useClubeExitOffer();
-  const {
-    canStart: canStartExitOffer,
-    isActive: isExitOfferActive,
-    start: startExitOffer,
-  } = exitOffer;
-  const [exitOpen, setExitOpen] = useState(false);
-  const [exitOfferDismissed, setExitOfferDismissed] = useState(false);
 
   // ===== Reveal cinematográfico do desconto de R$100 =====
   // Mostra R$197 no card de preço; quando o usuário rola até o card, espera 2s,
