@@ -842,7 +842,7 @@ const VipLandingB: React.FC = () => {
                   <PriceAmount value={displayPrice} className="text-7xl font-black viplanding-gold-text" />
                 </div>
                 <div className="text-sm text-purple-300">
-                  por ano{unlocked ? ' · economize R$ 100' : ' · menos de R$ 17/mês'}
+                  por ano{unlocked ? ' · economize R$ 128' : ' · menos de R$ 6/mês'}
                 </div>
                 {unlocked && (
                   <div className="mt-1 text-[11px] uppercase tracking-wider font-bold text-yellow-300">
