@@ -3589,6 +3589,13 @@ export type Database = {
         Args: { _winner_id: string }
         Returns: undefined
       }
+      retrigger_clube_intro_offer: {
+        Args: never
+        Returns: {
+          clube_intro_eligible_until: string
+          clube_intro_revealed_at: string
+        }[]
+      }
       search_exclusive_posts: {
         Args: {
           p_limit?: number
