@@ -20,10 +20,8 @@ import { useViewContent } from '@/hooks/useViewContent';
 import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
 import { useTotalClubMembers, TOTAL_CLUB_MEMBERS_FALLBACK } from '@/hooks/useTotalClubMembers';
 import { useClubeIntroOffer, useIntroCountdown } from '@/hooks/useClubeIntroOffer';
-import { useClubeExitOffer } from '@/hooks/useClubeExitOffer';
 import { useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
 import { trackFunnel } from '@/lib/funnelTracking';
-import ClubeExitOffer from '@/components/user/ClubeExitOffer';
 import ClubeDiscountReveal from '@/components/user/ClubeDiscountReveal';
 
 
