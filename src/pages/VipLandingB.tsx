@@ -621,7 +621,7 @@ const VipLandingB: React.FC = () => {
                 {unlocked ? (
                   <>Você economiza <strong className="text-yellow-300">R$ 128</strong> agora.</>
                 ) : (
-                  <>Equivale a menos de <strong className="text-white">R$ 17 por mês</strong>.</>
+                  <>Equivale a menos de <strong className="text-white">R$ 6 por mês</strong>.</>
                 )}
               </p>
               <p className="text-[11px] text-purple-300 mt-1">
