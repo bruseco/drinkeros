@@ -4,8 +4,8 @@
 //
 // Offers (sempre cobra a partir de R$197 + cupom para que o valor exibido na
 // landing seja EXATAMENTE o valor cobrado no Stripe):
-// - offer=intro -> R$197 + cupom CLUBE_INTRO_100 (R$100 off) = R$ 97
-// - offer=exit  -> R$197 + cupom CLUBE_EXIT_128  (R$128 off) = R$ 69
+// - offer=intro -> R$197 + cupom CLUBE_EXIT_128 (R$128 off) = R$ 69
+// - offer=exit  -> alias legado, mesmo resultado de intro (R$ 69)
 // - offer=full  -> R$197 sem cupom
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0?target=deno";
@@ -21,7 +21,6 @@ const PRICE_CARD_197 = "price_1TbyKYGlXZFgg9244vr2jrTS";
 const PRICE_PIX_197 = "price_1TbyL1GlXZFgg924wxKo7wVc";
 
 // Coupons (duration: forever) — desconto persiste em todas as renovações anuais
-const COUPON_INTRO_100 = "xEg5vViJ"; // R$100 off → R$97 forever
 const COUPON_EXIT_128 = "Hy11JuxP";  // R$128 off → R$69 forever
 
 type Offer = "intro" | "exit" | "full";
@@ -31,14 +30,12 @@ function resolveOffer(input: unknown): Offer {
 }
 
 function couponFor(offer: Offer): string | null {
-  if (offer === "intro") return COUPON_INTRO_100;
-  if (offer === "exit") return COUPON_EXIT_128;
+  if (offer === "intro" || offer === "exit") return COUPON_EXIT_128;
   return null;
 }
 
 function expectedAmount(offer: Offer): number {
-  if (offer === "intro") return 97;
-  if (offer === "exit") return 69;
+  if (offer === "intro" || offer === "exit") return 69;
   return 197;
 }
 
