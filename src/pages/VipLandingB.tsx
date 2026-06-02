@@ -890,12 +890,6 @@ const VipLandingB: React.FC = () => {
           </div>
         </div>
       </div>
-      <ClubeExitOffer
-        open={exitOpen}
-        loading={loading}
-        onAccept={handleExitAccept}
-        onDismiss={handleExitDismiss}
-      />
     </div>
   );
 };
