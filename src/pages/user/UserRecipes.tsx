@@ -22,7 +22,7 @@ import { shouldShowPwaGate } from '@/components/user/PwaInstallGate';
 import { getPrimaryPhase } from '@/lib/seasonalPhases';
 import { Sparkles } from 'lucide-react';
 import { saveRecipeFeedOrder, consumeRecipeScrollTarget, recipeKey } from '@/lib/recipesFeedNav';
-import { useClubeExitOffer } from '@/hooks/useClubeExitOffer';
+import { useClubeIntroOffer } from '@/hooks/useClubeIntroOffer';
 import { useInterests, isProfessionalOnly } from '@/hooks/useInterests';
 
 
