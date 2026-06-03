@@ -11,6 +11,9 @@ import { PwaInstallGate } from './PwaInstallGate';
 import { PwaSplashScreen } from './PwaSplashScreen';
 import { VipDiscountCountdownBanner } from './VipDiscountCountdownBanner';
 import { WelcomeOverlay } from './WelcomeOverlay';
+import ClubeIntroStickyBar from './ClubeIntroStickyBar';
+import ClubeRetriggerWatcher from './ClubeRetriggerWatcher';
+
 
 import { Loader2 } from 'lucide-react';
 
