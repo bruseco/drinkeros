@@ -6,8 +6,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useTriggerRedirect } from "@/components/TriggerRedirect";
 import ScrollToTop from "@/components/ScrollToTop";
-import ClubeIntroStickyBar from "@/components/user/ClubeIntroStickyBar";
-import ClubeRetriggerWatcher from "@/components/user/ClubeRetriggerWatcher";
 
 // Public pages
 import Login from "./pages/Login";
@@ -141,8 +139,6 @@ const App = () => (
         <AuthProvider>
           <ScrollToTop />
           <FacebookPixel />
-          <ClubeIntroStickyBar />
-          <ClubeRetriggerWatcher />
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<RootRedirect />} />
