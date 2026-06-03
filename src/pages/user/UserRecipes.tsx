@@ -15,8 +15,6 @@ import { useRecipeAccessGuard, isVipOnlyCharacteristic } from '@/hooks/useRecipe
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
-import { Crown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { usePwaStatus } from '@/hooks/usePwaStatus';
 import { shouldShowPwaGate } from '@/components/user/PwaInstallGate';
 import { getPrimaryPhase } from '@/lib/seasonalPhases';
