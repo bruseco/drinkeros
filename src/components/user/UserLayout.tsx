@@ -11,6 +11,9 @@ import { PwaInstallGate } from './PwaInstallGate';
 import { PwaSplashScreen } from './PwaSplashScreen';
 import { VipDiscountCountdownBanner } from './VipDiscountCountdownBanner';
 import { WelcomeOverlay } from './WelcomeOverlay';
+import ClubeIntroStickyBar from './ClubeIntroStickyBar';
+import ClubeRetriggerWatcher from './ClubeRetriggerWatcher';
+
 
 import { Loader2 } from 'lucide-react';
 
@@ -51,7 +54,10 @@ export const UserLayout: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-background">
+      <ClubeIntroStickyBar />
+      <ClubeRetriggerWatcher />
       <WelcomeOverlay />
+
       <PwaSplashScreen />
       <UserSidebar />
       <div className="flex flex-1 flex-col min-w-0">
