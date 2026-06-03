@@ -80,35 +80,54 @@ const UserBatalha: React.FC = () => {
           <p className="text-muted-foreground">Nenhuma receita ainda. Seja o primeiro a postar!</p>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2">
           {feed.map(r => {
             const initial = (r.author_name || 'U').charAt(0).toUpperCase();
+            const ingredientTags = (r.ingredients || '')
+              .split(',')
+              .map(s => s.trim())
+              .filter(Boolean)
+              .slice(0, 4);
             return (
               <Link key={r.id} to={`/app/batalha/receita/${r.id}`}>
                 <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full relative">
-                  {r.is_in_battle && (
-                    <span className="absolute top-2 left-2 z-10 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-lime-400 text-lime-950 shadow-md">
-                      Em Batalha
-                    </span>
-                  )}
-                  {r.image_url ? (
-                    <img src={r.image_url} alt={r.name} className="w-full aspect-video object-cover" />
-                  ) : (
-                    <div className="w-full aspect-video bg-muted" />
-                  )}
-                  <div className="p-3 space-y-2">
-                    <h3 className="font-semibold truncate">{r.name}</h3>
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-6 w-6">
-                        <AvatarImage src={r.author_avatar || undefined} />
-                        <AvatarFallback className="text-xs">{initial}</AvatarFallback>
-                      </Avatar>
-                      <span className="text-xs text-muted-foreground truncate">{r.author_name || 'Usuário'}</span>
+                  <div className="flex">
+                    <div className="relative w-1/2 shrink-0 aspect-square">
+                      {r.is_in_battle && (
+                        <span className="absolute top-2 left-2 z-10 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-lime-400 text-lime-950 shadow-md">
+                          Em Batalha
+                        </span>
+                      )}
+                      {r.image_url ? (
+                        <img src={r.image_url} alt={r.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-muted" />
+                      )}
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium">{r.avg_rating.toFixed(1)}</span>
-                      <span className="text-xs text-muted-foreground">({r.total_votes})</span>
+                    <div className="flex-1 min-w-0 p-3 flex flex-col gap-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-semibold text-sm leading-tight line-clamp-2">{r.name}</h3>
+                        <div className="flex items-center gap-0.5 shrink-0">
+                          <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                          <span className="text-xs font-medium">{r.avg_rating.toFixed(1)}</span>
+                        </div>
+                      </div>
+                      {ingredientTags.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {ingredientTags.map((t) => (
+                            <span key={t} className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground truncate max-w-full">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1.5 mt-auto">
+                        <Avatar className="h-5 w-5">
+                          <AvatarImage src={r.author_avatar || undefined} />
+                          <AvatarFallback className="text-[10px]">{initial}</AvatarFallback>
+                        </Avatar>
+                        <span className="text-[11px] text-muted-foreground truncate">{r.author_name || 'Usuário'}</span>
+                      </div>
                     </div>
                   </div>
                 </Card>
@@ -117,6 +136,7 @@ const UserBatalha: React.FC = () => {
           })}
         </div>
       )}
+
     </div>
   );
 };
