@@ -126,8 +126,8 @@ const UserBatalhaNew: React.FC = () => {
       <h1 className="text-2xl font-bold">Postar Receita no Clube</h1>
 
       <div className="space-y-2">
-        <Label>Foto da receita</Label>
-        <label className="flex items-center justify-center w-full aspect-video border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 overflow-hidden">
+        <Label>Foto da receita (1:1)</Label>
+        <label className="flex items-center justify-center w-full aspect-square max-w-sm mx-auto border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 overflow-hidden">
           {preview ? (
             <img src={preview} alt="Preview" className="w-full h-full object-cover" />
           ) : (
@@ -136,6 +136,15 @@ const UserBatalhaNew: React.FC = () => {
           <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
         </label>
       </div>
+
+      <ImageCropDialog
+        open={cropOpen}
+        imageSrc={rawImageSrc}
+        aspect={1}
+        onClose={() => { setCropOpen(false); setRawImageSrc(null); }}
+        onConfirm={handleCropConfirm}
+      />
+
 
       <div className="space-y-2">
         <Label>Nome da receita *</Label>
