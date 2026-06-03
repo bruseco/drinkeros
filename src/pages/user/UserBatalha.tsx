@@ -104,13 +104,11 @@ const UserBatalha: React.FC = () => {
                         <div className="w-full h-full bg-muted" />
                       )}
                     </div>
-                    <div className="flex-1 min-w-0 p-3 flex flex-col gap-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-semibold text-sm leading-tight line-clamp-2">{r.name}</h3>
-                        <div className="flex items-center gap-0.5 shrink-0">
-                          <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                          <span className="text-xs font-medium">{r.avg_rating.toFixed(1)}</span>
-                        </div>
+                    <div className="flex-1 min-w-0 p-3 flex flex-col gap-1.5">
+                      <h3 className="font-semibold text-sm leading-tight line-clamp-2">{r.name}</h3>
+                      <div className="flex items-center gap-0.5">
+                        <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                        <span className="text-xs font-medium">{r.avg_rating.toFixed(1)}</span>
                       </div>
                       {ingredientTags.length > 0 && (
                         <div className="flex flex-wrap gap-1">
