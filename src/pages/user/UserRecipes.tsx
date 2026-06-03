@@ -526,58 +526,9 @@ const UserRecipes: React.FC = () => {
         )}
       </div>
 
-      {isLockedForUser && !installBannerVisible && (
-        <ClubeUpsellBanner />
-      )}
     </div>
   );
 };
 
-const ClubeUpsellBanner: React.FC = () => {
-  const intro = useClubeIntroOffer();
-  if (intro.isActive) {
-    return (
-      <div className="fixed bottom-[84px] left-0 right-0 z-40 px-3 pb-2 lg:bottom-6 pointer-events-none">
-        <div className="mx-auto max-w-md pointer-events-auto rounded-2xl bg-gradient-to-r from-purple-700 to-fuchsia-600 p-3 shadow-lg shadow-purple-500/30 text-white flex items-center gap-3 border border-yellow-300/60">
-          <div className="shrink-0 rounded-full bg-yellow-300/20 p-2">
-            <Crown className="h-5 w-5 text-yellow-300" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[12.5px] leading-snug font-extrabold text-yellow-300 uppercase tracking-wide">
-              Atenção! Você ganhou R$128 de desconto e sua assinatura pode ficar por apenas R$69 anual.
-            </p>
-            <p className="text-[12px] leading-snug text-white/95 mt-1">
-              Acesse receitas ilimitadas, + de 40 receitas de Xaropes Artesanais e muito mais.
-            </p>
-          </div>
-          <Link to="/clube-b" className="shrink-0">
-            <Button size="sm" className="bg-yellow-300 text-purple-900 hover:bg-yellow-200 font-extrabold rounded-full h-9 px-4">
-              Aproveitar
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-  return (
-    <div className="fixed bottom-[84px] left-0 right-0 z-40 px-3 pb-2 lg:bottom-6 pointer-events-none">
-      <div className="mx-auto max-w-md pointer-events-auto rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-500 p-3 shadow-lg shadow-purple-500/30 text-white flex items-center gap-3">
-        <div className="shrink-0 rounded-full bg-white/20 p-2">
-          <Crown className="h-5 w-5" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[13px] leading-snug font-medium">
-            Torne-se membro do Clube: acesse receitas ilimitadas, mais de 40 xaropes artesanais e muito mais.
-          </p>
-        </div>
-        <Link to="/clube-b" className="shrink-0">
-          <Button size="sm" className="bg-white text-purple-700 hover:bg-white/90 font-bold rounded-full h-9 px-4">
-            Saiba mais
-          </Button>
-        </Link>
-      </div>
-    </div>
-  );
-};
 
 export default UserRecipes;
