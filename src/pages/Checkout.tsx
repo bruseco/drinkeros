@@ -363,50 +363,34 @@ export default function Checkout() {
               )}
 
               <div className="bg-white rounded-xl overflow-hidden p-2 sm:p-4 text-black">
-                {isClub ? (
-                  <div className="p-2 sm:p-3">
-                    <button
-                      type="button"
-                      onClick={handleClubCheckout}
-                      disabled={submitting}
-                      className="w-full bg-primary hover:bg-primary/90 disabled:opacity-60 text-white font-semibold py-3.5 rounded-lg flex items-center justify-center gap-2 transition"
-                    >
-                      {submitting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" /> Abrindo pagamento seguro...
-                        </>
-                      ) : (
-                        <>
-                          <ShieldCheck className="w-4 h-4" />
-                          Continuar para pagamento seguro
-                        </>
-                      )}
-                    </button>
-                    <p className="text-[11px] text-black/50 text-center mt-3">
-                      Você será direcionado para o ambiente seguro da Stripe para concluir o pagamento.
-                    </p>
-                  </div>
-                ) : payerEmail !== null ? (
+                {payerEmail !== null ? (
                   <Payment
-                    key={`brick-${finalPrice}-all`}
+                    key={`brick-${finalPrice}-${isClub ? clubMethod : "all"}`}
                     initialization={{
                       amount: finalPrice,
                       ...(payerEmail ? { payer: { email: payerEmail } } : {}),
                     }}
                     customization={{
-                      paymentMethods: {
-                        creditCard: "all",
-                        bankTransfer: ["pix"],
-                        maxInstallments: 12,
-                        minInstallments: 1,
-                      },
+                      paymentMethods: isClub
+                        ? {
+                            creditCard: clubMethod === "card" ? "all" : undefined,
+                            bankTransfer: clubMethod === "pix" ? ["pix"] : undefined,
+                            maxInstallments: 1,
+                            minInstallments: 1,
+                          }
+                        : {
+                            creditCard: "all",
+                            bankTransfer: ["pix"],
+                            maxInstallments: 12,
+                            minInstallments: 1,
+                          },
                       visual: {
                         style: { theme: "default" },
                         hideFormTitle: true,
                       },
                     }}
                     onReady={() => {
-                      console.log("[MP Brick] ready", { amount: finalPrice });
+                      console.log("[MP Brick] ready", { amount: finalPrice, isClub, clubMethod });
                     }}
                     onSubmit={async ({ formData }) => {
                       await onSubmit(formData);
@@ -420,12 +404,13 @@ export default function Checkout() {
                     <Loader2 className="w-4 h-4 animate-spin" /> Carregando pagamento...
                   </div>
                 )}
-                {submitting && !isClub && (
+                {submitting && (
                   <div className="flex items-center justify-center gap-2 py-3 text-sm text-black/70">
                     <Loader2 className="w-4 h-4 animate-spin" /> Processando...
                   </div>
                 )}
               </div>
+
             </>
           )}
         </div>
