@@ -47,9 +47,24 @@ const UserBatalhaNew: React.FC = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
-    setImageFile(f);
-    setPreview(URL.createObjectURL(f));
+    const reader = new FileReader();
+    reader.onload = () => {
+      setRawImageSrc(reader.result as string);
+      setCropOpen(true);
+    };
+    reader.readAsDataURL(f);
+    // reset input so picking same file again retriggers
+    e.target.value = '';
   };
+
+  const handleCropConfirm = (blob: Blob) => {
+    const file = new File([blob], `recipe-${Date.now()}.jpg`, { type: 'image/jpeg' });
+    setImageFile(file);
+    setPreview(URL.createObjectURL(blob));
+    setCropOpen(false);
+    setRawImageSrc(null);
+  };
+
 
   const addTag = (
     raw: string,
