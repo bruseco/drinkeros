@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { Loader2, Upload, X } from 'lucide-react';
 import AutocompleteTagInput from '@/components/admin/AutocompleteTagInput';
 import { useExistingTags } from '@/hooks/useExistingTags';
+import ImageCropDialog from '@/components/user/ImageCropDialog';
 import { findCanonicalTag } from '@/lib/normalizeTag';
 
 const UserBatalhaNew: React.FC = () => {
@@ -28,6 +29,8 @@ const UserBatalhaNew: React.FC = () => {
   const [description, setDescription] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [rawImageSrc, setRawImageSrc] = useState<string | null>(null);
+  const [cropOpen, setCropOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // Bloqueio: somente sócios do Clube podem postar
@@ -44,9 +47,24 @@ const UserBatalhaNew: React.FC = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
-    setImageFile(f);
-    setPreview(URL.createObjectURL(f));
+    const reader = new FileReader();
+    reader.onload = () => {
+      setRawImageSrc(reader.result as string);
+      setCropOpen(true);
+    };
+    reader.readAsDataURL(f);
+    // reset input so picking same file again retriggers
+    e.target.value = '';
   };
+
+  const handleCropConfirm = (blob: Blob) => {
+    const file = new File([blob], `recipe-${Date.now()}.jpg`, { type: 'image/jpeg' });
+    setImageFile(file);
+    setPreview(URL.createObjectURL(blob));
+    setCropOpen(false);
+    setRawImageSrc(null);
+  };
+
 
   const addTag = (
     raw: string,
@@ -108,8 +126,8 @@ const UserBatalhaNew: React.FC = () => {
       <h1 className="text-2xl font-bold">Postar Receita no Clube</h1>
 
       <div className="space-y-2">
-        <Label>Foto da receita</Label>
-        <label className="flex items-center justify-center w-full aspect-video border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 overflow-hidden">
+        <Label>Foto da receita (1:1)</Label>
+        <label className="flex items-center justify-center w-full aspect-square max-w-sm mx-auto border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 overflow-hidden">
           {preview ? (
             <img src={preview} alt="Preview" className="w-full h-full object-cover" />
           ) : (
@@ -118,6 +136,15 @@ const UserBatalhaNew: React.FC = () => {
           <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
         </label>
       </div>
+
+      <ImageCropDialog
+        open={cropOpen}
+        imageSrc={rawImageSrc}
+        aspect={1}
+        onClose={() => { setCropOpen(false); setRawImageSrc(null); }}
+        onConfirm={handleCropConfirm}
+      />
+
 
       <div className="space-y-2">
         <Label>Nome da receita *</Label>
