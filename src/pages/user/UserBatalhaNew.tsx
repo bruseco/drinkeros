@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { Loader2, Upload, X } from 'lucide-react';
 import AutocompleteTagInput from '@/components/admin/AutocompleteTagInput';
 import { useExistingTags } from '@/hooks/useExistingTags';
+import ImageCropDialog from '@/components/user/ImageCropDialog';
 import { findCanonicalTag } from '@/lib/normalizeTag';
 
 const UserBatalhaNew: React.FC = () => {
