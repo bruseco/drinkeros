@@ -241,7 +241,7 @@ const AdminAccessMetrics: React.FC = () => {
               <CardTitle className="text-base flex items-center gap-2">
                 <Repeat className="h-4 w-4" /> Recorrência de uso do app
               </CardTitle>
-              <CardDescription>Quantos dias distintos cada usuário logado retornou ao site (qualquer atividade conta)</CardDescription>
+              <CardDescription>Visão vitalícia: quantos dias distintos cada usuário acessou o app desde o cadastro</CardDescription>
             </CardHeader>
             <CardContent>
               <RecurrenceChart data={demographics?.recurrence} />
@@ -576,13 +576,13 @@ const DemoPie: React.FC<{ title: string; data: PieDatum[]; total: number }> = ({
 
 const RecurrenceChart: React.FC<{ data?: DemographicsMetricsRecurrence }> = ({ data }) => {
   const rows = [
-    { label: '1 acesso', value: data?.b_1 ?? 0 },
-    { label: '2–4 acessos', value: data?.b_2_4 ?? 0 },
-    { label: '+5 acessos', value: data?.b_5_plus ?? 0 },
-    { label: '+50 acessos', value: data?.b_50_plus ?? 0 },
-    { label: '+100 acessos', value: data?.b_100_plus ?? 0 },
-    { label: '+500 acessos', value: data?.b_500_plus ?? 0 },
-    { label: '+1000 acessos', value: data?.b_1000_plus ?? 0 },
+    { label: '1 dia', value: data?.b_1 ?? 0 },
+    { label: '2–4 dias', value: data?.b_2_4 ?? 0 },
+    { label: '5–49 dias', value: data?.b_5_plus ?? 0 },
+    { label: '50–99 dias', value: data?.b_50_plus ?? 0 },
+    { label: '100–499 dias', value: data?.b_100_plus ?? 0 },
+    { label: '500–999 dias', value: data?.b_500_plus ?? 0 },
+    { label: '+1000 dias', value: data?.b_1000_plus ?? 0 },
   ];
   return (
     <div>
@@ -603,7 +603,7 @@ const RecurrenceChart: React.FC<{ data?: DemographicsMetricsRecurrence }> = ({ d
         </ResponsiveContainer>
       </div>
       <p className="text-xs text-muted-foreground mt-2">
-        Total de usuários com pelo menos 1 dia de atividade logada: {(data?.total ?? 0).toLocaleString('pt-BR')}
+        Total de usuários com pelo menos 1 dia de acesso registrado desde a existência do app: {(data?.total ?? 0).toLocaleString('pt-BR')}
       </p>
     </div>
   );
