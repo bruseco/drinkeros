@@ -376,7 +376,7 @@ const VipLandingB: React.FC = () => {
   }, [searchParams, setSearchParams, queryClient]);
 
   const handleSubscribe = async (
-    chosenMethod: 'card' | 'pix' = 'card',
+    _chosenMethod: 'card' | 'pix' = 'card',
     chosenOffer?: 'intro' | 'full',
   ) => {
     if (!user) {
@@ -384,39 +384,32 @@ const VipLandingB: React.FC = () => {
       return;
     }
     if (loading) return;
-    // Sem fluxo de exit: enquanto a intro está ativa (ou carregando) pedimos R$69.
     const offer: 'intro' | 'full' =
       chosenOffer ?? ((promo.isLoading || promo.isActive) ? 'intro' : 'full');
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('create-club-checkout', {
-        body: { method: chosenMethod, offer },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      if (!data?.url) throw new Error('URL de checkout não retornada');
+      const amount = offer === 'intro' ? 69 : 197;
 
       trackInitiateCheckout({
-        amount: data.amount,
-        currency: data.currency,
-        product_name: data.product_name,
+        amount,
+        currency: 'BRL',
+        product_name: 'Clube dos Drinkeros · Anual',
         product_type: 'subscription',
-        price_id: data.price_id,
-        session_id: data.session_id,
       });
       trackAbConversion('clube');
       trackFunnel(
         'clube-b',
         'checkout_1_started',
         {
-          amountCents: Math.round(Number(data.amount || 0) * 100),
+          amountCents: amount * 100,
           userId: user?.id ?? null,
-          metadata: { offer, method: chosenMethod },
+          metadata: { offer, provider: 'mercadopago' },
         },
       );
       await waitForPixelFlush();
 
-      window.location.href = data.url;
+      // Mercado Pago checkout transparente (cartão recorrente + PIX) na página /checkout
+      navigate('/checkout/club/clube-anual');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Tente novamente em alguns instantes.';
       toast.error('Erro ao iniciar checkout', { description: message });
