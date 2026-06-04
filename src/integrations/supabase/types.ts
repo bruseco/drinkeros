@@ -68,6 +68,33 @@ export type Database = {
         }
         Relationships: []
       }
+      app_daily_accesses: {
+        Row: {
+          access_date: string
+          first_seen_at: string
+          hits: number
+          id: string
+          last_seen_at: string
+          user_id: string
+        }
+        Insert: {
+          access_date: string
+          first_seen_at?: string
+          hits?: number
+          id?: string
+          last_seen_at?: string
+          user_id: string
+        }
+        Update: {
+          access_date?: string
+          first_seen_at?: string
+          hits?: number
+          id?: string
+          last_seen_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       certificate_layout_settings: {
         Row: {
           date_font_size: number
@@ -3625,6 +3652,7 @@ export type Database = {
       }
       slugify: { Args: { v: string }; Returns: string }
       start_vip_discount_window: { Args: never; Returns: string }
+      track_app_daily_access: { Args: never; Returns: undefined }
       track_funnel_event: {
         Args: {
           _amount_cents?: number
