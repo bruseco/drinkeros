@@ -491,8 +491,9 @@ const VipLandingB: React.FC = () => {
 
       `}</style>
 
-      {/* Banner sticky global (ClubeIntroStickyBar) cobre o app inteiro,
-          inclusive ao navegar — não duplicamos aqui. */}
+      {/* Banner sticky de countdown — também renderizado aqui para que apareça
+          imediatamente ao revelar a oferta sem precisar sair de /clube-b. */}
+      <ClubeIntroStickyBar />
       <ClubeDiscountReveal open={revealOpen} onClose={handleRevealClose} />
 
 
