@@ -27,10 +27,13 @@ export const UserNavbar: React.FC = () => {
 
   return (
     <>
-      <header className={cn(
-        'z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 lg:hidden',
-        !isRecipesListPage && 'sticky top-0'
-      )}>
+      <header
+        className={cn(
+          'z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 lg:hidden',
+          !isRecipesListPage && 'sticky'
+        )}
+        style={!isRecipesListPage ? { top: 'var(--top-banner-h, 0px)' } : undefined}
+      >
         <div className="container mx-auto flex h-16 items-center justify-between px-4 relative">
           <div className="flex items-center gap-2">
             {isInternalPage && (
