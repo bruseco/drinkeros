@@ -23,6 +23,7 @@ import { useClubeIntroOffer, useIntroCountdown } from '@/hooks/useClubeIntroOffe
 import { useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
 import { trackFunnel } from '@/lib/funnelTracking';
 import ClubeDiscountReveal from '@/components/user/ClubeDiscountReveal';
+import ClubeIntroStickyBar from '@/components/user/ClubeIntroStickyBar';
 
 
 import drinksStrip from '@/assets/1000-drinks.jpg';
