@@ -603,7 +603,7 @@ const RecurrenceChart: React.FC<{ data?: DemographicsMetricsRecurrence }> = ({ d
         </ResponsiveContainer>
       </div>
       <p className="text-xs text-muted-foreground mt-2">
-        Total de usuários com pelo menos 1 dia de acesso registrado desde a existência do app: {(data?.total ?? 0).toLocaleString('pt-BR')}
+        Total de usuários cadastrados avaliados desde a existência do app: {(data?.total ?? 0).toLocaleString('pt-BR')}
       </p>
     </div>
   );
