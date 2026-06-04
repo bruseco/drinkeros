@@ -18,6 +18,28 @@ function shouldLogOnce(key: string, ttlMs: number): boolean {
 
 const VIEW_TTL_MS = 6 * 60 * 60 * 1000; // 6h — uma view por conteúdo a cada 6h por usuário
 
+const getBrazilDateKey = () =>
+  new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+
+/** Registra 1 dia de acesso ao app por usuário para métricas de recorrência vitalícia. */
+export const useTrackDailyAppAccess = () => {
+  const { user } = useAuth();
+  const loggedRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const dateKey = getBrazilDateKey();
+    const storageKey = `daily-app-access:${user.id}:${dateKey}`;
+    if (loggedRef.current === storageKey) return;
+    loggedRef.current = storageKey;
+
+    if (!shouldLogOnce(storageKey, 24 * 60 * 60 * 1000)) return;
+
+    (supabase as any).rpc('track_app_daily_access').then(() => {});
+  }, [user?.id]);
+};
+
 /** Registra um view de curso (no máx. 1x a cada 6h por user+curso) */
 export const useTrackCourseView = (courseId?: string | null) => {
   const { user } = useAuth();
