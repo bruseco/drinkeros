@@ -13,6 +13,7 @@ import { VipDiscountCountdownBanner } from './VipDiscountCountdownBanner';
 import { WelcomeOverlay } from './WelcomeOverlay';
 import ClubeIntroStickyBar from './ClubeIntroStickyBar';
 import ClubeRetriggerWatcher from './ClubeRetriggerWatcher';
+import { useTrackDailyAppAccess } from '@/hooks/useAccessTracking';
 
 
 import { Loader2 } from 'lucide-react';
@@ -20,6 +21,7 @@ import { Loader2 } from 'lucide-react';
 export const UserLayout: React.FC = () => {
   const { user, isLoading } = useAuth();
   const [phoneCheck, setPhoneCheck] = useState<'pending' | 'ok' | 'missing'>('pending');
+  useTrackDailyAppAccess();
 
   useEffect(() => {
     if (!user) return;
