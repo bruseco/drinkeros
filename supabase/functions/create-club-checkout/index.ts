@@ -4,8 +4,8 @@
 //
 // Offers (sempre cobra a partir de R$197 + cupom para que o valor exibido na
 // landing seja EXATAMENTE o valor cobrado no Stripe):
-// - offer=intro -> R$197 + cupom CLUBE_EXIT_128 (R$128 off) = R$ 69
-// - offer=exit  -> alias legado, mesmo resultado de intro (R$ 69)
+// - offer=intro -> R$197 + cupom CLUBE_EXIT_150 (R$150 off) = R$ 47
+// - offer=exit  -> alias legado, mesmo resultado de intro (R$ 47)
 // - offer=full  -> R$197 sem cupom
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0?target=deno";
