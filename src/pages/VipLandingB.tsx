@@ -112,7 +112,7 @@ const IntroCountdownPill: React.FC<{ untilMs: number }> = ({ untilMs }) => {
   return (
     <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs font-semibold text-yellow-200">
       <Timer className="h-3.5 w-3.5" />
-      <span className="text-yellow-100">Desconto de R$ 128 expira em</span>
+      <span className="text-yellow-100">Desconto de R$ 150 expira em</span>
       <span className="font-mono font-bold text-white tabular-nums">
         {mm}:{ss}
       </span>
@@ -339,8 +339,8 @@ const VipLandingB: React.FC = () => {
     setDisplayPrice(promo.promoPrice);
     if (priceSettleTimerRef.current !== null) window.clearTimeout(priceSettleTimerRef.current);
     priceSettleTimerRef.current = window.setTimeout(() => setPriceSettled(true), 620);
-    // Funil: 1ª oferta (R$97) revelada
-    trackFunnel('clube-b', 'offer_1_revealed', { amountCents: 6900, userId: user?.id ?? null });
+    // Funil: 1ª oferta revelada
+    trackFunnel('clube-b', 'offer_1_revealed', { amountCents: 4700, userId: user?.id ?? null });
   }, [promo, user?.id]);
 
   useViewContent({
@@ -388,7 +388,7 @@ const VipLandingB: React.FC = () => {
       chosenOffer ?? ((promo.isLoading || promo.isActive) ? 'intro' : 'full');
     setLoading(true);
     try {
-      const amount = offer === 'intro' ? 69 : 197;
+      const amount = offer === 'intro' ? 47 : 197;
 
       trackInitiateCheckout({
         amount,
@@ -614,7 +614,7 @@ const VipLandingB: React.FC = () => {
               </div>
               <p className="text-sm text-purple-200 mt-1">
                 {unlocked ? (
-                  <>Você economiza <strong className="text-yellow-300">R$ 128</strong> agora.</>
+                  <>Você economiza <strong className="text-yellow-300">R$ 150</strong> agora.</>
                 ) : (
                   <>Equivale a menos de <strong className="text-white">R$ 6 por mês</strong>.</>
                 )}
@@ -837,7 +837,7 @@ const VipLandingB: React.FC = () => {
                   <PriceAmount value={displayPrice} className="text-7xl font-black viplanding-gold-text" />
                 </div>
                 <div className="text-sm text-purple-300">
-                  por ano{unlocked ? ' · economize R$ 128' : ' · menos de R$ 6/mês'}
+                  por ano{unlocked ? ' · economize R$ 150' : ' · menos de R$ 4/mês'}
                 </div>
                 {unlocked && (
                   <div className="mt-1 text-[11px] uppercase tracking-wider font-bold text-yellow-300">

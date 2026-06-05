@@ -11,7 +11,7 @@ const corsHeaders = {
 const MP_API = "https://api.mercadopago.com";
 
 const PLANS: Record<string, { amount: number; frequency: number; reason: string }> = {
-  "clube-anual": { amount: 69, frequency: 12, reason: "Clube dos Drinkeros · Anual" },
+  "clube-anual": { amount: 47, frequency: 12, reason: "Clube dos Drinkeros · Anual" },
   clube:         { amount: 9.9, frequency: 1,  reason: "Clube dos Drinkeros · Mensal" },
 };
 

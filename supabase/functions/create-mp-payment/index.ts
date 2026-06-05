@@ -22,7 +22,7 @@ const CLUB_PRODUCTS: Record<string, { id: string; name: string; slug: string; pr
     id: "club",
     name: "Clube dos Drinkeros · Anual",
     slug: "clube-anual",
-    price: 69,
+    price: 47,
     cover_image_url: null,
     description: "Acesso por 12 meses ao Clube.",
     period_days: 365,

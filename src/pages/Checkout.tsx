@@ -26,7 +26,7 @@ const CLUB_PRODUCTS: Record<string, Product> = {
     id: "club",
     name: "Clube dos Drinkeros · Anual",
     slug: "clube-anual",
-    price: 69,
+    price: 47,
     cover_image_url: null,
     description: "Acesso por 12 meses às receitas exclusivas e benefícios do Clube.",
   },

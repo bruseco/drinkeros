@@ -166,7 +166,7 @@ const VipLanding: React.FC = () => {
     content_name: 'Clube dos Drinkeros',
     content_category: 'clube',
     content_type: 'product',
-    value: 69,
+    value: 47,
     currency: 'BRL',
   });
 

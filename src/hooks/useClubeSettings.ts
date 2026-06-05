@@ -15,7 +15,7 @@ export interface ClubeSettings {
 const FALLBACK: ClubeSettings = {
   id: '',
   full_price: 197,
-  promo_price: 69,
+  promo_price: 47,
   benefits: [],
 };
 
@@ -34,7 +34,7 @@ export function useClubeSettings() {
       return {
         id: row.id,
         full_price: Number(row.full_price) || 197,
-        promo_price: Number(row.promo_price) || 69,
+        promo_price: Number(row.promo_price) || 47,
         benefits: Array.isArray(row.benefits) ? row.benefits : [],
       };
     },

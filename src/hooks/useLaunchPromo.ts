@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
  * - Ativa automaticamente quando o usuário chega via anúncio (qualquer parâmetro UTM na URL).
  * - Persiste em localStorage por 15 minutos a partir da primeira ativação.
  * - Após expirar: a cada 3 visitas adicionais à página da oferta cheia (R$197),
- *   reativa automaticamente a promo de R$69 por mais 15 minutos.
+ *   reativa automaticamente a promo de R$47 por mais 15 minutos.
  * - Sem UTM e sem gatilho de reativação = preço cheio (R$ 197).
  */
 
@@ -13,7 +13,7 @@ export const LAUNCH_PROMO_KEY = 'clube:launch-promo-start';
 export const LAUNCH_PROMO_VISITS_KEY = 'clube:launch-promo-fullprice-visits';
 export const LAUNCH_PROMO_DURATION_MS = 15 * 60 * 1000; // 15 minutos
 export const LAUNCH_PROMO_VISITS_THRESHOLD = 3;
-export const PRICE_PROMO = 69;
+export const PRICE_PROMO = 47;
 export const PRICE_FULL = 197;
 
 const UTM_PARAMS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
