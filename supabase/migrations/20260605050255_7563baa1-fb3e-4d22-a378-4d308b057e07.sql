@@ -1,0 +1,1 @@
+UPDATE public.clube_settings SET promo_price = 47 WHERE promo_price = 69;
