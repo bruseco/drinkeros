@@ -328,7 +328,11 @@ const AdminOrders: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <Badge variant={sourceVariant[r.source] || 'outline'}>
-                        {sourceLabel[r.source] || r.source}
+                        {(sourceLabel[r.source] || r.source) + (
+                          r.source === 'mercadopago' && r.payment_method
+                            ? ` (${r.payment_method === 'pix' ? 'Pix' : 'Cartão'})`
+                            : ''
+                        )}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right font-medium">{fmtBRL(r.amount)}</TableCell>
