@@ -16,7 +16,7 @@ const AdminClube: React.FC = () => {
   const qc = useQueryClient();
 
   const [fullPrice, setFullPrice] = useState<string>('197');
-  const [promoPrice, setPromoPrice] = useState<string>('69');
+  const [promoPrice, setPromoPrice] = useState<string>('47');
   const [benefits, setBenefits] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
