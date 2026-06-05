@@ -13,6 +13,7 @@ export interface AdminOrder {
   amount: number | null;
   currency: string | null;
   source: string;
+  payment_method: string | null;
   purchased_at: string;
   external_ref: string | null;
   total_count: number;

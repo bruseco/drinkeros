@@ -3422,6 +3422,7 @@ export type Database = {
           currency: string
           external_ref: string
           id: string
+          payment_method: string
           product_id: string
           product_name: string
           product_type: string
