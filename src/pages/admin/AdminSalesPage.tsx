@@ -26,8 +26,8 @@ const CLUB_STEPS: Step[] = [
   { key: 'pageview', label: 'PageViews', icon: Eye, hint: 'Pessoas que abriram a página' },
   { key: 'offer_1_revealed', label: '1ª Oferta revelada (R$97/ano)', icon: Sparkles, amount: 97 },
   { key: 'checkout_1_started', label: '1º Checkout iniciado', icon: ShoppingCart, amount: 97 },
-  { key: 'offer_2_revealed', label: '2ª Oferta revelada (R$69/ano)', icon: Sparkles, amount: 69 },
-  { key: 'checkout_2_started', label: '2º Checkout iniciado', icon: ShoppingCart, amount: 69 },
+  { key: 'offer_2_revealed', label: '2ª Oferta revelada (R$47/ano)', icon: Sparkles, amount: 47 },
+  { key: 'checkout_2_started', label: '2º Checkout iniciado', icon: ShoppingCart, amount: 47 },
   { key: 'subscription_confirmed', label: 'Assinaturas confirmadas', icon: Crown },
 ];
 
