@@ -168,7 +168,7 @@ const AdminSalesPage: React.FC = () => {
                     <div className="text-xl font-bold">{pct(safeCounts.checkout_1_started, safeCounts.offer_1_revealed)}</div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">% checkout R$69</div>
+                    <div className="text-xs text-muted-foreground">% checkout R$47</div>
                     <div className="text-xl font-bold">{pct(safeCounts.checkout_2_started, safeCounts.offer_2_revealed)}</div>
                   </div>
                 </>
