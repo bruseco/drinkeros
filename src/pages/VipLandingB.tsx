@@ -339,8 +339,8 @@ const VipLandingB: React.FC = () => {
     setDisplayPrice(promo.promoPrice);
     if (priceSettleTimerRef.current !== null) window.clearTimeout(priceSettleTimerRef.current);
     priceSettleTimerRef.current = window.setTimeout(() => setPriceSettled(true), 620);
-    // Funil: 1ª oferta (R$97) revelada
-    trackFunnel('clube-b', 'offer_1_revealed', { amountCents: 6900, userId: user?.id ?? null });
+    // Funil: 1ª oferta revelada
+    trackFunnel('clube-b', 'offer_1_revealed', { amountCents: 4700, userId: user?.id ?? null });
   }, [promo, user?.id]);
 
   useViewContent({
