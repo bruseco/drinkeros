@@ -21,7 +21,7 @@ const PRICE_CARD_197 = "price_1TbyKYGlXZFgg9244vr2jrTS";
 const PRICE_PIX_197 = "price_1TbyL1GlXZFgg924wxKo7wVc";
 
 // Coupons (duration: forever) — desconto persiste em todas as renovações anuais
-const COUPON_EXIT_128 = "Hy11JuxP";  // R$128 off → R$69 forever
+const COUPON_EXIT_150 = "1HADYn9g";  // R$150 off → R$47 forever
 
 type Offer = "intro" | "exit" | "full";
 
