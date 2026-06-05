@@ -35,7 +35,7 @@ function couponFor(offer: Offer): string | null {
 }
 
 function expectedAmount(offer: Offer): number {
-  if (offer === "intro" || offer === "exit") return 69;
+  if (offer === "intro" || offer === "exit") return 47;
   return 197;
 }
 
