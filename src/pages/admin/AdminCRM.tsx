@@ -72,10 +72,17 @@ function useAdminProfiles() {
   return useQuery({
     queryKey: ['admin-profiles-crm'],
     queryFn: async () => {
+      const { data: roleRows, error: rolesErr } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .in('role', ['super_admin', 'editor', 'viewer']);
+      if (rolesErr) throw rolesErr;
+      const ids = Array.from(new Set((roleRows || []).map((r) => r.user_id)));
+      if (ids.length === 0) return [];
       const { data, error } = await supabase
         .from('profiles')
         .select('user_id, full_name, email')
-        .eq('is_admin', true);
+        .in('user_id', ids);
       if (error) throw error;
       return data;
     },
