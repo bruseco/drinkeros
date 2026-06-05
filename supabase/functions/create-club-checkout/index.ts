@@ -30,7 +30,7 @@ function resolveOffer(input: unknown): Offer {
 }
 
 function couponFor(offer: Offer): string | null {
-  if (offer === "intro" || offer === "exit") return COUPON_EXIT_128;
+  if (offer === "intro" || offer === "exit") return COUPON_EXIT_150;
   return null;
 }
 
