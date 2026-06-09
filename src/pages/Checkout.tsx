@@ -117,7 +117,10 @@ export default function Checkout() {
             return;
           }
           const clubProd = CLUB_PRODUCTS[slug as string] || CLUB_PRODUCTS["clube-anual"];
-          setProduct(clubProd);
+          const adjusted = (slug === "clube-anual" && youth.isYouth)
+            ? { ...clubProd, price: youth.price }
+            : clubProd;
+          setProduct(adjusted);
           setPayerEmail(user.email ?? "");
           setLoading(false);
           return;
