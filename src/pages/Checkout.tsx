@@ -152,7 +152,7 @@ export default function Checkout() {
         setLoading(false);
       }
     })();
-  }, [productType, slug, navigate]);
+  }, [productType, slug, navigate, youth.isYouth, youth.loading]);
 
   const finalPrice = useMemo(() => {
     if (!product) return 0;
