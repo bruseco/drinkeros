@@ -619,11 +619,16 @@ const VipLandingB: React.FC = () => {
               </div>
               <p className="text-sm text-purple-200 mt-1">
                 {unlocked ? (
-                  <>Você economiza <strong className="text-yellow-300">R$ 150</strong> agora.</>
+                  <>Você economiza <strong className="text-yellow-300">R$ {effectiveSavings}</strong> agora.</>
                 ) : (
                   <>Equivale a menos de <strong className="text-white">R$ 6 por mês</strong>.</>
                 )}
               </p>
+              {unlocked && youth.isYouth && (
+                <p className="text-[12px] text-yellow-200 mt-2 leading-snug">
+                  🎓 Condição especial para <strong className="text-yellow-300">estudantes e jovens bartenders</strong> em início de carreira.
+                </p>
+              )}
               <p className="text-[11px] text-purple-300 mt-1">
                 Acesso anual · renovação automática · cancele quando quiser
               </p>
