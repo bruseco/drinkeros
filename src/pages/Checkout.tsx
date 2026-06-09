@@ -73,10 +73,13 @@ export default function Checkout() {
   const [clubMethod, setClubMethod] = useState<ClubMethod>("card");
 
   const vip = useVipDiscount();
+  const youth = useYouthDiscount();
   const isClub = productType === "club";
   // Sócio/Vitalício recebem desconto escalonado (80% por 7d → 50% depois) apenas em produtos avulsos.
   const vipPercent = !isClub && vip.ready && vip.isVip ? vip.percent : 0;
   const isVip = vipPercent > 0;
+  // Jovem Bartender (≤24 anos): R$27 no anual do Clube.
+  const isYouthClubAnual = isClub && slug === "clube-anual" && youth.isYouth;
 
   // 1. Carrega Public Key e inicializa MP SDK (Clube e produtos avulsos agora usam Mercado Pago)
   useEffect(() => {
