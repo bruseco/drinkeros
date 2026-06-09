@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Crown } from 'lucide-react';
 import { useClubeIntroOffer, useIntroCountdown } from '@/hooks/useClubeIntroOffer';
+import { useYouthDiscount } from '@/hooks/useYouthDiscount';
 
 /**
  * Barra fixa no topo do app exibindo countdown do desconto de R$100.
