@@ -217,7 +217,7 @@ const VipLandingB: React.FC = () => {
     promo.isActive && promo.hasRevealed,
   );
   const [displayPrice, setDisplayPrice] = useState<number>(
-    promo.isActive && promo.hasRevealed ? promo.promoPrice : promo.fullPrice,
+    promo.isActive && promo.hasRevealed ? effectivePromoPrice : promo.fullPrice,
   );
   const [priceSettled, setPriceSettled] = useState<boolean>(
     promo.isActive && promo.hasRevealed,
