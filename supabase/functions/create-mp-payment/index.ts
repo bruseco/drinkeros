@@ -164,7 +164,11 @@ serve(async (req) => {
     const isPix = formData.payment_method_id === "pix";
     const paymentBody: Record<string, unknown> = {
       transaction_amount: finalPrice,
-      description: applyDiscount ? `${product.name} (Sócio do Clube -${vipPercent}%)` : product.name,
+      description: youthDiscount
+        ? `${product.name} (Jovem Bartender)`
+        : applyDiscount
+        ? `${product.name} (Sócio do Clube -${vipPercent}%)`
+        : product.name,
       payment_method_id: formData.payment_method_id,
       external_reference: externalRef,
       notification_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/mercadopago-webhook`,
