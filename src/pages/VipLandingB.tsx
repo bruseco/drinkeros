@@ -393,7 +393,7 @@ const VipLandingB: React.FC = () => {
       chosenOffer ?? ((promo.isLoading || promo.isActive) ? 'intro' : 'full');
     setLoading(true);
     try {
-      const amount = offer === 'intro' ? 47 : 197;
+      const amount = offer === 'intro' ? effectivePromoPrice : 197;
 
       trackInitiateCheckout({
         amount,
