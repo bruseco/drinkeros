@@ -181,6 +181,7 @@ serve(async (req) => {
         vip_discount_applied: applyDiscount ? "true" : "false",
         vip_discount_percent: applyDiscount ? String(vipPercent) : "0",
         access_period_days: product_type === "club" ? String(clubPeriodDays) : "",
+        youth_discount: youthDiscount ? "true" : "false",
       },
       payer: {
         email: payerEmail,
