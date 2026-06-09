@@ -341,12 +341,12 @@ const VipLandingB: React.FC = () => {
     setUnlocked(true);
     setPriceSettled(false);
     promo.markRevealed();
-    setDisplayPrice(promo.promoPrice);
+    setDisplayPrice(effectivePromoPrice);
     if (priceSettleTimerRef.current !== null) window.clearTimeout(priceSettleTimerRef.current);
     priceSettleTimerRef.current = window.setTimeout(() => setPriceSettled(true), 620);
     // Funil: 1ª oferta revelada
-    trackFunnel('clube-b', 'offer_1_revealed', { amountCents: 4700, userId: user?.id ?? null });
-  }, [promo, user?.id]);
+    trackFunnel('clube-b', 'offer_1_revealed', { amountCents: effectivePromoPrice * 100, userId: user?.id ?? null });
+  }, [promo, user?.id, effectivePromoPrice]);
 
   useViewContent({
     key: 'clube-dos-drinkeros',
