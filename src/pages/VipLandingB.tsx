@@ -847,8 +847,13 @@ const VipLandingB: React.FC = () => {
                   <PriceAmount value={displayPrice} className="text-7xl font-black viplanding-gold-text" />
                 </div>
                 <div className="text-sm text-purple-300">
-                  por ano{unlocked ? ' · economize R$ 150' : ' · menos de R$ 4/mês'}
+                  por ano{unlocked ? ` · economize R$ ${effectiveSavings}` : ' · menos de R$ 4/mês'}
                 </div>
+                {unlocked && youth.isYouth && (
+                  <div className="mt-2 text-[12px] text-yellow-200 leading-snug px-2">
+                    🎓 Condição especial para <strong className="text-yellow-300">estudantes e jovens bartenders</strong> em início de carreira.
+                  </div>
+                )}
                 {unlocked && (
                   <div className="mt-1 text-[11px] uppercase tracking-wider font-bold text-yellow-300">
                     Promoção de lançamento do novo app
