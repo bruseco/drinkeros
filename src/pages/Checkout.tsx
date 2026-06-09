@@ -9,6 +9,7 @@ import { trackFbEvent, trackInitiateCheckout, waitForPixelFlush } from "@/lib/me
 import { useViewContent } from "@/hooks/useViewContent";
 import { useVipDiscount } from "@/hooks/useVipDiscount";
 import { applyVipDiscountFor } from "@/lib/vipDiscount";
+import { useYouthDiscount } from "@/hooks/useYouthDiscount";
 
 type ClubMethod = "card" | "pix";
 
@@ -72,10 +73,13 @@ export default function Checkout() {
   const [clubMethod, setClubMethod] = useState<ClubMethod>("card");
 
   const vip = useVipDiscount();
+  const youth = useYouthDiscount();
   const isClub = productType === "club";
   // Sócio/Vitalício recebem desconto escalonado (80% por 7d → 50% depois) apenas em produtos avulsos.
   const vipPercent = !isClub && vip.ready && vip.isVip ? vip.percent : 0;
   const isVip = vipPercent > 0;
+  // Jovem Bartender (≤24 anos): R$27 no anual do Clube.
+  const isYouthClubAnual = isClub && slug === "clube-anual" && youth.isYouth;
 
   // 1. Carrega Public Key e inicializa MP SDK (Clube e produtos avulsos agora usam Mercado Pago)
   useEffect(() => {
@@ -113,7 +117,10 @@ export default function Checkout() {
             return;
           }
           const clubProd = CLUB_PRODUCTS[slug as string] || CLUB_PRODUCTS["clube-anual"];
-          setProduct(clubProd);
+          const adjusted = (slug === "clube-anual" && youth.isYouth)
+            ? { ...clubProd, price: youth.price }
+            : clubProd;
+          setProduct(adjusted);
           setPayerEmail(user.email ?? "");
           setLoading(false);
           return;
@@ -145,7 +152,7 @@ export default function Checkout() {
         setLoading(false);
       }
     })();
-  }, [productType, slug, navigate]);
+  }, [productType, slug, navigate, youth.isYouth, youth.loading]);
 
   const finalPrice = useMemo(() => {
     if (!product) return 0;

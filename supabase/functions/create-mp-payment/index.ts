@@ -116,6 +116,27 @@ serve(async (req) => {
       throw new Error("Faça login para assinar o Clube dos Drinkeros");
     }
 
+    // Desconto Jovem Bartender (≤24 anos): R$27 no clube-anual.
+    let youthDiscount = false;
+    if (product_type === "club" && product.slug === "clube-anual" && userId) {
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("birth_date")
+        .eq("user_id", userId)
+        .maybeSingle();
+      const bd = (prof as any)?.birth_date as string | null;
+      if (bd) {
+        const d = new Date(bd);
+        if (!isNaN(d.getTime())) {
+          const now = new Date();
+          let age = now.getFullYear() - d.getFullYear();
+          const m = now.getMonth() - d.getMonth();
+          if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+          if (age >= 14 && age <= 24) youthDiscount = true;
+        }
+      }
+    }
+
     // Desconto escalonado (Sócio + Vitalício, sincroniza com src/lib/vipDiscount.ts)
     const VIP_INTRO_PERCENT = 80;
     const VIP_BASE_PERCENT = 50;
@@ -131,7 +152,7 @@ serve(async (req) => {
     const applyDiscount = vipPercent > 0;
     const basePrice = Number(product.price);
     const finalPrice = product_type === "club"
-      ? basePrice
+      ? (youthDiscount ? 27 : basePrice)
       : applyDiscount
       ? Math.round(basePrice * (1 - vipPercent / 100) * 100) / 100
       : basePrice;
@@ -143,7 +164,11 @@ serve(async (req) => {
     const isPix = formData.payment_method_id === "pix";
     const paymentBody: Record<string, unknown> = {
       transaction_amount: finalPrice,
-      description: applyDiscount ? `${product.name} (Sócio do Clube -${vipPercent}%)` : product.name,
+      description: youthDiscount
+        ? `${product.name} (Jovem Bartender)`
+        : applyDiscount
+        ? `${product.name} (Sócio do Clube -${vipPercent}%)`
+        : product.name,
       payment_method_id: formData.payment_method_id,
       external_reference: externalRef,
       notification_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/mercadopago-webhook`,
@@ -156,6 +181,7 @@ serve(async (req) => {
         vip_discount_applied: applyDiscount ? "true" : "false",
         vip_discount_percent: applyDiscount ? String(vipPercent) : "0",
         access_period_days: product_type === "club" ? String(clubPeriodDays) : "",
+        youth_discount: youthDiscount ? "true" : "false",
       },
       payer: {
         email: payerEmail,

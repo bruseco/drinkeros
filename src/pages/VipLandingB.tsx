@@ -20,6 +20,7 @@ import { useViewContent } from '@/hooks/useViewContent';
 import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
 import { useTotalClubMembers, TOTAL_CLUB_MEMBERS_FALLBACK } from '@/hooks/useTotalClubMembers';
 import { useClubeIntroOffer, useIntroCountdown } from '@/hooks/useClubeIntroOffer';
+import { useYouthDiscount } from '@/hooks/useYouthDiscount';
 import { useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
 import { trackFunnel } from '@/lib/funnelTracking';
 import ClubeDiscountReveal from '@/components/user/ClubeDiscountReveal';
@@ -196,6 +197,10 @@ const VipLandingB: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [isClosing] = useState(false);
   const promo = useClubeIntroOffer();
+  const youth = useYouthDiscount();
+  // Preço efetivo após considerar Jovem Bartender (≤24 anos): R$27.
+  const effectivePromoPrice = youth.isYouth ? youth.price : promo.promoPrice;
+  const effectiveSavings = promo.fullPrice - effectivePromoPrice;
 
   // ===== Reveal cinematográfico do desconto de R$100 =====
   // Mostra R$197 no card de preço; quando o usuário rola até o card, espera 2s,
@@ -212,7 +217,7 @@ const VipLandingB: React.FC = () => {
     promo.isActive && promo.hasRevealed,
   );
   const [displayPrice, setDisplayPrice] = useState<number>(
-    promo.isActive && promo.hasRevealed ? promo.promoPrice : promo.fullPrice,
+    promo.isActive && promo.hasRevealed ? effectivePromoPrice : promo.fullPrice,
   );
   const [priceSettled, setPriceSettled] = useState<boolean>(
     promo.isActive && promo.hasRevealed,
@@ -267,13 +272,13 @@ const VipLandingB: React.FC = () => {
     if (promo.isActive && promo.hasRevealed) {
       setUnlocked(true);
       setPriceSettled(true);
-      setDisplayPrice(promo.promoPrice);
+      setDisplayPrice(effectivePromoPrice);
     } else if (!promo.isActive) {
       setUnlocked(false);
       setPriceSettled(false);
       setDisplayPrice(promo.fullPrice);
     }
-  }, [promo.isLoading, promo.isActive, promo.hasRevealed, promo.promoPrice, promo.fullPrice]);
+  }, [promo.isLoading, promo.isActive, promo.hasRevealed, effectivePromoPrice, promo.fullPrice]);
 
   // Callback ref usado nos cards com o valor R$197 — registra cada elemento.
   const registerPriceCard = React.useCallback((el: HTMLDivElement | null) => {
@@ -336,12 +341,12 @@ const VipLandingB: React.FC = () => {
     setUnlocked(true);
     setPriceSettled(false);
     promo.markRevealed();
-    setDisplayPrice(promo.promoPrice);
+    setDisplayPrice(effectivePromoPrice);
     if (priceSettleTimerRef.current !== null) window.clearTimeout(priceSettleTimerRef.current);
     priceSettleTimerRef.current = window.setTimeout(() => setPriceSettled(true), 620);
     // Funil: 1ª oferta revelada
-    trackFunnel('clube-b', 'offer_1_revealed', { amountCents: 4700, userId: user?.id ?? null });
-  }, [promo, user?.id]);
+    trackFunnel('clube-b', 'offer_1_revealed', { amountCents: effectivePromoPrice * 100, userId: user?.id ?? null });
+  }, [promo, user?.id, effectivePromoPrice]);
 
   useViewContent({
     key: 'clube-dos-drinkeros',
@@ -388,7 +393,7 @@ const VipLandingB: React.FC = () => {
       chosenOffer ?? ((promo.isLoading || promo.isActive) ? 'intro' : 'full');
     setLoading(true);
     try {
-      const amount = offer === 'intro' ? 47 : 197;
+      const amount = offer === 'intro' ? effectivePromoPrice : 197;
 
       trackInitiateCheckout({
         amount,
@@ -614,11 +619,16 @@ const VipLandingB: React.FC = () => {
               </div>
               <p className="text-sm text-purple-200 mt-1">
                 {unlocked ? (
-                  <>Você economiza <strong className="text-yellow-300">R$ 150</strong> agora.</>
+                  <>Você economiza <strong className="text-yellow-300">R$ {effectiveSavings}</strong> agora.</>
                 ) : (
                   <>Equivale a menos de <strong className="text-white">R$ 6 por mês</strong>.</>
                 )}
               </p>
+              {unlocked && youth.isYouth && (
+                <p className="text-[12px] text-yellow-200 mt-2 leading-snug">
+                  🎓 Condição especial para <strong className="text-yellow-300">estudantes e jovens bartenders</strong> em início de carreira.
+                </p>
+              )}
               <p className="text-[11px] text-purple-300 mt-1">
                 Acesso anual · renovação automática · cancele quando quiser
               </p>
@@ -837,8 +847,13 @@ const VipLandingB: React.FC = () => {
                   <PriceAmount value={displayPrice} className="text-7xl font-black viplanding-gold-text" />
                 </div>
                 <div className="text-sm text-purple-300">
-                  por ano{unlocked ? ' · economize R$ 150' : ' · menos de R$ 4/mês'}
+                  por ano{unlocked ? ` · economize R$ ${effectiveSavings}` : ' · menos de R$ 4/mês'}
                 </div>
+                {unlocked && youth.isYouth && (
+                  <div className="mt-2 text-[12px] text-yellow-200 leading-snug px-2">
+                    🎓 Condição especial para <strong className="text-yellow-300">estudantes e jovens bartenders</strong> em início de carreira.
+                  </div>
+                )}
                 {unlocked && (
                   <div className="mt-1 text-[11px] uppercase tracking-wider font-bold text-yellow-300">
                     Promoção de lançamento do novo app
