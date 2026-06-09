@@ -196,6 +196,10 @@ const VipLandingB: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [isClosing] = useState(false);
   const promo = useClubeIntroOffer();
+  const youth = useYouthDiscount();
+  // Preço efetivo após considerar Jovem Bartender (≤24 anos): R$27.
+  const effectivePromoPrice = youth.isYouth ? youth.price : promo.promoPrice;
+  const effectiveSavings = promo.fullPrice - effectivePromoPrice;
 
   // ===== Reveal cinematográfico do desconto de R$100 =====
   // Mostra R$197 no card de preço; quando o usuário rola até o card, espera 2s,
