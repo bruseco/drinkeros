@@ -272,13 +272,13 @@ const VipLandingB: React.FC = () => {
     if (promo.isActive && promo.hasRevealed) {
       setUnlocked(true);
       setPriceSettled(true);
-      setDisplayPrice(promo.promoPrice);
+      setDisplayPrice(effectivePromoPrice);
     } else if (!promo.isActive) {
       setUnlocked(false);
       setPriceSettled(false);
       setDisplayPrice(promo.fullPrice);
     }
-  }, [promo.isLoading, promo.isActive, promo.hasRevealed, promo.promoPrice, promo.fullPrice]);
+  }, [promo.isLoading, promo.isActive, promo.hasRevealed, effectivePromoPrice, promo.fullPrice]);
 
   // Callback ref usado nos cards com o valor R$197 — registra cada elemento.
   const registerPriceCard = React.useCallback((el: HTMLDivElement | null) => {
