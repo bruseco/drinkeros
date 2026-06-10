@@ -354,7 +354,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
                 filter: 'drop-shadow(0 0 32px rgba(241,196,15,0.58))',
               }}
             >
-              R$ 150
+              R$ {discountAmount}
             </div>
           </div>
 
@@ -369,6 +369,20 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
           >
             de desconto.
           </div>
+
+          {/* Mensagem extra para Jovem Bartender */}
+          {youth.isYouth && (
+            <div
+              className="mt-5 text-yellow-200 text-sm sm:text-base font-medium leading-snug px-2"
+              style={{
+                opacity: showDiscount ? 1 : 0,
+                transform: showDiscount ? 'translateY(0)' : 'translateY(18px)',
+                transition: 'opacity 500ms ease 120ms, transform 500ms ease 120ms',
+              }}
+            >
+              🎓 R$ 20 a mais por ser <strong>estudante / jovem bartender</strong> em início de carreira.
+            </div>
+          )}
         </div>
       )}
 
