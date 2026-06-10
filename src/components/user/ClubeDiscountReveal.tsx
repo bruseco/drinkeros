@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import giftBody from '@/assets/gift-box-body.png';
 import giftLid from '@/assets/gift-box-lid.png';
+import { useYouthDiscount } from '@/hooks/useYouthDiscount';
 
 interface Props {
   open: boolean;
@@ -25,6 +26,8 @@ type Phase =
  *  2) REVEAL: ao clicar, a tampa voa e revela "Você ganhou R$100 de desconto."
  */
 export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
+  const youth = useYouthDiscount();
+  const discountAmount = youth.isYouth ? 170 : 150;
   const [phase, setPhase] = useState<Phase>('idle');
   const onCloseRef = React.useRef(onClose);
   useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
@@ -351,7 +354,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
                 filter: 'drop-shadow(0 0 32px rgba(241,196,15,0.58))',
               }}
             >
-              R$ 150
+              R$ {discountAmount}
             </div>
           </div>
 
@@ -366,6 +369,20 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
           >
             de desconto.
           </div>
+
+          {/* Mensagem extra para Jovem Bartender */}
+          {youth.isYouth && (
+            <div
+              className="mt-5 text-yellow-200 text-sm sm:text-base font-medium leading-snug px-2"
+              style={{
+                opacity: showDiscount ? 1 : 0,
+                transform: showDiscount ? 'translateY(0)' : 'translateY(18px)',
+                transition: 'opacity 500ms ease 120ms, transform 500ms ease 120ms',
+              }}
+            >
+              🎓 R$ 20 a mais por ser <strong>estudante / jovem bartender</strong> em início de carreira.
+            </div>
+          )}
         </div>
       )}
 
