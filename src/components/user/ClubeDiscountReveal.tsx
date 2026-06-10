@@ -26,6 +26,8 @@ type Phase =
  *  2) REVEAL: ao clicar, a tampa voa e revela "Você ganhou R$100 de desconto."
  */
 export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
+  const youth = useYouthDiscount();
+  const discountAmount = youth.isYouth ? 170 : 150;
   const [phase, setPhase] = useState<Phase>('idle');
   const onCloseRef = React.useRef(onClose);
   useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
