@@ -334,9 +334,26 @@ serve(async (req) => {
     }
 
     // ============ Pagamento aprovado: liberar acesso ============
-    const productType = metadata.product_type as string | undefined;
-    const productId = metadata.product_id as string | undefined;
-    const knownUserId = (metadata.user_id as string | undefined) || null;
+    let productType = metadata.product_type as string | undefined;
+    let productId = metadata.product_id as string | undefined;
+    let knownUserId = (metadata.user_id as string | undefined) || null;
+
+    // Cobrança recorrente do Clube vem via topic=payment SEM metadata custom.
+    // Detecta pelo external_reference: "club:<userId>:<slug>:<ts>".
+    if ((!productType || !productId) && typeof externalRef === "string" && externalRef.startsWith("club:")) {
+      const parts = externalRef.split(":");
+      const refUserId = parts[1] || null;
+      const refSlug = parts[2] || "clube-anual";
+      productType = "club";
+      productId = "club";
+      knownUserId = knownUserId || refUserId;
+      (metadata as any).product_type = "club";
+      (metadata as any).product_id = "club";
+      (metadata as any).product_slug = refSlug;
+      (metadata as any).access_period_days = refSlug === "clube-anual" ? 365 : 30;
+      (metadata as any).recurring = true;
+      console.log("[mp-webhook] recurring club charge detected via external_reference:", { externalRef, refUserId, refSlug });
+    }
 
     if (!productType || !productId || (productType !== "club" && !ACCESS_TABLE_MAP[productType])) {
       await logPurchaseResolutionFailure(supabase, {
