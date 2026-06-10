@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import giftBody from '@/assets/gift-box-body.png';
 import giftLid from '@/assets/gift-box-lid.png';
+import { useYouthDiscount } from '@/hooks/useYouthDiscount';
 
 interface Props {
   open: boolean;
