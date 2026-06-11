@@ -38,17 +38,8 @@ const LAYOUT_DEFAULTS: CertificateLayout = {
 const IMG_W = 3347;
 const IMG_H = 2447;
 
-function generateVerificationCode(): string {
-  const year = new Date().getFullYear();
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return `CRIM-${year}-${code}`;
-}
-
 function formatDatePtBr(dateStr: string): string {
+
   const date = new Date(dateStr);
   const months = [
     'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
@@ -142,23 +133,24 @@ export const useGenerateCertificate = () => {
       let cert = existing as Certificate | null;
 
       if (!cert) {
-        const { data: newCert, error } = await supabase
-          .from('certificates')
-          .insert({
-            user_id: user.id,
-            certificate_type: 'course',
-            reference_id: referenceId,
-            reference_name: referenceName,
-            verification_code: generateVerificationCode(),
-            completed_at: completedAt || new Date().toISOString(),
-            student_name: studentName,
-          })
-          .select()
-          .single();
+        const { data: newCert, error } = await supabase.rpc('issue_course_certificate', {
+          _reference_id: referenceId,
+          _reference_name: referenceName,
+        });
 
-        if (error) throw error;
-        cert = newCert as Certificate;
+        if (error) {
+          const msg = error.message || '';
+          if (msg.includes('course_not_completed')) {
+            throw new Error('Conclua todas as aulas do curso para emitir o certificado.');
+          }
+          if (msg.includes('no_course_access')) {
+            throw new Error('Você não tem acesso a este curso.');
+          }
+          throw error;
+        }
+        cert = newCert as unknown as Certificate;
       }
+
 
       const layout = await fetchLayout();
       await generatePDF(cert, studentName, certificateBgUrl, textColor, layout);
