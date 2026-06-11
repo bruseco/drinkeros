@@ -3575,6 +3575,28 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      issue_course_certificate: {
+        Args: { _reference_id: string; _reference_name: string }
+        Returns: {
+          certificate_type: string
+          completed_at: string
+          created_at: string
+          id: string
+          reference_id: string
+          reference_name: string
+          student_cpf: string | null
+          student_name: string | null
+          user_id: string
+          verification_code: string
+          workload_seconds: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "certificates"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
