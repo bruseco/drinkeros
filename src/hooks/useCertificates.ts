@@ -38,17 +38,8 @@ const LAYOUT_DEFAULTS: CertificateLayout = {
 const IMG_W = 3347;
 const IMG_H = 2447;
 
-function generateVerificationCode(): string {
-  const year = new Date().getFullYear();
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return `CRIM-${year}-${code}`;
-}
-
 function formatDatePtBr(dateStr: string): string {
+
   const date = new Date(dateStr);
   const months = [
     'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
