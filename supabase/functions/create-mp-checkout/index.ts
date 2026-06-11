@@ -129,6 +129,7 @@ serve(async (req) => {
         user_id: userId || "",
         vip_discount_applied: applyDiscount ? "true" : "false",
         vip_discount_percent: applyDiscount ? String(vipPercent) : "0",
+        buyer_email: userEmail || "",
       },
       // Permite até 12x no cartão (juros do emissor)
       payment_methods: {
