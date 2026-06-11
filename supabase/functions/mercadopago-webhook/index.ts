@@ -322,7 +322,19 @@ serve(async (req) => {
     const status = payment?.status; // approved, pending, rejected, refunded, etc.
     const externalRef = payment?.external_reference as string | undefined;
     const metadata = payment?.metadata || {};
-    const payerEmail = payment?.payer?.email;
+    // MP frequentemente mascara payer.email na consulta do pagamento (ex.: "XXXXXXX").
+    // Prioridade: override (replay admin) > metadata.buyer_email (salvo no checkout) > payer.email válido.
+    const isValidEmail = (e: unknown): e is string =>
+      typeof e === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.trim());
+    const overrideEmail = body?.override_email;
+    const rawPayerEmail = payment?.payer?.email;
+    const payerEmail =
+      (isValidEmail(overrideEmail) ? overrideEmail.trim().toLowerCase() : null) ||
+      (isValidEmail(metadata?.buyer_email) ? String(metadata.buyer_email).trim().toLowerCase() : null) ||
+      (isValidEmail(rawPayerEmail) ? String(rawPayerEmail).trim().toLowerCase() : null);
+    if (!payerEmail && rawPayerEmail) {
+      console.warn("[mp-webhook] payer email invalid/masked:", rawPayerEmail);
+    }
     const payerName = [payment?.payer?.first_name, payment?.payer?.last_name].filter(Boolean).join(" ") || null;
 
     if (status !== "approved") {
