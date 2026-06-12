@@ -89,6 +89,14 @@ async function recordPurchase(supabase: any, p: {
       siteUrl: SITE_URL,
     });
   }
+
+  // Dispara sync NIBO em tempo real (fire-and-forget). Cron 5min é a rede de segurança.
+  try {
+    supabase.functions.invoke("nibo-sync-payment", { body: { auto: true } })
+      .catch((e: unknown) => console.warn("[mp-webhook] nibo-invoke-failed", e));
+  } catch (e) {
+    console.warn("[mp-webhook] nibo-invoke-threw", e);
+  }
 }
 
 /** Resolve ou cria conta do comprador. Em caso de falha, loga e retorna null. */

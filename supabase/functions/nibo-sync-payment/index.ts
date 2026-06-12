@@ -96,10 +96,19 @@ async function upsertCustomer(order: OrderRow): Promise<{
   }
 
   // Cria
+  const safeName = (order.buyer_name && order.buyer_name.trim())
+    || order.buyer_email.split("@")[0].replace(/[._-]+/g, " ").trim()
+    || order.buyer_email;
   const body: Record<string, unknown> = {
-    name: order.buyer_name || order.buyer_email,
+    name: safeName,
+    corporateName: safeName,
     email: order.buyer_email,
-    communication: { contactName: order.buyer_name || undefined, email: order.buyer_email },
+    isActive: true,
+    communication: {
+      contactName: safeName,
+      email: order.buyer_email,
+      ...(order.buyer_phone ? { cellPhone: order.buyer_phone.replace(/\D/g, "") } : {}),
+    },
   };
   if (cpf && cpf.length === 11) {
     body.document = { number: cpf, type: "Cpf" };
@@ -307,30 +316,47 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     let orderIds: string[] = body.order_ids || (body.order_id ? [body.order_id] : []);
 
-    // Modo automático (cron): processa últimas vendas sem sync com sucesso
+    // Modo automático (cron): processa últimas vendas sem sync com sucesso.
+    // Consulta direta nas tabelas de acesso (bypassa admin_orders que exige is_admin via auth.uid).
     if (body.auto === true && orderIds.length === 0) {
       const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString();
-      const { data: orders } = await supabase.rpc("admin_orders", {
-        p_search: null,
-        p_source: null,
-        p_product_type: null,
-        p_from: since,
-        p_to: null,
-        p_limit: 200,
-        p_offset: 0,
-      });
-      const list = (orders as Array<{ id: string }>) || [];
-      const ids = list.map((o) => o.id);
-      if (ids.length > 0) {
+      const collected: string[] = [];
+
+      const pulls = await Promise.all([
+        supabase.from("user_courses").select("id, purchased_at")
+          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since)
+          .order("purchased_at", { ascending: false }).limit(200),
+        supabase.from("user_ebooks").select("id, purchased_at")
+          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since)
+          .order("purchased_at", { ascending: false }).limit(200),
+        supabase.from("user_combos").select("id, purchased_at")
+          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since)
+          .order("purchased_at", { ascending: false }).limit(200),
+        supabase.from("user_packages").select("id, purchased_at")
+          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since)
+          .order("purchased_at", { ascending: false }).limit(200),
+        supabase.from("vip_payments").select("id, paid_at, created_at")
+          .eq("status", "paid").gte("created_at", since)
+          .order("created_at", { ascending: false }).limit(200),
+      ]);
+
+      const [courses, ebooks, combos, packages, vips] = pulls.map((r) => r.data || []) as Array<Array<{ id: string }>>;
+      for (const r of courses) collected.push(`course:${r.id}`);
+      for (const r of ebooks) collected.push(`ebook:${r.id}`);
+      for (const r of combos) collected.push(`combo:${r.id}`);
+      for (const r of packages) collected.push(`package:${r.id}`);
+      for (const r of vips) collected.push(`vip:${r.id}`);
+
+      if (collected.length > 0) {
         const { data: synced } = await supabase
           .from("nibo_sync_log")
           .select("order_id, status")
-          .in("order_id", ids);
+          .in("order_id", collected);
         const okSet = new Set(
           (synced || []).filter((s) => s.status === "success").map((s) => s.order_id),
         );
         // Limita 50 por execução para não estourar tempo
-        orderIds = ids.filter((id) => !okSet.has(id)).slice(0, 50);
+        orderIds = collected.filter((id) => !okSet.has(id)).slice(0, 50);
       }
     }
 
