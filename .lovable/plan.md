@@ -1,37 +1,50 @@
-## Problema
+## Como está hoje
 
-A cobrança recorrente do Clube (R$47, Mastercard, 10/jun 14h01, ref. `club:89ee...:clube-anual:178...`) não aparece em `/admin/orders` porque não foi gravada em `purchases`.
+O sync NIBO já tinha sido pensado pra rodar automatizado, mas **na prática nada está sendo emitido**. Diagnóstico:
 
-Confirmado: a última linha de `purchases` (gateway `mercado_pago`) é de 15:30 UTC; a cobrança das 17:01 UTC não foi inserida.
+### 1. O cron está ativo, mas não pega nenhuma venda
+- Existe um job `nibo-sync-every-5min` (cron `*/5 * * * *`) ativo, que chama a edge function `nibo-sync-payment` com `{"auto": true}` e o **anon key**.
+- Dentro de `nibo-sync-payment`, o modo `auto` chama o RPC `admin_orders` pra buscar as últimas vendas.
+- `admin_orders` é `SECURITY DEFINER` mas exige `is_admin(auth.uid())`. Como o cron chama com anon (sem usuário), `auth.uid()` é `null` → **RPC sempre lança "Acesso negado"** → lista de IDs vazia → cron termina silenciosamente sem sincronizar nada.
+- Prova: temos 53 vendas em `purchases`, mas só **1 linha em `nibo_sync_log`** (uma VIP, criada manualmente, que falhou).
 
-## Causa
+### 2. Webhooks de pagamento não disparam o NIBO
+- Apesar do comentário no topo do arquivo dizer "Disparado por: stripe-webhook, mercadopago-webhook (auto)", **nenhum dos webhooks chama `nibo-sync-payment`** após registrar a venda. Não há nenhum `functions.invoke('nibo-sync-payment')` em `stripe-webhook` nem `mercadopago-webhook`.
 
-`supabase/functions/mercadopago-webhook/index.ts` trata pagamento recorrente quando o Mercado Pago envia `topic = subscription_authorized_payment` / `authorized_payment`. Mas o MP também envia (e neste caso enviou) `topic = payment` com o `payment_id` da cobrança recorrente. Nesse fluxo:
+### 3. Mapeamento de serviços NIBO está vazio
+- A tabela `nibo_service_mappings` está **sem nenhum registro**. Mesmo que o sync rodasse, `emitInvoice` retornaria erro "Sem mapeamento NIBO para product_type=...". Esse mapeamento precisa ser preenchido em `/admin/nibo` (escolher um perfil NIBO pra cada tipo: ebook, curso, combo, pacote, clube).
 
-1. Faz `GET /v1/payments/{id}` — o pagamento de assinatura **não tem** `metadata.product_type` / `metadata.product_id` (esses metadados só existem no checkout transparente, não em cobranças geradas pelo preapproval).
-2. O webhook cai no guard `if (!productType || !productId ...)` e aborta com `metadata_invalid`, sem gravar em `purchases` nem em `vip_payments`.
+### 4. O único registro existente também está quebrado por outro motivo
+- A linha em `nibo_sync_log` (uma compra VIP) parou em "É necessário preencher os dados do cliente!" — o payload de `customers POST` está incompleto pra NIBO (provavelmente falta endereço/documento). Vamos resolver junto.
 
-O `external_reference` da cobrança recorrente vem como `club:<userId>:<slug>:<ts>` (herdado do preapproval), então dá pra identificar como Clube mesmo sem metadata.
+## O que vou fazer pra deixar 100% automático
 
-## Fix
+### A. Corrigir o modo `auto` da `nibo-sync-payment`
+Trocar a chamada ao RPC `admin_orders` por uma query direta usando o service-role client (que a função já tem), unindo `purchases` + `vip_payments` dos últimos 30 dias e filtrando o que ainda não está como `success` em `nibo_sync_log`. Mantém o limite de 50 por execução.
 
-Editar `supabase/functions/mercadopago-webhook/index.ts`, no handler de `topic === "payment"`, antes do guard atual:
+Resultado: o cron de 5 em 5 minutos passa a enxergar as vendas e sincronizar.
 
-1. Se `metadata.product_type` estiver ausente e `external_reference` começar com `club:`, tratar como cobrança recorrente do Clube:
-   - Parsear `external_reference` → `[_, userId, slug]`.
-   - Detectar período pelo slug (`clube-anual` → 365 dias; senão 30).
-   - Reaproveitar `resolveOrCreateBuyer` (com `knownUserId = userId`, email/nome do payer).
-   - Chamar `grantClubAccess` com o `paymentId` e período correto.
-   - Chamar `recordPurchase` com `productType: "club"`, `transactionId: String(paymentId)`, `payment_method` derivado de `payment.payment_method_id` (já implementado o mapeamento Cartão/Pix na listagem admin via `useAdminOrders`).
-   - Retornar `{ ok: true, granted: true, club: true, recurring: true }`.
-2. Manter o fluxo existente (com metadata) intacto para checkout transparente avulso.
-3. Não alterar mais nada (admin UI, hooks, RPC `admin_orders`) — `purchases` já é a fonte e o `payment_method` já é renderizado.
+### B. Disparar o NIBO em tempo real nos webhooks
+Em `stripe-webhook` (cursos/ebooks pagos via Stripe se aplicável) e em `mercadopago-webhook`, ao final do fluxo de sucesso (depois do `purchases.insert`), fazer um `supabase.functions.invoke('nibo-sync-payment', { body: { order_id: <id> } })` em modo "fire-and-forget" (sem bloquear a resposta ao gateway, com try/catch isolado). O cron continua como rede de segurança pra qualquer falha.
 
-## Backfill da cobrança que falhou
+### C. Robustecer o payload de cliente NIBO
+Ajustar `upsertCustomer` para enviar todos os campos que a NIBO exige (nome obrigatório, e-mail, telefone formatado, e tentar fallback quando não houver CPF). Hoje só envia `name`, `email` e às vezes `document`/`phone` — e a NIBO está reclamando justamente disso na única tentativa que rodou.
 
-Após o deploy, posso reenviar manualmente uma notificação para o webhook (`POST /functions/v1/mercadopago-webhook` com `{ "type": "payment", "data": { "id": "163470013850" } }`) para registrar retroativamente a venda da wandymacedo@hotmail.com em `purchases` e `vip_payments`. Confirme se quer que eu faça esse replay assim que o fix subir.
+### D. Reprocessar o histórico
+Depois que o mapeamento estiver configurado e o código corrigido, disparar `nibo-sync-payment` em modo `auto` uma vez pra emitir NF retroativa das 53 vendas. Vou avisar quando estiver pronto pra rodar.
 
-## Como testar
+### E. (Ação do usuário) Configurar `nibo_service_mappings`
+Precisa entrar em `/admin/nibo`, clicar em "Buscar perfis no NIBO", e salvar o perfil correto pra cada tipo de produto. Sem isso, **nenhuma NF é emitida** independente do código. Vou deixar isso destacado no fim da implementação.
 
-1. Ver no `/admin/orders` filtro Mercado Pago a venda de R$47 da wandymacedo aparecendo como `Mercado Pago (Cartão)`.
-2. Próximas renovações automáticas do Clube passam a aparecer sozinhas.
+## Como testar depois
+1. Rodar uma venda de teste (Mercado Pago) → conferir que aparece linha em `nibo_sync_log` com `status='success'` em segundos (não precisa esperar 5 min).
+2. Conferir no painel NIBO que cliente, lançamento e NF-e foram criados.
+3. Conferir o badge "NIBO" verde na linha do pedido em `/admin/pedidos`.
+4. Forçar uma falha (ex.: remover temporariamente o mapeamento) → conferir que o cron retenta e o botão "Tentar de novo" funciona.
+
+## Arquivos que serão alterados
+- `supabase/functions/nibo-sync-payment/index.ts` — substituir `admin_orders` por query direta, melhorar payload de cliente.
+- `supabase/functions/mercadopago-webhook/index.ts` — invocar `nibo-sync-payment` após sucesso.
+- `supabase/functions/stripe-webhook/index.ts` — idem.
+
+Nenhuma alteração de UI, tracking (Meta Pixel), PWA, auth, ou banco de dados (sem migration).
