@@ -153,6 +153,14 @@ serve(async (req) => {
         siteUrl: SITE_URL,
       });
     }
+
+    // Dispara sync NIBO em tempo real (fire-and-forget). Cron 5min é a rede de segurança.
+    try {
+      supabase.functions.invoke("nibo-sync-payment", { body: { auto: true } })
+        .catch((e: unknown) => log("nibo-invoke-failed", { err: String(e) }));
+    } catch (e) {
+      log("nibo-invoke-threw", { err: String(e) });
+    }
   };
 
   const SITE_URL = Deno.env.get("SITE_URL") || "https://drinkeros.lovable.app";
