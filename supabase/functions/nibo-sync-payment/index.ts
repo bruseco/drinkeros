@@ -96,10 +96,19 @@ async function upsertCustomer(order: OrderRow): Promise<{
   }
 
   // Cria
+  const safeName = (order.buyer_name && order.buyer_name.trim())
+    || order.buyer_email.split("@")[0].replace(/[._-]+/g, " ").trim()
+    || order.buyer_email;
   const body: Record<string, unknown> = {
-    name: order.buyer_name || order.buyer_email,
+    name: safeName,
+    corporateName: safeName,
     email: order.buyer_email,
-    communication: { contactName: order.buyer_name || undefined, email: order.buyer_email },
+    isActive: true,
+    communication: {
+      contactName: safeName,
+      email: order.buyer_email,
+      ...(order.buyer_phone ? { cellPhone: order.buyer_phone.replace(/\D/g, "") } : {}),
+    },
   };
   if (cpf && cpf.length === 11) {
     body.document = { number: cpf, type: "Cpf" };
