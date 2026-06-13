@@ -99,6 +99,8 @@ async function upsertCustomer(order: OrderRow): Promise<{
   const safeName = (order.buyer_name && order.buyer_name.trim())
     || order.buyer_email.split("@")[0].replace(/[._-]+/g, " ").trim()
     || order.buyer_email;
+  const phoneDigits = order.buyer_phone ? order.buyer_phone.replace(/\D/g, "") : null;
+  // NIBO rejeita o objeto `phone` top-level — usar APENAS `communication.cellPhone`.
   const body: Record<string, unknown> = {
     name: safeName,
     corporateName: safeName,
@@ -107,7 +109,7 @@ async function upsertCustomer(order: OrderRow): Promise<{
     communication: {
       contactName: safeName,
       email: order.buyer_email,
-      ...(order.buyer_phone ? { cellPhone: order.buyer_phone.replace(/\D/g, "") } : {}),
+      ...(phoneDigits ? { cellPhone: phoneDigits } : {}),
     },
   };
   if (cpf && cpf.length === 11) {
@@ -115,22 +117,31 @@ async function upsertCustomer(order: OrderRow): Promise<{
   } else if (cpf && cpf.length === 14) {
     body.document = { number: cpf, type: "Cnpj" };
   }
-  if (order.buyer_phone) {
-    body.phone = { number: order.buyer_phone.replace(/\D/g, "") };
-  }
 
-  const created = await nibo<{ id: string }>("/customers", {
+  const created = await nibo<unknown>("/customers", {
     method: "POST",
     body: JSON.stringify(body),
   });
-  if (!created.ok || !created.data?.id) {
+  // NIBO retorna o ID como uma string JSON pura (ex.: "\"<uuid>\""), não como objeto.
+  let customerId: string | null = null;
+  if (created.ok) {
+    if (typeof created.data === "string") customerId = created.data;
+    else if (created.data && typeof (created.data as { id?: string }).id === "string") {
+      customerId = (created.data as { id: string }).id;
+    } else {
+      // fallback: parse manual do raw
+      const trimmed = created.raw.trim().replace(/^"|"$/g, "");
+      if (/^[0-9a-f-]{30,}$/i.test(trimmed)) customerId = trimmed;
+    }
+  }
+  if (!customerId) {
     return {
       id: null,
       status: "failed",
       error: `customers POST ${created.status}: ${created.raw.slice(0, 400)}`,
     };
   }
-  return { id: created.data.id, status: "success", raw: created.data };
+  return { id: customerId, status: "success", raw: created.data ?? created.raw };
 }
 
 async function createSchedule(order: OrderRow, customerId: string) {
