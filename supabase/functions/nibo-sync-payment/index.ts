@@ -55,6 +55,15 @@ async function nibo<T = unknown>(
   return { ok: res.ok, status: res.status, data, raw };
 }
 
+// NIBO retorna IDs como string JSON pura (ex.: "\"<uuid>\"") em vez de { id }.
+function extractId(data: unknown, raw: string): string | null {
+  if (typeof data === "string") return data;
+  if (data && typeof (data as { id?: string }).id === "string") return (data as { id: string }).id;
+  const trimmed = raw.trim().replace(/^"|"$/g, "");
+  if (/^[0-9a-f-]{30,}$/i.test(trimmed)) return trimmed;
+  return null;
+}
+
 async function getOrder(orderId: string): Promise<OrderRow | null> {
   const { data, error } = await supabase.rpc("nibo_get_order", { p_order_id: orderId });
   if (error) {
@@ -155,14 +164,15 @@ async function createSchedule(order: OrderRow, customerId: string) {
     reference: order.external_ref || order.id,
     isPaid: true,
   };
-  const r = await nibo<{ id: string }>("/schedules/credit", {
+  const r = await nibo<unknown>("/schedules/credit", {
     method: "POST",
     body: JSON.stringify(body),
   });
+  const id = r.ok ? extractId(r.data, r.raw) : null;
   return {
-    id: r.data?.id || null,
-    status: r.ok ? ("success" as const) : ("failed" as const),
-    error: r.ok ? undefined : `schedules POST ${r.status}: ${r.raw.slice(0, 400)}`,
+    id,
+    status: (r.ok && id) ? ("success" as const) : ("failed" as const),
+    error: (r.ok && id) ? undefined : `schedules POST ${r.status}: ${r.raw.slice(0, 400)}`,
     raw: r.data ?? r.raw,
   };
 }
@@ -194,14 +204,15 @@ async function emitInvoice(order: OrderRow, customerId: string) {
     referenceDate: order.purchased_at.slice(0, 10),
     issueDate: new Date().toISOString().slice(0, 10),
   };
-  const r = await nibo<{ id: string }>("/invoices/serviceinvoices", {
+  const r = await nibo<unknown>("/invoices/serviceinvoices", {
     method: "POST",
     body: JSON.stringify(body),
   });
+  const id = r.ok ? extractId(r.data, r.raw) : null;
   return {
-    id: r.data?.id || null,
-    status: r.ok ? ("success" as const) : ("failed" as const),
-    error: r.ok ? undefined : `invoice POST ${r.status}: ${r.raw.slice(0, 400)}`,
+    id,
+    status: (r.ok && id) ? ("success" as const) : ("failed" as const),
+    error: (r.ok && id) ? undefined : `invoice POST ${r.status}: ${r.raw.slice(0, 400)}`,
     raw: r.data ?? r.raw,
   };
 }
