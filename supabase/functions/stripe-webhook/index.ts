@@ -158,7 +158,10 @@ serve(async (req) => {
     // Dispara sync NIBO em tempo real (fire-and-forget). Cron 5min é a rede de segurança.
     try {
       const body = p.niboOrderId ? { order_id: p.niboOrderId } : { auto: true };
-      supabase.functions.invoke("nibo-sync-payment", { body })
+      supabase.functions.invoke("nibo-sync-payment", {
+        body,
+        headers: { "x-internal-nibo-sync": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "" },
+      })
         .catch((e: unknown) => log("nibo-invoke-failed", { err: String(e) }));
     } catch (e) {
       log("nibo-invoke-threw", { err: String(e) });
