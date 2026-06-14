@@ -13,10 +13,26 @@ const NIBO_BASE = "https://api.nibo.com.br/empresas/v1";
 const NIBO_TOKEN = Deno.env.get("NIBO_API_TOKEN") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 
 const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
   auth: { persistSession: false },
 });
+
+async function canRunManualSync(req: Request): Promise<boolean> {
+  const auth = req.headers.get("Authorization") || "";
+  const token = auth.replace(/^Bearer\s+/i, "").trim();
+  if (token && token === SERVICE_KEY) return true;
+  if (!token || !ANON_KEY) return false;
+
+  const userClient = createClient(SUPABASE_URL, ANON_KEY, { auth: { persistSession: false } });
+  const { data: userData } = await userClient.auth.getUser(token);
+  const userId = userData?.user?.id;
+  if (!userId) return false;
+
+  const { data: isAdmin } = await supabase.rpc("is_admin", { _user_id: userId });
+  return isAdmin === true;
+}
 
 type OrderRow = {
   id: string;
@@ -408,6 +424,13 @@ serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     let orderIds: string[] = body.order_ids || (body.order_id ? [body.order_id] : []);
+
+    if (orderIds.length > 0 && !(await canRunManualSync(req))) {
+      return new Response(JSON.stringify({ error: "Acesso negado" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Modo automático (cron): processa últimas vendas sem sync com sucesso.
     // Consulta direta nas tabelas de acesso (bypassa admin_orders que exige is_admin via auth.uid).
