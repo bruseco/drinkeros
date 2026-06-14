@@ -261,7 +261,7 @@ serve(async (req) => {
           const targetTable = productType === "course" ? "user_courses" : "user_ebooks";
           const idCol = productType === "course" ? "course_id" : "ebook_id";
 
-          const { error: grantErr } = await supabase
+          const { data: accessRow, error: grantErr } = await supabase
             .from(targetTable)
             .upsert(
               {
@@ -275,7 +275,9 @@ serve(async (req) => {
                 stripe_payment_intent_id: (session.payment_intent as string) || null,
               },
               { onConflict: `user_id,${idCol}` },
-            );
+            )
+            .select("id")
+            .maybeSingle();
           if (grantErr) log("grant-access-error", { error: grantErr.message, productType, productId });
 
           // Busca nome real do produto p/ Meta Pixel
@@ -292,6 +294,7 @@ serve(async (req) => {
             currency: (session.currency ?? "brl").toUpperCase(),
             status: "paid",
             transactionId: (session.payment_intent as string) || session.id,
+            niboOrderId: accessRow?.id ? `${productType}:${accessRow.id}` : null,
             metadata: { session_id: session.id, event_id: event.id },
             buyerEmail: email,
             buyerName: fullName,
@@ -333,7 +336,7 @@ serve(async (req) => {
           await supabase.from("vip_renewal_reminders_sent").delete().eq("user_id", userId);
 
           const isClubPix = meta.plan_kind === "club_pix_annual";
-          const { error: vipPaymentErr } = await supabase.from("vip_payments").upsert({
+          const { data: vipPaymentRow, error: vipPaymentErr } = await supabase.from("vip_payments").upsert({
             user_id: userId,
             amount: (session.amount_total ?? 0) / 100,
             currency: (session.currency ?? "brl").toUpperCase(),
@@ -345,7 +348,7 @@ serve(async (req) => {
             period_start: new Date().toISOString(),
             period_end: new Date(oneYearFromNow * 1000).toISOString(),
             metadata: { event_id: event.id, session_id: session.id, plan_kind: meta.plan_kind },
-          }, { onConflict: "stripe_payment_intent_id" });
+          }, { onConflict: "stripe_payment_intent_id" }).select("id").maybeSingle();
           if (vipPaymentErr) log("vip-payments-upsert-error-annual", { error: vipPaymentErr.message, sessionId: session.id });
 
           await upsertVipPlan(userId, oneYearFromNow);
@@ -359,6 +362,7 @@ serve(async (req) => {
             currency: (session.currency ?? "brl").toUpperCase(),
             status: "paid",
             transactionId: (session.payment_intent as string) || session.id,
+            niboOrderId: vipPaymentRow?.id ? `vip:${vipPaymentRow.id}` : null,
             metadata: { plan_kind: meta.plan_kind, session_id: session.id, event_id: event.id },
             buyerEmail: email,
             buyerName: fullName,
