@@ -229,7 +229,6 @@ async function createSchedule(order: OrderRow, customerId: string) {
     reference: order.external_ref || order.id,
     serviceProfileId: mapping.id,
     additionalServiceDescription: order.product_name,
-    autoGenerateNFSeType: 5,
   };
   // FormatType=json faz a NIBO retornar scheduleId; sem isso a resposta pode ser só string/HTML.
   const r = await nibo<unknown>("/schedules/credit/FormatType=json", {
