@@ -155,20 +155,37 @@ async function upsertCustomer(order: OrderRow): Promise<{
 
 async function createSchedule(order: OrderRow, customerId: string) {
   const dueDate = order.purchased_at.slice(0, 10);
+  const mapping = await getServiceIdForType(order.product_type);
+  if (!mapping.id) {
+    return {
+      id: null,
+      status: "failed" as const,
+      error: `Sem mapeamento NIBO para product_type="${order.product_type}". Configure em /admin/nibo.`,
+      raw: null,
+    };
+  }
   const body = {
     stakeholderId: customerId,
     dueDate,
     scheduleDate: dueDate,
+    accrualDate: dueDate,
     value: Number(order.amount || 0),
     description: `${order.product_name} (#${order.id})`,
     reference: order.external_ref || order.id,
-    isPaid: true,
+    serviceProfileId: mapping.id,
+    additionalServiceDescription: order.product_name,
+    autoGenerateNFSeType: 5,
   };
-  const r = await nibo<unknown>("/schedules/credit", {
+  // FormatType=json faz a NIBO retornar scheduleId; sem isso a resposta pode ser só string/HTML.
+  const r = await nibo<unknown>("/schedules/credit/FormatType=json", {
     method: "POST",
     body: JSON.stringify(body),
   });
-  const id = r.ok ? extractId(r.data, r.raw) : null;
+  const id = r.ok
+    ? ((r.data && typeof (r.data as { scheduleId?: string }).scheduleId === "string")
+      ? (r.data as { scheduleId: string }).scheduleId
+      : extractId(r.data, r.raw))
+    : null;
   return {
     id,
     status: (r.ok && id) ? ("success" as const) : ("failed" as const),
@@ -197,22 +214,21 @@ async function emitInvoice(order: OrderRow, customerId: string) {
     };
   }
   const body = {
-    stakeholderId: customerId,
-    serviceId: mapping.id,
-    serviceDescription: order.product_name,
-    serviceValue: Number(order.amount || 0),
-    referenceDate: order.purchased_at.slice(0, 10),
-    issueDate: new Date().toISOString().slice(0, 10),
+    StakeholderId: customerId,
+    ServiceProfileId: mapping.id,
+    AccrualRpsDate: order.purchased_at.slice(0, 10),
+    AdditionalServiceDescription: order.product_name,
+    AdditionalRemarks: `Pedido ${order.external_ref || order.id}`,
   };
-  const r = await nibo<unknown>("/invoices/serviceinvoices", {
+  const r = await nibo<unknown>("/nfse", {
     method: "POST",
     body: JSON.stringify(body),
   });
-  const id = r.ok ? extractId(r.data, r.raw) : null;
+  const id = r.ok ? (extractId(r.data, r.raw) || `nfse:${order.id}`) : null;
   return {
     id,
     status: (r.ok && id) ? ("success" as const) : ("failed" as const),
-    error: (r.ok && id) ? undefined : `invoice POST ${r.status}: ${r.raw.slice(0, 400)}`,
+    error: (r.ok && id) ? undefined : `nfse POST ${r.status}: ${r.raw.slice(0, 400)}`,
     raw: r.data ?? r.raw,
   };
 }
