@@ -310,6 +310,9 @@ async function processOrder(orderId: string) {
   }
   const order = await getOrder(orderId);
   if (!order) return { ok: false, error: `Pedido ${orderId} não encontrado` };
+  if (!(Number(order.amount || 0) > 0)) {
+    return { ok: true, skipped: true, reason: "Pedido sem valor pago" };
+  }
 
   // Upsert no log
   const baseLog = {
@@ -440,19 +443,19 @@ serve(async (req) => {
 
       const pulls = await Promise.all([
         supabase.from("user_courses").select("id, purchased_at")
-          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since)
+          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since).gt("amount", 0)
           .order("purchased_at", { ascending: false }).limit(200),
         supabase.from("user_ebooks").select("id, purchased_at")
-          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since)
+          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since).gt("amount", 0)
           .order("purchased_at", { ascending: false }).limit(200),
         supabase.from("user_combos").select("id, purchased_at")
-          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since)
+          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since).gt("amount", 0)
           .order("purchased_at", { ascending: false }).limit(200),
         supabase.from("user_packages").select("id, purchased_at")
-          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since)
+          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since).gt("amount", 0)
           .order("purchased_at", { ascending: false }).limit(200),
         supabase.from("vip_payments").select("id, paid_at, created_at")
-          .eq("status", "paid").gte("created_at", since)
+          .eq("status", "paid").gte("created_at", since).gt("amount", 0)
           .order("created_at", { ascending: false }).limit(200),
       ]);
 
