@@ -30,6 +30,7 @@ async function recordPurchase(supabase: any, p: {
   productId?: string | null;
   productName: string;
   productType: string;
+  niboOrderId?: string | null;
   amountPaid: number;
   currency: string;
   status: string;
@@ -92,7 +93,8 @@ async function recordPurchase(supabase: any, p: {
 
   // Dispara sync NIBO em tempo real (fire-and-forget). Cron 5min é a rede de segurança.
   try {
-    supabase.functions.invoke("nibo-sync-payment", { body: { auto: true } })
+    const body = p.niboOrderId ? { order_id: p.niboOrderId } : { auto: true };
+    supabase.functions.invoke("nibo-sync-payment", { body })
       .catch((e: unknown) => console.warn("[mp-webhook] nibo-invoke-failed", e));
   } catch (e) {
     console.warn("[mp-webhook] nibo-invoke-threw", e);
@@ -132,7 +134,7 @@ async function resolveOrCreateBuyer(supabase: any, args: {
   return res;
 }
 
-async function grantClubAccess(supabase: any, userId: string, payment: any, paymentId: string, periodDays: number) {
+async function grantClubAccess(supabase: any, userId: string, payment: any, paymentId: string, periodDays: number): Promise<string | null> {
   const now = new Date();
   const periodEnd = new Date(now.getTime() + periodDays * 24 * 60 * 60 * 1000);
 
@@ -150,10 +152,10 @@ async function grantClubAccess(supabase: any, userId: string, payment: any, paym
       activated_at: now.toISOString(),
       expires_at: periodEnd.toISOString(),
     }, { onConflict: "user_id" });
-    return;
+    return existingPayment.id;
   }
 
-  await supabase.from("vip_payments").insert({
+  const { data: createdPayment } = await supabase.from("vip_payments").insert({
     user_id: userId,
     amount: Number(payment?.transaction_amount || 0),
     currency: String(payment?.currency_id || "BRL").toUpperCase(),
@@ -163,7 +165,7 @@ async function grantClubAccess(supabase: any, userId: string, payment: any, paym
     period_start: now.toISOString(),
     period_end: periodEnd.toISOString(),
     metadata: { mercadopago_payment_id: String(paymentId), source: "mercadopago" },
-  });
+  }).select("id").maybeSingle();
 
   await supabase.from("user_plans").upsert({
     user_id: userId,
@@ -172,6 +174,8 @@ async function grantClubAccess(supabase: any, userId: string, payment: any, paym
     activated_at: now.toISOString(),
     expires_at: periodEnd.toISOString(),
   }, { onConflict: "user_id" });
+
+  return createdPayment?.id ?? null;
 }
 
 serve(async (req) => {
