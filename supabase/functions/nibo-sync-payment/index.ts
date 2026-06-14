@@ -70,7 +70,8 @@ function flattenCategories(items: unknown[]): Array<{ id: string; name: string |
   const out: Array<{ id: string; name: string | null; type: string | null; isDeleted: boolean; isSubgroup: boolean }> = [];
   const visit = (item: Record<string, unknown>) => {
     const id = typeof item.id === "string" ? item.id : null;
-    if (id) {
+    const children = Array.isArray(item.children) ? item.children : [];
+    if (id && (typeof item.type === "string" || children.length === 0)) {
       out.push({
         id,
         name: typeof item.name === "string" ? item.name : null,
@@ -79,7 +80,6 @@ function flattenCategories(items: unknown[]): Array<{ id: string; name: string |
         isSubgroup: item.isSubgroup === true || item.isSubgroup === 1,
       });
     }
-    const children = Array.isArray(item.children) ? item.children : [];
     for (const child of children) visit(child as Record<string, unknown>);
   };
   for (const item of items) visit(item as Record<string, unknown>);
