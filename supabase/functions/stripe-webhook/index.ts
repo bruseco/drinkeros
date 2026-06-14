@@ -94,6 +94,7 @@ serve(async (req) => {
     productId?: string | null;
     productName: string;
     productType: string; // 'club' | 'course' | 'ebook' | 'combo' | 'package'
+    niboOrderId?: string | null;
     amountPaid: number;  // BRL units
     currency: string;
     status: string;      // 'paid' | 'active'
@@ -156,7 +157,8 @@ serve(async (req) => {
 
     // Dispara sync NIBO em tempo real (fire-and-forget). Cron 5min é a rede de segurança.
     try {
-      supabase.functions.invoke("nibo-sync-payment", { body: { auto: true } })
+      const body = p.niboOrderId ? { order_id: p.niboOrderId } : { auto: true };
+      supabase.functions.invoke("nibo-sync-payment", { body })
         .catch((e: unknown) => log("nibo-invoke-failed", { err: String(e) }));
     } catch (e) {
       log("nibo-invoke-threw", { err: String(e) });
