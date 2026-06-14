@@ -20,6 +20,7 @@ const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
 });
 
 async function canRunManualSync(req: Request): Promise<boolean> {
+  if ((req.headers.get("x-internal-nibo-sync") || "") === SERVICE_KEY) return true;
   const auth = req.headers.get("Authorization") || "";
   const token = auth.replace(/^Bearer\s+/i, "").trim();
   if (token && token === SERVICE_KEY) return true;
