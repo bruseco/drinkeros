@@ -447,6 +447,7 @@ serve(async (req) => {
           .select("id")
           .eq("metadata->>event_id", event.id)
           .maybeSingle();
+        let vipPaymentId: string | null = existingEvt?.id ?? null;
 
         // Reset de lembretes ao renovar/ativar
         await supabase.from("vip_renewal_reminders_sent").delete().eq("user_id", userId);
@@ -485,13 +486,17 @@ serve(async (req) => {
 
           let upsertErr: any = null;
           if (onConflict) {
-            const { error } = await supabase
+            const { data: upsertedVip, error } = await supabase
               .from("vip_payments")
-              .upsert(vipPayload, { onConflict });
+              .upsert(vipPayload, { onConflict })
+              .select("id")
+              .maybeSingle();
             upsertErr = error;
+            vipPaymentId = upsertedVip?.id ?? vipPaymentId;
           } else {
-            const { error } = await supabase.from("vip_payments").insert(vipPayload);
+            const { data: insertedVip, error } = await supabase.from("vip_payments").insert(vipPayload).select("id").maybeSingle();
             upsertErr = error;
+            vipPaymentId = insertedVip?.id ?? vipPaymentId;
           }
 
           if (upsertErr) {
@@ -524,6 +529,7 @@ serve(async (req) => {
           currency: (invoiceCurrency ?? session.currency ?? "brl").toUpperCase(),
           status: "paid",
           transactionId: invoiceId || subscriptionId || session.id,
+          niboOrderId: vipPaymentId ? `vip:${vipPaymentId}` : null,
           metadata: {
             subscription_id: subscriptionId,
             session_id: session.id,
@@ -555,7 +561,7 @@ serve(async (req) => {
           periodEnd = sub.current_period_end ?? null;
         }
 
-        const { error: vipPaymentErr } = await supabase.from("vip_payments").upsert({
+        const { data: vipPaymentRow, error: vipPaymentErr } = await supabase.from("vip_payments").upsert({
           user_id: userId,
           amount: (invoice.amount_paid ?? 0) / 100,
           currency: (invoice.currency ?? "brl").toUpperCase(),
@@ -571,7 +577,7 @@ serve(async (req) => {
             : null,
           period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
           metadata: { event_id: event.id },
-        }, { onConflict: "stripe_invoice_id" });
+        }, { onConflict: "stripe_invoice_id" }).select("id").maybeSingle();
         if (vipPaymentErr) log("vip-payments-upsert-error-invoice", { error: vipPaymentErr.message, invoiceId: invoice.id });
 
         // Reset lembretes ao renovar
@@ -588,6 +594,7 @@ serve(async (req) => {
           currency: (invoice.currency ?? "brl").toUpperCase(),
           status: "paid",
           transactionId: invoice.id,
+          niboOrderId: vipPaymentRow?.id ? `vip:${vipPaymentRow.id}` : null,
           metadata: { subscription_id: subscriptionId, event_id: event.id },
         });
         break;
