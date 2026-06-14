@@ -64,6 +64,47 @@ function extractId(data: unknown, raw: string): string | null {
   return null;
 }
 
+let cachedRevenueCategory: { id: string; name: string | null } | null | undefined;
+
+function flattenCategories(items: unknown[]): Array<{ id: string; name: string | null; type: string | null; isDeleted: boolean; isSubgroup: boolean }> {
+  const out: Array<{ id: string; name: string | null; type: string | null; isDeleted: boolean; isSubgroup: boolean }> = [];
+  const visit = (item: Record<string, unknown>) => {
+    const id = typeof item.id === "string" ? item.id : null;
+    if (id) {
+      out.push({
+        id,
+        name: typeof item.name === "string" ? item.name : null,
+        type: typeof item.type === "string" ? item.type : null,
+        isDeleted: item.isDeleted === true,
+        isSubgroup: item.isSubgroup === true || item.isSubgroup === 1,
+      });
+    }
+    const children = Array.isArray(item.children) ? item.children : [];
+    for (const child of children) visit(child as Record<string, unknown>);
+  };
+  for (const item of items) visit(item as Record<string, unknown>);
+  return out;
+}
+
+async function getRevenueCategory(): Promise<{ id: string; name: string | null } | null> {
+  if (cachedRevenueCategory !== undefined) return cachedRevenueCategory;
+  const attempts = await Promise.all([
+    nibo<{ items?: unknown[] } | unknown[]>("/schedules/categories/tree?CanComposeNFSeValueOnly=true", { method: "GET" }),
+    nibo<{ items?: unknown[] }>("/categories?$top=100", { method: "GET" }),
+  ]);
+  const categories = attempts.flatMap((r) => {
+    const rawItems = Array.isArray(r.data) ? r.data : (Array.isArray((r.data as { items?: unknown[] } | null)?.items) ? (r.data as { items: unknown[] }).items : []);
+    return flattenCategories(rawItems);
+  }).filter((c) => c.id && !c.isDeleted && !c.isSubgroup);
+
+  const preferred = categories.find((c) => {
+    const text = `${c.name || ""} ${c.type || ""}`.toLowerCase();
+    return /receita|venda|servi[cç]o|faturamento|entrada|credit/.test(text);
+  }) || categories[0] || null;
+  cachedRevenueCategory = preferred ? { id: preferred.id, name: preferred.name } : null;
+  return cachedRevenueCategory;
+}
+
 async function getOrder(orderId: string): Promise<OrderRow | null> {
   const { data, error } = await supabase.rpc("nibo_get_order", { p_order_id: orderId });
   if (error) {
@@ -164,11 +205,25 @@ async function createSchedule(order: OrderRow, customerId: string) {
       raw: null,
     };
   }
+  const category = await getRevenueCategory();
+  if (!category?.id) {
+    return {
+      id: null,
+      status: "failed" as const,
+      error: "Nenhuma categoria NIBO de receita/NFS-e encontrada para compor o recebimento.",
+      raw: null,
+    };
+  }
   const body = {
     stakeholderId: customerId,
     dueDate,
     scheduleDate: dueDate,
     accrualDate: dueDate,
+    categories: [{
+      categoryId: category.id,
+      value: Number(order.amount || 0),
+      description: order.product_name,
+    }],
     value: Number(order.amount || 0),
     description: `${order.product_name} (#${order.id})`,
     reference: order.external_ref || order.id,
@@ -203,7 +258,7 @@ async function getServiceIdForType(productType: string): Promise<{ id: string | 
   return { id: data?.nibo_service_id || null, name: data?.nibo_service_name || null };
 }
 
-async function emitInvoice(order: OrderRow, customerId: string) {
+async function emitInvoice(order: OrderRow, customerId: string, scheduleId: string) {
   const mapping = await getServiceIdForType(order.product_type);
   if (!mapping.id) {
     return {
@@ -214,6 +269,7 @@ async function emitInvoice(order: OrderRow, customerId: string) {
     };
   }
   const body = {
+    ScheduleId: scheduleId,
     StakeholderId: customerId,
     ServiceProfileId: mapping.id,
     AccrualRpsDate: order.purchased_at.slice(0, 10),
@@ -302,8 +358,8 @@ async function processOrder(orderId: string) {
   // 3) Invoice (NF-e)
   let invoiceId = existingLog?.nibo_invoice_id ?? null;
   let invoiceStatus: "success" | "failed" | "skipped" = "skipped";
-  if (customerId && !invoiceId) {
-    const inv = await emitInvoice(order, customerId);
+  if (customerId && scheduleId && !invoiceId) {
+    const inv = await emitInvoice(order, customerId, scheduleId);
     invoiceStatus = inv.status;
     invoiceId = inv.id;
     responses.invoice = inv.raw;
