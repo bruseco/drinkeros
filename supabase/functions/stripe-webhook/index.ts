@@ -94,6 +94,7 @@ serve(async (req) => {
     productId?: string | null;
     productName: string;
     productType: string; // 'club' | 'course' | 'ebook' | 'combo' | 'package'
+    niboOrderId?: string | null;
     amountPaid: number;  // BRL units
     currency: string;
     status: string;      // 'paid' | 'active'
@@ -156,7 +157,11 @@ serve(async (req) => {
 
     // Dispara sync NIBO em tempo real (fire-and-forget). Cron 5min é a rede de segurança.
     try {
-      supabase.functions.invoke("nibo-sync-payment", { body: { auto: true } })
+      const body = p.niboOrderId ? { order_id: p.niboOrderId } : { auto: true };
+      supabase.functions.invoke("nibo-sync-payment", {
+        body,
+        headers: { "x-internal-nibo-sync": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "" },
+      })
         .catch((e: unknown) => log("nibo-invoke-failed", { err: String(e) }));
     } catch (e) {
       log("nibo-invoke-threw", { err: String(e) });
@@ -259,7 +264,7 @@ serve(async (req) => {
           const targetTable = productType === "course" ? "user_courses" : "user_ebooks";
           const idCol = productType === "course" ? "course_id" : "ebook_id";
 
-          const { error: grantErr } = await supabase
+          const { data: accessRow, error: grantErr } = await supabase
             .from(targetTable)
             .upsert(
               {
@@ -273,7 +278,9 @@ serve(async (req) => {
                 stripe_payment_intent_id: (session.payment_intent as string) || null,
               },
               { onConflict: `user_id,${idCol}` },
-            );
+            )
+            .select("id")
+            .maybeSingle();
           if (grantErr) log("grant-access-error", { error: grantErr.message, productType, productId });
 
           // Busca nome real do produto p/ Meta Pixel
@@ -290,6 +297,7 @@ serve(async (req) => {
             currency: (session.currency ?? "brl").toUpperCase(),
             status: "paid",
             transactionId: (session.payment_intent as string) || session.id,
+            niboOrderId: accessRow?.id ? `${productType}:${accessRow.id}` : null,
             metadata: { session_id: session.id, event_id: event.id },
             buyerEmail: email,
             buyerName: fullName,
@@ -331,7 +339,7 @@ serve(async (req) => {
           await supabase.from("vip_renewal_reminders_sent").delete().eq("user_id", userId);
 
           const isClubPix = meta.plan_kind === "club_pix_annual";
-          const { error: vipPaymentErr } = await supabase.from("vip_payments").upsert({
+          const { data: vipPaymentRow, error: vipPaymentErr } = await supabase.from("vip_payments").upsert({
             user_id: userId,
             amount: (session.amount_total ?? 0) / 100,
             currency: (session.currency ?? "brl").toUpperCase(),
@@ -343,7 +351,7 @@ serve(async (req) => {
             period_start: new Date().toISOString(),
             period_end: new Date(oneYearFromNow * 1000).toISOString(),
             metadata: { event_id: event.id, session_id: session.id, plan_kind: meta.plan_kind },
-          }, { onConflict: "stripe_payment_intent_id" });
+          }, { onConflict: "stripe_payment_intent_id" }).select("id").maybeSingle();
           if (vipPaymentErr) log("vip-payments-upsert-error-annual", { error: vipPaymentErr.message, sessionId: session.id });
 
           await upsertVipPlan(userId, oneYearFromNow);
@@ -357,6 +365,7 @@ serve(async (req) => {
             currency: (session.currency ?? "brl").toUpperCase(),
             status: "paid",
             transactionId: (session.payment_intent as string) || session.id,
+            niboOrderId: vipPaymentRow?.id ? `vip:${vipPaymentRow.id}` : null,
             metadata: { plan_kind: meta.plan_kind, session_id: session.id, event_id: event.id },
             buyerEmail: email,
             buyerName: fullName,
@@ -441,6 +450,7 @@ serve(async (req) => {
           .select("id")
           .eq("metadata->>event_id", event.id)
           .maybeSingle();
+        let vipPaymentId: string | null = existingEvt?.id ?? null;
 
         // Reset de lembretes ao renovar/ativar
         await supabase.from("vip_renewal_reminders_sent").delete().eq("user_id", userId);
@@ -479,13 +489,17 @@ serve(async (req) => {
 
           let upsertErr: any = null;
           if (onConflict) {
-            const { error } = await supabase
+            const { data: upsertedVip, error } = await supabase
               .from("vip_payments")
-              .upsert(vipPayload, { onConflict });
+              .upsert(vipPayload, { onConflict })
+              .select("id")
+              .maybeSingle();
             upsertErr = error;
+            vipPaymentId = upsertedVip?.id ?? vipPaymentId;
           } else {
-            const { error } = await supabase.from("vip_payments").insert(vipPayload);
+            const { data: insertedVip, error } = await supabase.from("vip_payments").insert(vipPayload).select("id").maybeSingle();
             upsertErr = error;
+            vipPaymentId = insertedVip?.id ?? vipPaymentId;
           }
 
           if (upsertErr) {
@@ -518,6 +532,7 @@ serve(async (req) => {
           currency: (invoiceCurrency ?? session.currency ?? "brl").toUpperCase(),
           status: "paid",
           transactionId: invoiceId || subscriptionId || session.id,
+          niboOrderId: vipPaymentId ? `vip:${vipPaymentId}` : null,
           metadata: {
             subscription_id: subscriptionId,
             session_id: session.id,
@@ -549,7 +564,7 @@ serve(async (req) => {
           periodEnd = sub.current_period_end ?? null;
         }
 
-        const { error: vipPaymentErr } = await supabase.from("vip_payments").upsert({
+        const { data: vipPaymentRow, error: vipPaymentErr } = await supabase.from("vip_payments").upsert({
           user_id: userId,
           amount: (invoice.amount_paid ?? 0) / 100,
           currency: (invoice.currency ?? "brl").toUpperCase(),
@@ -565,7 +580,7 @@ serve(async (req) => {
             : null,
           period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
           metadata: { event_id: event.id },
-        }, { onConflict: "stripe_invoice_id" });
+        }, { onConflict: "stripe_invoice_id" }).select("id").maybeSingle();
         if (vipPaymentErr) log("vip-payments-upsert-error-invoice", { error: vipPaymentErr.message, invoiceId: invoice.id });
 
         // Reset lembretes ao renovar
@@ -582,6 +597,7 @@ serve(async (req) => {
           currency: (invoice.currency ?? "brl").toUpperCase(),
           status: "paid",
           transactionId: invoice.id,
+          niboOrderId: vipPaymentRow?.id ? `vip:${vipPaymentRow.id}` : null,
           metadata: { subscription_id: subscriptionId, event_id: event.id },
         });
         break;

@@ -30,6 +30,7 @@ async function recordPurchase(supabase: any, p: {
   productId?: string | null;
   productName: string;
   productType: string;
+  niboOrderId?: string | null;
   amountPaid: number;
   currency: string;
   status: string;
@@ -92,7 +93,11 @@ async function recordPurchase(supabase: any, p: {
 
   // Dispara sync NIBO em tempo real (fire-and-forget). Cron 5min é a rede de segurança.
   try {
-    supabase.functions.invoke("nibo-sync-payment", { body: { auto: true } })
+    const body = p.niboOrderId ? { order_id: p.niboOrderId } : { auto: true };
+    supabase.functions.invoke("nibo-sync-payment", {
+      body,
+      headers: { "x-internal-nibo-sync": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "" },
+    })
       .catch((e: unknown) => console.warn("[mp-webhook] nibo-invoke-failed", e));
   } catch (e) {
     console.warn("[mp-webhook] nibo-invoke-threw", e);
@@ -132,7 +137,7 @@ async function resolveOrCreateBuyer(supabase: any, args: {
   return res;
 }
 
-async function grantClubAccess(supabase: any, userId: string, payment: any, paymentId: string, periodDays: number) {
+async function grantClubAccess(supabase: any, userId: string, payment: any, paymentId: string, periodDays: number): Promise<string | null> {
   const now = new Date();
   const periodEnd = new Date(now.getTime() + periodDays * 24 * 60 * 60 * 1000);
 
@@ -150,10 +155,10 @@ async function grantClubAccess(supabase: any, userId: string, payment: any, paym
       activated_at: now.toISOString(),
       expires_at: periodEnd.toISOString(),
     }, { onConflict: "user_id" });
-    return;
+    return existingPayment.id;
   }
 
-  await supabase.from("vip_payments").insert({
+  const { data: createdPayment } = await supabase.from("vip_payments").insert({
     user_id: userId,
     amount: Number(payment?.transaction_amount || 0),
     currency: String(payment?.currency_id || "BRL").toUpperCase(),
@@ -163,7 +168,7 @@ async function grantClubAccess(supabase: any, userId: string, payment: any, paym
     period_start: now.toISOString(),
     period_end: periodEnd.toISOString(),
     metadata: { mercadopago_payment_id: String(paymentId), source: "mercadopago" },
-  });
+  }).select("id").maybeSingle();
 
   await supabase.from("user_plans").upsert({
     user_id: userId,
@@ -172,6 +177,8 @@ async function grantClubAccess(supabase: any, userId: string, payment: any, paym
     activated_at: now.toISOString(),
     expires_at: periodEnd.toISOString(),
   }, { onConflict: "user_id" });
+
+  return createdPayment?.id ?? null;
 }
 
 serve(async (req) => {
@@ -263,8 +270,9 @@ serve(async (req) => {
         .eq("metadata->>mp_authorized_payment_id", String(resourceId))
         .maybeSingle();
 
-      if (!existing?.id) {
-        await supabase.from("vip_payments").insert({
+      let vipPaymentId: string | null = existing?.id ?? null;
+      if (!vipPaymentId) {
+        const { data: createdVip } = await supabase.from("vip_payments").insert({
           user_id: userId,
           amount: Number(ap?.transaction_amount || pre?.auto_recurring?.transaction_amount || 0),
           currency: "BRL",
@@ -278,7 +286,8 @@ serve(async (req) => {
             mp_authorized_payment_id: String(resourceId),
             mp_preapproval_id: String(preapprovalId),
           },
-        });
+        }).select("id").maybeSingle();
+        vipPaymentId = createdVip?.id ?? null;
       }
 
       await supabase.from("user_plans").upsert({
@@ -298,6 +307,7 @@ serve(async (req) => {
         currency: "BRL",
         status: "approved",
         transactionId: String(resourceId),
+        niboOrderId: vipPaymentId ? `vip:${vipPaymentId}` : null,
         metadata: { mp_preapproval_id: String(preapprovalId) },
         buyerEmail: payerEmail,
         buyerName: payerName,
@@ -410,7 +420,7 @@ serve(async (req) => {
 
     if (productType === "club") {
       const periodDays = Number(metadata.access_period_days) || 365;
-      await grantClubAccess(supabase, userId, payment, String(paymentId), periodDays);
+      const vipPaymentId = await grantClubAccess(supabase, userId, payment, String(paymentId), periodDays);
 
       await recordPurchase(supabase, {
         userId,
@@ -421,6 +431,7 @@ serve(async (req) => {
         currency: String(payment?.currency_id || "BRL").toUpperCase(),
         status: "approved",
         transactionId: String(paymentId),
+        niboOrderId: vipPaymentId ? `vip:${vipPaymentId}` : null,
         metadata: { period_days: periodDays, payment_method: payment?.payment_method_id === "pix" ? "pix" : "card" },
         buyerEmail: payerEmail,
         buyerName: payerName,
@@ -434,7 +445,7 @@ serve(async (req) => {
     }
 
     const { table, fk } = ACCESS_TABLE_MAP[productType];
-    const { error: insertErr } = await supabase.from(table).upsert({
+    const { data: accessRow, error: insertErr } = await supabase.from(table).upsert({
       user_id: userId,
       [fk]: productId,
       source: "mercadopago",
@@ -442,7 +453,7 @@ serve(async (req) => {
       amount: Number(payment?.transaction_amount || 0),
       currency: String(payment?.currency_id || "BRL").toUpperCase(),
       purchased_at: new Date().toISOString(),
-    }, { onConflict: `user_id,${fk}` });
+    }, { onConflict: `user_id,${fk}` }).select("id").maybeSingle();
 
     if (insertErr) {
       console.error("[mp-webhook] failed to grant access:", insertErr);
@@ -476,6 +487,7 @@ serve(async (req) => {
       currency: String(payment?.currency_id || "BRL").toUpperCase(),
       status: "approved",
       transactionId: String(paymentId),
+      niboOrderId: accessRow?.id ? `${productType}:${accessRow.id}` : null,
       metadata: { payment_method: payment?.payment_method_id === "pix" ? "pix" : "card" },
       buyerEmail: payerEmail,
       buyerName: payerName,

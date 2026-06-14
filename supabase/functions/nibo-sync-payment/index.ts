@@ -13,10 +13,27 @@ const NIBO_BASE = "https://api.nibo.com.br/empresas/v1";
 const NIBO_TOKEN = Deno.env.get("NIBO_API_TOKEN") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 
 const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
   auth: { persistSession: false },
 });
+
+async function canRunManualSync(req: Request): Promise<boolean> {
+  if ((req.headers.get("x-internal-nibo-sync") || "") === SERVICE_KEY) return true;
+  const auth = req.headers.get("Authorization") || "";
+  const token = auth.replace(/^Bearer\s+/i, "").trim();
+  if (token && token === SERVICE_KEY) return true;
+  if (!token || !ANON_KEY) return false;
+
+  const userClient = createClient(SUPABASE_URL, ANON_KEY, { auth: { persistSession: false } });
+  const { data: userData } = await userClient.auth.getUser(token);
+  const userId = userData?.user?.id;
+  if (!userId) return false;
+
+  const { data: isAdmin } = await supabase.rpc("is_admin", { _user_id: userId });
+  return isAdmin === true;
+}
 
 type OrderRow = {
   id: string;
@@ -62,6 +79,47 @@ function extractId(data: unknown, raw: string): string | null {
   const trimmed = raw.trim().replace(/^"|"$/g, "");
   if (/^[0-9a-f-]{30,}$/i.test(trimmed)) return trimmed;
   return null;
+}
+
+let cachedRevenueCategory: { id: string; name: string | null } | null | undefined;
+
+function flattenCategories(items: unknown[]): Array<{ id: string; name: string | null; type: string | null; isDeleted: boolean; isSubgroup: boolean }> {
+  const out: Array<{ id: string; name: string | null; type: string | null; isDeleted: boolean; isSubgroup: boolean }> = [];
+  const visit = (item: Record<string, unknown>) => {
+    const id = typeof item.id === "string" ? item.id : null;
+    const children = Array.isArray(item.children) ? item.children : [];
+    if (id && (typeof item.type === "string" || children.length === 0)) {
+      out.push({
+        id,
+        name: typeof item.name === "string" ? item.name : null,
+        type: typeof item.type === "string" ? item.type : null,
+        isDeleted: item.isDeleted === true,
+        isSubgroup: item.isSubgroup === true || item.isSubgroup === 1,
+      });
+    }
+    for (const child of children) visit(child as Record<string, unknown>);
+  };
+  for (const item of items) visit(item as Record<string, unknown>);
+  return out;
+}
+
+async function getRevenueCategory(): Promise<{ id: string; name: string | null } | null> {
+  if (cachedRevenueCategory !== undefined) return cachedRevenueCategory;
+  const attempts = await Promise.all([
+    nibo<{ items?: unknown[] } | unknown[]>("/schedules/categories/tree?CanComposeNFSeValueOnly=true", { method: "GET" }),
+    nibo<{ items?: unknown[] }>("/categories?$top=100", { method: "GET" }),
+  ]);
+  const categories = attempts.flatMap((r) => {
+    const rawItems = Array.isArray(r.data) ? r.data : (Array.isArray((r.data as { items?: unknown[] } | null)?.items) ? (r.data as { items: unknown[] }).items : []);
+    return flattenCategories(rawItems);
+  }).filter((c) => c.id && !c.isDeleted && !c.isSubgroup);
+
+  const preferred = categories.find((c) => {
+    const text = `${c.name || ""} ${c.type || ""}`.toLowerCase();
+    return /receita|venda|servi[cç]o|faturamento|entrada|credit/.test(text);
+  }) || categories[0] || null;
+  cachedRevenueCategory = preferred ? { id: preferred.id, name: preferred.name } : null;
+  return cachedRevenueCategory;
 }
 
 async function getOrder(orderId: string): Promise<OrderRow | null> {
@@ -155,20 +213,50 @@ async function upsertCustomer(order: OrderRow): Promise<{
 
 async function createSchedule(order: OrderRow, customerId: string) {
   const dueDate = order.purchased_at.slice(0, 10);
+  const mapping = await getServiceIdForType(order.product_type);
+  if (!mapping.id) {
+    return {
+      id: null,
+      status: "failed" as const,
+      error: `Sem mapeamento NIBO para product_type="${order.product_type}". Configure em /admin/nibo.`,
+      raw: null,
+    };
+  }
+  const category = await getRevenueCategory();
+  if (!category?.id) {
+    return {
+      id: null,
+      status: "failed" as const,
+      error: "Nenhuma categoria NIBO de receita/NFS-e encontrada para compor o recebimento.",
+      raw: null,
+    };
+  }
   const body = {
     stakeholderId: customerId,
     dueDate,
     scheduleDate: dueDate,
+    accrualDate: dueDate,
+    categories: [{
+      categoryId: category.id,
+      value: Number(order.amount || 0),
+      description: order.product_name,
+    }],
     value: Number(order.amount || 0),
     description: `${order.product_name} (#${order.id})`,
     reference: order.external_ref || order.id,
-    isPaid: true,
+    serviceProfileId: mapping.id,
+    additionalServiceDescription: order.product_name,
   };
-  const r = await nibo<unknown>("/schedules/credit", {
+  // FormatType=json faz a NIBO retornar scheduleId; sem isso a resposta pode ser só string/HTML.
+  const r = await nibo<unknown>("/schedules/credit/FormatType=json", {
     method: "POST",
     body: JSON.stringify(body),
   });
-  const id = r.ok ? extractId(r.data, r.raw) : null;
+  const id = r.ok
+    ? ((r.data && typeof (r.data as { scheduleId?: string }).scheduleId === "string")
+      ? (r.data as { scheduleId: string }).scheduleId
+      : extractId(r.data, r.raw))
+    : null;
   return {
     id,
     status: (r.ok && id) ? ("success" as const) : ("failed" as const),
@@ -186,7 +274,7 @@ async function getServiceIdForType(productType: string): Promise<{ id: string | 
   return { id: data?.nibo_service_id || null, name: data?.nibo_service_name || null };
 }
 
-async function emitInvoice(order: OrderRow, customerId: string) {
+async function emitInvoice(order: OrderRow, customerId: string, scheduleId: string) {
   const mapping = await getServiceIdForType(order.product_type);
   if (!mapping.id) {
     return {
@@ -197,22 +285,22 @@ async function emitInvoice(order: OrderRow, customerId: string) {
     };
   }
   const body = {
-    stakeholderId: customerId,
-    serviceId: mapping.id,
-    serviceDescription: order.product_name,
-    serviceValue: Number(order.amount || 0),
-    referenceDate: order.purchased_at.slice(0, 10),
-    issueDate: new Date().toISOString().slice(0, 10),
+    ScheduleId: scheduleId,
+    StakeholderId: customerId,
+    ServiceProfileId: mapping.id,
+    AccrualRpsDate: order.purchased_at.slice(0, 10),
+    AdditionalServiceDescription: order.product_name,
+    AdditionalRemarks: `Pedido ${order.external_ref || order.id}`,
   };
-  const r = await nibo<unknown>("/invoices/serviceinvoices", {
+  const r = await nibo<unknown>("/nfse", {
     method: "POST",
     body: JSON.stringify(body),
   });
-  const id = r.ok ? extractId(r.data, r.raw) : null;
+  const id = r.ok ? (extractId(r.data, r.raw) || `nfse:${order.id}`) : null;
   return {
     id,
     status: (r.ok && id) ? ("success" as const) : ("failed" as const),
-    error: (r.ok && id) ? undefined : `invoice POST ${r.status}: ${r.raw.slice(0, 400)}`,
+    error: (r.ok && id) ? undefined : `nfse POST ${r.status}: ${r.raw.slice(0, 400)}`,
     raw: r.data ?? r.raw,
   };
 }
@@ -223,6 +311,9 @@ async function processOrder(orderId: string) {
   }
   const order = await getOrder(orderId);
   if (!order) return { ok: false, error: `Pedido ${orderId} não encontrado` };
+  if (!(Number(order.amount || 0) > 0)) {
+    return { ok: true, skipped: true, reason: "Pedido sem valor pago" };
+  }
 
   // Upsert no log
   const baseLog = {
@@ -286,8 +377,8 @@ async function processOrder(orderId: string) {
   // 3) Invoice (NF-e)
   let invoiceId = existingLog?.nibo_invoice_id ?? null;
   let invoiceStatus: "success" | "failed" | "skipped" = "skipped";
-  if (customerId && !invoiceId) {
-    const inv = await emitInvoice(order, customerId);
+  if (customerId && scheduleId && !invoiceId) {
+    const inv = await emitInvoice(order, customerId, scheduleId);
     invoiceStatus = inv.status;
     invoiceId = inv.id;
     responses.invoice = inv.raw;
@@ -338,6 +429,13 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     let orderIds: string[] = body.order_ids || (body.order_id ? [body.order_id] : []);
 
+    if (orderIds.length > 0 && !(await canRunManualSync(req))) {
+      return new Response(JSON.stringify({ error: "Acesso negado" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Modo automático (cron): processa últimas vendas sem sync com sucesso.
     // Consulta direta nas tabelas de acesso (bypassa admin_orders que exige is_admin via auth.uid).
     if (body.auto === true && orderIds.length === 0) {
@@ -346,19 +444,19 @@ serve(async (req) => {
 
       const pulls = await Promise.all([
         supabase.from("user_courses").select("id, purchased_at")
-          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since)
+          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since).gt("amount", 0)
           .order("purchased_at", { ascending: false }).limit(200),
         supabase.from("user_ebooks").select("id, purchased_at")
-          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since)
+          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since).gt("amount", 0)
           .order("purchased_at", { ascending: false }).limit(200),
         supabase.from("user_combos").select("id, purchased_at")
-          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since)
+          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since).gt("amount", 0)
           .order("purchased_at", { ascending: false }).limit(200),
         supabase.from("user_packages").select("id, purchased_at")
-          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since)
+          .in("source", ["stripe", "mercadopago"]).gte("purchased_at", since).gt("amount", 0)
           .order("purchased_at", { ascending: false }).limit(200),
         supabase.from("vip_payments").select("id, paid_at, created_at")
-          .eq("status", "paid").gte("created_at", since)
+          .eq("status", "paid").gte("created_at", since).gt("amount", 0)
           .order("created_at", { ascending: false }).limit(200),
       ]);
 
