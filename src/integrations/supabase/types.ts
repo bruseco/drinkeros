@@ -1736,9 +1736,16 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address_city: string | null
+          address_complement: string | null
+          address_neighborhood: string | null
+          address_number: string | null
+          address_state: string | null
+          address_street: string | null
           avatar_url: string | null
           bio: string | null
           birth_date: string | null
+          cep: string | null
           clube_exit_eligible_until: string | null
           clube_intro_eligible_until: string | null
           clube_intro_revealed_at: string | null
@@ -1757,9 +1764,16 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          address_city?: string | null
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_state?: string | null
+          address_street?: string | null
           avatar_url?: string | null
           bio?: string | null
           birth_date?: string | null
+          cep?: string | null
           clube_exit_eligible_until?: string | null
           clube_intro_eligible_until?: string | null
           clube_intro_revealed_at?: string | null
@@ -1778,9 +1792,16 @@ export type Database = {
           user_id: string
         }
         Update: {
+          address_city?: string | null
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_state?: string | null
+          address_street?: string | null
           avatar_url?: string | null
           bio?: string | null
           birth_date?: string | null
+          cep?: string | null
           clube_exit_eligible_until?: string | null
           clube_intro_eligible_until?: string | null
           clube_intro_revealed_at?: string | null
@@ -3605,6 +3626,19 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      nibo_claim_order: {
+        Args: {
+          p_amount: number
+          p_buyer_email: string
+          p_buyer_name: string
+          p_currency: string
+          p_order_id: string
+          p_product_name: string
+          p_product_type: string
+          p_user_id: string
+        }
+        Returns: boolean
       }
       nibo_get_order: {
         Args: { p_order_id: string }
