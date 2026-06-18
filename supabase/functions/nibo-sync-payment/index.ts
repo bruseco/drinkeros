@@ -107,20 +107,28 @@ async function getRevenueCategory(): Promise<{ id: string; name: string | null }
   if (cachedRevenueCategory !== undefined) return cachedRevenueCategory;
   const attempts = await Promise.all([
     nibo<{ items?: unknown[] } | unknown[]>("/schedules/categories/tree?CanComposeNFSeValueOnly=true", { method: "GET" }),
-    nibo<{ items?: unknown[] }>("/categories?$top=100", { method: "GET" }),
+    nibo<{ items?: unknown[] }>("/categories?$top=200", { method: "GET" }),
   ]);
   const categories = attempts.flatMap((r) => {
     const rawItems = Array.isArray(r.data) ? r.data : (Array.isArray((r.data as { items?: unknown[] } | null)?.items) ? (r.data as { items: unknown[] }).items : []);
     return flattenCategories(rawItems);
   }).filter((c) => c.id && !c.isDeleted && !c.isSubgroup);
 
-  const preferred = categories.find((c) => {
-    const text = `${c.name || ""} ${c.type || ""}`.toLowerCase();
-    return /receita|venda|servi[cç]o|faturamento|entrada|credit/.test(text);
-  }) || categories[0] || null;
+  // 1) Preferência explícita: "101 - Infoprodutos e Cursos" (Drinkeros)
+  const preferred =
+    categories.find((c) => /^\s*101\b/.test(c.name || "") && /infoproduto|curso/i.test(c.name || "")) ||
+    categories.find((c) => /infoproduto/i.test(c.name || "") && /curso/i.test(c.name || "")) ||
+    categories.find((c) => /^\s*101\b/.test(c.name || "")) ||
+    categories.find((c) => {
+      const text = `${c.name || ""} ${c.type || ""}`.toLowerCase();
+      return /receita|venda|servi[cç]o|faturamento|entrada|credit/.test(text);
+    }) ||
+    categories[0] ||
+    null;
   cachedRevenueCategory = preferred ? { id: preferred.id, name: preferred.name } : null;
   return cachedRevenueCategory;
 }
+
 
 async function getOrder(orderId: string): Promise<OrderRow | null> {
   const { data, error } = await supabase.rpc("nibo_get_order", { p_order_id: orderId });
