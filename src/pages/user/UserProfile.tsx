@@ -156,8 +156,16 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
         bio: bio.trim() || null,
         birth_date: birthDate || null,
         gender: gender || null,
+        cep: cep.replace(/\D/g, '') || null,
+        address_street: addrStreet.trim() || null,
+        address_number: addrNumber.trim() || null,
+        address_complement: addrComplement.trim() || null,
+        address_neighborhood: addrNeighborhood.trim() || null,
+        address_city: addrCity.trim() || null,
+        address_state: addrState.trim().toUpperCase().slice(0, 2) || null,
       };
       if (!cpfLocked && cpf.replace(/\D/g, '').length === 11) updateData.cpf = cpf.replace(/\D/g, '');
+
       const { error } = await supabase.from('profiles').update(updateData).eq('user_id', user.id);
       if (error) throw error;
       toast.success('Perfil atualizado com sucesso!');
