@@ -35,6 +35,14 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
   const [gender, setGender] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [cpfLocked, setCpfLocked] = useState(false);
+  const [cep, setCep] = useState('');
+  const [addrStreet, setAddrStreet] = useState('');
+  const [addrNumber, setAddrNumber] = useState('');
+  const [addrComplement, setAddrComplement] = useState('');
+  const [addrNeighborhood, setAddrNeighborhood] = useState('');
+  const [addrCity, setAddrCity] = useState('');
+  const [addrState, setAddrState] = useState('');
+  const [cepLoading, setCepLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
@@ -49,7 +57,11 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
   useEffect(() => {
     const fetchExtra = async () => {
       if (!user) return;
-      const { data } = await supabase.from('profiles').select('phone, cpf, bio, birth_date, gender').eq('user_id', user.id).single();
+      const { data } = await supabase
+        .from('profiles')
+        .select('phone, cpf, bio, birth_date, gender, cep, address_street, address_number, address_complement, address_neighborhood, address_city, address_state')
+        .eq('user_id', user.id)
+        .single();
       if (data?.phone) setPhone(data.phone);
       if (data?.bio) setBio(data.bio);
       if ((data as any)?.birth_date) setBirthDate((data as any).birth_date);
@@ -59,9 +71,35 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
         setCpf(d.length === 11 ? `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}` : d);
         setCpfLocked(true);
       }
+      const d = data as any;
+      if (d?.cep) setCep(d.cep.length === 8 ? `${d.cep.slice(0,5)}-${d.cep.slice(5)}` : d.cep);
+      if (d?.address_street) setAddrStreet(d.address_street);
+      if (d?.address_number) setAddrNumber(d.address_number);
+      if (d?.address_complement) setAddrComplement(d.address_complement);
+      if (d?.address_neighborhood) setAddrNeighborhood(d.address_neighborhood);
+      if (d?.address_city) setAddrCity(d.address_city);
+      if (d?.address_state) setAddrState(d.address_state);
     };
     fetchExtra();
   }, [user]);
+
+  const lookupCep = async (raw: string) => {
+    const digits = raw.replace(/\D/g, '');
+    if (digits.length !== 8) return;
+    setCepLoading(true);
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+      const json = await res.json();
+      if (json && !json.erro) {
+        if (json.logradouro) setAddrStreet(json.logradouro);
+        if (json.bairro) setAddrNeighborhood(json.bairro);
+        if (json.localidade) setAddrCity(json.localidade);
+        if (json.uf) setAddrState(json.uf);
+      }
+    } catch {}
+    finally { setCepLoading(false); }
+  };
+
 
   useEffect(() => {
     if (!onCompletenessChange) return;
