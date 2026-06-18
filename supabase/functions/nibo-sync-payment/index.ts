@@ -351,35 +351,33 @@ async function processOrder(orderId: string) {
     return { ok: true, skipped: true, reason: "Pedido sem valor pago" };
   }
 
-  // Upsert no log
-  const baseLog = {
-    order_id: order.id,
-    user_id: order.user_id,
-    buyer_email: order.buyer_email,
-    buyer_name: order.buyer_name,
-    amount: order.amount,
-    currency: order.currency,
-    product_type: order.product_type,
-    product_name: order.product_name,
-    last_attempt_at: new Date().toISOString(),
-  };
+  // CLAIM ATÔMICO — impede que duas execuções concorrentes (webhook + cron)
+  // criem o mesmo lançamento/NF duplicado no NIBO.
+  const { data: claimed, error: claimErr } = await supabase.rpc("nibo_claim_order", {
+    p_order_id: order.id,
+    p_user_id: order.user_id,
+    p_buyer_email: order.buyer_email,
+    p_buyer_name: order.buyer_name,
+    p_amount: order.amount,
+    p_currency: order.currency,
+    p_product_type: order.product_type,
+    p_product_name: order.product_name,
+  });
+  if (claimErr) {
+    console.error("nibo_claim_order error", claimErr);
+    return { ok: false, error: `claim error: ${claimErr.message}` };
+  }
+  if (claimed !== true) {
+    return { ok: true, skipped: true, reason: "Pedido já sincronizado ou em processamento" };
+  }
 
+  // Recarrega estado parcial (caso seja um retry após falha)
   const { data: existingLog } = await supabase
     .from("nibo_sync_log")
     .select("id, attempts, nibo_customer_id, nibo_schedule_id, nibo_invoice_id, status")
     .eq("order_id", order.id)
     .maybeSingle();
 
-  // Se já está success completo, retorna
-  if (existingLog?.status === "success") {
-    return { ok: true, skipped: true, log_id: existingLog.id };
-  }
-
-  const attempts = (existingLog?.attempts ?? 0) + 1;
-  await supabase.from("nibo_sync_log").upsert(
-    { ...baseLog, attempts, status: "pending" },
-    { onConflict: "order_id" },
-  );
 
   // 1) Cliente
   let customerId = existingLog?.nibo_customer_id ?? null;
