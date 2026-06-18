@@ -150,15 +150,35 @@ async function upsertCustomer(order: OrderRow): Promise<{
     return { id: null, status: "failed", error: "Comprador sem e-mail" };
   }
 
-  // Busca CPF do profile
+  // Busca CPF + endereço do profile (NIBO precisa de tudo para emitir NF-e)
   let cpf: string | null = null;
+  let addr: {
+    cep: string | null;
+    street: string | null;
+    number: string | null;
+    complement: string | null;
+    neighborhood: string | null;
+    city: string | null;
+    state: string | null;
+  } = { cep: null, street: null, number: null, complement: null, neighborhood: null, city: null, state: null };
   if (order.user_id) {
     const { data: prof } = await supabase
       .from("profiles")
-      .select("cpf")
+      .select("cpf, cep, address_street, address_number, address_complement, address_neighborhood, address_city, address_state")
       .eq("user_id", order.user_id)
       .maybeSingle();
     cpf = prof?.cpf?.replace(/\D/g, "") || null;
+    if (prof) {
+      addr = {
+        cep: prof.cep?.replace(/\D/g, "") || null,
+        street: prof.address_street?.trim() || null,
+        number: prof.address_number?.trim() || null,
+        complement: prof.address_complement?.trim() || null,
+        neighborhood: prof.address_neighborhood?.trim() || null,
+        city: prof.address_city?.trim() || null,
+        state: prof.address_state?.trim()?.toUpperCase().slice(0, 2) || null,
+      };
+    }
   }
 
   // Tenta achar cliente existente por e-mail
@@ -166,16 +186,13 @@ async function upsertCustomer(order: OrderRow): Promise<{
     `/customers?$filter=email eq '${encodeURIComponent(order.buyer_email)}'&$top=1`,
     { method: "GET" },
   );
-  if (search.ok && search.data?.items?.[0]?.id) {
-    return { id: search.data.items[0].id, status: "success", raw: search.data };
-  }
+  const existingId = search.ok && search.data?.items?.[0]?.id ? search.data.items[0].id : null;
 
   // Cria
   const safeName = (order.buyer_name && order.buyer_name.trim())
     || order.buyer_email.split("@")[0].replace(/[._-]+/g, " ").trim()
     || order.buyer_email;
   const phoneDigits = order.buyer_phone ? order.buyer_phone.replace(/\D/g, "") : null;
-  // NIBO rejeita o objeto `phone` top-level — usar APENAS `communication.cellPhone`.
   const body: Record<string, unknown> = {
     name: safeName,
     corporateName: safeName,
@@ -192,23 +209,33 @@ async function upsertCustomer(order: OrderRow): Promise<{
   } else if (cpf && cpf.length === 14) {
     body.document = { number: cpf, type: "Cnpj" };
   }
+  // Endereço — NIBO usa em "address" para emissão de NFS-e
+  if (addr.street || addr.cep) {
+    body.address = {
+      ...(addr.street ? { line1: addr.street } : {}),
+      ...(addr.number ? { number: addr.number } : {}),
+      ...(addr.complement ? { line2: addr.complement } : {}),
+      ...(addr.neighborhood ? { neighborhood: addr.neighborhood } : {}),
+      ...(addr.city ? { city: { name: addr.city, state: addr.state ? { uf: addr.state } : undefined } } : {}),
+      ...(addr.cep ? { zipCode: addr.cep } : {}),
+    };
+  }
+
+  // Se já existe, atualiza com CPF/endereço (necessário para NF-e)
+  if (existingId) {
+    const upd = await nibo<unknown>(`/customers/${existingId}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
+    // Mesmo se PUT falhar, retornamos o id existente para não bloquear schedule.
+    return { id: existingId, status: "success", raw: upd.data ?? search.data };
+  }
 
   const created = await nibo<unknown>("/customers", {
     method: "POST",
     body: JSON.stringify(body),
   });
-  // NIBO retorna o ID como uma string JSON pura (ex.: "\"<uuid>\""), não como objeto.
-  let customerId: string | null = null;
-  if (created.ok) {
-    if (typeof created.data === "string") customerId = created.data;
-    else if (created.data && typeof (created.data as { id?: string }).id === "string") {
-      customerId = (created.data as { id: string }).id;
-    } else {
-      // fallback: parse manual do raw
-      const trimmed = created.raw.trim().replace(/^"|"$/g, "");
-      if (/^[0-9a-f-]{30,}$/i.test(trimmed)) customerId = trimmed;
-    }
-  }
+  const customerId = created.ok ? extractId(created.data, created.raw) : null;
   if (!customerId) {
     return {
       id: null,
@@ -218,6 +245,7 @@ async function upsertCustomer(order: OrderRow): Promise<{
   }
   return { id: customerId, status: "success", raw: created.data ?? created.raw };
 }
+
 
 async function createSchedule(order: OrderRow, customerId: string) {
   const dueDate = order.purchased_at.slice(0, 10);
