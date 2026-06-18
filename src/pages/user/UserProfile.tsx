@@ -35,6 +35,14 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
   const [gender, setGender] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [cpfLocked, setCpfLocked] = useState(false);
+  const [cep, setCep] = useState('');
+  const [addrStreet, setAddrStreet] = useState('');
+  const [addrNumber, setAddrNumber] = useState('');
+  const [addrComplement, setAddrComplement] = useState('');
+  const [addrNeighborhood, setAddrNeighborhood] = useState('');
+  const [addrCity, setAddrCity] = useState('');
+  const [addrState, setAddrState] = useState('');
+  const [cepLoading, setCepLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
@@ -49,7 +57,11 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
   useEffect(() => {
     const fetchExtra = async () => {
       if (!user) return;
-      const { data } = await supabase.from('profiles').select('phone, cpf, bio, birth_date, gender').eq('user_id', user.id).single();
+      const { data } = await supabase
+        .from('profiles')
+        .select('phone, cpf, bio, birth_date, gender, cep, address_street, address_number, address_complement, address_neighborhood, address_city, address_state')
+        .eq('user_id', user.id)
+        .single();
       if (data?.phone) setPhone(data.phone);
       if (data?.bio) setBio(data.bio);
       if ((data as any)?.birth_date) setBirthDate((data as any).birth_date);
@@ -59,9 +71,35 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
         setCpf(d.length === 11 ? `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}` : d);
         setCpfLocked(true);
       }
+      const d = data as any;
+      if (d?.cep) setCep(d.cep.length === 8 ? `${d.cep.slice(0,5)}-${d.cep.slice(5)}` : d.cep);
+      if (d?.address_street) setAddrStreet(d.address_street);
+      if (d?.address_number) setAddrNumber(d.address_number);
+      if (d?.address_complement) setAddrComplement(d.address_complement);
+      if (d?.address_neighborhood) setAddrNeighborhood(d.address_neighborhood);
+      if (d?.address_city) setAddrCity(d.address_city);
+      if (d?.address_state) setAddrState(d.address_state);
     };
     fetchExtra();
   }, [user]);
+
+  const lookupCep = async (raw: string) => {
+    const digits = raw.replace(/\D/g, '');
+    if (digits.length !== 8) return;
+    setCepLoading(true);
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+      const json = await res.json();
+      if (json && !json.erro) {
+        if (json.logradouro) setAddrStreet(json.logradouro);
+        if (json.bairro) setAddrNeighborhood(json.bairro);
+        if (json.localidade) setAddrCity(json.localidade);
+        if (json.uf) setAddrState(json.uf);
+      }
+    } catch {}
+    finally { setCepLoading(false); }
+  };
+
 
   useEffect(() => {
     if (!onCompletenessChange) return;
@@ -118,8 +156,16 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
         bio: bio.trim() || null,
         birth_date: birthDate || null,
         gender: gender || null,
+        cep: cep.replace(/\D/g, '') || null,
+        address_street: addrStreet.trim() || null,
+        address_number: addrNumber.trim() || null,
+        address_complement: addrComplement.trim() || null,
+        address_neighborhood: addrNeighborhood.trim() || null,
+        address_city: addrCity.trim() || null,
+        address_state: addrState.trim().toUpperCase().slice(0, 2) || null,
       };
       if (!cpfLocked && cpf.replace(/\D/g, '').length === 11) updateData.cpf = cpf.replace(/\D/g, '');
+
       const { error } = await supabase.from('profiles').update(updateData).eq('user_id', user.id);
       if (error) throw error;
       toast.success('Perfil atualizado com sucesso!');
@@ -237,6 +283,59 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
         />
         {cpfLocked && <p className="text-xs text-muted-foreground">O CPF não pode ser alterado após o cadastro.</p>}
       </div>
+
+      <Separator />
+      <div className="space-y-2">
+        <Label className="text-base font-semibold">Endereço (para emissão de nota fiscal)</Label>
+        <p className="text-xs text-muted-foreground">Usado apenas para emitir a NF-e das suas compras.</p>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="space-y-2 col-span-1">
+          <Label htmlFor="cep">CEP</Label>
+          <Input
+            id="cep"
+            value={cep}
+            onChange={(e) => {
+              const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
+              const formatted = digits.length > 5 ? `${digits.slice(0,5)}-${digits.slice(5)}` : digits;
+              setCep(formatted);
+              if (digits.length === 8) lookupCep(digits);
+            }}
+            placeholder="00000-000"
+            maxLength={9}
+          />
+          {cepLoading && <p className="text-xs text-muted-foreground">Buscando CEP...</p>}
+        </div>
+        <div className="space-y-2 col-span-2">
+          <Label htmlFor="addrStreet">Rua / Logradouro</Label>
+          <Input id="addrStreet" value={addrStreet} onChange={(e) => setAddrStreet(e.target.value)} placeholder="Rua das Flores" />
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="space-y-2 col-span-1">
+          <Label htmlFor="addrNumber">Número</Label>
+          <Input id="addrNumber" value={addrNumber} onChange={(e) => setAddrNumber(e.target.value)} placeholder="123" />
+        </div>
+        <div className="space-y-2 col-span-2">
+          <Label htmlFor="addrComplement">Complemento</Label>
+          <Input id="addrComplement" value={addrComplement} onChange={(e) => setAddrComplement(e.target.value)} placeholder="Apto 42 (opcional)" />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="addrNeighborhood">Bairro</Label>
+        <Input id="addrNeighborhood" value={addrNeighborhood} onChange={(e) => setAddrNeighborhood(e.target.value)} />
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="space-y-2 col-span-2">
+          <Label htmlFor="addrCity">Cidade</Label>
+          <Input id="addrCity" value={addrCity} onChange={(e) => setAddrCity(e.target.value)} />
+        </div>
+        <div className="space-y-2 col-span-1">
+          <Label htmlFor="addrState">UF</Label>
+          <Input id="addrState" value={addrState} onChange={(e) => setAddrState(e.target.value.toUpperCase().slice(0, 2))} maxLength={2} placeholder="SP" />
+        </div>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="email">E-mail</Label>
         <Input id="email" value={user?.email || ''} disabled className="opacity-60" />

@@ -107,20 +107,28 @@ async function getRevenueCategory(): Promise<{ id: string; name: string | null }
   if (cachedRevenueCategory !== undefined) return cachedRevenueCategory;
   const attempts = await Promise.all([
     nibo<{ items?: unknown[] } | unknown[]>("/schedules/categories/tree?CanComposeNFSeValueOnly=true", { method: "GET" }),
-    nibo<{ items?: unknown[] }>("/categories?$top=100", { method: "GET" }),
+    nibo<{ items?: unknown[] }>("/categories?$top=200", { method: "GET" }),
   ]);
   const categories = attempts.flatMap((r) => {
     const rawItems = Array.isArray(r.data) ? r.data : (Array.isArray((r.data as { items?: unknown[] } | null)?.items) ? (r.data as { items: unknown[] }).items : []);
     return flattenCategories(rawItems);
   }).filter((c) => c.id && !c.isDeleted && !c.isSubgroup);
 
-  const preferred = categories.find((c) => {
-    const text = `${c.name || ""} ${c.type || ""}`.toLowerCase();
-    return /receita|venda|servi[cç]o|faturamento|entrada|credit/.test(text);
-  }) || categories[0] || null;
+  // 1) Preferência explícita: "101 - Infoprodutos e Cursos" (Drinkeros)
+  const preferred =
+    categories.find((c) => /^\s*101\b/.test(c.name || "") && /infoproduto|curso/i.test(c.name || "")) ||
+    categories.find((c) => /infoproduto/i.test(c.name || "") && /curso/i.test(c.name || "")) ||
+    categories.find((c) => /^\s*101\b/.test(c.name || "")) ||
+    categories.find((c) => {
+      const text = `${c.name || ""} ${c.type || ""}`.toLowerCase();
+      return /receita|venda|servi[cç]o|faturamento|entrada|credit/.test(text);
+    }) ||
+    categories[0] ||
+    null;
   cachedRevenueCategory = preferred ? { id: preferred.id, name: preferred.name } : null;
   return cachedRevenueCategory;
 }
+
 
 async function getOrder(orderId: string): Promise<OrderRow | null> {
   const { data, error } = await supabase.rpc("nibo_get_order", { p_order_id: orderId });
@@ -142,15 +150,35 @@ async function upsertCustomer(order: OrderRow): Promise<{
     return { id: null, status: "failed", error: "Comprador sem e-mail" };
   }
 
-  // Busca CPF do profile
+  // Busca CPF + endereço do profile (NIBO precisa de tudo para emitir NF-e)
   let cpf: string | null = null;
+  let addr: {
+    cep: string | null;
+    street: string | null;
+    number: string | null;
+    complement: string | null;
+    neighborhood: string | null;
+    city: string | null;
+    state: string | null;
+  } = { cep: null, street: null, number: null, complement: null, neighborhood: null, city: null, state: null };
   if (order.user_id) {
     const { data: prof } = await supabase
       .from("profiles")
-      .select("cpf")
+      .select("cpf, cep, address_street, address_number, address_complement, address_neighborhood, address_city, address_state")
       .eq("user_id", order.user_id)
       .maybeSingle();
     cpf = prof?.cpf?.replace(/\D/g, "") || null;
+    if (prof) {
+      addr = {
+        cep: prof.cep?.replace(/\D/g, "") || null,
+        street: prof.address_street?.trim() || null,
+        number: prof.address_number?.trim() || null,
+        complement: prof.address_complement?.trim() || null,
+        neighborhood: prof.address_neighborhood?.trim() || null,
+        city: prof.address_city?.trim() || null,
+        state: prof.address_state?.trim()?.toUpperCase().slice(0, 2) || null,
+      };
+    }
   }
 
   // Tenta achar cliente existente por e-mail
@@ -158,16 +186,13 @@ async function upsertCustomer(order: OrderRow): Promise<{
     `/customers?$filter=email eq '${encodeURIComponent(order.buyer_email)}'&$top=1`,
     { method: "GET" },
   );
-  if (search.ok && search.data?.items?.[0]?.id) {
-    return { id: search.data.items[0].id, status: "success", raw: search.data };
-  }
+  const existingId = search.ok && search.data?.items?.[0]?.id ? search.data.items[0].id : null;
 
   // Cria
   const safeName = (order.buyer_name && order.buyer_name.trim())
     || order.buyer_email.split("@")[0].replace(/[._-]+/g, " ").trim()
     || order.buyer_email;
   const phoneDigits = order.buyer_phone ? order.buyer_phone.replace(/\D/g, "") : null;
-  // NIBO rejeita o objeto `phone` top-level — usar APENAS `communication.cellPhone`.
   const body: Record<string, unknown> = {
     name: safeName,
     corporateName: safeName,
@@ -184,23 +209,33 @@ async function upsertCustomer(order: OrderRow): Promise<{
   } else if (cpf && cpf.length === 14) {
     body.document = { number: cpf, type: "Cnpj" };
   }
+  // Endereço — NIBO usa em "address" para emissão de NFS-e
+  if (addr.street || addr.cep) {
+    body.address = {
+      ...(addr.street ? { line1: addr.street } : {}),
+      ...(addr.number ? { number: addr.number } : {}),
+      ...(addr.complement ? { line2: addr.complement } : {}),
+      ...(addr.neighborhood ? { neighborhood: addr.neighborhood } : {}),
+      ...(addr.city ? { city: { name: addr.city, state: addr.state ? { uf: addr.state } : undefined } } : {}),
+      ...(addr.cep ? { zipCode: addr.cep } : {}),
+    };
+  }
+
+  // Se já existe, atualiza com CPF/endereço (necessário para NF-e)
+  if (existingId) {
+    const upd = await nibo<unknown>(`/customers/${existingId}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
+    // Mesmo se PUT falhar, retornamos o id existente para não bloquear schedule.
+    return { id: existingId, status: "success", raw: upd.data ?? search.data };
+  }
 
   const created = await nibo<unknown>("/customers", {
     method: "POST",
     body: JSON.stringify(body),
   });
-  // NIBO retorna o ID como uma string JSON pura (ex.: "\"<uuid>\""), não como objeto.
-  let customerId: string | null = null;
-  if (created.ok) {
-    if (typeof created.data === "string") customerId = created.data;
-    else if (created.data && typeof (created.data as { id?: string }).id === "string") {
-      customerId = (created.data as { id: string }).id;
-    } else {
-      // fallback: parse manual do raw
-      const trimmed = created.raw.trim().replace(/^"|"$/g, "");
-      if (/^[0-9a-f-]{30,}$/i.test(trimmed)) customerId = trimmed;
-    }
-  }
+  const customerId = created.ok ? extractId(created.data, created.raw) : null;
   if (!customerId) {
     return {
       id: null,
@@ -210,6 +245,7 @@ async function upsertCustomer(order: OrderRow): Promise<{
   }
   return { id: customerId, status: "success", raw: created.data ?? created.raw };
 }
+
 
 async function createSchedule(order: OrderRow, customerId: string) {
   const dueDate = order.purchased_at.slice(0, 10);
@@ -315,35 +351,33 @@ async function processOrder(orderId: string) {
     return { ok: true, skipped: true, reason: "Pedido sem valor pago" };
   }
 
-  // Upsert no log
-  const baseLog = {
-    order_id: order.id,
-    user_id: order.user_id,
-    buyer_email: order.buyer_email,
-    buyer_name: order.buyer_name,
-    amount: order.amount,
-    currency: order.currency,
-    product_type: order.product_type,
-    product_name: order.product_name,
-    last_attempt_at: new Date().toISOString(),
-  };
+  // CLAIM ATÔMICO — impede que duas execuções concorrentes (webhook + cron)
+  // criem o mesmo lançamento/NF duplicado no NIBO.
+  const { data: claimed, error: claimErr } = await supabase.rpc("nibo_claim_order", {
+    p_order_id: order.id,
+    p_user_id: order.user_id,
+    p_buyer_email: order.buyer_email,
+    p_buyer_name: order.buyer_name,
+    p_amount: order.amount,
+    p_currency: order.currency,
+    p_product_type: order.product_type,
+    p_product_name: order.product_name,
+  });
+  if (claimErr) {
+    console.error("nibo_claim_order error", claimErr);
+    return { ok: false, error: `claim error: ${claimErr.message}` };
+  }
+  if (claimed !== true) {
+    return { ok: true, skipped: true, reason: "Pedido já sincronizado ou em processamento" };
+  }
 
+  // Recarrega estado parcial (caso seja um retry após falha)
   const { data: existingLog } = await supabase
     .from("nibo_sync_log")
     .select("id, attempts, nibo_customer_id, nibo_schedule_id, nibo_invoice_id, status")
     .eq("order_id", order.id)
     .maybeSingle();
 
-  // Se já está success completo, retorna
-  if (existingLog?.status === "success") {
-    return { ok: true, skipped: true, log_id: existingLog.id };
-  }
-
-  const attempts = (existingLog?.attempts ?? 0) + 1;
-  await supabase.from("nibo_sync_log").upsert(
-    { ...baseLog, attempts, status: "pending" },
-    { onConflict: "order_id" },
-  );
 
   // 1) Cliente
   let customerId = existingLog?.nibo_customer_id ?? null;
