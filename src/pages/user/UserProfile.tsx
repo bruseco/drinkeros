@@ -283,6 +283,59 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
         />
         {cpfLocked && <p className="text-xs text-muted-foreground">O CPF não pode ser alterado após o cadastro.</p>}
       </div>
+
+      <Separator />
+      <div className="space-y-2">
+        <Label className="text-base font-semibold">Endereço (para emissão de nota fiscal)</Label>
+        <p className="text-xs text-muted-foreground">Usado apenas para emitir a NF-e das suas compras.</p>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="space-y-2 col-span-1">
+          <Label htmlFor="cep">CEP</Label>
+          <Input
+            id="cep"
+            value={cep}
+            onChange={(e) => {
+              const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
+              const formatted = digits.length > 5 ? `${digits.slice(0,5)}-${digits.slice(5)}` : digits;
+              setCep(formatted);
+              if (digits.length === 8) lookupCep(digits);
+            }}
+            placeholder="00000-000"
+            maxLength={9}
+          />
+          {cepLoading && <p className="text-xs text-muted-foreground">Buscando CEP...</p>}
+        </div>
+        <div className="space-y-2 col-span-2">
+          <Label htmlFor="addrStreet">Rua / Logradouro</Label>
+          <Input id="addrStreet" value={addrStreet} onChange={(e) => setAddrStreet(e.target.value)} placeholder="Rua das Flores" />
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="space-y-2 col-span-1">
+          <Label htmlFor="addrNumber">Número</Label>
+          <Input id="addrNumber" value={addrNumber} onChange={(e) => setAddrNumber(e.target.value)} placeholder="123" />
+        </div>
+        <div className="space-y-2 col-span-2">
+          <Label htmlFor="addrComplement">Complemento</Label>
+          <Input id="addrComplement" value={addrComplement} onChange={(e) => setAddrComplement(e.target.value)} placeholder="Apto 42 (opcional)" />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="addrNeighborhood">Bairro</Label>
+        <Input id="addrNeighborhood" value={addrNeighborhood} onChange={(e) => setAddrNeighborhood(e.target.value)} />
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="space-y-2 col-span-2">
+          <Label htmlFor="addrCity">Cidade</Label>
+          <Input id="addrCity" value={addrCity} onChange={(e) => setAddrCity(e.target.value)} />
+        </div>
+        <div className="space-y-2 col-span-1">
+          <Label htmlFor="addrState">UF</Label>
+          <Input id="addrState" value={addrState} onChange={(e) => setAddrState(e.target.value.toUpperCase().slice(0, 2))} maxLength={2} placeholder="SP" />
+        </div>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="email">E-mail</Label>
         <Input id="email" value={user?.email || ''} disabled className="opacity-60" />
