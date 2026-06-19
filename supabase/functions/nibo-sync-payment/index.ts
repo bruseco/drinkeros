@@ -193,7 +193,7 @@ async function upsertCustomer(order: OrderRow): Promise<{
     || order.buyer_email.split("@")[0].replace(/[._-]+/g, " ").trim()
     || order.buyer_email;
   const phoneDigits = order.buyer_phone ? order.buyer_phone.replace(/\D/g, "") : null;
-  const body: Record<string, unknown> = {
+  const baseBody: Record<string, unknown> = {
     name: safeName,
     corporateName: safeName,
     email: order.buyer_email,
@@ -205,36 +205,54 @@ async function upsertCustomer(order: OrderRow): Promise<{
     },
   };
   if (cpf && cpf.length === 11) {
-    body.document = { number: cpf, type: "Cpf" };
+    baseBody.document = { number: cpf, type: "Cpf" };
   } else if (cpf && cpf.length === 14) {
-    body.document = { number: cpf, type: "Cnpj" };
+    baseBody.document = { number: cpf, type: "Cnpj" };
   }
-  // Endereço — NIBO usa em "address" para emissão de NFS-e
-  if (addr.street || addr.cep) {
-    body.address = {
-      ...(addr.street ? { line1: addr.street } : {}),
-      ...(addr.number ? { number: addr.number } : {}),
-      ...(addr.complement ? { line2: addr.complement } : {}),
-      ...(addr.neighborhood ? { neighborhood: addr.neighborhood } : {}),
-      ...(addr.city ? { city: { name: addr.city, state: addr.state ? { uf: addr.state } : undefined } } : {}),
-      ...(addr.cep ? { zipCode: addr.cep } : {}),
-    };
-  }
+
+  // Endereço FLAT (city/state como strings) — NIBO rejeita o objeto aninhado
+  // com a mensagem genérica "É necessário preencher os dados do cliente!".
+  const addressFlat: Record<string, unknown> = {};
+  if (addr.street) addressFlat.line1 = addr.street;
+  if (addr.number) addressFlat.number = addr.number;
+  if (addr.complement) addressFlat.line2 = addr.complement;
+  if (addr.neighborhood) addressFlat.neighborhood = addr.neighborhood;
+  if (addr.city) addressFlat.city = addr.city;
+  if (addr.state) addressFlat.state = addr.state;
+  if (addr.cep) addressFlat.zipCode = addr.cep;
+
+  const fullBody = Object.keys(addressFlat).length > 0
+    ? { ...baseBody, address: addressFlat }
+    : baseBody;
 
   // Se já existe, atualiza com CPF/endereço (necessário para NF-e)
   if (existingId) {
     const upd = await nibo<unknown>(`/customers/${existingId}`, {
       method: "PUT",
-      body: JSON.stringify(body),
+      body: JSON.stringify(fullBody),
     });
-    // Mesmo se PUT falhar, retornamos o id existente para não bloquear schedule.
+    if (!upd.ok && Object.keys(addressFlat).length > 0) {
+      await nibo<unknown>(`/customers/${existingId}`, {
+        method: "PUT",
+        body: JSON.stringify(baseBody),
+      });
+    }
     return { id: existingId, status: "success", raw: upd.data ?? search.data };
   }
 
-  const created = await nibo<unknown>("/customers", {
+  // POST: primeiro tenta com endereço; se falhar (NIBO 400 com address inválido),
+  // recria sem endereço e atualiza depois via PUT.
+  let created = await nibo<unknown>("/customers", {
     method: "POST",
-    body: JSON.stringify(body),
+    body: JSON.stringify(fullBody),
   });
+  if (!created.ok && Object.keys(addressFlat).length > 0) {
+    console.warn(`[nibo] POST /customers falhou com address (${created.status}). Retry sem address.`);
+    created = await nibo<unknown>("/customers", {
+      method: "POST",
+      body: JSON.stringify(baseBody),
+    });
+  }
   const customerId = created.ok ? extractId(created.data, created.raw) : null;
   if (!customerId) {
     return {
@@ -242,6 +260,13 @@ async function upsertCustomer(order: OrderRow): Promise<{
       status: "failed",
       error: `customers POST ${created.status}: ${created.raw.slice(0, 400)}`,
     };
+  }
+  // Se temos endereço, tenta PUT para completar (não bloqueia se falhar)
+  if (Object.keys(addressFlat).length > 0) {
+    await nibo<unknown>(`/customers/${customerId}`, {
+      method: "PUT",
+      body: JSON.stringify(fullBody),
+    }).catch(() => null);
   }
   return { id: customerId, status: "success", raw: created.data ?? created.raw };
 }
