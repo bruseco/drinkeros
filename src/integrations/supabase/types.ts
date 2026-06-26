@@ -217,6 +217,69 @@ export type Database = {
           },
         ]
       }
+      club_post_comments: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_hidden: boolean
+          target_id: string
+          target_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_hidden?: boolean
+          target_id: string
+          target_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_hidden?: boolean
+          target_id?: string
+          target_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      club_posts: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_hidden: boolean
+          is_reported: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_hidden?: boolean
+          is_reported?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_hidden?: boolean
+          is_reported?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       club_recipe_votes: {
         Row: {
           created_at: string
@@ -3517,6 +3580,38 @@ export type Database = {
         Args: { p_from: string; p_to: string }
         Returns: Json
       }
+      get_club_feed: {
+        Args: { _before?: string; _filter?: string; _limit?: number }
+        Returns: {
+          author_avatar: string
+          author_name: string
+          body: string
+          comments_count: number
+          created_at: string
+          id: string
+          ingredients: string
+          instructions: string
+          kind: string
+          likes_count: number
+          recipe_description: string
+          recipe_image: string
+          recipe_name: string
+          user_id: string
+        }[]
+      }
+      get_club_ranking: {
+        Args: { _limit?: number; _scope?: string }
+        Returns: {
+          author_avatar: string
+          author_name: string
+          created_at: string
+          likes_count: number
+          recipe_id: string
+          recipe_image: string
+          recipe_name: string
+          user_id: string
+        }[]
+      }
       get_current_battle_recipe_ids: { Args: never; Returns: string[] }
       get_demographics_metrics: { Args: never; Returns: Json }
       get_package_recipe_metadata: {
@@ -3593,6 +3688,7 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_club_member: { Args: { _user_id: string }; Returns: boolean }
       issue_course_certificate: {
         Args: { _reference_id: string; _reference_name: string }
         Returns: {
@@ -3673,6 +3769,23 @@ export type Database = {
         Returns: {
           clube_intro_eligible_until: string
           clube_intro_revealed_at: string
+        }[]
+      }
+      search_club_recipes: {
+        Args: { _limit?: number; _q: string }
+        Returns: {
+          author_avatar: string
+          author_name: string
+          comments_count: number
+          created_at: string
+          description: string
+          id: string
+          image_url: string
+          ingredients: string
+          instructions: string
+          likes_count: number
+          name: string
+          user_id: string
         }[]
       }
       search_exclusive_posts: {
