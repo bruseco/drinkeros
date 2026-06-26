@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Heart, MessageCircle, Search, Send, Trophy, Loader2, Sparkles, ChefHat, ChevronUp } from 'lucide-react';
+import { Heart, MessageCircle, Search, Send, Trophy, Loader2, Sparkles, ChefHat, ChevronUp, Plus } from 'lucide-react';
 import { format, formatDistanceToNow, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
@@ -435,8 +435,17 @@ const RankingSheet: React.FC = () => {
 const RecipesTab: React.FC<{ myLikes: Set<string> }> = ({ myLikes }) => {
   const [q, setQ] = useState('');
   const { data = [], isLoading } = useClubRecipesSearch(q);
+  const navigate = useNavigate();
   return (
     <div className="space-y-3">
+      <Button
+        onClick={() => navigate('/app/batalha/nova')}
+        className="w-full"
+        size="lg"
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Enviar minha receita
+      </Button>
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
