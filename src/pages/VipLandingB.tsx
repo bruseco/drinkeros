@@ -385,7 +385,7 @@ const VipLandingB: React.FC = () => {
     chosenOffer?: 'intro' | 'full',
   ) => {
     if (!user) {
-      navigate('/signup?redirect=/clube');
+      navigate('/signup?redirect=/pv-clube');
       return;
     }
     if (loading) return;

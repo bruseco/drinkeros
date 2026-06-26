@@ -144,7 +144,7 @@ const App = () => (
             <Route path="/" element={<RootRedirect />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/clube" element={<Navigate to="/pv-clube-b" replace />} />
+            <Route path="/pv-clube" element={<Navigate to="/pv-clube-b" replace />} />
             <Route path="/pv-clube-b" element={<VipLandingB />} />
             <Route path="/vip" element={<Navigate to="/pv-clube-b" replace />} />
             <Route path="/reset-password" element={<ResetPassword />} />

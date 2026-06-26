@@ -400,7 +400,7 @@ const UserHome: React.FC = () => {
                             ? (hasStarted && courseProgress.nextLessonId ? `/app/aula/${courseProgress.nextLessonId}` : `/app/curso/${item.id}`)
                             : `/app/modulo/${item.id}`)
                         : isVipOnlyLocked
-                          ? '/clube'
+                          ? '/pv-clube'
                           : (item.type === 'combo' ? `/app/combo/${item.id}?locked=true` : item.type === 'course' ? `/app/curso/${item.id}?locked=true` : `/app/modulo/${item.id}?locked=true`);
 
                       return (

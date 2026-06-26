@@ -6,9 +6,9 @@ import { cn } from '@/lib/utils';
 
 interface PlanBadgeProps {
   className?: string;
-  /** Se true, vira link para /clube quando Grátis (default: true) */
+  /** Se true, vira link para /pv-clube quando Grátis (default: true) */
   linkOnFree?: boolean;
-  /** Se true, vira link para /clube quando Aluno (upsell para Sócio) (default: true) */
+  /** Se true, vira link para /pv-clube quando Aluno (upsell para Sócio) (default: true) */
   linkOnAluno?: boolean;
 }
 
@@ -69,7 +69,7 @@ export const PlanBadge: React.FC<PlanBadgeProps> = ({
         Aluno
       </span>
     );
-    return linkOnAluno ? <Link to="/clube">{content}</Link> : content;
+    return linkOnAluno ? <Link to="/pv-clube">{content}</Link> : content;
   }
 
   // Grátis (default)
@@ -80,5 +80,5 @@ export const PlanBadge: React.FC<PlanBadgeProps> = ({
     </span>
   );
 
-  return linkOnFree ? <Link to="/clube">{content}</Link> : content;
+  return linkOnFree ? <Link to="/pv-clube">{content}</Link> : content;
 };

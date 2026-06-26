@@ -82,7 +82,7 @@ const EbookLanding: React.FC = () => {
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#0a0a0a] text-white px-6 text-center gap-4">
         <h1 className="text-2xl font-bold">Ebook não encontrado</h1>
         <p className="text-white/70">O link pode estar incorreto ou o ebook foi removido.</p>
-        <Link to="/clube" className="underline text-white/90">Conheça o Clube dos Drinkeros</Link>
+        <Link to="/pv-clube" className="underline text-white/90">Conheça o Clube dos Drinkeros</Link>
       </div>
     );
   }

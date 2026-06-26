@@ -8,7 +8,7 @@ const ORIGIN = typeof window !== 'undefined' ? window.location.origin : '';
 
 // Resolve path público da pageKey (best effort)
 const pathFromPageKey = (pageKey: string): string => {
-  if (pageKey === 'clube') return '/clube';
+  if (pageKey === 'clube') return '/pv-clube';
   if (pageKey === 'clube-b') return '/pv-clube-b';
   // Para courses/ebooks o pageKey carrega o id; mostrar pageKey cru.
   return `/${pageKey}`;

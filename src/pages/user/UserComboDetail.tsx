@@ -100,7 +100,7 @@ const UserComboDetail: React.FC = () => {
               </div>
             </div>
             <Button asChild className="bg-white text-purple-700 hover:bg-white/90 font-bold gap-2 rounded-xl shadow-md">
-              <Link to="/clube">
+              <Link to="/pv-clube">
                 <Crown className="h-4 w-4" />
                 Virar sócio
               </Link>

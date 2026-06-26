@@ -50,7 +50,7 @@ const useProductInfo = (productKey: string): ProductInfo | null => {
     return {
       productKey,
       name: 'Clube dos Drinkeros',
-      originalPath: '/clube',
+      originalPath: '/pv-clube',
       pageKeyA: 'clube',
       pageKeyB: 'clube-b',
       defaultVariantPath: '/pv-clube-b',

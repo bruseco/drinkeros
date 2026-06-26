@@ -8,7 +8,7 @@
  * Botões de compra:
  *  - Mercado Pago (ebooks, cursos, produtos avulsos): funcionam sem login
  *  - Stripe (Clube/assinatura): atualmente exige cadastro rápido antes do
- *    Stripe (`/signup?redirect=/clube`) porque a edge function
+ *    Stripe (`/signup?redirect=/pv-clube`) porque a edge function
  *    `create-club-checkout` precisa do user.id/email para vincular a
  *    assinatura via webhook. Esse é o único gate de auth permitido nessas
  *    páginas, e acontece somente no clique do botão — nunca no load.
@@ -16,7 +16,7 @@
  * Rotas internas pagas (ex.: /app/**, /admin/**) NÃO entram aqui.
  */
 export const PUBLIC_SALES_ROUTES: string[] = [
-  '/clube',
+  '/pv-clube',
   '/drinkeros-xperience',
   '/mixologia-avancada',
   '/bar-p-eventos',

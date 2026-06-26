@@ -53,7 +53,7 @@ const AdminSalesPages: React.FC = () => {
       type: 'club',
       is_available_for_sale: true,
       pages: [
-        { path: '/clube', pageKey: 'clube', variant: 'a' },
+        { path: '/pv-clube', pageKey: 'clube', variant: 'a' },
         ...(testByKey.get('clube')
           ? [{ path: testByKey.get('clube')!.variant_path, pageKey: 'clube-b', variant: 'b' as const }]
           : []),

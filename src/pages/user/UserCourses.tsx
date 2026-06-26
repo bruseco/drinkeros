@@ -200,17 +200,17 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, owned, expired = false,
   const hasStarted = owned && !expired && progress > 0;
   const { ref, centrality } = useViewportCenter<HTMLDivElement>();
 
-  // Expirado tem prioridade visual: leva pra /clube pra renovar
-  // Cursos exclusivos do Clube e não adquiridos: leva direto pra /clube
+  // Expirado tem prioridade visual: leva pra /pv-clube pra renovar
+  // Cursos exclusivos do Clube e não adquiridos: leva direto pra /pv-clube
   // Bloqueado: leva pra landing/página de venda do curso (se houver)
   const landingRoute = course.slug ? COURSE_LANDING_ROUTES[course.slug] : undefined;
   const isVipOnly = course.slug ? VIP_ONLY_COURSE_SLUGS.has(course.slug) : false;
   const cardLink = expired
-    ? '/clube'
+    ? '/pv-clube'
     : owned
     ? `/app/curso/${course.id}`
     : isVipOnly
-    ? '/clube'
+    ? '/pv-clube'
     : landingRoute ?? `/app/curso/${course.id}?locked=true`;
 
   // Opacidade dinâmica: base 0.55 → 1.0 conforme se aproxima do centro

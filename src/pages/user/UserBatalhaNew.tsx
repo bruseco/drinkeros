@@ -37,7 +37,7 @@ const UserBatalhaNew: React.FC = () => {
   useEffect(() => {
     if (!planLoading && planData && !planData.isVip) {
       toast.info('Para postar na Batalha você precisa ser sócio do Clube dos Drinkeros.');
-      nav('/clube', { replace: true });
+      nav('/pv-clube', { replace: true });
     }
   }, [planLoading, planData, nav]);
 

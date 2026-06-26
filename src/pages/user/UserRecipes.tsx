@@ -469,13 +469,13 @@ const UserRecipes: React.FC = () => {
                 // Visual de bloqueio (cadeado/overlay) somente para Xaropes exclusivos.
                 // Quando o limite diário estourar, o card continua igual — só o link já vai pro /clube.
                 const showLockOverlay = isVipOnly;
-                const target = (isVipOnly || blockedByLimit) ? '/clube' : `/app/receita/${(recipe as any).slug || recipe.id}`;
+                const target = (isVipOnly || blockedByLimit) ? '/pv-clube' : `/app/receita/${(recipe as any).slug || recipe.id}`;
                 const recipeFeedOrder = recipes.map((r: any) => ({ id: r.id, slug: r.slug ?? null }));
                 return (
                   <Link
                     key={recipe.id}
                     to={target}
-                    state={target === '/clube' ? undefined : { recipeFeedOrder }}
+                    state={target === '/pv-clube' ? undefined : { recipeFeedOrder }}
                     data-recipe-key={recipeKey({ id: recipe.id, slug: (recipe as any).slug ?? null })}
                   >
                     <div className="group overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative">

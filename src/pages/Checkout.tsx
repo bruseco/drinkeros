@@ -193,7 +193,7 @@ export default function Checkout() {
           import('@/lib/firePurchaseFromBackend').then(m =>
             m.firePurchaseFromBackend({ source: 'checkout-pix' })
           );
-          setTimeout(() => navigate(isClub ? "/clube?clube=success" : `/${product?.slug}?checkout=success`), 2000);
+          setTimeout(() => navigate(isClub ? "/pv-clube?clube=success" : `/${product?.slug}?checkout=success`), 2000);
         }
       } catch (_) { /* ignore */ }
     }, 4000);
@@ -234,10 +234,10 @@ export default function Checkout() {
           import('@/lib/firePurchaseFromBackend').then(m =>
             m.firePurchaseFromBackend({ source: 'checkout-mp-subscription' })
           );
-          setTimeout(() => navigate("/clube?clube=success"), 1500);
+          setTimeout(() => navigate("/pv-clube?clube=success"), 1500);
         } else if (data?.status === "pending") {
           toast.info("Assinatura em análise. Você receberá a confirmação em breve.");
-          setTimeout(() => navigate("/clube?clube=pending"), 1800);
+          setTimeout(() => navigate("/pv-clube?clube=pending"), 1800);
         } else {
           toast.error("Não foi possível ativar a assinatura", { description: data?.status_detail || "Tente outro cartão." });
         }
@@ -271,10 +271,10 @@ export default function Checkout() {
         import('@/lib/firePurchaseFromBackend').then(m =>
           m.firePurchaseFromBackend({ source: 'checkout-mp-card' })
         );
-        setTimeout(() => navigate(isClub ? "/clube?clube=success" : `/${product.slug}?checkout=success`), 1500);
+        setTimeout(() => navigate(isClub ? "/pv-clube?clube=success" : `/${product.slug}?checkout=success`), 1500);
       } else if (data.status === "in_process" || data.status === "pending") {
         toast.info("Pagamento em análise. Você receberá uma confirmação em breve.");
-        setTimeout(() => navigate(isClub ? "/clube?clube=pending" : `/${product.slug}?checkout=pending`), 2000);
+        setTimeout(() => navigate(isClub ? "/pv-clube?clube=pending" : `/${product.slug}?checkout=pending`), 2000);
       } else {
         toast.error("Pagamento recusado", { description: data.status_detail || "Tente outro cartão." });
       }
@@ -299,7 +299,7 @@ export default function Checkout() {
     <div className="min-h-screen bg-black text-white">
       <header className="border-b border-white/10 bg-black/80 backdrop-blur sticky top-0 z-20">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to={isClub ? "/clube" : `/${product.slug}`} className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
+          <Link to={isClub ? "/pv-clube" : `/${product.slug}`} className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
           <img src={drinkerosLogo} alt="Drinkeros" className="h-7 w-auto opacity-90" />

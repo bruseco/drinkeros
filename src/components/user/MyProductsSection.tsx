@@ -108,7 +108,7 @@ export const MyProductsSection: React.FC = () => {
     <div className="space-y-2 p-3">
       {hasExpired && (
         <Link
-          to="/clube"
+          to="/pv-clube"
           className="block rounded-lg bg-gradient-to-r from-purple-600 to-fuchsia-500 p-3 text-white shadow-sm hover:shadow-md transition-shadow"
         >
           <div className="flex items-center gap-2">
