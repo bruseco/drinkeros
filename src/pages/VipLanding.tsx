@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import DOMPurify from 'dompurify';
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Crown, Check, X, GlassWater, Sparkles, Zap, BookOpen, GraduationCap, Loader2, RefreshCw, Gift, PlayCircle, Trophy, Timer } from 'lucide-react';
 import jackDaniels from '@/assets/landing/bebida-decifrada/jack-daniels-degustacao.mp4';
