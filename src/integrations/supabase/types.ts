@@ -2202,7 +2202,6 @@ export type Database = {
           facebook_pixel_enabled: boolean
           facebook_pixel_id: string | null
           id: string
-          meta_capi_access_token: string | null
           meta_test_event_code: string | null
           updated_at: string
         }
@@ -2211,7 +2210,6 @@ export type Database = {
           facebook_pixel_enabled?: boolean
           facebook_pixel_id?: string | null
           id?: string
-          meta_capi_access_token?: string | null
           meta_test_event_code?: string | null
           updated_at?: string
         }
@@ -2220,7 +2218,6 @@ export type Database = {
           facebook_pixel_enabled?: boolean
           facebook_pixel_id?: string | null
           id?: string
-          meta_capi_access_token?: string | null
           meta_test_event_code?: string | null
           updated_at?: string
         }
@@ -3658,6 +3655,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      purge_expired_welcome_passwords: { Args: never; Returns: undefined }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
