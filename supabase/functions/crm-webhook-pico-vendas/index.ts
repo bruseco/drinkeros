@@ -20,13 +20,17 @@ Deno.serve(async (req) => {
 
   try {
     const expectedSecret = Deno.env.get("CRM_WEBHOOK_SECRET");
-    if (expectedSecret) {
-      const provided = req.headers.get("x-webhook-secret") || new URL(req.url).searchParams.get("secret");
-      if (provided !== expectedSecret) {
-        return new Response(JSON.stringify({ error: "Unauthorized" }), {
-          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+    if (!expectedSecret) {
+      console.error("[crm-webhook] CRM_WEBHOOK_SECRET not configured – refusing request");
+      return new Response(JSON.stringify({ error: "Webhook not configured" }), {
+        status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const provided = req.headers.get("x-webhook-secret") || new URL(req.url).searchParams.get("secret");
+    if (provided !== expectedSecret) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const supabase = createClient(
