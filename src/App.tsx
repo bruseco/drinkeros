@@ -249,9 +249,6 @@ const App = () => (
               <Route path="clube" element={<UserClube />} />
             </Route>
 
-            {/* Redirect público /clube → área logada */}
-            <Route path="/clube" element={<Navigate to="/app/clube" replace />} />
-
             {/* Catch all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
