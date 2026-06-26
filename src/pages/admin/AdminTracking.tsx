@@ -15,7 +15,6 @@ interface TrackingSettings {
   id: string;
   facebook_pixel_id: string | null;
   facebook_pixel_enabled: boolean;
-  meta_capi_access_token: string | null;
   meta_test_event_code: string | null;
 }
 
@@ -26,7 +25,7 @@ const AdminTracking: React.FC = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('tracking_settings')
-        .select('*')
+        .select('id, facebook_pixel_id, facebook_pixel_enabled, meta_test_event_code')
         .limit(1)
         .maybeSingle();
       if (error) throw error;
@@ -36,14 +35,12 @@ const AdminTracking: React.FC = () => {
 
   const [pixelId, setPixelId] = useState('');
   const [enabled, setEnabled] = useState(false);
-  const [capiToken, setCapiToken] = useState('');
   const [testEventCode, setTestEventCode] = useState('');
 
   useEffect(() => {
     if (data) {
       setPixelId(data.facebook_pixel_id ?? '');
       setEnabled(data.facebook_pixel_enabled);
-      setCapiToken(data.meta_capi_access_token ?? '');
       setTestEventCode(data.meta_test_event_code ?? '');
     }
   }, [data]);
@@ -56,7 +53,6 @@ const AdminTracking: React.FC = () => {
         .update({
           facebook_pixel_id: pixelId.trim() || null,
           facebook_pixel_enabled: enabled,
-          meta_capi_access_token: capiToken.trim() || null,
           meta_test_event_code: testEventCode.trim() || null,
         })
         .eq('id', data.id);
