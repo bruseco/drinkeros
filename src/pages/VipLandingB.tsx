@@ -171,7 +171,7 @@ PriceAmount.displayName = 'PriceAmount';
 const VipLandingB: React.FC = () => {
   useAbVariantTrack('clube', 'b');
   const { user } = useAuth();
-  // Funil: pageview da página /clube-b (dedup por sessão).
+  // Funil: pageview da página /pv-clube-b (dedup por sessão).
   useEffect(() => { trackFunnel('clube-b', 'pageview', { userId: user?.id ?? null }); }, [user?.id]);
   const { data: planData } = useUserPlan();
   const { data: totalMembers } = useTotalClubMembers();
@@ -491,7 +491,7 @@ const VipLandingB: React.FC = () => {
       `}</style>
 
       {/* Banner sticky de countdown — também renderizado aqui para que apareça
-          imediatamente ao revelar a oferta sem precisar sair de /clube-b. */}
+          imediatamente ao revelar a oferta sem precisar sair de /pv-clube-b. */}
       <ClubeIntroStickyBar />
       <ClubeDiscountReveal open={revealOpen} onClose={handleRevealClose} />
 

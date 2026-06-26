@@ -53,7 +53,7 @@ const useProductInfo = (productKey: string): ProductInfo | null => {
       originalPath: '/clube',
       pageKeyA: 'clube',
       pageKeyB: 'clube-b',
-      defaultVariantPath: '/clube-b',
+      defaultVariantPath: '/pv-clube-b',
       backPath: '/admin/paginas-venda',
     };
   }
