@@ -15,6 +15,21 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     const connectionId = url.searchParams.get("connection_id");
 
+    // Require pre-shared secret to prevent unauthenticated status manipulation
+    const expectedSecret = Deno.env.get("ZAPI_STATUS_WEBHOOK_SECRET");
+    if (!expectedSecret) {
+      console.error("[status-webhook] ZAPI_STATUS_WEBHOOK_SECRET not configured");
+      return new Response(JSON.stringify({ error: "Webhook not configured" }), {
+        status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const providedSecret = req.headers.get("x-webhook-secret") || url.searchParams.get("secret");
+    if (providedSecret !== expectedSecret) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (!connectionId) {
       return new Response(
         JSON.stringify({ error: "connection_id is required" }),
