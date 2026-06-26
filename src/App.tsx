@@ -97,6 +97,7 @@ import UserBatalha from "./pages/user/UserBatalha";
 import UserBatalhaNew from "./pages/user/UserBatalhaNew";
 import UserBatalhaRanking from "./pages/user/UserBatalhaRanking";
 import UserBatalhaRecipeDetail from "./pages/user/UserBatalhaRecipeDetail";
+import UserClube from "./pages/user/UserClube";
 
 // Sensible defaults to reduce DB read pressure (Disk IO):
 // - staleTime 60s evita refetch a cada navegação dentro de 1min
@@ -149,6 +150,7 @@ const App = () => (
             <Route path="/vip" element={<Navigate to="/pv-clube-b" replace />} />
             {/* Legacy redirects (links antigos) */}
             <Route path="/clube-b" element={<Navigate to="/pv-clube-b" replace />} />
+            <Route path="/clube" element={<Navigate to="/app/clube" replace />} />
 
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/install" element={<Install />} />
@@ -244,6 +246,7 @@ const App = () => (
               <Route path="batalha/nova" element={<UserBatalhaNew />} />
               <Route path="batalha/ranking" element={<UserBatalhaRanking />} />
               <Route path="batalha/receita/:id" element={<UserBatalhaRecipeDetail />} />
+              <Route path="clube" element={<UserClube />} />
             </Route>
 
             {/* Catch all */}
