@@ -412,7 +412,7 @@ const VipLanding: React.FC = () => {
                   <Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
                   <span
                     className="[&_strong]:text-white"
-                    dangerouslySetInnerHTML={{ __html: b.text }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(b.text, { ALLOWED_TAGS: ['strong','em','b','i','br','span'], ALLOWED_ATTR: [] }) }}
                   />
                 </li>
               ))}
