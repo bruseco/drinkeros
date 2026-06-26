@@ -386,7 +386,7 @@ serve(async (req) => {
     // Prioridade: override (replay admin) > metadata.buyer_email (salvo no checkout) > payer.email válido.
     const isValidEmail = (e: unknown): e is string =>
       typeof e === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.trim());
-    const overrideEmail = body?.override_email;
+    const overrideEmail = isAdminReplay ? body?.override_email : null;
     const rawPayerEmail = payment?.payer?.email;
     const payerEmail =
       (isValidEmail(overrideEmail) ? overrideEmail.trim().toLowerCase() : null) ||
