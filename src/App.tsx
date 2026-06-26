@@ -97,6 +97,7 @@ import UserBatalha from "./pages/user/UserBatalha";
 import UserBatalhaNew from "./pages/user/UserBatalhaNew";
 import UserBatalhaRanking from "./pages/user/UserBatalhaRanking";
 import UserBatalhaRecipeDetail from "./pages/user/UserBatalhaRecipeDetail";
+import UserClube from "./pages/user/UserClube";
 
 // Sensible defaults to reduce DB read pressure (Disk IO):
 // - staleTime 60s evita refetch a cada navegação dentro de 1min
