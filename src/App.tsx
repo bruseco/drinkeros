@@ -150,6 +150,7 @@ const App = () => (
             <Route path="/vip" element={<Navigate to="/pv-clube-b" replace />} />
             {/* Legacy redirects (links antigos) */}
             <Route path="/clube-b" element={<Navigate to="/pv-clube-b" replace />} />
+            <Route path="/clube" element={<Navigate to="/app/clube" replace />} />
 
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/install" element={<Install />} />
