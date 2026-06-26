@@ -113,20 +113,13 @@ const AdminTracking: React.FC = () => {
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="capiToken">Token da Conversions API (CAPI)</Label>
-                <Input
-                  id="capiToken"
-                  type="password"
-                  value={capiToken}
-                  onChange={(e) => setCapiToken(e.target.value)}
-                  placeholder="EAAG... (token de longa duração)"
-                  autoComplete="off"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Usado para enviar eventos server-side (Purchase) direto para a Meta. Gere em Eventos → Configurações → Conversions API.
-                </p>
-              </div>
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertDescription>
+                  O token da <strong>Conversions API (CAPI)</strong> agora é armazenado como secret de servidor (<code>META_CAPI_ACCESS_TOKEN</code>) e não fica mais salvo no banco. Configure pelo painel de Secrets do backend.
+                </AlertDescription>
+              </Alert>
+
 
               <div className="space-y-2">
                 <Label htmlFor="testEventCode">Código de Evento de Teste (opcional)</Label>
