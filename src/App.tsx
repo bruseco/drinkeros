@@ -245,7 +245,11 @@ const App = () => (
               <Route path="batalha/nova" element={<UserBatalhaNew />} />
               <Route path="batalha/ranking" element={<UserBatalhaRanking />} />
               <Route path="batalha/receita/:id" element={<UserBatalhaRecipeDetail />} />
+              <Route path="clube" element={<UserClube />} />
             </Route>
+
+            {/* Redirect público /clube → área logada */}
+            <Route path="/clube" element={<Navigate to="/app/clube" replace />} />
 
             {/* Catch all */}
             <Route path="*" element={<NotFound />} />
