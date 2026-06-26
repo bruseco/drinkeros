@@ -181,6 +181,31 @@ async function grantClubAccess(supabase: any, userId: string, payment: any, paym
   return createdPayment?.id ?? null;
 }
 
+async function verifyMpSignature(req: Request, rawBody: string, dataId: string | null): Promise<boolean> {
+  const secret = Deno.env.get("MP_WEBHOOK_SECRET");
+  if (!secret) {
+    console.error("[mp-webhook] MP_WEBHOOK_SECRET not configured");
+    return false;
+  }
+  const sigHeader = req.headers.get("x-signature") || "";
+  const requestId = req.headers.get("x-request-id") || "";
+  const parts = Object.fromEntries(sigHeader.split(",").map((kv) => {
+    const i = kv.indexOf("=");
+    return i > 0 ? [kv.slice(0, i).trim(), kv.slice(i + 1).trim()] : [kv.trim(), ""];
+  }));
+  const ts = parts["ts"];
+  const v1 = parts["v1"];
+  if (!ts || !v1 || !dataId) return false;
+  const manifest = `id:${dataId};request-id:${requestId};ts:${ts};`;
+  const key = await crypto.subtle.importKey(
+    "raw", new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
+  );
+  const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(manifest));
+  const hex = Array.from(new Uint8Array(mac)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  return hex === v1;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -195,13 +220,30 @@ serve(async (req) => {
     );
 
     const url = new URL(req.url);
+    const rawBody = await req.text();
     let body: any = {};
-    try { body = await req.json(); } catch { body = {}; }
+    try { body = rawBody ? JSON.parse(rawBody) : {}; } catch { body = {}; }
 
     const topic = body?.type || body?.topic || url.searchParams.get("topic") || url.searchParams.get("type");
     const resourceId = body?.data?.id || url.searchParams.get("id") || url.searchParams.get("data.id");
 
-    console.log("[mp-webhook] received:", { topic, resourceId, body });
+    // Admin replay path: requires server-side replay secret. Bypass MP signature.
+    const replaySecret = Deno.env.get("MP_REPLAY_SECRET");
+    const replayHeader = req.headers.get("x-internal-replay-secret");
+    const isAdminReplay = !!(replaySecret && replayHeader && replayHeader === replaySecret);
+
+    if (!isAdminReplay) {
+      const ok = await verifyMpSignature(req, rawBody, resourceId ? String(resourceId) : null);
+      if (!ok) {
+        console.warn("[mp-webhook] signature verification failed");
+        return new Response(JSON.stringify({ error: "Invalid signature" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    console.log("[mp-webhook] received:", { topic, resourceId, adminReplay: isAdminReplay });
+
 
     // ============ Assinatura recorrente do Clube (preapproval) ============
     if ((topic === "preapproval" || topic === "subscription_preapproval") && resourceId) {
