@@ -57,7 +57,7 @@ export const ClubeIntroStickyBar: React.FC = () => {
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       <Link
-        to="/clube-b#clube-pricing"
+        to="/pv-clube-b#clube-pricing"
         className="flex items-center justify-center gap-2 px-3 py-2 text-xs sm:text-sm font-semibold text-white"
         style={{
           backgroundImage:

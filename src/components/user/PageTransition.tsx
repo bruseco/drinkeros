@@ -15,7 +15,7 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
     location.pathname === '/app/receitas' ||
     location.pathname.startsWith('/app/receita/') ||
     location.pathname.startsWith('/app/batalha') ||
-    location.pathname === '/clube';
+    location.pathname === '/pv-clube';
 
   useEffect(() => {
     if (disableWrapper || location.key === prevKeyRef.current) return;

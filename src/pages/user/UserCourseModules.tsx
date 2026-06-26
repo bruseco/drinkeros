@@ -135,7 +135,7 @@ const UserCourseModules: React.FC = () => {
             </div>
           </div>
           <Button asChild size="sm" className="bg-white text-purple-700 hover:bg-white/90 font-semibold gap-1.5 flex-shrink-0">
-            <Link to="/clube">
+            <Link to="/pv-clube">
               <Crown className="h-4 w-4" />
               Virar sócio
             </Link>

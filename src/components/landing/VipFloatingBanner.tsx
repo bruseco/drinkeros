@@ -72,7 +72,7 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
   return (
     <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[60] w-[calc(100%-1.5rem)] max-w-md animate-bounce-in pointer-events-auto">
       <Link
-        to="/clube"
+        to="/pv-clube"
         className="relative block rounded-2xl p-4 pr-10 text-left shadow-2xl"
         style={{
           background: 'linear-gradient(90deg, #000000 0%, #6b21a8 55%, #ec4899 100%)',

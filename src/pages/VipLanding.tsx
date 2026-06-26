@@ -213,7 +213,7 @@ const VipLanding: React.FC = () => {
 
   const handleSubscribe = async (chosenMethod: 'card' | 'pix' = 'card') => {
     if (!user) {
-      navigate('/signup?redirect=/clube');
+      navigate('/signup?redirect=/pv-clube');
       return;
     }
     if (loading) return; // bloqueia clique duplo

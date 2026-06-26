@@ -73,7 +73,7 @@ const AdminClube: React.FC = () => {
       toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
       return;
     }
-    toast({ title: 'Configurações salvas!', description: 'Página /clube atualizada.' });
+    toast({ title: 'Configurações salvas!', description: 'Página /pv-clube atualizada.' });
     qc.invalidateQueries({ queryKey: ['clube-settings'] });
   };
 
@@ -102,7 +102,7 @@ const AdminClube: React.FC = () => {
           </p>
         </div>
         <Button asChild variant="outline" size="sm">
-          <a href="/clube" target="_blank" rel="noopener noreferrer">
+          <a href="/pv-clube" target="_blank" rel="noopener noreferrer">
             Ver página <ExternalLink className="h-3.5 w-3.5 ml-1" />
           </a>
         </Button>

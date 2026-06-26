@@ -139,10 +139,10 @@ const UserEbooks: React.FC = () => {
             const wrapperClass =
               'flex flex-col items-center w-full max-w-[390px] mx-auto cursor-pointer transition-transform active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl';
 
-            // Para expirados, sempre vai para o /clube
+            // Para expirados, sempre vai para o /pv-clube
             if (expired) {
               return (
-                <Link key={ebook.id} to="/clube" className={wrapperClass} aria-label={`${ebook.name} — Renovar no Clube`}>
+                <Link key={ebook.id} to="/pv-clube" className={wrapperClass} aria-label={`${ebook.name} — Renovar no Clube`}>
                   {cardInner}
                 </Link>
               );

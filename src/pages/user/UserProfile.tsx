@@ -451,7 +451,7 @@ const PlanSection: React.FC = () => {
           </p>
           <Button
             className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:opacity-95 text-white border-0"
-            onClick={() => navigate('/clube')}
+            onClick={() => navigate('/pv-clube')}
           >
             <Crown className="mr-2 h-4 w-4" />
             Virar Sócio Drinkeros
@@ -465,7 +465,7 @@ const PlanSection: React.FC = () => {
           </p>
           <Button
             className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:opacity-95 text-white border-0"
-            onClick={() => navigate('/clube')}
+            onClick={() => navigate('/pv-clube')}
           >
             <Crown className="mr-2 h-4 w-4" />
             Virar Sócio Drinkeros
