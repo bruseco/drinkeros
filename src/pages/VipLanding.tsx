@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import DOMPurify from 'dompurify';
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Crown, Check, X, GlassWater, Sparkles, Zap, BookOpen, GraduationCap, Loader2, RefreshCw, Gift, PlayCircle, Trophy, Timer } from 'lucide-react';
 import jackDaniels from '@/assets/landing/bebida-decifrada/jack-daniels-degustacao.mp4';
@@ -412,7 +413,7 @@ const VipLanding: React.FC = () => {
                   <Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
                   <span
                     className="[&_strong]:text-white"
-                    dangerouslySetInnerHTML={{ __html: b.text }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(b.text, { ALLOWED_TAGS: ['strong','em','b','i','br','span'], ALLOWED_ATTR: [] }) }}
                   />
                 </li>
               ))}
