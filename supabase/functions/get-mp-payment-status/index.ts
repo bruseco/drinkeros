@@ -6,6 +6,22 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+async function invokeWebhookFallback(paymentId: string) {
+  try {
+    const resp = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/mercadopago-webhook`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-internal-mp-sync": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "",
+      },
+      body: JSON.stringify({ type: "payment", data: { id: paymentId }, source: "get-mp-payment-status-fallback" }),
+    });
+    if (!resp.ok) console.warn("[get-mp-payment-status] webhook fallback non-2xx", resp.status);
+  } catch (e) {
+    console.warn("[get-mp-payment-status] webhook fallback failed", (e as Error).message);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
@@ -21,6 +37,11 @@ serve(async (req) => {
     });
     const data = await resp.json();
     if (!resp.ok) throw new Error(data?.message || "Falha ao consultar pagamento");
+
+    // Rede de segurança para PIX: quando o polling detecta aprovação, força o mesmo fluxo idempotente do webhook.
+    if (data?.status === "approved") {
+      await invokeWebhookFallback(id);
+    }
 
     return new Response(
       JSON.stringify({
