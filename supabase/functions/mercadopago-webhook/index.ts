@@ -232,17 +232,28 @@ serve(async (req) => {
     const replayHeader = req.headers.get("x-internal-replay-secret");
     const isAdminReplay = !!(replaySecret && replayHeader && replayHeader === replaySecret);
 
+    // Verificação de assinatura é best-effort: se falhar, registramos como suspeito
+    // mas SEGUIMOS processando. A validação autoritativa é o fetch via MP API com
+    // nosso ACCESS_TOKEN (atacante não consegue forjar um payment_id que retorne
+    // status=approved no NOSSO merchant). Isso evita perder vendas reais quando
+    // headers de assinatura chegam ausentes/divergentes (já vimos casos em PIX).
+    let signatureOk = true;
     if (!isAdminReplay) {
-      const ok = await verifyMpSignature(req, rawBody, resourceId ? String(resourceId) : null);
-      if (!ok) {
-        console.warn("[mp-webhook] signature verification failed");
-        return new Response(JSON.stringify({ error: "Invalid signature" }), {
-          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      signatureOk = await verifyMpSignature(req, rawBody, resourceId ? String(resourceId) : null);
+      if (!signatureOk) {
+        console.warn("[mp-webhook] signature verification failed (continuing; MP API fetch will validate)", { topic, resourceId });
+        try {
+          await supabase.from("webhook_purchase_logs").insert({
+            gateway: "mercado_pago",
+            transaction_id: resourceId ? String(resourceId) : null,
+            error_message: "signature_invalid_soft_continue",
+            raw_payload: { topic, resourceId, headers: { "x-request-id": req.headers.get("x-request-id") || null, has_signature: !!req.headers.get("x-signature") } },
+          });
+        } catch (_) { /* best-effort */ }
       }
     }
 
-    console.log("[mp-webhook] received:", { topic, resourceId, adminReplay: isAdminReplay });
+    console.log("[mp-webhook] received:", { topic, resourceId, adminReplay: isAdminReplay, signatureOk });
 
 
     // ============ Assinatura recorrente do Clube (preapproval) ============
