@@ -28,6 +28,15 @@ project_id = "pvjlcfhqueibjnkuzzna"
   [functions.create-mp-checkout]
     verify_jwt = false
 
+  [functions.create-mp-payment]
+    verify_jwt = false
+
+  [functions.create-mp-subscription]
+    verify_jwt = true
+
+  [functions.get-mp-payment-status]
+    verify_jwt = false
+
   [functions.mercadopago-webhook]
     verify_jwt = false
 
