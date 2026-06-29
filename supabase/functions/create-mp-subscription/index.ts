@@ -15,6 +15,23 @@ const PLANS: Record<string, { amount: number; frequency: number; reason: string 
   clube:         { amount: 9.9, frequency: 1,  reason: "Clube dos Drinkeros · Mensal" },
 };
 
+async function invokeWebhookFallback(preapprovalId: unknown) {
+  if (!preapprovalId) return;
+  try {
+    const resp = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/mercadopago-webhook`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-internal-mp-sync": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "",
+      },
+      body: JSON.stringify({ type: "preapproval", data: { id: String(preapprovalId) }, source: "create-mp-subscription-fallback" }),
+    });
+    if (!resp.ok) console.warn("[create-mp-subscription] webhook fallback non-2xx", resp.status);
+  } catch (e) {
+    console.warn("[create-mp-subscription] webhook fallback failed", (e as Error).message);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -103,6 +120,12 @@ serve(async (req) => {
     }
 
     console.log("[create-mp-subscription] created:", { id: data.id, status: data.status });
+
+    // Rede de segurança para assinaturas aprovadas no ato: se a notificação do MP falhar,
+    // o webhook interno ainda registra a venda/liberação de forma idempotente.
+    if (data?.status === "authorized") {
+      await invokeWebhookFallback(data.id);
+    }
 
     return new Response(
       JSON.stringify({
