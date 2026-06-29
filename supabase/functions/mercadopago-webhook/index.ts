@@ -206,6 +206,60 @@ async function verifyMpSignature(req: Request, rawBody: string, dataId: string |
   return hex === v1;
 }
 
+function getNested(obj: any, path: string): unknown {
+  return path.split(".").reduce((acc, key) => acc && typeof acc === "object" ? acc[key] : undefined, obj);
+}
+
+function extractResourceFromNotification(body: any, url: URL): { topic: string | null; resourceId: string | null } {
+  const rawTopic =
+    body?.type ||
+    body?.topic ||
+    url.searchParams.get("topic") ||
+    url.searchParams.get("type") ||
+    null;
+
+  const rawResource =
+    body?.data?.id ||
+    body?.data_id ||
+    getNested(body, "data.id") ||
+    url.searchParams.get("id") ||
+    url.searchParams.get("data.id") ||
+    url.searchParams.get("data_id") ||
+    body?.resource ||
+    url.searchParams.get("resource") ||
+    null;
+
+  let topic = rawTopic ? String(rawTopic) : null;
+  let resourceId = rawResource ? String(rawResource) : null;
+
+  // Formato IPN legado: { topic: "payment", resource: "https://api.mercadopago.com/v1/payments/123" }
+  // ou resource="/v1/payments/123". Antes isso tentava buscar o URL inteiro como id e ignorava a venda.
+  const resourceText = resourceId || "";
+  const paymentMatch = resourceText.match(/\/v1\/payments\/(\d+)/i) || resourceText.match(/payments\/(\d+)/i);
+  if (paymentMatch?.[1]) {
+    topic = topic || "payment";
+    resourceId = paymentMatch[1];
+  }
+
+  const authorizedMatch = resourceText.match(/\/authorized_payments\/([^/?#]+)/i) || resourceText.match(/authorized_payments\/([^/?#]+)/i);
+  if (authorizedMatch?.[1]) {
+    topic = topic || "authorized_payment";
+    resourceId = authorizedMatch[1];
+  }
+
+  const preapprovalMatch = resourceText.match(/\/preapproval\/([^/?#]+)/i) || resourceText.match(/preapproval\/([^/?#]+)/i);
+  if (preapprovalMatch?.[1]) {
+    topic = topic || "preapproval";
+    resourceId = preapprovalMatch[1];
+  }
+
+  if (topic === "payment.created" || topic === "payment.updated") topic = "payment";
+  if (topic === "subscription_preapproval") topic = "preapproval";
+  if (topic === "subscription_authorized_payment") topic = "authorized_payment";
+
+  return { topic, resourceId };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -224,13 +278,14 @@ serve(async (req) => {
     let body: any = {};
     try { body = rawBody ? JSON.parse(rawBody) : {}; } catch { body = {}; }
 
-    const topic = body?.type || body?.topic || url.searchParams.get("topic") || url.searchParams.get("type");
-    const resourceId = body?.data?.id || url.searchParams.get("id") || url.searchParams.get("data.id");
+    const { topic, resourceId } = extractResourceFromNotification(body, url);
 
     // Admin replay path: requires server-side replay secret. Bypass MP signature.
     const replaySecret = Deno.env.get("MP_REPLAY_SECRET");
     const replayHeader = req.headers.get("x-internal-replay-secret");
-    const isAdminReplay = !!(replaySecret && replayHeader && replayHeader === replaySecret);
+    const internalSyncHeader = req.headers.get("x-internal-mp-sync");
+    const isInternalSync = !!(internalSyncHeader && internalSyncHeader === (Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""));
+    const isAdminReplay = !!(replaySecret && replayHeader && replayHeader === replaySecret) || isInternalSync;
 
     // Verificação de assinatura é best-effort: se falhar, registramos como suspeito
     // mas SEGUIMOS processando. A validação autoritativa é o fetch via MP API com
@@ -374,6 +429,16 @@ serve(async (req) => {
 
     const paymentId = resourceId;
     if (topic !== "payment" || !paymentId) {
+      if (!topic || !paymentId) {
+        try {
+          await supabase.from("webhook_purchase_logs").insert({
+            gateway: "mercado_pago",
+            transaction_id: paymentId ? String(paymentId) : null,
+            error_message: "ignored_missing_topic_or_resource",
+            raw_payload: { body, query: Object.fromEntries(url.searchParams.entries()) },
+          });
+        } catch (_) { /* best-effort */ }
+      }
       return new Response(JSON.stringify({ ok: true, ignored: true }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

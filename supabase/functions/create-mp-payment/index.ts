@@ -17,6 +17,23 @@ const TABLE_MAP: Record<Exclude<ProductType, "club">, string> = {
   package: "packages",
 };
 
+async function invokeWebhookFallback(paymentId: unknown) {
+  if (!paymentId) return;
+  try {
+    const resp = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/mercadopago-webhook`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-internal-mp-sync": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "",
+      },
+      body: JSON.stringify({ type: "payment", data: { id: String(paymentId) }, source: "create-mp-payment-fallback" }),
+    });
+    if (!resp.ok) console.warn("[create-mp-payment] webhook fallback non-2xx", resp.status);
+  } catch (e) {
+    console.warn("[create-mp-payment] webhook fallback failed", (e as Error).message);
+  }
+}
+
 const CLUB_PRODUCTS: Record<string, { id: string; name: string; slug: string; price: number; cover_image_url: null; description: string; period_days: number }> = {
   "clube-anual": {
     id: "club",
@@ -220,6 +237,12 @@ serve(async (req) => {
       method: mpData.payment_method_id,
       external_reference: externalRef,
     });
+
+    // Rede de segurança: cartão aprovado volta na hora e às vezes o webhook do MP não chega.
+    // Chamamos o mesmo processador de webhook de forma interna/idempotente para registrar venda e liberar acesso.
+    if (mpData?.status === "approved") {
+      await invokeWebhookFallback(mpData.id);
+    }
 
     // Para Pix retorna o QR code; para cartão retorna status
     const pixData = mpData.point_of_interaction?.transaction_data;
