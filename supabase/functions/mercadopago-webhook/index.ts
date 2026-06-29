@@ -430,12 +430,14 @@ serve(async (req) => {
     const paymentId = resourceId;
     if (topic !== "payment" || !paymentId) {
       if (!topic || !paymentId) {
-        await supabase.from("webhook_purchase_logs").insert({
-          gateway: "mercado_pago",
-          transaction_id: paymentId ? String(paymentId) : null,
-          error_message: "ignored_missing_topic_or_resource",
-          raw_payload: { body, query: Object.fromEntries(url.searchParams.entries()) },
-        }).catch(() => null);
+        try {
+          await supabase.from("webhook_purchase_logs").insert({
+            gateway: "mercado_pago",
+            transaction_id: paymentId ? String(paymentId) : null,
+            error_message: "ignored_missing_topic_or_resource",
+            raw_payload: { body, query: Object.fromEntries(url.searchParams.entries()) },
+          });
+        } catch (_) { /* best-effort */ }
       }
       return new Response(JSON.stringify({ ok: true, ignored: true }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
