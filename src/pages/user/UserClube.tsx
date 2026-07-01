@@ -517,18 +517,18 @@ const RecipesTab: React.FC<{ myLikes: Set<string> }> = ({ myLikes }) => {
 /* ---------- Main page ---------- */
 const UserClube: React.FC = () => {
   const navigate = useNavigate();
-  const { data: plan, isLoading: planLoading } = useUserPlan();
+  const { user, loading: authLoading } = useAuth();
   const [tab, setTab] = useState<'chat' | 'recipes'>('chat');
   const { data: myLikes } = useMyClubLikes();
   const likes = useMemo(() => myLikes ?? new Set<string>(), [myLikes]);
 
-  if (planLoading) {
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
     );
   }
 
-  if (!plan?.isVip) {
+  if (!user) {
     return (
       <div className="container mx-auto max-w-md py-10 px-4 text-center space-y-4 pb-24 md:pb-10">
         <div className="mx-auto h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
@@ -536,9 +536,9 @@ const UserClube: React.FC = () => {
         </div>
         <h1 className="text-xl font-bold">Clube dos Drinkeros</h1>
         <p className="text-sm text-muted-foreground">
-          Esta área é exclusiva para Sócios do Clube. Vire Sócio e participe do chat, poste suas receitas e dispute o ranking.
+          Entre com sua conta para participar do chat, postar suas receitas e votar no ranking.
         </p>
-        <Button onClick={() => navigate('/pv-clube')}>Quero entrar no Clube</Button>
+        <Button onClick={() => navigate('/login')}>Entrar</Button>
       </div>
     );
   }
