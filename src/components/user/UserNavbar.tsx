@@ -60,15 +60,8 @@ export const UserNavbar: React.FC = () => {
             const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
             const inner = (
               <>
-                {item.img ? (
-                  <img
-                    src={isActive ? item.imgActive : item.img}
-                    alt=""
-                    className={cn("h-6 w-6 object-contain transition-transform duration-300", isActive && "scale-110")}
-                  />
-                ) : (
-                  <item.icon className={cn("h-6 w-6 transition-transform duration-300", isActive && "scale-110")} />
-                )}
+                <item.icon className={cn("h-6 w-6 transition-transform duration-300", isActive && "scale-110")} />
+
                 <span className={cn("text-[10px] font-medium transition-all duration-300", isActive && "font-semibold")}>
                   {item.label}
                 </span>
