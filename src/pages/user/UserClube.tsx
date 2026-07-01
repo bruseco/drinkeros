@@ -362,7 +362,7 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
 
       <div
         className="sticky z-30 bg-background/95 backdrop-blur pt-2 pb-6
-                   bottom-[calc(85px+env(safe-area-inset-bottom))] lg:bottom-4"
+                   bottom-[calc(70px+env(safe-area-inset-bottom))] lg:bottom-4"
       >
 
 
