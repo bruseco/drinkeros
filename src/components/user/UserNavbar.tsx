@@ -1,14 +1,12 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Wine, Heart, GraduationCap, BookOpen, ArrowLeft } from 'lucide-react';
+import { Wine, Heart, GraduationCap, BookOpen, ArrowLeft, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
-import batalhaIcon from '@/assets/ico-batalha.png';
-import batalhaIconAtivo from '@/assets/ico-batalha-ativo.png';
 import { Button } from '@/components/ui/button';
 import { UserAvatarMenu } from '@/components/user/UserAvatarMenu';
 
-const mainRoutes = ['/app/receitas', '/app/cursos', '/app/batalha', '/app/ebooks', '/app/favoritos', '/app/perfil'];
+const mainRoutes = ['/app/receitas', '/app/cursos', '/app/clube', '/app/ebooks', '/app/favoritos', '/app/perfil'];
 
 export const UserNavbar: React.FC = () => {
   const location = useLocation();
@@ -20,10 +18,11 @@ export const UserNavbar: React.FC = () => {
   const navItems = [
     { icon: Wine, label: 'Receitas', href: '/app/receitas' },
     { icon: GraduationCap, label: 'Cursos', href: '/app/cursos' },
-    { label: 'Batalha', href: '/app/batalha', img: batalhaIcon, imgActive: batalhaIconAtivo, isNew: true },
+    { icon: Users, label: 'Clube', href: '/app/clube', isNew: true },
     { icon: BookOpen, label: 'Ebooks', href: '/app/ebooks' },
     { icon: Heart, label: 'Favoritos', href: '/app/favoritos' },
   ];
+
 
   return (
     <>
