@@ -383,8 +383,7 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
 
 /* ---------- Ranking Sheet ---------- */
 const RankingSheet: React.FC = () => {
-  const [scope, setScope] = useState<'month' | 'all'>('month');
-  const { data = [], isLoading } = useClubRanking(scope);
+  const { data = [], isLoading } = useClubRanking('all');
 
   return (
     <Sheet>
@@ -397,39 +396,34 @@ const RankingSheet: React.FC = () => {
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2"><Trophy className="h-5 w-5" /> Ranking de receitas</SheetTitle>
         </SheetHeader>
-        <Tabs value={scope} onValueChange={(v) => setScope(v as any)} className="mt-4">
-          <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="month">Mensal</TabsTrigger>
-            <TabsTrigger value="all">Geral</TabsTrigger>
-          </TabsList>
-          <TabsContent value={scope} className="mt-3 space-y-2">
-            {isLoading && <div className="text-sm text-muted-foreground">Carregando…</div>}
-            {!isLoading && data.length === 0 && (
-              <div className="text-sm text-muted-foreground">Sem receitas curtidas {scope === 'month' ? 'neste mês' : 'ainda'}.</div>
-            )}
-            {data.map((r, idx) => (
-              <Card key={r.recipe_id} className="p-2 flex items-center gap-3">
-                <div className="text-lg font-bold w-6 text-center text-muted-foreground">{idx + 1}</div>
-                {r.recipe_image ? (
-                  <img src={r.recipe_image} alt={r.recipe_name} className="h-12 w-12 rounded-md object-cover" />
-                ) : (
-                  <div className="h-12 w-12 rounded-md bg-muted flex items-center justify-center"><ChefHat className="h-5 w-5 text-muted-foreground" /></div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold truncate">{r.recipe_name}</div>
-                  <div className="text-xs text-muted-foreground truncate">{r.author_name || 'Sócio'}</div>
-                </div>
-                <div className="inline-flex items-center gap-1 text-sm text-primary">
-                  <Heart className="h-4 w-4 fill-current" /> {r.likes_count}
-                </div>
-              </Card>
-            ))}
-          </TabsContent>
-        </Tabs>
+        <div className="mt-4 space-y-2">
+          {isLoading && <div className="text-sm text-muted-foreground">Carregando…</div>}
+          {!isLoading && data.length === 0 && (
+            <div className="text-sm text-muted-foreground">Sem receitas curtidas ainda.</div>
+          )}
+          {data.map((r, idx) => (
+            <Card key={r.recipe_id} className="p-2 flex items-center gap-3">
+              <div className="text-lg font-bold w-6 text-center text-muted-foreground">{idx + 1}</div>
+              {r.recipe_image ? (
+                <img src={r.recipe_image} alt={r.recipe_name} className="h-12 w-12 rounded-md object-cover" />
+              ) : (
+                <div className="h-12 w-12 rounded-md bg-muted flex items-center justify-center"><ChefHat className="h-5 w-5 text-muted-foreground" /></div>
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold truncate">{r.recipe_name}</div>
+                <div className="text-xs text-muted-foreground truncate">{r.author_name || 'Sócio'}</div>
+              </div>
+              <div className="inline-flex items-center gap-1 text-sm text-primary">
+                <Heart className="h-4 w-4 fill-current" /> {r.likes_count}
+              </div>
+            </Card>
+          ))}
+        </div>
       </SheetContent>
     </Sheet>
   );
 };
+
 
 /* ---------- Recipes Tab (with search) ---------- */
 const RecipesTab: React.FC<{ myLikes: Set<string> }> = ({ myLikes }) => {
