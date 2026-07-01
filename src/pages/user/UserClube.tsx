@@ -288,9 +288,11 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [showTip, setShowTip] = useState(true);
+  const [tipFading, setTipFading] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => setShowTip(false), 5000);
-    return () => clearTimeout(t);
+    const fadeT = setTimeout(() => setTipFading(true), 4500);
+    const hideT = setTimeout(() => setShowTip(false), 5000);
+    return () => { clearTimeout(fadeT); clearTimeout(hideT); };
   }, []);
 
 
