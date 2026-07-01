@@ -287,13 +287,18 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [showTip, setShowTip] = useState(true);
+  const [showTip, setShowTip] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return sessionStorage.getItem('clube_tip_shown') !== '1';
+  });
   const [tipFading, setTipFading] = useState(false);
   useEffect(() => {
+    if (!showTip) return;
+    sessionStorage.setItem('clube_tip_shown', '1');
     const fadeT = setTimeout(() => setTipFading(true), 4500);
     const hideT = setTimeout(() => setShowTip(false), 5000);
     return () => { clearTimeout(fadeT); clearTimeout(hideT); };
-  }, []);
+  }, [showTip]);
 
 
   // Feed pages come newest-first; flatten and reverse so newest is at bottom (chat style).
