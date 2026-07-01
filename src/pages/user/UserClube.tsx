@@ -261,6 +261,8 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
   const [body, setBody] = useState('');
   const scrollerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
 
   // Feed pages come newest-first; flatten and reverse so newest is at bottom (chat style).
   const items = useMemo(() => {
