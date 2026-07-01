@@ -1,20 +1,19 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Wine, Heart, GraduationCap, BookOpen } from 'lucide-react';
+import { Wine, Heart, GraduationCap, BookOpen, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PlanBadge } from '@/components/user/PlanBadge';
 import { UserAvatarMenu } from '@/components/user/UserAvatarMenu';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
-import batalhaIcon from '@/assets/ico-batalha.png';
-import batalhaIconAtivo from '@/assets/ico-batalha-ativo.png';
 
 const navItems = [
   { icon: Wine, label: 'Receitas', href: '/app/receitas' },
   { icon: GraduationCap, label: 'Cursos', href: '/app/cursos' },
-  { label: 'Batalha', href: '/app/batalha', img: batalhaIcon, imgActive: batalhaIconAtivo, isNew: true },
+  { icon: Users, label: 'Clube', href: '/app/clube', isNew: true },
   { icon: BookOpen, label: 'Ebooks', href: '/app/ebooks' },
   { icon: Heart, label: 'Favoritos', href: '/app/favoritos' },
 ];
+
 
 export const UserSidebar: React.FC = () => {
   const location = useLocation();
@@ -36,11 +35,8 @@ export const UserSidebar: React.FC = () => {
 
           const content = (
             <>
-              {item.img ? (
-                <img src={isActive ? item.imgActive : item.img} alt="" className="h-5 w-5 shrink-0 object-contain" />
-              ) : (
-                <item.icon className="h-5 w-5 shrink-0" />
-              )}
+              <item.icon className="h-5 w-5 shrink-0" />
+
               <span>{item.label}</span>
               {item.isNew && (
                 <span className="ml-auto text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
