@@ -374,15 +374,23 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
 
 
         <div className="flex items-end gap-2">
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => navigate('/app/batalha/nova')}
+            className="shrink-0"
+            title="Enviar receita"
+            aria-label="Enviar receita"
+          >
+            <Martini className="h-4 w-4 text-primary" />
+          </Button>
           <Textarea
             ref={textareaRef}
-
             value={body}
             onChange={(e) => setBody(e.target.value)}
             onInput={(e) => {
               const el = e.currentTarget;
               el.style.height = 'auto';
-              // ~3 linhas máximo (line-height ~20px + padding); depois disso rola dentro
               el.style.height = Math.min(el.scrollHeight, 84) + 'px';
             }}
             onKeyDown={(e) => {
@@ -401,6 +409,7 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
           </Button>
         </div>
       </div>
+
 
     </div>
   );
