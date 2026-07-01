@@ -243,3 +243,89 @@ export const useAddToCursosCollection = () => {
     },
   });
 };
+
+/**
+ * Salva uma receita do Clube nos favoritos do usuário
+ * e a coloca automaticamente numa coleção "Clube dos Drinkeros"
+ * (cria a coleção se ainda não existir). Operação idempotente.
+ */
+export const useSaveClubRecipe = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (recipeId: string) => {
+      if (!user) throw new Error('Not authenticated');
+
+      // 1) Garantir favorito (idempotente)
+      const { data: existingFav } = await supabase
+        .from('favorites')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('recipe_id', recipeId)
+        .maybeSingle();
+
+      if (!existingFav) {
+        const { error: favErr } = await supabase
+          .from('favorites')
+          .insert({ user_id: user.id, recipe_id: recipeId });
+        if (favErr) throw favErr;
+      }
+
+      // 2) Garantir coleção "Clube dos Drinkeros"
+      let { data: existingCol } = await supabase
+        .from('collections')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('name', 'Clube dos Drinkeros')
+        .maybeSingle();
+
+      let collectionId: string;
+      if (existingCol) {
+        collectionId = existingCol.id;
+      } else {
+        const { data: created, error } = await supabase
+          .from('collections')
+          .insert({ name: 'Clube dos Drinkeros', user_id: user.id })
+          .select('id')
+          .single();
+        if (error) throw error;
+        collectionId = created.id;
+      }
+
+      // 3) Inserir na coleção (idempotente)
+      const { data: alreadyIn } = await supabase
+        .from('collection_recipes')
+        .select('id')
+        .eq('collection_id', collectionId)
+        .eq('recipe_id', recipeId)
+        .maybeSingle();
+
+      if (!alreadyIn) {
+        const { error } = await supabase
+          .from('collection_recipes')
+          .insert({ collection_id: collectionId, recipe_id: recipeId });
+        if (error) throw error;
+      }
+
+      return { alreadySaved: !!existingFav && !!alreadyIn };
+    },
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ['collection-recipes'] });
+      toast({
+        title: res?.alreadySaved ? 'Já estava salva' : 'Salva em Clube dos Drinkeros',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro ao salvar',
+        description: error?.message,
+        variant: 'destructive',
+      });
+    },
+  });
+};
+
