@@ -243,6 +243,12 @@ const ChatMessage: React.FC<{ item: ClubFeedItem; isMine: boolean; likes: Set<st
           </div>
         </div>
       </div>
+      {isMine && (
+        <Avatar className="h-8 w-8 shrink-0 mt-1 bg-background border border-border/60">
+          <AvatarImage src={drinkerosFace} className="object-contain p-0.5" />
+          <AvatarFallback className="text-[11px]">DK</AvatarFallback>
+        </Avatar>
+      )}
     </div>
   );
 };
