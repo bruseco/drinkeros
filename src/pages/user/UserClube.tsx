@@ -261,6 +261,8 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
   const [body, setBody] = useState('');
   const scrollerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
 
   // Feed pages come newest-first; flatten and reverse so newest is at bottom (chat style).
   const items = useMemo(() => {
@@ -284,12 +286,14 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
     if (!text) return;
     try {
       setBody('');
+      if (textareaRef.current) textareaRef.current.style.height = 'auto';
       await create.mutateAsync(text);
     } catch (e: any) {
       toast.error(e.message ?? 'Erro ao enviar');
       setBody(text);
     }
   };
+
 
   // Group by day to render date separators
   const grouped: Array<{ type: 'sep'; key: string; label: string } | { type: 'msg'; item: ClubFeedItem }> = [];
@@ -358,13 +362,21 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
 
       <div
         className="sticky z-30 bg-background/95 backdrop-blur py-2
-                   bottom-[calc(80px+env(safe-area-inset-bottom))] lg:bottom-4"
+                   bottom-[calc(85px+env(safe-area-inset-bottom))] lg:bottom-4"
       >
 
         <div className="flex items-end gap-2">
           <Textarea
+            ref={textareaRef}
+
             value={body}
             onChange={(e) => setBody(e.target.value)}
+            onInput={(e) => {
+              const el = e.currentTarget;
+              el.style.height = 'auto';
+              // ~3 linhas máximo (line-height ~20px + padding); depois disso rola dentro
+              el.style.height = Math.min(el.scrollHeight, 84) + 'px';
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -374,13 +386,14 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
             placeholder="Mensagem para o Clube…"
             rows={1}
             maxLength={2000}
-            className="resize-none min-h-[40px] max-h-32"
+            className="resize-none min-h-[40px] max-h-[84px] overflow-y-auto"
           />
           <Button size="icon" disabled={!body.trim() || create.isPending} onClick={submit} className="shrink-0">
             {create.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>
         </div>
       </div>
+
     </div>
   );
 };
