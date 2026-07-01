@@ -124,7 +124,6 @@ const RecipeCard: React.FC<{
   compact?: boolean;
 }> = ({ recipe, isLiked, compact }) => {
   const toggle = useToggleRecipeLike();
-  const [showComments, setShowComments] = useState(false);
 
   return (
     <Card className="overflow-hidden">
@@ -164,16 +163,13 @@ const RecipeCard: React.FC<{
             <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
             <span>{recipe.likes_count}</span>
           </button>
-          <button
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-            onClick={() => setShowComments((v) => !v)}
-          >
+          <div className="inline-flex items-center gap-1 text-sm text-muted-foreground">
             <MessageCircle className="h-4 w-4" />
             <span>{recipe.comments_count}</span>
-          </button>
+          </div>
         </div>
 
-        {showComments && <CommentsBlock targetType="recipe" targetId={recipe.id} expandedDefault />}
+        <CommentsBlock targetType="recipe" targetId={recipe.id} />
       </div>
     </Card>
   );
