@@ -401,7 +401,7 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
         <div className="flex items-end gap-2">
           <div className="relative shrink-0">
             {showTip && (
-              <div className="absolute bottom-full left-0 mb-2 z-40 animate-in fade-in slide-in-from-bottom-1">
+              <div className={`absolute bottom-full left-0 mb-2 z-40 transition-opacity duration-500 ${tipFading ? 'opacity-0' : 'opacity-100 animate-in fade-in slide-in-from-bottom-1'}`}>
                 <div className="relative bg-white text-black text-xs font-medium rounded-lg px-3 py-2 shadow-lg whitespace-nowrap">
                   Compartilhe suas receitas!
                   <div className="absolute top-full left-5 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-white" />
