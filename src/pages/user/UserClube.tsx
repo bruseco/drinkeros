@@ -287,6 +287,11 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [showTip, setShowTip] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setShowTip(false), 5000);
+    return () => clearTimeout(t);
+  }, []);
 
 
   // Feed pages come newest-first; flatten and reverse so newest is at bottom (chat style).
@@ -392,16 +397,25 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
 
 
         <div className="flex items-end gap-2">
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={() => navigate('/app/batalha/nova')}
-            className="shrink-0"
-            title="Enviar receita"
-            aria-label="Enviar receita"
-          >
-            <Martini className="h-4 w-4 text-primary" />
-          </Button>
+          <div className="relative shrink-0">
+            {showTip && (
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-40 animate-in fade-in slide-in-from-bottom-1">
+                <div className="relative bg-white text-black text-xs font-medium rounded-lg px-3 py-2 shadow-lg whitespace-nowrap">
+                  Compartilhe suas receitas!
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-white" />
+                </div>
+              </div>
+            )}
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => navigate('/app/batalha/nova')}
+              title="Enviar receita"
+              aria-label="Enviar receita"
+            >
+              <Martini className="h-4 w-4 text-primary" />
+            </Button>
+          </div>
           <Textarea
             ref={textareaRef}
             value={body}
