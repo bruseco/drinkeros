@@ -262,6 +262,7 @@ const ChatMessage: React.FC<{ item: ClubFeedItem; isMine: boolean; likes: Set<st
 /* ---------- Chat Tab ---------- */
 const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const feedQuery = useClubFeed('all');
   const create = useCreateClubPost();
   const [body, setBody] = useState('');
