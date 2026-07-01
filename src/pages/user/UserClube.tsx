@@ -361,9 +361,10 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
       </div>
 
       <div
-        className="sticky z-30 bg-background/95 backdrop-blur py-2
+        className="sticky z-30 bg-background/95 backdrop-blur pt-2 pb-6
                    bottom-[calc(85px+env(safe-area-inset-bottom))] lg:bottom-4"
       >
+
 
         <div className="flex items-end gap-2">
           <Textarea
