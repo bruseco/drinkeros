@@ -334,7 +334,7 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
 
   return (
     <div className="min-h-[calc(100vh-180px)]">
-      <div ref={scrollerRef} className="space-y-2 pb-2">
+      <div ref={scrollerRef} className="space-y-2 pb-[calc(160px+env(safe-area-inset-bottom))] lg:pb-24">
         {feedQuery.hasNextPage && (
           <div className="flex justify-center pb-2">
             <Button
