@@ -367,6 +367,8 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
 
         <div className="flex items-end gap-2">
           <Textarea
+            ref={textareaRef}
+
             value={body}
             onChange={(e) => setBody(e.target.value)}
             onInput={(e) => {
