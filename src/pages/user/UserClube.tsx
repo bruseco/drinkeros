@@ -286,12 +286,14 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
     if (!text) return;
     try {
       setBody('');
+      if (textareaRef.current) textareaRef.current.style.height = 'auto';
       await create.mutateAsync(text);
     } catch (e: any) {
       toast.error(e.message ?? 'Erro ao enviar');
       setBody(text);
     }
   };
+
 
   // Group by day to render date separators
   const grouped: Array<{ type: 'sep'; key: string; label: string } | { type: 'msg'; item: ClubFeedItem }> = [];
