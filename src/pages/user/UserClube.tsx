@@ -178,6 +178,9 @@ const RecipeCard: React.FC<{
 
 /* ---------- WhatsApp-style chat bubble for text posts ---------- */
 const ChatMessage: React.FC<{ item: ClubFeedItem; isMine: boolean; likes: Set<string> }> = ({ item, isMine, likes }) => {
+  const { profile } = useAuth();
+  const myAvatar = profile?.avatar_url || undefined;
+  const myName = profile?.full_name || 'Você';
   if (item.kind === 'recipe') {
     // Recipe card as bubble (full width-ish, centered look but aligned by author)
     return (
