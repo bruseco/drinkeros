@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Heart, MessageCircle, Search, Send, Trophy, Loader2, Sparkles, ChefHat, ChevronUp, Plus, Martini } from 'lucide-react';
+import { Heart, MessageCircle, Search, Send, Trophy, Loader2, Sparkles, ChefHat, ChevronUp, Plus, Martini, Bookmark } from 'lucide-react';
+import { useSaveClubRecipe } from '@/hooks/useCollections';
 
 import { format, formatDistanceToNow, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -125,6 +126,9 @@ const RecipeCard: React.FC<{
   compact?: boolean;
 }> = ({ recipe, isLiked, compact }) => {
   const toggle = useToggleRecipeLike();
+  const save = useSaveClubRecipe();
+  const { user } = useAuth();
+  const isOwn = user?.id === recipe.user_id;
 
   return (
     <Card className="overflow-hidden">
@@ -168,6 +172,17 @@ const RecipeCard: React.FC<{
             <MessageCircle className="h-4 w-4" />
             <span>{recipe.comments_count}</span>
           </div>
+          {!isOwn && (
+            <button
+              className="ml-auto inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition disabled:opacity-50"
+              disabled={save.isPending}
+              onClick={() => save.mutate(recipe.id)}
+              title="Salvar em Favoritos (Clube dos Drinkeros)"
+            >
+              {save.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bookmark className="h-4 w-4" />}
+              <span className="hidden sm:inline">Salvar</span>
+            </button>
+          )}
         </div>
 
         <CommentsBlock targetType="recipe" targetId={recipe.id} />
@@ -502,18 +517,18 @@ const RecipesTab: React.FC<{ myLikes: Set<string> }> = ({ myLikes }) => {
 /* ---------- Main page ---------- */
 const UserClube: React.FC = () => {
   const navigate = useNavigate();
-  const { data: plan, isLoading: planLoading } = useUserPlan();
+  const { user, isLoading: authLoading } = useAuth();
   const [tab, setTab] = useState<'chat' | 'recipes'>('chat');
   const { data: myLikes } = useMyClubLikes();
   const likes = useMemo(() => myLikes ?? new Set<string>(), [myLikes]);
 
-  if (planLoading) {
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
     );
   }
 
-  if (!plan?.isVip) {
+  if (!user) {
     return (
       <div className="container mx-auto max-w-md py-10 px-4 text-center space-y-4 pb-24 md:pb-10">
         <div className="mx-auto h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
@@ -521,9 +536,9 @@ const UserClube: React.FC = () => {
         </div>
         <h1 className="text-xl font-bold">Clube dos Drinkeros</h1>
         <p className="text-sm text-muted-foreground">
-          Esta área é exclusiva para Sócios do Clube. Vire Sócio e participe do chat, poste suas receitas e dispute o ranking.
+          Entre com sua conta para participar do chat, postar suas receitas e votar no ranking.
         </p>
-        <Button onClick={() => navigate('/pv-clube')}>Quero entrar no Clube</Button>
+        <Button onClick={() => navigate('/login')}>Entrar</Button>
       </div>
     );
   }

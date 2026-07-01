@@ -52,25 +52,30 @@ export const useCollectionRecipes = () => {
 
       const recipeIds = [...new Set(crs.map((cr) => cr.recipe_id))];
 
-      // Recipes can live in either `recipes` (aulas) or `exclusive_posts` (drinks)
-      const [recipesRes, postsRes] = await Promise.all([
+      // Recipes can live in `recipes` (aulas), `exclusive_posts` (drinks) ou `club_recipes` (Clube)
+      const [recipesRes, postsRes, clubRes] = await Promise.all([
         supabase.from('recipes').select('id, name, image_url, servings').in('id', recipeIds),
         supabase.from('exclusive_posts').select('id, title, cover_image_url').in('id', recipeIds),
+        supabase.from('club_recipes').select('id, name, image_url').in('id', recipeIds),
       ]);
 
       const recipesMap = new Map((recipesRes.data || []).map((r) => [r.id, r]));
       const postsMap = new Map((postsRes.data || []).map((p) => [p.id, p]));
+      const clubMap = new Map((clubRes.data || []).map((c) => [c.id, c]));
 
       return crs.map((cr) => {
         const r = recipesMap.get(cr.recipe_id);
         const p = postsMap.get(cr.recipe_id);
+        const c = clubMap.get(cr.recipe_id);
         return {
           ...cr,
-          kind: r ? ('aula' as const) : p ? ('receita' as const) : null,
+          kind: r ? ('aula' as const) : p ? ('receita' as const) : c ? ('clube' as const) : null,
           recipe: r
             ? { id: r.id, name: r.name, image_url: r.image_url, servings: r.servings }
             : p
             ? { id: p.id, name: p.title, image_url: p.cover_image_url, servings: null as string | null }
+            : c
+            ? { id: c.id, name: c.name, image_url: c.image_url, servings: null as string | null }
             : null,
         };
       });
@@ -238,3 +243,89 @@ export const useAddToCursosCollection = () => {
     },
   });
 };
+
+/**
+ * Salva uma receita do Clube nos favoritos do usuário
+ * e a coloca automaticamente numa coleção "Clube dos Drinkeros"
+ * (cria a coleção se ainda não existir). Operação idempotente.
+ */
+export const useSaveClubRecipe = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (recipeId: string) => {
+      if (!user) throw new Error('Not authenticated');
+
+      // 1) Garantir favorito (idempotente)
+      const { data: existingFav } = await supabase
+        .from('favorites')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('recipe_id', recipeId)
+        .maybeSingle();
+
+      if (!existingFav) {
+        const { error: favErr } = await supabase
+          .from('favorites')
+          .insert({ user_id: user.id, recipe_id: recipeId });
+        if (favErr) throw favErr;
+      }
+
+      // 2) Garantir coleção "Clube dos Drinkeros"
+      let { data: existingCol } = await supabase
+        .from('collections')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('name', 'Clube dos Drinkeros')
+        .maybeSingle();
+
+      let collectionId: string;
+      if (existingCol) {
+        collectionId = existingCol.id;
+      } else {
+        const { data: created, error } = await supabase
+          .from('collections')
+          .insert({ name: 'Clube dos Drinkeros', user_id: user.id })
+          .select('id')
+          .single();
+        if (error) throw error;
+        collectionId = created.id;
+      }
+
+      // 3) Inserir na coleção (idempotente)
+      const { data: alreadyIn } = await supabase
+        .from('collection_recipes')
+        .select('id')
+        .eq('collection_id', collectionId)
+        .eq('recipe_id', recipeId)
+        .maybeSingle();
+
+      if (!alreadyIn) {
+        const { error } = await supabase
+          .from('collection_recipes')
+          .insert({ collection_id: collectionId, recipe_id: recipeId });
+        if (error) throw error;
+      }
+
+      return { alreadySaved: !!existingFav && !!alreadyIn };
+    },
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      queryClient.invalidateQueries({ queryKey: ['collection-recipes'] });
+      toast({
+        title: res?.alreadySaved ? 'Já estava salva' : 'Salva em Clube dos Drinkeros',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro ao salvar',
+        description: error?.message,
+        variant: 'destructive',
+      });
+    },
+  });
+};
+
