@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Heart, MessageCircle, Search, Send, Trophy, Loader2, Sparkles, ChefHat, ChevronUp, Plus, Martini } from 'lucide-react';
-import drinkerosFace from '@/assets/logotipo-drinkeros.png';
+
 import { format, formatDistanceToNow, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
@@ -178,6 +178,9 @@ const RecipeCard: React.FC<{
 
 /* ---------- WhatsApp-style chat bubble for text posts ---------- */
 const ChatMessage: React.FC<{ item: ClubFeedItem; isMine: boolean; likes: Set<string> }> = ({ item, isMine, likes }) => {
+  const { profile } = useAuth();
+  const myAvatar = profile?.avatar_url || undefined;
+  const myName = profile?.full_name || 'Você';
   if (item.kind === 'recipe') {
     // Recipe card as bubble (full width-ish, centered look but aligned by author)
     return (
@@ -214,9 +217,9 @@ const ChatMessage: React.FC<{ item: ClubFeedItem; isMine: boolean; likes: Set<st
           </div>
         </div>
         {isMine && (
-          <Avatar className="h-8 w-8 shrink-0 mt-1 bg-background border border-border/60">
-            <AvatarImage src={drinkerosFace} className="object-contain p-0.5" />
-            <AvatarFallback className="text-[11px]">DK</AvatarFallback>
+          <Avatar className="h-8 w-8 shrink-0 mt-1">
+            {myAvatar && <AvatarImage src={myAvatar} />}
+            <AvatarFallback className="text-[11px]"><Initials name={myName} /></AvatarFallback>
           </Avatar>
         )}
       </div>
@@ -250,9 +253,9 @@ const ChatMessage: React.FC<{ item: ClubFeedItem; isMine: boolean; likes: Set<st
         </div>
       </div>
       {isMine && (
-        <Avatar className="h-8 w-8 shrink-0 mt-1 bg-background border border-border/60">
-          <AvatarImage src={drinkerosFace} className="object-contain p-0.5" />
-          <AvatarFallback className="text-[11px]">DK</AvatarFallback>
+        <Avatar className="h-8 w-8 shrink-0 mt-1">
+          {myAvatar && <AvatarImage src={myAvatar} />}
+          <AvatarFallback className="text-[11px]"><Initials name={myName} /></AvatarFallback>
         </Avatar>
       )}
     </div>
