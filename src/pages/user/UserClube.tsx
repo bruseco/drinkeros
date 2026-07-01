@@ -70,12 +70,9 @@ const CommentsBlock: React.FC<{ targetType: 'post' | 'recipe'; targetId: string;
   return (
     <div className="space-y-2 pt-2 border-t border-border/50">
       {isLoading && <div className="text-xs text-muted-foreground">carregando comentários…</div>}
-      {!isLoading && comments.length === 0 && (
-        <div className="text-xs text-muted-foreground">Seja o primeiro a comentar.</div>
-      )}
       {!isLoading && comments.length > 3 && !expanded && (
         <button className="text-xs text-primary hover:underline" onClick={() => setExpanded(true)}>
-          Ver todos os {comments.length} comentários
+          Carregar mais {comments.length - 3} comentário{comments.length - 3 > 1 ? 's' : ''}
         </button>
       )}
       <div className="space-y-2">
