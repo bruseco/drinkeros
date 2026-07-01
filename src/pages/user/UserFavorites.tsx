@@ -287,7 +287,7 @@ const UserFavorites: React.FC = () => {
                             image_url: (cr.recipe as any).image_url || (cr.recipe as any).cover_image_url,
                             servings: (cr.recipe as any).servings,
                           }}
-                          to={(cr as any).kind === 'receita' ? `/app/receita/${cr.recipe_id}` : `/app/aula/${cr.recipe_id}`}
+                          to={(cr as any).kind === 'clube' ? `/app/clube` : (cr as any).kind === 'receita' ? `/app/receita/${cr.recipe_id}` : `/app/aula/${cr.recipe_id}`}
                           compact
                           hideTitle
                         />
