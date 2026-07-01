@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Wine, Heart, GraduationCap, BookOpen, Users } from 'lucide-react';
+import { Wine, Heart, GraduationCap, BookOpen, UsersRound } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PlanBadge } from '@/components/user/PlanBadge';
 import { UserAvatarMenu } from '@/components/user/UserAvatarMenu';
@@ -9,7 +9,7 @@ import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 const navItems = [
   { icon: Wine, label: 'Receitas', href: '/app/receitas' },
   { icon: GraduationCap, label: 'Cursos', href: '/app/cursos' },
-  { icon: Users, label: 'Clube', href: '/app/clube', isNew: true },
+  { icon: UsersRound, label: 'Clube', href: '/app/clube', isNew: true },
   { icon: BookOpen, label: 'Ebooks', href: '/app/ebooks' },
   { icon: Heart, label: 'Favoritos', href: '/app/favoritos' },
 ];
