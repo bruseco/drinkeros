@@ -358,13 +358,19 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
 
       <div
         className="sticky z-30 bg-background/95 backdrop-blur py-2
-                   bottom-[calc(80px+env(safe-area-inset-bottom))] lg:bottom-4"
+                   bottom-[calc(85px+env(safe-area-inset-bottom))] lg:bottom-4"
       >
 
         <div className="flex items-end gap-2">
           <Textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
+            onInput={(e) => {
+              const el = e.currentTarget;
+              el.style.height = 'auto';
+              // ~3 linhas máximo (line-height ~20px + padding); depois disso rola dentro
+              el.style.height = Math.min(el.scrollHeight, 84) + 'px';
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -374,13 +380,14 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
             placeholder="Mensagem para o Clube…"
             rows={1}
             maxLength={2000}
-            className="resize-none min-h-[40px] max-h-32"
+            className="resize-none min-h-[40px] max-h-[84px] overflow-y-auto"
           />
           <Button size="icon" disabled={!body.trim() || create.isPending} onClick={submit} className="shrink-0">
             {create.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>
         </div>
       </div>
+
     </div>
   );
 };
