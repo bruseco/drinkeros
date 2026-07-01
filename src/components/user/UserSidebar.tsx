@@ -35,11 +35,8 @@ export const UserSidebar: React.FC = () => {
 
           const content = (
             <>
-              {item.img ? (
-                <img src={isActive ? item.imgActive : item.img} alt="" className="h-5 w-5 shrink-0 object-contain" />
-              ) : (
-                <item.icon className="h-5 w-5 shrink-0" />
-              )}
+              <item.icon className="h-5 w-5 shrink-0" />
+
               <span>{item.label}</span>
               {item.isNew && (
                 <span className="ml-auto text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
