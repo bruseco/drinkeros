@@ -304,8 +304,8 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
   }
 
   return (
-    <div className="rounded-lg border border-border/60 bg-muted/20">
-      <div ref={scrollerRef} className="p-3 space-y-2">
+    <div className="min-h-[calc(100vh-180px)]">
+      <div ref={scrollerRef} className="space-y-2 pb-2">
         {feedQuery.hasNextPage && (
           <div className="flex justify-center pb-2">
             <Button
@@ -357,9 +357,10 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
       </div>
 
       <div
-        className="sticky z-30 -mx-px border-t border-border/60 bg-background/95 backdrop-blur p-2 rounded-b-lg
-                   bottom-[calc(72px+env(safe-area-inset-bottom))] lg:bottom-2"
+        className="sticky z-30 bg-background/95 backdrop-blur py-2
+                   bottom-[calc(80px+env(safe-area-inset-bottom))] lg:bottom-4"
       >
+
         <div className="flex items-end gap-2">
           <Textarea
             value={body}
