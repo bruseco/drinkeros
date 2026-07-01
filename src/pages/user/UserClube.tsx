@@ -517,7 +517,7 @@ const RecipesTab: React.FC<{ myLikes: Set<string> }> = ({ myLikes }) => {
 /* ---------- Main page ---------- */
 const UserClube: React.FC = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [tab, setTab] = useState<'chat' | 'recipes'>('chat');
   const { data: myLikes } = useMyClubLikes();
   const likes = useMemo(() => myLikes ?? new Set<string>(), [myLikes]);
