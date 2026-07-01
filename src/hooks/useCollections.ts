@@ -52,25 +52,30 @@ export const useCollectionRecipes = () => {
 
       const recipeIds = [...new Set(crs.map((cr) => cr.recipe_id))];
 
-      // Recipes can live in either `recipes` (aulas) or `exclusive_posts` (drinks)
-      const [recipesRes, postsRes] = await Promise.all([
+      // Recipes can live in `recipes` (aulas), `exclusive_posts` (drinks) ou `club_recipes` (Clube)
+      const [recipesRes, postsRes, clubRes] = await Promise.all([
         supabase.from('recipes').select('id, name, image_url, servings').in('id', recipeIds),
         supabase.from('exclusive_posts').select('id, title, cover_image_url').in('id', recipeIds),
+        supabase.from('club_recipes').select('id, name, image_url').in('id', recipeIds),
       ]);
 
       const recipesMap = new Map((recipesRes.data || []).map((r) => [r.id, r]));
       const postsMap = new Map((postsRes.data || []).map((p) => [p.id, p]));
+      const clubMap = new Map((clubRes.data || []).map((c) => [c.id, c]));
 
       return crs.map((cr) => {
         const r = recipesMap.get(cr.recipe_id);
         const p = postsMap.get(cr.recipe_id);
+        const c = clubMap.get(cr.recipe_id);
         return {
           ...cr,
-          kind: r ? ('aula' as const) : p ? ('receita' as const) : null,
+          kind: r ? ('aula' as const) : p ? ('receita' as const) : c ? ('clube' as const) : null,
           recipe: r
             ? { id: r.id, name: r.name, image_url: r.image_url, servings: r.servings }
             : p
             ? { id: p.id, name: p.title, image_url: p.cover_image_url, servings: null as string | null }
+            : c
+            ? { id: c.id, name: c.name, image_url: c.image_url, servings: null as string | null }
             : null,
         };
       });
