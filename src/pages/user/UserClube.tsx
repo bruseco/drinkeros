@@ -126,6 +126,9 @@ const RecipeCard: React.FC<{
   compact?: boolean;
 }> = ({ recipe, isLiked, compact }) => {
   const toggle = useToggleRecipeLike();
+  const save = useSaveClubRecipe();
+  const { user } = useAuth();
+  const isOwn = user?.id === recipe.user_id;
 
   return (
     <Card className="overflow-hidden">
@@ -169,6 +172,17 @@ const RecipeCard: React.FC<{
             <MessageCircle className="h-4 w-4" />
             <span>{recipe.comments_count}</span>
           </div>
+          {!isOwn && (
+            <button
+              className="ml-auto inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition disabled:opacity-50"
+              disabled={save.isPending}
+              onClick={() => save.mutate(recipe.id)}
+              title="Salvar em Favoritos (Clube dos Drinkeros)"
+            >
+              {save.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bookmark className="h-4 w-4" />}
+              <span className="hidden sm:inline">Salvar</span>
+            </button>
+          )}
         </div>
 
         <CommentsBlock targetType="recipe" targetId={recipe.id} />
