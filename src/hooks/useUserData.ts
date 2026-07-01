@@ -293,25 +293,30 @@ export const useFavorites = () => {
 
       const recipeIds = data.map((f) => f.recipe_id);
 
-      // Try to fetch from recipes (aulas) and exclusive_posts (receitas de drink)
-      const [recipesRes, postsRes] = await Promise.all([
+      // Try to fetch from recipes (aulas), exclusive_posts (drinks) e club_recipes (Clube)
+      const [recipesRes, postsRes, clubRes] = await Promise.all([
         supabase.from('recipes').select('id, name, image_url, servings').in('id', recipeIds),
         supabase.from('exclusive_posts').select('id, title, cover_image_url').in('id', recipeIds),
+        supabase.from('club_recipes').select('id, name, image_url').in('id', recipeIds),
       ]);
 
       const recipesMap = new Map((recipesRes.data || []).map((r) => [r.id, r]));
       const postsMap = new Map((postsRes.data || []).map((p) => [p.id, p]));
+      const clubMap = new Map((clubRes.data || []).map((c) => [c.id, c]));
 
       return data.map((fav) => {
         const recipe = recipesMap.get(fav.recipe_id);
         const post = postsMap.get(fav.recipe_id);
+        const club = clubMap.get(fav.recipe_id);
         return {
           ...fav,
-          kind: recipe ? ('aula' as const) : post ? ('receita' as const) : null,
+          kind: recipe ? ('aula' as const) : post ? ('receita' as const) : club ? ('clube' as const) : null,
           recipe: recipe
             ? { id: recipe.id, name: recipe.name, image_url: recipe.image_url, servings: recipe.servings }
             : post
             ? { id: post.id, name: post.title, image_url: post.cover_image_url, servings: null }
+            : club
+            ? { id: club.id, name: club.name, image_url: club.image_url, servings: null }
             : null,
         };
       });
