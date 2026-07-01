@@ -334,7 +334,7 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
 
   return (
     <div className="min-h-[calc(100vh-180px)]">
-      <div ref={scrollerRef} className="space-y-2 pb-2">
+      <div ref={scrollerRef} className="space-y-2 pb-[calc(160px+env(safe-area-inset-bottom))] lg:pb-24">
         {feedQuery.hasNextPage && (
           <div className="flex justify-center pb-2">
             <Button
@@ -386,12 +386,10 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
       </div>
 
       <div
-        className="sticky z-30 bg-background/95 backdrop-blur pt-2 pb-6
+        className="fixed left-0 right-0 z-30 bg-background/95 backdrop-blur pt-2 pb-6
                    bottom-[calc(70px+env(safe-area-inset-bottom))] lg:bottom-4"
       >
-
-
-        <div className="flex items-end gap-2">
+        <div className="mx-auto max-w-2xl px-4 flex items-end gap-2">
           <Button
             size="icon"
             variant="outline"
@@ -427,6 +425,7 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
           </Button>
         </div>
       </div>
+
 
 
     </div>
