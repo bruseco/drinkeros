@@ -548,7 +548,7 @@ const UserClube: React.FC = () => {
       <div className="flex items-center justify-between gap-2">
         <div>
           <h1 className="text-xl font-bold leading-tight">Clube</h1>
-          <p className="text-xs text-muted-foreground">Chat dos sócios, receitas e ranking.</p>
+          <p className="text-xs text-muted-foreground">Converse e compartilhe Receitas!</p>
         </div>
         <RankingSheet />
       </div>
