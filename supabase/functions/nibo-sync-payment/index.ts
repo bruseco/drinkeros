@@ -149,8 +149,9 @@ async function upsertCustomer(order: OrderRow): Promise<{
 }> {
 
   if (!order.buyer_email) {
-    return { id: null, status: "failed", error: "Comprador sem e-mail" };
+    return { id: null, status: "failed", hasCpf: false, error: "Comprador sem e-mail" };
   }
+
 
   // Busca CPF + endereço do profile (NIBO precisa de tudo para emitir NF-e)
   let cpf: string | null = null;
