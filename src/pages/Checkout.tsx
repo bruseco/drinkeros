@@ -10,6 +10,7 @@ import { useViewContent } from "@/hooks/useViewContent";
 import { useVipDiscount } from "@/hooks/useVipDiscount";
 import { applyVipDiscountFor } from "@/lib/vipDiscount";
 import { useYouthDiscount } from "@/hooks/useYouthDiscount";
+import CheckoutFiscalGate from "@/components/user/CheckoutFiscalGate";
 
 type ClubMethod = "card" | "pix";
 
