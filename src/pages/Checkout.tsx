@@ -206,6 +206,10 @@ export default function Checkout() {
 
   const onSubmit = async (formData: any) => {
     if (!product) return;
+    if (userId && !fiscalReady) {
+      toast.error("Complete os dados fiscais (CPF e endereço) antes de pagar.");
+      return;
+    }
     setSubmitting(true);
     try {
       // Cartão no Clube → cria assinatura recorrente (preapproval) com card_token_id
