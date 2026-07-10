@@ -261,6 +261,7 @@ async function upsertCustomer(order: OrderRow): Promise<{
     return {
       id: null,
       status: "failed",
+      hasCpf: false,
       error: `customers POST ${created.status}: ${created.raw.slice(0, 400)}`,
     };
   }
@@ -271,8 +272,9 @@ async function upsertCustomer(order: OrderRow): Promise<{
       body: JSON.stringify(fullBody),
     }).catch(() => null);
   }
-  return { id: customerId, status: "success", raw: created.data ?? created.raw };
+  return { id: customerId, status: "success", hasCpf: !!(cpf && (cpf.length === 11 || cpf.length === 14)), raw: created.data ?? created.raw };
 }
+
 
 
 async function createSchedule(order: OrderRow, customerId: string) {
