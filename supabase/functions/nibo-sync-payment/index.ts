@@ -409,20 +409,25 @@ async function processOrder(orderId: string) {
     .maybeSingle();
 
 
-  // 1) Cliente
+  // 1) Cliente — sempre re-upsert enquanto a NF-e não foi emitida, para garantir
+  // que CPF/endereço adicionados depois da compra sejam propagados ao NIBO.
   let customerId = existingLog?.nibo_customer_id ?? null;
   let customerStatus: "success" | "failed" | "skipped" = "skipped";
+  let hasCpf = false;
   let lastError: string | null = null;
   const responses: Record<string, unknown> = {};
 
-  if (!customerId) {
+  const invoiceAlreadyDone = !!existingLog?.nibo_invoice_id;
+  if (!invoiceAlreadyDone) {
     const c = await upsertCustomer(order);
     customerStatus = c.status;
-    customerId = c.id;
+    customerId = c.id ?? customerId;
+    hasCpf = c.hasCpf;
     responses.customer = c.raw;
     if (c.error) lastError = c.error;
   } else {
     customerStatus = "success";
+    hasCpf = true;
   }
 
   // 2) Schedule
@@ -438,18 +443,25 @@ async function processOrder(orderId: string) {
     scheduleStatus = "success";
   }
 
-  // 3) Invoice (NF-e)
+  // 3) Invoice (NF-e) — só emite se o comprador tem CPF/CNPJ cadastrado.
+  // A prefeitura rejeita NFSe para tomador sem CPF ("PNFe0006").
   let invoiceId = existingLog?.nibo_invoice_id ?? null;
   let invoiceStatus: "success" | "failed" | "skipped" = "skipped";
   if (customerId && scheduleId && !invoiceId) {
-    const inv = await emitInvoice(order, customerId, scheduleId);
-    invoiceStatus = inv.status;
-    invoiceId = inv.id;
-    responses.invoice = inv.raw;
-    if (inv.error) lastError = inv.error;
+    if (!hasCpf) {
+      invoiceStatus = "failed";
+      lastError = "NF-e não emitida: comprador sem CPF/CNPJ no cadastro. Peça ao cliente para completar o perfil e reenvie.";
+    } else {
+      const inv = await emitInvoice(order, customerId, scheduleId);
+      invoiceStatus = inv.status;
+      invoiceId = inv.id;
+      responses.invoice = inv.raw;
+      if (inv.error) lastError = inv.error;
+    }
   } else if (invoiceId) {
     invoiceStatus = "success";
   }
+
 
   const allOk =
     customerStatus === "success" &&
