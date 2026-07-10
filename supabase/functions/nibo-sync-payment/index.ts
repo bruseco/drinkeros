@@ -143,9 +143,11 @@ async function getOrder(orderId: string): Promise<OrderRow | null> {
 async function upsertCustomer(order: OrderRow): Promise<{
   id: string | null;
   status: "success" | "skipped" | "failed";
+  hasCpf: boolean;
   error?: string;
   raw?: unknown;
 }> {
+
   if (!order.buyer_email) {
     return { id: null, status: "failed", error: "Comprador sem e-mail" };
   }
