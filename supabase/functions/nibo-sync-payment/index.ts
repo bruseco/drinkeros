@@ -240,7 +240,7 @@ async function upsertCustomer(order: OrderRow): Promise<{
         body: JSON.stringify(baseBody),
       });
     }
-    return { id: existingId, status: "success", raw: upd.data ?? search.data };
+    return { id: existingId, status: "success", hasCpf: !!(cpf && (cpf.length === 11 || cpf.length === 14)), raw: upd.data ?? search.data };
   }
 
   // POST: primeiro tenta com endereço; se falhar (NIBO 400 com address inválido),
