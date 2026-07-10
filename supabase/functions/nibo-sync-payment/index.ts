@@ -143,12 +143,15 @@ async function getOrder(orderId: string): Promise<OrderRow | null> {
 async function upsertCustomer(order: OrderRow): Promise<{
   id: string | null;
   status: "success" | "skipped" | "failed";
+  hasCpf: boolean;
   error?: string;
   raw?: unknown;
 }> {
+
   if (!order.buyer_email) {
-    return { id: null, status: "failed", error: "Comprador sem e-mail" };
+    return { id: null, status: "failed", hasCpf: false, error: "Comprador sem e-mail" };
   }
+
 
   // Busca CPF + endereço do profile (NIBO precisa de tudo para emitir NF-e)
   let cpf: string | null = null;
@@ -237,7 +240,7 @@ async function upsertCustomer(order: OrderRow): Promise<{
         body: JSON.stringify(baseBody),
       });
     }
-    return { id: existingId, status: "success", raw: upd.data ?? search.data };
+    return { id: existingId, status: "success", hasCpf: !!(cpf && (cpf.length === 11 || cpf.length === 14)), raw: upd.data ?? search.data };
   }
 
   // POST: primeiro tenta com endereço; se falhar (NIBO 400 com address inválido),
@@ -258,6 +261,7 @@ async function upsertCustomer(order: OrderRow): Promise<{
     return {
       id: null,
       status: "failed",
+      hasCpf: false,
       error: `customers POST ${created.status}: ${created.raw.slice(0, 400)}`,
     };
   }
@@ -268,8 +272,9 @@ async function upsertCustomer(order: OrderRow): Promise<{
       body: JSON.stringify(fullBody),
     }).catch(() => null);
   }
-  return { id: customerId, status: "success", raw: created.data ?? created.raw };
+  return { id: customerId, status: "success", hasCpf: !!(cpf && (cpf.length === 11 || cpf.length === 14)), raw: created.data ?? created.raw };
 }
+
 
 
 async function createSchedule(order: OrderRow, customerId: string) {
@@ -404,20 +409,25 @@ async function processOrder(orderId: string) {
     .maybeSingle();
 
 
-  // 1) Cliente
+  // 1) Cliente — sempre re-upsert enquanto a NF-e não foi emitida, para garantir
+  // que CPF/endereço adicionados depois da compra sejam propagados ao NIBO.
   let customerId = existingLog?.nibo_customer_id ?? null;
   let customerStatus: "success" | "failed" | "skipped" = "skipped";
+  let hasCpf = false;
   let lastError: string | null = null;
   const responses: Record<string, unknown> = {};
 
-  if (!customerId) {
+  const invoiceAlreadyDone = !!existingLog?.nibo_invoice_id;
+  if (!invoiceAlreadyDone) {
     const c = await upsertCustomer(order);
     customerStatus = c.status;
-    customerId = c.id;
+    customerId = c.id ?? customerId;
+    hasCpf = c.hasCpf;
     responses.customer = c.raw;
     if (c.error) lastError = c.error;
   } else {
     customerStatus = "success";
+    hasCpf = true;
   }
 
   // 2) Schedule
@@ -433,18 +443,25 @@ async function processOrder(orderId: string) {
     scheduleStatus = "success";
   }
 
-  // 3) Invoice (NF-e)
+  // 3) Invoice (NF-e) — só emite se o comprador tem CPF/CNPJ cadastrado.
+  // A prefeitura rejeita NFSe para tomador sem CPF ("PNFe0006").
   let invoiceId = existingLog?.nibo_invoice_id ?? null;
   let invoiceStatus: "success" | "failed" | "skipped" = "skipped";
   if (customerId && scheduleId && !invoiceId) {
-    const inv = await emitInvoice(order, customerId, scheduleId);
-    invoiceStatus = inv.status;
-    invoiceId = inv.id;
-    responses.invoice = inv.raw;
-    if (inv.error) lastError = inv.error;
+    if (!hasCpf) {
+      invoiceStatus = "failed";
+      lastError = "NF-e não emitida: comprador sem CPF/CNPJ no cadastro. Peça ao cliente para completar o perfil e reenvie.";
+    } else {
+      const inv = await emitInvoice(order, customerId, scheduleId);
+      invoiceStatus = inv.status;
+      invoiceId = inv.id;
+      responses.invoice = inv.raw;
+      if (inv.error) lastError = inv.error;
+    }
   } else if (invoiceId) {
     invoiceStatus = "success";
   }
+
 
   const allOk =
     customerStatus === "success" &&
