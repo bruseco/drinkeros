@@ -72,6 +72,8 @@ export default function Checkout() {
   const [paid, setPaid] = useState(false);
   const [payerEmail, setPayerEmail] = useState<string | null>(null);
   const [clubMethod, setClubMethod] = useState<ClubMethod>("card");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [fiscalReady, setFiscalReady] = useState(false);
 
   const vip = useVipDiscount();
   const youth = useYouthDiscount();
