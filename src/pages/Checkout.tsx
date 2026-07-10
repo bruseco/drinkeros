@@ -113,6 +113,7 @@ export default function Checkout() {
       setLoading(true);
       try {
         const { data: { user } } = await supabase.auth.getUser();
+        setUserId(user?.id ?? null);
 
         if (productType === "club") {
           if (!user) {
