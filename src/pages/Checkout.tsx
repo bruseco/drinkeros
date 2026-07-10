@@ -10,6 +10,7 @@ import { useViewContent } from "@/hooks/useViewContent";
 import { useVipDiscount } from "@/hooks/useVipDiscount";
 import { applyVipDiscountFor } from "@/lib/vipDiscount";
 import { useYouthDiscount } from "@/hooks/useYouthDiscount";
+import CheckoutFiscalGate from "@/components/user/CheckoutFiscalGate";
 
 type ClubMethod = "card" | "pix";
 
@@ -71,6 +72,8 @@ export default function Checkout() {
   const [paid, setPaid] = useState(false);
   const [payerEmail, setPayerEmail] = useState<string | null>(null);
   const [clubMethod, setClubMethod] = useState<ClubMethod>("card");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [fiscalReady, setFiscalReady] = useState(false);
 
   const vip = useVipDiscount();
   const youth = useYouthDiscount();
@@ -110,6 +113,7 @@ export default function Checkout() {
       setLoading(true);
       try {
         const { data: { user } } = await supabase.auth.getUser();
+        setUserId(user?.id ?? null);
 
         if (productType === "club") {
           if (!user) {
@@ -202,6 +206,10 @@ export default function Checkout() {
 
   const onSubmit = async (formData: any) => {
     if (!product) return;
+    if (userId && !fiscalReady) {
+      toast.error("Complete os dados fiscais (CPF e endereço) antes de pagar.");
+      return;
+    }
     setSubmitting(true);
     try {
       // Cartão no Clube → cria assinatura recorrente (preapproval) com card_token_id
@@ -369,7 +377,11 @@ export default function Checkout() {
                 </div>
               )}
 
-              <div className="bg-white rounded-xl overflow-hidden p-2 sm:p-4 text-black">
+              {userId && !fiscalReady && (
+                <CheckoutFiscalGate userId={userId} onReady={() => setFiscalReady(true)} />
+              )}
+
+              <div className={`bg-white rounded-xl overflow-hidden p-2 sm:p-4 text-black ${userId && !fiscalReady ? "opacity-40 pointer-events-none select-none" : ""}`}>
                 {payerEmail !== null ? (
                   <Payment
                     key={`brick-${finalPrice}-${isClub ? clubMethod : "all"}`}
