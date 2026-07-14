@@ -18,7 +18,7 @@ export const UserNavbar: React.FC = () => {
   const navItems = [
     { icon: Wine, label: 'Receitas', href: '/app/receitas' },
     { icon: GraduationCap, label: 'Cursos', href: '/app/cursos' },
-    { icon: MessagesSquare, label: 'Clube', href: '/app/clube', isNew: true },
+    { icon: MessagesSquare, label: 'Clube', href: '/app/clube' },
     { icon: BookOpen, label: 'Ebooks', href: '/app/ebooks' },
     { icon: Heart, label: 'Favoritos', href: '/app/favoritos' },
   ];
