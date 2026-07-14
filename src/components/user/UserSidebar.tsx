@@ -9,7 +9,7 @@ import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 const navItems = [
   { icon: Wine, label: 'Receitas', href: '/app/receitas' },
   { icon: GraduationCap, label: 'Cursos', href: '/app/cursos' },
-  { icon: MessagesSquare, label: 'Clube', href: '/app/clube', isNew: true },
+  { icon: MessagesSquare, label: 'Clube', href: '/app/clube' },
   { icon: BookOpen, label: 'Ebooks', href: '/app/ebooks' },
   { icon: Heart, label: 'Favoritos', href: '/app/favoritos' },
 ];
@@ -38,11 +38,6 @@ export const UserSidebar: React.FC = () => {
               <item.icon className="h-5 w-5 shrink-0" />
 
               <span>{item.label}</span>
-              {item.isNew && (
-                <span className="ml-auto text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
-                  Novo
-                </span>
-              )}
             </>
           );
 
