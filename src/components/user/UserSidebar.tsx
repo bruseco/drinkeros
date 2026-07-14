@@ -38,11 +38,6 @@ export const UserSidebar: React.FC = () => {
               <item.icon className="h-5 w-5 shrink-0" />
 
               <span>{item.label}</span>
-              {item.isNew && (
-                <span className="ml-auto text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
-                  Novo
-                </span>
-              )}
             </>
           );
 

@@ -65,11 +65,6 @@ export const UserNavbar: React.FC = () => {
                 <span className={cn("text-[10px] font-medium transition-all duration-300", isActive && "font-semibold")}>
                   {item.label}
                 </span>
-                {item.isNew && (
-                  <span className="absolute -top-1 right-0 text-[8px] font-bold uppercase tracking-wide px-1 py-0.5 rounded-full bg-primary text-primary-foreground leading-none">
-                    Novo
-                  </span>
-                )}
               </>
             );
 
