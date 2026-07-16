@@ -46,8 +46,27 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Step 2: Set password for existing user
+    // Step 2: set_password is permanently disabled.
+    // Previously this allowed setting a new password with only an email —
+    // effectively an account takeover. The legacy migration is complete;
+    // users must use the standard "esqueci minha senha" reset flow (magic
+    // link / OTP verified server-side) to change their password.
     if (action === "set_password") {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error:
+            "Esta rota foi desativada. Use 'Esqueci minha senha' para redefinir sua senha por e-mail.",
+        }),
+        {
+          status: 410,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    // Legacy stub kept to preserve function signature — unreachable.
+    if (false && action === "set_password_disabled") {
       if (!email || !password) {
         return new Response(JSON.stringify({ success: false, error: "E-mail e senha são obrigatórios" }), {
           status: 400,
