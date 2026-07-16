@@ -46,58 +46,25 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Step 2: Set password for existing user
+    // Step 2: set_password is permanently disabled.
+    // Previously this allowed setting a new password with only an email —
+    // effectively an account takeover. The legacy migration is complete;
+    // users must use the standard "esqueci minha senha" reset flow (magic
+    // link / OTP verified server-side) to change their password.
     if (action === "set_password") {
-      if (!email || !password) {
-        return new Response(JSON.stringify({ success: false, error: "E-mail e senha são obrigatórios" }), {
-          status: 400,
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error:
+            "Esta rota foi desativada. Use 'Esqueci minha senha' para redefinir sua senha por e-mail.",
+        }),
+        {
+          status: 410,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      if (password.length < 6) {
-        return new Response(JSON.stringify({ success: false, error: "A senha deve ter no mínimo 6 caracteres" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      const normalizedEmail = email.trim().toLowerCase();
-
-      // Find user
-      const { data: profiles } = await adminClient
-        .from("profiles")
-        .select("user_id")
-        .eq("email", normalizedEmail)
-        .limit(1);
-
-      if (!profiles || profiles.length === 0) {
-        return new Response(JSON.stringify({ success: false, error: "Usuário não encontrado" }), {
-          status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      const userId = profiles[0].user_id;
-
-      // Update password via admin API
-      const { error } = await adminClient.auth.admin.updateUserById(userId, {
-        password,
-        email_confirm: true,
-      });
-
-      if (error) {
-        console.error("Error setting password:", error);
-        return new Response(JSON.stringify({ success: false, error: error.message }), {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+        },
+      );
     }
+
 
     return new Response(JSON.stringify({ error: "Ação inválida" }), {
       status: 400,
