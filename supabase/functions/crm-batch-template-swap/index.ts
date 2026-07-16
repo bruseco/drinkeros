@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { assertInternalOrAdmin } from "../_shared/internalAuth.ts";
 
 const SHORT_LINK_BASE = "https://alunos.criminallab.com.br";
 
@@ -34,6 +35,8 @@ const STAGE_DEFAULT: Record<string, string> = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const _authFail = await assertInternalOrAdmin(req, corsHeaders);
+  if (_authFail) return _authFail;
 
   try {
     const supabase = createClient(

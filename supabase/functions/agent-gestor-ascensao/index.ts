@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { assertInternalOrAdmin } from "../_shared/internalAuth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,6 +18,8 @@ const UPSELL_CONNECTION_ID = "c0332f67-c559-4a6a-b406-68691bdd780b";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const _authFail = await assertInternalOrAdmin(req, corsHeaders);
+  if (_authFail) return _authFail;
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;

@@ -1,5 +1,6 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { assertInternalOrAdmin } from "../_shared/internalAuth.ts";
 
 const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')!;
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -100,6 +101,8 @@ Responda APENAS com JSON válido: {"yield_ml": number|null, "drinks_count": numb
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  const _authFail = await assertInternalOrAdmin(req, corsHeaders);
+  if (_authFail) return _authFail;
 
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
