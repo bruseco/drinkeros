@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Loader2, Mail } from 'lucide-react';
+import { Loader2, Mail, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { InstallBanner } from '@/components/user/InstallBanner';
 import { WhatsAppFloatingButton } from '@/components/user/WhatsAppFloatingButton';
@@ -35,6 +35,7 @@ const Login: React.FC = () => {
   const [magicLinkEmail, setMagicLinkEmail] = useState('');
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [lastMethod, setLastMethod] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [isProcessingHash, setIsProcessingHash] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     return window.location.hash.includes('access_token=');
@@ -309,14 +310,26 @@ const Login: React.FC = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div className="relative">
               {lastMethod === 'email' && (
