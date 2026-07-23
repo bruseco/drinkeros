@@ -35,6 +35,7 @@ const Login: React.FC = () => {
   const [magicLinkEmail, setMagicLinkEmail] = useState('');
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [lastMethod, setLastMethod] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [isProcessingHash, setIsProcessingHash] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     return window.location.hash.includes('access_token=');
