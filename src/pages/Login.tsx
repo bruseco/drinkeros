@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Loader2, Mail } from 'lucide-react';
+import { Loader2, Mail, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { InstallBanner } from '@/components/user/InstallBanner';
 import { WhatsAppFloatingButton } from '@/components/user/WhatsAppFloatingButton';
