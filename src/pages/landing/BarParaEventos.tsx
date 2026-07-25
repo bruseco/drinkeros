@@ -26,6 +26,7 @@ import CourseLanding, {
 
 import logo from '@/assets/landing/bar/logo.png';
 import instructor from '@/assets/landing/bar/instructor.jpg';
+import henriqueAbout from '@/assets/landing/bar/henrique-about.png.asset.json';
 import dep1 from '@/assets/landing/bar/dep-1.png';
 import dep2 from '@/assets/landing/bar/dep-2.png';
 import dep3 from '@/assets/landing/bar/dep-3.png';

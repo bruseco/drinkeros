@@ -134,7 +134,7 @@ const MixologiaAvancada: React.FC = () => (
     aboutInstructor={{
       name: 'Tom Oliveira',
       photoSrc: instructor,
-      title: 'Quem é o seu',
+      title: 'Quem é o seu professor?',
       paragraphs: [
         'Tom Oliveira é natural de São Paulo e começou sua trajetória no mundo da coquetelaria em 2005, quando atuou como bartender na Rua Augusta. Desde então, já passou por alguns dos principais bares do Brasil.',
         'Além de mais de 20 anos de experiência na área da mixologia, o Tom sempre investiu em atualização e aprofundamento — acumulando formações de referência no setor.',
