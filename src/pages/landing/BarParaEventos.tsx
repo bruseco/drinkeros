@@ -130,6 +130,17 @@ const BarParaEventos: React.FC = () => (
     bonus={bonus}
     testimonials={[{ src: dep1 }, { src: dep2 }, { src: dep3 }]}
     guaranteeDays={15}
+    aboutInstructor={{
+      name: 'Henrique Todeschini',
+      photoSrc: henriqueAbout.url,
+      title: 'Quem é o seu professor?',
+      paragraphs: [
+        'Henrique Todeschini é o fundador da La Mafia Bartenders, hoje La Mafia Drinkeros, empresa de bar para eventos presente nos melhores e mais luxuosos eventos da região Sul do país.',
+        'Atua no mercado de eventos desde 2009, com rigor, responsabilidade e organização — o que o levou a conquistar cada vez mais clientes e um nome forte no mercado.',
+        'Em 2020, com a chegada da pandemia, ele levou toda essa bagagem para o digital e passou a ensinar o que aprendeu na prática ao longo de mais de uma década.',
+        'Hoje ele traz para você essa oportunidade de empreendimento e liberdade financeira com o Curso de Bar para Eventos produzido pela Drinkeros.',
+      ],
+    }}
     offerSummary="Monte e opere bar para eventos do zero: estrutura, equipe, cardápio, precificação e logística.
 Aprenda a calcular consumo, montar kits e garantir margem alta em casamentos, corporativos e festas.
 Para quem quer empreender em eventos ou profissionalizar a operação que já tem.
