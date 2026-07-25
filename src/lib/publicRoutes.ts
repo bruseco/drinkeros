@@ -17,13 +17,19 @@
  */
 export const PUBLIC_SALES_ROUTES: string[] = [
   '/pv-clube',
+  '/pv-clube-b',
+  '/vip',
   '/drinkeros-xperience',
   '/mixologia-avancada',
   '/bar-p-eventos',
   '/drinkdelivery-engarrafados',
   '/bartender-a-bordo',
   '/ingredientes-artesanais',
+  '/producao-de-ingredientes-artesanais',
   '/classicos-destilados',
+  '/workshop-alem-dos-classicos',
+  '/bebida-decifrada',
+  '/rand',
   // Ebooks (rota dinâmica /ebook/:slug)
   '/ebook/o-velho-guia-do-bartender',
   '/ebook/drinks-tematicos',
@@ -34,6 +40,7 @@ export const PUBLIC_SALES_ROUTES: string[] = [
   '/ebook/os-30-drinks-com-whisky-pra-vc-se-sentir-um-poderoso-chefao',
   '/ebook/os-30-drinks-com-cachaca-para-se-orgulhar-do-brasil',
 ];
+
 
 /**
  * Prefixos de rotas públicas (qualquer slug abaixo é público).
