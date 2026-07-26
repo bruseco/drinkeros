@@ -216,16 +216,17 @@ export const useMonthlyRanking = (monthYear?: string) => {
 
       const ids = recipes.map(r => r.id);
       const userIds = [...new Set(recipes.map(r => r.user_id))];
-      const [{ data: votes }, { data: profiles }] = await Promise.all([
-        supabase.from('club_recipe_votes').select('recipe_id, rating').in('recipe_id', ids),
+      const [{ data: stats }, { data: profiles }] = await Promise.all([
+        supabase.rpc('get_club_recipe_vote_stats' as any, { _recipe_ids: ids }),
         supabase.from('profiles').select('user_id, full_name, avatar_url').in('user_id', userIds),
       ]);
+      const statsList = (stats || []) as Array<{ recipe_id: string; total_votes: number; avg_rating: number }>;
 
       return recipes
         .map(r => {
-          const rv = (votes || []).filter(v => v.recipe_id === r.id);
-          const total = rv.length;
-          const avg = total > 0 ? rv.reduce((s, v) => s + v.rating, 0) / total : 0;
+          const s = statsList.find(x => x.recipe_id === r.id);
+          const total = Number(s?.total_votes || 0);
+          const avg = Number(s?.avg_rating || 0);
           const profile = (profiles || []).find(p => p.user_id === r.user_id);
           return {
             recipe_id: r.id,
