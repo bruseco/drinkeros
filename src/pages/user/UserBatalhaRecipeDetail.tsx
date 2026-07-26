@@ -20,14 +20,14 @@ const UserBatalhaRecipeDetail: React.FC = () => {
     queryFn: async () => {
       const { data: recipe } = await supabase.from('club_recipes').select('*').eq('id', id!).maybeSingle();
       if (!recipe) return null;
-      const [{ data: votes }, { data: profile }] = await Promise.all([
-        supabase.from('club_recipe_votes').select('rating, user_id').eq('recipe_id', id!),
+      const [{ data: stats }, { data: profile }] = await Promise.all([
+        supabase.rpc('get_club_recipe_vote_stats' as any, { _recipe_ids: [id!] }),
         supabase.from('profiles').select('user_id, full_name, avatar_url, bio').eq('user_id', recipe.user_id).maybeSingle(),
       ]);
-      const total = votes?.length || 0;
-      const avg = total > 0 ? votes!.reduce((s, v) => s + v.rating, 0) / total : 0;
-      const my = user ? votes?.find(v => v.user_id === user.id) : null;
-      return { recipe, profile, avg, total, myVote: my?.rating || 0 };
+      const s = ((stats || []) as Array<{ total_votes: number; avg_rating: number; my_rating: number | null }>)[0];
+      const total = Number(s?.total_votes || 0);
+      const avg = Number(s?.avg_rating || 0);
+      return { recipe, profile, avg, total, myVote: s?.my_rating || 0 };
     },
     enabled: !!id,
   });
