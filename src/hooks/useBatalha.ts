@@ -74,23 +74,27 @@ export const useBatalhaFeed = () => {
       const recipeIds = recipes.map(r => r.id);
       const userIds = [...new Set(recipes.map(r => r.user_id))];
 
-      const [{ data: votes }, { data: profiles }] = await Promise.all([
-        supabase.from('club_recipe_votes').select('recipe_id, rating, user_id').in('recipe_id', recipeIds),
+      const [{ data: stats }, { data: profiles }] = await Promise.all([
+        supabase.rpc('get_club_recipe_vote_stats' as any, { _recipe_ids: recipeIds }),
         supabase.from('profiles').select('user_id, full_name, avatar_url').in('user_id', userIds),
       ]);
 
+      const statsList = (stats || []) as Array<{
+        recipe_id: string;
+        total_votes: number;
+        avg_rating: number;
+        my_rating: number | null;
+      }>;
+
       return recipes.map(r => {
-        const recipeVotes = (votes || []).filter(v => v.recipe_id === r.id);
-        const total = recipeVotes.length;
-        const avg = total > 0 ? recipeVotes.reduce((s, v) => s + v.rating, 0) / total : 0;
-        const my = user ? recipeVotes.find(v => v.user_id === user.id) : null;
+        const s = statsList.find(x => x.recipe_id === r.id);
         const profile = (profiles || []).find(p => p.user_id === r.user_id);
         return {
           ...r,
           characteristics: r.characteristics || [],
-          avg_rating: avg,
-          total_votes: total,
-          user_vote: my?.rating || null,
+          avg_rating: Number(s?.avg_rating || 0),
+          total_votes: Number(s?.total_votes || 0),
+          user_vote: user ? s?.my_rating ?? null : null,
           author_name: profile?.full_name || null,
           author_avatar: profile?.avatar_url || null,
           is_in_battle: isInCurrentMonthBRT(r.created_at),
@@ -104,29 +108,24 @@ export const useBatalhaRanking = () => {
   return useQuery({
     queryKey: ['club-ranking'],
     queryFn: async () => {
-      const { data: points, error } = await supabase
-        .from('club_user_points')
-        .select('*')
-        .order('points', { ascending: false })
-        .limit(50);
+      const { data, error } = await supabase.rpc('get_club_points_leaderboard' as any, { _limit: 50 });
       if (error) throw error;
-      if (!points?.length) return [];
+      const points = (data || []) as Array<{
+        user_id: string;
+        points: number;
+        recipes_published: number;
+        votes_given: number;
+        votes_received: number;
+        full_name: string | null;
+        avatar_url: string | null;
+      }>;
 
-      const userIds = points.map(p => p.user_id);
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, full_name, avatar_url')
-        .in('user_id', userIds);
-
-      return points.map(p => {
-        const profile = (profiles || []).find(pr => pr.user_id === p.user_id);
-        return {
-          ...p,
-          full_name: profile?.full_name || 'Usuário',
-          avatar_url: profile?.avatar_url || null,
-          tier: tierFromPoints(p.points),
-        };
-      });
+      return points.map(p => ({
+        ...p,
+        full_name: p.full_name || 'Usuário',
+        avatar_url: p.avatar_url || null,
+        tier: tierFromPoints(p.points),
+      }));
     },
   });
 };
@@ -217,16 +216,17 @@ export const useMonthlyRanking = (monthYear?: string) => {
 
       const ids = recipes.map(r => r.id);
       const userIds = [...new Set(recipes.map(r => r.user_id))];
-      const [{ data: votes }, { data: profiles }] = await Promise.all([
-        supabase.from('club_recipe_votes').select('recipe_id, rating').in('recipe_id', ids),
+      const [{ data: stats }, { data: profiles }] = await Promise.all([
+        supabase.rpc('get_club_recipe_vote_stats' as any, { _recipe_ids: ids }),
         supabase.from('profiles').select('user_id, full_name, avatar_url').in('user_id', userIds),
       ]);
+      const statsList = (stats || []) as Array<{ recipe_id: string; total_votes: number; avg_rating: number }>;
 
       return recipes
         .map(r => {
-          const rv = (votes || []).filter(v => v.recipe_id === r.id);
-          const total = rv.length;
-          const avg = total > 0 ? rv.reduce((s, v) => s + v.rating, 0) / total : 0;
+          const s = statsList.find(x => x.recipe_id === r.id);
+          const total = Number(s?.total_votes || 0);
+          const avg = Number(s?.avg_rating || 0);
           const profile = (profiles || []).find(p => p.user_id === r.user_id);
           return {
             recipe_id: r.id,

@@ -3600,6 +3600,18 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_club_points_leaderboard: {
+        Args: { _limit?: number }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          points: number
+          recipes_published: number
+          user_id: string
+          votes_given: number
+          votes_received: number
+        }[]
+      }
       get_club_ranking: {
         Args: { _limit?: number; _scope?: string }
         Returns: {
@@ -3611,6 +3623,15 @@ export type Database = {
           recipe_image: string
           recipe_name: string
           user_id: string
+        }[]
+      }
+      get_club_recipe_vote_stats: {
+        Args: { _recipe_ids: string[] }
+        Returns: {
+          avg_rating: number
+          my_rating: number
+          recipe_id: string
+          total_votes: number
         }[]
       }
       get_current_battle_recipe_ids: { Args: never; Returns: string[] }
