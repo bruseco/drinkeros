@@ -48,6 +48,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
   const [number, setNumber] = useState("");
   const [complement, setComplement] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
+  const [neighborhoodAutoFailed, setNeighborhoodAutoFailed] = useState(false);
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [needsForm, setNeedsForm] = useState(false);
@@ -108,9 +109,16 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       const json = await res.json();
       if (json && !json.erro) {
         if (json.logradouro) setStreet(json.logradouro);
-        if (json.bairro) setNeighborhood(json.bairro);
         if (json.localidade) setCity(json.localidade);
         if (json.uf) setState(json.uf);
+        // ViaCEP às vezes devolve bairro vazio (CEP único / geral de município).
+        // Nesse caso sinalizamos para o usuário preencher manualmente.
+        if (json.bairro) {
+          setNeighborhood(json.bairro);
+          setNeighborhoodAutoFailed(false);
+        } else {
+          setNeighborhoodAutoFailed(true);
+        }
       } else {
         toast.error("CEP não encontrado");
       }
