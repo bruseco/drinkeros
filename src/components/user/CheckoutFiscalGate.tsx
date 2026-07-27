@@ -23,6 +23,7 @@ const isFiscalComplete = (d: FiscalData | null) =>
   (d.cep || "").replace(/\D/g, "").length === 8 &&
   !!d.address_street?.trim() &&
   !!d.address_number?.trim() &&
+  !!d.address_neighborhood?.trim() &&
   !!d.address_city?.trim() &&
   !!d.address_state?.trim();
 
@@ -47,6 +48,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
   const [number, setNumber] = useState("");
   const [complement, setComplement] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
+  const [neighborhoodAutoFailed, setNeighborhoodAutoFailed] = useState(false);
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [needsForm, setNeedsForm] = useState(false);
@@ -107,9 +109,16 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       const json = await res.json();
       if (json && !json.erro) {
         if (json.logradouro) setStreet(json.logradouro);
-        if (json.bairro) setNeighborhood(json.bairro);
         if (json.localidade) setCity(json.localidade);
         if (json.uf) setState(json.uf);
+        // ViaCEP às vezes devolve bairro vazio (CEP único / geral de município).
+        // Nesse caso sinalizamos para o usuário preencher manualmente.
+        if (json.bairro) {
+          setNeighborhood(json.bairro);
+          setNeighborhoodAutoFailed(false);
+        } else {
+          setNeighborhoodAutoFailed(true);
+        }
       } else {
         toast.error("CEP não encontrado");
       }
@@ -151,6 +160,13 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       toast.error("Preencha o endereço completo");
       return;
     }
+    if (!neighborhood.trim()) {
+      toast.error("Preencha o bairro", {
+        description: "O bairro é obrigatório para a emissão da nota fiscal.",
+      });
+      setNeighborhoodAutoFailed(true);
+      return;
+    }
 
     setSaving(true);
     try {
@@ -176,6 +192,9 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       setSaving(false);
     }
   };
+
+  const neighborhoodMissing = neighborhoodAutoFailed && !neighborhood.trim();
+
 
   if (loading) {
     return (
@@ -251,7 +270,25 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
 
         <div>
           <Label htmlFor="neighborhood" className="text-xs">Bairro</Label>
-          <Input id="neighborhood" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="bg-white/5 border-white/10 text-white mt-1" />
+          <Input
+            id="neighborhood"
+            value={neighborhood}
+            onChange={(e) => {
+              setNeighborhood(e.target.value);
+              if (e.target.value.trim()) setNeighborhoodAutoFailed(false);
+            }}
+            aria-invalid={neighborhoodMissing}
+            className={`bg-white/5 text-white mt-1 ${
+              neighborhoodMissing
+                ? "border-destructive ring-1 ring-destructive focus-visible:ring-destructive"
+                : "border-white/10"
+            }`}
+          />
+          {neighborhoodMissing && (
+            <p className="text-[11px] text-destructive mt-1">
+              Bairro não encontrado automaticamente, preencha manualmente
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-[1fr_90px] gap-3">

@@ -43,6 +43,7 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
   const [addrCity, setAddrCity] = useState('');
   const [addrState, setAddrState] = useState('');
   const [cepLoading, setCepLoading] = useState(false);
+  const [neighborhoodAutoFailed, setNeighborhoodAutoFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
@@ -92,9 +93,15 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
       const json = await res.json();
       if (json && !json.erro) {
         if (json.logradouro) setAddrStreet(json.logradouro);
-        if (json.bairro) setAddrNeighborhood(json.bairro);
         if (json.localidade) setAddrCity(json.localidade);
         if (json.uf) setAddrState(json.uf);
+        // ViaCEP pode devolver bairro vazio — obrigamos preenchimento manual.
+        if (json.bairro) {
+          setAddrNeighborhood(json.bairro);
+          setNeighborhoodAutoFailed(false);
+        } else {
+          setNeighborhoodAutoFailed(true);
+        }
       }
     } catch {}
     finally { setCepLoading(false); }
@@ -148,6 +155,17 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
 
   const handleSave = async () => {
     if (!user) return;
+    // Bairro é obrigatório para a emissão da NF-e (NIBO/prefeitura).
+    const hasAnyAddress = Boolean(
+      cep.replace(/\D/g, '') || addrStreet.trim() || addrNumber.trim() || addrCity.trim() || addrState.trim()
+    );
+    if (hasAnyAddress && !addrNeighborhood.trim()) {
+      setNeighborhoodAutoFailed(true);
+      toast.error('Preencha o bairro', {
+        description: 'O bairro é obrigatório para a emissão da nota fiscal.',
+      });
+      return;
+    }
     setSaving(true);
     try {
       const updateData: Record<string, any> = {
@@ -187,7 +205,11 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
     birthDate: !birthDate,
     gender: !gender,
     cpf: cpf.replace(/\D/g, '').length !== 11,
+    neighborhood: !addrNeighborhood.trim(),
   };
+
+  const neighborhoodMissing = neighborhoodAutoFailed && !addrNeighborhood.trim();
+
 
   const IncompleteTag = () => (
     <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-destructive/15 text-destructive border border-destructive/30">
@@ -323,7 +345,19 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
       </div>
       <div className="space-y-2">
         <Label htmlFor="addrNeighborhood">Bairro</Label>
-        <Input id="addrNeighborhood" value={addrNeighborhood} onChange={(e) => setAddrNeighborhood(e.target.value)} />
+        <Input
+          id="addrNeighborhood"
+          value={addrNeighborhood}
+          onChange={(e) => {
+            setAddrNeighborhood(e.target.value);
+            if (e.target.value.trim()) setNeighborhoodAutoFailed(false);
+          }}
+          aria-invalid={neighborhoodMissing}
+          className={cn(neighborhoodMissing && 'border-destructive ring-2 ring-destructive/40 focus-visible:ring-destructive')}
+        />
+        {neighborhoodMissing && (
+          <p className="text-xs text-destructive">Bairro não encontrado automaticamente, preencha manualmente</p>
+        )}
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div className="space-y-2 col-span-2">
