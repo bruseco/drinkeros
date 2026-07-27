@@ -193,6 +193,9 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
     }
   };
 
+  const neighborhoodMissing = neighborhoodAutoFailed && !neighborhood.trim();
+
+
   if (loading) {
     return (
       <div className="bg-white/5 border border-white/10 rounded-xl p-6 flex items-center justify-center">
