@@ -224,55 +224,76 @@ async function upsertCustomer(order: OrderRow): Promise<{
   if (addr.state) addressFlat.state = addr.state;
   if (addr.cep) addressFlat.zipCode = addr.cep;
 
-  const fullBody = Object.keys(addressFlat).length > 0
-    ? { ...baseBody, address: addressFlat }
-    : baseBody;
+  // Endereço fiscal mínimo exigido pela prefeitura (NFSe). Sem isso não
+  // adianta criar/atualizar o cliente — a NF-e seria rejeitada (PNFe0006).
+  const missingFields = [
+    !addr.street && "rua",
+    !addr.number && "número",
+    !addr.neighborhood && "bairro",
+    !addr.city && "cidade",
+    !addr.state && "UF",
+    !addr.cep && "CEP",
+  ].filter(Boolean) as string[];
 
-  // Se já existe, atualiza com CPF/endereço (necessário para NF-e)
+  if (missingFields.length > 0) {
+    const error = `Endereço fiscal incompleto no perfil (faltando: ${missingFields.join(", ")}). ` +
+      `Peça ao cliente para completar o cadastro e reenvie a sincronização.`;
+    console.error("[nibo] endereço incompleto", {
+      order_id: order.id,
+      user_id: order.user_id,
+      buyer_email: order.buyer_email,
+      existing_nibo_customer_id: existingId,
+      missing: missingFields,
+      attempted_address: addressFlat,
+    });
+    return { id: null, status: "failed", hasCpf: false, error, raw: { missing: missingFields, address: addressFlat } };
+  }
+
+  const fullBody = { ...baseBody, address: addressFlat };
+  const hasDocument = !!(cpf && (cpf.length === 11 || cpf.length === 14));
+
+  // NADA de fallback sem endereço: se o NIBO recusar o payload com endereço,
+  // falhamos alto e visível (nibo_sync_log / /admin/nibo) em vez de criar um
+  // cliente incompleto que depois quebra a emissão da NF-e.
   if (existingId) {
     const upd = await nibo<unknown>(`/customers/${existingId}`, {
       method: "PUT",
       body: JSON.stringify(fullBody),
     });
-    if (!upd.ok && Object.keys(addressFlat).length > 0) {
-      await nibo<unknown>(`/customers/${existingId}`, {
-        method: "PUT",
-        body: JSON.stringify(baseBody),
+    if (!upd.ok) {
+      const error = `customers PUT ${upd.status}: ${upd.raw.slice(0, 400)}`;
+      console.error("[nibo] PUT /customers com endereço falhou", {
+        order_id: order.id,
+        user_id: order.user_id,
+        buyer_email: order.buyer_email,
+        nibo_customer_id: existingId,
+        status: upd.status,
+        response: upd.raw.slice(0, 800),
+        attempted_payload: fullBody,
       });
+      return { id: null, status: "failed", hasCpf: false, error, raw: upd.data ?? upd.raw };
     }
-    return { id: existingId, status: "success", hasCpf: !!(cpf && (cpf.length === 11 || cpf.length === 14)), raw: upd.data ?? search.data };
+    return { id: existingId, status: "success", hasCpf: hasDocument, raw: upd.data ?? search.data };
   }
 
-  // POST: primeiro tenta com endereço; se falhar (NIBO 400 com address inválido),
-  // recria sem endereço e atualiza depois via PUT.
-  let created = await nibo<unknown>("/customers", {
+  const created = await nibo<unknown>("/customers", {
     method: "POST",
     body: JSON.stringify(fullBody),
   });
-  if (!created.ok && Object.keys(addressFlat).length > 0) {
-    console.warn(`[nibo] POST /customers falhou com address (${created.status}). Retry sem address.`);
-    created = await nibo<unknown>("/customers", {
-      method: "POST",
-      body: JSON.stringify(baseBody),
-    });
-  }
   const customerId = created.ok ? extractId(created.data, created.raw) : null;
   if (!customerId) {
-    return {
-      id: null,
-      status: "failed",
-      hasCpf: false,
-      error: `customers POST ${created.status}: ${created.raw.slice(0, 400)}`,
-    };
+    const error = `customers POST ${created.status}: ${created.raw.slice(0, 400)}`;
+    console.error("[nibo] POST /customers com endereço falhou", {
+      order_id: order.id,
+      user_id: order.user_id,
+      buyer_email: order.buyer_email,
+      status: created.status,
+      response: created.raw.slice(0, 800),
+      attempted_payload: fullBody,
+    });
+    return { id: null, status: "failed", hasCpf: false, error, raw: created.data ?? created.raw };
   }
-  // Se temos endereço, tenta PUT para completar (não bloqueia se falhar)
-  if (Object.keys(addressFlat).length > 0) {
-    await nibo<unknown>(`/customers/${customerId}`, {
-      method: "PUT",
-      body: JSON.stringify(fullBody),
-    }).catch(() => null);
-  }
-  return { id: customerId, status: "success", hasCpf: !!(cpf && (cpf.length === 11 || cpf.length === 14)), raw: created.data ?? created.raw };
+  return { id: customerId, status: "success", hasCpf: hasDocument, raw: created.data ?? created.raw };
 }
 
 
