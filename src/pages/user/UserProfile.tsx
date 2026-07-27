@@ -155,6 +155,17 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
 
   const handleSave = async () => {
     if (!user) return;
+    // Bairro é obrigatório para a emissão da NF-e (NIBO/prefeitura).
+    const hasAnyAddress = Boolean(
+      cep.replace(/\D/g, '') || addrStreet.trim() || addrNumber.trim() || addrCity.trim() || addrState.trim()
+    );
+    if (hasAnyAddress && !addrNeighborhood.trim()) {
+      setNeighborhoodAutoFailed(true);
+      toast.error('Preencha o bairro', {
+        description: 'O bairro é obrigatório para a emissão da nota fiscal.',
+      });
+      return;
+    }
     setSaving(true);
     try {
       const updateData: Record<string, any> = {
@@ -194,7 +205,11 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
     birthDate: !birthDate,
     gender: !gender,
     cpf: cpf.replace(/\D/g, '').length !== 11,
+    neighborhood: !addrNeighborhood.trim(),
   };
+
+  const neighborhoodMissing = neighborhoodAutoFailed && !addrNeighborhood.trim();
+
 
   const IncompleteTag = () => (
     <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-destructive/15 text-destructive border border-destructive/30">
