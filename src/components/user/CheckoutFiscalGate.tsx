@@ -23,6 +23,7 @@ const isFiscalComplete = (d: FiscalData | null) =>
   (d.cep || "").replace(/\D/g, "").length === 8 &&
   !!d.address_street?.trim() &&
   !!d.address_number?.trim() &&
+  !!d.address_neighborhood?.trim() &&
   !!d.address_city?.trim() &&
   !!d.address_state?.trim();
 
