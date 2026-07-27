@@ -345,7 +345,19 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
       </div>
       <div className="space-y-2">
         <Label htmlFor="addrNeighborhood">Bairro</Label>
-        <Input id="addrNeighborhood" value={addrNeighborhood} onChange={(e) => setAddrNeighborhood(e.target.value)} />
+        <Input
+          id="addrNeighborhood"
+          value={addrNeighborhood}
+          onChange={(e) => {
+            setAddrNeighborhood(e.target.value);
+            if (e.target.value.trim()) setNeighborhoodAutoFailed(false);
+          }}
+          aria-invalid={neighborhoodMissing}
+          className={cn(neighborhoodMissing && 'border-destructive ring-2 ring-destructive/40 focus-visible:ring-destructive')}
+        />
+        {neighborhoodMissing && (
+          <p className="text-xs text-destructive">Bairro não encontrado automaticamente, preencha manualmente</p>
+        )}
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div className="space-y-2 col-span-2">
