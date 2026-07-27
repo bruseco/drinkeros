@@ -43,6 +43,7 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
   const [addrCity, setAddrCity] = useState('');
   const [addrState, setAddrState] = useState('');
   const [cepLoading, setCepLoading] = useState(false);
+  const [neighborhoodAutoFailed, setNeighborhoodAutoFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
@@ -92,9 +93,15 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
       const json = await res.json();
       if (json && !json.erro) {
         if (json.logradouro) setAddrStreet(json.logradouro);
-        if (json.bairro) setAddrNeighborhood(json.bairro);
         if (json.localidade) setAddrCity(json.localidade);
         if (json.uf) setAddrState(json.uf);
+        // ViaCEP pode devolver bairro vazio — obrigamos preenchimento manual.
+        if (json.bairro) {
+          setAddrNeighborhood(json.bairro);
+          setNeighborhoodAutoFailed(false);
+        } else {
+          setNeighborhoodAutoFailed(true);
+        }
       }
     } catch {}
     finally { setCepLoading(false); }
