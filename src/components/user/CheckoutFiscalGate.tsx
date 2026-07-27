@@ -160,6 +160,13 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       toast.error("Preencha o endereço completo");
       return;
     }
+    if (!neighborhood.trim()) {
+      toast.error("Preencha o bairro", {
+        description: "O bairro é obrigatório para a emissão da nota fiscal.",
+      });
+      setNeighborhoodAutoFailed(true);
+      return;
+    }
 
     setSaving(true);
     try {
@@ -260,7 +267,25 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
 
         <div>
           <Label htmlFor="neighborhood" className="text-xs">Bairro</Label>
-          <Input id="neighborhood" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="bg-white/5 border-white/10 text-white mt-1" />
+          <Input
+            id="neighborhood"
+            value={neighborhood}
+            onChange={(e) => {
+              setNeighborhood(e.target.value);
+              if (e.target.value.trim()) setNeighborhoodAutoFailed(false);
+            }}
+            aria-invalid={neighborhoodMissing}
+            className={`bg-white/5 text-white mt-1 ${
+              neighborhoodMissing
+                ? "border-destructive ring-1 ring-destructive focus-visible:ring-destructive"
+                : "border-white/10"
+            }`}
+          />
+          {neighborhoodMissing && (
+            <p className="text-[11px] text-destructive mt-1">
+              Bairro não encontrado automaticamente, preencha manualmente
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-[1fr_90px] gap-3">
