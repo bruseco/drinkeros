@@ -255,7 +255,7 @@ export default function Checkout() {
 
       // Pix (Clube ou produto avulso) ou Cartão de produto avulso → pagamento único
       const { data, error } = await supabase.functions.invoke("create-mp-payment", {
-        body: { product_type: productType, slug: product.slug, formData },
+        body: { product_type: productType, slug: product.slug, formData, fiscal: fiscalData },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
