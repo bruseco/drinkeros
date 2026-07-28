@@ -536,6 +536,27 @@ serve(async (req) => {
     }
     const userId = resolved.userId;
 
+    // Persiste o CPF informado no checkout (Brick MP) quando o perfil ainda não tem —
+    // sem isso o NIBO recusa a emissão da NFS-e ("comprador sem CPF/CNPJ").
+    try {
+      const cpfFromCheckout = String(
+        (metadata as any)?.buyer_cpf || payment?.payer?.identification?.number || ""
+      ).replace(/\D/g, "");
+      if (cpfFromCheckout.length === 11 || cpfFromCheckout.length === 14) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("cpf")
+          .eq("id", userId)
+          .maybeSingle();
+        if (!prof?.cpf || String(prof.cpf).replace(/\D/g, "").length < 11) {
+          await supabase.from("profiles").update({ cpf: cpfFromCheckout }).eq("id", userId);
+          console.log("[mp-webhook] cpf-saved-from-checkout", { userId });
+        }
+      }
+    } catch (e) {
+      console.warn("[mp-webhook] cpf-persist-failed", e);
+    }
+
     if (productType === "club") {
       const periodDays = Number(metadata.access_period_days) || 365;
       const vipPaymentId = await grantClubAccess(supabase, userId, payment, String(paymentId), periodDays);
