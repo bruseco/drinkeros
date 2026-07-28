@@ -66,6 +66,7 @@ serve(async (req) => {
     const {
       product_type,
       slug,
+      fiscal, // dados fiscais coletados no checkout (CPF + endereço) — obrigatórios para NFS-e
       formData, // vindo do Brick: { token, payment_method_id, issuer_id, installments, payer:{email, identification}, transaction_amount }
     } = body || {};
 
@@ -201,7 +202,15 @@ serve(async (req) => {
         youth_discount: youthDiscount ? "true" : "false",
         buyer_email: payerEmail,
         // CPF informado no Brick do MP — persistido no perfil pelo webhook para a NFS-e.
-        buyer_cpf: String(formData?.payer?.identification?.number || "").replace(/\D/g, ""),
+        buyer_cpf: String(fiscal?.cpf || formData?.payer?.identification?.number || "").replace(/\D/g, ""),
+        // Endereço fiscal coletado no checkout (obrigatório para a NFS-e no NIBO).
+        buyer_cep: String(fiscal?.cep || "").replace(/\D/g, ""),
+        buyer_street: String(fiscal?.address_street || ""),
+        buyer_number: String(fiscal?.address_number || ""),
+        buyer_complement: String(fiscal?.address_complement || ""),
+        buyer_neighborhood: String(fiscal?.address_neighborhood || ""),
+        buyer_city: String(fiscal?.address_city || ""),
+        buyer_state: String(fiscal?.address_state || ""),
       },
       payer: {
         email: payerEmail,

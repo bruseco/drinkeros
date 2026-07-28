@@ -27,10 +27,22 @@ const isFiscalComplete = (d: FiscalData | null) =>
   !!d.address_city?.trim() &&
   !!d.address_state?.trim();
 
+export interface FiscalPayload {
+  cpf: string;
+  cep: string;
+  address_street: string;
+  address_number: string;
+  address_complement: string | null;
+  address_neighborhood: string;
+  address_city: string;
+  address_state: string;
+}
+
 interface Props {
-  userId: string;
+  /** null = visitante (convidado): dados não são salvos no perfil, só devolvidos ao checkout. */
+  userId: string | null;
   /** Chamado assim que os dados fiscais estiverem completos (na entrada ou após salvar). */
-  onReady: () => void;
+  onReady: (fiscal?: FiscalPayload) => void;
 }
 
 /**
@@ -56,6 +68,12 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      if (!userId) {
+        // Convidado: sempre pede os dados fiscais (sem perfil para consultar).
+        setNeedsForm(true);
+        setLoading(false);
+        return;
+      }
       const { data } = await supabase
         .from("profiles")
         .select("cpf, cep, address_street, address_number, address_complement, address_neighborhood, address_city, address_state")
@@ -64,7 +82,16 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       if (cancelled) return;
       const d = (data as FiscalData) || null;
       if (isFiscalComplete(d)) {
-        onReady();
+        onReady({
+          cpf: (d!.cpf || "").replace(/\D/g, ""),
+          cep: (d!.cep || "").replace(/\D/g, ""),
+          address_street: d!.address_street!,
+          address_number: d!.address_number!,
+          address_complement: d!.address_complement,
+          address_neighborhood: d!.address_neighborhood!,
+          address_city: d!.address_city!,
+          address_state: d!.address_state!,
+        });
         setLoading(false);
         return;
       }
@@ -168,23 +195,41 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       return;
     }
 
+    const payload: FiscalPayload = {
+      cpf: cpfDigits,
+      cep: cepDigits,
+      address_street: street.trim(),
+      address_number: number.trim(),
+      address_complement: complement.trim() || null,
+      address_neighborhood: neighborhood.trim(),
+      address_city: city.trim(),
+      address_state: state.trim().toUpperCase().slice(0, 2),
+    };
+
+    if (!userId) {
+      // Convidado: nada é salvo agora; os dados seguem junto do pagamento.
+      onReady(payload);
+      setNeedsForm(false);
+      return;
+    }
+
     setSaving(true);
     try {
       const updateData: Record<string, any> = {
-        cep: cepDigits,
-        address_street: street.trim(),
-        address_number: number.trim(),
-        address_complement: complement.trim() || null,
-        address_neighborhood: neighborhood.trim() || null,
-        address_city: city.trim(),
-        address_state: state.trim().toUpperCase().slice(0, 2),
+        cep: payload.cep,
+        address_street: payload.address_street,
+        address_number: payload.address_number,
+        address_complement: payload.address_complement,
+        address_neighborhood: payload.address_neighborhood,
+        address_city: payload.address_city,
+        address_state: payload.address_state,
       };
       if (!cpfLocked) updateData.cpf = cpfDigits;
 
       const { error } = await supabase.from("profiles").update(updateData).eq("user_id", userId);
       if (error) throw error;
       toast.success("Dados fiscais salvos!");
-      onReady();
+      onReady(payload);
       setNeedsForm(false);
     } catch (err: any) {
       toast.error("Erro ao salvar", { description: err.message });
