@@ -200,6 +200,8 @@ serve(async (req) => {
         access_period_days: product_type === "club" ? String(clubPeriodDays) : "",
         youth_discount: youthDiscount ? "true" : "false",
         buyer_email: payerEmail,
+        // CPF informado no Brick do MP — persistido no perfil pelo webhook para a NFS-e.
+        buyer_cpf: String(formData?.payer?.identification?.number || "").replace(/\D/g, ""),
       },
       payer: {
         email: payerEmail,
