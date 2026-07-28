@@ -378,11 +378,17 @@ export default function Checkout() {
                 </div>
               )}
 
-              {userId && !fiscalReady && (
-                <CheckoutFiscalGate userId={userId} onReady={() => setFiscalReady(true)} />
+              {!fiscalReady && (
+                <CheckoutFiscalGate
+                  userId={userId}
+                  onReady={(f) => {
+                    if (f) setFiscalData(f);
+                    setFiscalReady(true);
+                  }}
+                />
               )}
 
-              <div className={`bg-white rounded-xl overflow-hidden p-2 sm:p-4 text-black ${userId && !fiscalReady ? "opacity-40 pointer-events-none select-none" : ""}`}>
+              <div className={`bg-white rounded-xl overflow-hidden p-2 sm:p-4 text-black ${!fiscalReady ? "opacity-40 pointer-events-none select-none" : ""}`}>
                 {payerEmail !== null ? (
                   <Payment
                     key={`brick-${finalPrice}-${isClub ? clubMethod : "all"}`}
