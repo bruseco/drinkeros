@@ -62,13 +62,14 @@ function clearVariant(pageKey: string) {
   document.cookie = `ab:${pageKey}=; path=/; max-age=0`;
 }
 
+/**
+ * Lê apenas a configuração de roteamento do teste (sem métricas internas),
+ * via RPC pública. As contagens de visita/conversão ficam restritas ao admin.
+ */
 async function fetchTest(pageKey: string): Promise<AbTestRow | null> {
-  const { data } = await supabase
-    .from('ab_tests' as any)
-    .select('*')
-    .eq('page_key', pageKey)
-    .maybeSingle();
-  return (data as any) ?? null;
+  const { data } = await supabase.rpc('get_ab_test_config' as any, { _page_key: pageKey });
+  const row = Array.isArray(data) ? data[0] : data;
+  return (row as any) ?? null;
 }
 
 function pickVariant(splitPct: number): 'a' | 'b' {

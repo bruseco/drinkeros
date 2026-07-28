@@ -3577,6 +3577,17 @@ export type Database = {
           clube_intro_revealed_at: string
         }[]
       }
+      get_ab_test_config: {
+        Args: { _page_key: string }
+        Returns: {
+          original_path: string
+          page_key: string
+          status: string
+          traffic_split_pct: number
+          variant_path: string
+          winner: string
+        }[]
+      }
       get_access_metrics: {
         Args: { p_from: string; p_to: string }
         Returns: Json
