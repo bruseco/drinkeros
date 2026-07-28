@@ -66,6 +66,7 @@ serve(async (req) => {
     const {
       product_type,
       slug,
+      fiscal, // dados fiscais coletados no checkout (CPF + endereço) — obrigatórios para NFS-e
       formData, // vindo do Brick: { token, payment_method_id, issuer_id, installments, payer:{email, identification}, transaction_amount }
     } = body || {};
 
