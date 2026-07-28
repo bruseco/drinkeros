@@ -82,7 +82,16 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       if (cancelled) return;
       const d = (data as FiscalData) || null;
       if (isFiscalComplete(d)) {
-        onReady();
+        onReady({
+          cpf: (d!.cpf || "").replace(/\D/g, ""),
+          cep: (d!.cep || "").replace(/\D/g, ""),
+          address_street: d!.address_street!,
+          address_number: d!.address_number!,
+          address_complement: d!.address_complement,
+          address_neighborhood: d!.address_neighborhood!,
+          address_city: d!.address_city!,
+          address_state: d!.address_state!,
+        });
         setLoading(false);
         return;
       }
