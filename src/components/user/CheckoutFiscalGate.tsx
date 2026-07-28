@@ -186,23 +186,41 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       return;
     }
 
+    const payload: FiscalPayload = {
+      cpf: cpfDigits,
+      cep: cepDigits,
+      address_street: street.trim(),
+      address_number: number.trim(),
+      address_complement: complement.trim() || null,
+      address_neighborhood: neighborhood.trim(),
+      address_city: city.trim(),
+      address_state: state.trim().toUpperCase().slice(0, 2),
+    };
+
+    if (!userId) {
+      // Convidado: nada é salvo agora; os dados seguem junto do pagamento.
+      onReady(payload);
+      setNeedsForm(false);
+      return;
+    }
+
     setSaving(true);
     try {
       const updateData: Record<string, any> = {
-        cep: cepDigits,
-        address_street: street.trim(),
-        address_number: number.trim(),
-        address_complement: complement.trim() || null,
-        address_neighborhood: neighborhood.trim() || null,
-        address_city: city.trim(),
-        address_state: state.trim().toUpperCase().slice(0, 2),
+        cep: payload.cep,
+        address_street: payload.address_street,
+        address_number: payload.address_number,
+        address_complement: payload.address_complement,
+        address_neighborhood: payload.address_neighborhood,
+        address_city: payload.address_city,
+        address_state: payload.address_state,
       };
       if (!cpfLocked) updateData.cpf = cpfDigits;
 
       const { error } = await supabase.from("profiles").update(updateData).eq("user_id", userId);
       if (error) throw error;
       toast.success("Dados fiscais salvos!");
-      onReady();
+      onReady(payload);
       setNeedsForm(false);
     } catch (err: any) {
       toast.error("Erro ao salvar", { description: err.message });
