@@ -536,25 +536,51 @@ serve(async (req) => {
     }
     const userId = resolved.userId;
 
-    // Persiste o CPF informado no checkout (Brick MP) quando o perfil ainda não tem —
-    // sem isso o NIBO recusa a emissão da NFS-e ("comprador sem CPF/CNPJ").
+    // Persiste CPF + endereço informados no checkout quando o perfil ainda não tem —
+    // sem isso o NIBO recusa a emissão da NFS-e ("comprador sem CPF/CNPJ" / endereço incompleto).
     try {
+      const md = (metadata as any) || {};
       const cpfFromCheckout = String(
-        (metadata as any)?.buyer_cpf || payment?.payer?.identification?.number || ""
+        md.buyer_cpf || payment?.payer?.identification?.number || ""
       ).replace(/\D/g, "");
-      if (cpfFromCheckout.length === 11 || cpfFromCheckout.length === 14) {
-        const { data: prof } = await supabase
-          .from("profiles")
-          .select("cpf")
-          .eq("id", userId)
-          .maybeSingle();
-        if (!prof?.cpf || String(prof.cpf).replace(/\D/g, "").length < 11) {
-          await supabase.from("profiles").update({ cpf: cpfFromCheckout }).eq("id", userId);
-          console.log("[mp-webhook] cpf-saved-from-checkout", { userId });
-        }
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("cpf, cep, address_street, address_number, address_neighborhood, address_city, address_state")
+        .eq("id", userId)
+        .maybeSingle();
+
+      const update: Record<string, unknown> = {};
+      if (
+        (cpfFromCheckout.length === 11 || cpfFromCheckout.length === 14) &&
+        (!prof?.cpf || String(prof.cpf).replace(/\D/g, "").length < 11)
+      ) {
+        update.cpf = cpfFromCheckout;
+      }
+
+      const cep = String(md.buyer_cep || "").replace(/\D/g, "");
+      const hasAddress =
+        cep.length === 8 &&
+        md.buyer_street && md.buyer_number && md.buyer_neighborhood && md.buyer_city && md.buyer_state;
+      const profileAddressIncomplete =
+        !prof?.cep || !prof?.address_street || !prof?.address_number ||
+        !prof?.address_neighborhood || !prof?.address_city || !prof?.address_state;
+
+      if (hasAddress && profileAddressIncomplete) {
+        update.cep = cep;
+        update.address_street = String(md.buyer_street);
+        update.address_number = String(md.buyer_number);
+        update.address_complement = md.buyer_complement ? String(md.buyer_complement) : null;
+        update.address_neighborhood = String(md.buyer_neighborhood);
+        update.address_city = String(md.buyer_city);
+        update.address_state = String(md.buyer_state).toUpperCase().slice(0, 2);
+      }
+
+      if (Object.keys(update).length > 0) {
+        await supabase.from("profiles").update(update).eq("id", userId);
+        console.log("[mp-webhook] fiscal-data-saved-from-checkout", { userId, fields: Object.keys(update) });
       }
     } catch (e) {
-      console.warn("[mp-webhook] cpf-persist-failed", e);
+      console.warn("[mp-webhook] fiscal-persist-failed", e);
     }
 
     if (productType === "club") {
