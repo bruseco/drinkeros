@@ -68,6 +68,12 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      if (!userId) {
+        // Convidado: sempre pede os dados fiscais (sem perfil para consultar).
+        setNeedsForm(true);
+        setLoading(false);
+        return;
+      }
       const { data } = await supabase
         .from("profiles")
         .select("cpf, cep, address_street, address_number, address_complement, address_neighborhood, address_city, address_state")
