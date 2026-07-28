@@ -27,10 +27,22 @@ const isFiscalComplete = (d: FiscalData | null) =>
   !!d.address_city?.trim() &&
   !!d.address_state?.trim();
 
+export interface FiscalPayload {
+  cpf: string;
+  cep: string;
+  address_street: string;
+  address_number: string;
+  address_complement: string | null;
+  address_neighborhood: string;
+  address_city: string;
+  address_state: string;
+}
+
 interface Props {
-  userId: string;
+  /** null = visitante (convidado): dados não são salvos no perfil, só devolvidos ao checkout. */
+  userId: string | null;
   /** Chamado assim que os dados fiscais estiverem completos (na entrada ou após salvar). */
-  onReady: () => void;
+  onReady: (fiscal?: FiscalPayload) => void;
 }
 
 /**
