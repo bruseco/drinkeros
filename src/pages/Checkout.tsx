@@ -207,7 +207,7 @@ export default function Checkout() {
 
   const onSubmit = async (formData: any) => {
     if (!product) return;
-    if (userId && !fiscalReady) {
+    if (!fiscalReady) {
       toast.error("Complete os dados fiscais (CPF e endereço) antes de pagar.");
       return;
     }
