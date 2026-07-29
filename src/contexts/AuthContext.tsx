@@ -22,6 +22,7 @@ interface AuthContextType {
   isAdmin: boolean;
   canEdit: boolean;
   isSuperAdmin: boolean;
+  isPartner: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
