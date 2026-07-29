@@ -3,7 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { trackFbEvent } from '@/lib/metaPixel';
 
-type AppRole = 'super_admin' | 'editor' | 'viewer';
+type AppRole = 'super_admin' | 'editor' | 'viewer' | 'parceiro';
 
 interface UserProfile {
   id: string;
