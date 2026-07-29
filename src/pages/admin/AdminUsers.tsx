@@ -51,12 +51,14 @@ const roleLabels: Record<AppRole, string> = {
   super_admin: 'Super Admin',
   editor: 'Editor',
   viewer: 'Visualizador',
+  parceiro: 'Parceiro',
 };
 
 const roleBadgeVariant: Record<AppRole | 'student', 'default' | 'secondary' | 'outline' | 'destructive'> = {
   super_admin: 'destructive',
   editor: 'default',
   viewer: 'secondary',
+  parceiro: 'default',
   student: 'outline',
 };
 
