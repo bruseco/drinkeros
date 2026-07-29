@@ -3,7 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { trackFbEvent } from '@/lib/metaPixel';
 
-type AppRole = 'super_admin' | 'editor' | 'viewer';
+type AppRole = 'super_admin' | 'editor' | 'viewer' | 'parceiro';
 
 interface UserProfile {
   id: string;
@@ -22,6 +22,7 @@ interface AuthContextType {
   isAdmin: boolean;
   canEdit: boolean;
   isSuperAdmin: boolean;
+  isPartner: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
@@ -204,6 +205,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAdmin = roles.some((r) => ['super_admin', 'editor', 'viewer'].includes(r));
   const canEdit = roles.some((r) => ['super_admin', 'editor'].includes(r));
   const isSuperAdmin = roles.includes('super_admin');
+  const isPartner = roles.includes('parceiro');
 
   return (
     <AuthContext.Provider
@@ -216,6 +218,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAdmin,
         canEdit,
         isSuperAdmin,
+        isPartner,
         signIn,
         signOut,
       }}

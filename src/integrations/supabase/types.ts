@@ -1797,6 +1797,36 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_products: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string | null
+          product_name: string | null
+          product_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          product_name?: string | null
+          product_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          product_name?: string | null
+          product_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address_city: string | null
@@ -3722,6 +3752,7 @@ export type Database = {
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_club_member: { Args: { _user_id: string }; Returns: boolean }
+      is_partner: { Args: { _user_id: string }; Returns: boolean }
       issue_course_certificate: {
         Args: { _reference_id: string; _reference_name: string }
         Returns: {
@@ -3876,7 +3907,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "super_admin" | "editor" | "viewer"
+      app_role: "super_admin" | "editor" | "viewer" | "parceiro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4004,7 +4035,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["super_admin", "editor", "viewer"],
+      app_role: ["super_admin", "editor", "viewer", "parceiro"],
     },
   },
 } as const

@@ -6,8 +6,11 @@ import { usePackages } from '@/hooks/usePackages';
 import { BookOpen, Package, FileCheck, FilePen, BellRing, TrendingUp, Loader2, Smartphone } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 const AdminDashboard: React.FC = () => {
+  const { isAdmin, isPartner } = useAuth();
   const { data: recipes = [] } = useRecipes();
   const { data: packages = [] } = usePackages();
   const [runningStudy, setRunningStudy] = useState(false);
@@ -23,6 +26,10 @@ const AdminDashboard: React.FC = () => {
       setPwaStats({ installed: installed ?? 0, total: total ?? 0 });
     })();
   }, []);
+
+  if (isPartner && !isAdmin) {
+    return <Navigate to="/admin/pedidos" replace />;
+  }
 
   const publishedRecipes = recipes.filter((r) => r.status === 'published').length;
   const draftRecipes = recipes.filter((r) => r.status === 'draft').length;
