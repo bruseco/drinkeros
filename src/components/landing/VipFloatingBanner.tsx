@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
-import { applyVipDiscountFor, formatBRL, VIP_DISCOUNT_INTRO_PERCENT } from '@/lib/vipDiscount';
+import { formatBRL, getVipPriceFor, VIP_DISCOUNT_INTRO_PERCENT } from '@/lib/vipDiscount';
 import { useVipDiscount } from '@/hooks/useVipDiscount';
 import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
 
@@ -9,6 +9,8 @@ interface VipFloatingBannerProps {
   /** ID do elemento "Matricule-se" que dispara a contagem */
   watchTargetId: string;
   basePrice: number;
+  /** Slug do produto — usado para overrides de preço VIP fixo. */
+  slug?: string;
   /** Nome do curso/produto exibido no banner para dar contexto ao desconto. */
   productName?: string;
   /** Delay em ms após visualização do CTA. Default 5000. */
@@ -20,6 +22,7 @@ const STORAGE_KEY_PREFIX = 'vipFloatingDismissed:';
 const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
   watchTargetId,
   basePrice,
+  slug,
   productName,
   delayMs = 5000,
 }) => {
@@ -67,7 +70,7 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
 
   // Banner promocional para VISITANTES (não-sócios) — sempre mostra a oferta máxima (intro 80%)
   const displayPercent = vip.percent || VIP_DISCOUNT_INTRO_PERCENT;
-  const vipPrice = applyVipDiscountFor(basePrice, displayPercent);
+  const vipPrice = getVipPriceFor(slug, basePrice, displayPercent);
 
   return (
     <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[60] w-[calc(100%-1.5rem)] max-w-md animate-bounce-in pointer-events-auto">

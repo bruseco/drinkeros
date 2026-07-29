@@ -21,7 +21,7 @@ import { useUserPlan } from '@/hooks/useUserPlan';
 import drinkerosFooterLogo from '@/assets/logotipo-drinkeros.png';
 import { useCourseBySlug } from '@/hooks/useCourses';
 import { useComboBySlug } from '@/hooks/useCombos';
-import { applyVipDiscountFor, formatBRL } from '@/lib/vipDiscount';
+import { applyVipDiscountFor, formatBRL, getVipPriceFor } from '@/lib/vipDiscount';
 import { useVipDiscount } from '@/hooks/useVipDiscount';
 import { VipDiscountCountdownBanner } from '@/components/user/VipDiscountCountdownBanner';
 import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
@@ -262,7 +262,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const basePrice = dbPrice ?? fallbackPrice;
   const vip = useVipDiscount();
   const { data: totalStudents } = useTotalStudents();
-  const finalPrice = isVip ? applyVipDiscountFor(basePrice, vip.percent) : basePrice;
+  const finalPrice = isVip ? getVipPriceFor(slug, basePrice, vip.percent) : basePrice;
   // Parcelamento com juros do cliente (Mercado Pago: 4,49% a.m. compostos)
   const INSTALLMENT_RATE = 0.0449;
   const INSTALLMENT_COUNT = 12;
@@ -448,6 +448,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
         <VipFloatingBanner
           watchTargetId="cl-matricule-cta"
           basePrice={basePrice}
+          slug={slug}
           productName={brand}
           delayMs={5000}
         />

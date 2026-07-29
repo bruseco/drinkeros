@@ -169,10 +169,15 @@ serve(async (req) => {
     }
     const applyDiscount = vipPercent > 0;
     const basePrice = Number(product.price);
+    // Preço VIP fixo por produto (sincronizado com src/lib/vipDiscount.ts)
+    const VIP_FIXED_PRICE_BY_SLUG: Record<string, number> = { "classicos-destilados": 197 };
+    const vipFixed = VIP_FIXED_PRICE_BY_SLUG[product.slug];
     const finalPrice = product_type === "club"
       ? (youthDiscount ? 27 : basePrice)
       : applyDiscount
-      ? Math.round(basePrice * (1 - vipPercent / 100) * 100) / 100
+      ? (vipFixed !== undefined
+        ? Math.min(vipFixed, basePrice)
+        : Math.round(basePrice * (1 - vipPercent / 100) * 100) / 100)
       : basePrice;
 
     const externalRef = `${product_type}:${product.id}:${userId || "guest"}:${Date.now()}`;
