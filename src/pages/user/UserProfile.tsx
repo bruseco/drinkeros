@@ -642,7 +642,7 @@ const InterestsSection: React.FC = () => {
 
 const UserProfile: React.FC = () => {
 
-  const { signOut, isSuperAdmin } = useAuth();
+  const { signOut, isSuperAdmin, isPartner } = useAuth();
   const navigate = useNavigate();
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [adminMode, setAdminModeState] = useState<boolean>(() => isAdminModeOn());
@@ -789,6 +789,20 @@ const UserProfile: React.FC = () => {
         <ChevronRight className="h-5 w-5 text-muted-foreground" />
       </button>
 
+      {/* Painel do Parceiro */}
+      {isPartner && !isSuperAdmin && (
+        <button
+          onClick={() => { setAdminMode(true); navigate('/admin/pedidos'); }}
+          className="flex w-full items-center justify-between rounded-lg border border-accent/40 bg-accent/5 px-4 h-14 hover:bg-accent/10 transition-colors"
+        >
+          <span className="flex items-center gap-3 text-sm font-semibold text-accent">
+            <Shield className="h-5 w-5" />
+            Acessar painel do Parceiro
+          </span>
+          <ChevronRight className="h-5 w-5 text-accent" />
+        </button>
+      )}
+
       {/* Painel de Administração (mobile, super admin only) */}
       {isSuperAdmin && (
         <button
@@ -802,6 +816,7 @@ const UserProfile: React.FC = () => {
           <ChevronRight className="h-5 w-5 text-accent" />
         </button>
       )}
+
 
       {/* Sair */}
       <button
