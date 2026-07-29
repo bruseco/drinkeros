@@ -38,6 +38,27 @@ export const applyVipDiscountFor = (price: number, percent: number): number => {
   return Number((price * (1 - percent / 100)).toFixed(2));
 };
 
+/**
+ * Preço VIP fixo (piso) por slug de produto.
+ * Alguns produtos não seguem o percentual padrão do Sócio: eles têm um valor
+ * final fechado, independente da janela de 80%/50%.
+ * Mantenha sincronizado com as edge functions `create-mp-payment` e `create-mp-checkout`.
+ */
+export const VIP_FIXED_PRICE_BY_SLUG: Record<string, number> = {
+  'classicos-destilados': 197,
+};
+
+/** Preço final para Sócio considerando overrides por produto. */
+export const getVipPriceFor = (
+  slug: string | null | undefined,
+  price: number,
+  percent: number,
+): number => {
+  const fixed = slug ? VIP_FIXED_PRICE_BY_SLUG[slug] : undefined;
+  if (fixed !== undefined) return Math.min(fixed, price);
+  return applyVipDiscountFor(price, percent);
+};
+
 /** @deprecated Use `applyVipDiscountFor(price, percent)` com o percent vindo de `useVipDiscount()` */
 export const applyVipDiscount = (price: number): number =>
   applyVipDiscountFor(price, VIP_DISCOUNT_INTRO_PERCENT);
