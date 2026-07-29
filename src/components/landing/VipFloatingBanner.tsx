@@ -70,7 +70,7 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
 
   // Banner promocional para VISITANTES (não-sócios) — sempre mostra a oferta máxima (intro 80%)
   const displayPercent = vip.percent || VIP_DISCOUNT_INTRO_PERCENT;
-  const vipPrice = applyVipDiscountFor(basePrice, displayPercent);
+  const vipPrice = getVipPriceFor(slug, basePrice, displayPercent);
 
   return (
     <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[60] w-[calc(100%-1.5rem)] max-w-md animate-bounce-in pointer-events-auto">
