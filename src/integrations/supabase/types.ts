@@ -1797,6 +1797,39 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_access_grants: {
+        Row: {
+          created_at: string
+          id: string
+          partner_user_id: string
+          product_id: string | null
+          product_name: string | null
+          product_type: string
+          target_email: string
+          target_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          partner_user_id: string
+          product_id?: string | null
+          product_name?: string | null
+          product_type: string
+          target_email: string
+          target_user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          partner_user_id?: string
+          product_id?: string | null
+          product_name?: string | null
+          product_type?: string
+          target_email?: string
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       partner_products: {
         Row: {
           created_at: string
