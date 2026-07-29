@@ -22,6 +22,7 @@ const STORAGE_KEY_PREFIX = 'vipFloatingDismissed:';
 const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
   watchTargetId,
   basePrice,
+  slug,
   productName,
   delayMs = 5000,
 }) => {
