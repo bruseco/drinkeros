@@ -9,6 +9,8 @@ interface VipFloatingBannerProps {
   /** ID do elemento "Matricule-se" que dispara a contagem */
   watchTargetId: string;
   basePrice: number;
+  /** Slug do produto — usado para overrides de preço VIP fixo. */
+  slug?: string;
   /** Nome do curso/produto exibido no banner para dar contexto ao desconto. */
   productName?: string;
   /** Delay em ms após visualização do CTA. Default 5000. */
