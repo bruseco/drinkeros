@@ -27,6 +27,10 @@ const AdminDashboard: React.FC = () => {
     })();
   }, []);
 
+  if (isPartner && !isAdmin) {
+    return <Navigate to="/admin/pedidos" replace />;
+  }
+
   const publishedRecipes = recipes.filter((r) => r.status === 'published').length;
   const draftRecipes = recipes.filter((r) => r.status === 'draft').length;
   const activePackages = packages.filter((p) => p.is_active).length;
