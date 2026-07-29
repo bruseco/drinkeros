@@ -158,6 +158,9 @@ const AdminOrders: React.FC = () => {
         </div>
       </div>
 
+      {isPartner && <PartnerGrantAccessCard />}
+
+
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
