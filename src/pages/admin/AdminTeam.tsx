@@ -43,10 +43,11 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { UserPlus, Trash2, Shield, Edit2, Users } from 'lucide-react';
+import { UserPlus, Trash2, Shield, Edit2, Users, Handshake, Package } from 'lucide-react';
+import { PartnerProductsDialog } from '@/components/admin/PartnerProductsDialog';
 import { Navigate } from 'react-router-dom';
 
-type AppRole = 'super_admin' | 'editor' | 'viewer';
+type AppRole = 'super_admin' | 'editor' | 'viewer' | 'parceiro';
 
 interface TeamMember {
   id: string;
@@ -63,12 +64,14 @@ const roleLabels: Record<AppRole, string> = {
   super_admin: 'Super Admin',
   editor: 'Editor',
   viewer: 'Visualizador',
+  parceiro: 'Parceiro',
 };
 
 const roleColors: Record<AppRole, string> = {
   super_admin: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
   editor: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
   viewer: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
+  parceiro: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
 };
 
 const AdminTeam: React.FC = () => {
@@ -78,6 +81,7 @@ const AdminTeam: React.FC = () => {
   const [newMemberEmail, setNewMemberEmail] = useState('');
   const [newMemberRole, setNewMemberRole] = useState<AppRole>('viewer');
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const [partnerMember, setPartnerMember] = useState<TeamMember | null>(null);
 
   // Redirect if not super admin
   if (!isSuperAdmin) {
@@ -249,6 +253,7 @@ const AdminTeam: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="viewer">Visualizador - Apenas consulta</SelectItem>
+                    <SelectItem value="parceiro">Parceiro - Vendas dos produtos dele</SelectItem>
                     <SelectItem value="editor">Editor - Gestão de conteúdo</SelectItem>
                     <SelectItem value="super_admin">Super Admin - Acesso total</SelectItem>
                   </SelectContent>
@@ -268,7 +273,7 @@ const AdminTeam: React.FC = () => {
       </div>
 
       {/* Role descriptions */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -305,6 +310,19 @@ const AdminTeam: React.FC = () => {
           <CardContent>
             <p className="text-xs text-muted-foreground">
               Apenas visualização de conteúdo, sem permissão de edição.
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Handshake className="h-4 w-4 text-amber-500" />
+              Parceiro
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground">
+              Vê somente as vendas dos produtos vinculados a ele. Sem acesso ao restante do painel.
             </p>
           </CardContent>
         </Card>
@@ -354,6 +372,7 @@ const AdminTeam: React.FC = () => {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="viewer">Visualizador</SelectItem>
+                            <SelectItem value="parceiro">Parceiro</SelectItem>
                             <SelectItem value="editor">Editor</SelectItem>
                             <SelectItem value="super_admin">Super Admin</SelectItem>
                           </SelectContent>
@@ -394,6 +413,16 @@ const AdminTeam: React.FC = () => {
                         </div>
                       ) : (
                         <div className="flex justify-end gap-2">
+                          {member.role === 'parceiro' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setPartnerMember(member)}
+                            >
+                              <Package className="mr-2 h-4 w-4" />
+                              Produtos
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             variant="ghost"
