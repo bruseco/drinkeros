@@ -8,7 +8,7 @@ import drinkerosLogo from "@/assets/logotipo-drinkeros.png";
 import { trackFbEvent, trackInitiateCheckout, waitForPixelFlush } from "@/lib/metaPixel";
 import { useViewContent } from "@/hooks/useViewContent";
 import { useVipDiscount } from "@/hooks/useVipDiscount";
-import { applyVipDiscountFor } from "@/lib/vipDiscount";
+import { applyVipDiscountFor, getVipPriceFor } from "@/lib/vipDiscount";
 import { useYouthDiscount } from "@/hooks/useYouthDiscount";
 import CheckoutFiscalGate, { type FiscalPayload } from "@/components/user/CheckoutFiscalGate";
 
