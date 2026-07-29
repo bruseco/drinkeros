@@ -205,6 +205,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAdmin = roles.some((r) => ['super_admin', 'editor', 'viewer'].includes(r));
   const canEdit = roles.some((r) => ['super_admin', 'editor'].includes(r));
   const isSuperAdmin = roles.includes('super_admin');
+  const isPartner = roles.includes('parceiro');
 
   return (
     <AuthContext.Provider
@@ -217,6 +218,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAdmin,
         canEdit,
         isSuperAdmin,
+        isPartner,
         signIn,
         signOut,
       }}
