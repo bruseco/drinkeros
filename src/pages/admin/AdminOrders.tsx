@@ -17,6 +17,7 @@ import {
 import { Loader2, Search, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { NiboSyncCell } from '@/components/admin/NiboSyncCell';
 import { useAuth } from '@/contexts/AuthContext';
+import { PartnerGrantAccessCard } from '@/components/admin/PartnerGrantAccessCard';
 
 const sourceLabel: Record<string, string> = {
   stripe: 'Stripe',
@@ -157,6 +158,9 @@ const AdminOrders: React.FC = () => {
           <p className="text-muted-foreground">Histórico de vendas confirmadas pelo Stripe e Mercado Pago</p>
         </div>
       </div>
+
+      {isPartner && <PartnerGrantAccessCard />}
+
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
