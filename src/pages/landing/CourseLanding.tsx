@@ -262,7 +262,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const basePrice = dbPrice ?? fallbackPrice;
   const vip = useVipDiscount();
   const { data: totalStudents } = useTotalStudents();
-  const finalPrice = isVip ? applyVipDiscountFor(basePrice, vip.percent) : basePrice;
+  const finalPrice = isVip ? getVipPriceFor(slug, basePrice, vip.percent) : basePrice;
   // Parcelamento com juros do cliente (Mercado Pago: 4,49% a.m. compostos)
   const INSTALLMENT_RATE = 0.0449;
   const INSTALLMENT_COUNT = 12;
