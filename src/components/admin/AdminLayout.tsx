@@ -8,7 +8,7 @@ import { UserNavbar } from '@/components/user/UserNavbar';
 import { Loader2 } from 'lucide-react';
 
 export const AdminLayout: React.FC = () => {
-  const { user, isLoading, isAdmin } = useAuth();
+  const { user, isLoading, isAdmin, isPartner } = useAuth();
 
   if (isLoading) {
     return (
