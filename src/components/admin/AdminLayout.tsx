@@ -22,7 +22,7 @@ export const AdminLayout: React.FC = () => {
     return <Navigate to="/admin/login" replace />;
   }
 
-  if (!isAdmin) {
+  if (!isAdmin && !isPartner) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
