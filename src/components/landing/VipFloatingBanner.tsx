@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
-import { applyVipDiscountFor, formatBRL, VIP_DISCOUNT_INTRO_PERCENT } from '@/lib/vipDiscount';
+import { formatBRL, getVipPriceFor, VIP_DISCOUNT_INTRO_PERCENT } from '@/lib/vipDiscount';
 import { useVipDiscount } from '@/hooks/useVipDiscount';
 import clubeLogo from '@/assets/logotipo-clube-dos-drinkeros.png';
 
