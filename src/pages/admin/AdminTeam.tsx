@@ -472,6 +472,15 @@ const AdminTeam: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      {partnerMember && (
+        <PartnerProductsDialog
+          open={!!partnerMember}
+          onOpenChange={(v) => { if (!v) setPartnerMember(null); }}
+          userId={partnerMember.user_id}
+          userLabel={partnerMember.profile?.full_name || partnerMember.profile?.email || 'parceiro'}
+        />
+      )}
     </div>
   );
 };
