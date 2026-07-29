@@ -17,6 +17,7 @@ import {
 import { Loader2, Search, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { NiboSyncCell } from '@/components/admin/NiboSyncCell';
 import { useAuth } from '@/contexts/AuthContext';
+import { PartnerGrantAccessCard } from '@/components/admin/PartnerGrantAccessCard';
 
 const sourceLabel: Record<string, string> = {
   stripe: 'Stripe',
