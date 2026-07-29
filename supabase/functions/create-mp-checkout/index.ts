@@ -91,8 +91,13 @@ serve(async (req) => {
     }
     const applyDiscount = vipPercent > 0;
     const basePrice = Number(product.price);
+    // Preço VIP fixo por produto (sincronizado com src/lib/vipDiscount.ts)
+    const VIP_FIXED_PRICE_BY_SLUG: Record<string, number> = { "classicos-destilados": 197 };
+    const vipFixed = VIP_FIXED_PRICE_BY_SLUG[product.slug];
     const finalPrice = applyDiscount
-      ? Math.round(basePrice * (1 - vipPercent / 100) * 100) / 100
+      ? (vipFixed !== undefined
+        ? Math.min(vipFixed, basePrice)
+        : Math.round(basePrice * (1 - vipPercent / 100) * 100) / 100)
       : basePrice;
 
     const origin = req.headers.get("origin") || "https://drinkeros.com";
