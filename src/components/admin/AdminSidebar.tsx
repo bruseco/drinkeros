@@ -46,8 +46,12 @@ const adminItems = [
 ];
 
 export const AdminSidebar: React.FC = () => {
-  const { user, profile, signOut, isSuperAdmin } = useAuth();
+  const { user, profile, signOut, isSuperAdmin, isAdmin, isPartner } = useAuth();
   const location = useLocation();
+  const partnerOnly = isPartner && !isAdmin;
+  const visibleMenuItems = partnerOnly
+    ? [{ title: 'Vendas', icon: ShoppingCart, href: '/admin/pedidos' }]
+    : menuItems;
 
   return (
     <Sidebar>
