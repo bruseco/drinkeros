@@ -557,6 +557,7 @@ const AdminUsers: React.FC = () => {
                           <SelectContent>
                             <SelectItem value="student"><Badge variant="outline">Aluno</Badge></SelectItem>
                             <SelectItem value="viewer"><Badge variant="secondary">Visualizador</Badge></SelectItem>
+                            <SelectItem value="parceiro"><Badge variant="default">Parceiro</Badge></SelectItem>
                             <SelectItem value="editor"><Badge variant="default">Editor</Badge></SelectItem>
                             <SelectItem value="super_admin"><Badge variant="destructive">Super Admin</Badge></SelectItem>
                           </SelectContent>
