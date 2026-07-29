@@ -21,7 +21,7 @@ import { useUserPlan } from '@/hooks/useUserPlan';
 import drinkerosFooterLogo from '@/assets/logotipo-drinkeros.png';
 import { useCourseBySlug } from '@/hooks/useCourses';
 import { useComboBySlug } from '@/hooks/useCombos';
-import { applyVipDiscountFor, formatBRL } from '@/lib/vipDiscount';
+import { applyVipDiscountFor, formatBRL, getVipPriceFor } from '@/lib/vipDiscount';
 import { useVipDiscount } from '@/hooks/useVipDiscount';
 import { VipDiscountCountdownBanner } from '@/components/user/VipDiscountCountdownBanner';
 import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
