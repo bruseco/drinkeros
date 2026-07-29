@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/table';
 import { Loader2, Search, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { NiboSyncCell } from '@/components/admin/NiboSyncCell';
+import { useAuth } from '@/contexts/AuthContext';
 
 const sourceLabel: Record<string, string> = {
   stripe: 'Stripe',
@@ -63,6 +64,8 @@ const initialMtd = () => {
 };
 
 const AdminOrders: React.FC = () => {
+  const { isAdmin, isPartner } = useAuth();
+  const partnerOnly = isPartner && !isAdmin;
   const [search, setSearch] = useState('');
   const [source, setSource] = useState<string>('all');
   const [productType, setProductType] = useState<string>('all');
@@ -309,7 +312,7 @@ const AdminOrders: React.FC = () => {
                   <TableHead>Tipo</TableHead>
                   <TableHead>Origem</TableHead>
                   <TableHead className="text-right">Valor</TableHead>
-                  <TableHead>NIBO</TableHead>
+                  {!partnerOnly && <TableHead>NIBO</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -317,10 +320,17 @@ const AdminOrders: React.FC = () => {
                   <TableRow key={r.id}>
                     <TableCell className="whitespace-nowrap text-sm">{fmtDate(r.purchased_at)}</TableCell>
                     <TableCell>
-                      <Link to={`/admin/users/${r.user_id}`} className="hover:underline">
-                        <div className="font-medium">{r.buyer_name || '—'}</div>
-                        <div className="text-xs text-muted-foreground">{r.buyer_email}</div>
-                      </Link>
+                      {partnerOnly ? (
+                        <>
+                          <div className="font-medium">{r.buyer_name || '—'}</div>
+                          <div className="text-xs text-muted-foreground">{r.buyer_email}</div>
+                        </>
+                      ) : (
+                        <Link to={`/admin/users/${r.user_id}`} className="hover:underline">
+                          <div className="font-medium">{r.buyer_name || '—'}</div>
+                          <div className="text-xs text-muted-foreground">{r.buyer_email}</div>
+                        </Link>
+                      )}
                     </TableCell>
                     <TableCell className="max-w-xs truncate">{r.product_name}</TableCell>
                     <TableCell>
@@ -336,7 +346,7 @@ const AdminOrders: React.FC = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right font-medium">{fmtBRL(r.amount)}</TableCell>
-                    <TableCell><NiboSyncCell orderId={r.id} /></TableCell>
+                    {!partnerOnly && <TableCell><NiboSyncCell orderId={r.id} /></TableCell>}
                   </TableRow>
                 ))}
               </TableBody>
