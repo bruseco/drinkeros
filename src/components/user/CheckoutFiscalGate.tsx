@@ -215,7 +215,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
 
     setSaving(true);
     try {
-      const updateData: Record<string, any> = {
+      const addressData: Record<string, any> = {
         cep: payload.cep,
         address_street: payload.address_street,
         address_number: payload.address_number,
@@ -224,9 +224,18 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
         address_city: payload.address_city,
         address_state: payload.address_state,
       };
+      const updateData: Record<string, any> = { ...addressData };
       if (!cpfLocked) updateData.cpf = cpfDigits;
 
-      const { error } = await supabase.from("profiles").update(updateData).eq("user_id", userId);
+      let { error } = await supabase.from("profiles").update(updateData).eq("user_id", userId);
+
+      // CPF já usado em outro perfil (cadastro antigo/duplicado): salva só o endereço
+      // e segue o checkout — o CPF continua indo junto do pagamento para a nota fiscal.
+      if (error && (error.code === "23505" || /profiles_cpf_key|duplicate key/i.test(error.message))) {
+        const retry = await supabase.from("profiles").update(addressData).eq("user_id", userId);
+        error = retry.error;
+      }
+
       if (error) throw error;
       toast.success("Dados fiscais salvos!");
       onReady(payload);
@@ -237,6 +246,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       setSaving(false);
     }
   };
+
 
   const neighborhoodMissing = neighborhoodAutoFailed && !neighborhood.trim();
 
