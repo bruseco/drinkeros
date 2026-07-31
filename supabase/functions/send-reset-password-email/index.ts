@@ -15,7 +15,8 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email } = await req.json();
+    const body = await req.json();
+    const email = String(body?.email || "").trim().toLowerCase();
 
     if (!email) {
       throw new Error("Email é obrigatório");
@@ -25,11 +26,11 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check if user exists
+    // Check if user exists (case-insensitive)
     const { data: existingProfile } = await supabase
       .from("profiles")
       .select("id")
-      .eq("email", email)
+      .ilike("email", email)
       .maybeSingle();
 
     if (!existingProfile) {
@@ -41,13 +42,25 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Use native Supabase password reset (handled by auth-email-hook)
-    const siteUrl = Deno.env.get("SITE_URL") || "https://criminallab.lovable.app";
+    const siteUrl = Deno.env.get("SITE_URL") || "https://drinkeros.com";
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${siteUrl}/reset-password`,
     });
 
     if (resetError) {
-      console.error("Error generating recovery link:", resetError.message);
+      console.error("Error generating recovery link:", email, resetError.status, resetError.message);
+      const status = (resetError as any).status;
+      const isRate = status === 429 || /rate limit|security purposes/i.test(resetError.message);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          code: isRate ? "rate_limited" : "send_failed",
+          message: isRate
+            ? "Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente."
+            : "Não foi possível enviar o email agora. Tente novamente em instantes.",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
     }
 
     console.log("Reset password triggered via native auth system for:", email);
