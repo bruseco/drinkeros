@@ -174,17 +174,25 @@ const Login: React.FC = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('send-reset-password-email', {
-        body: { email: resetEmail },
+        body: { email: resetEmail.trim().toLowerCase() },
       });
 
       if (error) throw error;
 
-      toast({
-        title: 'Email enviado',
-        description: 'Se o email estiver cadastrado, você receberá um link para redefinir sua senha.',
-      });
-      setResetDialogOpen(false);
-      setResetEmail('');
+      if (data && data.success === false) {
+        toast({
+          title: data.code === 'rate_limited' ? 'Aguarde um pouco' : 'Erro',
+          description: data.message || 'Não foi possível enviar o email. Tente novamente.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Email enviado',
+          description: 'Se o email estiver cadastrado, você receberá um link para redefinir sua senha. Verifique também a caixa de spam.',
+        });
+        setResetDialogOpen(false);
+        setResetEmail('');
+      }
     } catch (error: any) {
       toast({
         title: 'Erro',
