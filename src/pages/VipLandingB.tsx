@@ -46,7 +46,7 @@ const AnimatedAccessLoop: React.FC = () => {
         <div key="free" className="w-full flex flex-col items-center gap-3 animate-fade-in">
           <p className="text-base md:text-lg text-purple-100 leading-snug text-center">
             <span className="block text-yellow-300/90 font-bold tracking-wide text-xs sm:text-sm uppercase mb-1">No plano grátis</span>
-            Você acessa <strong className="text-white">apenas 1 receita</strong> por dia
+            Você acessa <strong className="text-white">apenas 1 receita</strong> por semana
           </p>
           <div className="flex items-center justify-center w-16 h-16 rounded-full bg-white/5 border border-white/10">
             <GlassWater className="w-8 h-8 text-yellow-300" />
@@ -560,7 +560,7 @@ const VipLandingB: React.FC = () => {
                 <span className="text-purple-300 text-xs sm:text-sm">o que você tem hoje</span>
               </div>
               <ul className="space-y-3 text-sm">
-                <li className="flex items-start gap-2 text-purple-200"><Check className="h-4 w-4 text-purple-300 shrink-0 mt-0.5" /> <span><strong className="text-white">1 receita completa</strong> liberada por dia</span></li>
+                <li className="flex items-start gap-2 text-purple-200"><Check className="h-4 w-4 text-purple-300 shrink-0 mt-0.5" /> <span><strong className="text-white">1 receita completa</strong> liberada por semana</span></li>
                 <li className="flex items-start gap-2 text-purple-200"><Check className="h-4 w-4 text-purple-300 shrink-0 mt-0.5" /> <span>Navegação e filtros liberados</span></li>
                 <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> <span>Acesso limitado aos conteúdos especiais</span></li>
                 <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> <span>Sem participação na <strong>Batalha dos Drinkeros</strong></span></li>

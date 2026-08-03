@@ -468,7 +468,7 @@ const UserRecipes: React.FC = () => {
                 const alreadyViewedToday = dailyViews?.ids.has(recipe.id) ?? false;
                 const blockedByLimit = limitReached && !alreadyViewedToday;
                 // Visual de bloqueio (cadeado/overlay) somente para Xaropes exclusivos.
-                // Quando o limite diário estourar, o card continua igual — só o link já vai pro /clube.
+                // Quando o limite semanal estourar, o card continua igual — só o link já vai pro /clube.
                 const showLockOverlay = isVipOnly;
                 const target = (isVipOnly || blockedByLimit) ? '/pv-clube' : `/app/receita/${(recipe as any).slug || recipe.id}`;
                 const recipeFeedOrder = recipes.map((r: any) => ({ id: r.id, slug: r.slug ?? null }));
