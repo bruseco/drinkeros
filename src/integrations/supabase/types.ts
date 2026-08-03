@@ -3624,6 +3624,7 @@ export type Database = {
       close_monthly_battle: { Args: { _target_month?: string }; Returns: Json }
       close_yearly_battle: { Args: { _target_year?: number }; Returns: Json }
       count_daily_views: { Args: { _user_id: string }; Returns: number }
+      count_weekly_views: { Args: { _user_id: string }; Returns: number }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
