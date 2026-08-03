@@ -183,7 +183,7 @@ const UserRecipes: React.FC = () => {
   const stickyRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { data: planData } = useUserPlan();
-  const { isVip: hasFullRecipeAccess, dailyLimit } = useRecipeAccessGuard();
+  const { isVip: hasFullRecipeAccess, weeklyLimit } = useRecipeAccessGuard();
   const isLockedForUser = planData ? !hasFullRecipeAccess : false;
   const { user } = useAuth();
   const pwa = usePwaStatus();
