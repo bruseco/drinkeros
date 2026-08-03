@@ -64,20 +64,20 @@ export const useRecipeAccessGuard = () => {
 
       if (hasFullRecipeAccess) return true;
 
-      // Já viu hoje? Permite re-acesso sem contar de novo
-      const today = new Date().toISOString().split('T')[0];
+      // Já liberou essa receita nos últimos 7 dias? Permite re-acesso sem contar de novo
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
       const { data: alreadyViewed } = await supabase
         .from('daily_recipe_views')
         .select('id')
         .eq('user_id', user.id)
         .eq('recipe_id', recipeId)
-        .eq('view_date', today)
+        .gt('view_date', weekAgo)
         .maybeSingle();
 
       if (alreadyViewed) return true;
 
-      // Conta visualizações de hoje
-      const { data: countData } = await supabase.rpc('count_daily_views', {
+      // Conta visualizações dos últimos 7 dias
+      const { data: countData } = await supabase.rpc('count_weekly_views', {
         _user_id: user.id,
       });
       const count = (countData as number) ?? 0;
@@ -90,9 +90,9 @@ export const useRecipeAccessGuard = () => {
       const lifetime = lifetimeCount ?? 0;
 
       // Se ainda está no primeiro acesso (menos de 3 receitas no histórico), libera
-      // Caso contrário, aplica limite diário de 1
+      // Caso contrário, aplica limite semanal de 1
       const withinFirstAccess = lifetime < FIRST_ACCESS_BONUS;
-      if (!withinFirstAccess && count >= DAILY_LIMIT) {
+      if (!withinFirstAccess && count >= WEEKLY_LIMIT) {
         navigate('/pv-clube-b', { replace: true, state: { from: '/app/receitas' } });
         return false;
       }
@@ -102,11 +102,12 @@ export const useRecipeAccessGuard = () => {
         .from('daily_recipe_views')
         .insert({ user_id: user.id, recipe_id: recipeId });
 
-      qc.invalidateQueries({ queryKey: ['daily-view-count', user.id] });
+      qc.invalidateQueries({ queryKey: ['weekly-view-count', user.id] });
+      qc.invalidateQueries({ queryKey: ['daily-views-week', user.id] });
       return true;
     },
     [user?.id, planData?.isVip, hasExclusive, hasLifetime, planLoading, exclusiveLoading, lifetimeLoading, navigate, qc]
   );
 
-  return { check, isVip: !!planData?.isVip || !!hasLifetime || !!hasExclusive, dailyLimit: DAILY_LIMIT };
+  return { check, isVip: !!planData?.isVip || !!hasLifetime || !!hasExclusive, weeklyLimit: WEEKLY_LIMIT };
 };
