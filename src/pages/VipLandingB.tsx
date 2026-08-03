@@ -283,6 +283,7 @@ const VipLandingB: React.FC = () => {
   // Callback ref usado nos cards com o valor R$197 — registra cada elemento.
   const registerPriceCard = React.useCallback((el: HTMLDivElement | null) => {
     if (!el) return;
+    if (priceCardEls.current.has(el)) return; // evita loop de re-render
     priceCardEls.current.add(el);
     setPriceCardVersion((v) => v + 1);
   }, []);
