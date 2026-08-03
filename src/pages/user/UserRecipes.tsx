@@ -183,7 +183,7 @@ const UserRecipes: React.FC = () => {
   const stickyRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { data: planData } = useUserPlan();
-  const { isVip: hasFullRecipeAccess, dailyLimit } = useRecipeAccessGuard();
+  const { isVip: hasFullRecipeAccess, weeklyLimit } = useRecipeAccessGuard();
   const isLockedForUser = planData ? !hasFullRecipeAccess : false;
   const { user } = useAuth();
   const pwa = usePwaStatus();
@@ -199,22 +199,23 @@ const UserRecipes: React.FC = () => {
     return () => window.removeEventListener('install-banner-dismissed', onDismiss);
   }, [pwa.isStandalone, pwa.hasInstalledBefore, pwa.loading]);
 
-  // Para usuários free: busca quais receitas já foram vistas hoje + total para saber se o limite estourou
+  // Para usuários free: busca quais receitas já foram liberadas nos últimos 7 dias
   const { data: dailyViews } = useQuery({
-    queryKey: ['daily-views-today', user?.id],
+    queryKey: ['daily-views-week', user?.id],
     enabled: !!user?.id && isLockedForUser,
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const today = new Date().toISOString().split('T')[0];
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
       const { data } = await supabase
         .from('daily_recipe_views')
         .select('recipe_id')
         .eq('user_id', user!.id)
-        .eq('view_date', today);
+        .gt('view_date', weekAgo);
       const ids = new Set((data ?? []).map((r) => r.recipe_id as string));
       return { ids, count: ids.size };
     },
   });
-  const limitReached = isLockedForUser && (dailyViews?.count ?? 0) >= dailyLimit;
+  const limitReached = isLockedForUser && (dailyViews?.count ?? 0) >= weeklyLimit;
 
   // Garante que ao entrar na página (signup, navegação direta) o scroll inicia no topo.
   // No pós-cadastro, ignora qualquer restauração antiga do iOS/Safari e de receitas anteriores.
@@ -467,7 +468,7 @@ const UserRecipes: React.FC = () => {
                 const alreadyViewedToday = dailyViews?.ids.has(recipe.id) ?? false;
                 const blockedByLimit = limitReached && !alreadyViewedToday;
                 // Visual de bloqueio (cadeado/overlay) somente para Xaropes exclusivos.
-                // Quando o limite diário estourar, o card continua igual — só o link já vai pro /clube.
+                // Quando o limite semanal estourar, o card continua igual — só o link já vai pro /clube.
                 const showLockOverlay = isVipOnly;
                 const target = (isVipOnly || blockedByLimit) ? '/pv-clube' : `/app/receita/${(recipe as any).slug || recipe.id}`;
                 const recipeFeedOrder = recipes.map((r: any) => ({ id: r.id, slug: r.slug ?? null }));
