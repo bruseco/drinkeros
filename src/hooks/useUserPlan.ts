@@ -84,12 +84,12 @@ export const useDailyViewCount = () => {
   const { user } = useAuth();
 
   return useQuery<number>({
-    queryKey: ['daily-view-count', user?.id],
+    queryKey: ['weekly-view-count', user?.id],
     enabled: !!user?.id,
-    staleTime: 30_000,
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       if (!user?.id) return 0;
-      const { data } = await supabase.rpc('count_daily_views', {
+      const { data } = await supabase.rpc('count_weekly_views', {
         _user_id: user.id,
       });
       return (data as number) ?? 0;
