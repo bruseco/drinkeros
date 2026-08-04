@@ -582,9 +582,21 @@ serve(async (req) => {
       }
 
       if (Object.keys(update).length > 0) {
-        await supabase.from("profiles").update(update).eq("id", userId);
-        console.log("[mp-webhook] fiscal-data-saved-from-checkout", { userId, fields: Object.keys(update) });
+        let { error: upErr } = await supabase.from("profiles").update(update).eq("user_id", userId);
+        // CPF já usado por outro perfil (cadastro duplicado): salva o restante.
+        if (upErr && (upErr.code === "23505" || /profiles_cpf_key|duplicate key/i.test(upErr.message))) {
+          const { cpf: _cpf, ...rest } = update as Record<string, unknown>;
+          if (Object.keys(rest).length > 0) {
+            const retry = await supabase.from("profiles").update(rest).eq("user_id", userId);
+            upErr = retry.error;
+          } else {
+            upErr = null;
+          }
+        }
+        if (upErr) console.warn("[mp-webhook] fiscal-persist-error", upErr);
+        else console.log("[mp-webhook] fiscal-data-saved-from-checkout", { userId, fields: Object.keys(update) });
       }
+
     } catch (e) {
       console.warn("[mp-webhook] fiscal-persist-failed", e);
     }
