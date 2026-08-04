@@ -233,8 +233,10 @@ serve(async (req) => {
         access_period_days: product_type === "club" ? String(clubPeriodDays) : "",
         youth_discount: youthDiscount ? "true" : "false",
         buyer_email: payerEmail,
+        buyer_name: fiscalName,
         // CPF informado no Brick do MP — persistido no perfil pelo webhook para a NFS-e.
-        buyer_cpf: String(fiscal?.cpf || formData?.payer?.identification?.number || "").replace(/\D/g, ""),
+        buyer_cpf: fiscalCpf,
+
         // Endereço fiscal coletado no checkout (obrigatório para a NFS-e no NIBO).
         buyer_cep: String(fiscal?.cep || "").replace(/\D/g, ""),
         buyer_street: String(fiscal?.address_street || ""),
