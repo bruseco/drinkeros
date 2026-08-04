@@ -182,7 +182,14 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
   const handleSave = async () => {
     const cpfDigits = cpf.replace(/\D/g, "");
     const cepDigits = cep.replace(/\D/g, "");
+    const nameTrimmed = fullName.trim().replace(/\s+/g, " ");
 
+    if (nameTrimmed.length < 3 || !nameTrimmed.includes(" ")) {
+      toast.error("Informe seu nome completo", {
+        description: "O nome completo é obrigatório para a emissão da nota fiscal.",
+      });
+      return;
+    }
     if (!cpfLocked && !validateCpf(cpfDigits)) {
       toast.error("CPF inválido");
       return;
@@ -204,6 +211,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
     }
 
     const payload: FiscalPayload = {
+      full_name: nameTrimmed,
       cpf: cpfDigits,
       cep: cepDigits,
       address_street: street.trim(),
@@ -224,6 +232,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
     setSaving(true);
     try {
       const addressData: Record<string, any> = {
+        full_name: payload.full_name,
         cep: payload.cep,
         address_street: payload.address_street,
         address_number: payload.address_number,
@@ -234,6 +243,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       };
       const updateData: Record<string, any> = { ...addressData };
       if (!cpfLocked) updateData.cpf = cpfDigits;
+
 
       let { error } = await supabase.from("profiles").update(updateData).eq("user_id", userId);
 
