@@ -288,13 +288,25 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
         <div>
           <h3 className="text-sm font-semibold">Dados para nota fiscal</h3>
           <p className="text-xs text-white/60 mt-0.5">
-            Precisamos do seu CPF e endereço para emitir a nota fiscal da sua compra. Cadastro único — usado em todas as próximas compras.
+            Precisamos do seu nome completo, CPF e endereço para emitir a nota fiscal da sua compra. Cadastro único — usado em todas as próximas compras.
           </p>
         </div>
       </div>
 
       <div className="grid gap-3">
         <div>
+          <Label htmlFor="fiscal-name" className="text-xs">Nome completo</Label>
+          <Input
+            id="fiscal-name"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Seu nome completo"
+            autoComplete="name"
+            className="mt-1"
+          />
+        </div>
+        <div>
+
           <Label htmlFor="cpf" className="text-xs">CPF</Label>
           <Input
             id="cpf"
