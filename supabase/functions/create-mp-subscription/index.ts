@@ -86,7 +86,42 @@ serve(async (req) => {
     }
 
     const payerEmail = (body?.payer_email as string | undefined) || user.email;
-    const externalRef = `club:${user.id}:${slug}:${Date.now()}`;
+
+    // Anti-duplicidade: se já existe assinatura autorizada/pendente para este e-mail,
+    // não cria outra (evita cobranças repetidas por cliques múltiplos).
+    try {
+      const searchUrl = `${MP_API}/preapproval/search?payer_email=${encodeURIComponent(payerEmail)}&limit=20`;
+      const searchResp = await fetch(searchUrl, {
+        headers: { "Authorization": `Bearer ${mpToken}` },
+      });
+      if (searchResp.ok) {
+        const searchJson = await searchResp.json();
+        const results: any[] = searchJson?.results || [];
+        const active = results.find(
+          (r) => r?.status === "authorized" || r?.status === "pending",
+        );
+        if (active) {
+          console.log("[create-mp-subscription] assinatura já existente:", active.id, active.status);
+          if (active.status === "authorized") await invokeWebhookFallback(active.id);
+          return new Response(
+            JSON.stringify({
+              error: "Você já possui uma assinatura do Clube ativa neste e-mail. Não cobramos novamente.",
+              code: "subscription_exists",
+              existing_id: active.id,
+              existing_status: active.status,
+            }),
+            { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+      }
+    } catch (e) {
+      console.warn("[create-mp-subscription] falha ao checar duplicidade", (e as Error).message);
+    }
+
+    // Idempotência estável por usuário+plano+dia: cliques repetidos não geram nova cobrança.
+    const dayKey = new Date().toISOString().slice(0, 10);
+    const externalRef = `club:${user.id}:${slug}:${dayKey}`;
+
 
     const preapprovalBody: Record<string, unknown> = {
       reason,
