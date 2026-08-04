@@ -545,8 +545,8 @@ serve(async (req) => {
       ).replace(/\D/g, "");
       const { data: prof } = await supabase
         .from("profiles")
-        .select("cpf, cep, address_street, address_number, address_neighborhood, address_city, address_state")
-        .eq("id", userId)
+        .select("full_name, cpf, cep, address_street, address_number, address_neighborhood, address_city, address_state")
+        .eq("user_id", userId)
         .maybeSingle();
 
       const update: Record<string, unknown> = {};
@@ -556,6 +556,12 @@ serve(async (req) => {
       ) {
         update.cpf = cpfFromCheckout;
       }
+
+      const nameFromCheckout = String(md.buyer_name || payerName || "").trim();
+      if (nameFromCheckout.length >= 3 && (!prof?.full_name || String(prof.full_name).trim().length < 3)) {
+        update.full_name = nameFromCheckout;
+      }
+
 
       const cep = String(md.buyer_cep || "").replace(/\D/g, "");
       const hasAddress =
