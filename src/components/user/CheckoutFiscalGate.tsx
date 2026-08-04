@@ -7,6 +7,7 @@ import { Loader2, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 interface FiscalData {
+  full_name: string | null;
   cpf: string | null;
   cep: string | null;
   address_street: string | null;
@@ -19,6 +20,7 @@ interface FiscalData {
 
 const isFiscalComplete = (d: FiscalData | null) =>
   !!d &&
+  (d.full_name || "").trim().length >= 3 &&
   (d.cpf || "").replace(/\D/g, "").length === 11 &&
   (d.cep || "").replace(/\D/g, "").length === 8 &&
   !!d.address_street?.trim() &&
@@ -28,6 +30,7 @@ const isFiscalComplete = (d: FiscalData | null) =>
   !!d.address_state?.trim();
 
 export interface FiscalPayload {
+  full_name: string;
   cpf: string;
   cep: string;
   address_street: string;
@@ -44,6 +47,7 @@ interface Props {
   /** Chamado assim que os dados fiscais estiverem completos (na entrada ou após salvar). */
   onReady: (fiscal?: FiscalPayload) => void;
 }
+
 
 /**
  * Bloqueia o checkout até que o usuário tenha CPF + endereço completo salvos no perfil.
