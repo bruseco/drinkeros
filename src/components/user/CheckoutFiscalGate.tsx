@@ -57,6 +57,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
+  const [fullName, setFullName] = useState("");
   const [cpf, setCpf] = useState("");
   const [cpfLocked, setCpfLocked] = useState(false);
   const [cep, setCep] = useState("");
@@ -80,13 +81,14 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       }
       const { data } = await supabase
         .from("profiles")
-        .select("cpf, cep, address_street, address_number, address_complement, address_neighborhood, address_city, address_state")
+        .select("full_name, cpf, cep, address_street, address_number, address_complement, address_neighborhood, address_city, address_state")
         .eq("user_id", userId)
         .maybeSingle();
       if (cancelled) return;
       const d = (data as FiscalData) || null;
       if (isFiscalComplete(d)) {
         onReady({
+          full_name: (d!.full_name || "").trim(),
           cpf: (d!.cpf || "").replace(/\D/g, ""),
           cep: (d!.cep || "").replace(/\D/g, ""),
           address_street: d!.address_street!,
@@ -100,6 +102,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
         return;
       }
       // Preenche o form com o que já existe
+      setFullName(d?.full_name || "");
       if (d?.cpf) {
         setCpf(d.cpf.length === 11 ? d.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4") : d.cpf);
         setCpfLocked(true);
@@ -114,6 +117,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       setNeedsForm(true);
       setLoading(false);
     })();
+
     return () => {
       cancelled = true;
     };
