@@ -180,8 +180,35 @@ serve(async (req) => {
         : Math.round(basePrice * (1 - vipPercent / 100) * 100) / 100)
       : basePrice;
 
+    // ===== Validação fiscal obrigatória (NFS-e/NIBO) =====
+    // Sem CPF + endereço completo o NIBO recusa a emissão. Bloqueia aqui para que
+    // nenhum fluxo (convidado, /rand, links diretos) consiga pagar sem os dados.
+    const fiscalCpf = String(fiscal?.cpf || formData?.payer?.identification?.number || "").replace(/\D/g, "");
+    const fiscalCep = String(fiscal?.cep || "").replace(/\D/g, "");
+    const fiscalName = String(fiscal?.full_name || "").trim();
+    const missingFiscal: string[] = [];
+    if (fiscalName.length < 3) missingFiscal.push("nome completo");
+    if (fiscalCpf.length !== 11 && fiscalCpf.length !== 14) missingFiscal.push("CPF");
+    if (fiscalCep.length !== 8) missingFiscal.push("CEP");
+    if (!String(fiscal?.address_street || "").trim()) missingFiscal.push("rua");
+    if (!String(fiscal?.address_number || "").trim()) missingFiscal.push("número");
+    if (!String(fiscal?.address_neighborhood || "").trim()) missingFiscal.push("bairro");
+    if (!String(fiscal?.address_city || "").trim()) missingFiscal.push("cidade");
+    if (!String(fiscal?.address_state || "").trim()) missingFiscal.push("UF");
+    if (missingFiscal.length > 0) {
+      return new Response(
+        JSON.stringify({
+          error: `Dados fiscais incompletos (faltando: ${missingFiscal.join(", ")}). Preencha para emitirmos a nota fiscal.`,
+          code: "fiscal_incomplete",
+          missing: missingFiscal,
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const externalRef = `${product_type}:${product.id}:${userId || "guest"}:${Date.now()}`;
     const payerEmail = formData?.payer?.email || userEmail || "comprador@drinkeros.com";
+
 
     // Monta body do pagamento conforme método
     const isPix = formData.payment_method_id === "pix";
@@ -206,8 +233,10 @@ serve(async (req) => {
         access_period_days: product_type === "club" ? String(clubPeriodDays) : "",
         youth_discount: youthDiscount ? "true" : "false",
         buyer_email: payerEmail,
+        buyer_name: fiscalName,
         // CPF informado no Brick do MP — persistido no perfil pelo webhook para a NFS-e.
-        buyer_cpf: String(fiscal?.cpf || formData?.payer?.identification?.number || "").replace(/\D/g, ""),
+        buyer_cpf: fiscalCpf,
+
         // Endereço fiscal coletado no checkout (obrigatório para a NFS-e no NIBO).
         buyer_cep: String(fiscal?.cep || "").replace(/\D/g, ""),
         buyer_street: String(fiscal?.address_street || ""),

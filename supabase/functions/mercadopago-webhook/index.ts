@@ -545,8 +545,8 @@ serve(async (req) => {
       ).replace(/\D/g, "");
       const { data: prof } = await supabase
         .from("profiles")
-        .select("cpf, cep, address_street, address_number, address_neighborhood, address_city, address_state")
-        .eq("id", userId)
+        .select("full_name, cpf, cep, address_street, address_number, address_neighborhood, address_city, address_state")
+        .eq("user_id", userId)
         .maybeSingle();
 
       const update: Record<string, unknown> = {};
@@ -556,6 +556,12 @@ serve(async (req) => {
       ) {
         update.cpf = cpfFromCheckout;
       }
+
+      const nameFromCheckout = String(md.buyer_name || payerName || "").trim();
+      if (nameFromCheckout.length >= 3 && (!prof?.full_name || String(prof.full_name).trim().length < 3)) {
+        update.full_name = nameFromCheckout;
+      }
+
 
       const cep = String(md.buyer_cep || "").replace(/\D/g, "");
       const hasAddress =
@@ -576,9 +582,21 @@ serve(async (req) => {
       }
 
       if (Object.keys(update).length > 0) {
-        await supabase.from("profiles").update(update).eq("id", userId);
-        console.log("[mp-webhook] fiscal-data-saved-from-checkout", { userId, fields: Object.keys(update) });
+        let { error: upErr } = await supabase.from("profiles").update(update).eq("user_id", userId);
+        // CPF já usado por outro perfil (cadastro duplicado): salva o restante.
+        if (upErr && (upErr.code === "23505" || /profiles_cpf_key|duplicate key/i.test(upErr.message))) {
+          const { cpf: _cpf, ...rest } = update as Record<string, unknown>;
+          if (Object.keys(rest).length > 0) {
+            const retry = await supabase.from("profiles").update(rest).eq("user_id", userId);
+            upErr = retry.error;
+          } else {
+            upErr = null;
+          }
+        }
+        if (upErr) console.warn("[mp-webhook] fiscal-persist-error", upErr);
+        else console.log("[mp-webhook] fiscal-data-saved-from-checkout", { userId, fields: Object.keys(update) });
       }
+
     } catch (e) {
       console.warn("[mp-webhook] fiscal-persist-failed", e);
     }

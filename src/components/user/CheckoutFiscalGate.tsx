@@ -7,6 +7,7 @@ import { Loader2, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 interface FiscalData {
+  full_name: string | null;
   cpf: string | null;
   cep: string | null;
   address_street: string | null;
@@ -19,6 +20,7 @@ interface FiscalData {
 
 const isFiscalComplete = (d: FiscalData | null) =>
   !!d &&
+  (d.full_name || "").trim().length >= 3 &&
   (d.cpf || "").replace(/\D/g, "").length === 11 &&
   (d.cep || "").replace(/\D/g, "").length === 8 &&
   !!d.address_street?.trim() &&
@@ -28,6 +30,7 @@ const isFiscalComplete = (d: FiscalData | null) =>
   !!d.address_state?.trim();
 
 export interface FiscalPayload {
+  full_name: string;
   cpf: string;
   cep: string;
   address_street: string;
@@ -45,6 +48,7 @@ interface Props {
   onReady: (fiscal?: FiscalPayload) => void;
 }
 
+
 /**
  * Bloqueia o checkout até que o usuário tenha CPF + endereço completo salvos no perfil.
  * Obrigatório para emissão de NFSe (NIBO). Sem esses dados a prefeitura rejeita a nota.
@@ -53,6 +57,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
+  const [fullName, setFullName] = useState("");
   const [cpf, setCpf] = useState("");
   const [cpfLocked, setCpfLocked] = useState(false);
   const [cep, setCep] = useState("");
@@ -76,13 +81,14 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       }
       const { data } = await supabase
         .from("profiles")
-        .select("cpf, cep, address_street, address_number, address_complement, address_neighborhood, address_city, address_state")
+        .select("full_name, cpf, cep, address_street, address_number, address_complement, address_neighborhood, address_city, address_state")
         .eq("user_id", userId)
         .maybeSingle();
       if (cancelled) return;
       const d = (data as FiscalData) || null;
       if (isFiscalComplete(d)) {
         onReady({
+          full_name: (d!.full_name || "").trim(),
           cpf: (d!.cpf || "").replace(/\D/g, ""),
           cep: (d!.cep || "").replace(/\D/g, ""),
           address_street: d!.address_street!,
@@ -96,6 +102,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
         return;
       }
       // Preenche o form com o que já existe
+      setFullName(d?.full_name || "");
       if (d?.cpf) {
         setCpf(d.cpf.length === 11 ? d.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4") : d.cpf);
         setCpfLocked(true);
@@ -110,6 +117,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       setNeedsForm(true);
       setLoading(false);
     })();
+
     return () => {
       cancelled = true;
     };
@@ -174,7 +182,14 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
   const handleSave = async () => {
     const cpfDigits = cpf.replace(/\D/g, "");
     const cepDigits = cep.replace(/\D/g, "");
+    const nameTrimmed = fullName.trim().replace(/\s+/g, " ");
 
+    if (nameTrimmed.length < 3 || !nameTrimmed.includes(" ")) {
+      toast.error("Informe seu nome completo", {
+        description: "O nome completo é obrigatório para a emissão da nota fiscal.",
+      });
+      return;
+    }
     if (!cpfLocked && !validateCpf(cpfDigits)) {
       toast.error("CPF inválido");
       return;
@@ -196,6 +211,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
     }
 
     const payload: FiscalPayload = {
+      full_name: nameTrimmed,
       cpf: cpfDigits,
       cep: cepDigits,
       address_street: street.trim(),
@@ -216,6 +232,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
     setSaving(true);
     try {
       const addressData: Record<string, any> = {
+        full_name: payload.full_name,
         cep: payload.cep,
         address_street: payload.address_street,
         address_number: payload.address_number,
@@ -226,6 +243,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       };
       const updateData: Record<string, any> = { ...addressData };
       if (!cpfLocked) updateData.cpf = cpfDigits;
+
 
       let { error } = await supabase.from("profiles").update(updateData).eq("user_id", userId);
 
@@ -270,13 +288,25 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
         <div>
           <h3 className="text-sm font-semibold">Dados para nota fiscal</h3>
           <p className="text-xs text-white/60 mt-0.5">
-            Precisamos do seu CPF e endereço para emitir a nota fiscal da sua compra. Cadastro único — usado em todas as próximas compras.
+            Precisamos do seu nome completo, CPF e endereço para emitir a nota fiscal da sua compra. Cadastro único — usado em todas as próximas compras.
           </p>
         </div>
       </div>
 
       <div className="grid gap-3">
         <div>
+          <Label htmlFor="fiscal-name" className="text-xs">Nome completo</Label>
+          <Input
+            id="fiscal-name"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Seu nome completo"
+            autoComplete="name"
+            className="mt-1"
+          />
+        </div>
+        <div>
+
           <Label htmlFor="cpf" className="text-xs">CPF</Label>
           <Input
             id="cpf"

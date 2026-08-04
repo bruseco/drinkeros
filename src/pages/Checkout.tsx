@@ -257,8 +257,30 @@ export default function Checkout() {
       const { data, error } = await supabase.functions.invoke("create-mp-payment", {
         body: { product_type: productType, slug: product.slug, formData, fiscal: fiscalData },
       });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (error) {
+        // Erro 400 do servidor (ex.: dados fiscais incompletos) vem no corpo da resposta.
+        let serverMsg = "";
+        let code = "";
+        try {
+          const ctx: any = (error as any).context;
+          const body = ctx && typeof ctx.json === "function" ? await ctx.json() : null;
+          serverMsg = body?.error || "";
+          code = body?.code || "";
+        } catch { /* ignore */ }
+        if (code === "fiscal_incomplete") {
+          setFiscalReady(false);
+          setFiscalData(null);
+        }
+        throw new Error(serverMsg || error.message);
+      }
+      if (data?.error) {
+        if (data?.code === "fiscal_incomplete") {
+          setFiscalReady(false);
+          setFiscalData(null);
+        }
+        throw new Error(data.error);
+      }
+
 
       // InitiateCheckout — pagamento MP criado com sucesso (Pix gerado, cartão aprovado/recusado, etc.).
       trackInitiateCheckout({
