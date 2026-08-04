@@ -223,8 +223,30 @@ export default function Checkout() {
             identification: formData?.payer?.identification,
           },
         });
-        if (error) throw error;
+        if (error) {
+          // 409 = já existe assinatura ativa para este e-mail (evita cobrança duplicada).
+          let serverMsg = "";
+          let code = "";
+          try {
+            const ctx: any = (error as any).context;
+            const body = ctx && typeof ctx.json === "function" ? await ctx.json() : null;
+            serverMsg = body?.error || "";
+            code = body?.code || "";
+          } catch { /* ignore */ }
+          if (code === "subscription_exists") {
+            toast.info(serverMsg || "Você já possui uma assinatura ativa do Clube.");
+            setTimeout(() => navigate("/pv-clube?clube=success"), 1500);
+            return;
+          }
+          throw new Error(serverMsg || error.message);
+        }
+        if (data?.code === "subscription_exists") {
+          toast.info(data.error || "Você já possui uma assinatura ativa do Clube.");
+          setTimeout(() => navigate("/pv-clube?clube=success"), 1500);
+          return;
+        }
         if (data?.error) throw new Error(data.error);
+
 
         // InitiateCheckout — assinatura MP criada com sucesso (qualquer status final).
         trackInitiateCheckout({
