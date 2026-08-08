@@ -100,8 +100,9 @@ export const PartnerGrantAccessCard: React.FC = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Digite o e-mail de um aluno já cadastrado na base, selecione e libere o acesso.
+          Digite o e-mail completo de um aluno já cadastrado na base, selecione e libere o acesso.
         </p>
+
 
         {products.length > 1 && (
           <Select value={productKey} onValueChange={setProductKey}>
