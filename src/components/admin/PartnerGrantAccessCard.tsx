@@ -100,8 +100,9 @@ export const PartnerGrantAccessCard: React.FC = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Digite o e-mail de um aluno já cadastrado na base, selecione e libere o acesso.
+          Digite o e-mail completo de um aluno já cadastrado na base, selecione e libere o acesso.
         </p>
+
 
         {products.length > 1 && (
           <Select value={productKey} onValueChange={setProductKey}>
@@ -138,7 +139,7 @@ export const PartnerGrantAccessCard: React.FC = () => {
         ) : (
           <div className="space-y-2">
             <Input
-              placeholder="Digite o e-mail do aluno..."
+              placeholder="Digite o e-mail completo do aluno..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -149,7 +150,8 @@ export const PartnerGrantAccessCard: React.FC = () => {
                     <Loader2 className="h-3.5 w-3.5 animate-spin" /> Buscando...
                   </div>
                 ) : results.length === 0 ? (
-                  <div className="p-3 text-sm text-muted-foreground">Nenhum e-mail cadastrado encontrado.</div>
+                  <div className="p-3 text-sm text-muted-foreground">Digite o e-mail completo do aluno cadastrado.</div>
+
                 ) : (
                   results.map((u) => (
                     <button

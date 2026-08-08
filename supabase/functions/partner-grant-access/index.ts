@@ -60,6 +60,21 @@ serve(async (req: Request) => {
 
     if (action === "search") {
       const q = String(body.query || "").trim().toLowerCase();
+
+      // Super admins keep the broad search; partners must know the exact
+      // e-mail (no partial enumeration of the whole user base).
+      if (!isSuperAdmin) {
+        const isFullEmail = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(q);
+        if (!isFullEmail) return json({ users: [], requires_full_email: true });
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("user_id, email, full_name")
+          .eq("email", q)
+          .limit(1);
+        if (error) throw error;
+        return json({ users: data || [] });
+      }
+
       if (q.length < 3) return json({ users: [] });
       const { data, error } = await supabase
         .from("profiles")
@@ -69,6 +84,7 @@ serve(async (req: Request) => {
       if (error) throw error;
       return json({ users: data || [] });
     }
+
 
     if (action === "grant") {
       const targetUserId = String(body.target_user_id || "");

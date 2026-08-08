@@ -2,6 +2,7 @@
 // how many days remain until expires_at (or how many days have passed).
 // Each user receives each reminder at most once per cycle (per expires_at value).
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { assertInternalOrAdmin } from "../_shared/internalAuth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
@@ -28,6 +29,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  const _authFail = await assertInternalOrAdmin(req, corsHeaders);
+  if (_authFail) return _authFail;
 
   try {
     const supabase = createClient(
