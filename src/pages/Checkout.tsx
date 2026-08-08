@@ -332,7 +332,11 @@ export default function Checkout() {
         toast.error("Pagamento recusado", { description: data.status_detail || "Tente outro cartão." });
       }
     } catch (err: any) {
-      toast.error("Erro no pagamento", { description: err.message });
+      const raw = String(err?.message || "");
+      const friendly = /non-2xx|Failed to fetch|FunctionsHttpError/i.test(raw) || !raw
+        ? "Não foi possível concluir o pagamento. Recarregue a página e tente novamente."
+        : raw;
+      toast.error("Erro no pagamento", { description: friendly });
     } finally {
       setSubmitting(false);
     }
