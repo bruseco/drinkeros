@@ -185,7 +185,20 @@ serve(async (req) => {
     // nenhum fluxo (convidado, /rand, links diretos) consiga pagar sem os dados.
     const fiscalCpf = String(fiscal?.cpf || formData?.payer?.identification?.number || "").replace(/\D/g, "");
     const fiscalCep = String(fiscal?.cep || "").replace(/\D/g, "");
-    const fiscalName = String(fiscal?.full_name || "").trim();
+    // Nome: prioriza o que veio do checkout; se faltar (ex.: bundle antigo em cache no
+    // navegador/PWA do cliente), cai para o perfil do usuário logado e depois para o
+    // nome informado no Brick do Mercado Pago. Só bloqueia se nenhum existir.
+    let fiscalName = String(fiscal?.full_name || "").trim().replace(/\s+/g, " ");
+    if (fiscalName.length < 3 && userId) {
+      const { data: profName } = await supabase
+        .from("profiles").select("full_name").eq("user_id", userId).maybeSingle();
+      fiscalName = String((profName as any)?.full_name || "").trim().replace(/\s+/g, " ");
+    }
+    if (fiscalName.length < 3) {
+      const mpName = [formData?.payer?.first_name, formData?.payer?.last_name]
+        .filter(Boolean).join(" ").trim().replace(/\s+/g, " ");
+      if (mpName.length >= 3) fiscalName = mpName;
+    }
     const missingFiscal: string[] = [];
     if (fiscalName.length < 3) missingFiscal.push("nome completo");
     if (fiscalCpf.length !== 11 && fiscalCpf.length !== 14) missingFiscal.push("CPF");
@@ -196,6 +209,13 @@ serve(async (req) => {
     if (!String(fiscal?.address_city || "").trim()) missingFiscal.push("cidade");
     if (!String(fiscal?.address_state || "").trim()) missingFiscal.push("UF");
     if (missingFiscal.length > 0) {
+      console.error("[create-mp-payment] bloqueio fiscal", {
+        product_type,
+        slug,
+        user_id: userId,
+        has_fiscal_payload: !!fiscal,
+        missing: missingFiscal,
+      });
       return new Response(
         JSON.stringify({
           error: `Dados fiscais incompletos (faltando: ${missingFiscal.join(", ")}). Preencha para emitirmos a nota fiscal.`,
@@ -205,6 +225,7 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+
 
     const externalRef = `${product_type}:${product.id}:${userId || "guest"}:${Date.now()}`;
     const payerEmail = formData?.payer?.email || userEmail || "comprador@drinkeros.com";
