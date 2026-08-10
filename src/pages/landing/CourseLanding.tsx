@@ -1188,9 +1188,6 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                   {oldPriceLabel && (
                     <p className="text-lg text-white/60 line-through">{oldPriceLabel}</p>
                   )}
-                  {giftEnabled && giftRevealed && (
-                    <p className="text-lg text-white/60 line-through">{formatBRL(giftOfficialPrice as number)}</p>
-                  )}
                   <p className="text-sm uppercase tracking-wider text-white/70 mt-2">por apenas</p>
                   <p
                     className={`text-5xl sm:text-6xl font-black bg-clip-text text-transparent my-2${pricePulsing ? ' cl-price-pulse' : ''}`}
