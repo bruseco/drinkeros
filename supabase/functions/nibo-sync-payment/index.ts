@@ -140,7 +140,50 @@ async function getOrder(orderId: string): Promise<OrderRow | null> {
   return list[0] || null;
 }
 
+// Código IBGE do município (NIBO usa para compor a NFS-e). Fonte: ViaCEP.
+const ibgeCache = new Map<string, string | null>();
+async function getIbgeCode(cepDigits: string): Promise<string | null> {
+  const cep = cepDigits.replace(/\D/g, "");
+  if (cep.length !== 8) return null;
+  if (ibgeCache.has(cep)) return ibgeCache.get(cep) ?? null;
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 4000);
+    const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`, { signal: ctrl.signal });
+    clearTimeout(t);
+    const json = await res.json().catch(() => null) as { ibge?: string } | null;
+    const code = json?.ibge && /^\d{7}$/.test(json.ibge) ? json.ibge : null;
+    ibgeCache.set(cep, code);
+    return code;
+  } catch (_e) {
+    ibgeCache.set(cep, null);
+    return null;
+  }
+}
+
+// Relê o cliente no NIBO e confirma que o bairro (district) foi realmente
+// persistido. Se não foi, falhamos alto em vez de registrar sucesso enganoso.
+async function verifyCustomerAddress(
+  customerId: string,
+  attemptedPayload: Record<string, unknown>,
+  order: OrderRow,
+): Promise<{ id: null; status: "failed"; hasCpf: false; error: string; raw: unknown } | null> {
+  const check = await nibo<{ address?: Record<string, unknown> }>(`/customers/${customerId}`, { method: "GET" });
+  const savedDistrict = typeof check.data?.address?.district === "string" ? check.data.address.district.trim() : "";
+  if (savedDistrict) return null;
+  const error = "NIBO gravou o cliente sem bairro (address.district vazio). NFS-e seria rejeitada.";
+  console.error("[nibo] verificação pós-gravação falhou", {
+    order_id: order.id,
+    buyer_email: order.buyer_email,
+    nibo_customer_id: customerId,
+    attempted_payload: attemptedPayload,
+    saved_address: check.data?.address ?? check.raw.slice(0, 500),
+  });
+  return { id: null, status: "failed", hasCpf: false, error, raw: { saved: check.data?.address ?? check.raw.slice(0, 500), sent: attemptedPayload } };
+}
+
 async function upsertCustomer(order: OrderRow): Promise<{
+
   id: string | null;
   status: "success" | "skipped" | "failed";
   hasCpf: boolean;
