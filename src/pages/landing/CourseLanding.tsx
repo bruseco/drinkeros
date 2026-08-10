@@ -284,6 +284,93 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     (Math.pow(1 + INSTALLMENT_RATE, INSTALLMENT_COUNT) - 1);
   const installments = installmentValue.toFixed(2).replace('.', ',');
 
+  /* ===== Presente de desconto (preço oficial → preço real animado) ===== */
+  const giftEnabled = !!giftOfficialPrice && giftOfficialPrice > finalPrice && !isVip;
+  const giftStorageKey = `gift-reveal:${slug}`;
+  const [giftRevealed, setGiftRevealed] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return sessionStorage.getItem(`gift-reveal:${slug}`) === '1';
+    } catch {
+      return false;
+    }
+  });
+  const [giftOpen, setGiftOpen] = useState(false);
+  const [displayPrice, setDisplayPrice] = useState<number | null>(null);
+  const [pricePulsing, setPricePulsing] = useState(false);
+  const priceAnchorRef = useRef<HTMLDivElement | null>(null);
+  const giftSeenRef = useRef(false);
+
+  // Abre o presente quando a área de preço entra na tela
+  useEffect(() => {
+    if (!giftEnabled || giftRevealed) return;
+    const el = priceAnchorRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !giftSeenRef.current) {
+          giftSeenRef.current = true;
+          obs.disconnect();
+          setGiftOpen(true);
+        }
+      },
+      { threshold: 0.4 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [giftEnabled, giftRevealed]);
+
+  const markRevealed = () => {
+    try {
+      sessionStorage.setItem(giftStorageKey, '1');
+    } catch {
+      /* ignore */
+    }
+    setGiftRevealed(true);
+  };
+
+  const runPriceCountdown = () => {
+    if (!giftOfficialPrice) return;
+    const from = giftOfficialPrice;
+    const to = finalPrice;
+    const duration = 1800;
+    const start = performance.now();
+    setDisplayPrice(from);
+    const step = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setDisplayPrice(from + (to - from) * eased);
+      if (t < 1) requestAnimationFrame(step);
+      else {
+        setDisplayPrice(to);
+        setPricePulsing(true);
+      }
+    };
+    requestAnimationFrame(step);
+  };
+
+  const handleGiftReveal = () => {
+    setGiftOpen(false);
+    markRevealed();
+    runPriceCountdown();
+  };
+
+  const handleGiftClose = () => {
+    setGiftOpen(false);
+    markRevealed();
+    setDisplayPrice(null);
+    setPricePulsing(true);
+  };
+
+  // Preço exibido na seção de oferta
+  const shownPrice =
+    giftEnabled && !giftRevealed
+      ? (giftOfficialPrice as number)
+      : displayPrice ?? finalPrice;
+  // CTA verde animado só depois que o valor chegou no preço final
+  const ctaGreenClass = giftEnabled && !pricePulsing ? 'cl-cta-green-dark' : 'cl-cta-green';
+
+
   const handleBuy = async () => {
     setCheckoutLoading(true);
     try {
