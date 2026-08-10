@@ -428,7 +428,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
         radial-gradient(70% 70% at 50% 100%, ${theme.glow3}, transparent 60%),
         linear-gradient(180deg, #07030a 0%, #050507 100%);
       background-size: 200% 200%, 200% 200%, 200% 200%, 100% 100%;
-      animation: clAuroraDrift 18s ease-in-out infinite;
+      animation: clAuroraDrift 10s ease-in-out 1 both;
     }
     @media (prefers-reduced-motion: reduce) {
       .cl-aurora { animation: none; }
