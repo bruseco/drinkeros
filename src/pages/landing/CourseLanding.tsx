@@ -211,6 +211,10 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   checkoutPath,
   hideVipBanner = false,
   disableVipDiscount = false,
+  giftOfficialPrice,
+  giftTitle,
+  giftSubtitle,
+
 }) => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
