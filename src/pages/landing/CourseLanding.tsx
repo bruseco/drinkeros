@@ -506,6 +506,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
         linear-gradient(90deg, transparent 0%, rgba(190,242,100,0.35) 45%, transparent 70%);
       background-size: 220% 220%, 220% 220%, 220% 220%, 45% 100%;
       background-repeat: no-repeat;
+      animation: clLiquidFlow 8s ease-in-out infinite;
     }
 
     /* CTA verde escuro, sem animação (antes de pegar o desconto) */
