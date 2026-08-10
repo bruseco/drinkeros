@@ -297,7 +297,15 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   });
   const [giftOpen, setGiftOpen] = useState(false);
   const [displayPrice, setDisplayPrice] = useState<number | null>(null);
-  const [pricePulsing, setPricePulsing] = useState(false);
+  const [pricePulsing, setPricePulsing] = useState(() => {
+    // Se já revelou nesta sessão, o preço final já está em vigor desde o início
+    if (typeof window === 'undefined') return false;
+    try {
+      return sessionStorage.getItem(`gift-reveal:${slug}`) === '1';
+    } catch {
+      return false;
+    }
+  });
   const priceAnchorRef = useRef<HTMLDivElement | null>(null);
   const giftSeenRef = useRef(false);
 
@@ -382,6 +390,10 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       : displayPrice ?? finalPrice;
   // CTA verde animado só depois que o valor chegou no preço final
   const ctaGreenClass = giftEnabled && !pricePulsing ? 'cl-cta-green-dark' : 'cl-cta-green';
+  // Gradiente verde para o preço final (R$297) após o desconto
+  const priceGradient = pricePulsing
+    ? 'linear-gradient(90deg, #a3e635, #22c55e, #15803d)'
+    : `linear-gradient(90deg, ${theme.accent}, ${theme.primary}, ${theme.secondary})`;
   const shownInstallments = (
     (shownPrice * INSTALLMENT_RATE * Math.pow(1 + INSTALLMENT_RATE, INSTALLMENT_COUNT)) /
     (Math.pow(1 + INSTALLMENT_RATE, INSTALLMENT_COUNT) - 1)
@@ -1192,7 +1204,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                   <p
                     className={`text-5xl sm:text-6xl font-black bg-clip-text text-transparent my-2${pricePulsing ? ' cl-price-pulse' : ''}`}
                     style={{
-                      backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.primary}, ${theme.secondary})`,
+                      backgroundImage: priceGradient,
                     }}
                   >
                     {formatBRL(shownPrice)}
