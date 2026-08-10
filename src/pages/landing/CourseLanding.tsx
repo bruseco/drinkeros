@@ -456,7 +456,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     }
     .cl-cta {
       background: linear-gradient(90deg, ${theme.accent}, ${theme.primary}, ${theme.secondary});
-      animation: clGlowPulse 3.2s ease-in-out infinite;
+      animation: clGlowPulse 3.2s ease-in-out 3 both;
       transform: translate3d(0, 0, 0);
       will-change: transform, box-shadow;
     }
@@ -472,7 +472,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
         linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 45%, transparent 70%);
       background-size: 220% 220%, 220% 220%, 220% 220%, 45% 100%;
       background-repeat: no-repeat;
-      animation: clLiquidFlow 8s ease-in-out infinite;
+      animation: clLiquidFlow 8s ease-in-out 1 both;
       filter: saturate(1.15);
       z-index: 0;
       pointer-events: none;
