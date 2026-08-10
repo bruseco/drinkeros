@@ -159,7 +159,14 @@ export interface CourseLandingProps {
   hideVipBanner?: boolean;
   /** Desabilita o desconto VIP nesta oferta (preço cheio para todos, inclusive sócios). */
   disableVipDiscount?: boolean;
+  /** Preço "oficial" exibido antes da revelação do presente (ex.: 497).
+   *  Quando o usuário chega na área de preço, abre o overlay do presente e,
+   *  ao pegar o desconto, o valor desce animado até o preço real. */
+  giftOfficialPrice?: number;
+  giftTitle?: string;
+  giftSubtitle?: string;
 }
+
 
 const CourseLanding: React.FC<CourseLandingProps> = ({
   slug,
