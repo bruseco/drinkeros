@@ -1107,7 +1107,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
               </p>
             )}
 
-            <div className="text-center mb-6">
+            <div className="text-center mb-6" ref={priceAnchorRef}>
               {isVip ? (
                 <>
                   <div
