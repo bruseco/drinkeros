@@ -28,6 +28,8 @@ import AnimatedStudentCount from '@/components/landing/AnimatedStudentCount';
 import VipFloatingBanner from '@/components/landing/VipFloatingBanner';
 import SeoHead from '@/components/SeoHead';
 import { useTotalStudents, TOTAL_STUDENTS_FALLBACK } from '@/hooks/useTotalStudents';
+import PriceGiftReveal from '@/components/landing/PriceGiftReveal';
+
 
 /** Total padrão (fallback) — fonte real é o RPC `get_total_students_certified`. */
 export const TOTAL_STUDENTS_CERTIFIED = TOTAL_STUDENTS_FALLBACK;
@@ -159,7 +161,14 @@ export interface CourseLandingProps {
   hideVipBanner?: boolean;
   /** Desabilita o desconto VIP nesta oferta (preço cheio para todos, inclusive sócios). */
   disableVipDiscount?: boolean;
+  /** Preço "oficial" exibido antes da revelação do presente (ex.: 497).
+   *  Quando o usuário chega na área de preço, abre o overlay do presente e,
+   *  ao pegar o desconto, o valor desce animado até o preço real. */
+  giftOfficialPrice?: number;
+  giftTitle?: string;
+  giftSubtitle?: string;
 }
+
 
 const CourseLanding: React.FC<CourseLandingProps> = ({
   slug,
@@ -202,6 +211,10 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   checkoutPath,
   hideVipBanner = false,
   disableVipDiscount = false,
+  giftOfficialPrice,
+  giftTitle,
+  giftSubtitle,
+
 }) => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -270,6 +283,100 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     (finalPrice * INSTALLMENT_RATE * Math.pow(1 + INSTALLMENT_RATE, INSTALLMENT_COUNT)) /
     (Math.pow(1 + INSTALLMENT_RATE, INSTALLMENT_COUNT) - 1);
   const installments = installmentValue.toFixed(2).replace('.', ',');
+
+  /* ===== Presente de desconto (preço oficial → preço real animado) ===== */
+  const giftEnabled = !!giftOfficialPrice && giftOfficialPrice > finalPrice && !isVip;
+  const giftStorageKey = `gift-reveal:${slug}`;
+  const [giftRevealed, setGiftRevealed] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return sessionStorage.getItem(`gift-reveal:${slug}`) === '1';
+    } catch {
+      return false;
+    }
+  });
+  const [giftOpen, setGiftOpen] = useState(false);
+  const [displayPrice, setDisplayPrice] = useState<number | null>(null);
+  const [pricePulsing, setPricePulsing] = useState(false);
+  const priceAnchorRef = useRef<HTMLDivElement | null>(null);
+  const giftSeenRef = useRef(false);
+
+  // Abre o presente quando a área de preço entra na tela
+  useEffect(() => {
+    if (!giftEnabled || giftRevealed) return;
+    const el = priceAnchorRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !giftSeenRef.current) {
+          giftSeenRef.current = true;
+          obs.disconnect();
+          setGiftOpen(true);
+        }
+      },
+      { threshold: 0.4 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [giftEnabled, giftRevealed]);
+
+  const markRevealed = () => {
+    try {
+      sessionStorage.setItem(giftStorageKey, '1');
+    } catch {
+      /* ignore */
+    }
+    setGiftRevealed(true);
+  };
+
+  const runPriceCountdown = () => {
+    if (!giftOfficialPrice) return;
+    const from = giftOfficialPrice;
+    const to = finalPrice;
+    const duration = 1800;
+    const start = performance.now();
+    setDisplayPrice(from);
+    const step = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setDisplayPrice(from + (to - from) * eased);
+      if (t < 1) requestAnimationFrame(step);
+      else {
+        setDisplayPrice(to);
+        setPricePulsing(true);
+      }
+    };
+    requestAnimationFrame(step);
+  };
+
+  const handleGiftReveal = () => {
+    setGiftOpen(false);
+    markRevealed();
+    runPriceCountdown();
+  };
+
+  const handleGiftClose = () => {
+    setGiftOpen(false);
+    markRevealed();
+    setDisplayPrice(null);
+    setPricePulsing(true);
+  };
+
+  // Preço exibido na seção de oferta
+  const shownPrice =
+    giftEnabled && !giftRevealed
+      ? (giftOfficialPrice as number)
+      : displayPrice ?? finalPrice;
+  // CTA verde animado só depois que o valor chegou no preço final
+  const ctaGreenClass = giftEnabled && !pricePulsing ? 'cl-cta-green-dark' : 'cl-cta-green';
+  const shownInstallments = (
+    (shownPrice * INSTALLMENT_RATE * Math.pow(1 + INSTALLMENT_RATE, INSTALLMENT_COUNT)) /
+    (Math.pow(1 + INSTALLMENT_RATE, INSTALLMENT_COUNT) - 1)
+  )
+    .toFixed(2)
+    .replace('.', ',');
+
+
 
   const handleBuy = async () => {
     setCheckoutLoading(true);
@@ -400,7 +507,31 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       background-size: 220% 220%, 220% 220%, 220% 220%, 45% 100%;
       background-repeat: no-repeat;
     }
+
+    /* CTA verde escuro, sem animação (antes de pegar o desconto) */
+    .cl-cta-green-dark {
+      background: linear-gradient(90deg, #14532d, #166534, #14532d);
+      animation: none !important;
+      box-shadow: 0 8px 24px rgba(20,83,45,0.45);
+    }
+    .cl-cta-green-dark .cl-cta-liquid {
+      background: linear-gradient(90deg, #14532d, #166534, #14532d);
+      animation: none !important;
+      opacity: 0.9;
+    }
+
+    /* Preço pulsante após a revelação do desconto */
+    @keyframes clPricePulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
+      50% { transform: scale(1.08); filter: drop-shadow(0 0 18px rgba(132,204,22,0.55)); }
+    }
+    .cl-price-pulse {
+      display: inline-block;
+      animation: clPricePulse 1.4s ease-in-out infinite;
+      will-change: transform;
+    }
   `;
+
 
   const isYoutube = heroVideoUrl?.includes('youtube.com') || heroVideoUrl?.includes('youtu.be');
   const guarantee =
@@ -1000,7 +1131,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
               </p>
             )}
 
-            <div className="text-center mb-6">
+            <div className="text-center mb-6" ref={priceAnchorRef}>
               {isVip ? (
                 <>
                   <div
@@ -1043,20 +1174,24 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                   {oldPriceLabel && (
                     <p className="text-lg text-white/60 line-through">{oldPriceLabel}</p>
                   )}
+                  {giftEnabled && giftRevealed && (
+                    <p className="text-lg text-white/60 line-through">{formatBRL(giftOfficialPrice as number)}</p>
+                  )}
                   <p className="text-sm uppercase tracking-wider text-white/70 mt-2">por apenas</p>
                   <p
-                    className="text-5xl sm:text-6xl font-black bg-clip-text text-transparent my-2"
+                    className={`text-5xl sm:text-6xl font-black bg-clip-text text-transparent my-2${pricePulsing ? ' cl-price-pulse' : ''}`}
                     style={{
                       backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.primary}, ${theme.secondary})`,
                     }}
                   >
-                    {formatBRL(finalPrice)}
+                    {formatBRL(shownPrice)}
                   </p>
                   <p className="text-base text-white/80">
-                    em até <strong style={{ color: theme.accent }}>12x R$ {installments}</strong>
+                    em até <strong style={{ color: theme.accent }}>12x R$ {shownInstallments}</strong>
                   </p>
                 </>
               )}
+
             </div>
 
             {/* Oferta VIP agora aparece como banner flutuante (VipFloatingBanner) */}
@@ -1066,7 +1201,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                 id="cl-matricule-cta"
                 onClick={handleBuy}
                 disabled={checkoutLoading}
-                className="cl-cta cl-cta-green group relative inline-flex items-center justify-center gap-3 rounded-full px-8 sm:px-12 py-5 sm:py-6 font-extrabold text-white text-lg sm:text-xl overflow-hidden isolate transition-transform duration-300 hover:scale-[1.03] disabled:opacity-70 disabled:cursor-not-allowed"
+                className={`cl-cta ${ctaGreenClass} group relative inline-flex items-center justify-center gap-3 rounded-full px-8 sm:px-12 py-5 sm:py-6 font-extrabold text-white text-lg sm:text-xl overflow-hidden isolate transition-transform duration-300 hover:scale-[1.03] disabled:opacity-70 disabled:cursor-not-allowed`}
               >
                 <span className="cl-cta-liquid" aria-hidden="true" />
                 {checkoutLoading ? (
@@ -1165,8 +1300,19 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
           © {new Date().getFullYear()} Drinkeros — Todos os direitos reservados
         </p>
       </footer>
+
+      {giftEnabled && (
+        <PriceGiftReveal
+          open={giftOpen}
+          title={giftTitle}
+          subtitle={giftSubtitle}
+          onReveal={handleGiftReveal}
+          onClose={handleGiftClose}
+        />
+      )}
     </div>
   );
 };
+
 
 export default CourseLanding;
