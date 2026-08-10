@@ -1204,7 +1204,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                   <p
                     className={`text-5xl sm:text-6xl font-black bg-clip-text text-transparent my-2${pricePulsing ? ' cl-price-pulse' : ''}`}
                     style={{
-                      backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.primary}, ${theme.secondary})`,
+                      backgroundImage: priceGradient,
                     }}
                   >
                     {formatBRL(shownPrice)}
