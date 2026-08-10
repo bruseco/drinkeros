@@ -390,6 +390,10 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       : displayPrice ?? finalPrice;
   // CTA verde animado só depois que o valor chegou no preço final
   const ctaGreenClass = giftEnabled && !pricePulsing ? 'cl-cta-green-dark' : 'cl-cta-green';
+  // Gradiente verde para o preço final (R$297) após o desconto
+  const priceGradient = pricePulsing
+    ? 'linear-gradient(90deg, #a3e635, #22c55e, #15803d)'
+    : `linear-gradient(90deg, ${theme.accent}, ${theme.primary}, ${theme.secondary})`;
   const shownInstallments = (
     (shownPrice * INSTALLMENT_RATE * Math.pow(1 + INSTALLMENT_RATE, INSTALLMENT_COUNT)) /
     (Math.pow(1 + INSTALLMENT_RATE, INSTALLMENT_COUNT) - 1)
