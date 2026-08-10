@@ -297,7 +297,15 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   });
   const [giftOpen, setGiftOpen] = useState(false);
   const [displayPrice, setDisplayPrice] = useState<number | null>(null);
-  const [pricePulsing, setPricePulsing] = useState(false);
+  const [pricePulsing, setPricePulsing] = useState(() => {
+    // Se já revelou nesta sessão, o preço final já está em vigor desde o início
+    if (typeof window === 'undefined') return false;
+    try {
+      return sessionStorage.getItem(`gift-reveal:${slug}`) === '1';
+    } catch {
+      return false;
+    }
+  });
   const priceAnchorRef = useRef<HTMLDivElement | null>(null);
   const giftSeenRef = useRef(false);
 
