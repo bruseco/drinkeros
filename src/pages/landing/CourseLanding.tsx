@@ -507,7 +507,31 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       background-size: 220% 220%, 220% 220%, 220% 220%, 45% 100%;
       background-repeat: no-repeat;
     }
+
+    /* CTA verde escuro, sem animação (antes de pegar o desconto) */
+    .cl-cta-green-dark {
+      background: linear-gradient(90deg, #14532d, #166534, #14532d);
+      animation: none !important;
+      box-shadow: 0 8px 24px rgba(20,83,45,0.45);
+    }
+    .cl-cta-green-dark .cl-cta-liquid {
+      background: linear-gradient(90deg, #14532d, #166534, #14532d);
+      animation: none !important;
+      opacity: 0.9;
+    }
+
+    /* Preço pulsante após a revelação do desconto */
+    @keyframes clPricePulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
+      50% { transform: scale(1.08); filter: drop-shadow(0 0 18px rgba(132,204,22,0.55)); }
+    }
+    .cl-price-pulse {
+      display: inline-block;
+      animation: clPricePulse 1.4s ease-in-out infinite;
+      will-change: transform;
+    }
   `;
+
 
   const isYoutube = heroVideoUrl?.includes('youtube.com') || heroVideoUrl?.includes('youtu.be');
   const guarantee =
