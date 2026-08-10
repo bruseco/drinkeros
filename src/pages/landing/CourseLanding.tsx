@@ -1300,8 +1300,19 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
           © {new Date().getFullYear()} Drinkeros — Todos os direitos reservados
         </p>
       </footer>
+
+      {giftEnabled && (
+        <PriceGiftReveal
+          open={giftOpen}
+          title={giftTitle}
+          subtitle={giftSubtitle}
+          onReveal={handleGiftReveal}
+          onClose={handleGiftClose}
+        />
+      )}
     </div>
   );
 };
+
 
 export default CourseLanding;
