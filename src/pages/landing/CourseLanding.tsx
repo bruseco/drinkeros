@@ -301,23 +301,28 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const priceAnchorRef = useRef<HTMLDivElement | null>(null);
   const giftSeenRef = useRef(false);
 
-  // Abre o presente quando a área de preço entra na tela
+  // Abre o presente quando a área de preço entra na tela (com 3s de delay)
   useEffect(() => {
     if (!giftEnabled || giftRevealed) return;
     const el = priceAnchorRef.current;
     if (!el) return;
+    let delayTimer: number | undefined;
     const obs = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !giftSeenRef.current) {
           giftSeenRef.current = true;
           obs.disconnect();
-          setGiftOpen(true);
+          // Delay de 3 segundos antes de mostrar a oferta
+          delayTimer = window.setTimeout(() => setGiftOpen(true), 3000);
         }
       },
       { threshold: 0.4 },
     );
     obs.observe(el);
-    return () => obs.disconnect();
+    return () => {
+      obs.disconnect();
+      if (delayTimer) window.clearTimeout(delayTimer);
+    };
   }, [giftEnabled, giftRevealed]);
 
   const markRevealed = () => {
@@ -327,6 +332,10 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       /* ignore */
     }
     setGiftRevealed(true);
+  };
+
+  const scrollToPriceAnchor = () => {
+    priceAnchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
   const runPriceCountdown = () => {
@@ -352,7 +361,9 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const handleGiftReveal = () => {
     setGiftOpen(false);
     markRevealed();
-    runPriceCountdown();
+    // Scroll até o valor e depois dispara a animação de descer o número
+    scrollToPriceAnchor();
+    window.setTimeout(runPriceCountdown, 700);
   };
 
   const handleGiftClose = () => {
@@ -360,6 +371,8 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     markRevealed();
     setDisplayPrice(null);
     setPricePulsing(true);
+    // Mesmo fechando, rola até o valor
+    scrollToPriceAnchor();
   };
 
   // Preço exibido na seção de oferta
