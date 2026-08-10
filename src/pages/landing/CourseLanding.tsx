@@ -369,6 +369,13 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       : displayPrice ?? finalPrice;
   // CTA verde animado só depois que o valor chegou no preço final
   const ctaGreenClass = giftEnabled && !pricePulsing ? 'cl-cta-green-dark' : 'cl-cta-green';
+  const shownInstallments = (
+    (shownPrice * INSTALLMENT_RATE * Math.pow(1 + INSTALLMENT_RATE, INSTALLMENT_COUNT)) /
+    (Math.pow(1 + INSTALLMENT_RATE, INSTALLMENT_COUNT) - 1)
+  )
+    .toFixed(2)
+    .replace('.', ',');
+
 
 
   const handleBuy = async () => {
