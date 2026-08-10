@@ -215,14 +215,18 @@ async function upsertCustomer(order: OrderRow): Promise<{
 
   // Endereço FLAT (city/state como strings) — NIBO rejeita o objeto aninhado
   // com a mensagem genérica "É necessário preencher os dados do cliente!".
+  // ATENÇÃO: o campo de bairro no NIBO chama-se "district" (não "neighborhood").
   const addressFlat: Record<string, unknown> = {};
   if (addr.street) addressFlat.line1 = addr.street;
   if (addr.number) addressFlat.number = addr.number;
   if (addr.complement) addressFlat.line2 = addr.complement;
-  if (addr.neighborhood) addressFlat.neighborhood = addr.neighborhood;
+  if (addr.neighborhood) addressFlat.district = addr.neighborhood;
   if (addr.city) addressFlat.city = addr.city;
   if (addr.state) addressFlat.state = addr.state;
   if (addr.cep) addressFlat.zipCode = addr.cep;
+  if (addr.street || addr.city) addressFlat.country = "Brasil";
+  const ibge = addr.cep ? await getIbgeCode(addr.cep) : null;
+  if (ibge) addressFlat.ibgeCode = ibge;
 
   // Endereço fiscal mínimo exigido pela prefeitura (NFSe). Sem isso não
   // adianta criar/atualizar o cliente — a NF-e seria rejeitada (PNFe0006).
@@ -273,6 +277,8 @@ async function upsertCustomer(order: OrderRow): Promise<{
       });
       return { id: null, status: "failed", hasCpf: false, error, raw: upd.data ?? upd.raw };
     }
+    const verified = await verifyCustomerAddress(existingId, fullBody, order);
+    if (verified) return verified;
     return { id: existingId, status: "success", hasCpf: hasDocument, raw: upd.data ?? search.data };
   }
 
@@ -293,8 +299,11 @@ async function upsertCustomer(order: OrderRow): Promise<{
     });
     return { id: null, status: "failed", hasCpf: false, error, raw: created.data ?? created.raw };
   }
+  const verifiedNew = await verifyCustomerAddress(customerId, fullBody, order);
+  if (verifiedNew) return verifiedNew;
   return { id: customerId, status: "success", hasCpf: hasDocument, raw: created.data ?? created.raw };
 }
+
 
 
 
