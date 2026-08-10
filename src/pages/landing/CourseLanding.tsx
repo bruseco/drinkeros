@@ -528,7 +528,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     }
     .cl-price-pulse {
       display: inline-block;
-      animation: clPricePulse 1.4s ease-in-out infinite;
+      animation: clPricePulse 1.4s ease-in-out 7 both;
       will-change: transform;
     }
   `;
