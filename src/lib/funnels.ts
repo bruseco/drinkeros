@@ -14,6 +14,12 @@ export interface FunnelDef {
   description: string;
   publicPath: string;
   steps: FunnelStepDef[];
+  /**
+   * Produto vinculado. Quando definido, a etapa final ("Comprou") é medida
+   * pelas vendas aprovadas no banco, e não por evento do navegador.
+   */
+  productType?: 'course' | 'combo' | 'ebook' | 'package';
+  productSlug?: string;
 }
 
 export const FUNNELS: FunnelDef[] = [
@@ -23,14 +29,17 @@ export const FUNNELS: FunnelDef[] = [
     name: 'Funil RAND',
     description: 'Caminho de venda do curso do Rand na página /rand',
     publicPath: '/rand',
+    productType: 'combo',
+    productSlug: 'rand',
     steps: [
       { event: 'pageview', label: 'Acessou a página /rand', hint: 'Visitantes únicos' },
       { event: 'offer_1_revealed', label: 'Pegou o desconto', hint: 'Abriu o presente' },
       { event: 'checkout_1_started', label: 'Clicou em comprar', hint: 'Foi para o checkout' },
-      { event: 'subscription_confirmed', label: 'Comprou', hint: 'Pagamento confirmado' },
+      { event: 'subscription_confirmed', label: 'Comprou', hint: 'Pagamento aprovado (banco)' },
     ],
   },
 ];
+
 
 export const getFunnel = (key: string): FunnelDef | undefined =>
   FUNNELS.find((f) => f.key === key);
