@@ -3,13 +3,22 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Sparkles, Briefcase, PartyPopper, ArrowRight } from 'lucide-react';
 import { useUpdateInterests, type Interest } from '@/hooks/useInterests';
+import { useUserPlan } from '@/hooks/useUserPlan';
 
 const FLAG_KEY = 'drinkeros:just_signed_up';
 
 type Step = 'welcome' | 'interests';
 
+const PLAN_LABELS: Record<string, { text: string; className: string }> = {
+  free: { text: 'grátis', className: 'text-green-400' },
+  aluno: { text: 'Aluno', className: 'text-sky-400' },
+  socio: { text: 'Sócio do Clube', className: 'text-yellow-400' },
+  vitalicio: { text: 'Sócio Vitalício', className: 'text-amber-400' },
+};
+
 export const WelcomeOverlay: React.FC = () => {
   const { user } = useAuth();
+  const { data: plan } = useUserPlan();
   const updateInterests = useUpdateInterests();
   const [visible, setVisible] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -17,6 +26,9 @@ export const WelcomeOverlay: React.FC = () => {
   const [step, setStep] = useState<Step>('welcome');
   const [selected, setSelected] = useState<Interest[]>([]);
   const [saving, setSaving] = useState(false);
+
+  const planLabel = PLAN_LABELS[plan?.plan ?? 'free'] ?? PLAN_LABELS.free;
+
 
   useEffect(() => {
     if (!user) return;
