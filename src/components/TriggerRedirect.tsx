@@ -19,16 +19,13 @@ export function useTriggerRedirect(): boolean {
 
     (async () => {
       try {
-        const { data } = await supabase
-          .from('redirect_links')
-          .select('destination_url')
-          .eq('code', trigger)
-          .single();
+        const { data } = await supabase.rpc('resolve_redirect_link', { link_code: trigger });
 
-        if (data?.destination_url) {
+        const destination = typeof data === 'string' ? data : null;
+        if (destination) {
           // Increment click count (fire and forget)
           supabase.rpc('increment_redirect_click', { link_code: trigger }).then(() => {});
-          window.location.href = data.destination_url;
+          window.location.href = destination;
         } else {
           // Invalid code, stop redirecting
           setIsRedirecting(false);
@@ -37,6 +34,7 @@ export function useTriggerRedirect(): boolean {
         setIsRedirecting(false);
       }
     })();
+
   }, [searchParams]);
 
   return isRedirecting;
