@@ -42,6 +42,7 @@ const adminItems = [
   { title: 'Métricas de Acesso', icon: Activity, href: '/admin/metricas-acesso' },
   { title: 'Tracking', icon: LineChart, href: '/admin/metricas' },
   { title: 'Páginas de Venda', icon: Tag, href: '/admin/paginas-venda' },
+  { title: 'Métricas de Funil', icon: Filter, href: '/admin/funis' },
   { title: 'Checklist de Postagens', icon: ClipboardCheck, href: '/admin/checklist-postagens' },
 ];
 

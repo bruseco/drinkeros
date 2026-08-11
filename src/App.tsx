@@ -70,6 +70,8 @@ import AdminCRM from "./pages/admin/AdminCRM";
 import AdminUXMetrics from "./pages/admin/AdminUXMetrics";
 import AdminAccessMetrics from "./pages/admin/AdminAccessMetrics";
 import AdminSalesPages from "./pages/admin/AdminSalesPages";
+import AdminFunnels from "./pages/admin/AdminFunnels";
+import AdminFunnelDetail from "./pages/admin/AdminFunnelDetail";
 import AdminSalesProduct from "./pages/admin/AdminSalesProduct";
 import AdminSalesPage from "./pages/admin/AdminSalesPage";
 import AdminTracking from "./pages/admin/AdminTracking";
@@ -217,6 +219,8 @@ const App = () => (
               <Route path="crm" element={<AdminCRM />} />
               <Route path="ux-metrics" element={<AdminUXMetrics />} />
               <Route path="metricas-acesso" element={<AdminAccessMetrics />} />
+              <Route path="funis" element={<AdminFunnels />} />
+              <Route path="funis/:funnelKey" element={<AdminFunnelDetail />} />
               <Route path="paginas-venda" element={<AdminSalesPages />} />
               <Route path="paginas-venda/:productKey" element={<AdminSalesProduct />} />
               <Route path="paginas-venda/:productKey/:pageKey" element={<AdminSalesPage />} />
