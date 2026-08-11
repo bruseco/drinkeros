@@ -427,13 +427,23 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const handleBuy = async () => {
     setCheckoutLoading(true);
     if (funnelPageKey) {
-      import('@/lib/funnelTracking').then(m =>
-        m.trackFunnel(funnelPageKey, 'checkout_1_started', { amountCents: Math.round(shownPrice * 100) }),
-      );
+      // Aguarda (com teto de 1.5s) para o evento não se perder na navegação.
+      try {
+        const m = await import('@/lib/funnelTracking');
+        await Promise.race([
+          m.trackFunnelAsync(funnelPageKey, 'checkout_1_started', {
+            amountCents: Math.round(shownPrice * 100),
+          }),
+          new Promise((r) => setTimeout(r, 1500)),
+        ]);
+      } catch {
+        /* nunca bloqueia a compra */
+      }
     }
     try {
       window.location.href = checkoutPath ?? `/checkout/course/${slug}`;
       return;
+
     } catch (err: any) {
       toast({
         title: 'Erro ao iniciar compra',

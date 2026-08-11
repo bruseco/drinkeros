@@ -58,20 +58,56 @@ export function trackFunnel(
   event: FunnelEvent,
   opts: TrackFunnelOpts = {},
 ): void {
+  void trackFunnelAsync(pageKey, event, opts);
+}
+
+/**
+ * Versão aguardável — use antes de navegar para o checkout, senão a navegação
+ * cancela a request e o evento se perde.
+ */
+export async function trackFunnelAsync(
+  pageKey: string,
+  event: FunnelEvent,
+  opts: TrackFunnelOpts = {},
+): Promise<void> {
   if (!pageKey) return;
   if (!opts.force && markedLocally(pageKey, event)) return;
 
   const sid = getSessionId();
-  Promise.resolve(
-    supabase.rpc('track_funnel_event' as any, {
-      _page_key: pageKey,
-      _event: event,
-      _session_id: sid,
-      _user_id: opts.userId ?? null,
-      _amount_cents: opts.amountCents ?? null,
-      _metadata: (opts.metadata ?? {}) as any,
-    }),
-  ).catch(() => {
+  const body = {
+    _page_key: pageKey,
+    _event: event,
+    _session_id: sid,
+    _user_id: opts.userId ?? null,
+    _amount_cents: opts.amountCents ?? null,
+    _metadata: opts.metadata ?? {},
+  };
+
+  // `keepalive` garante que a request sobreviva à navegação da página.
+  try {
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/rpc/track_funnel_event`;
+    const anon = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token ?? anon;
+    await fetch(url, {
+      method: 'POST',
+      keepalive: true,
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: anon,
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+    return;
+  } catch {
+    /* fallback abaixo */
+  }
+
+  try {
+    await supabase.rpc('track_funnel_event' as any, body as any);
+  } catch {
     /* fire-and-forget */
-  });
+  }
 }
+

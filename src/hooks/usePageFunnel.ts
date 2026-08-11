@@ -79,7 +79,9 @@ export const usePageFunnel = (
             _since: since,
           },
         );
-        if (!salesError) {
+        if (salesError) {
+          console.warn('[funnel] falha ao ler vendas do banco:', salesError.message);
+        } else {
           out.subscription_confirmed = Number(sales) || 0;
         }
       }
