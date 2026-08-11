@@ -321,7 +321,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const priceAnchorRef = useRef<HTMLDivElement | null>(null);
   const giftSeenRef = useRef(false);
 
-  // Abre o presente quando a área de preço entra na tela (com 3s de delay)
+  // Abre o presente quando a área de preço entra na tela (com 1s de delay)
   useEffect(() => {
     if (!giftEnabled || giftRevealed) return;
     const el = priceAnchorRef.current;
@@ -332,8 +332,8 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
         if (entry.isIntersecting && !giftSeenRef.current) {
           giftSeenRef.current = true;
           obs.disconnect();
-          // Delay de 3 segundos antes de mostrar a oferta
-          delayTimer = window.setTimeout(() => setGiftOpen(true), 3000);
+          // Delay de 1 segundo antes de mostrar a oferta
+          delayTimer = window.setTimeout(() => setGiftOpen(true), 1000);
         }
       },
       { threshold: 0.4 },
