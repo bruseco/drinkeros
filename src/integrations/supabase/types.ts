@@ -3866,6 +3866,7 @@ export type Database = {
         Args: { _winner_id: string }
         Returns: undefined
       }
+      resolve_redirect_link: { Args: { link_code: string }; Returns: string }
       retrigger_clube_intro_offer: {
         Args: never
         Returns: {
