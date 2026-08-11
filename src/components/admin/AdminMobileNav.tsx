@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Home, BookOpen, FileText, Wine, ShoppingBag, UserCog, ShoppingCart, Users, Mail, Bell,
-  Rocket, MessageCircle, ClipboardCheck, Clock, Target, BarChart3, Activity, LineChart, Tag, MoreHorizontal,
+  Rocket, MessageCircle, ClipboardCheck, Clock, Target, BarChart3, Activity, LineChart, Tag, Filter, MoreHorizontal,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -32,6 +32,7 @@ const moreItems = [
   { title: 'Métricas de Acesso', icon: Activity, href: '/admin/metricas-acesso' },
   { title: 'Tracking', icon: LineChart, href: '/admin/metricas' },
   { title: 'Páginas de Venda', icon: Tag, href: '/admin/paginas-venda' },
+  { title: 'Métricas de Funil', icon: Filter, href: '/admin/funis' },
   { title: 'Checklist de Postagens', icon: ClipboardCheck, href: '/admin/checklist-postagens' },
 ];
 

@@ -167,6 +167,8 @@ export interface CourseLandingProps {
   giftOfficialPrice?: number;
   giftTitle?: string;
   giftSubtitle?: string;
+  /** Chave do funil (page_key) para métricas em /admin/funis. Ex.: 'rand'. */
+  funnelPageKey?: string;
 }
 
 
@@ -214,6 +216,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   giftOfficialPrice,
   giftTitle,
   giftSubtitle,
+  funnelPageKey,
 
 }) => {
   const { toast } = useToast();
@@ -232,6 +235,9 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
         description: 'Acesse seu e-mail para ativar sua conta e começar.',
       });
       import('@/lib/firePurchaseFromBackend').then(m => m.firePurchaseFromBackend({ source: 'course-landing' }));
+      if (funnelPageKey) {
+        import('@/lib/funnelTracking').then(m => m.trackFunnel(funnelPageKey, 'subscription_confirmed'));
+      }
     } else if (status === 'cancel') {
       toast({
         title: 'Compra cancelada',
@@ -239,7 +245,13 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
         variant: 'destructive',
       });
     }
-  }, [searchParams, toast]);
+  }, [searchParams, toast, funnelPageKey]);
+
+  // Funil: pageview
+  useEffect(() => {
+    if (!funnelPageKey) return;
+    import('@/lib/funnelTracking').then(m => m.trackFunnel(funnelPageKey, 'pageview'));
+  }, [funnelPageKey]);
 
   // Hero video: starts muted (autoplay policy), unmute on first user interaction
   const heroVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -366,9 +378,17 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     requestAnimationFrame(step);
   };
 
+  const trackGiftFunnel = () => {
+    if (!funnelPageKey) return;
+    import('@/lib/funnelTracking').then(m =>
+      m.trackFunnel(funnelPageKey, 'offer_1_revealed', { amountCents: Math.round(finalPrice * 100) }),
+    );
+  };
+
   const handleGiftReveal = () => {
     setGiftOpen(false);
     markRevealed();
+    trackGiftFunnel();
     // Scroll até o valor e depois dispara a animação de descer o número
     scrollToPriceAnchor();
     window.setTimeout(runPriceCountdown, 700);
@@ -377,6 +397,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const handleGiftClose = () => {
     setGiftOpen(false);
     markRevealed();
+    trackGiftFunnel();
     setDisplayPrice(null);
     setPricePulsing(true);
     // Mesmo fechando, rola até o valor
@@ -405,6 +426,11 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
 
   const handleBuy = async () => {
     setCheckoutLoading(true);
+    if (funnelPageKey) {
+      import('@/lib/funnelTracking').then(m =>
+        m.trackFunnel(funnelPageKey, 'checkout_1_started', { amountCents: Math.round(shownPrice * 100) }),
+      );
+    }
     try {
       window.location.href = checkoutPath ?? `/checkout/course/${slug}`;
       return;

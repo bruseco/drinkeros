@@ -124,6 +124,7 @@ const Rand: React.FC = () => (
     theme={theme}
     fallbackPrice={147}
     oldPriceLabel="De R$ 944,00"
+    funnelPageKey="rand"
     giftOfficialPrice={497}
     giftTitle="O Rand tem um desconto aqui pra você!"
     giftSubtitle="Abra o presente e libere o seu preço especial no Pacote RAND."

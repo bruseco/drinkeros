@@ -13,7 +13,7 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
 } from '@/components/ui/sidebar';
-import { GraduationCap, Play, Users, UserCog, LogOut, Home, Mail, Bell, BookOpen, Rocket, MessageCircle, Layers, ClipboardCheck, Clock, Target, BarChart3, FileText, ShoppingBag, Wine, Tag, ShoppingCart, Activity, LineChart } from 'lucide-react';
+import { GraduationCap, Play, Users, UserCog, LogOut, Home, Mail, Bell, BookOpen, Rocket, MessageCircle, Layers, ClipboardCheck, Clock, Target, BarChart3, FileText, ShoppingBag, Wine, Tag, ShoppingCart, Activity, LineChart, Filter } from 'lucide-react';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import { Button } from '@/components/ui/button';
 
@@ -42,6 +42,7 @@ const adminItems = [
   { title: 'Métricas de Acesso', icon: Activity, href: '/admin/metricas-acesso' },
   { title: 'Tracking', icon: LineChart, href: '/admin/metricas' },
   { title: 'Páginas de Venda', icon: Tag, href: '/admin/paginas-venda' },
+  { title: 'Métricas de Funil', icon: Filter, href: '/admin/funis' },
   { title: 'Checklist de Postagens', icon: ClipboardCheck, href: '/admin/checklist-postagens' },
 ];
 
