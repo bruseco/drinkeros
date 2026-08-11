@@ -148,6 +148,16 @@ const AdminFunnelDetail: React.FC = () => {
                 </div>
               ))}
             </div>
+
+            {funnel.productType && funnel.productSlug && (
+              <p className="text-xs text-muted-foreground pt-2">
+                As etapas 1 a 3 são contadas por sessão de navegação na página. A etapa
+                “Comprou” é contada pelos pagamentos aprovados do produto no banco — por isso
+                pode incluir compras feitas por outros caminhos (ex.: link direto) e não depende
+                do cliente voltar para a página após pagar.
+              </p>
+            )}
+
           </div>
         )}
       </div>
