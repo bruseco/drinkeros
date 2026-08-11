@@ -383,7 +383,15 @@ export default function Checkout() {
               <p className="text-sm text-white/70">Liberando seu acesso...</p>
             </div>
           ) : pixResult ? (
-            <PixDisplay pix={pixResult} amount={finalPrice} />
+            <PixDisplay
+              pix={pixResult}
+              amount={finalPrice}
+              onBack={() => {
+                setPixResult(null);
+                setPixPaymentId(null);
+              }}
+            />
+
           ) : (
             <>
               {isClub && (
