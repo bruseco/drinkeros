@@ -21,7 +21,14 @@ const AdminFunnelDetail: React.FC = () => {
   const { funnelKey } = useParams<{ funnelKey: string }>();
   const funnel = getFunnel(funnelKey ?? '');
   const [range, setRange] = useState<FunnelRange>('30d');
-  const { data: counts, isLoading } = usePageFunnel(funnel?.pageKey ?? '', range);
+  const { data: counts, isLoading } = usePageFunnel(
+    funnel?.pageKey ?? '',
+    range,
+    funnel?.productType && funnel?.productSlug
+      ? { productType: funnel.productType, productSlug: funnel.productSlug }
+      : undefined,
+  );
+
 
   if (!funnel) {
     return (
