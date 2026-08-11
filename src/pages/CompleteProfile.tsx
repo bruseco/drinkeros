@@ -39,10 +39,34 @@ const CompleteProfile: React.FC = () => {
         navigate('/app', { replace: true });
         return;
       }
-      setFullName(data?.full_name || (user.user_metadata as any)?.full_name || (user.user_metadata as any)?.name || '');
+
+      const meta = (user.user_metadata as any) || {};
+      let name: string =
+        data?.full_name?.trim() ||
+        meta.full_name ||
+        meta.name ||
+        [meta.given_name, meta.family_name].filter(Boolean).join(' ') ||
+        '';
+
+      // Fallback: nome informado no checkout (compra como convidado)
+      if (!name.trim()) {
+        const { data: purchase } = await supabase
+          .from('purchases')
+          .select('buyer_name')
+          .eq('user_id', user.id)
+          .not('buyer_name', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        name = purchase?.buyer_name?.trim() || '';
+      }
+
+      setFullName(name);
+      if (data?.phone) setPhone(data.phone as any);
       if (data?.birth_date) setBirthDate(data.birth_date);
       setChecking(false);
     })();
+
   }, [user, authLoading, navigate]);
 
   const calcAge = (iso: string) => {
