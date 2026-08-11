@@ -143,6 +143,7 @@ const App = () => (
         <AuthProvider>
           <ScrollToTop />
           <FacebookPixel />
+          <WhatsAppFloatingButton />
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<RootRedirect />} />
