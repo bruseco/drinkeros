@@ -77,6 +77,7 @@ import AdminSalesPage from "./pages/admin/AdminSalesPage";
 import AdminTracking from "./pages/admin/AdminTracking";
 import AdminPostChecklist from "./pages/admin/AdminPostChecklist";
 import { FacebookPixel } from "./components/FacebookPixel";
+import { WhatsAppFloatingButton } from "./components/user/WhatsAppFloatingButton";
 
 // User pages
 import { UserLayout } from "./components/user/UserLayout";
@@ -142,6 +143,7 @@ const App = () => (
         <AuthProvider>
           <ScrollToTop />
           <FacebookPixel />
+          <WhatsAppFloatingButton />
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<RootRedirect />} />
