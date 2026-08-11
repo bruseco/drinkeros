@@ -235,9 +235,9 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
         description: 'Acesse seu e-mail para ativar sua conta e começar.',
       });
       import('@/lib/firePurchaseFromBackend').then(m => m.firePurchaseFromBackend({ source: 'course-landing' }));
-      if (funnelPageKey) {
-        import('@/lib/funnelTracking').then(m => m.trackFunnel(funnelPageKey, 'subscription_confirmed'));
-      }
+      // A etapa "Comprou" do funil NÃO é registrada aqui: a URL de sucesso pode
+      // ser aberta por robôs/testes. A contagem vem das vendas aprovadas no banco.
+
     } else if (status === 'cancel') {
       toast({
         title: 'Compra cancelada',
