@@ -21,7 +21,14 @@ const AdminFunnelDetail: React.FC = () => {
   const { funnelKey } = useParams<{ funnelKey: string }>();
   const funnel = getFunnel(funnelKey ?? '');
   const [range, setRange] = useState<FunnelRange>('30d');
-  const { data: counts, isLoading } = usePageFunnel(funnel?.pageKey ?? '', range);
+  const { data: counts, isLoading } = usePageFunnel(
+    funnel?.pageKey ?? '',
+    range,
+    funnel?.productType && funnel?.productSlug
+      ? { productType: funnel.productType, productSlug: funnel.productSlug }
+      : undefined,
+  );
+
 
   if (!funnel) {
     return (
@@ -141,6 +148,16 @@ const AdminFunnelDetail: React.FC = () => {
                 </div>
               ))}
             </div>
+
+            {funnel.productType && funnel.productSlug && (
+              <p className="text-xs text-muted-foreground pt-2">
+                As etapas 1 a 3 são contadas por sessão de navegação na página. A etapa
+                “Comprou” é contada pelos pagamentos aprovados do produto no banco — por isso
+                pode incluir compras feitas por outros caminhos (ex.: link direto) e não depende
+                do cliente voltar para a página após pagar.
+              </p>
+            )}
+
           </div>
         )}
       </div>

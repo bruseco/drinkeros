@@ -40,15 +40,25 @@ const ZERO: FunnelCounts = {
   subscription_confirmed: 0,
 };
 
-export const usePageFunnel = (pageKey: string, range: FunnelRange = '30d') => {
+export interface FunnelSalesSource {
+  productType: string;
+  productSlug: string;
+}
+
+export const usePageFunnel = (
+  pageKey: string,
+  range: FunnelRange = '30d',
+  salesSource?: FunnelSalesSource,
+) => {
   return useQuery({
-    queryKey: ['page-funnel', pageKey, range],
+    queryKey: ['page-funnel', pageKey, range, salesSource?.productType, salesSource?.productSlug],
     enabled: !!pageKey,
     refetchInterval: 30_000,
     queryFn: async (): Promise<FunnelCounts> => {
+      const since = sinceFromRange(range);
       const { data, error } = await supabase.rpc('get_page_funnel' as any, {
         _page_key: pageKey,
-        _since: sinceFromRange(range),
+        _since: since,
       });
       if (error) throw error;
       const out: FunnelCounts = { ...ZERO };
@@ -57,7 +67,25 @@ export const usePageFunnel = (pageKey: string, range: FunnelRange = '30d') => {
           out[row.event as keyof FunnelCounts] = Number(row.count) || 0;
         }
       }
+
+      // Etapa "Comprou": medida por vendas aprovadas no banco (fonte confiável),
+      // e não por evento disparado no navegador.
+      if (salesSource) {
+        const { data: sales, error: salesError } = await supabase.rpc(
+          'get_page_funnel_sales' as any,
+          {
+            _product_type: salesSource.productType,
+            _product_slug: salesSource.productSlug,
+            _since: since,
+          },
+        );
+        if (!salesError) {
+          out.subscription_confirmed = Number(sales) || 0;
+        }
+      }
+
       return out;
     },
   });
 };
+

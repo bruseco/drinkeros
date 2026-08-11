@@ -3727,6 +3727,10 @@ export type Database = {
           event: string
         }[]
       }
+      get_page_funnel_sales: {
+        Args: { _product_slug: string; _product_type: string; _since?: string }
+        Returns: number
+      }
       get_public_tracking_settings: {
         Args: never
         Returns: {
