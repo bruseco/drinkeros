@@ -383,7 +383,15 @@ export default function Checkout() {
               <p className="text-sm text-white/70">Liberando seu acesso...</p>
             </div>
           ) : pixResult ? (
-            <PixDisplay pix={pixResult} amount={finalPrice} />
+            <PixDisplay
+              pix={pixResult}
+              amount={finalPrice}
+              onBack={() => {
+                setPixResult(null);
+                setPixPaymentId(null);
+              }}
+            />
+
           ) : (
             <>
               {isClub && (
@@ -543,7 +551,7 @@ export default function Checkout() {
   );
 }
 
-function PixDisplay({ pix, amount }: { pix: PixData; amount: number }) {
+function PixDisplay({ pix, amount, onBack }: { pix: PixData; amount: number; onBack?: () => void }) {
   const copy = () => {
     navigator.clipboard.writeText(pix.qr_code);
     toast.success("Código Pix copiado!");
@@ -568,10 +576,27 @@ function PixDisplay({ pix, amount }: { pix: PixData; amount: number }) {
         >
           <Copy className="w-4 h-4" /> Copiar código Pix
         </button>
+        {pix.qr_code && (
+          <textarea
+            readOnly
+            value={pix.qr_code}
+            onFocus={(e) => e.currentTarget.select()}
+            className="w-full text-[11px] leading-snug bg-black/5 border border-black/10 rounded-lg p-2 h-20 resize-none"
+          />
+        )}
         <p className="text-xs text-black/50 text-center">
           Após pagar, esta tela libera o acesso automaticamente.
         </p>
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="w-full flex items-center justify-center gap-2 border border-black/15 text-black py-3 rounded-lg font-medium hover:bg-black/5"
+          >
+            <CreditCard className="w-4 h-4" /> Prefiro pagar com cartão
+          </button>
+        )}
       </div>
     </div>
   );
 }
+
