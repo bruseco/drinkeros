@@ -59,7 +59,9 @@ export const UserLayout: React.FC = () => {
   return (
     <div className="flex min-h-screen bg-background">
       <ClubeIntroStickyBar />
+      <VipDiscountBootstrap />
       <ClubeRetriggerWatcher />
+
       <WelcomeOverlay />
 
       <PwaSplashScreen />
