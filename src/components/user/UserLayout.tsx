@@ -13,6 +13,8 @@ import { VipDiscountCountdownBanner } from './VipDiscountCountdownBanner';
 import { WelcomeOverlay } from './WelcomeOverlay';
 import ClubeIntroStickyBar from './ClubeIntroStickyBar';
 import ClubeRetriggerWatcher from './ClubeRetriggerWatcher';
+import VipDiscountBootstrap from './VipDiscountBootstrap';
+
 import { useTrackDailyAppAccess } from '@/hooks/useAccessTracking';
 
 
