@@ -115,10 +115,12 @@ export const WelcomeOverlay: React.FC = () => {
 
   return (
     <div
-      className={`fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm px-6 transition-opacity duration-500 ${
+      role="dialog"
+      aria-modal="true"
+      style={{ pointerEvents: 'auto' }}
+      className={`fixed inset-0 z-[300] flex items-center justify-center bg-black/80 backdrop-blur-sm px-6 transition-opacity duration-500 ${
         closing ? 'opacity-0' : 'opacity-100 animate-fade-in'
       }`}
-      aria-hidden
     >
       {step === 'welcome' && (
         <div className="text-center max-w-sm">
@@ -130,17 +132,19 @@ export const WelcomeOverlay: React.FC = () => {
           </h2>
           <p className="mt-3 text-white/80 text-base leading-snug">
             Sua jornada no mundo dos drinks começa agora! Você está no plano{' '}
-            <span className="font-semibold text-green-400">grátis</span>. 🍹
+            <span className={`font-semibold ${planLabel.className}`}>{planLabel.text}</span>. 🍹
           </p>
           <button
             type="button"
             onClick={handleNext}
-            className="mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-7 py-3 text-base font-semibold shadow-lg shadow-accent/30 hover:scale-[1.03] active:scale-[0.98] transition-transform"
+            onPointerUp={handleNext}
+            className="mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-7 py-3 text-base font-semibold shadow-lg shadow-accent/30 hover:scale-[1.03] active:scale-[0.98] transition-transform touch-manipulation select-none"
           >
             Próximo <ArrowRight className="h-4 w-4" />
           </button>
         </div>
       )}
+
 
       {step === 'interests' && (
         <div className="w-full max-w-sm animate-fade-in">
