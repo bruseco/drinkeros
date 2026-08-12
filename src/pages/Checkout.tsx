@@ -315,9 +315,14 @@ export default function Checkout() {
         id: data.id,
       });
 
-      if (data.pix) {
+      const isPixResponse =
+        data.payment_method_id === "pix" &&
+        !!data.pix && (!!data.pix.qr_code || !!data.pix.qr_code_base64);
+
+      if (isPixResponse) {
         setPixResult(data.pix);
         setPixPaymentId(String(data.id));
+
       } else if (data.status === "approved") {
         setPaid(true);
         toast.success("Pagamento aprovado!");
