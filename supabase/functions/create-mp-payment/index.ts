@@ -310,8 +310,12 @@ serve(async (req) => {
       await invokeWebhookFallback(mpData.id);
     }
 
-    // Para Pix retorna o QR code; para cartão retorna status
-    const pixData = mpData.point_of_interaction?.transaction_data;
+    // Para Pix retorna o QR code; para cartão retorna status.
+    // IMPORTANTE: o MP também devolve point_of_interaction em pagamentos de cartão
+    // (com transaction_data vazio). Só consideramos Pix quando o método é pix E existe QR.
+    const poi = mpData.point_of_interaction?.transaction_data;
+    const pixData = isPix && poi && (poi.qr_code || poi.qr_code_base64) ? poi : null;
+
 
     return new Response(
       JSON.stringify({
