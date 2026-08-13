@@ -184,7 +184,31 @@ serve(async (req) => {
             .eq('user_id', record.user_id).in('ebook_id', ebookIds).is('refunded_at', null);
         }
 
+        // Módulos (packages) liberados pelos cursos do combo
+        if (courseIds.length) {
+          const { data: cp } = await (supabase as any)
+            .from('course_packages').select('package_id').in('course_id', courseIds);
+          const pkgIds = (cp || []).map((r: any) => r.package_id);
+          if (pkgIds.length) {
+            await (supabase as any).from('user_packages')
+              .update({ refunded_at: now, expires_at: now })
+              .eq('user_id', record.user_id).in('package_id', pkgIds).is('refunded_at', null);
+          }
+        }
       }
+
+      // Curso avulso estornado: revoga também os módulos liberados por ele
+      if (table === 'user_courses' && record.user_id && record.course_id) {
+        const { data: cp } = await (supabase as any)
+          .from('course_packages').select('package_id').eq('course_id', record.course_id);
+        const pkgIds = (cp || []).map((r: any) => r.package_id);
+        if (pkgIds.length) {
+          await (supabase as any).from('user_packages')
+            .update({ refunded_at: now, expires_at: now })
+            .eq('user_id', record.user_id).in('package_id', pkgIds).is('refunded_at', null);
+        }
+      }
+
 
       // Revoga o acesso exclusivo (Receitas) SOMENTE se o produto estornado
       // era o responsável por liberá-lo (combo com includes_exclusive_access),
