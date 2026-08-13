@@ -33,10 +33,31 @@ Deno.serve(async (req) => {
 
     if (!roleData) throw new Error('Not authorized - super_admin only');
 
-    const { userId, newEmail } = await req.json();
+    const body = await req.json();
+    const userId = body.userId;
+    const newEmail = String(body.newEmail || '').trim().toLowerCase();
     if (!userId || !newEmail) throw new Error('userId and newEmail are required');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) throw new Error('E-mail inválido');
 
     console.log(`Updating email for user ${userId} to ${newEmail}`);
+
+    // Pré-checagem: o e-mail já pertence a outra conta?
+    const { data: existingProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('user_id, full_name')
+      .ilike('email', newEmail)
+      .maybeSingle();
+
+    if (existingProfile && existingProfile.user_id !== userId) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          code: 'email_in_use',
+          error: `Este e-mail já está em uso por outra conta${existingProfile.full_name ? ` (${existingProfile.full_name})` : ''}. Exclua ou altere a outra conta antes de reutilizar este e-mail.`,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      );
+    }
 
     const { data, error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
       email: newEmail,
