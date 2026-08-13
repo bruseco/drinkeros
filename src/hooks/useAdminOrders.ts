@@ -16,6 +16,7 @@ export interface AdminOrder {
   payment_method: string | null;
   purchased_at: string;
   external_ref: string | null;
+  refunded_at: string | null;
   total_count: number;
 }
 
