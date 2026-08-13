@@ -154,14 +154,45 @@ serve(async (req) => {
         }
       }
     } else {
-      // Mark and remove access
+      const now = new Date().toISOString();
+      // Mantém o registro (histórico/relatório de vendas) mas revoga o acesso
+      // expirando-o. NÃO deletamos mais: a exclusão fazia os produtos internos
+      // do combo reaparecerem como vendas avulsas com valor cheio.
       await (supabase as any).from(table).update({
-        refunded_at: new Date().toISOString(),
+        refunded_at: now,
         refund_amount: refundAmount,
         refund_id: refundId,
+        expires_at: now,
       }).eq('id', recordId);
-      // Then delete to revoke access
-      await (supabase as any).from(table).delete().eq('id', recordId);
+
+      // Revoga os acessos propagados (cursos/ebooks liberados pelo combo)
+      if (table === 'user_combos' && record.user_id && record.combo_id) {
+        const [{ data: cc }, { data: ce }] = await Promise.all([
+          (supabase as any).from('combo_courses').select('course_id').eq('combo_id', record.combo_id),
+          (supabase as any).from('combo_ebooks').select('ebook_id').eq('combo_id', record.combo_id),
+        ]);
+        const courseIds = (cc || []).map((r: any) => r.course_id);
+        const ebookIds = (ce || []).map((r: any) => r.ebook_id);
+        if (courseIds.length) {
+          await (supabase as any).from('user_courses')
+            .update({ refunded_at: now, expires_at: now })
+            .eq('user_id', record.user_id).in('course_id', courseIds).is('refunded_at', null);
+        }
+        if (ebookIds.length) {
+          await (supabase as any).from('user_ebooks')
+            .update({ refunded_at: now, expires_at: now })
+            .eq('user_id', record.user_id).in('ebook_id', ebookIds).is('refunded_at', null);
+        }
+      }
+    }
+
+    // Marca a compra correspondente como estornada (evita contar no faturamento)
+    const txRef = mpRef || stripeRef;
+    if (txRef) {
+      await (supabase as any)
+        .from('purchases')
+        .update({ status: 'refunded' })
+        .eq('transaction_id', txRef);
     }
 
     return new Response(JSON.stringify({

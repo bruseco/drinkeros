@@ -336,7 +336,12 @@ const AdminOrders: React.FC = () => {
                         </Link>
                       )}
                     </TableCell>
-                    <TableCell className="max-w-xs truncate">{r.product_name}</TableCell>
+                    <TableCell className="max-w-xs truncate">
+                      {r.product_name}
+                      {r.refunded_at && (
+                        <Badge variant="destructive" className="ml-2 align-middle">Estornado</Badge>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Badge variant="outline">{productLabel[r.product_type] || r.product_type}</Badge>
                     </TableCell>

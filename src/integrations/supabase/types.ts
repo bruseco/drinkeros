@@ -3568,6 +3568,7 @@ export type Database = {
           product_name: string
           product_type: string
           purchased_at: string
+          refunded_at: string
           source: string
           total_count: number
           user_id: string
