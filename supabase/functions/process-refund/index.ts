@@ -186,22 +186,47 @@ serve(async (req) => {
 
       }
 
-      // Revoga o acesso exclusivo (Receitas) liberado pela compra estornada,
-      // desde que o usuário não seja Sócio ativo nem Vitalício.
-      if (record.user_id) {
+      // Revoga o acesso exclusivo (Receitas) SOMENTE se o produto estornado
+      // era o responsável por liberá-lo (combo com includes_exclusive_access),
+      // e desde que o usuário não seja Sócio ativo nem Vitalício.
+      let grantedExclusive = false;
+      if (table === 'user_combos' && record.combo_id) {
+        const { data: comboRow } = await (supabase as any)
+          .from('combos')
+          .select('includes_exclusive_access')
+          .eq('id', record.combo_id)
+          .maybeSingle();
+        grantedExclusive = !!comboRow?.includes_exclusive_access;
+      }
+
+      if (grantedExclusive && record.user_id) {
         const [{ data: planRow }, { data: lifetimeRow }] = await Promise.all([
           (supabase as any).from('user_plans').select('plan, expires_at').eq('user_id', record.user_id).maybeSingle(),
           (supabase as any).from('user_lifetime_access').select('id').eq('user_id', record.user_id).maybeSingle(),
         ]);
         const isVipActive = planRow?.plan === 'vip' &&
           (!planRow?.expires_at || new Date(planRow.expires_at) > new Date());
-        if (!lifetimeRow && !isVipActive) {
+
+        // Verifica se outro combo ativo (não estornado) ainda garante o acesso
+        const { data: otherCombos } = await (supabase as any)
+          .from('user_combos')
+          .select('combo_id, expires_at, refunded_at, combos(includes_exclusive_access)')
+          .eq('user_id', record.user_id)
+          .is('refunded_at', null)
+          .neq('id', recordId);
+        const stillGranted = (otherCombos || []).some((c: any) =>
+          c.combos?.includes_exclusive_access &&
+          (!c.expires_at || new Date(c.expires_at) > new Date())
+        );
+
+        if (!lifetimeRow && !isVipActive && !stillGranted) {
           await (supabase as any).from('user_exclusive_access')
             .update({ expires_at: now })
             .eq('user_id', record.user_id)
             .eq('feature', 'receitas');
         }
       }
+
     }
 
 
