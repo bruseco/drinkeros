@@ -386,6 +386,10 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   };
 
   const handleGiftReveal = () => {
+    // Trava o valor no preço oficial ANTES de marcar como revelado,
+    // para o preço final (ex.: 297) nunca piscar antes da animação.
+    if (giftOfficialPrice) setDisplayPrice(giftOfficialPrice);
+    setPricePulsing(false);
     setGiftOpen(false);
     markRevealed();
     trackGiftFunnel();
@@ -393,6 +397,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     scrollToPriceAnchor();
     window.setTimeout(runPriceCountdown, 700);
   };
+
 
   const handleGiftClose = () => {
     setGiftOpen(false);
