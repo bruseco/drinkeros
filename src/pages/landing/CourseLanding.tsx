@@ -256,32 +256,65 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   // Hero video: starts muted (autoplay policy), unmute on first user interaction
   const heroVideoRef = useRef<HTMLVideoElement | null>(null);
   const heroIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const muteVideo = useRef(() => {
+    const v = heroVideoRef.current;
+    if (v) {
+      v.muted = true;
+    }
+    const iframe = heroIframeRef.current;
+    if (iframe?.contentWindow) {
+      iframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
+    }
+  }).current;
+  const unmuteVideo = useRef(() => {
+    const v = heroVideoRef.current;
+    if (v) {
+      v.muted = false;
+      v.volume = 1;
+      const p = v.play();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    }
+    const iframe = heroIframeRef.current;
+    if (iframe?.contentWindow) {
+      // YouTube IFrame API postMessage to unmute
+      iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    }
+  }).current;
   useEffect(() => {
     if (!heroVideoUrl) return;
     let unmuted = false;
     const unmute = () => {
       if (unmuted) return;
       unmuted = true;
-      const v = heroVideoRef.current;
-      if (v) {
-        v.muted = false;
-        v.volume = 1;
-        const p = v.play();
-        if (p && typeof p.catch === 'function') p.catch(() => {});
-      }
-      const iframe = heroIframeRef.current;
-      if (iframe?.contentWindow) {
-        // YouTube IFrame API postMessage to unmute
-        iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
-        iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-      }
+      unmuteVideo();
       cleanup();
     };
     const events: Array<keyof WindowEventMap> = ['pointerdown', 'touchstart', 'keydown', 'scroll', 'wheel'];
     const cleanup = () => events.forEach(e => window.removeEventListener(e, unmute));
     events.forEach(e => window.addEventListener(e, unmute, { passive: true, once: false }));
     return cleanup;
-  }, [heroVideoUrl]);
+  }, [heroVideoUrl, unmuteVideo]);
+
+  // Ao chegar na seção de preços, deixa o som do vídeo do hero mudo novamente
+  useEffect(() => {
+    if (!heroVideoUrl) return;
+    const el = priceAnchorRef.current;
+    if (!el) return;
+    let didMute = false;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !didMute) {
+          didMute = true;
+          muteVideo();
+        }
+      },
+      { threshold: 0.4 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [heroVideoUrl, muteVideo]);
+
 
   const dbPrice = (course as any)?.price ? Number((course as any).price) : (combo as any)?.price ? Number((combo as any).price) : null;
   const basePrice = dbPrice ?? fallbackPrice;
