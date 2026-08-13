@@ -184,8 +184,11 @@ serve(async (req) => {
             .eq('user_id', record.user_id).in('ebook_id', ebookIds).is('refunded_at', null);
         }
 
-        // Revoga o acesso exclusivo (Receitas) liberado pelo combo,
-        // desde que o usuário não seja Sócio ativo nem Vitalício.
+      }
+
+      // Revoga o acesso exclusivo (Receitas) liberado pela compra estornada,
+      // desde que o usuário não seja Sócio ativo nem Vitalício.
+      if (record.user_id) {
         const [{ data: planRow }, { data: lifetimeRow }] = await Promise.all([
           (supabase as any).from('user_plans').select('plan, expires_at').eq('user_id', record.user_id).maybeSingle(),
           (supabase as any).from('user_lifetime_access').select('id').eq('user_id', record.user_id).maybeSingle(),
@@ -199,8 +202,8 @@ serve(async (req) => {
             .eq('feature', 'receitas');
         }
       }
-
     }
+
 
     // Marca a compra correspondente como estornada (evita contar no faturamento)
     const txRef = mpRef || stripeRef;
