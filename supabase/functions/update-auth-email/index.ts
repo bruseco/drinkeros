@@ -66,6 +66,17 @@ Deno.serve(async (req) => {
 
     if (error) {
       console.error('updateUserById error:', JSON.stringify(error));
+      const msg = `${error.message || ''}`;
+      if (msg.includes('users_email_partial_key') || msg.includes('duplicate key') || msg.includes('already been registered')) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            code: 'email_in_use',
+            error: 'Este e-mail já está cadastrado em outra conta. Exclua ou altere a outra conta antes de reutilizar este e-mail.',
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        );
+      }
       throw error;
     }
 
