@@ -183,8 +183,27 @@ serve(async (req) => {
             .update({ refunded_at: now, expires_at: now })
             .eq('user_id', record.user_id).in('ebook_id', ebookIds).is('refunded_at', null);
         }
+
+      }
+
+      // Revoga o acesso exclusivo (Receitas) liberado pela compra estornada,
+      // desde que o usuário não seja Sócio ativo nem Vitalício.
+      if (record.user_id) {
+        const [{ data: planRow }, { data: lifetimeRow }] = await Promise.all([
+          (supabase as any).from('user_plans').select('plan, expires_at').eq('user_id', record.user_id).maybeSingle(),
+          (supabase as any).from('user_lifetime_access').select('id').eq('user_id', record.user_id).maybeSingle(),
+        ]);
+        const isVipActive = planRow?.plan === 'vip' &&
+          (!planRow?.expires_at || new Date(planRow.expires_at) > new Date());
+        if (!lifetimeRow && !isVipActive) {
+          await (supabase as any).from('user_exclusive_access')
+            .update({ expires_at: now })
+            .eq('user_id', record.user_id)
+            .eq('feature', 'receitas');
+        }
       }
     }
+
 
     // Marca a compra correspondente como estornada (evita contar no faturamento)
     const txRef = mpRef || stripeRef;
