@@ -21,6 +21,7 @@ import { template as clubePaymentFailed } from './clube-payment-failed.tsx'
 import { template as accountCreated } from './account-created.tsx'
 import { template as purchaseConfirmed } from './purchase-confirmed.tsx'
 import { template as pixPaymentPending } from './pix-payment-pending.tsx'
+import { template as randOffer197 } from './rand-offer-197.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'welcome': welcomeEmail,
@@ -35,4 +36,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'account-created': accountCreated,
   'purchase-confirmed': purchaseConfirmed,
   'pix-payment-pending': pixPaymentPending,
+  'rand-offer-197': randOffer197,
 }
