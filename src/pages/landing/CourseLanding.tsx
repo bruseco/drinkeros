@@ -451,6 +451,11 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       else {
         setDisplayPrice(to);
         setPricePulsing(true);
+        // Mostra a tarja pink somente quando o preço chegar no primeiro desconto (R$ 297)
+        const firstTarget = coupon ? coupon.previousPrice : finalPrice;
+        if (Math.abs(to - firstTarget) < 0.5) {
+          setCountdownBarVisible(true);
+        }
       }
     };
     requestAnimationFrame(step);
@@ -472,6 +477,15 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       return raw ? Number(raw) : null;
     } catch {
       return null;
+    }
+  });
+  const [countdownBarVisible, setCountdownBarVisible] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      // Se já havia revelado o desconto e a contagem está ativa, mantém a tarja visível
+      return sessionStorage.getItem(`gift-reveal:${slug}`) === '1' && !!sessionStorage.getItem(`offer-countdown:${slug}`);
+    } catch {
+      return false;
     }
   });
   const startCountdown = () => {
@@ -539,6 +553,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     couponAnimatedRef.current = true;
     setPricePulsing(false);
     setDisplayPrice(coupon.previousPrice);
+    setCountdownBarVisible(true);
     startCountdown();
     const t = window.setTimeout(() => {
       scrollToPriceAnchor();
@@ -1513,7 +1528,12 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       </footer>
 
       {countdownStartedAt && (
-        <OfferCountdownBar startedAt={countdownStartedAt} minutes={offerCountdownMinutes} hideOnEnd />
+        <OfferCountdownBar
+          startedAt={countdownStartedAt}
+          minutes={offerCountdownMinutes}
+          hideOnEnd
+          visible={countdownBarVisible}
+        />
       )}
 
       {giftEnabled && (
