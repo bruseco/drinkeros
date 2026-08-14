@@ -249,6 +249,8 @@ export default function Checkout() {
       .filter(Boolean).join(" ").trim();
     if (mpCpf) setBuyerCpf(mpCpf);
     if (mpName) setBuyerName(mpName);
+    const mpEmail = String(formData?.payer?.email || "").trim();
+    if (mpEmail) setPayerEmail(mpEmail);
     const fiscalData = { cpf: mpCpf, full_name: mpName } as Record<string, string>;
     setSubmitting(true);
     try {
@@ -360,7 +362,7 @@ export default function Checkout() {
         import('@/lib/firePurchaseFromBackend').then(m =>
           m.firePurchaseFromBackend({ source: 'checkout-mp-card' })
         );
-        finishAfterPayment(isClub ? "/pv-clube?clube=success" : `/${product.slug}?checkout=success`);
+        finishAfterPayment(isClub ? "/pv-clube?clube=success" : `/${product.slug}?checkout=success`, 1500, String(data.id || ""));
       } else if (data.status === "in_process" || data.status === "pending") {
         toast.info("Pagamento em análise. Você receberá uma confirmação em breve.");
         setTimeout(() => navigate(isClub ? "/pv-clube?clube=pending" : `/${product.slug}?checkout=pending`), 2000);
