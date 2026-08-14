@@ -6,7 +6,8 @@ Sim, é totalmente possível. Resumo do fluxo:
 1. Usuário chega na área de preço (R$ 497)
 2. Abre o presente → agora pede NOME + E-MAIL para liberar
 3. Desconto revelado: 497 → 297 (animação atual, sem mudanças)
-4. Se não comprar em 15 min → e-mail "só pra você: R$ 197"
+4. Tarja pink no topo com contador de 15 min ("oferta por tempo limitado")
+5. Se não comprar em 20 min → e-mail "só pra você: R$ 197" (só se NÃO comprou)
 5. Link do e-mail abre /rand (ou checkout) com cupom ativo
 6. Página mostra R$ 297 e faz nova animação: 297 → 197
 7. Checkout cobra R$ 197 (validado no servidor pelo cupom)
