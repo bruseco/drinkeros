@@ -87,14 +87,28 @@ const AdminSalesPage: React.FC = () => {
   const pageKey = decodeURIComponent(rawPage ?? '');
   const [range, setRange] = useState<FunnelRange>('30d');
 
-  const { data: counts, isLoading } = usePageFunnel(pageKey, range);
-
   const isClube = pageKey === 'clube' || pageKey === 'clube-b';
   const steps = isClube ? CLUB_STEPS : SIMPLE_STEPS;
+
+  const funnelDef = React.useMemo(
+    () => ({
+      key: pageKey,
+      pageKey,
+      name: pageKey,
+      description: '',
+      publicPath: pathFromPageKey(pageKey),
+      steps: steps.map((s) => ({ key: String(s.key), event: s.key as any, label: s.label })),
+    }),
+    [pageKey, steps],
+  );
+
+  const { data: counts, isLoading } = usePageFunnel(pageKey ? funnelDef : undefined, range);
+
   const safeCounts: FunnelCounts = counts ?? {
     pageview: 0, offer_1_revealed: 0, checkout_1_started: 0,
     offer_2_revealed: 0, checkout_2_started: 0, subscription_confirmed: 0,
   };
+
 
   const topCount = safeCounts[steps[0].key];
   const publicPath = pathFromPageKey(pageKey);
