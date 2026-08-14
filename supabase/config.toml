@@ -45,3 +45,12 @@ project_id = "pvjlcfhqueibjnkuzzna"
 
   [functions.nibo-list-services]
     verify_jwt = true
+
+  [functions.capture-offer-lead]
+    verify_jwt = false
+
+  [functions.validate-offer-coupon]
+    verify_jwt = false
+
+  [functions.send-offer-followup-emails]
+    verify_jwt = false
