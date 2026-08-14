@@ -163,6 +163,75 @@ const AdminUserDetail: React.FC = () => {
     </div>
   );
 
+  const saveProfileField = async (column: string) => {
+    if (!userId) return;
+    const value = profileDraft.trim() || null;
+    const { error } = await supabase.from('profiles').update({ [column]: value } as any).eq('user_id', userId);
+    if (error) {
+      toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Dado atualizado' });
+      queryClient.invalidateQueries({ queryKey: ['admin-user-detail'] });
+      setEditingProfileField(null);
+    }
+  };
+
+  const renderProfileField = (column: string, label: string, value: string | null) => (
+    <div className="flex items-center gap-3 py-1.5">
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        {editingProfileField === column ? (
+          <div className="flex items-center gap-2 mt-1">
+            <Input
+              value={profileDraft}
+              onChange={(e) => setProfileDraft(e.target.value)}
+              className="h-8"
+              type={column === 'birth_date' ? 'date' : 'text'}
+              autoFocus
+            />
+            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => saveProfileField(column)}>
+              <Check className="h-4 w-4" />
+            </Button>
+            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditingProfileField(null)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <p className="font-medium text-sm truncate">
+            {value || <span className="text-muted-foreground italic">não informado</span>}
+          </p>
+        )}
+      </div>
+      {editingProfileField !== column && (
+        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => { setEditingProfileField(column); setProfileDraft(value || ''); }}>
+          <Pencil className="h-3.5 w-3.5" />
+        </Button>
+      )}
+    </div>
+  );
+
+  const addressComplete = !!(profile.cep && profile.address_street && profile.address_number && profile.address_neighborhood && profile.address_city && profile.address_state);
+
+  const copyFiscalData = async () => {
+    const text = [
+      `Nome: ${profile.full_name || '-'}`,
+      `CPF: ${profile.cpf || '-'}`,
+      `Email: ${profile.email}`,
+      `Telefone: ${profile.phone || '-'}`,
+      `CEP: ${profile.cep || '-'}`,
+      `Endereço: ${profile.address_street || '-'}, ${profile.address_number || '-'}${profile.address_complement ? ` - ${profile.address_complement}` : ''}`,
+      `Bairro: ${profile.address_neighborhood || '-'}`,
+      `Cidade/UF: ${profile.address_city || '-'} / ${profile.address_state || '-'}`,
+    ].join('\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({ title: 'Dados fiscais copiados' });
+    } catch {
+      toast({ title: 'Não foi possível copiar', variant: 'destructive' });
+    }
+  };
+
+
   const excludeIds = {
     courses: courses.map((c) => c.ref_id),
     ebooks: ebooks.map((e) => e.ref_id),
