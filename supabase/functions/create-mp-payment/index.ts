@@ -180,48 +180,40 @@ serve(async (req) => {
         : Math.round(basePrice * (1 - vipPercent / 100) * 100) / 100)
       : basePrice;
 
-    // ===== Validação fiscal obrigatória (NFS-e/NIBO) =====
-    // Sem CPF + endereço completo o NIBO recusa a emissão. Bloqueia aqui para que
-    // nenhum fluxo (convidado, /rand, links diretos) consiga pagar sem os dados.
+    // ===== Dados fiscais (NFS-e/NIBO) — best effort, sem bloquear o pagamento =====
+    // CPF e nome vêm do próprio formulário do Mercado Pago (Brick). O endereço é
+    // coletado DEPOIS do pagamento (modal pós-compra) e a NFS-e só é emitida
+    // quando ele estiver completo.
     const fiscalCpf = String(fiscal?.cpf || formData?.payer?.identification?.number || "").replace(/\D/g, "");
-    const fiscalCep = String(fiscal?.cep || "").replace(/\D/g, "");
-    // Nome: prioriza o que veio do checkout; se faltar (ex.: bundle antigo em cache no
-    // navegador/PWA do cliente), cai para o perfil do usuário logado e depois para o
-    // nome informado no Brick do Mercado Pago. Só bloqueia se nenhum existir.
     let fiscalName = String(fiscal?.full_name || "").trim().replace(/\s+/g, " ");
-    if (fiscalName.length < 3 && userId) {
-      const { data: profName } = await supabase
-        .from("profiles").select("full_name").eq("user_id", userId).maybeSingle();
-      fiscalName = String((profName as any)?.full_name || "").trim().replace(/\s+/g, " ");
-    }
     if (fiscalName.length < 3) {
       const mpName = [formData?.payer?.first_name, formData?.payer?.last_name]
         .filter(Boolean).join(" ").trim().replace(/\s+/g, " ");
       if (mpName.length >= 3) fiscalName = mpName;
     }
-    // Etapa 1 do checkout: exigimos apenas nome completo + CPF antes do pagamento.
-    // O endereço (CEP, rua, número, bairro, cidade, UF) é coletado DEPOIS do pagamento
-    // (etapa 3) e a NFS-e só é emitida quando ele estiver completo.
-    const missingFiscal: string[] = [];
-    if (fiscalName.length < 3) missingFiscal.push("nome completo");
-    if (fiscalCpf.length !== 11 && fiscalCpf.length !== 14) missingFiscal.push("CPF");
-    if (missingFiscal.length > 0) {
-      console.error("[create-mp-payment] bloqueio fiscal", {
-        product_type,
-        slug,
-        user_id: userId,
-        has_fiscal_payload: !!fiscal,
-        missing: missingFiscal,
-      });
-      return new Response(
-        JSON.stringify({
-          error: `Dados incompletos (faltando: ${missingFiscal.join(", ")}). Preencha para continuar.`,
-          code: "fiscal_incomplete",
-          missing: missingFiscal,
-        }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+    if (fiscalName.length < 3 && userId) {
+      const { data: profName } = await supabase
+        .from("profiles").select("full_name").eq("user_id", userId).maybeSingle();
+      fiscalName = String((profName as any)?.full_name || "").trim().replace(/\s+/g, " ");
     }
+
+    // Persiste CPF/nome no perfil do usuário logado quando ainda não existirem.
+    if (userId && (fiscalCpf.length === 11 || fiscalName.length >= 3)) {
+      try {
+        const { data: prof } = await supabase
+          .from("profiles").select("cpf, full_name").eq("user_id", userId).maybeSingle();
+        const patch: Record<string, string> = {};
+        if (fiscalCpf.length === 11 && !(prof as any)?.cpf) patch.cpf = fiscalCpf;
+        if (fiscalName.length >= 3 && !String((prof as any)?.full_name || "").trim()) patch.full_name = fiscalName;
+        if (Object.keys(patch).length > 0) {
+          const { error: upErr } = await supabase.from("profiles").update(patch).eq("user_id", userId);
+          if (upErr) console.warn("[create-mp-payment] perfil não atualizado", upErr.message);
+        }
+      } catch (e) {
+        console.warn("[create-mp-payment] falha ao persistir dados fiscais", (e as Error).message);
+      }
+    }
+
 
 
     const externalRef = `${product_type}:${product.id}:${userId || "guest"}:${Date.now()}`;
