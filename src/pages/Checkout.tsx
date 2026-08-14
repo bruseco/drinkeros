@@ -423,101 +423,98 @@ export default function Checkout() {
               }}
             />
 
+          ) : submitting ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-16 text-white">
+              <Loader2 className="w-10 h-10 animate-spin text-primary" />
+              <p className="text-base font-medium">Processando...</p>
+              <p className="text-sm text-white/60">Aguarde enquanto confirmamos seu pagamento.</p>
+            </div>
           ) : (
-              {submitting ? (
-                <div className="flex flex-col items-center justify-center gap-3 py-16 text-white">
-                  <Loader2 className="w-10 h-10 animate-spin text-primary" />
-                  <p className="text-base font-medium">Processando...</p>
-                  <p className="text-sm text-white/60">Aguarde enquanto confirmamos seu pagamento.</p>
-                </div>
-              ) : (
-                <>
-                  {isClub && (
-                    <div className="grid grid-cols-2 gap-2 mb-4">
-                      <button
-                        type="button"
-                        onClick={() => setClubMethod("card")}
-                        className={`rounded-xl border p-3 text-left transition ${
-                          clubMethod === "card"
-                            ? "border-primary bg-primary/10"
-                            : "border-white/10 bg-white/5 hover:border-white/20"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          <CreditCard className="w-4 h-4" />
-                          <span className="text-sm font-medium">Cartão</span>
-                          <span className="ml-auto text-[10px] uppercase tracking-wider bg-primary/20 text-primary px-1.5 py-0.5 rounded">
-                            Recomendado
-                          </span>
-                        </div>
-                        <p className="text-xs text-white/60 flex items-center gap-1">
-                          <RefreshCw className="w-3 h-3" /> Renovação automática anual
-                        </p>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setClubMethod("pix")}
-                        className={`rounded-xl border p-3 text-left transition ${
-                          clubMethod === "pix"
-                            ? "border-primary bg-primary/10"
-                            : "border-white/10 bg-white/5 hover:border-white/20"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          <QrCode className="w-4 h-4" />
-                          <span className="text-sm font-medium">Pix</span>
-                        </div>
-                        <p className="text-xs text-white/60">Acesso por 12 meses · sem renovação</p>
-                      </button>
+            <>
+              {isClub && (
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => setClubMethod("card")}
+                    className={`rounded-xl border p-3 text-left transition ${
+                      clubMethod === "card"
+                        ? "border-primary bg-primary/10"
+                        : "border-white/10 bg-white/5 hover:border-white/20"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <CreditCard className="w-4 h-4" />
+                      <span className="text-sm font-medium">Cartão</span>
+                      <span className="ml-auto text-[10px] uppercase tracking-wider bg-primary/20 text-primary px-1.5 py-0.5 rounded">
+                        Recomendado
+                      </span>
                     </div>
-                  )}
-
-
-                  <div className="bg-white rounded-xl overflow-hidden p-2 sm:p-4 text-black">
-                    {payerEmail !== null ? (
-                      <Payment
-                        key={`brick-${finalPrice}-${isClub ? clubMethod : "all"}`}
-                        initialization={{
-                          amount: finalPrice,
-                          ...(payerEmail ? { payer: { email: payerEmail } } : {}),
-                        }}
-                        customization={{
-                          paymentMethods: isClub
-                            ? {
-                                creditCard: clubMethod === "card" ? "all" : undefined,
-                                bankTransfer: clubMethod === "pix" ? ["pix"] : undefined,
-                                maxInstallments: 1,
-                                minInstallments: 1,
-                              }
-                            : {
-                                creditCard: "all",
-                                bankTransfer: ["pix"],
-                                maxInstallments: 12,
-                                minInstallments: 1,
-                              },
-                          visual: {
-                            style: { theme: "default" },
-                            hideFormTitle: true,
-                          },
-                        }}
-                        onReady={() => {
-                          console.log("[MP Brick] ready", { amount: finalPrice, isClub, clubMethod });
-                        }}
-                        onSubmit={async ({ formData }) => {
-                          await onSubmit(formData);
-                        }}
-                        onError={(err) => {
-                          console.error("[Brick error]", err);
-                        }}
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center py-8 text-black/60 text-sm gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin" /> Carregando pagamento...
-                      </div>
-                    )}
-                  </div>
-                </>
+                    <p className="text-xs text-white/60 flex items-center gap-1">
+                      <RefreshCw className="w-3 h-3" /> Renovação automática anual
+                    </p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setClubMethod("pix")}
+                    className={`rounded-xl border p-3 text-left transition ${
+                      clubMethod === "pix"
+                        ? "border-primary bg-primary/10"
+                        : "border-white/10 bg-white/5 hover:border-white/20"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <QrCode className="w-4 h-4" />
+                      <span className="text-sm font-medium">Pix</span>
+                    </div>
+                    <p className="text-xs text-white/60">Acesso por 12 meses · sem renovação</p>
+                  </button>
+                </div>
               )}
+
+
+              <div className="bg-white rounded-xl overflow-hidden p-2 sm:p-4 text-black">
+                {payerEmail !== null ? (
+                  <Payment
+                    key={`brick-${finalPrice}-${isClub ? clubMethod : "all"}`}
+                    initialization={{
+                      amount: finalPrice,
+                      ...(payerEmail ? { payer: { email: payerEmail } } : {}),
+                    }}
+                    customization={{
+                      paymentMethods: isClub
+                        ? {
+                            creditCard: clubMethod === "card" ? "all" : undefined,
+                            bankTransfer: clubMethod === "pix" ? ["pix"] : undefined,
+                            maxInstallments: 1,
+                            minInstallments: 1,
+                          }
+                        : {
+                            creditCard: "all",
+                            bankTransfer: ["pix"],
+                            maxInstallments: 12,
+                            minInstallments: 1,
+                          },
+                      visual: {
+                        style: { theme: "default" },
+                        hideFormTitle: true,
+                      },
+                    }}
+                    onReady={() => {
+                      console.log("[MP Brick] ready", { amount: finalPrice, isClub, clubMethod });
+                    }}
+                    onSubmit={async ({ formData }) => {
+                      await onSubmit(formData);
+                    }}
+                    onError={(err) => {
+                      console.error("[Brick error]", err);
+                    }}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center py-8 text-black/60 text-sm gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Carregando pagamento...
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>
