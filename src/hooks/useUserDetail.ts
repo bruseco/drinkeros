@@ -28,7 +28,19 @@ export interface UserDetail {
     avatar_url: string | null;
     created_at: string;
     last_sign_in_provider: string | null;
+    birth_date: string | null;
+    gender: string | null;
+    bio: string | null;
+    interests: string[] | null;
+    cep: string | null;
+    address_street: string | null;
+    address_number: string | null;
+    address_complement: string | null;
+    address_neighborhood: string | null;
+    address_city: string | null;
+    address_state: string | null;
   };
+
   role: string | null;
   plan: { plan: string; expires_at: string | null; activated_at: string; source: string } | null;
   is_lifetime: boolean;
