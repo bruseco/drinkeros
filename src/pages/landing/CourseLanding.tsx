@@ -357,7 +357,13 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
           try {
             sessionStorage.setItem(`offer-coupon:${slug}`, token);
           } catch { /* ignore */ }
+          import('@/lib/funnelTracking').then((m) =>
+            m.trackFunnel(funnelPageKey, 'offer_2_revealed', {
+              amountCents: Math.round(Number(data.price) * 100),
+            }),
+          );
         }
+
       } catch { /* cupom inválido não quebra a página */ }
     })();
     return () => { cancelled = true; };
