@@ -1,7 +1,15 @@
 import type { FunnelEvent } from '@/lib/funnelTracking';
 
 export interface FunnelStepDef {
-  event: FunnelEvent;
+  /** Identificador único da etapa dentro do funil. */
+  key: string;
+  /** Evento de navegador (quando a etapa é medida por sessão). */
+  event?: FunnelEvent;
+  /**
+   * Quando definido, a etapa é medida por vendas aprovadas no banco,
+   * filtrando pelo valor pago (faixa em reais).
+   */
+  sales?: { min?: number; max?: number };
   label: string;
   hint?: string;
 }
@@ -14,10 +22,7 @@ export interface FunnelDef {
   description: string;
   publicPath: string;
   steps: FunnelStepDef[];
-  /**
-   * Produto vinculado. Quando definido, a etapa final ("Comprou") é medida
-   * pelas vendas aprovadas no banco, e não por evento do navegador.
-   */
+  /** Produto vinculado, usado nas etapas medidas por vendas do banco. */
   productType?: 'course' | 'combo' | 'ebook' | 'package';
   productSlug?: string;
 }
@@ -32,10 +37,13 @@ export const FUNNELS: FunnelDef[] = [
     productType: 'combo',
     productSlug: 'rand',
     steps: [
-      { event: 'pageview', label: 'Acessou a página /rand', hint: 'Visitantes únicos' },
-      { event: 'offer_1_revealed', label: 'Pegou o desconto', hint: 'Abriu o presente' },
-      { event: 'checkout_1_started', label: 'Clicou em comprar', hint: 'Foi para o checkout' },
-      { event: 'subscription_confirmed', label: 'Comprou', hint: 'Pagamento aprovado (banco)' },
+      { key: 'pageview', event: 'pageview', label: 'Acessou a página /rand', hint: 'Visitantes únicos' },
+      { key: 'offer_1', event: 'offer_1_revealed', label: 'Pegou o desconto (R$ 297)', hint: 'Abriu o presente' },
+      { key: 'checkout_1', event: 'checkout_1_started', label: 'Clicou em comprar por R$ 297', hint: 'Foi para o checkout' },
+      { key: 'offer_2', event: 'offer_2_revealed', label: 'Abriu o 2º desconto (R$ 197)', hint: 'Clicou no link do e-mail' },
+      { key: 'checkout_2', event: 'checkout_2_started', label: 'Clicou em comprar por R$ 197', hint: 'Checkout com cupom' },
+      { key: 'sales_297', sales: { min: 200 }, label: 'Comprou por R$ 297', hint: 'Pagamento aprovado (banco)' },
+      { key: 'sales_197', sales: { max: 199.99 }, label: 'Comprou por R$ 197', hint: 'Pagamento aprovado (banco)' },
     ],
   },
 ];
