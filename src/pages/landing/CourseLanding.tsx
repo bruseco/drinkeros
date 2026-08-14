@@ -1505,15 +1505,24 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
         </p>
       </footer>
 
+      {countdownStartedAt && (
+        <OfferCountdownBar startedAt={countdownStartedAt} minutes={offerCountdownMinutes} hideOnEnd />
+      )}
+
       {giftEnabled && (
         <PriceGiftReveal
           open={giftOpen}
           title={giftTitle}
           subtitle={giftSubtitle}
+          requireLead={leadCapture}
+          defaultName={leadDefaults.name}
+          defaultEmail={leadDefaults.email}
+          onSubmitLead={handleLeadSubmit}
           onReveal={handleGiftReveal}
           onClose={handleGiftClose}
         />
       )}
+
     </div>
   );
 };
