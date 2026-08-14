@@ -167,8 +167,13 @@ export interface CourseLandingProps {
   giftOfficialPrice?: number;
   giftTitle?: string;
   giftSubtitle?: string;
+  /** Pede nome + e-mail no presente antes de liberar o desconto (funil de 2ª oferta). */
+  leadCapture?: boolean;
+  /** Minutos da tarja rosa de contagem regressiva exibida após o desconto. */
+  offerCountdownMinutes?: number;
   /** Chave do funil (page_key) para métricas em /admin/funis. Ex.: 'rand'. */
   funnelPageKey?: string;
+
 }
 
 
