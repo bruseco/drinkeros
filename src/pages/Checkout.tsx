@@ -181,13 +181,42 @@ export default function Checkout() {
     })();
   }, [productType, slug, navigate, youth.isYouth, youth.loading]);
 
+  // Cupom da 2ª oferta (token vindo do link do e-mail ou guardado na sessão)
+  const [couponToken, setCouponToken] = useState<string | null>(null);
+  const [couponPrice, setCouponPrice] = useState<number | null>(null);
+  useEffect(() => {
+    if (!product || isClub) return;
+    const fromUrl = new URLSearchParams(window.location.search).get("c") || "";
+    let token = fromUrl.trim();
+    if (!token) {
+      try {
+        token = sessionStorage.getItem(`offer-coupon:${product.slug}`) || "";
+      } catch { /* ignore */ }
+    }
+    if (!token) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase.functions.invoke("validate-offer-coupon", {
+        body: { token },
+      });
+      if (cancelled || error) return;
+      if (data?.valid && data?.product_slug === product.slug) {
+        setCouponToken(token);
+        setCouponPrice(Number(data.price));
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [product, isClub]);
+
   const finalPrice = useMemo(() => {
     if (!product) return 0;
     if (isClub) return Number(product.price);
-    return vipPercent > 0
+    const vipPrice = vipPercent > 0
       ? getVipPriceFor(product.slug, Number(product.price), vipPercent)
       : Number(product.price);
-  }, [product, vipPercent, isClub]);
+    return couponPrice !== null ? Math.min(couponPrice, vipPrice) : vipPrice;
+  }, [product, vipPercent, isClub, couponPrice]);
+
 
   // Etapa 3: após o pagamento, pede o endereço fiscal (não bloqueante).
   // Convidado (sem conta logada) → vai para a criação de conta com e-mail preenchido.
@@ -318,7 +347,7 @@ export default function Checkout() {
 
       // Pix (Clube ou produto avulso) ou Cartão de produto avulso → pagamento único
       const { data, error } = await supabase.functions.invoke("create-mp-payment", {
-        body: { product_type: productType, slug: product.slug, formData, fiscal: fiscalData },
+        body: { product_type: productType, slug: product.slug, formData, fiscal: fiscalData, coupon_token: couponToken || undefined },
       });
       if (error) {
         // Erro 400 do servidor (ex.: dados fiscais incompletos) vem no corpo da resposta.

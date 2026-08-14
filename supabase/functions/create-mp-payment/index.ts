@@ -2,6 +2,7 @@
 // usando o token gerado pelo Payment Brick no frontend.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { OFFERS, normalizeEmail } from "../_shared/offerLeads.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -172,13 +173,43 @@ serve(async (req) => {
     // Preço VIP fixo por produto (sincronizado com src/lib/vipDiscount.ts)
     const VIP_FIXED_PRICE_BY_SLUG: Record<string, number> = { "classicos-destilados": 197 };
     const vipFixed = VIP_FIXED_PRICE_BY_SLUG[product.slug];
-    const finalPrice = product_type === "club"
+    const vipPrice = product_type === "club"
       ? (youthDiscount ? 27 : basePrice)
       : applyDiscount
       ? (vipFixed !== undefined
         ? Math.min(vipFixed, basePrice)
         : Math.round(basePrice * (1 - vipPercent / 100) * 100) / 100)
       : basePrice;
+
+    // ===== Cupom da segunda oferta (link enviado por e-mail) =====
+    // O preço NUNCA vem do cliente: o token é revalidado aqui no servidor.
+    let couponLeadId: string | null = null;
+    let couponPrice: number | null = null;
+    const couponToken = String(body?.coupon_token || "").trim();
+    if (couponToken && couponToken.length <= 128 && product_type !== "club") {
+      const { data: leadRow } = await supabase
+        .from("landing_offer_leads")
+        .select("id, page_key, email_sent_at, token_expires_at, redeemed_at")
+        .eq("discount_token", couponToken)
+        .maybeSingle();
+      const lead = leadRow as any;
+      const offer = lead ? OFFERS[lead.page_key] : undefined;
+      const valid = !!lead && !!offer &&
+        offer.productSlug === product.slug &&
+        offer.productType === product_type &&
+        !!lead.email_sent_at &&
+        !lead.redeemed_at &&
+        (!lead.token_expires_at || new Date(lead.token_expires_at).getTime() > Date.now());
+      if (valid) {
+        couponLeadId = lead.id;
+        couponPrice = Math.min(offer!.couponPrice, basePrice);
+      } else {
+        console.log("[create-mp-payment] cupom inválido/expirado", { slug: product.slug });
+      }
+    }
+
+    const finalPrice = couponPrice !== null ? Math.min(couponPrice, vipPrice) : vipPrice;
+
 
     // ===== Dados fiscais (NFS-e/NIBO) — best effort, sem bloquear o pagamento =====
     // CPF e nome vêm do próprio formulário do Mercado Pago (Brick). O endereço é
@@ -298,6 +329,38 @@ serve(async (req) => {
     if (mpData?.status === "approved") {
       await invokeWebhookFallback(mpData.id);
     }
+
+    // Trava anti-constrangimento: quem já iniciou/concluiu o pagamento deste
+    // produto nunca deve receber o e-mail com o preço menor.
+    try {
+      const leadEmail = normalizeEmail(payerEmail);
+      const offerForProduct = Object.values(OFFERS).find(
+        (o) => o.productSlug === product.slug && o.productType === product_type,
+      );
+      if (offerForProduct && leadEmail && leadEmail !== "comprador@drinkeros.com") {
+        await supabase
+          .from("landing_offer_leads")
+          .update({
+            ineligible_at: new Date().toISOString(),
+            ineligible_reason: `payment:${mpData.status}`,
+          })
+          .eq("page_key", offerForProduct.pageKey)
+          .ilike("email", leadEmail)
+          .is("ineligible_at", null)
+          .is("email_sent_at", null);
+      }
+      if (couponLeadId) {
+        await supabase
+          .from("landing_offer_leads")
+          .update({ redeemed_at: new Date().toISOString() })
+          .eq("id", couponLeadId)
+          .is("redeemed_at", null);
+      }
+    } catch (e) {
+      console.warn("[create-mp-payment] offer lead update falhou:", (e as Error).message);
+    }
+
+
 
     // Para Pix retorna o QR code; para cartão retorna status.
     // IMPORTANTE: o MP também devolve point_of_interaction em pagamentos de cartão

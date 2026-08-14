@@ -29,6 +29,7 @@ import VipFloatingBanner from '@/components/landing/VipFloatingBanner';
 import SeoHead from '@/components/SeoHead';
 import { useTotalStudents, TOTAL_STUDENTS_FALLBACK } from '@/hooks/useTotalStudents';
 import PriceGiftReveal from '@/components/landing/PriceGiftReveal';
+import OfferCountdownBar from '@/components/landing/OfferCountdownBar';
 
 
 /** Total padrão (fallback) — fonte real é o RPC `get_total_students_certified`. */
@@ -167,8 +168,13 @@ export interface CourseLandingProps {
   giftOfficialPrice?: number;
   giftTitle?: string;
   giftSubtitle?: string;
+  /** Pede nome + e-mail no presente antes de liberar o desconto (funil de 2ª oferta). */
+  leadCapture?: boolean;
+  /** Minutos da tarja rosa de contagem regressiva exibida após o desconto. */
+  offerCountdownMinutes?: number;
   /** Chave do funil (page_key) para métricas em /admin/funis. Ex.: 'rand'. */
   funnelPageKey?: string;
+
 }
 
 
@@ -217,6 +223,9 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   giftTitle,
   giftSubtitle,
   funnelPageKey,
+  leadCapture = false,
+  offerCountdownMinutes = 15,
+
 
 }) => {
   const { toast } = useToast();
@@ -320,7 +329,43 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const basePrice = dbPrice ?? fallbackPrice;
   const vip = useVipDiscount();
   const { data: totalStudents } = useTotalStudents();
-  const finalPrice = isVip ? getVipPriceFor(slug, basePrice, vip.percent) : basePrice;
+
+  /* ===== Cupom da segunda oferta (link do e-mail: ?c=token) ===== */
+  const couponTokenParam = searchParams.get('c');
+  const [coupon, setCoupon] = useState<
+    { token: string; price: number; previousPrice: number; name?: string; email?: string } | null
+  >(null);
+
+  useEffect(() => {
+    const token = (couponTokenParam || '').trim();
+    if (!token || !funnelPageKey) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('validate-offer-coupon', {
+          body: { token },
+        });
+        if (cancelled || error) return;
+        if (data?.valid && data?.page_key === funnelPageKey) {
+          setCoupon({
+            token,
+            price: Number(data.price),
+            previousPrice: Number(data.previous_price),
+            name: data.name || undefined,
+            email: data.email || undefined,
+          });
+          try {
+            sessionStorage.setItem(`offer-coupon:${slug}`, token);
+          } catch { /* ignore */ }
+        }
+      } catch { /* cupom inválido não quebra a página */ }
+    })();
+    return () => { cancelled = true; };
+  }, [couponTokenParam, funnelPageKey, slug]);
+
+  const vipFinalPrice = isVip ? getVipPriceFor(slug, basePrice, vip.percent) : basePrice;
+  const finalPrice = coupon ? Math.min(coupon.price, vipFinalPrice) : vipFinalPrice;
+
   // Parcelamento com juros do cliente (Mercado Pago: 4,49% a.m. compostos)
   const INSTALLMENT_RATE = 0.0449;
   const INSTALLMENT_COUNT = 12;
@@ -330,7 +375,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const installments = installmentValue.toFixed(2).replace('.', ',');
 
   /* ===== Presente de desconto (preço oficial → preço real animado) ===== */
-  const giftEnabled = !!giftOfficialPrice && giftOfficialPrice > finalPrice && !isVip;
+  const giftEnabled = !!giftOfficialPrice && giftOfficialPrice > finalPrice && !isVip && !coupon;
   const giftStorageKey = `gift-reveal:${slug}`;
   const [giftRevealed, setGiftRevealed] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -391,10 +436,10 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     priceAnchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
-  const runPriceCountdown = () => {
-    if (!giftOfficialPrice) return;
-    const from = giftOfficialPrice;
-    const to = finalPrice;
+  const runPriceCountdown = (fromValue?: number, toValue?: number) => {
+    const from = fromValue ?? giftOfficialPrice;
+    const to = toValue ?? finalPrice;
+    if (from === undefined || from === null) return;
     const duration = 1800;
     const start = performance.now();
     setDisplayPrice(from);
@@ -418,6 +463,49 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     );
   };
 
+  /* ===== Tarja de contagem regressiva da oferta ===== */
+  const countdownKey = `offer-countdown:${slug}`;
+  const [countdownStartedAt, setCountdownStartedAt] = useState<number | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = sessionStorage.getItem(`offer-countdown:${slug}`);
+      return raw ? Number(raw) : null;
+    } catch {
+      return null;
+    }
+  });
+  const startCountdown = () => {
+    setCountdownStartedAt((prev) => {
+      if (prev) return prev;
+      const now = Date.now();
+      try { sessionStorage.setItem(countdownKey, String(now)); } catch { /* ignore */ }
+      return now;
+    });
+  };
+
+  /* ===== Captura de lead (nome + e-mail) antes do desconto ===== */
+  const [leadDefaults, setLeadDefaults] = useState<{ name: string; email: string }>({ name: '', email: '' });
+  useEffect(() => {
+    if (!leadCapture) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (cancelled || !data.user) return;
+      setLeadDefaults({
+        name: String((data.user.user_metadata as any)?.full_name || ''),
+        email: data.user.email || '',
+      });
+    })();
+    return () => { cancelled = true; };
+  }, [leadCapture]);
+
+  const handleLeadSubmit = async ({ name, email }: { name: string; email: string }) => {
+    if (!funnelPageKey) return;
+    await supabase.functions.invoke('capture-offer-lead', {
+      body: { page_key: funnelPageKey, name, email },
+    });
+  };
+
   const handleGiftReveal = () => {
     // Trava o valor no preço oficial ANTES de marcar como revelado,
     // para o preço final (ex.: 297) nunca piscar antes da animação.
@@ -426,9 +514,10 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     setGiftOpen(false);
     markRevealed();
     trackGiftFunnel();
+    startCountdown();
     // Scroll até o valor e depois dispara a animação de descer o número
     scrollToPriceAnchor();
-    window.setTimeout(runPriceCountdown, 700);
+    window.setTimeout(() => runPriceCountdown(), 700);
   };
 
 
@@ -438,15 +527,34 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     trackGiftFunnel();
     setDisplayPrice(null);
     setPricePulsing(true);
+    startCountdown();
     // Mesmo fechando, rola até o valor
     scrollToPriceAnchor();
   };
 
+  /* ===== Segunda animação: 297 → 197 quando o cupom do e-mail é válido ===== */
+  const couponAnimatedRef = useRef(false);
+  useEffect(() => {
+    if (!coupon || couponAnimatedRef.current) return;
+    couponAnimatedRef.current = true;
+    setPricePulsing(false);
+    setDisplayPrice(coupon.previousPrice);
+    startCountdown();
+    const t = window.setTimeout(() => {
+      scrollToPriceAnchor();
+      window.setTimeout(() => runPriceCountdown(coupon.previousPrice, coupon.price), 700);
+    }, 900);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coupon]);
+
   // Preço exibido na seção de oferta
-  const shownPrice =
-    giftEnabled && !giftRevealed
-      ? (giftOfficialPrice as number)
-      : displayPrice ?? finalPrice;
+  const shownPrice = coupon
+    ? displayPrice ?? coupon.previousPrice
+    : giftEnabled && !giftRevealed
+    ? (giftOfficialPrice as number)
+    : displayPrice ?? finalPrice;
+
   // CTA verde animado só depois que o valor chegou no preço final
   const ctaGreenClass = giftEnabled && !pricePulsing ? 'cl-cta-green-dark' : 'cl-cta-green';
   // Gradiente verde para o preço final (R$297) após o desconto
@@ -479,7 +587,13 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       }
     }
     try {
-      window.location.href = checkoutPath ?? `/checkout/course/${slug}`;
+      const target = checkoutPath ?? `/checkout/course/${slug}`;
+      const token = coupon?.token || (() => {
+        try { return sessionStorage.getItem(`offer-coupon:${slug}`) || ''; } catch { return ''; }
+      })();
+      window.location.href = token
+        ? `${target}${target.includes('?') ? '&' : '?'}c=${encodeURIComponent(token)}`
+        : target;
       return;
 
     } catch (err: any) {
@@ -1398,15 +1512,24 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
         </p>
       </footer>
 
+      {countdownStartedAt && (
+        <OfferCountdownBar startedAt={countdownStartedAt} minutes={offerCountdownMinutes} hideOnEnd />
+      )}
+
       {giftEnabled && (
         <PriceGiftReveal
           open={giftOpen}
           title={giftTitle}
           subtitle={giftSubtitle}
+          requireLead={leadCapture}
+          defaultName={leadDefaults.name}
+          defaultEmail={leadDefaults.email}
+          onSubmitLead={handleLeadSubmit}
           onReveal={handleGiftReveal}
           onClose={handleGiftClose}
         />
       )}
+
     </div>
   );
 };
