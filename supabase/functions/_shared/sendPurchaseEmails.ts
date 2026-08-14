@@ -106,7 +106,7 @@ export async function sendPurchaseEmails(supabase: any, args: SendPurchaseEmails
     const site = args.siteUrl.replace(/\/$/, '');
     // Tela de criação de conta: e-mail já preenchido, usuário só define a senha
     // e entra logado no app (validada pelo payment_id da compra).
-    let passwordSetupUrl = `${site}/criar-conta?pid=${encodeURIComponent(args.transactionId)}&email=${encodeURIComponent(args.email)}`;
+    const passwordSetupUrl = `${site}/criar-conta?pid=${encodeURIComponent(args.transactionId)}&email=${encodeURIComponent(args.email)}`;
     await invokeTemplate(
       supabase,
       'account-created',
