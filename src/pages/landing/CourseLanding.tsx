@@ -553,6 +553,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     couponAnimatedRef.current = true;
     setPricePulsing(false);
     setDisplayPrice(coupon.previousPrice);
+    setCountdownBarVisible(true);
     startCountdown();
     const t = window.setTimeout(() => {
       scrollToPriceAnchor();
