@@ -320,7 +320,43 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const basePrice = dbPrice ?? fallbackPrice;
   const vip = useVipDiscount();
   const { data: totalStudents } = useTotalStudents();
-  const finalPrice = isVip ? getVipPriceFor(slug, basePrice, vip.percent) : basePrice;
+
+  /* ===== Cupom da segunda oferta (link do e-mail: ?c=token) ===== */
+  const couponTokenParam = searchParams.get('c');
+  const [coupon, setCoupon] = useState<
+    { token: string; price: number; previousPrice: number; name?: string; email?: string } | null
+  >(null);
+
+  useEffect(() => {
+    const token = (couponTokenParam || '').trim();
+    if (!token || !funnelPageKey) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('validate-offer-coupon', {
+          body: { token },
+        });
+        if (cancelled || error) return;
+        if (data?.valid && data?.page_key === funnelPageKey) {
+          setCoupon({
+            token,
+            price: Number(data.price),
+            previousPrice: Number(data.previous_price),
+            name: data.name || undefined,
+            email: data.email || undefined,
+          });
+          try {
+            sessionStorage.setItem(`offer-coupon:${slug}`, token);
+          } catch { /* ignore */ }
+        }
+      } catch { /* cupom inválido não quebra a página */ }
+    })();
+    return () => { cancelled = true; };
+  }, [couponTokenParam, funnelPageKey, slug]);
+
+  const vipFinalPrice = isVip ? getVipPriceFor(slug, basePrice, vip.percent) : basePrice;
+  const finalPrice = coupon ? Math.min(coupon.price, vipFinalPrice) : vipFinalPrice;
+
   // Parcelamento com juros do cliente (Mercado Pago: 4,49% a.m. compostos)
   const INSTALLMENT_RATE = 0.0449;
   const INSTALLMENT_COUNT = 12;
