@@ -20,11 +20,22 @@ Sim, é totalmente possível. Resumo do fluxo:
 - Se o usuário já está logado, os campos vêm preenchidos e ele só confirma.
 - O lead também entra no funil de métricas (`/admin/funis`) como hoje.
 
-## 2. E-mail de segunda oferta (15 minutos)
+## 2. Tarja pink com contador (após o desconto de R$ 297)
 
-- Uma rotina automática roda a cada 5 minutos e busca leads do RAND com mais de 15 min, que ainda **não compraram** e que ainda não receberam o e-mail.
-- Envia um e-mail (template novo, no padrão visual dos atuais) dizendo que, especialmente para ela, o Pacote RAND sai por **R$ 197** (R$ 300 de desconto), com parcelamento em até 12x, e um botão com link único.
-- Um e-mail por lead (sem reenvio). Se a pessoa comprar antes, nada é enviado.
+- Assim que o desconto é revelado, aparece uma **tarja pink fixa no topo da tela** com texto do tipo "Oferta por tempo limitado — aproveite!" e um **contador regressivo de 15 minutos**.
+- O contador persiste enquanto o usuário navega a página (guardado no navegador) e some ao zerar ou após a compra.
+- A tarja não cobre a navegação nem quebra a safe-area no iPhone (respeita `env(safe-area-inset-top)`).
+
+## 3. E-mail de segunda oferta (20 minutos)
+
+- Uma rotina automática roda a cada 5 minutos e busca leads do RAND com mais de **20 minutos**, que ainda não receberam o e-mail.
+- **Trava anti-constrangimento**: antes de enviar, o sistema confirma que a pessoa **não comprou**, checando (por e-mail normalizado e, se houver, por `user_id`):
+  - `purchases` do Pacote RAND com status aprovado (inclui compras de convidado),
+  - pagamentos Pix/cartão pendentes ou em análise → **também não envia** (evita mandar oferta menor enquanto o pagamento está sendo confirmado),
+  - acesso já concedido ao combo (`user_combos`).
+  Qualquer um desses casos marca o lead como "não elegível" permanentemente.
+- Um e-mail por lead (sem reenvio).
+
 
 ## 3. Cupom no link
 
