@@ -410,7 +410,6 @@ const Login: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-      <WhatsAppFloatingButton />
     </div>
   );
 };
