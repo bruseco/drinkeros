@@ -1528,7 +1528,12 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       </footer>
 
       {countdownStartedAt && (
-        <OfferCountdownBar startedAt={countdownStartedAt} minutes={offerCountdownMinutes} hideOnEnd />
+        <OfferCountdownBar
+          startedAt={countdownStartedAt}
+          minutes={offerCountdownMinutes}
+          hideOnEnd
+          visible={countdownBarVisible}
+        />
       )}
 
       {giftEnabled && (
