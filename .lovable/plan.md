@@ -37,7 +37,7 @@ Sim, é totalmente possível. Resumo do fluxo:
 - Um e-mail por lead (sem reenvio).
 
 
-## 3. Cupom no link
+## 4. Cupom no link
 
 - O link do e-mail carrega um **token único do lead** (ex.: `/rand?c=TOKEN`).
 - Ao abrir, a página valida o token no servidor e, se válido:
