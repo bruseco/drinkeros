@@ -304,7 +304,7 @@ export default function Checkout() {
           toast.info("Assinatura em análise. Você receberá a confirmação em breve.");
           setTimeout(() => navigate("/pv-clube?clube=pending"), 1800);
         } else {
-          toast.error("Não foi possível ativar a assinatura", { description: data?.status_detail || "Tente outro cartão." });
+          toast.error("Não foi possível ativar a assinatura", { description: mpRejectionMessage(data?.status_detail) });
         }
         return;
       }
