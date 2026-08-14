@@ -14,6 +14,7 @@ import { WelcomeOverlay } from './WelcomeOverlay';
 import ClubeIntroStickyBar from './ClubeIntroStickyBar';
 import ClubeRetriggerWatcher from './ClubeRetriggerWatcher';
 import VipDiscountBootstrap from './VipDiscountBootstrap';
+import FiscalPendingBanner from './FiscalPendingBanner';
 
 import { useTrackDailyAppAccess } from '@/hooks/useAccessTracking';
 
@@ -68,6 +69,7 @@ export const UserLayout: React.FC = () => {
       <UserSidebar />
       <div className="flex flex-1 flex-col min-w-0">
         <PwaInstallGate />
+        <FiscalPendingBanner />
         <VipDiscountCountdownBanner />
         <UserNavbar />
         <PushNotificationPrompt />

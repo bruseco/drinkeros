@@ -10,7 +10,6 @@ import { useViewContent } from "@/hooks/useViewContent";
 import { useVipDiscount } from "@/hooks/useVipDiscount";
 import { applyVipDiscountFor, getVipPriceFor } from "@/lib/vipDiscount";
 import { useYouthDiscount } from "@/hooks/useYouthDiscount";
-import CheckoutFiscalGate, { type FiscalPayload } from "@/components/user/CheckoutFiscalGate";
 import FiscalAddressDialog from "@/components/user/FiscalAddressDialog";
 
 type ClubMethod = "card" | "pix";
@@ -74,8 +73,8 @@ export default function Checkout() {
   const [payerEmail, setPayerEmail] = useState<string | null>(null);
   const [clubMethod, setClubMethod] = useState<ClubMethod>("card");
   const [userId, setUserId] = useState<string | null>(null);
-  const [fiscalReady, setFiscalReady] = useState(false);
-  const [fiscalData, setFiscalData] = useState<FiscalPayload | null>(null);
+  const [buyerCpf, setBuyerCpf] = useState<string>("");
+  const [buyerName, setBuyerName] = useState<string>("");
   const [addressComplete, setAddressComplete] = useState(false);
   const [addressPromptRedirect, setAddressPromptRedirect] = useState<string | null>(null);
   const [lastPaymentId, setLastPaymentId] = useState<string | null>(null);
@@ -238,10 +237,13 @@ export default function Checkout() {
 
   const onSubmit = async (formData: any) => {
     if (!product) return;
-    if (!fiscalReady) {
-      toast.error("Complete os dados fiscais (CPF e endereço) antes de pagar.");
-      return;
-    }
+    // CPF e nome vêm do próprio formulário do Mercado Pago.
+    const mpCpf = String(formData?.payer?.identification?.number || "").replace(/\D/g, "");
+    const mpName = [formData?.payer?.first_name, formData?.payer?.last_name]
+      .filter(Boolean).join(" ").trim();
+    if (mpCpf) setBuyerCpf(mpCpf);
+    if (mpName) setBuyerName(mpName);
+    const fiscalData = { cpf: mpCpf, full_name: mpName } as Record<string, string>;
     setSubmitting(true);
     try {
       // Cartão no Clube → cria assinatura recorrente (preapproval) com card_token_id
@@ -320,19 +322,9 @@ export default function Checkout() {
           serverMsg = body?.error || "";
           code = body?.code || "";
         } catch { /* ignore */ }
-        if (code === "fiscal_incomplete") {
-          setFiscalReady(false);
-          setFiscalData(null);
-        }
         throw new Error(serverMsg || error.message);
       }
-      if (data?.error) {
-        if (data?.code === "fiscal_incomplete") {
-          setFiscalReady(false);
-          setFiscalData(null);
-        }
-        throw new Error(data.error);
-      }
+      if (data?.error) throw new Error(data.error);
 
 
       // InitiateCheckout — pagamento MP criado com sucesso (Pix gerado, cartão aprovado/recusado, etc.).
@@ -472,18 +464,8 @@ export default function Checkout() {
                 </div>
               )}
 
-              {!fiscalReady && (
-                <CheckoutFiscalGate
-                  userId={userId}
-                  mode="minimal"
-                  onReady={(f) => {
-                    if (f) setFiscalData(f);
-                    setFiscalReady(true);
-                  }}
-                />
-              )}
 
-              <div className={`bg-white rounded-xl overflow-hidden p-2 sm:p-4 text-black ${!fiscalReady ? "opacity-40 pointer-events-none select-none" : ""}`}>
+              <div className="bg-white rounded-xl overflow-hidden p-2 sm:p-4 text-black">
                 {payerEmail !== null ? (
                   <Payment
                     key={`brick-${finalPrice}-${isClub ? clubMethod : "all"}`}
@@ -592,6 +574,8 @@ export default function Checkout() {
         userId={userId}
         buyerEmail={payerEmail}
         paymentId={lastPaymentId}
+        initialName={buyerName}
+        initialCpf={buyerCpf}
         onDone={() => {
           const target = addressPromptRedirect;
           setAddressPromptRedirect(null);

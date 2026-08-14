@@ -23,6 +23,8 @@ interface AddressInput {
   address_neighborhood?: string;
   address_city?: string;
   address_state?: string;
+  full_name?: string;
+  cpf?: string;
 }
 
 serve(async (req) => {
@@ -60,7 +62,10 @@ serve(async (req) => {
       { auth: { persistSession: false } },
     );
 
-    const update = {
+    const fullName = String(address?.full_name || "").trim().replace(/\s+/g, " ");
+    const cpf = String(address?.cpf || "").replace(/\D/g, "");
+
+    const update: Record<string, unknown> = {
       cep,
       address_street: street,
       address_number: number,
@@ -68,6 +73,8 @@ serve(async (req) => {
       address_neighborhood: neighborhood,
       address_city: city,
       address_state: state,
+      ...(fullName.length >= 3 ? { full_name: fullName } : {}),
+      ...(cpf.length === 11 ? { cpf } : {}),
     };
 
     // 1) Usuário logado
@@ -76,7 +83,11 @@ serve(async (req) => {
       const anon = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!);
       const { data } = await anon.auth.getUser(authHeader.replace("Bearer ", ""));
       if (data.user) {
-        const { error } = await supabase.from("profiles").update(update).eq("user_id", data.user.id);
+        let { error } = await supabase.from("profiles").update(update).eq("user_id", data.user.id);
+        if (error && (error as any).code === "23505") {
+          const { cpf: _drop, ...rest } = update;
+          ({ error } = await supabase.from("profiles").update(rest).eq("user_id", data.user.id));
+        }
         if (error) return json({ error: error.message }, 400);
         return json({ success: true });
       }
@@ -105,7 +116,11 @@ serve(async (req) => {
       return json({ error: "Pagamento não confirmado" }, 400);
     }
 
-    const { error } = await supabase.from("profiles").update(update).eq("email", normalizedEmail);
+    let { error } = await supabase.from("profiles").update(update).eq("email", normalizedEmail);
+    if (error && (error as any).code === "23505") {
+      const { cpf: _drop, ...rest } = update;
+      ({ error } = await supabase.from("profiles").update(rest).eq("email", normalizedEmail));
+    }
     if (error) return json({ error: error.message }, 400);
 
     return json({ success: true });

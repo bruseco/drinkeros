@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, ChevronRight, Package, Camera, Crown, Bell, BellOff, Shield, ArrowLeftRight, Heart, Briefcase, PartyPopper } from 'lucide-react';
+import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, ChevronRight, Package, Camera, Crown, Bell, BellOff, Shield, ArrowLeftRight, Heart, Briefcase, PartyPopper, AlertTriangle } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useInterests, useUpdateInterests, type Interest } from '@/hooks/useInterests';
 
@@ -206,7 +206,15 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
     gender: !gender,
     cpf: cpf.replace(/\D/g, '').length !== 11,
     neighborhood: !addrNeighborhood.trim(),
+    cep: cep.replace(/\D/g, '').length !== 8,
+    street: !addrStreet.trim(),
+    number: !addrNumber.trim(),
+    city: !addrCity.trim(),
+    state: !addrState.trim(),
   };
+
+  const fiscalIncomplete =
+    miss.cep || miss.street || miss.number || miss.neighborhood || miss.city || miss.state || miss.cpf;
 
   const neighborhoodMissing = neighborhoodAutoFailed && !addrNeighborhood.trim();
 
@@ -310,10 +318,16 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
       <div className="space-y-2">
         <Label className="text-base font-semibold">Endereço (para emissão de nota fiscal)</Label>
         <p className="text-xs text-muted-foreground">Usado apenas para emitir a NF-e das suas compras.</p>
+        {fiscalIncomplete && (
+          <div className="flex items-start gap-2 rounded-md border border-yellow-500/40 bg-yellow-400/10 px-3 py-2 text-xs text-yellow-600 dark:text-yellow-400">
+            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+            <span>Dados fiscais incompletos. Complete para garantirmos a emissão da sua nota fiscal.</span>
+          </div>
+        )}
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div className="space-y-2 col-span-1">
-          <Label htmlFor="cep">CEP</Label>
+          <Label htmlFor="cep" className="flex items-center gap-2">CEP {miss.cep && <IncompleteTag />}</Label>
           <Input
             id="cep"
             value={cep}
@@ -329,13 +343,13 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
           {cepLoading && <p className="text-xs text-muted-foreground">Buscando CEP...</p>}
         </div>
         <div className="space-y-2 col-span-2">
-          <Label htmlFor="addrStreet">Rua / Logradouro</Label>
+          <Label htmlFor="addrStreet" className="flex items-center gap-2">Rua / Logradouro {miss.street && <IncompleteTag />}</Label>
           <Input id="addrStreet" value={addrStreet} onChange={(e) => setAddrStreet(e.target.value)} placeholder="Rua das Flores" />
         </div>
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div className="space-y-2 col-span-1">
-          <Label htmlFor="addrNumber">Número</Label>
+          <Label htmlFor="addrNumber" className="flex items-center gap-2">Número {miss.number && <IncompleteTag />}</Label>
           <Input id="addrNumber" value={addrNumber} onChange={(e) => setAddrNumber(e.target.value)} placeholder="123" />
         </div>
         <div className="space-y-2 col-span-2">
@@ -344,7 +358,7 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="addrNeighborhood">Bairro</Label>
+        <Label htmlFor="addrNeighborhood" className="flex items-center gap-2">Bairro {miss.neighborhood && <IncompleteTag />}</Label>
         <Input
           id="addrNeighborhood"
           value={addrNeighborhood}
@@ -361,11 +375,11 @@ const ProfileDataSection: React.FC<{ onCompletenessChange?: (complete: boolean) 
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div className="space-y-2 col-span-2">
-          <Label htmlFor="addrCity">Cidade</Label>
+          <Label htmlFor="addrCity" className="flex items-center gap-2">Cidade {miss.city && <IncompleteTag />}</Label>
           <Input id="addrCity" value={addrCity} onChange={(e) => setAddrCity(e.target.value)} />
         </div>
         <div className="space-y-2 col-span-1">
-          <Label htmlFor="addrState">UF</Label>
+          <Label htmlFor="addrState" className="flex items-center gap-2">UF {miss.state && <IncompleteTag />}</Label>
           <Input id="addrState" value={addrState} onChange={(e) => setAddrState(e.target.value.toUpperCase().slice(0, 2))} maxLength={2} placeholder="SP" />
         </div>
       </div>

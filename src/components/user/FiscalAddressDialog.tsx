@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,10 @@ interface Props {
   buyerEmail?: string | null;
   /** ID do pagamento (Mercado Pago) — valida a origem no caso convidado. */
   paymentId?: string | null;
+  /** Nome vindo do formulário do Mercado Pago (pré-preenche o campo). */
+  initialName?: string;
+  /** CPF vindo do formulário do Mercado Pago (pré-preenche e trava o campo). */
+  initialCpf?: string;
   /** Chamado ao concluir ou ao pular. */
   onDone: () => void;
 }
@@ -23,8 +27,11 @@ interface Props {
  * Etapa 3 do checkout: coleta o endereço fiscal DEPOIS do pagamento.
  * Não bloqueia o acesso ao produto — o usuário pode pular e completar depois.
  */
-export default function FiscalAddressDialog({ open, userId, buyerEmail, paymentId, onDone }: Props) {
+export default function FiscalAddressDialog({ open, userId, buyerEmail, paymentId, initialName, initialCpf, onDone }: Props) {
   const [saving, setSaving] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [cpfLocked, setCpfLocked] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
   const [cep, setCep] = useState("");
   const [street, setStreet] = useState("");
@@ -34,6 +41,45 @@ export default function FiscalAddressDialog({ open, userId, buyerEmail, paymentI
   const [neighborhoodAutoFailed, setNeighborhoodAutoFailed] = useState(false);
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
+
+  const formatCpf = (raw: string) => {
+    const d = raw.replace(/\D/g, "").slice(0, 11);
+    return d
+      .replace(/^(\d{3})(\d)/, "$1.$2")
+      .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
+  };
+
+  // Pré-preenche com o que veio do Mercado Pago e/ou com o perfil do usuário.
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    (async () => {
+      if (initialName) setFullName((v) => v || initialName);
+      if (initialCpf && initialCpf.replace(/\D/g, "").length === 11) {
+        setCpf(formatCpf(initialCpf));
+        setCpfLocked(true);
+      }
+      if (!userId) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name, cpf, cep, address_street, address_number, address_complement, address_neighborhood, address_city, address_state")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (cancelled || !data) return;
+      const d = data as any;
+      if (d.full_name) setFullName((v) => v || d.full_name);
+      if (d.cpf) { setCpf(formatCpf(d.cpf)); setCpfLocked(true); }
+      if (d.cep) setCep(formatCep(d.cep));
+      if (d.address_street) setStreet(d.address_street);
+      if (d.address_number) setNumber(d.address_number);
+      if (d.address_complement) setComplement(d.address_complement);
+      if (d.address_neighborhood) setNeighborhood(d.address_neighborhood);
+      if (d.address_city) setCity(d.address_city);
+      if (d.address_state) setState(d.address_state);
+    })();
+    return () => { cancelled = true; };
+  }, [open, userId, initialName, initialCpf]);
 
   const formatCep = (raw: string) => {
     const d = raw.replace(/\D/g, "").slice(0, 8);
@@ -68,6 +114,9 @@ export default function FiscalAddressDialog({ open, userId, buyerEmail, paymentI
   };
 
   const handleSave = async () => {
+    const cpfDigits = cpf.replace(/\D/g, "");
+    if (fullName.trim().replace(/\s+/g, " ").length < 3) return toast.error("Informe seu nome completo");
+    if (cpfDigits.length !== 11) return toast.error("CPF inválido");
     const cepDigits = cep.replace(/\D/g, "");
     if (cepDigits.length !== 8) return toast.error("CEP inválido");
     if (!street.trim() || !number.trim() || !city.trim() || !state.trim()) {
@@ -93,11 +142,26 @@ export default function FiscalAddressDialog({ open, userId, buyerEmail, paymentI
     setSaving(true);
     try {
       if (userId) {
-        const { error } = await supabase.from("profiles").update(address).eq("user_id", userId);
-        if (error) throw error;
+        const { error } = await supabase
+          .from("profiles")
+          .update({ ...address, full_name: fullName.trim().replace(/\s+/g, " "), cpf: cpfDigits })
+          .eq("user_id", userId);
+        if (error && (error as any).code !== "23505") throw error;
+        if (error) {
+          // CPF já cadastrado em outro perfil: salva o restante sem o CPF.
+          const { error: err2 } = await supabase
+            .from("profiles")
+            .update({ ...address, full_name: fullName.trim().replace(/\s+/g, " ") })
+            .eq("user_id", userId);
+          if (err2) throw err2;
+        }
       } else {
         const { data, error } = await supabase.functions.invoke("save-fiscal-address", {
-          body: { email: buyerEmail, payment_id: paymentId, address },
+          body: {
+            email: buyerEmail,
+            payment_id: paymentId,
+            address: { ...address, full_name: fullName.trim().replace(/\s+/g, " "), cpf: cpfDigits },
+          },
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
@@ -117,13 +181,31 @@ export default function FiscalAddressDialog({ open, userId, buyerEmail, paymentI
     <Dialog open={open} onOpenChange={(v) => { if (!v) onDone(); }}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Pagamento confirmado! 🎉</DialogTitle>
+          <DialogTitle>Precisamos emitir sua nota fiscal</DialogTitle>
           <DialogDescription>
-            Seu acesso já está liberado. Para emitirmos a nota fiscal, complete seu endereço abaixo.
+            Por favor preencha esses dados obrigatórios para você ter a garantia do seu produto.
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-3">
+          <div>
+            <Label htmlFor="fa-name" className="text-xs">Nome completo</Label>
+            <Input id="fa-name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome completo" className="mt-1" />
+          </div>
+
+          <div>
+            <Label htmlFor="fa-cpf" className="text-xs">CPF</Label>
+            <Input
+              id="fa-cpf"
+              value={cpf}
+              onChange={(e) => { if (!cpfLocked) setCpf(formatCpf(e.target.value)); }}
+              placeholder="000.000.000-00"
+              inputMode="numeric"
+              disabled={cpfLocked}
+              className={`mt-1 ${cpfLocked ? "opacity-60" : ""}`}
+            />
+          </div>
+
           <div className="grid grid-cols-[140px_1fr] gap-3">
             <div>
               <Label htmlFor="fa-cep" className="text-xs">CEP</Label>
