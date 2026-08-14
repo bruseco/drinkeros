@@ -1878,6 +1878,9 @@ export type Database = {
           cpf: string | null
           created_at: string
           email: string
+          email_verified: boolean
+          fiscal_reminder_24h_at: string | null
+          fiscal_reminder_48h_at: string | null
           full_name: string | null
           gender: string | null
           id: string
@@ -1906,6 +1909,9 @@ export type Database = {
           cpf?: string | null
           created_at?: string
           email: string
+          email_verified?: boolean
+          fiscal_reminder_24h_at?: string | null
+          fiscal_reminder_48h_at?: string | null
           full_name?: string | null
           gender?: string | null
           id?: string
@@ -1934,6 +1940,9 @@ export type Database = {
           cpf?: string | null
           created_at?: string
           email?: string
+          email_verified?: boolean
+          fiscal_reminder_24h_at?: string | null
+          fiscal_reminder_48h_at?: string | null
           full_name?: string | null
           gender?: string | null
           id?: string

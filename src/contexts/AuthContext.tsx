@@ -117,6 +117,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               Promise.resolve(supabase.rpc('start_vip_discount_window' as any)).catch(() => { /* ignore */ });
             }, 0);
 
+            // Verificação de e-mail em background (não bloqueia o acesso ao app)
+            if (session.user.email_confirmed_at) {
+              setTimeout(() => {
+                supabase
+                  .from('profiles')
+                  .update({ email_verified: true } as any)
+                  .eq('user_id', session.user!.id)
+                  .then(() => undefined, () => undefined);
+              }, 0);
+            }
+
             // CompleteRegistration para signups via OAuth/Magic Link.
             // O profile é criado por trigger no DB, então não dá pra confiar no
             // fluxo de auto-insert. Aqui detectamos cadastro novo comparando

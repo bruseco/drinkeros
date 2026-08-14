@@ -11,6 +11,7 @@ import { useVipDiscount } from "@/hooks/useVipDiscount";
 import { applyVipDiscountFor, getVipPriceFor } from "@/lib/vipDiscount";
 import { useYouthDiscount } from "@/hooks/useYouthDiscount";
 import CheckoutFiscalGate, { type FiscalPayload } from "@/components/user/CheckoutFiscalGate";
+import FiscalAddressDialog from "@/components/user/FiscalAddressDialog";
 
 type ClubMethod = "card" | "pix";
 
@@ -75,6 +76,9 @@ export default function Checkout() {
   const [userId, setUserId] = useState<string | null>(null);
   const [fiscalReady, setFiscalReady] = useState(false);
   const [fiscalData, setFiscalData] = useState<FiscalPayload | null>(null);
+  const [addressComplete, setAddressComplete] = useState(false);
+  const [addressPromptRedirect, setAddressPromptRedirect] = useState<string | null>(null);
+  const [lastPaymentId, setLastPaymentId] = useState<string | null>(null);
 
   const vip = useVipDiscount();
   const youth = useYouthDiscount();
@@ -115,6 +119,24 @@ export default function Checkout() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         setUserId(user?.id ?? null);
+
+        if (user) {
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("cep, address_street, address_number, address_neighborhood, address_city, address_state")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          const p = prof as any;
+          setAddressComplete(
+            !!p &&
+              String(p.cep || "").replace(/\D/g, "").length === 8 &&
+              !!String(p.address_street || "").trim() &&
+              !!String(p.address_number || "").trim() &&
+              !!String(p.address_neighborhood || "").trim() &&
+              !!String(p.address_city || "").trim() &&
+              !!String(p.address_state || "").trim(),
+          );
+        }
 
         if (productType === "club") {
           if (!user) {
@@ -167,6 +189,15 @@ export default function Checkout() {
       : Number(product.price);
   }, [product, vipPercent, isClub]);
 
+  // Etapa 3: após o pagamento, pede o endereço fiscal (não bloqueante).
+  const finishAfterPayment = (redirect: string, delay = 1500) => {
+    if (addressComplete) {
+      setTimeout(() => navigate(redirect), delay);
+    } else {
+      setTimeout(() => setAddressPromptRedirect(redirect), 600);
+    }
+  };
+
   // ViewContent da tela de checkout
   useViewContent({
     key: product ? `${productType}:${product.slug}` : null,
@@ -198,7 +229,7 @@ export default function Checkout() {
           import('@/lib/firePurchaseFromBackend').then(m =>
             m.firePurchaseFromBackend({ source: 'checkout-pix' })
           );
-          setTimeout(() => navigate(isClub ? "/pv-clube?clube=success" : `/${product?.slug}?checkout=success`), 2000);
+          finishAfterPayment(isClub ? "/pv-clube?clube=success" : `/${product?.slug}?checkout=success`, 2000);
         }
       } catch (_) { /* ignore */ }
     }, 4000);
@@ -265,7 +296,7 @@ export default function Checkout() {
           import('@/lib/firePurchaseFromBackend').then(m =>
             m.firePurchaseFromBackend({ source: 'checkout-mp-subscription' })
           );
-          setTimeout(() => navigate("/pv-clube?clube=success"), 1500);
+          finishAfterPayment("/pv-clube?clube=success");
         } else if (data?.status === "pending") {
           toast.info("Assinatura em análise. Você receberá a confirmação em breve.");
           setTimeout(() => navigate("/pv-clube?clube=pending"), 1800);
@@ -319,6 +350,8 @@ export default function Checkout() {
         data.payment_method_id === "pix" &&
         !!data.pix && (!!data.pix.qr_code || !!data.pix.qr_code_base64);
 
+      if (data?.id) setLastPaymentId(String(data.id));
+
       if (isPixResponse) {
         setPixResult(data.pix);
         setPixPaymentId(String(data.id));
@@ -329,7 +362,7 @@ export default function Checkout() {
         import('@/lib/firePurchaseFromBackend').then(m =>
           m.firePurchaseFromBackend({ source: 'checkout-mp-card' })
         );
-        setTimeout(() => navigate(isClub ? "/pv-clube?clube=success" : `/${product.slug}?checkout=success`), 1500);
+        finishAfterPayment(isClub ? "/pv-clube?clube=success" : `/${product.slug}?checkout=success`);
       } else if (data.status === "in_process" || data.status === "pending") {
         toast.info("Pagamento em análise. Você receberá uma confirmação em breve.");
         setTimeout(() => navigate(isClub ? "/pv-clube?clube=pending" : `/${product.slug}?checkout=pending`), 2000);
@@ -442,6 +475,7 @@ export default function Checkout() {
               {!fiscalReady && (
                 <CheckoutFiscalGate
                   userId={userId}
+                  mode="minimal"
                   onReady={(f) => {
                     if (f) setFiscalData(f);
                     setFiscalReady(true);
@@ -552,6 +586,18 @@ export default function Checkout() {
           </div>
         </aside>
       </div>
+
+      <FiscalAddressDialog
+        open={!!addressPromptRedirect}
+        userId={userId}
+        buyerEmail={payerEmail}
+        paymentId={lastPaymentId}
+        onDone={() => {
+          const target = addressPromptRedirect;
+          setAddressPromptRedirect(null);
+          if (target) navigate(target);
+        }}
+      />
     </div>
   );
 }

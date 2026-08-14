@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Loader2, RefreshCw, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
+import { Loader2, RefreshCw, CheckCircle2, AlertCircle, Clock, FileWarning } from 'lucide-react';
 
 interface Props {
   orderId: string;
@@ -86,6 +86,23 @@ export const NiboSyncCell = ({ orderId }: Props) => {
       <div className="flex items-center gap-2">
         <Badge variant="destructive" className="gap-1" title={row.last_error || ''}>
           <AlertCircle className="h-3 w-3" /> Falha
+        </Badge>
+        <Button size="sm" variant="outline" onClick={send} disabled={sending}>
+          {sending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Tentar de novo'}
+        </Button>
+      </div>
+    );
+  }
+
+  if (row?.status === 'pending_fiscal') {
+    return (
+      <div className="flex items-center gap-2">
+        <Badge
+          variant="outline"
+          className="gap-1 border-amber-500/50 text-amber-600 dark:text-amber-400"
+          title={row.last_error || 'O cliente ainda não preencheu o endereço fiscal.'}
+        >
+          <FileWarning className="h-3 w-3" /> Dados pendentes
         </Badge>
         <Button size="sm" variant="outline" onClick={send} disabled={sending}>
           {sending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Tentar de novo'}

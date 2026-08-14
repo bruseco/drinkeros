@@ -293,7 +293,16 @@ async function upsertCustomer(order: OrderRow): Promise<{
       missing: missingFields,
       attempted_address: addressFlat,
     });
-    return { id: null, status: "failed", hasCpf: false, error, raw: { missing: missingFields, address: addressFlat } };
+    // Não é falha de integração: são dados que o cliente ainda não preencheu
+    // (etapa 3 do checkout). Marcamos como pendente para não gerar ruído.
+    return {
+      id: null,
+      status: "skipped" as const,
+      pendingFiscal: true,
+      hasCpf: false,
+      error,
+      raw: { missing: missingFields, address: addressFlat },
+    };
   }
 
   const fullBody = { ...baseBody, address: addressFlat };
@@ -490,9 +499,11 @@ async function processOrder(orderId: string) {
   let lastError: string | null = null;
   const responses: Record<string, unknown> = {};
 
+  let pendingFiscal = false;
   const invoiceAlreadyDone = !!existingLog?.nibo_invoice_id;
   if (!invoiceAlreadyDone) {
     const c = await upsertCustomer(order);
+    pendingFiscal = !!(c as any).pendingFiscal;
     customerStatus = c.status;
     customerId = c.id ?? customerId;
     hasCpf = c.hasCpf;
@@ -545,7 +556,13 @@ async function processOrder(orderId: string) {
     scheduleStatus === "failed" ||
     invoiceStatus === "failed";
 
-  const finalStatus = allOk ? "success" : anyFail ? "partial" : "pending";
+  const finalStatus = allOk
+    ? "success"
+    : pendingFiscal
+    ? "pending_fiscal"
+    : anyFail
+    ? "partial"
+    : "pending";
 
   await supabase.from("nibo_sync_log").update({
     status: finalStatus,

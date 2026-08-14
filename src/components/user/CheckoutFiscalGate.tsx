@@ -18,6 +18,11 @@ interface FiscalData {
   address_state: string | null;
 }
 
+const isNameCpfComplete = (d: FiscalData | null) =>
+  !!d &&
+  (d.full_name || "").trim().length >= 3 &&
+  (d.cpf || "").replace(/\D/g, "").length === 11;
+
 const isFiscalComplete = (d: FiscalData | null) =>
   !!d &&
   (d.full_name || "").trim().length >= 3 &&
@@ -32,18 +37,23 @@ const isFiscalComplete = (d: FiscalData | null) =>
 export interface FiscalPayload {
   full_name: string;
   cpf: string;
-  cep: string;
-  address_street: string;
-  address_number: string;
-  address_complement: string | null;
-  address_neighborhood: string;
-  address_city: string;
-  address_state: string;
+  cep?: string;
+  address_street?: string;
+  address_number?: string;
+  address_complement?: string | null;
+  address_neighborhood?: string;
+  address_city?: string;
+  address_state?: string;
 }
 
 interface Props {
   /** null = visitante (convidado): dados não são salvos no perfil, só devolvidos ao checkout. */
   userId: string | null;
+  /**
+   * "minimal" (padrão): só nome completo + CPF antes do pagamento.
+   * "full": nome + CPF + endereço completo (usado no preenchimento pós-pagamento).
+   */
+  mode?: "minimal" | "full";
   /** Chamado assim que os dados fiscais estiverem completos (na entrada ou após salvar). */
   onReady: (fiscal?: FiscalPayload) => void;
 }
@@ -53,7 +63,8 @@ interface Props {
  * Bloqueia o checkout até que o usuário tenha CPF + endereço completo salvos no perfil.
  * Obrigatório para emissão de NFSe (NIBO). Sem esses dados a prefeitura rejeita a nota.
  */
-export default function CheckoutFiscalGate({ userId, onReady }: Props) {
+export default function CheckoutFiscalGate({ userId, mode = "minimal", onReady }: Props) {
+  const minimal = mode === "minimal";
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
@@ -86,17 +97,17 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
         .maybeSingle();
       if (cancelled) return;
       const d = (data as FiscalData) || null;
-      if (isFiscalComplete(d)) {
+      if (minimal ? isNameCpfComplete(d) : isFiscalComplete(d)) {
         onReady({
           full_name: (d!.full_name || "").trim(),
           cpf: (d!.cpf || "").replace(/\D/g, ""),
-          cep: (d!.cep || "").replace(/\D/g, ""),
-          address_street: d!.address_street!,
-          address_number: d!.address_number!,
+          cep: (d!.cep || "").replace(/\D/g, "") || undefined,
+          address_street: d!.address_street || undefined,
+          address_number: d!.address_number || undefined,
           address_complement: d!.address_complement,
-          address_neighborhood: d!.address_neighborhood!,
-          address_city: d!.address_city!,
-          address_state: d!.address_state!,
+          address_neighborhood: d!.address_neighborhood || undefined,
+          address_city: d!.address_city || undefined,
+          address_state: d!.address_state || undefined,
         });
         setLoading(false);
         return;
@@ -121,7 +132,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [userId, onReady]);
+  }, [userId, minimal, onReady]);
 
   const formatCpf = (raw: string) => {
     const d = raw.replace(/\D/g, "").slice(0, 11);
@@ -194,15 +205,15 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       toast.error("CPF inválido");
       return;
     }
-    if (cepDigits.length !== 8) {
+    if (!minimal && cepDigits.length !== 8) {
       toast.error("CEP inválido");
       return;
     }
-    if (!street.trim() || !number.trim() || !city.trim() || !state.trim()) {
+    if (!minimal && (!street.trim() || !number.trim() || !city.trim() || !state.trim())) {
       toast.error("Preencha o endereço completo");
       return;
     }
-    if (!neighborhood.trim()) {
+    if (!minimal && !neighborhood.trim()) {
       toast.error("Preencha o bairro", {
         description: "O bairro é obrigatório para a emissão da nota fiscal.",
       });
@@ -210,17 +221,19 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       return;
     }
 
-    const payload: FiscalPayload = {
-      full_name: nameTrimmed,
-      cpf: cpfDigits,
-      cep: cepDigits,
-      address_street: street.trim(),
-      address_number: number.trim(),
-      address_complement: complement.trim() || null,
-      address_neighborhood: neighborhood.trim(),
-      address_city: city.trim(),
-      address_state: state.trim().toUpperCase().slice(0, 2),
-    };
+    const payload: FiscalPayload = minimal
+      ? { full_name: nameTrimmed, cpf: cpfDigits }
+      : {
+          full_name: nameTrimmed,
+          cpf: cpfDigits,
+          cep: cepDigits,
+          address_street: street.trim(),
+          address_number: number.trim(),
+          address_complement: complement.trim() || null,
+          address_neighborhood: neighborhood.trim(),
+          address_city: city.trim(),
+          address_state: state.trim().toUpperCase().slice(0, 2),
+        };
 
     if (!userId) {
       // Convidado: nada é salvo agora; os dados seguem junto do pagamento.
@@ -231,16 +244,18 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
 
     setSaving(true);
     try {
-      const addressData: Record<string, any> = {
-        full_name: payload.full_name,
-        cep: payload.cep,
-        address_street: payload.address_street,
-        address_number: payload.address_number,
-        address_complement: payload.address_complement,
-        address_neighborhood: payload.address_neighborhood,
-        address_city: payload.address_city,
-        address_state: payload.address_state,
-      };
+      const addressData: Record<string, any> = minimal
+        ? { full_name: payload.full_name }
+        : {
+            full_name: payload.full_name,
+            cep: payload.cep,
+            address_street: payload.address_street,
+            address_number: payload.address_number,
+            address_complement: payload.address_complement,
+            address_neighborhood: payload.address_neighborhood,
+            address_city: payload.address_city,
+            address_state: payload.address_state,
+          };
       const updateData: Record<string, any> = { ...addressData };
       if (!cpfLocked) updateData.cpf = cpfDigits;
 
@@ -255,7 +270,7 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
       }
 
       if (error) throw error;
-      toast.success("Dados fiscais salvos!");
+      toast.success(minimal ? "Dados salvos!" : "Dados fiscais salvos!");
       onReady(payload);
       setNeedsForm(false);
     } catch (err: any) {
@@ -288,7 +303,9 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
         <div>
           <h3 className="text-sm font-semibold">Dados para nota fiscal</h3>
           <p className="text-xs text-white/60 mt-0.5">
-            Precisamos do seu nome completo, CPF e endereço para emitir a nota fiscal da sua compra. Cadastro único — usado em todas as próximas compras.
+            {minimal
+              ? "Precisamos apenas do seu nome completo e CPF para continuar. O endereço da nota fiscal você preenche depois da compra."
+              : "Precisamos do seu nome completo, CPF e endereço para emitir a nota fiscal da sua compra. Cadastro único — usado em todas as próximas compras."}
           </p>
         </div>
       </div>
@@ -319,6 +336,8 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
           />
         </div>
 
+        {!minimal && (
+          <>
         <div className="grid grid-cols-[140px_1fr] gap-3">
           <div>
             <Label htmlFor="cep" className="text-xs">CEP</Label>
@@ -387,8 +406,11 @@ export default function CheckoutFiscalGate({ userId, onReady }: Props) {
           </div>
         </div>
 
+          </>
+        )}
+
         <Button onClick={handleSave} disabled={saving} className="w-full mt-2">
-          {saving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Salvando...</> : "Salvar e continuar"}
+          {saving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Salvando...</> : minimal ? "Continuar para o pagamento" : "Salvar dados fiscais"}
         </Button>
       </div>
     </div>
