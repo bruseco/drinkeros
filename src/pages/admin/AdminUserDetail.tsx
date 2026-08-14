@@ -251,8 +251,48 @@ const AdminUserDetail: React.FC = () => {
             {renderField('email', 'Email', profile.email, <Mail className="h-4 w-4" />)}
             {renderField('phone', 'Telefone', profile.phone, <Phone className="h-4 w-4" />)}
             {renderField('cpf', 'CPF', profile.cpf, <IdCard className="h-4 w-4" />)}
+
+            <div className="mt-4 pt-3 border-t">
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" /> Endereço fiscal (NF-e)
+                </h4>
+                <Button size="sm" variant="ghost" className="gap-1.5 h-7 text-xs" onClick={copyFiscalData}>
+                  <Copy className="h-3.5 w-3.5" /> Copiar
+                </Button>
+              </div>
+              {!addressComplete && (
+                <p className="text-xs text-destructive mb-1">Endereço incompleto — a NF-e pode ser rejeitada.</p>
+              )}
+              {renderProfileField('cep', 'CEP', profile.cep)}
+              {renderProfileField('address_street', 'Rua / Logradouro', profile.address_street)}
+              {renderProfileField('address_number', 'Número', profile.address_number)}
+              {renderProfileField('address_complement', 'Complemento', profile.address_complement)}
+              {renderProfileField('address_neighborhood', 'Bairro', profile.address_neighborhood)}
+              {renderProfileField('address_city', 'Cidade', profile.address_city)}
+              {renderProfileField('address_state', 'Estado (UF)', profile.address_state)}
+            </div>
+
+            <div className="mt-4 pt-3 border-t">
+              <h4 className="text-sm font-semibold mb-1">Outros dados</h4>
+              {renderProfileField('birth_date', 'Data de nascimento', profile.birth_date)}
+              {renderProfileField('gender', 'Gênero', profile.gender)}
+              <div className="py-2">
+                <p className="text-xs text-muted-foreground">Interesses</p>
+                <p className="font-medium text-sm">
+                  {profile.interests?.length ? profile.interests.join(', ') : <span className="text-muted-foreground italic">não informado</span>}
+                </p>
+              </div>
+              <div className="py-2">
+                <p className="text-xs text-muted-foreground">Bio</p>
+                <p className="font-medium text-sm whitespace-pre-wrap">
+                  {profile.bio || <span className="text-muted-foreground italic">não informado</span>}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
+
 
         {/* Plan & Lifetime */}
         <Card>
