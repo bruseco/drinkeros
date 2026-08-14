@@ -52,16 +52,18 @@ Sim, é totalmente possível. Resumo do fluxo:
 - **Banco**: nova tabela `landing_offer_leads` (page_key, nome, e-mail normalizado, `discount_token`, `token_expires_at`, `email_sent_at`, `redeemed_at`, `user_id` opcional) com RLS: leitura só admin; inserção pública apenas via edge function (`capture-offer-lead`), nunca escrita direta do cliente.
 - **Frontend**:
   - `src/components/landing/PriceGiftReveal.tsx`: passo de lead opcional (props `requireLead`, `onLeadSubmit`).
-  - `src/pages/landing/CourseLanding.tsx`: props `leadCapture` e `couponPrice`; segunda animação (297 → 197) quando o token é válido; propagação do token para `checkoutPath`.
-  - `src/pages/landing/Rand.tsx`: ativa a captura de lead e o preço de cupom 197.
+  - Novo `src/components/landing/OfferCountdownBar.tsx`: tarja pink fixa no topo com contador de 15 min (persistido em `localStorage` por página).
+  - `src/pages/landing/CourseLanding.tsx`: props `leadCapture`, `couponPrice` e `countdownMinutes`; segunda animação (297 → 197) quando o token é válido; propagação do token para `checkoutPath`.
+  - `src/pages/landing/Rand.tsx`: ativa a captura de lead, a tarja de 15 min e o preço de cupom 197.
   - `src/pages/Checkout.tsx`: lê `?c=TOKEN`, valida e exibe o preço com cupom.
 - **Edge functions**:
   - `capture-offer-lead` (pública, valida formato/rate-limit, cria lead + token).
   - `validate-offer-coupon` (pública, retorna preço final do token).
   - `send-offer-followup-emails` (cron a cada 5 min, guard interno como as demais crons; usa `send-transactional-email`).
   - `create-mp-payment`: aceita `coupon_token`, revalida no servidor e usa R$ 197 como `transaction_amount`; marca `redeemed_at` na aprovação.
+  - `mercadopago-webhook`: ao aprovar/pendenciar uma compra do RAND, marca o lead correspondente como não elegível ao e-mail.
 - **Template**: `supabase/functions/_shared/transactional-email-templates/rand-offer-197.tsx` + registro no `registry.ts`.
-- **Checagem de compra**: por e-mail normalizado em `purchases` (inclui compras de convidado) antes de enviar o e-mail.
+- **Checagem de compra antes do envio**: `purchases` (aprovadas, pendentes e em análise, por e-mail normalizado e `user_id`) + `user_combos` do RAND.
 
 ## Impactos
 
