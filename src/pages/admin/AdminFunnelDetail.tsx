@@ -21,13 +21,7 @@ const AdminFunnelDetail: React.FC = () => {
   const { funnelKey } = useParams<{ funnelKey: string }>();
   const funnel = getFunnel(funnelKey ?? '');
   const [range, setRange] = useState<FunnelRange>('30d');
-  const { data: counts, isLoading } = usePageFunnel(
-    funnel?.pageKey ?? '',
-    range,
-    funnel?.productType && funnel?.productSlug
-      ? { productType: funnel.productType, productSlug: funnel.productSlug }
-      : undefined,
-  );
+  const { data: counts, isLoading } = usePageFunnel(funnel, range);
 
 
   if (!funnel) {
@@ -41,13 +35,12 @@ const AdminFunnelDetail: React.FC = () => {
     );
   }
 
-  const safe: FunnelCounts = counts ?? {
-    pageview: 0, offer_1_revealed: 0, checkout_1_started: 0,
-    offer_2_revealed: 0, checkout_2_started: 0, subscription_confirmed: 0,
-  };
+  const safe: FunnelCounts = counts ?? {};
+  const get = (key: string) => safe[key] ?? 0;
   const steps = funnel.steps;
-  const topCount = safe[steps[0].event as keyof FunnelCounts];
-  const lastCount = safe[steps[steps.length - 1].event as keyof FunnelCounts];
+  const topCount = get(steps[0].key);
+  const lastCount = get(steps[steps.length - 1].key);
+
 
   return (
     <div className="space-y-6">
@@ -96,11 +89,11 @@ const AdminFunnelDetail: React.FC = () => {
         ) : (
           <div className="space-y-4">
             {steps.map((s, idx) => {
-              const count = safe[s.event as keyof FunnelCounts];
-              const prev = idx === 0 ? null : safe[steps[idx - 1].event as keyof FunnelCounts];
+              const count = get(s.key);
+              const prev = idx === 0 ? null : get(steps[idx - 1].key);
               const widthPct = topCount > 0 ? Math.max(2, (count / topCount) * 100) : 2;
               return (
-                <div key={s.event} className="space-y-1.5">
+                <div key={s.key} className="space-y-1.5">
                   <div className="flex items-center justify-between gap-3 text-sm">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-[11px] font-bold text-primary shrink-0">
@@ -135,28 +128,25 @@ const AdminFunnelDetail: React.FC = () => {
                 <div className="text-xl font-bold">{pct(lastCount, topCount)}</div>
               </div>
               {steps.slice(1).map((s, i) => (
-                <div key={s.event}>
+                <div key={s.key}>
                   <div className="text-xs text-muted-foreground truncate">
                     % {s.label.toLowerCase()}
                   </div>
-                  <div className="text-xl font-bold">
-                    {pct(
-                      safe[s.event as keyof FunnelCounts],
-                      safe[steps[i].event as keyof FunnelCounts],
-                    )}
-                  </div>
+                  <div className="text-xl font-bold">{pct(get(s.key), get(steps[i].key))}</div>
                 </div>
               ))}
             </div>
 
             {funnel.productType && funnel.productSlug && (
               <p className="text-xs text-muted-foreground pt-2">
-                As etapas 1 a 3 são contadas por sessão de navegação na página. A etapa
-                “Comprou” é contada pelos pagamentos aprovados do produto no banco — por isso
-                pode incluir compras feitas por outros caminhos (ex.: link direto) e não depende
-                do cliente voltar para a página após pagar.
+                As etapas de navegação são contadas por sessão na página. As etapas “Comprou por
+                R$ 297” e “Comprou por R$ 197” são contadas pelos pagamentos aprovados do produto
+                no banco, separados pelo valor pago — por isso podem incluir compras feitas por
+                outros caminhos (ex.: link direto) e não dependem do cliente voltar para a página
+                após pagar.
               </p>
             )}
+
 
           </div>
         )}

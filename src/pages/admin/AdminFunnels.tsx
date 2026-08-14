@@ -33,8 +33,9 @@ const AdminFunnels: React.FC = () => {
             <p className="text-sm text-muted-foreground">{f.description}</p>
             <ol className="text-sm text-muted-foreground list-decimal pl-5 space-y-0.5">
               {f.steps.map((s) => (
-                <li key={s.event}>{s.label}</li>
+                <li key={s.key}>{s.label}</li>
               ))}
+
             </ol>
             <Link
               to={`/admin/funis/${f.key}`}

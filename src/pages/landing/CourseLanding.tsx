@@ -357,7 +357,13 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
           try {
             sessionStorage.setItem(`offer-coupon:${slug}`, token);
           } catch { /* ignore */ }
+          import('@/lib/funnelTracking').then((m) =>
+            m.trackFunnel(funnelPageKey, 'offer_2_revealed', {
+              amountCents: Math.round(Number(data.price) * 100),
+            }),
+          );
         }
+
       } catch { /* cupom inválido não quebra a página */ }
     })();
     return () => { cancelled = true; };
@@ -591,12 +597,18 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       // Aguarda (com teto de 1.5s) para o evento não se perder na navegação.
       try {
         const m = await import('@/lib/funnelTracking');
+        const hasCoupon = !!(coupon?.token || (() => {
+          try { return sessionStorage.getItem(`offer-coupon:${slug}`); } catch { return null; }
+        })());
         await Promise.race([
-          m.trackFunnelAsync(funnelPageKey, 'checkout_1_started', {
-            amountCents: Math.round(shownPrice * 100),
-          }),
+          m.trackFunnelAsync(
+            funnelPageKey,
+            hasCoupon ? 'checkout_2_started' : 'checkout_1_started',
+            { amountCents: Math.round(shownPrice * 100) },
+          ),
           new Promise((r) => setTimeout(r, 1500)),
         ]);
+
       } catch {
         /* nunca bloqueia a compra */
       }

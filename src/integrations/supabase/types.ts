@@ -3789,6 +3789,16 @@ export type Database = {
         Args: { _product_slug: string; _product_type: string; _since?: string }
         Returns: number
       }
+      get_page_funnel_sales_range: {
+        Args: {
+          _max_amount?: number
+          _min_amount?: number
+          _product_slug: string
+          _product_type: string
+          _since?: string
+        }
+        Returns: number
+      }
       get_public_tracking_settings: {
         Args: never
         Returns: {
