@@ -73,7 +73,8 @@ Sim, é totalmente possível. Resumo do fluxo:
 
 ## Como testar
 
-1. Abrir `/rand` anônimo, rolar até o preço, preencher nome/e-mail, conferir animação 497 → 297.
-2. Esperar 15 min sem comprar e conferir o e-mail com o link.
-3. Abrir o link: preço mostra 297 e anima até 197; checkout cobra 197.
-4. Reutilizar o link após a compra ou depois de 48h: preço volta a 297.
+1. Abrir `/rand` anônimo, rolar até o preço, preencher nome/e-mail, conferir animação 497 → 297 e a tarja pink com contador de 15 min.
+2. Esperar 20 min sem comprar e conferir o e-mail com o link.
+3. Comprar antes dos 20 min (cartão e Pix) e confirmar que o e-mail **não** é enviado.
+4. Abrir o link do e-mail: preço mostra 297 e anima até 197; checkout cobra 197.
+5. Reutilizar o link após a compra ou depois de 48h: preço volta a 297.
