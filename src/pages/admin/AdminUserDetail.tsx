@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
-import { ArrowLeft, Mail, Phone, IdCard, Crown, Shield, Calendar, Send, Key, Trash2, Loader2, Pencil, Check, X, BookOpen, FileText, Package, Layers, Sparkles, BarChart3, Bell, BellOff } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, IdCard, Crown, Shield, Calendar, Send, Key, Trash2, Loader2, Pencil, Check, X, BookOpen, FileText, Package, Layers, Sparkles, BarChart3, Bell, BellOff, MapPin, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
