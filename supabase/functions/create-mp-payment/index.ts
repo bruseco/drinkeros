@@ -305,6 +305,34 @@ serve(async (req) => {
     const poi = mpData.point_of_interaction?.transaction_data;
     const pixData = isPix && poi && (poi.qr_code || poi.qr_code_base64) ? poi : null;
 
+    // E-mail com o código Pix (copia e cola) para o comprador concluir o pagamento.
+    if (pixData && payerEmail && payerEmail !== "comprador@drinkeros.com") {
+      try {
+        const amountFormatted = new Intl.NumberFormat("pt-BR", {
+          style: "currency", currency: "BRL",
+        }).format(finalPrice);
+        const { error: mailErr } = await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "pix-payment-pending",
+            recipientEmail: payerEmail,
+            idempotencyKey: `pix-pending:mercado_pago:${mpData.id}`,
+            templateData: {
+              userName: fiscalName ? fiscalName.split(" ")[0] : undefined,
+              productName: product.name,
+              amountFormatted,
+              pixCode: pixData.qr_code,
+              ticketUrl: pixData.ticket_url,
+            },
+          },
+        });
+        if (mailErr) console.warn("[create-mp-payment] e-mail Pix falhou:", mailErr.message);
+      } catch (e) {
+        console.warn("[create-mp-payment] e-mail Pix exceção:", (e as Error).message);
+      }
+    }
+
+
+
 
     return new Response(
       JSON.stringify({
