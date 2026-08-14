@@ -52,12 +52,23 @@ export const PriceGiftReveal: React.FC<Props> = ({
     if (!open) {
       setOpening(false);
       setLeaving(false);
+      setShowForm(false);
+      setFormError(null);
+      setSaving(false);
     }
     return () => {
       timers.current.forEach((t) => window.clearTimeout(t));
       timers.current = [];
     };
   }, [open]);
+
+  useEffect(() => {
+    if (defaultName) setName((prev) => prev || defaultName);
+  }, [defaultName]);
+  useEffect(() => {
+    if (defaultEmail) setEmail((prev) => prev || defaultEmail);
+  }, [defaultEmail]);
+
 
   const sparkles = React.useMemo(
     () =>
