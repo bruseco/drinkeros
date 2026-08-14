@@ -20,6 +20,7 @@ import { template as clubeRenewalPlus3d } from './clube-renewal-plus3d.tsx'
 import { template as clubePaymentFailed } from './clube-payment-failed.tsx'
 import { template as accountCreated } from './account-created.tsx'
 import { template as purchaseConfirmed } from './purchase-confirmed.tsx'
+import { template as pixPaymentPending } from './pix-payment-pending.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'welcome': welcomeEmail,
