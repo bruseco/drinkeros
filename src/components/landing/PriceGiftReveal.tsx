@@ -248,25 +248,73 @@ export const PriceGiftReveal: React.FC<Props> = ({
           className="text-white/85 text-base sm:text-lg font-light tracking-wide px-3"
           style={{ animation: 'pgr-fade-up 520ms ease 480ms both' }}
         >
-          {subtitle}
+          {showForm ? 'Preencha seus dados para desbloquear o desconto:' : subtitle}
         </div>
 
-        <button
-          type="button"
-          onClick={handleOpenGift}
-          disabled={opening}
-          className="mt-7 inline-flex items-center justify-center rounded-full px-9 py-3.5 text-white font-extrabold text-lg hover:scale-[1.03] active:scale-[0.98] transition-transform disabled:opacity-70"
-          style={{
-            backgroundImage:
-              'linear-gradient(90deg, #65a30d 0%, #84cc16 25%, #bef264 50%, #84cc16 75%, #65a30d 100%)',
-            backgroundSize: '300% 100%',
-            boxShadow: '0 10px 26px rgba(101,163,13,0.55), 0 0 40px rgba(132,204,22,0.4)',
-            animation:
-              'pgr-fade-up 520ms ease 640ms both, pgr-btn-shimmer 2.6s linear 1100ms infinite',
-          }}
-        >
-          {ctaLabel}
-        </button>
+        {showForm ? (
+          <form
+            onSubmit={handleSubmitLead}
+            className="mt-5 space-y-3 text-left"
+            style={{ animation: 'pgr-fade-up 380ms ease both' }}
+          >
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Seu nome"
+              autoComplete="name"
+              autoFocus
+              className="w-full rounded-xl bg-white/95 px-4 py-3 text-base text-zinc-900 placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-lime-400"
+            />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Seu melhor e-mail"
+              autoComplete="email"
+              inputMode="email"
+              className="w-full rounded-xl bg-white/95 px-4 py-3 text-base text-zinc-900 placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-lime-400"
+            />
+            {formError && (
+              <p className="text-sm font-medium text-rose-300">{formError}</p>
+            )}
+            <button
+              type="submit"
+              disabled={saving || opening}
+              className="w-full inline-flex items-center justify-center rounded-full px-9 py-3.5 text-white font-extrabold text-lg hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-70"
+              style={{
+                backgroundImage:
+                  'linear-gradient(90deg, #65a30d 0%, #84cc16 25%, #bef264 50%, #84cc16 75%, #65a30d 100%)',
+                backgroundSize: '300% 100%',
+                boxShadow: '0 10px 26px rgba(101,163,13,0.55), 0 0 40px rgba(132,204,22,0.4)',
+                animation: 'pgr-btn-shimmer 2.6s linear infinite',
+              }}
+            >
+              {saving ? 'LIBERANDO...' : 'DESBLOQUEAR DESCONTO'}
+            </button>
+            <p className="text-center text-xs text-white/60">
+              Usamos seus dados apenas para enviar o seu desconto.
+            </p>
+          </form>
+        ) : (
+          <button
+            type="button"
+            onClick={handleOpenGift}
+            disabled={opening}
+            className="mt-7 inline-flex items-center justify-center rounded-full px-9 py-3.5 text-white font-extrabold text-lg hover:scale-[1.03] active:scale-[0.98] transition-transform disabled:opacity-70"
+            style={{
+              backgroundImage:
+                'linear-gradient(90deg, #65a30d 0%, #84cc16 25%, #bef264 50%, #84cc16 75%, #65a30d 100%)',
+              backgroundSize: '300% 100%',
+              boxShadow: '0 10px 26px rgba(101,163,13,0.55), 0 0 40px rgba(132,204,22,0.4)',
+              animation:
+                'pgr-fade-up 520ms ease 640ms both, pgr-btn-shimmer 2.6s linear 1100ms infinite',
+            }}
+          >
+            {ctaLabel}
+          </button>
+        )}
+
       </div>
 
       <style>{`
