@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, ChevronRight, Package, Camera, Crown, Bell, BellOff, Shield, ArrowLeftRight, Heart, Briefcase, PartyPopper } from 'lucide-react';
+import { User, Lock, Save, Eye, EyeOff, LogOut, MessageCircle, ChevronDown, ChevronRight, Package, Camera, Crown, Bell, BellOff, Shield, ArrowLeftRight, Heart, Briefcase, PartyPopper, AlertTriangle } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useInterests, useUpdateInterests, type Interest } from '@/hooks/useInterests';
 
