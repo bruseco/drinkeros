@@ -347,7 +347,7 @@ export default function Checkout() {
 
       // Pix (Clube ou produto avulso) ou Cartão de produto avulso → pagamento único
       const { data, error } = await supabase.functions.invoke("create-mp-payment", {
-        body: { product_type: productType, slug: product.slug, formData, fiscal: fiscalData },
+        body: { product_type: productType, slug: product.slug, formData, fiscal: fiscalData, coupon_token: couponToken || undefined },
       });
       if (error) {
         // Erro 400 do servidor (ex.: dados fiscais incompletos) vem no corpo da resposta.

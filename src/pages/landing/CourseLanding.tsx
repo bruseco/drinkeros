@@ -587,7 +587,13 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       }
     }
     try {
-      window.location.href = checkoutPath ?? `/checkout/course/${slug}`;
+      const target = checkoutPath ?? `/checkout/course/${slug}`;
+      const token = coupon?.token || (() => {
+        try { return sessionStorage.getItem(`offer-coupon:${slug}`) || ''; } catch { return ''; }
+      })();
+      window.location.href = token
+        ? `${target}${target.includes('?') ? '&' : '?'}c=${encodeURIComponent(token)}`
+        : target;
       return;
 
     } catch (err: any) {
