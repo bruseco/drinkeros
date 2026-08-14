@@ -222,6 +222,9 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   giftTitle,
   giftSubtitle,
   funnelPageKey,
+  leadCapture = false,
+  offerCountdownMinutes = 15,
+
 
 }) => {
   const { toast } = useToast();
