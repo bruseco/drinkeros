@@ -423,6 +423,12 @@ export default function Checkout() {
               }}
             />
 
+          ) : submitting ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-16 text-white">
+              <Loader2 className="w-10 h-10 animate-spin text-primary" />
+              <p className="text-base font-medium">Processando...</p>
+              <p className="text-sm text-white/60">Aguarde enquanto confirmamos seu pagamento.</p>
+            </div>
           ) : (
             <>
               {isClub && (
@@ -508,13 +514,7 @@ export default function Checkout() {
                     <Loader2 className="w-4 h-4 animate-spin" /> Carregando pagamento...
                   </div>
                 )}
-                {submitting && (
-                  <div className="flex items-center justify-center gap-2 py-3 text-sm text-black/70">
-                    <Loader2 className="w-4 h-4 animate-spin" /> Processando...
-                  </div>
-                )}
               </div>
-
             </>
           )}
         </div>
