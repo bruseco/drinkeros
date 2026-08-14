@@ -359,7 +359,7 @@ export default function Checkout() {
         toast.info("Pagamento em análise. Você receberá uma confirmação em breve.");
         setTimeout(() => navigate(isClub ? "/pv-clube?clube=pending" : `/${product.slug}?checkout=pending`), 2000);
       } else {
-        toast.error("Pagamento recusado", { description: data.status_detail || "Tente outro cartão." });
+        toast.error("Pagamento recusado", { description: mpRejectionMessage(data.status_detail) });
       }
     } catch (err: any) {
       const raw = String(err?.message || "");
