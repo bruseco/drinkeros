@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { format } from 'date-fns';
-import { ArrowLeft, Mail, Phone, IdCard, Crown, Shield, Calendar, Send, Key, Trash2, Loader2, Pencil, Check, X, BookOpen, FileText, Package, Layers, Sparkles, BarChart3, Bell, BellOff } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, IdCard, Crown, Shield, Calendar, Send, Key, Trash2, Loader2, Pencil, Check, X, BookOpen, FileText, Package, Layers, Sparkles, BarChart3, Bell, BellOff, MapPin, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -48,6 +48,8 @@ const AdminUserDetail: React.FC = () => {
 
   const [editingField, setEditingField] = useState<null | 'name' | 'email' | 'phone' | 'cpf'>(null);
   const [draftValue, setDraftValue] = useState('');
+  const [editingProfileField, setEditingProfileField] = useState<string | null>(null);
+  const [profileDraft, setProfileDraft] = useState('');
 
   const [addAccessOpen, setAddAccessOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
@@ -161,6 +163,75 @@ const AdminUserDetail: React.FC = () => {
     </div>
   );
 
+  const saveProfileField = async (column: string) => {
+    if (!userId) return;
+    const value = profileDraft.trim() || null;
+    const { error } = await supabase.from('profiles').update({ [column]: value } as any).eq('user_id', userId);
+    if (error) {
+      toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Dado atualizado' });
+      queryClient.invalidateQueries({ queryKey: ['admin-user-detail'] });
+      setEditingProfileField(null);
+    }
+  };
+
+  const renderProfileField = (column: string, label: string, value: string | null) => (
+    <div className="flex items-center gap-3 py-1.5">
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        {editingProfileField === column ? (
+          <div className="flex items-center gap-2 mt-1">
+            <Input
+              value={profileDraft}
+              onChange={(e) => setProfileDraft(e.target.value)}
+              className="h-8"
+              type={column === 'birth_date' ? 'date' : 'text'}
+              autoFocus
+            />
+            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => saveProfileField(column)}>
+              <Check className="h-4 w-4" />
+            </Button>
+            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditingProfileField(null)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <p className="font-medium text-sm truncate">
+            {value || <span className="text-muted-foreground italic">não informado</span>}
+          </p>
+        )}
+      </div>
+      {editingProfileField !== column && (
+        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => { setEditingProfileField(column); setProfileDraft(value || ''); }}>
+          <Pencil className="h-3.5 w-3.5" />
+        </Button>
+      )}
+    </div>
+  );
+
+  const addressComplete = !!(profile.cep && profile.address_street && profile.address_number && profile.address_neighborhood && profile.address_city && profile.address_state);
+
+  const copyFiscalData = async () => {
+    const text = [
+      `Nome: ${profile.full_name || '-'}`,
+      `CPF: ${profile.cpf || '-'}`,
+      `Email: ${profile.email}`,
+      `Telefone: ${profile.phone || '-'}`,
+      `CEP: ${profile.cep || '-'}`,
+      `Endereço: ${profile.address_street || '-'}, ${profile.address_number || '-'}${profile.address_complement ? ` - ${profile.address_complement}` : ''}`,
+      `Bairro: ${profile.address_neighborhood || '-'}`,
+      `Cidade/UF: ${profile.address_city || '-'} / ${profile.address_state || '-'}`,
+    ].join('\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({ title: 'Dados fiscais copiados' });
+    } catch {
+      toast({ title: 'Não foi possível copiar', variant: 'destructive' });
+    }
+  };
+
+
   const excludeIds = {
     courses: courses.map((c) => c.ref_id),
     ebooks: ebooks.map((e) => e.ref_id),
@@ -251,8 +322,48 @@ const AdminUserDetail: React.FC = () => {
             {renderField('email', 'Email', profile.email, <Mail className="h-4 w-4" />)}
             {renderField('phone', 'Telefone', profile.phone, <Phone className="h-4 w-4" />)}
             {renderField('cpf', 'CPF', profile.cpf, <IdCard className="h-4 w-4" />)}
+
+            <div className="mt-4 pt-3 border-t">
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" /> Endereço fiscal (NF-e)
+                </h4>
+                <Button size="sm" variant="ghost" className="gap-1.5 h-7 text-xs" onClick={copyFiscalData}>
+                  <Copy className="h-3.5 w-3.5" /> Copiar
+                </Button>
+              </div>
+              {!addressComplete && (
+                <p className="text-xs text-destructive mb-1">Endereço incompleto — a NF-e pode ser rejeitada.</p>
+              )}
+              {renderProfileField('cep', 'CEP', profile.cep)}
+              {renderProfileField('address_street', 'Rua / Logradouro', profile.address_street)}
+              {renderProfileField('address_number', 'Número', profile.address_number)}
+              {renderProfileField('address_complement', 'Complemento', profile.address_complement)}
+              {renderProfileField('address_neighborhood', 'Bairro', profile.address_neighborhood)}
+              {renderProfileField('address_city', 'Cidade', profile.address_city)}
+              {renderProfileField('address_state', 'Estado (UF)', profile.address_state)}
+            </div>
+
+            <div className="mt-4 pt-3 border-t">
+              <h4 className="text-sm font-semibold mb-1">Outros dados</h4>
+              {renderProfileField('birth_date', 'Data de nascimento', profile.birth_date)}
+              {renderProfileField('gender', 'Gênero', profile.gender)}
+              <div className="py-2">
+                <p className="text-xs text-muted-foreground">Interesses</p>
+                <p className="font-medium text-sm">
+                  {profile.interests?.length ? profile.interests.join(', ') : <span className="text-muted-foreground italic">não informado</span>}
+                </p>
+              </div>
+              <div className="py-2">
+                <p className="text-xs text-muted-foreground">Bio</p>
+                <p className="font-medium text-sm whitespace-pre-wrap">
+                  {profile.bio || <span className="text-muted-foreground italic">não informado</span>}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
+
 
         {/* Plan & Lifetime */}
         <Card>
