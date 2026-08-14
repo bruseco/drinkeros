@@ -474,6 +474,15 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       return null;
     }
   });
+  const [countdownBarVisible, setCountdownBarVisible] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      // Se já havia revelado o desconto e a contagem está ativa, mantém a tarja visível
+      return sessionStorage.getItem(`gift-reveal:${slug}`) === '1' && !!sessionStorage.getItem(`offer-countdown:${slug}`);
+    } catch {
+      return false;
+    }
+  });
   const startCountdown = () => {
     setCountdownStartedAt((prev) => {
       if (prev) return prev;
