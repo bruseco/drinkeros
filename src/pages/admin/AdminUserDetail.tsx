@@ -48,6 +48,8 @@ const AdminUserDetail: React.FC = () => {
 
   const [editingField, setEditingField] = useState<null | 'name' | 'email' | 'phone' | 'cpf'>(null);
   const [draftValue, setDraftValue] = useState('');
+  const [editingProfileField, setEditingProfileField] = useState<string | null>(null);
+  const [profileDraft, setProfileDraft] = useState('');
 
   const [addAccessOpen, setAddAccessOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
