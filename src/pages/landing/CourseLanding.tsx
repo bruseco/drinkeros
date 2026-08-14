@@ -29,6 +29,7 @@ import VipFloatingBanner from '@/components/landing/VipFloatingBanner';
 import SeoHead from '@/components/SeoHead';
 import { useTotalStudents, TOTAL_STUDENTS_FALLBACK } from '@/hooks/useTotalStudents';
 import PriceGiftReveal from '@/components/landing/PriceGiftReveal';
+import OfferCountdownBar from '@/components/landing/OfferCountdownBar';
 
 
 /** Total padrão (fallback) — fonte real é o RPC `get_total_students_certified`. */
