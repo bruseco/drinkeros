@@ -9,6 +9,12 @@ interface Props {
   title?: string;
   subtitle?: string;
   ctaLabel?: string;
+  /** Quando true, pede nome + e-mail antes de abrir o presente. */
+  requireLead?: boolean;
+  defaultName?: string;
+  defaultEmail?: string;
+  /** Recebe os dados do lead antes da revelação. Erros não bloqueiam o desconto. */
+  onSubmitLead?: (data: { name: string; email: string }) => Promise<void> | void;
   /** Chamado quando a animação de abertura termina (ou o usuário fecha). */
   onReveal: () => void;
   onClose: () => void;
@@ -17,19 +23,30 @@ interface Props {
 /**
  * Overlay de presente para revelar desconto em páginas de venda.
  * Intro: presente animado + botão "Pegar desconto".
- * Ao clicar: tampa voa e o overlay fecha, disparando onReveal().
+ * Ao clicar: (opcional) captura nome/e-mail, a tampa voa e o overlay fecha,
+ * disparando onReveal().
  */
 export const PriceGiftReveal: React.FC<Props> = ({
   open,
   title = 'Tem um desconto aqui pra você!',
   subtitle = 'Abra o presente e veja o seu preço especial.',
   ctaLabel = 'PEGAR DESCONTO',
+  requireLead = false,
+  defaultName = '',
+  defaultEmail = '',
+  onSubmitLead,
   onReveal,
   onClose,
 }) => {
   const [opening, setOpening] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState(defaultName);
+  const [email, setEmail] = useState(defaultEmail);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const timers = React.useRef<number[]>([]);
+
 
   useEffect(() => {
     if (!open) {
