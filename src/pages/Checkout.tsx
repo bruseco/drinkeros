@@ -11,6 +11,7 @@ import { useVipDiscount } from "@/hooks/useVipDiscount";
 import { applyVipDiscountFor, getVipPriceFor } from "@/lib/vipDiscount";
 import { useYouthDiscount } from "@/hooks/useYouthDiscount";
 import FiscalAddressDialog from "@/components/user/FiscalAddressDialog";
+import { mpRejectionMessage } from "@/lib/mpErrors";
 
 type ClubMethod = "card" | "pix";
 
@@ -303,7 +304,7 @@ export default function Checkout() {
           toast.info("Assinatura em análise. Você receberá a confirmação em breve.");
           setTimeout(() => navigate("/pv-clube?clube=pending"), 1800);
         } else {
-          toast.error("Não foi possível ativar a assinatura", { description: data?.status_detail || "Tente outro cartão." });
+          toast.error("Não foi possível ativar a assinatura", { description: mpRejectionMessage(data?.status_detail) });
         }
         return;
       }
@@ -359,7 +360,7 @@ export default function Checkout() {
         toast.info("Pagamento em análise. Você receberá uma confirmação em breve.");
         setTimeout(() => navigate(isClub ? "/pv-clube?clube=pending" : `/${product.slug}?checkout=pending`), 2000);
       } else {
-        toast.error("Pagamento recusado", { description: data.status_detail || "Tente outro cartão." });
+        toast.error("Pagamento recusado", { description: mpRejectionMessage(data.status_detail) });
       }
     } catch (err: any) {
       const raw = String(err?.message || "");
