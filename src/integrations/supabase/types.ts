@@ -1467,6 +1467,54 @@ export type Database = {
         }
         Relationships: []
       }
+      landing_offer_leads: {
+        Row: {
+          created_at: string
+          discount_token: string
+          email: string
+          email_sent_at: string | null
+          id: string
+          ineligible_at: string | null
+          ineligible_reason: string | null
+          name: string | null
+          page_key: string
+          redeemed_at: string | null
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          discount_token: string
+          email: string
+          email_sent_at?: string | null
+          id?: string
+          ineligible_at?: string | null
+          ineligible_reason?: string | null
+          name?: string | null
+          page_key: string
+          redeemed_at?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          discount_token?: string
+          email?: string
+          email_sent_at?: string | null
+          id?: string
+          ineligible_at?: string | null
+          ineligible_reason?: string | null
+          name?: string | null
+          page_key?: string
+          redeemed_at?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       lesson_watch_time: {
         Row: {
           course_id: string | null
