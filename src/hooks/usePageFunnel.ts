@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { FunnelEvent } from '@/lib/funnelTracking';
+import type { FunnelDef } from '@/lib/funnels';
 
 export type FunnelRange = 'today' | '7d' | '30d' | 'all';
 
@@ -22,72 +23,59 @@ const sinceFromRange = (range: FunnelRange): string | null => {
   }
 };
 
-export interface FunnelCounts {
-  pageview: number;
-  offer_1_revealed: number;
-  checkout_1_started: number;
-  offer_2_revealed: number;
-  checkout_2_started: number;
-  subscription_confirmed: number;
-}
+/** Contagens por chave de etapa do funil. */
+export type FunnelCounts = Record<string, number>;
 
-const ZERO: FunnelCounts = {
-  pageview: 0,
-  offer_1_revealed: 0,
-  checkout_1_started: 0,
-  offer_2_revealed: 0,
-  checkout_2_started: 0,
-  subscription_confirmed: 0,
-};
-
-export interface FunnelSalesSource {
-  productType: string;
-  productSlug: string;
-}
-
-export const usePageFunnel = (
-  pageKey: string,
-  range: FunnelRange = '30d',
-  salesSource?: FunnelSalesSource,
-) => {
+export const usePageFunnel = (funnel: FunnelDef | undefined, range: FunnelRange = '30d') => {
   return useQuery({
-    queryKey: ['page-funnel', pageKey, range, salesSource?.productType, salesSource?.productSlug],
-    enabled: !!pageKey,
+    queryKey: ['page-funnel', funnel?.key, range],
+    enabled: !!funnel,
     refetchInterval: 30_000,
     queryFn: async (): Promise<FunnelCounts> => {
+      if (!funnel) return {};
       const since = sinceFromRange(range);
+      const out: FunnelCounts = {};
+      for (const s of funnel.steps) out[s.key] = 0;
+
+      // Etapas medidas por evento no navegador
       const { data, error } = await supabase.rpc('get_page_funnel' as any, {
-        _page_key: pageKey,
+        _page_key: funnel.pageKey,
         _since: since,
       });
       if (error) throw error;
-      const out: FunnelCounts = { ...ZERO };
+      const byEvent = new Map<string, number>();
       for (const row of (data ?? []) as Array<{ event: FunnelEvent; count: number }>) {
-        if (row.event in out) {
-          out[row.event as keyof FunnelCounts] = Number(row.count) || 0;
-        }
+        byEvent.set(row.event, Number(row.count) || 0);
+      }
+      for (const s of funnel.steps) {
+        if (s.event) out[s.key] = byEvent.get(s.event) ?? 0;
       }
 
-      // Etapa "Comprou": medida por vendas aprovadas no banco (fonte confiável),
-      // e não por evento disparado no navegador.
-      if (salesSource) {
-        const { data: sales, error: salesError } = await supabase.rpc(
-          'get_page_funnel_sales' as any,
-          {
-            _product_type: salesSource.productType,
-            _product_slug: salesSource.productSlug,
-            _since: since,
-          },
+      // Etapas medidas por vendas aprovadas no banco (fonte confiável)
+      const salesSteps = funnel.steps.filter((s) => s.sales);
+      if (salesSteps.length && funnel.productType && funnel.productSlug) {
+        await Promise.all(
+          salesSteps.map(async (s) => {
+            const { data: sales, error: salesError } = await supabase.rpc(
+              'get_page_funnel_sales_range' as any,
+              {
+                _product_type: funnel.productType,
+                _product_slug: funnel.productSlug,
+                _since: since,
+                _min_amount: s.sales?.min ?? null,
+                _max_amount: s.sales?.max ?? null,
+              },
+            );
+            if (salesError) {
+              console.warn('[funnel] falha ao ler vendas do banco:', salesError.message);
+              return;
+            }
+            out[s.key] = Number(sales) || 0;
+          }),
         );
-        if (salesError) {
-          console.warn('[funnel] falha ao ler vendas do banco:', salesError.message);
-        } else {
-          out.subscription_confirmed = Number(sales) || 0;
-        }
       }
 
       return out;
     },
   });
 };
-
