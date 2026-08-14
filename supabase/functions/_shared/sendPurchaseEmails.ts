@@ -103,22 +103,10 @@ export async function sendPurchaseEmails(supabase: any, args: SendPurchaseEmails
 
   // 1) account-created (somente se conta foi criada agora) — substitui recovery nativo
   if (args.wasCreated) {
-    let passwordSetupUrl = `${args.siteUrl.replace(/\/$/, '')}/reset-password`;
-    try {
-      const { data, error } = await supabase.auth.admin.generateLink({
-        type: 'recovery',
-        email: args.email,
-        options: { redirectTo: `${args.siteUrl.replace(/\/$/, '')}/reset-password` },
-      });
-      if (error) {
-        console.warn('[sendPurchaseEmails] generateLink error:', error.message);
-      } else if (data?.properties?.action_link) {
-        passwordSetupUrl = data.properties.action_link;
-      }
-    } catch (e) {
-      console.warn('[sendPurchaseEmails] generateLink exception:', (e as Error).message);
-    }
-
+    const site = args.siteUrl.replace(/\/$/, '');
+    // Tela de criação de conta: e-mail já preenchido, usuário só define a senha
+    // e entra logado no app (validada pelo payment_id da compra).
+    let passwordSetupUrl = `${site}/criar-conta?pid=${encodeURIComponent(args.transactionId)}&email=${encodeURIComponent(args.email)}`;
     await invokeTemplate(
       supabase,
       'account-created',
