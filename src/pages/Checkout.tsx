@@ -190,11 +190,16 @@ export default function Checkout() {
   }, [product, vipPercent, isClub]);
 
   // Etapa 3: após o pagamento, pede o endereço fiscal (não bloqueante).
-  const finishAfterPayment = (redirect: string, delay = 1500) => {
+  // Convidado (sem conta logada) → vai para a criação de conta com e-mail preenchido.
+  const finishAfterPayment = (redirect: string, delay = 1500, paymentId?: string | null) => {
+    const pid = paymentId || lastPaymentId || pixPaymentId;
+    const target = !userId
+      ? `/criar-conta?pid=${encodeURIComponent(String(pid || ""))}&email=${encodeURIComponent(payerEmail || "")}`
+      : redirect;
     if (addressComplete) {
-      setTimeout(() => navigate(redirect), delay);
+      setTimeout(() => navigate(target), delay);
     } else {
-      setTimeout(() => setAddressPromptRedirect(redirect), 600);
+      setTimeout(() => setAddressPromptRedirect(target), 600);
     }
   };
 
@@ -244,6 +249,8 @@ export default function Checkout() {
       .filter(Boolean).join(" ").trim();
     if (mpCpf) setBuyerCpf(mpCpf);
     if (mpName) setBuyerName(mpName);
+    const mpEmail = String(formData?.payer?.email || "").trim();
+    if (mpEmail) setPayerEmail(mpEmail);
     const fiscalData = { cpf: mpCpf, full_name: mpName } as Record<string, string>;
     setSubmitting(true);
     try {
@@ -355,7 +362,7 @@ export default function Checkout() {
         import('@/lib/firePurchaseFromBackend').then(m =>
           m.firePurchaseFromBackend({ source: 'checkout-mp-card' })
         );
-        finishAfterPayment(isClub ? "/pv-clube?clube=success" : `/${product.slug}?checkout=success`);
+        finishAfterPayment(isClub ? "/pv-clube?clube=success" : `/${product.slug}?checkout=success`, 1500, String(data.id || ""));
       } else if (data.status === "in_process" || data.status === "pending") {
         toast.info("Pagamento em análise. Você receberá uma confirmação em breve.");
         setTimeout(() => navigate(isClub ? "/pv-clube?clube=pending" : `/${product.slug}?checkout=pending`), 2000);

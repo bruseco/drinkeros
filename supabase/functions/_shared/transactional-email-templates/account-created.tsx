@@ -23,7 +23,7 @@ const AccountCreatedEmail = ({
 }: AccountCreatedProps) => (
   <Html lang="pt-BR" dir="ltr">
     <Head />
-    <Preview>Sua conta {SITE_NAME} foi criada — defina sua senha</Preview>
+    <Preview>Crie sua conta {SITE_NAME} agora e acesse seu conteúdo</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
@@ -34,8 +34,8 @@ const AccountCreatedEmail = ({
             Bem-vindo(a){userName ? `, ${userName}` : ''}! 🎉
           </Heading>
           <Text style={text}>
-            Sua conta na {SITE_NAME} foi criada automaticamente após a confirmação
-            {productName ? ` da compra de ${productName}` : ' da sua compra'}.
+            Sua compra{productName ? ` de ${productName}` : ''} foi confirmada! Agora falta
+            só um passo: criar sua conta para acessar o app da {SITE_NAME}.
           </Text>
           {email && (
             <Text style={credentialText}>
@@ -43,22 +43,23 @@ const AccountCreatedEmail = ({
             </Text>
           )}
           <Text style={text}>
-            Para começar, defina sua senha clicando no botão abaixo:
+            É rápido: seu e-mail já vem preenchido, você só define a senha e
+            entra no app na hora.
           </Text>
           {passwordSetupUrl && (
             <Section style={{ textAlign: 'center' as const, margin: '8px 0 24px' }}>
               <Button style={button} href={passwordSetupUrl}>
-                Definir minha senha
+                Crie sua conta agora
               </Button>
             </Section>
           )}
           <Text style={smallText}>
-            Esse link é pessoal e expira em algumas horas. Se precisar, você
-            pode pedir um novo link na tela de login do app.
+            Esse link é pessoal e vale apenas para a sua compra. Se precisar de
+            ajuda, responda este e-mail.
           </Text>
           {appUrl && (
             <Text style={smallText}>
-              Depois de definir a senha, acesse o app em:{' '}
+              Depois de criar a conta, acesse o app em:{' '}
               <a href={appUrl} style={link}>{appUrl}</a>
             </Text>
           )}
@@ -74,7 +75,7 @@ const AccountCreatedEmail = ({
 
 export const template = {
   component: AccountCreatedEmail,
-  subject: 'Sua conta Drinkeros foi criada — defina sua senha',
+  subject: 'Crie sua conta Drinkeros e acesse seu conteúdo',
   displayName: 'Conta criada após compra',
   previewData: {
     userName: 'Maria',

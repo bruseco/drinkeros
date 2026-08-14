@@ -13,6 +13,7 @@ import Signup from "./pages/Signup";
 import VipLanding from "./pages/VipLanding";
 import VipLandingB from "./pages/VipLandingB";
 import ResetPassword from "./pages/ResetPassword";
+import CreateAccount from "./pages/CreateAccount";
 import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 import PackageLanding from "./pages/PackageLanding";
@@ -157,6 +158,7 @@ const App = () => (
             <Route path="/clube" element={<Navigate to="/app/clube" replace />} />
 
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/criar-conta" element={<CreateAccount />} />
             <Route path="/install" element={<Install />} />
             <Route path="/sso" element={<SSO />} />
             <Route path="/migracao" element={<Migracao />} />
