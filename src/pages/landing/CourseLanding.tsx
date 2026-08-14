@@ -427,10 +427,10 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     priceAnchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
-  const runPriceCountdown = () => {
-    if (!giftOfficialPrice) return;
-    const from = giftOfficialPrice;
-    const to = finalPrice;
+  const runPriceCountdown = (fromValue?: number, toValue?: number) => {
+    const from = fromValue ?? giftOfficialPrice;
+    const to = toValue ?? finalPrice;
+    if (from === undefined || from === null) return;
     const duration = 1800;
     const start = performance.now();
     setDisplayPrice(from);
@@ -454,6 +454,49 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     );
   };
 
+  /* ===== Tarja de contagem regressiva da oferta ===== */
+  const countdownKey = `offer-countdown:${slug}`;
+  const [countdownStartedAt, setCountdownStartedAt] = useState<number | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = sessionStorage.getItem(`offer-countdown:${slug}`);
+      return raw ? Number(raw) : null;
+    } catch {
+      return null;
+    }
+  });
+  const startCountdown = () => {
+    setCountdownStartedAt((prev) => {
+      if (prev) return prev;
+      const now = Date.now();
+      try { sessionStorage.setItem(countdownKey, String(now)); } catch { /* ignore */ }
+      return now;
+    });
+  };
+
+  /* ===== Captura de lead (nome + e-mail) antes do desconto ===== */
+  const [leadDefaults, setLeadDefaults] = useState<{ name: string; email: string }>({ name: '', email: '' });
+  useEffect(() => {
+    if (!leadCapture) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (cancelled || !data.user) return;
+      setLeadDefaults({
+        name: String((data.user.user_metadata as any)?.full_name || ''),
+        email: data.user.email || '',
+      });
+    })();
+    return () => { cancelled = true; };
+  }, [leadCapture]);
+
+  const handleLeadSubmit = async ({ name, email }: { name: string; email: string }) => {
+    if (!funnelPageKey) return;
+    await supabase.functions.invoke('capture-offer-lead', {
+      body: { page_key: funnelPageKey, name, email },
+    });
+  };
+
   const handleGiftReveal = () => {
     // Trava o valor no preço oficial ANTES de marcar como revelado,
     // para o preço final (ex.: 297) nunca piscar antes da animação.
@@ -462,9 +505,10 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     setGiftOpen(false);
     markRevealed();
     trackGiftFunnel();
+    startCountdown();
     // Scroll até o valor e depois dispara a animação de descer o número
     scrollToPriceAnchor();
-    window.setTimeout(runPriceCountdown, 700);
+    window.setTimeout(() => runPriceCountdown(), 700);
   };
 
 
@@ -474,15 +518,34 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     trackGiftFunnel();
     setDisplayPrice(null);
     setPricePulsing(true);
+    startCountdown();
     // Mesmo fechando, rola até o valor
     scrollToPriceAnchor();
   };
 
+  /* ===== Segunda animação: 297 → 197 quando o cupom do e-mail é válido ===== */
+  const couponAnimatedRef = useRef(false);
+  useEffect(() => {
+    if (!coupon || couponAnimatedRef.current) return;
+    couponAnimatedRef.current = true;
+    setPricePulsing(false);
+    setDisplayPrice(coupon.previousPrice);
+    startCountdown();
+    const t = window.setTimeout(() => {
+      scrollToPriceAnchor();
+      window.setTimeout(() => runPriceCountdown(coupon.previousPrice, coupon.price), 700);
+    }, 900);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coupon]);
+
   // Preço exibido na seção de oferta
-  const shownPrice =
-    giftEnabled && !giftRevealed
-      ? (giftOfficialPrice as number)
-      : displayPrice ?? finalPrice;
+  const shownPrice = coupon
+    ? displayPrice ?? coupon.previousPrice
+    : giftEnabled && !giftRevealed
+    ? (giftOfficialPrice as number)
+    : displayPrice ?? finalPrice;
+
   // CTA verde animado só depois que o valor chegou no preço final
   const ctaGreenClass = giftEnabled && !pricePulsing ? 'cl-cta-green-dark' : 'cl-cta-green';
   // Gradiente verde para o preço final (R$297) após o desconto
