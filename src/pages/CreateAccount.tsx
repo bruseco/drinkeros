@@ -95,6 +95,7 @@ export default function CreateAccount() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-4 py-10">
       <SeoHead
+        path="/criar-conta"
         title="Crie sua conta | Drinkeros"
         description="Defina sua senha e acesse agora o app da Drinkeros com sua compra liberada."
       />
