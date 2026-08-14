@@ -451,6 +451,11 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
       else {
         setDisplayPrice(to);
         setPricePulsing(true);
+        // Mostra a tarja pink somente quando o preço chegar no primeiro desconto (R$ 297)
+        const firstTarget = coupon ? coupon.previousPrice : finalPrice;
+        if (Math.abs(to - firstTarget) < 0.5) {
+          setCountdownBarVisible(true);
+        }
       }
     };
     requestAnimationFrame(step);
