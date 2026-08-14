@@ -16,6 +16,7 @@ import AnimatedNumber from '@/components/AnimatedNumber';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import SeoHead from '@/components/SeoHead';
+import { isValidEmailFormat, suggestEmail } from '@/lib/emailValidation';
 
 const Signup: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +24,13 @@ const Signup: React.FC = () => {
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const emailTrimmed = email.trim();
+  const emailFormatError =
+    emailTrimmed.length > 3 && !isValidEmailFormat(emailTrimmed)
+      ? 'E-mail inválido. Confira se está no formato nome@dominio.com'
+      : null;
+  const emailSuggestion = emailTrimmed.length > 3 ? suggestEmail(emailTrimmed) : null;
+
   const [phone, setPhone] = useState<string | undefined>(undefined);
   const [birthDate, setBirthDate] = useState('');
   const [password, setPassword] = useState('');
@@ -53,6 +61,16 @@ const Signup: React.FC = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isValidEmailFormat(email)) {
+      toast({
+        title: 'E-mail inválido',
+        description: 'Confira o e-mail digitado antes de continuar.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
 
     if (!phone || !isValidPhoneNumber(phone)) {
       toast({
@@ -283,9 +301,27 @@ const Signup: React.FC = () => {
                   placeholder="seu@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  aria-invalid={!!emailFormatError}
                   required
                 />
+                {emailFormatError && (
+                  <p className="text-xs text-destructive">{emailFormatError}</p>
+                )}
+                {emailSuggestion && (
+                  <p className="text-xs text-muted-foreground">
+                    Você quis dizer{' '}
+                    <button
+                      type="button"
+                      className="font-medium text-primary underline underline-offset-2"
+                      onClick={() => setEmail(emailSuggestion)}
+                    >
+                      {emailSuggestion}
+                    </button>
+                    ?
+                  </p>
+                )}
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="phone">WhatsApp</Label>
                 <PhoneInput

@@ -199,15 +199,12 @@ serve(async (req) => {
         .filter(Boolean).join(" ").trim().replace(/\s+/g, " ");
       if (mpName.length >= 3) fiscalName = mpName;
     }
+    // Etapa 1 do checkout: exigimos apenas nome completo + CPF antes do pagamento.
+    // O endereço (CEP, rua, número, bairro, cidade, UF) é coletado DEPOIS do pagamento
+    // (etapa 3) e a NFS-e só é emitida quando ele estiver completo.
     const missingFiscal: string[] = [];
     if (fiscalName.length < 3) missingFiscal.push("nome completo");
     if (fiscalCpf.length !== 11 && fiscalCpf.length !== 14) missingFiscal.push("CPF");
-    if (fiscalCep.length !== 8) missingFiscal.push("CEP");
-    if (!String(fiscal?.address_street || "").trim()) missingFiscal.push("rua");
-    if (!String(fiscal?.address_number || "").trim()) missingFiscal.push("número");
-    if (!String(fiscal?.address_neighborhood || "").trim()) missingFiscal.push("bairro");
-    if (!String(fiscal?.address_city || "").trim()) missingFiscal.push("cidade");
-    if (!String(fiscal?.address_state || "").trim()) missingFiscal.push("UF");
     if (missingFiscal.length > 0) {
       console.error("[create-mp-payment] bloqueio fiscal", {
         product_type,
@@ -218,7 +215,7 @@ serve(async (req) => {
       });
       return new Response(
         JSON.stringify({
-          error: `Dados fiscais incompletos (faltando: ${missingFiscal.join(", ")}). Preencha para emitirmos a nota fiscal.`,
+          error: `Dados incompletos (faltando: ${missingFiscal.join(", ")}). Preencha para continuar.`,
           code: "fiscal_incomplete",
           missing: missingFiscal,
         }),
