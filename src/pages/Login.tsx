@@ -18,7 +18,6 @@ import {
 import { Loader2, Mail, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { InstallBanner } from '@/components/user/InstallBanner';
-import { WhatsAppFloatingButton } from '@/components/user/WhatsAppFloatingButton';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import drinksStrip from '@/assets/1000-drinks.jpg';
 import AnimatedNumber from '@/components/AnimatedNumber';
@@ -410,7 +409,6 @@ const Login: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-      <WhatsAppFloatingButton />
     </div>
   );
 };

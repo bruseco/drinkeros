@@ -1,9 +1,39 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
+const SALES_PATHS = new Set([
+  '/pv-clube-b',
+  '/drinkeros-xperience',
+  '/mixologia-avancada',
+  '/bar-p-eventos',
+  '/drinkdelivery-engarrafados',
+  '/ingredientes-artesanais',
+  '/producao-de-ingredientes-artesanais',
+  '/classicos-destilados',
+  '/rand',
+  '/workshop-alem-dos-classicos',
+  '/bartender-a-bordo',
+  '/bebida-decifrada',
+]);
+
+const isPackageLanding = (pathname: string) => {
+  const parts = pathname.split('/').filter(Boolean);
+  return parts.length === 1 && !pathname.startsWith('/app/') && !pathname.startsWith('/admin/');
+};
+
 export const WhatsAppFloatingButton: React.FC = () => {
   const location = useLocation();
-  const isRand = location.pathname === '/rand';
+  const { pathname } = location;
+
+  const isSalesPage =
+    SALES_PATHS.has(pathname) ||
+    isPackageLanding(pathname) ||
+    pathname.startsWith('/ebook/') ||
+    pathname.startsWith('/checkout/');
+
+  if (!isSalesPage) return null;
+
+  const isRand = pathname === '/rand';
 
   if (isRand) {
     return (
@@ -36,7 +66,7 @@ export const WhatsAppFloatingButton: React.FC = () => {
       href="https://wa.me/5548991601025?text=Ol%C3%A1!%20Preciso%20de%20ajuda."
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-110 md:bottom-6 md:right-6 md:h-16 md:w-16"
+      className="fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-110 md:bottom-6 md:right-6 md:h-16 md:w-16"
       style={{ backgroundColor: '#25D366' }}
       aria-label="Falar no WhatsApp"
     >
