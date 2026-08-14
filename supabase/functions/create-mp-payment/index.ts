@@ -330,6 +330,38 @@ serve(async (req) => {
       await invokeWebhookFallback(mpData.id);
     }
 
+    // Trava anti-constrangimento: quem já iniciou/concluiu o pagamento deste
+    // produto nunca deve receber o e-mail com o preço menor.
+    try {
+      const leadEmail = normalizeEmail(payerEmail);
+      const offerForProduct = Object.values(OFFERS).find(
+        (o) => o.productSlug === product.slug && o.productType === product_type,
+      );
+      if (offerForProduct && leadEmail && leadEmail !== "comprador@drinkeros.com") {
+        await supabase
+          .from("landing_offer_leads")
+          .update({
+            ineligible_at: new Date().toISOString(),
+            ineligible_reason: `payment:${mpData.status}`,
+          })
+          .eq("page_key", offerForProduct.pageKey)
+          .ilike("email", leadEmail)
+          .is("ineligible_at", null)
+          .is("email_sent_at", null);
+      }
+      if (couponLeadId) {
+        await supabase
+          .from("landing_offer_leads")
+          .update({ redeemed_at: new Date().toISOString() })
+          .eq("id", couponLeadId)
+          .is("redeemed_at", null);
+      }
+    } catch (e) {
+      console.warn("[create-mp-payment] offer lead update falhou:", (e as Error).message);
+    }
+
+
+
     // Para Pix retorna o QR code; para cartão retorna status.
     // IMPORTANTE: o MP também devolve point_of_interaction em pagamentos de cartão
     // (com transaction_data vazio). Só consideramos Pix quando o método é pix E existe QR.
