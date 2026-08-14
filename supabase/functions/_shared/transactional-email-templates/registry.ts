@@ -34,4 +34,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'clube-payment-failed': clubePaymentFailed,
   'account-created': accountCreated,
   'purchase-confirmed': purchaseConfirmed,
+  'pix-payment-pending': pixPaymentPending,
 }
