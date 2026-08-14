@@ -88,12 +88,46 @@ export const PriceGiftReveal: React.FC<Props> = ({
 
   if (!open) return null;
 
-  const handleOpenGift = () => {
+  const runReveal = () => {
     if (opening) return;
     setOpening(true);
     timers.current.push(window.setTimeout(() => setLeaving(true), 750));
     timers.current.push(window.setTimeout(() => onReveal(), 1150));
   };
+
+  const handleOpenGift = () => {
+    if (opening || saving) return;
+    if (requireLead && !showForm) {
+      setShowForm(true);
+      return;
+    }
+    runReveal();
+  };
+
+  const handleSubmitLead = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (saving || opening) return;
+    const cleanName = name.trim().replace(/\s+/g, ' ');
+    const cleanEmail = email.trim().toLowerCase();
+    if (cleanName.length < 2) {
+      setFormError('Digite seu nome.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(cleanEmail)) {
+      setFormError('Digite um e-mail válido.');
+      return;
+    }
+    setFormError(null);
+    setSaving(true);
+    try {
+      await onSubmitLead?.({ name: cleanName, email: cleanEmail });
+    } catch {
+      // Nunca bloqueia o desconto por falha na captura.
+    }
+    setSaving(false);
+    runReveal();
+  };
+
 
   const content = (
     <div
