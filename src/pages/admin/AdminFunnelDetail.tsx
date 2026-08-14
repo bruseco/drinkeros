@@ -21,13 +21,7 @@ const AdminFunnelDetail: React.FC = () => {
   const { funnelKey } = useParams<{ funnelKey: string }>();
   const funnel = getFunnel(funnelKey ?? '');
   const [range, setRange] = useState<FunnelRange>('30d');
-  const { data: counts, isLoading } = usePageFunnel(
-    funnel?.pageKey ?? '',
-    range,
-    funnel?.productType && funnel?.productSlug
-      ? { productType: funnel.productType, productSlug: funnel.productSlug }
-      : undefined,
-  );
+  const { data: counts, isLoading } = usePageFunnel(funnel, range);
 
 
   if (!funnel) {
@@ -41,13 +35,12 @@ const AdminFunnelDetail: React.FC = () => {
     );
   }
 
-  const safe: FunnelCounts = counts ?? {
-    pageview: 0, offer_1_revealed: 0, checkout_1_started: 0,
-    offer_2_revealed: 0, checkout_2_started: 0, subscription_confirmed: 0,
-  };
+  const safe: FunnelCounts = counts ?? {};
+  const get = (key: string) => safe[key] ?? 0;
   const steps = funnel.steps;
-  const topCount = safe[steps[0].event as keyof FunnelCounts];
-  const lastCount = safe[steps[steps.length - 1].event as keyof FunnelCounts];
+  const topCount = get(steps[0].key);
+  const lastCount = get(steps[steps.length - 1].key);
+
 
   return (
     <div className="space-y-6">
