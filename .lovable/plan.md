@@ -6,7 +6,8 @@ Sim, é totalmente possível. Resumo do fluxo:
 1. Usuário chega na área de preço (R$ 497)
 2. Abre o presente → agora pede NOME + E-MAIL para liberar
 3. Desconto revelado: 497 → 297 (animação atual, sem mudanças)
-4. Se não comprar em 15 min → e-mail "só pra você: R$ 197"
+4. Tarja pink no topo com contador de 15 min ("oferta por tempo limitado")
+5. Se não comprar em 20 min → e-mail "só pra você: R$ 197" (só se NÃO comprou)
 5. Link do e-mail abre /rand (ou checkout) com cupom ativo
 6. Página mostra R$ 297 e faz nova animação: 297 → 197
 7. Checkout cobra R$ 197 (validado no servidor pelo cupom)
@@ -19,13 +20,24 @@ Sim, é totalmente possível. Resumo do fluxo:
 - Se o usuário já está logado, os campos vêm preenchidos e ele só confirma.
 - O lead também entra no funil de métricas (`/admin/funis`) como hoje.
 
-## 2. E-mail de segunda oferta (15 minutos)
+## 2. Tarja pink com contador (após o desconto de R$ 297)
 
-- Uma rotina automática roda a cada 5 minutos e busca leads do RAND com mais de 15 min, que ainda **não compraram** e que ainda não receberam o e-mail.
-- Envia um e-mail (template novo, no padrão visual dos atuais) dizendo que, especialmente para ela, o Pacote RAND sai por **R$ 197** (R$ 300 de desconto), com parcelamento em até 12x, e um botão com link único.
-- Um e-mail por lead (sem reenvio). Se a pessoa comprar antes, nada é enviado.
+- Assim que o desconto é revelado, aparece uma **tarja pink fixa no topo da tela** com texto do tipo "Oferta por tempo limitado — aproveite!" e um **contador regressivo de 15 minutos**.
+- O contador persiste enquanto o usuário navega a página (guardado no navegador) e some ao zerar ou após a compra.
+- A tarja não cobre a navegação nem quebra a safe-area no iPhone (respeita `env(safe-area-inset-top)`).
 
-## 3. Cupom no link
+## 3. E-mail de segunda oferta (20 minutos)
+
+- Uma rotina automática roda a cada 5 minutos e busca leads do RAND com mais de **20 minutos**, que ainda não receberam o e-mail.
+- **Trava anti-constrangimento**: antes de enviar, o sistema confirma que a pessoa **não comprou**, checando (por e-mail normalizado e, se houver, por `user_id`):
+  - `purchases` do Pacote RAND com status aprovado (inclui compras de convidado),
+  - pagamentos Pix/cartão pendentes ou em análise → **também não envia** (evita mandar oferta menor enquanto o pagamento está sendo confirmado),
+  - acesso já concedido ao combo (`user_combos`).
+  Qualquer um desses casos marca o lead como "não elegível" permanentemente.
+- Um e-mail por lead (sem reenvio).
+
+
+## 4. Cupom no link
 
 - O link do e-mail carrega um **token único do lead** (ex.: `/rand?c=TOKEN`).
 - Ao abrir, a página valida o token no servidor e, se válido:
@@ -40,16 +52,18 @@ Sim, é totalmente possível. Resumo do fluxo:
 - **Banco**: nova tabela `landing_offer_leads` (page_key, nome, e-mail normalizado, `discount_token`, `token_expires_at`, `email_sent_at`, `redeemed_at`, `user_id` opcional) com RLS: leitura só admin; inserção pública apenas via edge function (`capture-offer-lead`), nunca escrita direta do cliente.
 - **Frontend**:
   - `src/components/landing/PriceGiftReveal.tsx`: passo de lead opcional (props `requireLead`, `onLeadSubmit`).
-  - `src/pages/landing/CourseLanding.tsx`: props `leadCapture` e `couponPrice`; segunda animação (297 → 197) quando o token é válido; propagação do token para `checkoutPath`.
-  - `src/pages/landing/Rand.tsx`: ativa a captura de lead e o preço de cupom 197.
+  - Novo `src/components/landing/OfferCountdownBar.tsx`: tarja pink fixa no topo com contador de 15 min (persistido em `localStorage` por página).
+  - `src/pages/landing/CourseLanding.tsx`: props `leadCapture`, `couponPrice` e `countdownMinutes`; segunda animação (297 → 197) quando o token é válido; propagação do token para `checkoutPath`.
+  - `src/pages/landing/Rand.tsx`: ativa a captura de lead, a tarja de 15 min e o preço de cupom 197.
   - `src/pages/Checkout.tsx`: lê `?c=TOKEN`, valida e exibe o preço com cupom.
 - **Edge functions**:
   - `capture-offer-lead` (pública, valida formato/rate-limit, cria lead + token).
   - `validate-offer-coupon` (pública, retorna preço final do token).
   - `send-offer-followup-emails` (cron a cada 5 min, guard interno como as demais crons; usa `send-transactional-email`).
   - `create-mp-payment`: aceita `coupon_token`, revalida no servidor e usa R$ 197 como `transaction_amount`; marca `redeemed_at` na aprovação.
+  - `mercadopago-webhook`: ao aprovar/pendenciar uma compra do RAND, marca o lead correspondente como não elegível ao e-mail.
 - **Template**: `supabase/functions/_shared/transactional-email-templates/rand-offer-197.tsx` + registro no `registry.ts`.
-- **Checagem de compra**: por e-mail normalizado em `purchases` (inclui compras de convidado) antes de enviar o e-mail.
+- **Checagem de compra antes do envio**: `purchases` (aprovadas, pendentes e em análise, por e-mail normalizado e `user_id`) + `user_combos` do RAND.
 
 ## Impactos
 
@@ -59,7 +73,8 @@ Sim, é totalmente possível. Resumo do fluxo:
 
 ## Como testar
 
-1. Abrir `/rand` anônimo, rolar até o preço, preencher nome/e-mail, conferir animação 497 → 297.
-2. Esperar 15 min sem comprar e conferir o e-mail com o link.
-3. Abrir o link: preço mostra 297 e anima até 197; checkout cobra 197.
-4. Reutilizar o link após a compra ou depois de 48h: preço volta a 297.
+1. Abrir `/rand` anônimo, rolar até o preço, preencher nome/e-mail, conferir animação 497 → 297 e a tarja pink com contador de 15 min.
+2. Esperar 20 min sem comprar e conferir o e-mail com o link.
+3. Comprar antes dos 20 min (cartão e Pix) e confirmar que o e-mail **não** é enviado.
+4. Abrir o link do e-mail: preço mostra 297 e anima até 197; checkout cobra 197.
+5. Reutilizar o link após a compra ou depois de 48h: preço volta a 297.
