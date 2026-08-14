@@ -11,6 +11,7 @@ import { useVipDiscount } from "@/hooks/useVipDiscount";
 import { applyVipDiscountFor, getVipPriceFor } from "@/lib/vipDiscount";
 import { useYouthDiscount } from "@/hooks/useYouthDiscount";
 import FiscalAddressDialog from "@/components/user/FiscalAddressDialog";
+import { mpRejectionMessage } from "@/lib/mpErrors";
 
 type ClubMethod = "card" | "pix";
 
