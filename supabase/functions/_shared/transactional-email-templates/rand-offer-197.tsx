@@ -76,14 +76,14 @@ const RandOffer197Email = ({
 
 export const template = {
   component: RandOffer197Email,
-  subject: 'Seu desconto extra no Pacote RAND (R$ 197)',
-  displayName: 'Pacote RAND — oferta R$197',
+  subject: 'Seu desconto extra no Pacote RAND (R$ 97)',
+  displayName: 'Pacote RAND — oferta R$97',
   previewData: {
     userName: 'Bruno',
     offerUrl: 'https://drinkeros.com/rand?c=exemplo',
-    previousPriceFormatted: 'R$ 297,00',
-    priceFormatted: 'R$ 197,00',
-    installmentsFormatted: '12x de R$ 21,45',
+    previousPriceFormatted: 'R$ 197,00',
+    priceFormatted: 'R$ 97,00',
+    installmentsFormatted: '12x de R$ 10,56',
     expiresInHours: 48,
   },
 } satisfies TemplateEntry
