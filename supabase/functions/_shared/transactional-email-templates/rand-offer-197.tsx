@@ -18,8 +18,8 @@ interface RandOffer197Props {
 const RandOffer197Email = ({
   userName,
   offerUrl = 'https://drinkeros.com/rand',
-  previousPriceFormatted = 'R$ 297,00',
-  priceFormatted = 'R$ 197,00',
+  previousPriceFormatted = 'R$ 197,00',
+  priceFormatted = 'R$ 97,00',
   installmentsFormatted = '12x',
   expiresInHours = 48,
 }: RandOffer197Props) => (
