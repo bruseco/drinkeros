@@ -1,0 +1,1 @@
+UPDATE public.combos SET price = 197 WHERE slug = 'rand';

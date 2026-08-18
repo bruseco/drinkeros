@@ -140,7 +140,7 @@ const AdminFunnelDetail: React.FC = () => {
             {funnel.productType && funnel.productSlug && (
               <p className="text-xs text-muted-foreground pt-2">
                 As etapas de navegação são contadas por sessão na página. As etapas “Comprou por
-                R$ 297” e “Comprou por R$ 197” são contadas pelos pagamentos aprovados do produto
+                R$ 197” e “Comprou por R$ 97” são contadas pelos pagamentos aprovados do produto
                 no banco, separados pelo valor pago — por isso podem incluir compras feitas por
                 outros caminhos (ex.: link direto) e não dependem do cliente voltar para a página
                 após pagar.
