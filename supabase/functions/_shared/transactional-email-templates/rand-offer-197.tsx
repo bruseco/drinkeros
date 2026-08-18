@@ -50,7 +50,7 @@ const RandOffer197Email = ({
           </Section>
 
           <Text style={text}>
-            São <strong>R$ 300 de desconto</strong> no valor original: curso completo
+            São <strong>R$ 400 de desconto</strong> no valor original: curso completo
             Clássicos &amp; Destilados + 1 ano de Sócio do Clube dos Drinkeros.
           </Text>
 
