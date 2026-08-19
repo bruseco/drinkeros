@@ -36,6 +36,7 @@ export const PriceGiftReveal: React.FC<Props> = ({
   requireLead = false,
   defaultName = '',
   defaultEmail = '',
+  discountAmount,
   onSubmitLead,
   onReveal,
   onClose,
