@@ -1431,7 +1431,6 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                 {giftEnabled && giftRevealed && giftOfficialPrice && shownPrice < giftOfficialPrice && (
                   <div
                     className="mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-extrabold uppercase tracking-wide border border-lime-400/40 bg-gradient-to-r from-lime-500/20 to-emerald-500/20 text-lime-300 shadow-[0_0_20px_rgba(132,204,22,0.35)]"
-                    style={{ animation: 'cl-fade-up 400ms ease both' }}
                   >
                     <Tag className="h-4 w-4" />
                     Você economiza R$ {formatBRL(giftOfficialPrice - shownPrice)}
