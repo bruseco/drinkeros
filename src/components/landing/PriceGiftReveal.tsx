@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+import { X, Tag } from 'lucide-react';
 import giftBody from '@/assets/gift-box-body.png';
 import giftLid from '@/assets/gift-box-lid.png';
 
@@ -13,6 +13,8 @@ interface Props {
   requireLead?: boolean;
   defaultName?: string;
   defaultEmail?: string;
+  /** Valor do desconto concedido (ex.: 300). Exibido com destaque após abrir. */
+  discountAmount?: number;
   /** Recebe os dados do lead antes da revelação. Erros não bloqueiam o desconto. */
   onSubmitLead?: (data: { name: string; email: string }) => Promise<void> | void;
   /** Chamado quando a animação de abertura termina (ou o usuário fecha). */
