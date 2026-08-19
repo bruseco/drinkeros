@@ -1411,23 +1411,32 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                   </p>
                 </>
               ) : (
-                <>
-                  {oldPriceLabel && (
-                    <p className="text-lg text-white/60 line-through">{oldPriceLabel}</p>
-                  )}
-                  <p className="text-sm uppercase tracking-wider text-white/70 mt-2">por apenas</p>
-                  <p
-                    className={`text-5xl sm:text-6xl font-black bg-clip-text text-transparent my-2${pricePulsing ? ' cl-price-pulse' : ''}`}
-                    style={{
-                      backgroundImage: priceGradient,
-                    }}
+              <>
+                {oldPriceLabel && (
+                  <p className="text-lg text-white/60 line-through">{oldPriceLabel}</p>
+                )}
+                <p className="text-sm uppercase tracking-wider text-white/70 mt-2">por apenas</p>
+                <p
+                  className={`text-5xl sm:text-6xl font-black bg-clip-text text-transparent my-2${pricePulsing ? ' cl-price-pulse' : ''}`}
+                  style={{
+                    backgroundImage: priceGradient,
+                  }}
+                >
+                  {formatBRL(shownPrice)}
+                </p>
+                <p className="text-base text-white/80">
+                  em até <strong style={{ color: theme.accent }}>12x R$ {shownInstallments}</strong>
+                </p>
+                {giftEnabled && giftRevealed && giftOfficialPrice && shownPrice < giftOfficialPrice && (
+                  <div
+                    className="mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-extrabold uppercase tracking-wide border border-lime-400/40 bg-gradient-to-r from-lime-500/20 to-emerald-500/20 text-lime-300 shadow-[0_0_20px_rgba(132,204,22,0.35)]"
+                    style={{ animation: 'cl-fade-up 400ms ease both' }}
                   >
-                    {formatBRL(shownPrice)}
-                  </p>
-                  <p className="text-base text-white/80">
-                    em até <strong style={{ color: theme.accent }}>12x R$ {shownInstallments}</strong>
-                  </p>
-                </>
+                    <Tag className="h-4 w-4" />
+                    Você economiza R$ {formatBRL(giftOfficialPrice - shownPrice)}
+                  </div>
+                )}
+              </>
               )}
 
             </div>
