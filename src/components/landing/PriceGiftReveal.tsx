@@ -376,6 +376,10 @@ export const PriceGiftReveal: React.FC<Props> = ({
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
+        @keyframes pgr-savings-pulse {
+          0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(132,204,22,0.35); }
+          50% { transform: scale(1.03); box-shadow: 0 0 60px rgba(132,204,22,0.55); }
+        }
         @keyframes pgr-btn-shimmer {
           0% { background-position: 0% 50%; }
           100% { background-position: 300% 50%; }
