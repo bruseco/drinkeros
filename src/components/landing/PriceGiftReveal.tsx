@@ -251,10 +251,30 @@ export const PriceGiftReveal: React.FC<Props> = ({
           className="text-white/85 text-base sm:text-lg font-light tracking-wide px-3"
           style={{ animation: 'pgr-fade-up 520ms ease 480ms both' }}
         >
-          {showForm ? 'Preencha seus dados para desbloquear o desconto:' : subtitle}
+          {opening
+            ? 'Você acaba de desbloquear o desconto do Rand!'
+            : showForm
+            ? 'Preencha seus dados para desbloquear o desconto:'
+            : subtitle}
         </div>
 
-        {showForm ? (
+        {opening && discountAmount && discountAmount > 0 ? (
+          <div
+            className="mt-7 rounded-2xl border border-lime-300/40 bg-gradient-to-br from-lime-400/20 to-emerald-600/20 px-6 py-5 text-center shadow-[0_0_40px_rgba(132,204,22,0.35)]"
+            style={{ animation: 'pgr-fade-up 420ms ease 160ms both, pgr-savings-pulse 2s ease-in-out 500ms both' }}
+          >
+            <div className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-lime-200 mb-2">
+              <Tag className="h-4 w-4" />
+              Desconto liberado
+            </div>
+            <p className="text-3xl sm:text-4xl font-black text-white drop-shadow-[0_2px_12px_rgba(132,204,22,0.55)]">
+              R$ {discountAmount.toLocaleString('pt-BR')},00
+            </p>
+            <p className="text-sm text-lime-100/80 mt-1">
+              de desconto no Pacote RAND
+            </p>
+          </div>
+        ) : showForm ? (
           <form
             onSubmit={handleSubmitLead}
             className="mt-5 space-y-3 text-left"
