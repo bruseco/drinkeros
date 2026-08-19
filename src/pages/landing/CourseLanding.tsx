@@ -1556,6 +1556,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
           requireLead={leadCapture}
           defaultName={leadDefaults.name}
           defaultEmail={leadDefaults.email}
+          discountAmount={giftOfficialPrice && finalPrice ? Math.round(giftOfficialPrice - finalPrice) : undefined}
           onSubmitLead={handleLeadSubmit}
           onReveal={handleGiftReveal}
           onClose={handleGiftClose}
