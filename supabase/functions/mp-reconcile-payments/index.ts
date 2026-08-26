@@ -92,7 +92,9 @@ serve(async (req) => {
       .in("transaction_id", ids);
     const known = new Set((existing || []).map((r: any) => String(r.transaction_id)));
 
-    const missing = approved.filter((p) => !known.has(p.id));
+    // Ignora autorizações de R$ 0 (assinatura recém-criada): não geram venda.
+    const missing = approved.filter((p) => !known.has(p.id) && p.amount > 0);
+
 
     if (dryRun) {
       return json({ ok: true, checked: approved.length, missing: missing.length, ids: missing });
