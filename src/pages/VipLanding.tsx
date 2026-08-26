@@ -386,7 +386,6 @@ const VipLanding: React.FC = () => {
               <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> <span>Sem acesso aos <strong>Xaropes Artesanais</strong></span></li>
               
               <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> <span>Sem Bebida Decifrada</span></li>
-              <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> <span>Não participa da <strong>Batalha dos Drinkeros</strong></span></li>
               <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> <span>Cursos com preço cheio</span></li>
             </ul>
           </div>

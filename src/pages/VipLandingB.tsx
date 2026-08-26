@@ -564,7 +564,6 @@ const VipLandingB: React.FC = () => {
                 <li className="flex items-start gap-2 text-purple-200"><Check className="h-4 w-4 text-purple-300 shrink-0 mt-0.5" /> <span><strong className="text-white">1 receita completa</strong> liberada por semana</span></li>
                 <li className="flex items-start gap-2 text-purple-200"><Check className="h-4 w-4 text-purple-300 shrink-0 mt-0.5" /> <span>Navegação e filtros liberados</span></li>
                 <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> <span>Acesso limitado aos conteúdos especiais</span></li>
-                <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> <span>Sem participação na <strong>Batalha dos Drinkeros</strong></span></li>
                 <li className="flex items-start gap-2 text-purple-200"><X className="h-4 w-4 text-red-400 shrink-0 mt-0.5" /> <span>Cursos e ebooks vendidos separadamente</span></li>
               </ul>
             </div>
@@ -589,7 +588,6 @@ const VipLandingB: React.FC = () => {
                 <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><strong className="text-white">Xaropes Artesanais</strong> liberados</span></li>
                 <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span>Acesso à minissérie <strong className="text-white">Bebida Decifrada</strong></span></li>
                 <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><strong className="text-white">Workshop Além dos Clássicos</strong>, com certificado</span></li>
-                <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span>Participação na <strong className="text-white">Batalha dos Drinkeros</strong></span></li>
                 <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><strong className="text-white">80% de desconto</strong> em produtos selecionados</span></li>
                 <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span>Cursos e ebooks expirados <strong className="text-white">reativados</strong> enquanto a assinatura estiver ativa</span></li>
               </ul>
