@@ -416,7 +416,7 @@ const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
             <Button
               size="icon"
               variant="outline"
-              onClick={() => navigate('/app/batalha/nova')}
+              onClick={() => navigate('/app/clube/receita/nova')}
               title="Enviar receita"
               aria-label="Enviar receita"
             >
@@ -506,7 +506,7 @@ const RecipesTab: React.FC<{ myLikes: Set<string> }> = ({ myLikes }) => {
   return (
     <div className="space-y-3">
       <Button
-        onClick={() => navigate('/app/batalha/nova')}
+        onClick={() => navigate('/app/clube/receita/nova')}
         className="w-full"
         size="lg"
       >

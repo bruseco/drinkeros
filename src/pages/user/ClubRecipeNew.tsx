@@ -15,7 +15,7 @@ import { useExistingTags } from '@/hooks/useExistingTags';
 import ImageCropDialog from '@/components/user/ImageCropDialog';
 import { findCanonicalTag } from '@/lib/normalizeTag';
 
-const UserBatalhaNew: React.FC = () => {
+const ClubRecipeNew: React.FC = () => {
   const { user } = useAuth();
   const { data: planData, isLoading: planLoading } = useUserPlan();
   const nav = useNavigate();
@@ -36,7 +36,7 @@ const UserBatalhaNew: React.FC = () => {
   // Bloqueio: somente sócios do Clube podem postar
   useEffect(() => {
     if (!planLoading && planData && !planData.isVip) {
-      toast.info('Para postar na Batalha você precisa ser sócio do Clube dos Drinkeros.');
+      toast.info('Para postar receitas você precisa ser sócio do Clube dos Drinkeros.');
       nav('/pv-clube', { replace: true });
     }
   }, [planLoading, planData, nav]);
@@ -113,7 +113,7 @@ const UserBatalhaNew: React.FC = () => {
       });
       if (error) throw error;
       toast.success('Receita publicada! +5 pontos 🎉');
-      nav('/app/batalha');
+      nav('/app/clube');
     } catch (err: any) {
       toast.error('Erro ao publicar: ' + err.message);
     } finally {
@@ -251,4 +251,4 @@ const UserBatalhaNew: React.FC = () => {
   );
 };
 
-export default UserBatalhaNew;
+export default ClubRecipeNew;
