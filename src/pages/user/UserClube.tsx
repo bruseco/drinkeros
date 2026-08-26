@@ -265,7 +265,9 @@ const UserClube: React.FC = () => {
         </div>
       </div>
 
-      <div className="sticky top-0 z-10 bg-background -mx-4 px-4 py-3 space-y-3">
+      <div
+        className="sticky z-10 bg-background -mx-4 px-4 py-3 space-y-3 top-[calc(var(--top-banner-h,0px)+4rem)] lg:top-[var(--top-banner-h,0px)]"
+      >
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
