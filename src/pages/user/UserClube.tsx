@@ -184,13 +184,13 @@ const RecipeCard: React.FC<{
 };
 
 /* ---------- Ranking Sheet ---------- */
-const RankingSheet: React.FC = () => {
+const RankingSheet: React.FC<{ className?: string }> = ({ className }) => {
   const { data = [], isLoading } = useClubRanking('all');
 
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button size="sm" variant="outline" className="gap-1">
+        <Button size="sm" variant="outline" className={cn("gap-1", className)}>
           <Trophy className="h-4 w-4" /> Ranking
         </Button>
       </SheetTrigger>
