@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
 import { Heart, MessageCircle, Search, Trophy, Loader2, Sparkles, ChefHat, Plus, Bookmark } from 'lucide-react';
 import { useSaveClubRecipe } from '@/hooks/useCollections';
 
@@ -183,13 +184,13 @@ const RecipeCard: React.FC<{
 };
 
 /* ---------- Ranking Sheet ---------- */
-const RankingSheet: React.FC = () => {
+const RankingSheet: React.FC<{ className?: string }> = ({ className }) => {
   const { data = [], isLoading } = useClubRanking('all');
 
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button size="sm" variant="outline" className="gap-1">
+        <Button size="sm" variant="outline" className={cn("gap-1", className)}>
           <Trophy className="h-4 w-4" /> Ranking
         </Button>
       </SheetTrigger>
@@ -262,26 +263,32 @@ const UserClube: React.FC = () => {
           <h1 className="text-xl font-bold leading-tight">Clube de Receitas</h1>
           <p className="text-xs text-muted-foreground">Descubra, curta e compartilhe receitas!</p>
         </div>
-        <RankingSheet />
       </div>
 
-      <Button
-        onClick={() => navigate('/app/clube/receita/nova')}
-        className="w-full"
-        size="lg"
+      <div
+        className="sticky z-10 bg-background -mx-4 px-4 py-3 space-y-3 top-[calc(var(--top-banner-h,0px)+4rem)] lg:top-[var(--top-banner-h,0px)]"
       >
-        <Plus className="h-4 w-4 mr-2" />
-        Compartilhe sua receita!
-      </Button>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar por nome do drink ou ingrediente…"
+            className="pl-9"
+          />
+        </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Buscar por nome do drink ou ingrediente…"
-          className="pl-9"
-        />
+        <div className="grid grid-cols-2 gap-2">
+          <RankingSheet className="w-full" />
+          <Button
+            onClick={() => navigate('/app/clube/receita/nova')}
+            className="w-full"
+            size="default"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Compartilhe sua receita!
+          </Button>
+        </div>
       </div>
 
       {isLoading && <div className="text-sm text-muted-foreground">Carregando…</div>}

@@ -14,6 +14,8 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
   const disableWrapper =
     location.pathname === '/app/receitas' ||
     location.pathname.startsWith('/app/receita/') ||
+    location.pathname === '/app/clube' ||
+    location.pathname.startsWith('/app/clube/') ||
     location.pathname === '/pv-clube';
 
   useEffect(() => {
