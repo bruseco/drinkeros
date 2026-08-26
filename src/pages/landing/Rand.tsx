@@ -66,13 +66,13 @@ const profiles: ProfileItem[] = [
 ];
 
 const bonus: BonusItem[] = [
-  { title: '1 ANO de Sócio do Clube INCLUSO', description: 'Acesso completo ao Clube dos Drinkeros por 12 meses: app com mais de 1.000 receitas, conteúdos exclusivos e participação na Batalha dos Drinkeros — já incluso no Pacote RAND.', originalPrice: 'R$ 247,00', imageSrc: bonusVip },
+  { title: '1 ANO de Sócio do Clube INCLUSO', description: 'Acesso completo ao Clube dos Drinkeros por 12 meses: app com mais de 1.000 receitas e conteúdos exclusivos — já incluso no Pacote RAND.', originalPrice: 'R$ 247,00', imageSrc: bonusVip },
   { title: 'Mais de 40 receitas de Xaropes', description: 'Receituário exclusivo de xaropes artesanais para gerar economia e elevar seus drinks.', imageSrc: bonusXaropes },
   { title: 'Minissérie Bebida Decifrada', description: '6 episódios contando curiosidades das bebidas mais famosas (Jack Daniels, Amarula, Absolut e mais), com receitas exclusivas.', originalPrice: 'R$ 97,00', imageSrc: bonusBebidaDecifrada },
 ];
 
 const faq: FaqItem[] = [
-  { q: 'O que está incluso no Pacote RAND?', a: 'Você recebe o curso completo Clássicos & Destilados + 1 ano de Sócio do Clube dos Drinkeros (acesso ao app com mais de 1.000 receitas, conteúdos exclusivos e Batalha dos Drinkeros), tudo por um único valor.' },
+  { q: 'O que está incluso no Pacote RAND?', a: 'Você recebe o curso completo Clássicos & Destilados + 1 ano de Sócio do Clube dos Drinkeros (acesso ao app com mais de 1.000 receitas e conteúdos exclusivos), tudo por um único valor.' },
   { q: 'Não sou profissional, esse curso é pra mim?', a: 'Sim! Mais de 60% dos nossos alunos fazem o curso por hobby — é quase uma terapia. O conteúdo começa do zero.' },
   { q: 'Quanto tempo terei acesso?', a: 'O acesso ao curso e ao Clube é de 1 ano completo (365 dias).' },
   { q: 'Como recebo o acesso?', a: 'Após a aprovação do pagamento, você recebe os dados automaticamente no e-mail cadastrado. Verifique também o spam.' },
@@ -142,7 +142,7 @@ const Rand: React.FC = () => (
     aboutInstructor={aboutInstructor}
     guaranteeDays={15}
     offerSummary={`Curso completo Clássicos & Destilados + 1 ANO de Sócio do Clube dos Drinkeros.
-Mais de 1.000 receitas no app, Batalha dos Drinkeros e conteúdos exclusivos inclusos.
+Mais de 1.000 receitas no app e conteúdos exclusivos inclusos.
 Bônus: receitas de xaropes + minissérie Bebida Decifrada.
 Acesso completo + garantia incondicional de 15 dias.`}
     faq={faq}

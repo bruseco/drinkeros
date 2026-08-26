@@ -6,7 +6,6 @@ import { UserNavbar } from './UserNavbar';
 import { UserSidebar } from './UserSidebar';
 import { PushNotificationPrompt } from './PushNotificationPrompt';
 import { PageTransition } from './PageTransition';
-import { WinnerPopup } from './WinnerPopup';
 import { PwaInstallGate } from './PwaInstallGate';
 import { PwaSplashScreen } from './PwaSplashScreen';
 import { VipDiscountCountdownBanner } from './VipDiscountCountdownBanner';
@@ -73,7 +72,6 @@ export const UserLayout: React.FC = () => {
         <VipDiscountCountdownBanner />
         <UserNavbar />
         <PushNotificationPrompt />
-        <WinnerPopup />
         <main className="flex-1 pb-20 lg:pb-0">
           <PageTransition>
             <Outlet />

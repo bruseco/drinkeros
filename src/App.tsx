@@ -97,10 +97,7 @@ import UserComboDetail from "./pages/user/UserComboDetail";
 import UserProfile from "./pages/user/UserProfile";
 import UserClubeManage from "./pages/user/UserClubeManage";
 import UserRecipeDetail from "./pages/user/UserRecipeDetail";
-import UserBatalha from "./pages/user/UserBatalha";
-import UserBatalhaNew from "./pages/user/UserBatalhaNew";
-import UserBatalhaRanking from "./pages/user/UserBatalhaRanking";
-import UserBatalhaRecipeDetail from "./pages/user/UserBatalhaRecipeDetail";
+import ClubRecipeNew from "./pages/user/ClubRecipeNew";
 import UserClube from "./pages/user/UserClube";
 
 // Sensible defaults to reduce DB read pressure (Disk IO):
@@ -250,10 +247,7 @@ const App = () => (
               <Route path="combo/:comboId" element={<UserComboDetail />} />
               <Route path="perfil" element={<UserProfile />} />
               <Route path="clube/gerenciar" element={<UserClubeManage />} />
-              <Route path="batalha" element={<UserBatalha />} />
-              <Route path="batalha/nova" element={<UserBatalhaNew />} />
-              <Route path="batalha/ranking" element={<UserBatalhaRanking />} />
-              <Route path="batalha/receita/:id" element={<UserBatalhaRecipeDetail />} />
+              <Route path="clube/receita/nova" element={<ClubRecipeNew />} />
               <Route path="clube" element={<UserClube />} />
             </Route>
 

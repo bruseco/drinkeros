@@ -208,7 +208,7 @@ const UserClubeManage: React.FC = () => {
             <AlertDialogDescription>
               Você manterá o acesso até{' '}
               <strong>{expiresAt ? expiresAt.toLocaleDateString('pt-BR') : 'o fim do período'}</strong>.
-              Após isso, perderá receitas exclusivas, Batalha e demais benefícios.
+              Após isso, perderá receitas exclusivas e demais benefícios.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
