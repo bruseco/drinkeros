@@ -278,11 +278,11 @@ const UserClube: React.FC = () => {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <RankingSheet className="w-full" />
+        <div className="flex gap-2">
+          <RankingSheet className="flex-shrink-0 w-auto sm:flex-1" />
           <Button
             onClick={() => navigate('/app/clube/receita/nova')}
-            className="w-full"
+            className="flex-1"
             size="default"
           >
             <Plus className="h-4 w-4 mr-2" />
