@@ -495,7 +495,7 @@ const PlanSection: React.FC = () => {
         <>
           <p className="font-semibold">Plano Aluno</p>
           <p className="text-sm text-muted-foreground">
-            Você tem acesso aos cursos, e-books, combos ou pacotes que adquiriu. Vire Sócio para desbloquear receitas exclusivas, Batalha e bônus.
+            Você tem acesso aos cursos, e-books, combos ou pacotes que adquiriu. Vire Sócio para desbloquear receitas exclusivas e bônus.
           </p>
           <Button
             className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:opacity-95 text-white border-0"
@@ -509,7 +509,7 @@ const PlanSection: React.FC = () => {
         <>
           <p className="font-semibold">Plano Grátis</p>
           <p className="text-sm text-muted-foreground">
-            Faça upgrade para Sócio Drinkeros e desbloqueie receitas exclusivas, Batalha e muito mais.
+            Faça upgrade para Sócio Drinkeros e desbloqueie receitas exclusivas e muito mais.
           </p>
           <Button
             className="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:opacity-95 text-white border-0"

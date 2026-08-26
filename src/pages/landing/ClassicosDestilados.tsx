@@ -66,7 +66,7 @@ const profiles: ProfileItem[] = [
 ];
 
 const bonus: BonusItem[] = [
-  { title: 'Sócio do Clube por 1 Ano', description: 'Acesso completo ao Clube dos Drinkeros por 12 meses: app com mais de 1.000 receitas, conteúdos exclusivos e participação na Batalha dos Drinkeros.', originalPrice: 'R$ 247,00', imageSrc: bonusVip },
+  { title: 'Sócio do Clube por 1 Ano', description: 'Acesso completo ao Clube dos Drinkeros por 12 meses: app com mais de 1.000 receitas e conteúdos exclusivos.', originalPrice: 'R$ 247,00', imageSrc: bonusVip },
   { title: 'Mais de 40 receitas de Xaropes', description: 'Receituário exclusivo de xaropes artesanais para gerar economia e elevar seus drinks.', imageSrc: bonusXaropes },
   { title: 'Minissérie Bebida Decifrada', description: '6 episódios contando curiosidades das bebidas mais famosas (Jack Daniels, Amarula, Absolut e mais), com receitas exclusivas.', originalPrice: 'R$ 97,00', imageSrc: bonusBebidaDecifrada },
 ];
