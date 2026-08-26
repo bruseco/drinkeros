@@ -263,26 +263,30 @@ const UserClube: React.FC = () => {
           <h1 className="text-xl font-bold leading-tight">Clube de Receitas</h1>
           <p className="text-xs text-muted-foreground">Descubra, curta e compartilhe receitas!</p>
         </div>
-        <RankingSheet />
       </div>
 
-      <Button
-        onClick={() => navigate('/app/clube/receita/nova')}
-        className="w-full"
-        size="lg"
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Compartilhe sua receita!
-      </Button>
+      <div className="sticky top-0 z-10 bg-background -mx-4 px-4 py-3 space-y-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar por nome do drink ou ingrediente…"
+            className="pl-9"
+          />
+        </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Buscar por nome do drink ou ingrediente…"
-          className="pl-9"
-        />
+        <div className="grid grid-cols-2 gap-2">
+          <RankingSheet className="w-full" />
+          <Button
+            onClick={() => navigate('/app/clube/receita/nova')}
+            className="w-full"
+            size="default"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Compartilhe sua receita!
+          </Button>
+        </div>
       </div>
 
       {isLoading && <div className="text-sm text-muted-foreground">Carregando…</div>}
