@@ -231,6 +231,7 @@ const UserClube: React.FC = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const [q, setQ] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
   const { data = [], isLoading } = useClubRecipesSearch(q);
   const { data: myLikes } = useMyClubLikes();
   const likes = useMemo(() => myLikes ?? new Set<string>(), [myLikes]);
@@ -258,36 +259,75 @@ const UserClube: React.FC = () => {
 
   return (
     <div className="container mx-auto max-w-2xl px-4 py-4 pb-24 md:pb-6 space-y-3">
-      <div className="flex items-center justify-between gap-2">
-        <div>
-          <h1 className="text-xl font-bold leading-tight">Clube de Receitas</h1>
-          <p className="text-xs text-muted-foreground">Descubra, curta e compartilhe receitas!</p>
-        </div>
-      </div>
-
       <div
-        className="sticky z-10 bg-background -mx-4 px-4 py-3 space-y-3 top-[calc(var(--top-banner-h,0px)+4rem)] lg:top-[var(--top-banner-h,0px)]"
+        className="sticky z-20 bg-background/80 backdrop-blur-md -mx-4 px-4 py-3 space-y-3 top-[calc(var(--top-banner-h,0px)+4rem)] lg:top-[var(--top-banner-h,0px)] border-b border-border/40"
       >
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar por nome do drink ou ingrediente…"
-            className="pl-9"
-          />
+        {/* Mobile: título + ranking na mesma linha */}
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <h1 className="text-xl font-bold leading-tight">Clube de Receitas</h1>
+            <p className="text-xs text-muted-foreground">Descubra, curta e compartilhe receitas!</p>
+          </div>
+          <RankingSheet className="flex-shrink-0" />
         </div>
 
-        <div className="flex gap-2">
-          <RankingSheet className="flex-shrink-0 w-auto sm:flex-1" />
-          <Button
-            onClick={() => navigate('/app/clube/receita/nova')}
-            className="flex-1"
-            size="default"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Compartilhe sua receita!
-          </Button>
+        {/* Mobile: compartilhar + busca na mesma linha; desktop: busca em cima, botões lado a lado */}
+        <div className="block sm:hidden">
+          <div className="flex items-center gap-2 relative">
+            <Button
+              onClick={() => navigate('/app/clube/receita/nova')}
+              size="default"
+              className={cn(
+                "transition-all duration-300 ease-out shrink-0",
+                searchFocused ? "w-0 opacity-0 px-0 overflow-hidden border-0" : "flex-1"
+              )}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Compartilhe sua receita!
+            </Button>
+            <div
+              className={cn(
+                "transition-all duration-300 ease-out",
+                searchFocused ? "absolute inset-x-0 top-0 z-10" : "flex-[1.35]"
+              )}
+            >
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setSearchFocused(false)}
+                  placeholder="Buscar por nome…"
+                  className="pl-9"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="hidden sm:block space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Buscar por nome do drink ou ingrediente…"
+              className="pl-9"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <RankingSheet className="flex-shrink-0 w-auto sm:flex-1" />
+            <Button
+              onClick={() => navigate('/app/clube/receita/nova')}
+              className="flex-1"
+              size="default"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Compartilhe sua receita!
+            </Button>
+          </div>
         </div>
       </div>
 
