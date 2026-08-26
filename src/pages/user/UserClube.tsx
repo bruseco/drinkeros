@@ -1,37 +1,30 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Heart, MessageCircle, Search, Send, Trophy, Loader2, Sparkles, ChefHat, ChevronUp, Plus, Martini, Bookmark } from 'lucide-react';
+import { Heart, MessageCircle, Search, Trophy, Loader2, Sparkles, ChefHat, Plus, Bookmark } from 'lucide-react';
 import { useSaveClubRecipe } from '@/hooks/useCollections';
 
 import { format, formatDistanceToNow, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
-  useClubFeed,
   useClubRanking,
   useClubRecipesSearch,
   useClubComments,
-  useCreateClubPost,
   useCreateClubComment,
   useToggleRecipeLike,
   useMyClubLikes,
-  type ClubFeedItem,
   type ClubRecipeRow,
 } from '@/hooks/useClubFeed';
-import { useUserPlan } from '@/hooks/useUserPlan';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 const fmtRelative = (iso: string) =>
   formatDistanceToNow(new Date(iso), { addSuffix: true, locale: ptBR });
-
-const fmtTime = (iso: string) => format(new Date(iso), 'HH:mm');
 
 const fmtDayLabel = (iso: string) => {
   const d = new Date(iso);
@@ -47,22 +40,21 @@ const Initials = ({ name }: { name?: string | null }) => {
   return <>{i}</>;
 };
 
-/* ---------- Comments (used inside recipe bubbles) ---------- */
-const CommentsBlock: React.FC<{ targetType: 'post' | 'recipe'; targetId: string; expandedDefault?: boolean }> = ({
-  targetType,
+/* ---------- Comments (used inside recipe cards) ---------- */
+const CommentsBlock: React.FC<{ targetId: string; expandedDefault?: boolean }> = ({
   targetId,
   expandedDefault = false,
 }) => {
   const [expanded, setExpanded] = useState(expandedDefault);
   const [draft, setDraft] = useState('');
-  const { data: comments = [], isLoading } = useClubComments(targetType, targetId);
+  const { data: comments = [], isLoading } = useClubComments('recipe', targetId);
   const create = useCreateClubComment();
   const visible = expanded ? comments : comments.slice(-3);
 
   const submit = async () => {
     if (!draft.trim()) return;
     try {
-      await create.mutateAsync({ targetType, targetId, body: draft });
+      await create.mutateAsync({ targetType: 'recipe', targetId, body: draft });
       setDraft('');
     } catch (e: any) {
       toast.error(e.message ?? 'Erro ao comentar');
@@ -109,22 +101,21 @@ const CommentsBlock: React.FC<{ targetType: 'post' | 'recipe'; targetId: string;
           maxLength={1000}
         />
         <Button size="sm" variant="ghost" disabled={!draft.trim() || create.isPending} onClick={submit}>
-          {create.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          {create.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Enviar'}
         </Button>
       </div>
     </div>
   );
 };
 
-/* ---------- Recipe Card (used in Receitas tab and as chat bubble) ---------- */
+/* ---------- Recipe Card ---------- */
 const RecipeCard: React.FC<{
   recipe: Pick<
     ClubRecipeRow,
     'id' | 'user_id' | 'author_name' | 'author_avatar' | 'name' | 'image_url' | 'description' | 'ingredients' | 'likes_count' | 'comments_count' | 'created_at'
   >;
   isLiked: boolean;
-  compact?: boolean;
-}> = ({ recipe, isLiked, compact }) => {
+}> = ({ recipe, isLiked }) => {
   const toggle = useToggleRecipeLike();
   const save = useSaveClubRecipe();
   const { user } = useAuth();
@@ -133,7 +124,7 @@ const RecipeCard: React.FC<{
   return (
     <Card className="overflow-hidden">
       {recipe.image_url && (
-        <div className={`${compact ? 'aspect-[16/10]' : 'aspect-[4/3]'} w-full overflow-hidden bg-muted`}>
+        <div className="aspect-[4/3] w-full overflow-hidden bg-muted">
           <img src={recipe.image_url} alt={recipe.name} className="w-full h-full object-cover" loading="lazy" />
         </div>
       )}
@@ -155,7 +146,7 @@ const RecipeCard: React.FC<{
         {recipe.description && (
           <div className="text-sm text-muted-foreground line-clamp-2">{recipe.description}</div>
         )}
-        {recipe.ingredients && !compact && (
+        {recipe.ingredients && (
           <div className="text-xs text-muted-foreground/90 line-clamp-3 whitespace-pre-line">{recipe.ingredients}</div>
         )}
 
@@ -185,272 +176,9 @@ const RecipeCard: React.FC<{
           )}
         </div>
 
-        <CommentsBlock targetType="recipe" targetId={recipe.id} />
+        <CommentsBlock targetId={recipe.id} />
       </div>
     </Card>
-  );
-};
-
-/* ---------- WhatsApp-style chat bubble for text posts ---------- */
-const ChatMessage: React.FC<{ item: ClubFeedItem; isMine: boolean; likes: Set<string> }> = ({ item, isMine, likes }) => {
-  const { profile } = useAuth();
-  const myAvatar = profile?.avatar_url || undefined;
-  const myName = profile?.full_name || 'Você';
-  if (item.kind === 'recipe') {
-    // Recipe card as bubble (full width-ish, centered look but aligned by author)
-    return (
-      <div className={`flex ${isMine ? 'justify-end' : 'justify-start'} gap-2`}>
-        {!isMine && (
-          <Avatar className="h-8 w-8 shrink-0 mt-1">
-            {item.author_avatar && <AvatarImage src={item.author_avatar} />}
-            <AvatarFallback className="text-[11px]"><Initials name={item.author_name} /></AvatarFallback>
-          </Avatar>
-        )}
-        <div className="max-w-[85%] sm:max-w-[75%] w-full">
-          {!isMine && (
-            <div className="text-[11px] text-muted-foreground mb-1 ml-2">{item.author_name || 'Sócio'}</div>
-          )}
-          <RecipeCard
-            recipe={{
-              id: item.id,
-              user_id: item.user_id,
-              author_name: item.author_name,
-              author_avatar: item.author_avatar,
-              name: item.recipe_name || '',
-              image_url: item.recipe_image,
-              description: item.recipe_description,
-              ingredients: item.ingredients,
-              likes_count: item.likes_count,
-              comments_count: item.comments_count,
-              created_at: item.created_at,
-            }}
-            isLiked={likes.has(item.id)}
-            compact
-          />
-          <div className={`text-[10px] text-muted-foreground mt-1 ${isMine ? 'text-right mr-2' : 'ml-2'}`}>
-            {fmtTime(item.created_at)}
-          </div>
-        </div>
-        {isMine && (
-          <Avatar className="h-8 w-8 shrink-0 mt-1">
-            {myAvatar && <AvatarImage src={myAvatar} />}
-            <AvatarFallback className="text-[11px]"><Initials name={myName} /></AvatarFallback>
-          </Avatar>
-        )}
-      </div>
-    );
-  }
-
-  // Text post bubble
-  return (
-    <div className={`flex ${isMine ? 'justify-end' : 'justify-start'} gap-2`}>
-      {!isMine && (
-        <Avatar className="h-8 w-8 shrink-0 mt-1">
-          {item.author_avatar && <AvatarImage src={item.author_avatar} />}
-          <AvatarFallback className="text-[11px]"><Initials name={item.author_name} /></AvatarFallback>
-        </Avatar>
-      )}
-      <div className={`max-w-[80%] sm:max-w-[70%]`}>
-        <div
-          className={`rounded-2xl px-3 py-2 shadow-sm ${
-            isMine
-              ? 'bg-primary text-primary-foreground rounded-br-sm'
-              : 'bg-card text-foreground rounded-bl-sm border border-border/60'
-          }`}
-        >
-          {!isMine && (
-            <div className="text-[11px] font-medium opacity-80 mb-0.5">{item.author_name || 'Sócio'}</div>
-          )}
-          <div className="text-sm whitespace-pre-wrap break-words">{item.body}</div>
-          <div className={`text-[10px] mt-1 ${isMine ? 'text-primary-foreground/70 text-right' : 'text-muted-foreground'}`}>
-            {fmtTime(item.created_at)}
-          </div>
-        </div>
-      </div>
-      {isMine && (
-        <Avatar className="h-8 w-8 shrink-0 mt-1">
-          {myAvatar && <AvatarImage src={myAvatar} />}
-          <AvatarFallback className="text-[11px]"><Initials name={myName} /></AvatarFallback>
-        </Avatar>
-      )}
-    </div>
-  );
-};
-
-/* ---------- Chat Tab ---------- */
-const ChatTab: React.FC<{ likes: Set<string> }> = ({ likes }) => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const feedQuery = useClubFeed('all');
-  const create = useCreateClubPost();
-  const [body, setBody] = useState('');
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [showTip, setShowTip] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return sessionStorage.getItem('clube_tip_shown') !== '1';
-  });
-  const [tipFading, setTipFading] = useState(false);
-  useEffect(() => {
-    if (!showTip) return;
-    sessionStorage.setItem('clube_tip_shown', '1');
-    const fadeT = setTimeout(() => setTipFading(true), 4500);
-    const hideT = setTimeout(() => setShowTip(false), 5000);
-    return () => { clearTimeout(fadeT); clearTimeout(hideT); };
-  }, [showTip]);
-
-
-  // Feed pages come newest-first; flatten and reverse so newest is at bottom (chat style).
-  const items = useMemo(() => {
-    const flat = feedQuery.data?.pages.flat() ?? [];
-    return [...flat].reverse();
-  }, [feedQuery.data]);
-
-  // Auto-scroll to bottom on first load and when new msg appended at bottom.
-  const lastIdRef = useRef<string | null>(null);
-  useLayoutEffect(() => {
-    if (items.length === 0) return;
-    const lastId = items[items.length - 1].id;
-    if (lastIdRef.current !== lastId) {
-      bottomRef.current?.scrollIntoView({ behavior: lastIdRef.current ? 'smooth' : 'auto' });
-      lastIdRef.current = lastId;
-    }
-  }, [items]);
-
-  const submit = async () => {
-    const text = body.trim();
-    if (!text) return;
-    try {
-      setBody('');
-      if (textareaRef.current) textareaRef.current.style.height = 'auto';
-      await create.mutateAsync(text);
-    } catch (e: any) {
-      toast.error(e.message ?? 'Erro ao enviar');
-      setBody(text);
-    }
-  };
-
-
-  // Group by day to render date separators
-  const grouped: Array<{ type: 'sep'; key: string; label: string } | { type: 'msg'; item: ClubFeedItem }> = [];
-  let lastDay = '';
-  for (const it of items) {
-    const dayKey = format(new Date(it.created_at), 'yyyy-MM-dd');
-    if (dayKey !== lastDay) {
-      grouped.push({ type: 'sep', key: `sep-${dayKey}`, label: fmtDayLabel(it.created_at) });
-      lastDay = dayKey;
-    }
-    grouped.push({ type: 'msg', item: it });
-  }
-
-  return (
-    <div className="min-h-[calc(100vh-180px)]">
-      <div ref={scrollerRef} className="space-y-2 pb-2">
-        {feedQuery.hasNextPage && (
-          <div className="flex justify-center pb-2">
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-xs"
-              disabled={feedQuery.isFetchingNextPage}
-              onClick={() => feedQuery.fetchNextPage()}
-            >
-              {feedQuery.isFetchingNextPage ? (
-                <Loader2 className="h-3 w-3 animate-spin mr-1" />
-              ) : (
-                <ChevronUp className="h-3 w-3 mr-1" />
-              )}
-              Carregar mensagens anteriores
-            </Button>
-          </div>
-        )}
-
-        {feedQuery.isLoading && (
-          <div className="flex justify-center py-8">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-          </div>
-        )}
-
-        {!feedQuery.isLoading && items.length === 0 && (
-          <div className="text-center text-sm text-muted-foreground py-10">
-            Sem mensagens ainda. Manda a primeira!
-          </div>
-        )}
-
-        {grouped.map((g) =>
-          g.type === 'sep' ? (
-            <div key={g.key} className="flex justify-center my-3">
-              <span className="text-[10px] uppercase tracking-wide bg-background/80 border border-border/60 text-muted-foreground px-2 py-0.5 rounded-full">
-                {g.label}
-              </span>
-            </div>
-          ) : (
-            <ChatMessage
-              key={`${g.item.kind}-${g.item.id}`}
-              item={g.item}
-              isMine={!!user && g.item.user_id === user.id}
-              likes={likes}
-            />
-          ),
-        )}
-        <div ref={bottomRef} />
-      </div>
-
-      <div
-        className="sticky z-30 bg-background/95 backdrop-blur pt-2 pb-6
-                   bottom-[calc(70px+env(safe-area-inset-bottom))] lg:bottom-4"
-      >
-
-
-        <div className="flex items-end gap-2">
-          <div className="relative shrink-0">
-            {showTip && (
-              <div className={`absolute bottom-full left-0 mb-2 z-40 transition-opacity duration-500 ${tipFading ? 'opacity-0' : 'opacity-100 animate-in fade-in slide-in-from-bottom-1'}`}>
-                <div className="relative bg-white text-black text-xs font-medium rounded-lg px-3 py-2 shadow-lg whitespace-nowrap">
-                  Compartilhe suas receitas!
-                  <div className="absolute top-full left-5 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-white" />
-                </div>
-              </div>
-            )}
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={() => navigate('/app/clube/receita/nova')}
-              title="Enviar receita"
-              aria-label="Enviar receita"
-            >
-              <Martini className="h-4 w-4 text-primary" />
-            </Button>
-          </div>
-          <Textarea
-            ref={textareaRef}
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            onInput={(e) => {
-              const el = e.currentTarget;
-              el.style.height = 'auto';
-              el.style.height = Math.min(el.scrollHeight, 84) + 'px';
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                submit();
-              }
-            }}
-            placeholder="Mensagem para o Clube…"
-            rows={1}
-            maxLength={2000}
-            className="resize-none min-h-[40px] max-h-[84px] overflow-y-auto"
-          />
-          <Button size="icon" disabled={!body.trim() || create.isPending} onClick={submit} className="shrink-0">
-            {create.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-          </Button>
-        </div>
-      </div>
-
-
-    </div>
   );
 };
 
@@ -497,49 +225,12 @@ const RankingSheet: React.FC = () => {
   );
 };
 
-
-/* ---------- Recipes Tab (with search) ---------- */
-const RecipesTab: React.FC<{ myLikes: Set<string> }> = ({ myLikes }) => {
-  const [q, setQ] = useState('');
-  const { data = [], isLoading } = useClubRecipesSearch(q);
-  const navigate = useNavigate();
-  return (
-    <div className="space-y-3">
-      <Button
-        onClick={() => navigate('/app/clube/receita/nova')}
-        className="w-full"
-        size="lg"
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Enviar minha receita
-      </Button>
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Buscar por nome do drink ou ingrediente…"
-          className="pl-9"
-        />
-      </div>
-      {isLoading && <div className="text-sm text-muted-foreground">Carregando…</div>}
-      {!isLoading && data.length === 0 && (
-        <div className="text-sm text-muted-foreground text-center py-8">Nenhuma receita encontrada.</div>
-      )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {data.map((r) => (
-          <RecipeCard key={r.id} recipe={r} isLiked={myLikes.has(r.id)} />
-        ))}
-      </div>
-    </div>
-  );
-};
-
 /* ---------- Main page ---------- */
 const UserClube: React.FC = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
-  const [tab, setTab] = useState<'chat' | 'recipes'>('chat');
+  const [q, setQ] = useState('');
+  const { data = [], isLoading } = useClubRecipesSearch(q);
   const { data: myLikes } = useMyClubLikes();
   const likes = useMemo(() => myLikes ?? new Set<string>(), [myLikes]);
 
@@ -555,9 +246,9 @@ const UserClube: React.FC = () => {
         <div className="mx-auto h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
           <Sparkles className="h-7 w-7 text-primary" />
         </div>
-        <h1 className="text-xl font-bold">Clube dos Drinkeros</h1>
+        <h1 className="text-xl font-bold">Clube de Receitas</h1>
         <p className="text-sm text-muted-foreground">
-          Entre com sua conta para participar do chat, postar suas receitas e votar no ranking.
+          Entre com sua conta para descobrir receitas exclusivas e compartilhar as suas criações.
         </p>
         <Button onClick={() => navigate('/login')}>Entrar</Button>
       </div>
@@ -568,26 +259,40 @@ const UserClube: React.FC = () => {
     <div className="container mx-auto max-w-2xl px-4 py-4 pb-24 md:pb-6 space-y-3">
       <div className="flex items-center justify-between gap-2">
         <div>
-          <h1 className="text-xl font-bold leading-tight">Clube</h1>
-          <p className="text-xs text-muted-foreground">Converse e compartilhe Receitas!</p>
+          <h1 className="text-xl font-bold leading-tight">Clube de Receitas</h1>
+          <p className="text-xs text-muted-foreground">Descubra, curta e compartilhe receitas!</p>
         </div>
         <RankingSheet />
       </div>
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as 'chat' | 'recipes')}>
-        <TabsList className="w-full grid grid-cols-2">
-          <TabsTrigger value="chat">Chat</TabsTrigger>
-          <TabsTrigger value="recipes">Receitas</TabsTrigger>
-        </TabsList>
+      <Button
+        onClick={() => navigate('/app/clube/receita/nova')}
+        className="w-full"
+        size="lg"
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Compartilhe sua receita!
+      </Button>
 
-        <TabsContent value="chat" className="mt-3">
-          <ChatTab likes={likes} />
-        </TabsContent>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Buscar por nome do drink ou ingrediente…"
+          className="pl-9"
+        />
+      </div>
 
-        <TabsContent value="recipes" className="mt-3">
-          <RecipesTab myLikes={likes} />
-        </TabsContent>
-      </Tabs>
+      {isLoading && <div className="text-sm text-muted-foreground">Carregando…</div>}
+      {!isLoading && data.length === 0 && (
+        <div className="text-sm text-muted-foreground text-center py-8">Nenhuma receita encontrada.</div>
+      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {data.map((r) => (
+          <RecipeCard key={r.id} recipe={r} isLiked={likes.has(r.id)} />
+        ))}
+      </div>
     </div>
   );
 };
