@@ -20,14 +20,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { PartnerGrantAccessCard } from '@/components/admin/PartnerGrantAccessCard';
 
 const sourceLabel: Record<string, string> = {
-  stripe: 'Stripe',
   mercadopago: 'Mercado Pago',
 };
 
 const sourceVariant: Record<string, 'default' | 'secondary' | 'outline'> = {
-  stripe: 'default',
   mercadopago: 'secondary',
 };
+
 
 const productLabel: Record<string, string> = {
   curso: 'Curso',
@@ -155,7 +154,7 @@ const AdminOrders: React.FC = () => {
         <ShoppingCart className="h-7 w-7 text-primary" />
         <div>
           <h1 className="text-3xl font-bold">Vendas</h1>
-          <p className="text-muted-foreground">Histórico de vendas confirmadas pelo Stripe e Mercado Pago</p>
+          <p className="text-muted-foreground">Histórico de vendas confirmadas pelo Mercado Pago</p>
         </div>
       </div>
 
@@ -275,7 +274,6 @@ const AdminOrders: React.FC = () => {
               <SelectTrigger><SelectValue placeholder="Origem" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as origens</SelectItem>
-                <SelectItem value="stripe">Stripe</SelectItem>
                 <SelectItem value="mercadopago">Mercado Pago</SelectItem>
               </SelectContent>
             </Select>
