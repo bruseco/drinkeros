@@ -32,7 +32,6 @@ const statusLabel: Record<string, string> = {
 };
 
 const sourceLabel: Record<string, string> = {
-  stripe: 'Stripe',
   mercadopago: 'Mercado Pago',
   manual: 'Manual',
   import: 'Importação',
@@ -109,11 +108,9 @@ export const UserPaymentHistory: React.FC<{ userId: string }> = ({ userId }) => 
                 const canRefund =
                   p.status === 'paid' &&
                   !p.refunded_at &&
-                  (p.source === 'stripe' || p.source === 'mercadopago' || p.table === 'vip_payments');
+                  (p.source === 'mercadopago' || p.table === 'vip_payments');
                 const externalUrl =
-                  p.source === 'stripe' && p.external_ref
-                    ? `https://dashboard.stripe.com/payments/${p.external_ref}`
-                    : p.source === 'mercadopago' && p.external_ref
+                  p.source === 'mercadopago' && p.external_ref
                     ? `https://www.mercadopago.com.br/activities/detail/${p.external_ref}`
                     : null;
 
@@ -188,7 +185,7 @@ export const UserPaymentHistory: React.FC<{ userId: string }> = ({ userId }) => 
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Registrar pagamento manual</DialogTitle>
-              <DialogDescription>Use para vendas offline ou ajustes históricos do Clube. Pagamentos via Stripe/MP entram automaticamente.</DialogDescription>
+              <DialogDescription>Use para vendas offline ou ajustes históricos do Clube. Pagamentos via Mercado Pago entram automaticamente.</DialogDescription>
             </DialogHeader>
             <div className="space-y-3 py-2">
               <div className="grid grid-cols-2 gap-3">
@@ -254,7 +251,7 @@ export const UserPaymentHistory: React.FC<{ userId: string }> = ({ userId }) => 
                     <span className="font-mono text-xs">{refundTarget.external_ref}</span>
                   </div>
                 )}
-                {refundTarget.source !== 'stripe' && refundTarget.source !== 'mercadopago' && (
+                {refundTarget.source !== 'mercadopago' && (
                   <p className="text-xs text-amber-600 pt-2">
                     Pagamento sem provedor externo: o estorno será apenas registrado, sem chamar nenhum gateway.
                   </p>
