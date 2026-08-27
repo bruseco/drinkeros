@@ -32,16 +32,18 @@ export const useUserPayments = (userId: string | undefined) => {
     queryFn: async (): Promise<UserPaymentRow[]> => {
       const [vip, courses, combos, ebooks, packs] = await Promise.all([
         (supabase as any).from('vip_payments').select('*').eq('user_id', userId),
-        (supabase as any).from('user_courses').select('*, courses(name)').eq('user_id', userId).in('source', ['stripe', 'mercadopago']),
-        (supabase as any).from('user_combos').select('*, combos(name)').eq('user_id', userId).in('source', ['stripe', 'mercadopago']),
-        (supabase as any).from('user_ebooks').select('*, ebooks(name)').eq('user_id', userId).in('source', ['stripe', 'mercadopago']),
-        (supabase as any).from('user_packages').select('*, packages(name)').eq('user_id', userId).in('source', ['stripe', 'mercadopago']),
+        (supabase as any).from('user_courses').select('*, courses(name)').eq('user_id', userId).eq('source', 'mercadopago'),
+        (supabase as any).from('user_combos').select('*, combos(name)').eq('user_id', userId).eq('source', 'mercadopago'),
+        (supabase as any).from('user_ebooks').select('*, ebooks(name)').eq('user_id', userId).eq('source', 'mercadopago'),
+        (supabase as any).from('user_packages').select('*, packages(name)').eq('user_id', userId).eq('source', 'mercadopago'),
       ]);
 
       const rows: UserPaymentRow[] = [];
 
       (vip.data || []).forEach((p: any) => {
         const src = sourceFromMeta(p);
+        // Stripe foi descontinuado na Drinkeros: cobranças antigas não entram nos relatórios
+        if (src === 'stripe') return;
         rows.push({
           id: `vip:${p.id}`,
           table: 'vip_payments',
@@ -68,10 +70,7 @@ export const useUserPayments = (userId: string | undefined) => {
         (list || []).forEach((r: any) => {
           // Apenas pagamentos REAIS: precisam ter referência externa própria
           // (acessos propagados de cursos para módulos/combos não têm payment id)
-          const hasOwnPayment =
-            !!r.stripe_payment_intent_id ||
-            !!r.mercadopago_payment_id ||
-            !!r.stripe_session_id;
+          const hasOwnPayment = !!r.mercadopago_payment_id;
           if (!hasOwnPayment) return;
           rows.push({
             id: `${product_type}:${r.id}`,
@@ -85,7 +84,7 @@ export const useUserPayments = (userId: string | undefined) => {
             payment_method: null,
             status: r.refunded_at ? 'refunded' : 'paid',
             paid_at: r.purchased_at,
-            external_ref: r.stripe_payment_intent_id || r.mercadopago_payment_id || r.stripe_session_id || null,
+            external_ref: r.mercadopago_payment_id || null,
             refunded_at: r.refunded_at,
           });
         });
