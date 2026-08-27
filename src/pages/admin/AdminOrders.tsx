@@ -20,14 +20,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { PartnerGrantAccessCard } from '@/components/admin/PartnerGrantAccessCard';
 
 const sourceLabel: Record<string, string> = {
-  stripe: 'Stripe',
   mercadopago: 'Mercado Pago',
 };
 
 const sourceVariant: Record<string, 'default' | 'secondary' | 'outline'> = {
-  stripe: 'default',
   mercadopago: 'secondary',
 };
+
 
 const productLabel: Record<string, string> = {
   curso: 'Curso',
