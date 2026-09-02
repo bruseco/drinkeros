@@ -116,6 +116,17 @@ const CompleteProfile: React.FC = () => {
     }
     setIsSaving(false);
     if (error) {
+      // Sessão órfã: o usuário do token não existe mais no auth (conta excluída).
+      if ((error as any).code === '23503' || /profiles_user_id_fkey/i.test(error.message)) {
+        toast({
+          title: 'Sessão expirada',
+          description: 'Sua sessão não é mais válida. Entre novamente para continuar.',
+          variant: 'destructive',
+        });
+        await supabase.auth.signOut().catch(() => {});
+        navigate('/login', { replace: true });
+        return;
+      }
       toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
       return;
     }
