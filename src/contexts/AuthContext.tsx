@@ -172,11 +172,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     // THEN check initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
 
       if (session?.user) {
+        // Valida a sessão contra o servidor: se o usuário foi excluído,
+        // o token continua "válido" localmente e qualquer escrita quebra
+        // (ex.: profiles_user_id_fkey). Nesse caso, encerra a sessão.
+        try {
+          const { error } = await supabase.auth.getUser();
+          const code = (error as any)?.code || '';
+          const status = (error as any)?.status;
+          if (error && (code === 'user_not_found' || status === 403 || status === 401)) {
+            await supabase.auth.signOut();
+            setSession(null);
+            setUser(null);
+            setProfile(null);
+            setRoles([]);
+            setIsLoading(false);
+            return;
+          }
+        } catch { /* offline: mantém a sessão */ }
+
         fetchProfile(session.user.id, session.user);
         fetchRoles(session.user.id);
       }
