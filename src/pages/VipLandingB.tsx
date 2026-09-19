@@ -588,7 +588,7 @@ const VipLandingB: React.FC = () => {
                 <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><strong className="text-white">Xaropes Artesanais</strong> liberados</span></li>
                 <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span>Acesso à minissérie <strong className="text-white">Bebida Decifrada</strong></span></li>
                 <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><strong className="text-white">Workshop Além dos Clássicos</strong>, com certificado</span></li>
-                <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><strong className="text-white">80% de desconto</strong> em produtos selecionados</span></li>
+                <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span><strong className="text-white">80% OFF</strong> em cursos e e-books nos 7 primeiros dias de uso do app e <strong className="text-white">50% OFF</strong> depois, para sempre <span className="text-white/60">(alguns cursos têm condição especial de sócio)</span></span></li>
                 <li className="flex items-start gap-2"><Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" /> <span>Cursos e ebooks expirados <strong className="text-white">reativados</strong> enquanto a assinatura estiver ativa</span></li>
               </ul>
               <Button

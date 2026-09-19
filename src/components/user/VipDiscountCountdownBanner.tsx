@@ -5,7 +5,8 @@ import { useVipDiscount } from '@/hooks/useVipDiscount';
 import { cn } from '@/lib/utils';
 
 const SESSION_DISMISS_KEY = 'vip:intro80:dismissed';
-const PERSIST_DISMISS_KEY = 'vip:base50:dismissed';
+// Aviso de 50%: dispensa apenas na sessão — volta a aparecer em novos acessos
+const SESSION_DISMISS_BASE_KEY = 'vip:base50:dismissed';
 
 interface Props {
   /** Em páginas de produto, o aviso de 50% reaparece mesmo se o usuário já fechou */
@@ -30,7 +31,7 @@ export const VipDiscountCountdownBanner: React.FC<Props> = ({ forceShowOnProduct
   useEffect(() => {
     try {
       setDismissedIntro(sessionStorage.getItem(SESSION_DISMISS_KEY) === '1');
-      setDismissedBase(localStorage.getItem(PERSIST_DISMISS_KEY) === '1');
+      setDismissedBase(sessionStorage.getItem(SESSION_DISMISS_BASE_KEY) === '1');
     } catch { /* ignore */ }
   }, []);
 
@@ -69,7 +70,7 @@ export const VipDiscountCountdownBanner: React.FC<Props> = ({ forceShowOnProduct
           className="block px-4 py-2.5 pr-10 text-center text-sm sm:text-base font-medium hover:bg-yellow-300 transition-colors"
         >
           <Sparkles className="inline-block h-4 w-4 mr-1.5 -mt-0.5" />
-          <span className="font-bold">80% OFF</span> em todos Cursos e E-books —{' '}
+          <span className="font-bold">80% OFF</span> em Cursos e E-books —{' '}
           {liveTimer ? (
             <>Sua oferta expira em <span className="font-bold tabular-nums">{liveTimer}</span></>
           ) : vip.hoursRemaining > 0 && vip.hoursRemaining <= 24 ? (
@@ -108,7 +109,7 @@ export const VipDiscountCountdownBanner: React.FC<Props> = ({ forceShowOnProduct
           className="block px-4 py-2 pr-10 text-center text-sm font-medium hover:bg-yellow-100 transition-colors"
         >
           <Gem className="inline-block h-4 w-4 mr-1.5 -mt-0.5" />
-          Como Sócio do Clube, você tem <span className="font-bold">50% OFF</span> em todos os cursos e ebooks.
+          Como Sócio do Clube, você tem <span className="font-bold">50% OFF</span> em cursos e e-books. Alguns cursos têm condição especial de sócio.
         </Link>
         {!forceShowOnProduct && (
           <button
@@ -116,7 +117,7 @@ export const VipDiscountCountdownBanner: React.FC<Props> = ({ forceShowOnProduct
             aria-label="Fechar aviso"
             onClick={() => {
               setDismissedBase(true);
-              try { localStorage.setItem(PERSIST_DISMISS_KEY, '1'); } catch { /* ignore */ }
+              try { sessionStorage.setItem(SESSION_DISMISS_BASE_KEY, '1'); } catch { /* ignore */ }
             }}
             className="absolute top-1/2 right-2 -translate-y-1/2 inline-flex h-7 w-7 items-center justify-center rounded-full hover:bg-black/10 transition-colors"
           >

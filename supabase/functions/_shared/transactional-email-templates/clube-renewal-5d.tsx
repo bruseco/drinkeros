@@ -13,7 +13,7 @@ const Email = ({ userName, expiresAt }: ClubeRenewalProps) => (
         {expiresAt ? ` expira em ${expiresAt}` : ' está perto de expirar'}. Não deixe pra última hora — renove agora.
       </>
     }
-    body={<Text style={text}>Mantém o acesso a tudo: receitas exclusivas, xaropes artesanais e 80% OFF em todos os cursos.</Text>}
+    body={<Text style={text}>Mantém o acesso a tudo: receitas exclusivas, xaropes artesanais e 50% OFF em cursos e e-books como sócio.</Text>}
   />
 )
 

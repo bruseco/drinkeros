@@ -54,3 +54,6 @@ project_id = "pvjlcfhqueibjnkuzzna"
 
   [functions.send-offer-followup-emails]
     verify_jwt = false
+
+  [functions.send-clube-discount-ending]
+    verify_jwt = false
