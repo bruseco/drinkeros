@@ -137,4 +137,19 @@ export async function sendPurchaseEmails(supabase: any, args: SendPurchaseEmails
       isNewAccount: args.wasCreated,
     },
   );
+
+  // 3) clube-welcome-discount: explica o benefício de sócio (80% por 7 dias a
+  //    contar do primeiro acesso ao app, depois 50% para sempre).
+  if (args.productType === 'club') {
+    await invokeTemplate(
+      supabase,
+      'clube-welcome-discount',
+      args.email,
+      `clube-welcome-discount:${args.gateway}:${args.transactionId}`,
+      {
+        userName: firstName,
+        appUrl: `${args.siteUrl.replace(/\/$/, '')}/app/cursos`,
+      },
+    );
+  }
 }
