@@ -41,7 +41,7 @@ export const ClubeRenewalShell = ({ preview, title, intro, body, ctaLabel = 'Ren
             <Button style={button} href={ctaUrl}>{ctaLabel}</Button>
           </Section>
           <Text style={smallNote}>
-            Renove em segundos para continuar com receitas exclusivas, xaropes artesanais, descontos de 80% nos cursos e a comunidade do Clube.
+            Renove em segundos para continuar com receitas exclusivas, xaropes artesanais, seu desconto de sócio nos cursos e a comunidade do Clube.
           </Text>
         </Section>
         <Hr style={hr} />
