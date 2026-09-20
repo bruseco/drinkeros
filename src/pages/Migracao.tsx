@@ -82,8 +82,7 @@ const Migracao: React.FC = () => {
           </CardTitle>
           <CardDescription>
             {step === 'email' && 'Migre agora para a nova conta.'}
-            {step === 'password' && 'Crie uma senha para acessar a plataforma.'}
-            {step === 'done' && 'Tudo pronto! Sua conta foi migrada.'}
+            {step === 'done' && 'Enviamos o link de acesso para o seu e-mail.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
