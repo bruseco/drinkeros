@@ -96,7 +96,8 @@ const Migracao: React.FC = () => {
                   <span className="font-semibold text-foreground">mais rápido e mais inteligente</span>.
                 </p>
                 <p className="text-foreground font-medium">
-                  Insira abaixo o e-mail utilizado no sistema antigo e crie uma nova senha de acesso.
+                  Insira abaixo o e-mail utilizado no sistema antigo. Vamos enviar um link seguro
+                  para você criar sua nova senha.
                 </p>
               </div>
               <div className="space-y-2">
