@@ -64,60 +64,6 @@ const Migracao: React.FC = () => {
     setIsLoading(false);
   };
 
-  const handleSetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (password.length < 6) {
-      toast({
-        title: 'Senha muito curta',
-        description: 'A senha deve ter no mínimo 6 caracteres.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      toast({
-        title: 'Senhas não conferem',
-        description: 'As senhas digitadas não são iguais.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('migrate-user-password', {
-        body: { action: 'set_password', email: email.trim().toLowerCase(), password },
-      });
-
-      if (error) throw error;
-
-      if (data?.success) {
-        setStep('done');
-        toast({
-          title: 'Senha criada com sucesso!',
-          description: 'Você já pode fazer login com sua nova senha.',
-        });
-      } else {
-        toast({
-          title: 'Erro',
-          description: data?.error || 'Não foi possível criar a senha.',
-          variant: 'destructive',
-        });
-      }
-    } catch (err: any) {
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível criar a senha. Tente novamente.',
-        variant: 'destructive',
-      });
-    }
-
-    setIsLoading(false);
-  };
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 gap-4">
       <SeoHead
