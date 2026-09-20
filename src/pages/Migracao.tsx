@@ -125,61 +125,13 @@ const Migracao: React.FC = () => {
             </form>
           )}
 
-          {step === 'password' && (
-            <form onSubmit={handleSetPassword} className="space-y-4">
-              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-center">
-                <p className="text-sm font-medium">{email}</p>
-                <button
-                  type="button"
-                  className="text-xs text-primary underline mt-1"
-                  onClick={() => setStep('email')}
-                >
-                  Trocar e-mail
-                </button>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="new-password">Nova senha</Label>
-                <Input
-                  id="new-password"
-                  type="password"
-                  placeholder="Mínimo 6 caracteres"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  autoFocus
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirmar senha</Label>
-                <Input
-                  id="confirm-password"
-                  type="password"
-                  placeholder="Repita a senha"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  minLength={6}
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Criando senha...
-                  </>
-                ) : (
-                  'Criar senha'
-                )}
-              </Button>
-            </form>
-          )}
-
           {step === 'done' && (
             <div className="text-center space-y-4">
               <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
               <p className="text-sm text-muted-foreground">
-                Sua senha foi criada. Agora você pode acessar a plataforma.
+                Enviamos um link para <span className="font-medium text-foreground">{email}</span>.
+                Abra o e-mail e crie sua nova senha. Se não aparecer em alguns minutos, confira o
+                spam ou a lixeira.
               </p>
               <Button className="w-full" onClick={() => navigate('/login')}>
                 Ir para o Login
