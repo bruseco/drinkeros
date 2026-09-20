@@ -10,13 +10,11 @@ import { useToast } from '@/hooks/use-toast';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
 import SeoHead from '@/components/SeoHead';
 
-type Step = 'email' | 'password' | 'done';
+type Step = 'email' | 'done';
 
 const Migracao: React.FC = () => {
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -26,14 +24,28 @@ const Migracao: React.FC = () => {
     setIsLoading(true);
 
     try {
+      const normalized = email.trim().toLowerCase();
       const { data, error } = await supabase.functions.invoke('migrate-user-password', {
-        body: { action: 'check', email: email.trim().toLowerCase() },
+        body: { action: 'check', email: normalized },
       });
 
       if (error) throw error;
 
       if (data?.exists) {
-        setStep('password');
+        const { data: sent, error: sendErr } = await supabase.functions.invoke(
+          'send-reset-password-email',
+          { body: { email: normalized } },
+        );
+        if (sendErr) throw sendErr;
+        if (sent?.success === false) {
+          toast({
+            title: 'Não foi possível enviar agora',
+            description: sent?.message || 'Tente novamente em alguns minutos.',
+            variant: 'destructive',
+          });
+        } else {
+          setStep('done');
+        }
       } else {
         toast({
           title: 'E-mail não encontrado',
