@@ -212,10 +212,18 @@ const UserRecipes: React.FC = () => {
         .eq('user_id', user!.id)
         .gt('view_date', weekAgo);
       const ids = new Set((data ?? []).map((r) => r.recipe_id as string));
-      return { ids, count: ids.size };
+      const { count: lifetimeCount } = await supabase
+        .from('daily_recipe_views')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user!.id);
+      return { ids, count: ids.size, lifetime: lifetimeCount ?? 0 };
     },
   });
-  const limitReached = isLockedForUser && (dailyViews?.count ?? 0) >= weeklyLimit;
+  // Bônus de primeiro acesso: as 3 primeiras receitas da vida liberam normalmente,
+  // só depois vale o limite semanal.
+  const withinFirstAccess = (dailyViews?.lifetime ?? 0) < FIRST_ACCESS_BONUS;
+  const limitReached =
+    isLockedForUser && !withinFirstAccess && (dailyViews?.count ?? 0) >= weeklyLimit;
 
   // Garante que ao entrar na página (signup, navegação direta) o scroll inicia no topo.
   // No pós-cadastro, ignora qualquer restauração antiga do iOS/Safari e de receitas anteriores.

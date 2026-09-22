@@ -7,7 +7,7 @@ import { useUserPlan } from './useUserPlan';
 import { useHasExclusiveAccess } from './useExclusiveAccess';
 
 const WEEKLY_LIMIT = 1;
-const FIRST_ACCESS_BONUS = 3; // primeiro acesso libera 3 receitas, depois 1/semana
+export const FIRST_ACCESS_BONUS = 3; // primeiro acesso libera 3 receitas, depois 1/semana
 const VIP_ONLY_CHARACTERISTICS = ['Xaropes Artesanais'];
 
 export const isVipOnlyCharacteristic = (chars?: string[] | null) => {
