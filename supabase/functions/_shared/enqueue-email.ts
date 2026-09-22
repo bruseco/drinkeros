@@ -1,9 +1,13 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { EmailAPIError, sendLovableEmail } from "npm:@lovable.dev/email-js@0.1.0";
+
+const SENDER_DOMAIN = "notify.drinkeros.com";
+const FROM_DOMAIN = "notify.drinkeros.com";
+const SITE_NAME = "Drinkeros";
 
 /**
- * Sends an email by enqueuing it to the transactional email queue via RPC.
- * This is for server-side Edge Functions that need to send emails without SES.
- * Uses the same queue infrastructure as send-transactional-email.
+ * Envia um e-mail com HTML montado na hora (conteúdo dinâmico gerado pelo app)
+ * através do serviço gerenciado de e-mail da Lovable, registrando o resultado
+ * em email_send_log.
  */
 export async function enqueueEmail(
   supabase: any,
@@ -13,26 +17,20 @@ export async function enqueueEmail(
     html: string;
     label?: string;
     idempotencyKey?: string;
-  }
+  },
 ): Promise<{ success: boolean; error?: string }> {
-  const messageId = crypto.randomUUID();
-  const SENDER_DOMAIN = "notify.drinkeros.com";
-  const FROM_DOMAIN = "notify.drinkeros.com";
-  const SITE_NAME = "Drinkeros";
+  const apiKey = Deno.env.get("LOVABLE_API_KEY");
+  const templateName = params.label || "direct";
+
+  if (!apiKey) {
+    console.error("LOVABLE_API_KEY is not configured");
+    await logSend(supabase, templateName, params.to, "failed", "LOVABLE_API_KEY is not configured");
+    return { success: false, error: "LOVABLE_API_KEY is not configured" };
+  }
 
   try {
-    // Log pending
-    await supabase.from("email_send_log").insert({
-      message_id: messageId,
-      template_name: params.label || "direct",
-      recipient_email: params.to,
-      status: "pending",
-    });
-
-    const { error: enqueueError } = await supabase.rpc("enqueue_email", {
-      queue_name: "transactional_emails",
-      payload: {
-        message_id: messageId,
+    await sendLovableEmail(
+      {
         to: params.to,
         from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
         sender_domain: SENDER_DOMAIN,
@@ -40,20 +38,41 @@ export async function enqueueEmail(
         html: params.html,
         text: "",
         purpose: "transactional",
-        label: params.label || "direct",
-        idempotency_key: params.idempotencyKey || messageId,
-        queued_at: new Date().toISOString(),
+        label: templateName,
+        idempotency_key: params.idempotencyKey || crypto.randomUUID(),
       },
-    });
+      { apiKey, sendUrl: Deno.env.get("LOVABLE_SEND_URL") },
+    );
 
-    if (enqueueError) {
-      console.error("Failed to enqueue email:", enqueueError);
-      return { success: false, error: enqueueError.message };
-    }
-
+    await logSend(supabase, templateName, params.to, "sent");
     return { success: true };
   } catch (err: any) {
-    console.error("enqueueEmail error:", err);
-    return { success: false, error: err.message };
+    if (err instanceof EmailAPIError && err.code === "recipient_suppressed") {
+      await logSend(supabase, templateName, params.to, "suppressed");
+      return { success: false, error: "recipient_suppressed" };
+    }
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("sendEmail error:", message);
+    await logSend(supabase, templateName, params.to, "failed", message);
+    return { success: false, error: message };
+  }
+}
+
+async function logSend(
+  supabase: any,
+  templateName: string,
+  recipientEmail: string,
+  status: "sent" | "suppressed" | "failed",
+  errorMessage?: string,
+) {
+  const { error } = await supabase.from("email_send_log").insert({
+    message_id: null,
+    template_name: templateName,
+    recipient_email: recipientEmail,
+    status,
+    error_message: errorMessage ? errorMessage.slice(0, 1000) : null,
+  });
+  if (error) {
+    console.error("Failed to write email_send_log", { code: error.code, message: error.message });
   }
 }
