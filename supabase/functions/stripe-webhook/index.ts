@@ -637,12 +637,11 @@ serve(async (req) => {
             || (await supabase.from("profiles").select("email,full_name").eq("user_id", userId).maybeSingle()).data?.email;
           const profile = (await supabase.from("profiles").select("full_name").eq("user_id", userId).maybeSingle()).data;
           if (recipient) {
-            await supabase.functions.invoke("send-transactional-email", {
-              body: {
-                templateName: "clube-payment-failed",
-                recipientEmail: recipient,
-                templateData: { userName: profile?.full_name?.split(" ")[0] || "" },
-              },
+            await sendTemplateEmailWithLog(supabase, {
+              templateName: "clube-payment-failed",
+              recipientEmail: recipient,
+              idempotencyKey: `clube-payment-failed:${userId}:${invoice.id}`,
+              templateData: { userName: profile?.full_name?.split(" ")[0] || "" },
             });
           }
         } catch (e) {

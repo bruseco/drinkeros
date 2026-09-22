@@ -73,19 +73,17 @@ serve(async (req: Request) => {
         new Date(row.discount_intro_started_at as string).getTime() + WINDOW_DAYS * 86400000,
       );
 
-      const { error: invokeErr } = await supabase.functions.invoke("send-transactional-email", {
-        body: {
-          templateName: TEMPLATE,
-          recipientEmail: email,
-          idempotencyKey: `${TEMPLATE}:${userId}:${row.discount_intro_started_at}`,
-          templateData: {
-            userName: String((profile as any)?.full_name || "").trim().split(" ")[0] || undefined,
-            appUrl: APP_URL,
-            endsAt: fmtDate(endsAt),
-          },
+      const sendRes = await sendTemplateEmailWithLog(supabase, {
+        templateName: TEMPLATE,
+        recipientEmail: email,
+        idempotencyKey: `${TEMPLATE}:${userId}:${row.discount_intro_started_at}`,
+        templateData: {
+          userName: String((profile as any)?.full_name || "").trim().split(" ")[0] || undefined,
+          appUrl: APP_URL,
+          endsAt: fmtDate(endsAt),
         },
       });
-      if (invokeErr) { skipped.push(`${userId}: ${invokeErr.message}`); continue; }
+      if (!sendRes.success) { skipped.push(`${userId}: ${sendRes.error}`); continue; }
       sent++;
     }
 

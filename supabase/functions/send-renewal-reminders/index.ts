@@ -115,24 +115,19 @@ serve(async (req) => {
       }
 
       // Enqueue the transactional email
-      const { error: invokeErr } = await supabase.functions.invoke(
-        "send-transactional-email",
-        {
-          body: {
-            templateName: window.template,
-            recipientEmail: profile.email,
-            idempotencyKey: `renewal-${plan.user_id}-${window.template}-${plan.expires_at}`,
-            templateData: {
-              name: profile.full_name?.split(" ")[0] ?? "",
-              expires_at: plan.expires_at,
-              days_remaining: diffDays,
-            },
-          },
+      const sendRes = await sendTemplateEmailWithLog(supabase, {
+        templateName: window.template,
+        recipientEmail: profile.email,
+        idempotencyKey: `renewal-${plan.user_id}-${window.template}-${plan.expires_at}`,
+        templateData: {
+          name: profile.full_name?.split(" ")[0] ?? "",
+          expires_at: plan.expires_at,
+          days_remaining: diffDays,
         },
-      );
+      });
 
-      if (invokeErr) {
-        log("send-failed", { user_id: plan.user_id, error: invokeErr.message });
+      if (!sendRes.success) {
+        log("send-failed", { user_id: plan.user_id, error: sendRes.error });
         continue;
       }
 
