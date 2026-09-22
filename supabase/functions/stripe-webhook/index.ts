@@ -1,6 +1,7 @@
 // Stripe webhook handler for VIP subscription lifecycle.
 // Public endpoint (verify_jwt = false) — authenticity is enforced via Stripe signature.
 
+import { sendTemplateEmailWithLog } from "../_shared/send-email-helper.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";

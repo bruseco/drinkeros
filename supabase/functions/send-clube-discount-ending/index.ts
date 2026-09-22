@@ -2,6 +2,7 @@
 // A janela de 7 dias começa no PRIMEIRO ACESSO AO APP (user_plans.discount_intro_started_at,
 // gravado pelo RPC start_vip_discount_window). Este cron roda 1x por dia e avisa
 // quem está no 6º dia da janela. Dedup por email_send_log (1 envio por janela).
+import { sendTemplateEmailWithLog } from "../_shared/send-email-helper.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { assertInternalOrAdmin } from "../_shared/internalAuth.ts";

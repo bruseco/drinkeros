@@ -1,5 +1,6 @@
 // Checkout transparente: cria pagamento direto via API do Mercado Pago (Cartão ou Pix)
 // usando o token gerado pelo Payment Brick no frontend.
+import { sendTemplateEmailWithLog } from "../_shared/send-email-helper.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { OFFERS, normalizeEmail } from "../_shared/offerLeads.ts";

@@ -1,6 +1,7 @@
 // Daily job: scans VIP users and sends renewal reminder emails based on
 // how many days remain until expires_at (or how many days have passed).
 // Each user receives each reminder at most once per cycle (per expires_at value).
+import { sendTemplateEmailWithLog } from "../_shared/send-email-helper.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { assertInternalOrAdmin } from "../_shared/internalAuth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
