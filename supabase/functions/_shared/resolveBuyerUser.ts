@@ -30,6 +30,31 @@ export interface ResolveBuyerFailure {
 
 export type ResolveBuyerResult = ResolveBuyerSuccess | ResolveBuyerFailure;
 
+/**
+ * Procura um usuário existente em auth.users pelo e-mail usando o endpoint
+ * admin do GoTrue (suporta filtro por e-mail, sem depender de paginação).
+ */
+async function findAuthUserByEmail(email: string): Promise<string | null> {
+  try {
+    const baseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!baseUrl || !serviceKey) return null;
+    const res = await fetch(
+      `${baseUrl}/auth/v1/admin/users?per_page=50&filter=${encodeURIComponent(email)}`,
+      { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } },
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    const match = (json?.users ?? []).find(
+      (u: any) => (u.email || "").toLowerCase() === email,
+    );
+    return match?.id ?? null;
+  } catch (e) {
+    console.warn("[findAuthUserByEmail] failed:", (e as Error).message);
+    return null;
+  }
+}
+
 export async function resolveBuyerUser(
   supabase: any,
   input: ResolveBuyerInput,

@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
     // Pixel + token vêm de tracking_settings (mesmo padrão do Purchase)
     const { data: ts } = await supabase
       .from("tracking_settings")
-      .select("facebook_pixel_id, facebook_pixel_enabled, meta_capi_access_token, meta_test_event_code")
+      .select("facebook_pixel_id, facebook_pixel_enabled, meta_test_event_code")
       .limit(1)
       .maybeSingle();
 
@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const accessToken = ts.meta_capi_access_token || Deno.env.get("META_CAPI_ACCESS_TOKEN");
+    const accessToken = Deno.env.get("META_CAPI_ACCESS_TOKEN");
     if (!accessToken) {
       return new Response(JSON.stringify({ skipped: "no_token" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
