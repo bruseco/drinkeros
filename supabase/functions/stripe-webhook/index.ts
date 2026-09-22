@@ -1,6 +1,7 @@
 // Stripe webhook handler for VIP subscription lifecycle.
 // Public endpoint (verify_jwt = false) — authenticity is enforced via Stripe signature.
 
+import { sendTemplateEmailWithLog } from "../_shared/send-email-helper.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
@@ -637,12 +638,11 @@ serve(async (req) => {
             || (await supabase.from("profiles").select("email,full_name").eq("user_id", userId).maybeSingle()).data?.email;
           const profile = (await supabase.from("profiles").select("full_name").eq("user_id", userId).maybeSingle()).data;
           if (recipient) {
-            await supabase.functions.invoke("send-transactional-email", {
-              body: {
-                templateName: "clube-payment-failed",
-                recipientEmail: recipient,
-                templateData: { userName: profile?.full_name?.split(" ")[0] || "" },
-              },
+            await sendTemplateEmailWithLog(supabase, {
+              templateName: "clube-payment-failed",
+              recipientEmail: recipient,
+              idempotencyKey: `clube-payment-failed:${userId}:${invoice.id}`,
+              templateData: { userName: profile?.full_name?.split(" ")[0] || "" },
             });
           }
         } catch (e) {

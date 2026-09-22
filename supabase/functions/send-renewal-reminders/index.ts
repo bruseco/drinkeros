@@ -1,6 +1,7 @@
 // Daily job: scans VIP users and sends renewal reminder emails based on
 // how many days remain until expires_at (or how many days have passed).
 // Each user receives each reminder at most once per cycle (per expires_at value).
+import { sendTemplateEmailWithLog } from "../_shared/send-email-helper.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { assertInternalOrAdmin } from "../_shared/internalAuth.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
@@ -115,24 +116,19 @@ serve(async (req) => {
       }
 
       // Enqueue the transactional email
-      const { error: invokeErr } = await supabase.functions.invoke(
-        "send-transactional-email",
-        {
-          body: {
-            templateName: window.template,
-            recipientEmail: profile.email,
-            idempotencyKey: `renewal-${plan.user_id}-${window.template}-${plan.expires_at}`,
-            templateData: {
-              name: profile.full_name?.split(" ")[0] ?? "",
-              expires_at: plan.expires_at,
-              days_remaining: diffDays,
-            },
-          },
+      const sendRes = await sendTemplateEmailWithLog(supabase, {
+        templateName: window.template,
+        recipientEmail: profile.email,
+        idempotencyKey: `renewal-${plan.user_id}-${window.template}-${plan.expires_at}`,
+        templateData: {
+          name: profile.full_name?.split(" ")[0] ?? "",
+          expires_at: plan.expires_at,
+          days_remaining: diffDays,
         },
-      );
+      });
 
-      if (invokeErr) {
-        log("send-failed", { user_id: plan.user_id, error: invokeErr.message });
+      if (!sendRes.success) {
+        log("send-failed", { user_id: plan.user_id, error: sendRes.error });
         continue;
       }
 

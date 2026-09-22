@@ -1,3 +1,5 @@
+import { sendTemplateEmailWithLog } from './send-email-helper.ts';
+
 // Helper compartilhado: dispara e-mails pós-compra (account-created e purchase-confirmed)
 // com lock atômico via purchases.emails_dispatched_at para evitar envio duplicado em
 // reenvios de webhook.
@@ -71,13 +73,16 @@ async function invokeTemplate(
   templateData: Record<string, unknown>,
 ) {
   try {
-    const { error } = await supabase.functions.invoke('send-transactional-email', {
-      body: { templateName, recipientEmail, idempotencyKey, templateData },
+    const result = await sendTemplateEmailWithLog(supabase, {
+      templateName,
+      recipientEmail,
+      idempotencyKey,
+      templateData: templateData as Record<string, any>,
     });
-    if (error) {
-      console.warn(`[sendPurchaseEmails] ${templateName} invoke error:`, error.message);
+    if (!result.success) {
+      console.warn(`[sendPurchaseEmails] ${templateName} send error:`, result.error);
     } else {
-      console.log(`[sendPurchaseEmails] ${templateName} queued for ${recipientEmail}`);
+      console.log(`[sendPurchaseEmails] ${templateName} sent for ${recipientEmail}`);
     }
   } catch (e) {
     console.warn(`[sendPurchaseEmails] ${templateName} exception:`, (e as Error).message);

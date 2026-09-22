@@ -6,9 +6,18 @@ import {
   Body, Button, Container, Head, Heading, Html, Preview, Section, Text,
 } from 'npm:@react-email/components@0.0.22'
 
-interface EmailChangeEmailProps { siteName: string; email: string; newEmail: string; confirmationUrl: string }
+interface EmailChangeEmailProps {
+  siteName: string
+  // oldEmail é o endereço atual (HookData.OldEmail). No envio para o NOVO
+  // endereço, `email` é igual ao destinatário (NOVO), então usamos oldEmail
+  // para exibir "de ANTIGO para NOVO".
+  oldEmail?: string
+  email: string
+  newEmail: string
+  confirmationUrl: string
+}
 
-export const EmailChangeEmail = ({ siteName, email, newEmail, confirmationUrl }: EmailChangeEmailProps) => (
+export const EmailChangeEmail = ({ siteName, oldEmail, email, newEmail, confirmationUrl }: EmailChangeEmailProps) => (
   <Html lang="pt-BR" dir="ltr">
     <Head />
     <Preview>Confirme a alteração de e-mail na {siteName}</Preview>
@@ -19,7 +28,7 @@ export const EmailChangeEmail = ({ siteName, email, newEmail, confirmationUrl }:
         </Section>
         <Section style={content}>
           <Heading style={h1}>Alteração de e-mail</Heading>
-          <Text style={text}>Você solicitou a alteração do e-mail de <strong>{email}</strong> para <strong>{newEmail}</strong>.</Text>
+          <Text style={text}>Você solicitou a alteração do e-mail de <strong>{oldEmail || email}</strong> para <strong>{newEmail}</strong>.</Text>
           <Text style={text}>Clique no botão abaixo para confirmar:</Text>
           <Button style={button} href={confirmationUrl}>Confirmar Alteração</Button>
           <Text style={footer}>Se você não solicitou esta alteração, proteja sua conta imediatamente.</Text>

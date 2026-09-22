@@ -1,5 +1,6 @@
 // Checkout transparente: cria pagamento direto via API do Mercado Pago (Cartão ou Pix)
 // usando o token gerado pelo Payment Brick no frontend.
+import { sendTemplateEmailWithLog } from "../_shared/send-email-helper.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { OFFERS, normalizeEmail } from "../_shared/offerLeads.ts";
@@ -374,21 +375,19 @@ serve(async (req) => {
         const amountFormatted = new Intl.NumberFormat("pt-BR", {
           style: "currency", currency: "BRL",
         }).format(finalPrice);
-        const { error: mailErr } = await supabase.functions.invoke("send-transactional-email", {
-          body: {
-            templateName: "pix-payment-pending",
-            recipientEmail: payerEmail,
-            idempotencyKey: `pix-pending:mercado_pago:${mpData.id}`,
-            templateData: {
-              userName: fiscalName ? fiscalName.split(" ")[0] : undefined,
-              productName: product.name,
-              amountFormatted,
-              pixCode: pixData.qr_code,
-              ticketUrl: pixData.ticket_url,
-            },
+        const mailRes = await sendTemplateEmailWithLog(supabase, {
+          templateName: "pix-payment-pending",
+          recipientEmail: payerEmail,
+          idempotencyKey: `pix-pending:mercado_pago:${mpData.id}`,
+          templateData: {
+            userName: fiscalName ? fiscalName.split(" ")[0] : undefined,
+            productName: product.name,
+            amountFormatted,
+            pixCode: pixData.qr_code,
+            ticketUrl: pixData.ticket_url,
           },
         });
-        if (mailErr) console.warn("[create-mp-payment] e-mail Pix falhou:", mailErr.message);
+        if (!mailRes.success) console.warn("[create-mp-payment] e-mail Pix falhou:", mailRes.error);
       } catch (e) {
         console.warn("[create-mp-payment] e-mail Pix exceção:", (e as Error).message);
       }

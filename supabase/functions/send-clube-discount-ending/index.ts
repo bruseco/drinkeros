@@ -2,6 +2,7 @@
 // A janela de 7 dias começa no PRIMEIRO ACESSO AO APP (user_plans.discount_intro_started_at,
 // gravado pelo RPC start_vip_discount_window). Este cron roda 1x por dia e avisa
 // quem está no 6º dia da janela. Dedup por email_send_log (1 envio por janela).
+import { sendTemplateEmailWithLog } from "../_shared/send-email-helper.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { assertInternalOrAdmin } from "../_shared/internalAuth.ts";
@@ -73,19 +74,17 @@ serve(async (req: Request) => {
         new Date(row.discount_intro_started_at as string).getTime() + WINDOW_DAYS * 86400000,
       );
 
-      const { error: invokeErr } = await supabase.functions.invoke("send-transactional-email", {
-        body: {
-          templateName: TEMPLATE,
-          recipientEmail: email,
-          idempotencyKey: `${TEMPLATE}:${userId}:${row.discount_intro_started_at}`,
-          templateData: {
-            userName: String((profile as any)?.full_name || "").trim().split(" ")[0] || undefined,
-            appUrl: APP_URL,
-            endsAt: fmtDate(endsAt),
-          },
+      const sendRes = await sendTemplateEmailWithLog(supabase, {
+        templateName: TEMPLATE,
+        recipientEmail: email,
+        idempotencyKey: `${TEMPLATE}:${userId}:${row.discount_intro_started_at}`,
+        templateData: {
+          userName: String((profile as any)?.full_name || "").trim().split(" ")[0] || undefined,
+          appUrl: APP_URL,
+          endsAt: fmtDate(endsAt),
         },
       });
-      if (invokeErr) { skipped.push(`${userId}: ${invokeErr.message}`); continue; }
+      if (!sendRes.success) { skipped.push(`${userId}: ${sendRes.error}`); continue; }
       sent++;
     }
 

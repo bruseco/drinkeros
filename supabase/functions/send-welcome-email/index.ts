@@ -1,3 +1,4 @@
+import { sendTemplateEmailWithLog } from "../_shared/send-email-helper.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -32,22 +33,20 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Send via transactional email system
-    const { data, error } = await supabase.functions.invoke("send-transactional-email", {
-      body: {
-        templateName: "welcome",
-        recipientEmail: email,
-        idempotencyKey: `welcome-${email}-${Date.now()}`,
-        templateData: {
-          userName,
-          email,
-          password: temporaryPassword,
-          loginUrl,
-        },
+    const result = await sendTemplateEmailWithLog(supabase, {
+      templateName: "welcome",
+      recipientEmail: email,
+      idempotencyKey: `welcome-${email}-${Date.now()}`,
+      templateData: {
+        userName,
+        email,
+        password: temporaryPassword,
+        loginUrl,
       },
     });
 
-    if (error) {
-      throw new Error(`Failed to send welcome email: ${error.message}`);
+    if (!result.success) {
+      throw new Error(`Failed to send welcome email: ${result.error}`);
     }
 
     console.log("Welcome email sent successfully via transactional system:", email);
