@@ -11,7 +11,7 @@ import { useUserPlan } from '@/hooks/useUserPlan';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
-import { useRecipeAccessGuard, isVipOnlyCharacteristic } from '@/hooks/useRecipeAccessGuard';
+import { useRecipeAccessGuard, isVipOnlyCharacteristic, FIRST_ACCESS_BONUS } from '@/hooks/useRecipeAccessGuard';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import drinkrosLogo from '@/assets/logotipo-drinkeros.png';
