@@ -30,6 +30,31 @@ export interface ResolveBuyerFailure {
 
 export type ResolveBuyerResult = ResolveBuyerSuccess | ResolveBuyerFailure;
 
+/**
+ * Procura um usuário existente em auth.users pelo e-mail usando o endpoint
+ * admin do GoTrue (suporta filtro por e-mail, sem depender de paginação).
+ */
+async function findAuthUserByEmail(email: string): Promise<string | null> {
+  try {
+    const baseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!baseUrl || !serviceKey) return null;
+    const res = await fetch(
+      `${baseUrl}/auth/v1/admin/users?per_page=50&filter=${encodeURIComponent(email)}`,
+      { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } },
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    const match = (json?.users ?? []).find(
+      (u: any) => (u.email || "").toLowerCase() === email,
+    );
+    return match?.id ?? null;
+  } catch (e) {
+    console.warn("[findAuthUserByEmail] failed:", (e as Error).message);
+    return null;
+  }
+}
+
 export async function resolveBuyerUser(
   supabase: any,
   input: ResolveBuyerInput,
@@ -77,6 +102,16 @@ export async function resolveBuyerUser(
     };
   }
 
+  // 2.1) Pode existir em auth.users sem profile — procura antes de tentar criar.
+  const preExistingId = await findAuthUserByEmail(email);
+  if (preExistingId) {
+    await supabase.from("profiles").upsert(
+      { user_id: preExistingId, email, full_name: fullName },
+      { onConflict: "user_id" },
+    );
+    return { userId: preExistingId, wasCreated: false, email, fullName };
+  }
+
   // 3) Não existe: cria conta automaticamente (sem senha, e-mail já confirmado).
   // Trigger handle_new_user cria profile + user_plans('free').
   const { data: created, error: createErr } = await supabase.auth.admin.createUser({
@@ -86,24 +121,17 @@ export async function resolveBuyerUser(
   });
 
   if (createErr) {
-    // Conflito 422: usuário já existe em auth.users mas sem profile.
-    // Tenta achar pelo listUsers (paginado simples).
+    // Qualquer erro de criação (422 "already registered", 500 unexpected_failure
+    // por duplicidade 23505, corrida entre webhooks) pode significar que o usuário
+    // já existe. Sempre tenta localizar pelo e-mail antes de desistir.
     const msg = createErr.message || "";
-    if (msg.toLowerCase().includes("already") || msg.toLowerCase().includes("registered")) {
-      try {
-        const { data: list } = await supabase.auth.admin.listUsers({ page: 1, perPage: 200 });
-        const match = list?.users?.find((u: any) => (u.email || "").toLowerCase() === email);
-        if (match?.id) {
-          // garante profile (caso o trigger tenha falhado)
-          await supabase.from("profiles").upsert(
-            { user_id: match.id, email, full_name: fullName },
-            { onConflict: "user_id" },
-          );
-          return { userId: match.id, wasCreated: false, email, fullName };
-        }
-      } catch (e) {
-        console.warn("[resolveBuyerUser] listUsers fallback failed:", (e as Error).message);
-      }
+    const existingId = await findAuthUserByEmail(email);
+    if (existingId) {
+      await supabase.from("profiles").upsert(
+        { user_id: existingId, email, full_name: fullName },
+        { onConflict: "user_id" },
+      );
+      return { userId: existingId, wasCreated: false, email, fullName };
     }
     return {
       userId: null,
