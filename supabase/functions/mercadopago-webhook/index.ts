@@ -689,6 +689,17 @@ serve(async (req) => {
         upsell_payment_id: String(paymentId),
         updated_at: new Date().toISOString(),
       }).eq("id", upsellOfferId).neq("status", "paid");
+      await supabase.rpc("ppo_mark_event", { _offer_id: upsellOfferId, _event: "paid" });
+      // Quem já tinha algum curso do combo, mas vencido, recebe a renovação só do que faltava (nunca remove nem duplica).
+      if (productType === "combo" && productId) {
+        const { data: cc } = await supabase.from("combo_courses").select("course_id").eq("combo_id", productId);
+        const ids = (cc || []).map((r: any) => r.course_id);
+        if (ids.length) {
+          await supabase.from("user_courses")
+            .update({ expires_at: new Date(Date.now() + 365 * 86400_000).toISOString() })
+            .eq("user_id", userId).in("course_id", ids).lt("expires_at", new Date().toISOString());
+        }
+      }
     }
 
     return new Response(JSON.stringify({ ok: true, granted: true }), {
