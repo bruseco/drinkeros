@@ -30,10 +30,26 @@ const brl = (n: number) => `R$ ${n.toFixed(2).replace(".", ",")}`;
 
 export default function RandObrigado() {
   const [params] = useSearchParams();
+  const isDemo = params.get("demo") === "1";
   const ref = params.get("ref") || "";
   const navigate = useNavigate();
-  const [state, setState] = useState<OfferState | null>(null);
-  const [stage, setStage] = useState<Stage>("loading");
+  const [state, setState] = useState<OfferState | null>(() => isDemo ? ({
+    status: "eligible",
+    expired: false,
+    already_owned: false,
+    is_guest: true,
+    source_payment_id: "",
+    email: "",
+    first_name: null,
+    product: {
+      id: "",
+      name: "Drinkeros Xperience + Workshop Além dos Clássicos",
+      slug: "xperience-workshop-upsell",
+      cover_image_url: null,
+    },
+    price: 97,
+  }) : null);
+  const [stage, setStage] = useState<Stage>(isDemo ? "offer" : "loading");
   const [pix, setPix] = useState<any>(null);
   const [brickReady, setBrickReady] = useState(false);
   const [hasSession, setHasSession] = useState(false);
@@ -43,6 +59,7 @@ export default function RandObrigado() {
     supabase.functions.invoke("rand-upsell", { body: { ref, ...body } });
 
   useEffect(() => {
+    if (isDemo) return;
     supabase.auth.getSession().then(({ data }) => setHasSession(!!data.session));
     (async () => {
       const { data, error } = await call({ action: "get" });
@@ -55,18 +72,20 @@ export default function RandObrigado() {
       else { setStage("offer"); void call({ action: "track", event: "view" }); }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ref]);
+  }, [isDemo, ref]);
 
   // Brick do Mercado Pago (segundo checkout, token novo)
   useEffect(() => {
+    if (isDemo) return;
     if (stage !== "paying" || mpReady) { if (mpReady) setBrickReady(true); return; }
     supabase.functions.invoke("get-mp-public-key").then(({ data }) => {
       if (data?.publicKey) { initMercadoPago(data.publicKey, { locale: "pt-BR" }); mpReady = true; setBrickReady(true); }
     });
-  }, [stage]);
+  }, [isDemo, stage]);
 
   // Polling do Pix
   useEffect(() => {
+    if (isDemo) return;
     if (stage !== "pix") return;
     const t = setInterval(async () => {
       const { data } = await call({ action: "status" });
@@ -74,7 +93,7 @@ export default function RandObrigado() {
     }, 4000);
     return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stage]);
+  }, [isDemo, stage]);
 
   const onPaid = () => {
     setStage("done");
@@ -90,8 +109,19 @@ export default function RandObrigado() {
     else navigate(`/criar-conta?pid=${encodeURIComponent(state.source_payment_id)}`, { replace: true });
   };
 
-  const accept = () => { void call({ action: "track", event: "accept" }); setStage("paying"); };
-  const decline = async () => { await call({ action: "track", event: "decline" }); finish(); };
+  const showDemoNotice = () => toast.info("Modo de demonstração", {
+    description: "Nenhuma cobrança ou alteração de acesso será realizada.",
+  });
+  const accept = () => {
+    if (isDemo) { showDemoNotice(); return; }
+    void call({ action: "track", event: "accept" });
+    setStage("paying");
+  };
+  const decline = async () => {
+    if (isDemo) { showDemoNotice(); return; }
+    await call({ action: "track", event: "decline" });
+    finish();
+  };
 
   const onSubmit = async (formData: any) => {
     const { data, error } = await call({ action: "pay", formData });
@@ -122,6 +152,12 @@ export default function RandObrigado() {
       </header>
 
       <main className="max-w-xl mx-auto px-4 py-6 space-y-5">
+        {isDemo && (
+          <div role="status" className="rounded-lg border border-primary/40 bg-primary/10 px-4 py-3 text-center text-sm font-medium text-primary">
+            Modo de demonstração — nenhuma cobrança será realizada
+          </div>
+        )}
+
         <div className="flex items-center gap-3 rounded-xl border border-green-500/30 bg-green-500/10 p-4">
           <CheckCircle2 className="w-7 h-7 text-green-500 shrink-0" />
           <div>
