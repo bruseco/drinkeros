@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   CERTIFICATE_LAYOUT_DEFAULTS,
-  fitPreviewNameFontSize,
   formatCertificateDate,
+  getCertificateNameLayout,
   getCertificatePreviewGeometry,
   sanitizeCertificateFilename,
 } from './certificatePdf';
@@ -31,9 +31,31 @@ describe('certificatePdf', () => {
     expect(sanitizeCertificateFilename('Curso: Bar / Eventos?')).toBe('Curso- Bar - Eventos-');
   });
 
-  it('reduz nomes longos até a largura segura da prévia', () => {
-    const size = fitPreviewNameFontSize('Nome fictício muito longo', 20, 140, (value, fontSize) => value.length * fontSize * 0.5);
-    expect(size).toBeLessThan(20);
-    expect(size).toBeGreaterThanOrEqual((20 * 12) / 26);
+  it('preserva integralmente um nome longo ao ajustar fonte e linhas', () => {
+    const name = 'Maria Fernanda de Oliveira Nascimento Albuquerque dos Santos Pereira Cavalcante';
+    const fitted = getCertificateNameLayout(name, 26, 125);
+
+    expect(fitted.lines.length).toBeGreaterThan(1);
+    expect(fitted.lines.length).toBeLessThanOrEqual(2);
+    expect(fitted.lines.join(' ').replace(/\s+/g, ' ')).toBe(name);
+    expect(fitted.fontSizePt).toBeLessThanOrEqual(12);
+  });
+
+  it('falha explicitamente quando o nome completo não cabe na área segura', () => {
+    const impossibleName = Array.from({ length: 80 }, () => 'Extraordinariamente').join(' ');
+
+    expect(() => getCertificateNameLayout(impossibleName, 26, 80)).toThrow(
+      'O nome completo é longo demais para a área segura do certificado.',
+    );
+  });
+
+  it('recalcula o layout do nome quando a fonte preferida muda', () => {
+    const name = 'Maria Fernanda de Oliveira Nascimento Albuquerque dos Santos';
+    const at26 = getCertificateNameLayout(name, 26);
+    const at18 = getCertificateNameLayout(name, 18);
+
+    expect(at26.fontSizePt).toBeGreaterThan(at18.fontSizePt);
+    expect(at26.lines.join(' ')).toBe(name);
+    expect(at18.lines.join(' ')).toBe(name);
   });
 });

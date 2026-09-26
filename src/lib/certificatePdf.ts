@@ -36,6 +36,11 @@ export interface CertificateRenderMetrics {
   nameLines: number;
 }
 
+export interface CertificateNameLayout {
+  fontSizePt: number;
+  lines: string[];
+}
+
 export const CERTIFICATE_LAYOUT_REFERENCE = { width: 3347, height: 2447 } as const;
 export const CERTIFICATE_PDF_WIDTH_MM = 297;
 export const CERTIFICATE_LONG_NAME = 'Maria Fernanda de Oliveira Nascimento Albuquerque dos Santos';
@@ -51,6 +56,7 @@ export const CERTIFICATE_LAYOUT_DEFAULTS: CertificateLayoutValues = {
 
 const MAX_NAME_WIDTH_RATIO = 0.68;
 const MIN_NAME_FONT_SIZE_PT = 12;
+const ABSOLUTE_MIN_NAME_FONT_SIZE_PT = 9;
 const MAX_NAME_LINES = 2;
 
 export function formatCertificateDate(dateStr: string): string {
@@ -85,18 +91,6 @@ export function getCertificatePreviewGeometry(
     dateFontSizePx: layout.date_font_size * (containerWidth / pdfWidthPt),
     maxNameWidthPx: containerWidth * MAX_NAME_WIDTH_RATIO,
   };
-}
-
-export function fitPreviewNameFontSize(
-  name: string,
-  preferredSizePx: number,
-  maxWidthPx: number,
-  measureText: (value: string, fontSizePx: number) => number,
-): number {
-  let fontSize = preferredSizePx;
-  const minimum = preferredSizePx * (MIN_NAME_FONT_SIZE_PT / 26);
-  while (measureText(name, fontSize) > maxWidthPx && fontSize > minimum) fontSize -= 0.25;
-  return Math.max(fontSize, minimum);
 }
 
 function parseTextColor(textColor: string): [number, number, number] {
@@ -135,25 +129,54 @@ export async function loadCertificateImage(url: string): Promise<CertificateImag
   return { dataUrl, ...dimensions, format, mimeType };
 }
 
-function fitName(doc: jsPDF, name: string, preferredSize: number, maxWidthMm: number) {
-  let fontSize = preferredSize;
+function assertNameWasPreserved(name: string, lines: string[]): void {
+  const normalizedName = name.replace(/\s+/g, ' ').trim();
+  const normalizedLines = lines.join(' ').replace(/\s+/g, ' ').trim();
+  if (normalizedLines !== normalizedName) {
+    throw new Error('Não foi possível preservar o nome completo no certificado.');
+  }
+}
+
+function fitNameWithDocument(
+  doc: jsPDF,
+  rawName: string,
+  preferredSize: number,
+  maxWidthMm: number,
+): CertificateNameLayout {
+  const name = rawName.replace(/\s+/g, ' ').trim() || 'Aluno';
+  if (!Number.isFinite(preferredSize) || preferredSize <= 0) {
+    throw new Error('O tamanho da fonte do nome precisa ser maior que zero.');
+  }
+
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(fontSize);
-
-  while (doc.getTextWidth(name) > maxWidthMm && fontSize > MIN_NAME_FONT_SIZE_PT) {
-    fontSize -= 0.5;
+  const singleLineMinimum = Math.min(preferredSize, MIN_NAME_FONT_SIZE_PT);
+  for (let fontSize = preferredSize; fontSize >= singleLineMinimum; fontSize -= 0.5) {
     doc.setFontSize(fontSize);
+    if (doc.getTextWidth(name) <= maxWidthMm) return { fontSizePt: fontSize, lines: [name] };
   }
 
-  if (doc.getTextWidth(name) <= maxWidthMm) return { fontSize, lines: [name] };
-
-  const lines = doc.splitTextToSize(name, maxWidthMm) as string[];
-  while (lines.length > MAX_NAME_LINES && fontSize > 9) {
-    fontSize -= 0.5;
+  const multilineStart = singleLineMinimum;
+  const multilineMinimum = Math.min(multilineStart, ABSOLUTE_MIN_NAME_FONT_SIZE_PT);
+  for (let fontSize = multilineStart; fontSize >= multilineMinimum; fontSize -= 0.5) {
     doc.setFontSize(fontSize);
-    lines.splice(0, lines.length, ...(doc.splitTextToSize(name, maxWidthMm) as string[]));
+    const lines = doc.splitTextToSize(name, maxWidthMm) as string[];
+    const allLinesFit = lines.every((line) => doc.getTextWidth(line) <= maxWidthMm);
+    if (lines.length <= MAX_NAME_LINES && allLinesFit) {
+      assertNameWasPreserved(name, lines);
+      return { fontSizePt: fontSize, lines };
+    }
   }
-  return { fontSize, lines: lines.slice(0, MAX_NAME_LINES) };
+
+  throw new Error('O nome completo é longo demais para a área segura do certificado. Revise o nome antes de gerar.');
+}
+
+export function getCertificateNameLayout(
+  name: string,
+  preferredSizePt: number,
+  maxWidthMm = CERTIFICATE_PDF_WIDTH_MM * MAX_NAME_WIDTH_RATIO,
+): CertificateNameLayout {
+  const measurementDoc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  return fitNameWithDocument(measurementDoc, name, preferredSizePt, maxWidthMm);
 }
 
 export async function buildCertificatePdf(input: CertificatePdfInput): Promise<{
@@ -175,11 +198,11 @@ export async function buildCertificatePdf(input: CertificatePdfInput): Promise<{
   const nameY = (input.layout.name_y / reference.height) * pdfHeight;
   const dateX = (input.layout.date_x / reference.width) * pdfWidth;
   const dateY = (input.layout.date_y / reference.height) * pdfHeight;
-  const fittedName = fitName(doc, input.studentName.trim() || 'Aluno', input.layout.name_font_size, pdfWidth * MAX_NAME_WIDTH_RATIO);
-  const nameLineHeightMm = (fittedName.fontSize * 1.15 * 25.4) / 72;
+  const fittedName = fitNameWithDocument(doc, input.studentName, input.layout.name_font_size, pdfWidth * MAX_NAME_WIDTH_RATIO);
+  const nameLineHeightMm = (fittedName.fontSizePt * 1.15 * 25.4) / 72;
   const firstNameY = nameY - ((fittedName.lines.length - 1) * nameLineHeightMm) / 2;
 
-  doc.setFontSize(fittedName.fontSize);
+  doc.setFontSize(fittedName.fontSizePt);
   doc.text(fittedName.lines, nameX, firstNameY, {
     align: 'center',
     baseline: 'middle',
@@ -197,7 +220,7 @@ export async function buildCertificatePdf(input: CertificatePdfInput): Promise<{
       imageFormat: image.format,
       pdfWidthMm: pdfWidth,
       pdfHeightMm: pdfHeight,
-      nameFontSizePt: fittedName.fontSize,
+      nameFontSizePt: fittedName.fontSizePt,
       nameLines: fittedName.lines.length,
     },
   };
