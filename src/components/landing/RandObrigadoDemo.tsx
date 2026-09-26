@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CheckCircle2, Clock3, Loader2, Play, Sparkles, Volume2 } from "lucide-react";
+import { CheckCircle2, Clock3, Loader2, Sparkles, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import drinkerosLogo from "@/assets/logotipo-drinkeros.png";
@@ -19,6 +19,7 @@ type YouTubePlayer = {
   destroy: () => void;
   getCurrentTime: () => number;
   getDuration: () => number;
+  isMuted: () => boolean;
   mute: () => void;
   unMute: () => void;
   playVideo: () => void;
@@ -98,6 +99,7 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
   const milestoneKeysRef = useRef(new Set<string>());
   const [playerReady, setPlayerReady] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(false);
+  const [soundActivationPending, setSoundActivationPending] = useState(false);
   const [revealed, setRevealed] = useState(forceReveal);
   const [countdown, setCountdown] = useState(OFFER_SECONDS);
 
@@ -140,13 +142,23 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
 
   const activateVideo = useCallback(() => {
     const player = playerRef.current;
-    if (!player) return;
+    if (!player) {
+      setSoundEnabled(false);
+      return;
+    }
     try {
+      setSoundActivationPending(true);
       player.playVideo();
       player.unMute();
       setSoundEnabled(true);
+      window.setTimeout(() => {
+        const activePlayer = playerRef.current;
+        setSoundEnabled(Boolean(activePlayer && !activePlayer.isMuted()));
+        setSoundActivationPending(false);
+      }, 350);
     } catch {
       setSoundEnabled(false);
+      setSoundActivationPending(false);
     }
   }, []);
 
@@ -200,21 +212,12 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
       }
     }
 
-    const activateFromPage = (event: PointerEvent | KeyboardEvent) => {
-      if (event instanceof KeyboardEvent && !["Enter", " "].includes(event.key)) return;
-      activateVideo();
-    };
-    document.addEventListener("pointerdown", activateFromPage);
-    document.addEventListener("keydown", activateFromPage);
-
     return () => {
       cancelled = true;
-      document.removeEventListener("pointerdown", activateFromPage);
-      document.removeEventListener("keydown", activateFromPage);
       playerRef.current?.destroy();
       playerRef.current = null;
     };
-  }, [activateVideo]);
+  }, []);
 
   const demoEnded = countdown === 0;
 
@@ -242,28 +245,30 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
           ) : (
             <>
               <Loader2 className="h-5 w-5 shrink-0 animate-spin" aria-hidden="true" />
-              <span>Não feche esta página — estamos processando e preparando o seu acesso.</span>
+               <span>Não feche esta tela — estamos processando sua compra e preparando seu acesso. Fechar agora pode causar erro.</span>
             </>
           )}
         </div>
       </div>
 
-      <main className="mx-auto max-w-6xl px-4 pb-12 pt-[calc(env(safe-area-inset-top)+6.5rem)] sm:px-6 sm:pt-28">
-        <header className="mx-auto max-w-3xl text-center">
-          <img src={drinkerosLogo} alt="Drinkeros" className="mx-auto h-8 w-auto opacity-90 sm:h-10" />
-          <div className="mt-6 inline-flex items-center gap-2 rounded-md border border-success/40 bg-success/10 px-3 py-2 text-sm font-semibold text-success">
-            <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
-            Compra do RAND garantida
-          </div>
-          <h1 className="mt-5 text-balance text-3xl font-bold leading-tight sm:text-5xl">
-            Seus clássicos estão garantidos. Agora falta transformar técnica em oportunidade.
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Assista ao recado abaixo enquanto preparamos seu acesso.
-          </p>
-        </header>
+      <main className="mx-auto max-w-6xl px-4 pb-12 pt-[calc(env(safe-area-inset-top)+7.25rem)] sm:px-6 sm:pt-32">
+        {revealed && (
+          <header className="mx-auto mb-8 max-w-3xl animate-fade-in text-center">
+            <img src={drinkerosLogo} alt="Drinkeros" className="mx-auto h-8 w-auto opacity-90 sm:h-10" />
+            <div className="mt-6 inline-flex items-center gap-2 rounded-md border border-success/40 bg-success/10 px-3 py-2 text-sm font-semibold text-success">
+              <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+              Compra do RAND garantida
+            </div>
+            <h1 className="mt-5 text-balance text-3xl font-bold leading-tight sm:text-5xl">
+              Seus clássicos estão garantidos. Agora falta transformar técnica em oportunidade.
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+              Assista ao recado abaixo enquanto preparamos seu acesso.
+            </p>
+          </header>
+        )}
 
-        <section className="mx-auto mt-8 max-w-4xl" aria-label="Apresentação do Pacote Business">
+        <section className="mx-auto max-w-4xl" aria-label="Apresentação do Pacote Business">
             <div className="relative aspect-video overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
               <div ref={playerHostRef} className="absolute inset-0 h-full w-full" />
               {!playerReady && (
@@ -280,18 +285,23 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
               {!soundEnabled && (
                 <Button
                   type="button"
-                  variant="secondary"
                   onClick={activateVideo}
-                  className="absolute bottom-3 left-1/2 z-10 h-11 -translate-x-1/2 gap-2 border border-foreground/20 bg-background/90 px-4 text-foreground shadow-lg"
+                  aria-label="Clique para ouvir o vídeo"
+                  className="absolute inset-0 z-10 flex h-full w-full flex-col items-center justify-center gap-3 rounded-none bg-background/35 text-foreground backdrop-blur-[1px] hover:bg-background/45 focus-visible:ring-inset"
                 >
-                  {playerReady ? <Volume2 aria-hidden="true" /> : <Play aria-hidden="true" />}
-                  Toque para ativar o som
+                  {soundActivationPending ? (
+                    <Loader2 className="h-10 w-10 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <span className="grid h-16 w-16 place-items-center rounded-full border border-foreground/30 bg-background/90 shadow-xl">
+                      <Volume2 className="h-8 w-8" aria-hidden="true" />
+                    </span>
+                  )}
+                  <span className="rounded-md bg-background/90 px-4 py-2 text-base font-bold shadow-lg">
+                    Clique para ouvir
+                  </span>
                 </Button>
               )}
             </div>
-            <p className="mt-3 text-center text-sm text-muted-foreground">
-              A oferta será apresentada após 3:45 de reprodução do vídeo.
-            </p>
         </section>
 
         {revealed && (
