@@ -31,10 +31,13 @@ export function usePushNotifications() {
   }, [user]);
 
   const checkStatus = async () => {
-    if (!user || !isSupported) {
+    if (!isSupported) {
       setIsLoading(false);
       return;
     }
+    // Sem usuário ainda: continua "carregando" para ninguém decidir com dados incompletos
+    if (!user) return;
+    setIsLoading(true);
 
     try {
       // Check if VAPID keys are configured
