@@ -401,10 +401,10 @@ export function RandUpsellExperience({
                 Quatro caminhos para transformar coquetelaria em negócio
               </h2>
               <div className="mt-6 flex flex-wrap items-end justify-center gap-x-4 gap-y-1">
-                <p className="text-lg text-muted-foreground">de <span className="line-through">R$ 797</span> por</p>
+                <p className="text-lg text-muted-foreground">de <span className="line-through">R$ 2.288</span> por</p>
                 <p className="text-4xl font-black text-success sm:text-5xl">R$ 97</p>
               </div>
-              <p className="mt-2 text-sm font-medium text-muted-foreground">condição exclusiva deste pós-compra · pagamento único · os quatro cursos somam R$ 2.288 em conhecimento</p>
+              <p className="mt-2 text-sm font-medium text-muted-foreground">valor total dos quatro cursos avulsos · condição exclusiva deste pós-compra · pagamento único</p>
             </div>
 
             <h3 className="mx-auto mt-14 max-w-3xl text-balance text-center text-2xl font-black leading-tight sm:mt-16 sm:text-4xl">
