@@ -1908,6 +1908,75 @@ export type Database = {
         }
         Relationships: []
       }
+      post_purchase_offers: {
+        Row: {
+          accepted_at: string | null
+          amount: number | null
+          buyer_cpf: string | null
+          buyer_email: string
+          buyer_name: string | null
+          checkout_attempts: number
+          checkout_started_at: string | null
+          created_at: string
+          declined_at: string | null
+          expires_at: string
+          id: string
+          offer_key: string
+          paid_at: string | null
+          source_payment_id: string
+          source_user_id: string | null
+          status: string
+          updated_at: string
+          upsell_payment_id: string | null
+          upsell_payment_method: string | null
+          viewed_at: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          amount?: number | null
+          buyer_cpf?: string | null
+          buyer_email: string
+          buyer_name?: string | null
+          checkout_attempts?: number
+          checkout_started_at?: string | null
+          created_at?: string
+          declined_at?: string | null
+          expires_at?: string
+          id?: string
+          offer_key: string
+          paid_at?: string | null
+          source_payment_id: string
+          source_user_id?: string | null
+          status?: string
+          updated_at?: string
+          upsell_payment_id?: string | null
+          upsell_payment_method?: string | null
+          viewed_at?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          amount?: number | null
+          buyer_cpf?: string | null
+          buyer_email?: string
+          buyer_name?: string | null
+          checkout_attempts?: number
+          checkout_started_at?: string | null
+          created_at?: string
+          declined_at?: string | null
+          expires_at?: string
+          id?: string
+          offer_key?: string
+          paid_at?: string | null
+          source_payment_id?: string
+          source_user_id?: string | null
+          status?: string
+          updated_at?: string
+          upsell_payment_id?: string | null
+          upsell_payment_method?: string | null
+          viewed_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address_city: string | null
