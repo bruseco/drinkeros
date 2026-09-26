@@ -3954,6 +3954,17 @@ export type Database = {
           token: string
         }[]
       }
+      grant_combo_access: {
+        Args: {
+          _amount: number
+          _combo_id: string
+          _currency: string
+          _payment_id: string
+          _source?: string
+          _user_id: string
+        }
+        Returns: string
+      }
       has_ebook_access: {
         Args: { _ebook_id: string; _user_id: string }
         Returns: boolean

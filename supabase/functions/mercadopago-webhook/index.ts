@@ -628,7 +628,22 @@ serve(async (req) => {
     }
 
     const { table, fk } = ACCESS_TABLE_MAP[productType];
-    const { data: accessRow, error: insertErr } = await supabase.from(table).upsert({
+    let accessRow: { id: string } | null = null;
+    let insertErr: any = null;
+    if (productType === "combo") {
+      // Concessão/renovação idempotente: insere cursos/módulos ausentes, renova vencidos, preserva ativos e renova o combo.
+      const { data: comboRowId, error } = await supabase.rpc("grant_combo_access", {
+        _user_id: userId,
+        _combo_id: productId,
+        _payment_id: String(paymentId),
+        _amount: Number(payment?.transaction_amount || 0),
+        _currency: String(payment?.currency_id || "BRL").toUpperCase(),
+        _source: "mercadopago",
+      });
+      insertErr = error;
+      accessRow = comboRowId ? { id: String(comboRowId) } : null;
+    } else {
+    const res = await supabase.from(table).upsert({
       user_id: userId,
       [fk]: productId,
       source: "mercadopago",
@@ -637,6 +652,8 @@ serve(async (req) => {
       currency: String(payment?.currency_id || "BRL").toUpperCase(),
       purchased_at: new Date().toISOString(),
     }, { onConflict: `user_id,${fk}` }).select("id").maybeSingle();
+    accessRow = res.data as any; insertErr = res.error;
+    }
 
     if (insertErr) {
       console.error("[mp-webhook] failed to grant access:", insertErr);
@@ -690,16 +707,7 @@ serve(async (req) => {
         updated_at: new Date().toISOString(),
       }).eq("id", upsellOfferId).neq("status", "paid");
       await supabase.rpc("ppo_mark_event", { _offer_id: upsellOfferId, _event: "paid" });
-      // Quem já tinha algum curso do combo, mas vencido, recebe a renovação só do que faltava (nunca remove nem duplica).
-      if (productType === "combo" && productId) {
-        const { data: cc } = await supabase.from("combo_courses").select("course_id").eq("combo_id", productId);
-        const ids = (cc || []).map((r: any) => r.course_id);
-        if (ids.length) {
-          await supabase.from("user_courses")
-            .update({ expires_at: new Date(Date.now() + 365 * 86400_000).toISOString() })
-            .eq("user_id", userId).in("course_id", ids).lt("expires_at", new Date().toISOString());
-        }
-      }
+      // Renovação completa do combo já feita por grant_combo_access acima.
     }
 
     return new Response(JSON.stringify({ ok: true, granted: true }), {

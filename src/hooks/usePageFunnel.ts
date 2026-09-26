@@ -5,7 +5,7 @@ import type { FunnelDef } from '@/lib/funnels';
 
 export type FunnelRange = 'today' | '7d' | '30d' | 'all';
 
-const sinceFromRange = (range: FunnelRange): string | null => {
+export const sinceFromRange = (range: FunnelRange): string | null => {
   const now = Date.now();
   switch (range) {
     case 'today': {
