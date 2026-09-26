@@ -15,3 +15,4 @@
 - [x] Atualizar e validar o novo design seguro de /rand/obrigado?demo=1, sem afetar o fluxo real
 - [x] Simplificar o estado pré-revelação para faixa de processamento e vídeo, mantendo o pós-revelação aprovado
 - [x] Destacar áudio e CTAs revelados, separar a vitrine e validar acessibilidade visual
+- [x] Remover header pós-revelação (logo, selo, título e subtítulo) — página começa na faixa amarela com timer
