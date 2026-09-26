@@ -6,3 +6,7 @@
 - [x] Alinhar textos: e-mails de renovacao, VipLanding, VipLandingB, VipFloatingBanner
 - [x] Aviso de 50% no app deixa de ser dispensado para sempre
 - [x] Deixar claro que Classicos Destilados tem condicao propria (R$197)
+
+## Demonstração segura do pós-compra RAND (set/2026)
+- [x] Modo visual isolado em /rand/obrigado?demo=1, sem compras, dados, tracking ou concessão de acesso
+- [ ] Validar visualmente em mobile e desktop e confirmar ausência de chamadas sensíveis
