@@ -636,7 +636,7 @@ export default function Checkout() {
   );
 }
 
-function PixDisplay({ pix, amount, onBack }: { pix: PixData; amount: number; onBack?: () => void }) {
+export function PixDisplay({ pix, amount, onBack }: { pix: PixData; amount: number; onBack?: () => void }) {
   const copy = () => {
     navigator.clipboard.writeText(pix.qr_code);
     toast.success("Código Pix copiado!");
