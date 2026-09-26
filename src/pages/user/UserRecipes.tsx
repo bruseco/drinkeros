@@ -408,6 +408,15 @@ const UserRecipes: React.FC = () => {
         {/* Category filter chips */}
         <ScrollArea className="w-[100vw] -ml-4 whitespace-nowrap">
           <div className="flex gap-2 pb-1 px-4">
+            {selectedCategory && !CATEGORY_FILTERS.some((c) => c.value === selectedCategory) && (
+              <button
+                onClick={() => setSelectedCategory(null)}
+                className="inline-flex items-center gap-1.5 shrink-0 rounded-full px-3 py-1.5 text-xs font-medium border bg-accent text-accent-foreground border-accent"
+                aria-label={`Remover filtro ${selectedCategory}`}
+              >
+                {selectedCategory} ✕
+              </button>
+            )}
             {CATEGORY_FILTERS.map((cat) => {
               const active = selectedCategory === cat.value;
               return (
