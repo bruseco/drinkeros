@@ -18,7 +18,6 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Search, Loader2, Play, Sparkles, Clock, BookOpen, ChevronRight, Lock, CheckCircle2 } from 'lucide-react';
-import { InstallBanner } from '@/components/user/InstallBanner';
 import { Progress } from '@/components/ui/progress';
 import { LessonGrid } from '@/components/user/LessonGrid';
 import { LessonCarousel, LessonCarouselSkeleton } from '@/components/user/LessonCarousel';
@@ -305,8 +304,6 @@ const UserHome: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
-      {/* Install Banner */}
-      <InstallBanner />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-accent/5 to-secondary p-6">
