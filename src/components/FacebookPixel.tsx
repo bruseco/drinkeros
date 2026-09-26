@@ -88,6 +88,8 @@ const injectPixel = (pixelId: string) => {
 
 export const FacebookPixel: React.FC = () => {
   const location = useLocation();
+  const isSafeRandDemo = location.pathname === '/rand/obrigado'
+    && new URLSearchParams(location.search).get('demo') === '1';
   const [pixelReady, setPixelReady] = useState(() =>
     typeof window !== 'undefined' ? Boolean(window.__META_PIXEL_READY__) : false
   );
@@ -100,6 +102,7 @@ export const FacebookPixel: React.FC = () => {
 
 
   useEffect(() => {
+    if (isSafeRandDemo) return;
     let cancelled = false;
     (async () => {
       const { data, error } = await supabase.rpc('get_public_tracking_settings');
@@ -120,12 +123,13 @@ export const FacebookPixel: React.FC = () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isSafeRandDemo]);
 
   useEffect(() => {
+    if (isSafeRandDemo) return;
     if (!pixelReady || !injected || !window.fbq) return;
     firePageViewFromGlobalRoute(location.pathname);
-  }, [location.pathname, pixelReady]);
+  }, [isSafeRandDemo, location.pathname, pixelReady]);
 
   return null;
 };
