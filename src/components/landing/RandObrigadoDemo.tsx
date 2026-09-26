@@ -404,7 +404,7 @@ export function RandUpsellExperience({
                 <p className="text-lg text-muted-foreground">de <span className="line-through">R$ 797</span> por</p>
                 <p className="text-4xl font-black text-success sm:text-5xl">R$ 97</p>
               </div>
-              <p className="mt-2 text-sm font-medium text-muted-foreground">condição promocional · pagamento único</p>
+              <p className="mt-2 text-sm font-medium text-muted-foreground">condição exclusiva deste pós-compra · pagamento único · os quatro cursos somam R$ 2.288 em conhecimento</p>
             </div>
 
             <h3 className="mx-auto mt-14 max-w-3xl text-balance text-center text-2xl font-black leading-tight sm:mt-16 sm:text-4xl">

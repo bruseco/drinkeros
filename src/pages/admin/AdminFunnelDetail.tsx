@@ -164,8 +164,8 @@ const RandUpsellMetrics: React.FC = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('post_purchase_offers' as any)
-        .select('viewed_at, accepted_at, declined_at, checkout_started_at, paid_at, amount')
-        .eq('offer_key', 'rand-xperience-workshop');
+        .select('viewed_at, accepted_at, declined_at, checkout_started_at, paid_at, amount, events')
+        .eq('offer_key', 'rand-pacote-business');
       if (error) throw error;
       return (data || []) as any[];
     },
@@ -173,16 +173,24 @@ const RandUpsellMetrics: React.FC = () => {
   const rows = data ?? [];
   const n = (k: string) => rows.filter((r) => r[k]).length;
   const revenue = rows.filter((r) => r.paid_at).reduce((s, r) => s + Number(r.amount || 0), 0);
+  const e = (k: string) => rows.filter((r) => r.events && r.events[k]).length;
   const items = [
     ['Viu a página pós-compra', n('viewed_at')],
-    ['Aceitou', n('accepted_at')],
-    ['Recusou', n('declined_at')],
-    ['Iniciou o pagamento', n('checkout_started_at')],
-    ['Upsell aprovado', n('paid_at')],
+    ['Vídeo iniciado', e('video_start')],
+    ['Vídeo 25%', e('video_25')],
+    ['Vídeo 50%', e('video_50')],
+    ['Vídeo 75%', e('video_75')],
+    ['Vídeo 90%', e('video_90')],
+    ['Vídeo completo', e('video_complete')],
+    ['Oferta revelada (3:45)', e('offer_revealed')],
+    ['Aceitou', e('accept')],
+    ['Recusou', e('decline')],
+    ['Iniciou o pagamento', e('checkout_started')],
+    ['Upsell aprovado', e('paid')],
   ] as const;
   return (
     <div className="rounded-xl border border-border bg-card p-5 space-y-3">
-      <h2 className="text-lg font-semibold text-foreground">Pós-compra: Xperience + Workshop (R$ 97)</h2>
+      <h2 className="text-lg font-semibold text-foreground">Pós-compra: Pacote Business (R$ 97)</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {items.map(([label, v]) => (
           <div key={label} className="rounded-lg bg-muted/40 p-3">
