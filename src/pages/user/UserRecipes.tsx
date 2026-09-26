@@ -178,7 +178,10 @@ const UserRecipes: React.FC = () => {
   const [search, setSearch] = useState(searchParams.get('q') || persisted?.search || '');
   const [isStuck, setIsStuck] = useState(false);
   const { display: typingPlaceholder, isFocused, setIsFocused } = useTypingPlaceholder(SEARCH_PLACEHOLDERS);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(persisted?.category ?? null);
+  // ?categoria=Halloween (ex.: vindo de push sazonal) tem prioridade sobre o filtro salvo
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    searchParams.get('categoria') || persisted?.category || null
+  );
   const debouncedSearch = useDebounce(search, 300);
   const stickyRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
