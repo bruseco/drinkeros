@@ -10,6 +10,7 @@ import SeoHead from "@/components/SeoHead";
 import { trackInitiateCheckout } from "@/lib/metaPixel";
 import { mpRejectionMessage } from "@/lib/mpErrors";
 import { PixDisplay } from "@/pages/Checkout";
+import RandObrigadoDemo from "@/components/landing/RandObrigadoDemo";
 
 interface OfferState {
   status: string;
@@ -31,6 +32,7 @@ const brl = (n: number) => `R$ ${n.toFixed(2).replace(".", ",")}`;
 export default function RandObrigado() {
   const [params] = useSearchParams();
   const isDemo = params.get("demo") === "1";
+  const forceDemoReveal = isDemo && params.get("reveal") === "1";
   const ref = params.get("ref") || "";
   const navigate = useNavigate();
   const [state, setState] = useState<OfferState | null>(() => isDemo ? ({
@@ -141,6 +143,15 @@ export default function RandObrigado() {
   };
 
   const continueLabel = hasSession ? "Ir para meus cursos" : "Criar minha senha e acessar";
+
+  if (isDemo) {
+    return (
+      <>
+        <SeoHead title="Demonstração pós-compra RAND | Drinkeros" description="Prévia segura do pós-compra RAND." path="/rand/obrigado" />
+        <RandObrigadoDemo forceReveal={forceDemoReveal} />
+      </>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white pb-[env(safe-area-inset-bottom)]">
