@@ -10,3 +10,6 @@
 ## Demonstração segura do pós-compra RAND (set/2026)
 - [x] Modo visual isolado em /rand/obrigado?demo=1, sem compras, dados, tracking ou concessão de acesso
 - [x] Validar visualmente em mobile e desktop e confirmar ausência de chamadas sensíveis
+
+## Demonstração Pacote Business (set/2026)
+- [ ] Atualizar e validar o novo design seguro de /rand/obrigado?demo=1, sem afetar o fluxo real
