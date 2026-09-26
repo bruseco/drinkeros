@@ -1,25 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { CERTIFICATE_LAYOUT_DEFAULTS, CertificateLayoutValues } from '@/lib/certificatePdf';
 
-export interface CertificateLayout {
+export interface CertificateLayout extends CertificateLayoutValues {
   id: string;
-  name_x: number;
-  name_y: number;
-  date_x: number;
-  date_y: number;
-  name_font_size: number;
-  date_font_size: number;
 }
 
-const DEFAULTS: Omit<CertificateLayout, 'id'> = {
-  name_x: 1674,
-  name_y: 1334,
-  date_x: 897,
-  date_y: 1886,
-  name_font_size: 28,
-  date_font_size: 14,
-};
+const DEFAULTS = CERTIFICATE_LAYOUT_DEFAULTS;
 
 export const useCertificateLayout = () => {
   return useQuery({

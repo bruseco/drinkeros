@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Minus, Plus } from 'lucide-react';
 import { useCertificateLayout, useUpdateCertificateLayout, CertificateLayout } from '@/hooks/useCertificateLayout';
-
-const IMG_W = 3347;
-const IMG_H = 2447;
+import {
+  CERTIFICATE_LAYOUT_DEFAULTS,
+  CERTIFICATE_LONG_NAME,
+  downloadCertificatePdf,
+  getCertificatePreviewGeometry,
+} from '@/lib/certificatePdf';
 
 interface Props {
   open: boolean;
@@ -20,12 +23,16 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
   const { data: layout, isLoading } = useCertificateLayout();
   const updateLayout = useUpdateCertificateLayout();
 
-  const [nameX, setNameX] = useState(1674);
-  const [nameY, setNameY] = useState(1334);
-  const [dateX, setDateX] = useState(897);
-  const [dateY, setDateY] = useState(1886);
-  const [nameFontSize, setNameFontSize] = useState(28);
-  const [dateFontSize, setDateFontSize] = useState(14);
+  const [nameX, setNameX] = useState(CERTIFICATE_LAYOUT_DEFAULTS.name_x);
+  const [nameY, setNameY] = useState(CERTIFICATE_LAYOUT_DEFAULTS.name_y);
+  const [dateX, setDateX] = useState(CERTIFICATE_LAYOUT_DEFAULTS.date_x);
+  const [dateY, setDateY] = useState(CERTIFICATE_LAYOUT_DEFAULTS.date_y);
+  const [nameFontSize, setNameFontSize] = useState(CERTIFICATE_LAYOUT_DEFAULTS.name_font_size);
+  const [dateFontSize, setDateFontSize] = useState(CERTIFICATE_LAYOUT_DEFAULTS.date_font_size);
+  const [imageSize, setImageSize] = useState({ width: 3347, height: 2447 });
+  const [previewWidth, setPreviewWidth] = useState(600);
+  const [isGeneratingTest, setIsGeneratingTest] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (layout) {
@@ -38,6 +45,21 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
     }
   }, [layout]);
 
+  useEffect(() => {
+    if (!bgUrl) return;
+    const image = new Image();
+    image.onload = () => setImageSize({ width: image.naturalWidth, height: image.naturalHeight });
+    image.src = bgUrl;
+  }, [bgUrl]);
+
+  useEffect(() => {
+    const preview = previewRef.current;
+    if (!preview) return;
+    const observer = new ResizeObserver(([entry]) => setPreviewWidth(entry.contentRect.width));
+    observer.observe(preview);
+    return () => observer.disconnect();
+  }, [isLoading]);
+
   const handleSave = () => {
     if (!layout?.id) return;
     updateLayout.mutate({
@@ -49,6 +71,32 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
       name_font_size: nameFontSize,
       date_font_size: dateFontSize,
     });
+  };
+
+  const currentLayout = {
+    name_x: nameX,
+    name_y: nameY,
+    date_x: dateX,
+    date_y: dateY,
+    name_font_size: nameFontSize,
+    date_font_size: dateFontSize,
+  };
+
+  const handleFictionalTest = async () => {
+    if (!bgUrl) return;
+    setIsGeneratingTest(true);
+    try {
+      await downloadCertificatePdf({
+        backgroundUrl: bgUrl,
+        studentName: CERTIFICATE_LONG_NAME,
+        completedAt: '2026-04-16T12:00:00.000Z',
+        referenceName: 'Prévia fictícia',
+        textColor,
+        layout: currentLayout,
+      });
+    } finally {
+      setIsGeneratingTest(false);
+    }
   };
 
   const PixelControl = ({
@@ -77,30 +125,31 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
     </div>
   );
 
-  // Preview: scale the image to fit the dialog
-  const previewWidth = 600;
-  const scale = previewWidth / IMG_W;
-  const previewHeight = IMG_H * scale;
+  const geometry = getCertificatePreviewGeometry(previewWidth, imageSize.width, imageSize.height, currentLayout);
 
   const nameStyle: React.CSSProperties = {
     position: 'absolute',
-    left: `${nameX * scale}px`,
-    top: `${nameY * scale}px`,
-    transform: 'translateX(-50%)',
+    left: `${geometry.nameLeftPercent}%`,
+    top: `${geometry.nameTopPercent}%`,
+    transform: 'translate(-50%, -50%)',
     color: textColor,
-    fontSize: `${nameFontSize * scale}px`,
+    fontSize: `${geometry.nameFontSizePx}px`,
     fontFamily: 'Helvetica, Arial, sans-serif',
-    whiteSpace: 'nowrap',
+    lineHeight: 1.15,
+    maxWidth: `${geometry.maxNameWidthPx}px`,
+    width: `${geometry.maxNameWidthPx}px`,
+    overflowWrap: 'normal',
+    textAlign: 'center',
     pointerEvents: 'none',
   };
 
   const dateStyle: React.CSSProperties = {
     position: 'absolute',
-    left: `${dateX * scale}px`,
-    top: `${dateY * scale}px`,
-    transform: 'translateX(-50%)',
+    left: `${geometry.dateLeftPercent}%`,
+    top: `${geometry.dateTopPercent}%`,
+    transform: 'translate(-50%, -50%)',
     color: textColor,
-    fontSize: `${dateFontSize * scale}px`,
+    fontSize: `${geometry.dateFontSizePx}px`,
     fontFamily: 'Helvetica, Arial, sans-serif',
     whiteSpace: 'nowrap',
     pointerEvents: 'none',
@@ -108,7 +157,7 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Ajustar Posição Global do Certificado</DialogTitle>
         </DialogHeader>
@@ -121,22 +170,23 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
           <div className="space-y-4">
             {/* Preview */}
             <div
-              className="relative mx-auto border rounded-lg overflow-hidden"
-              style={{ width: previewWidth, height: previewHeight }}
+              ref={previewRef}
+              className="relative mx-auto w-full overflow-hidden rounded-lg border"
+              style={{ aspectRatio: geometry.aspectRatio }}
             >
               {bgUrl ? (
-                <img src={bgUrl} alt="Certificado" className="w-full h-full object-cover" />
+                <img src={bgUrl} alt="Certificado" className="h-full w-full object-contain" />
               ) : (
                 <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-sm">
                   Sem imagem de fundo
                 </div>
               )}
-              <span style={nameStyle}>Nome do Aluno</span>
+              <span style={nameStyle}>{CERTIFICATE_LONG_NAME}</span>
               <span style={dateStyle}>16 de abril de 2026</span>
             </div>
 
             {/* Controls */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2 p-3 border rounded-lg">
                 <p className="text-sm font-medium">Nome do Aluno</p>
                 <PixelControl label="X (px)" value={nameX} onChange={setNameX} />
@@ -152,10 +202,14 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Posições em pixels reais da imagem (3347×2447). O preview mostra a posição proporcional.
+              Fundo atual: {imageSize.width}×{imageSize.height}px. A prévia e o PDF preservam a imagem inteira e usam as mesmas posições proporcionais.
             </p>
 
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button type="button" variant="secondary" onClick={handleFictionalTest} disabled={!bgUrl || isGeneratingTest}>
+                {isGeneratingTest && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Baixar teste fictício
+              </Button>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancelar
               </Button>
