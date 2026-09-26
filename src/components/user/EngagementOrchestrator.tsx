@@ -25,7 +25,7 @@ import {
 
 const SESSION_SHOWN = 'engagement-prompt-session';
 const WELCOME_FLAG = 'drinkeros:just_signed_up';
-const LEGACY_DISMISS = 'pwa-install-banner-dismissed';
+const LEGACY_DISMISS_KEYS = ['pwa-install-banner-dismissed', 'installBannerDismissed'];
 const DAY = 86400000;
 const PWA_SNOOZE_DAYS = 30;
 const PWA_MIN_GAP_DAYS = 3;
@@ -102,8 +102,9 @@ export const EngagementOrchestrator: React.FC = () => {
       // Escolha anterior do banner antigo (localStorage): migra 1x para o perfil como "Agora não".
       let dismissedAt = ts(profile.pwa_prompt_dismissed_at);
       try {
-        if (!dismissedAt && localStorage.getItem(LEGACY_DISMISS) === '1') {
-          localStorage.removeItem(LEGACY_DISMISS);
+        if (!dismissedAt && LEGACY_DISMISS_KEYS.some((k) => localStorage.getItem(k) === '1')) {
+          // Remove só a chave do gate antigo; 'installBannerDismissed' segue usada pelo InstallBanner das páginas públicas.
+          localStorage.removeItem('pwa-install-banner-dismissed');
           record('pwa', 'dismissed');
           return;
         }
@@ -199,7 +200,8 @@ export const EngagementOrchestrator: React.FC = () => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="z-[200] max-w-md w-[calc(100%-1.5rem)] rounded-3xl border-border p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] [&>button]:hidden"
+        overlayClassName="z-[200]"
+        className="z-[201] max-h-[calc(100dvh-1.5rem)] overflow-y-auto max-w-md w-[calc(100%-1.5rem)] rounded-3xl border-border p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] [&>button]:hidden"
       >
         {stage === 'pwa' && (
           <div className="flex flex-col items-center text-center gap-5">
@@ -261,8 +263,9 @@ export const EngagementOrchestrator: React.FC = () => {
           <div className="flex flex-col items-center text-center gap-4">
             <DialogTitle className="text-xl font-bold">Tudo bem, respeitamos sua escolha</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
-              Se mudar de ideia, ative as notificações do Drinkeros nos Ajustes do celular
-              (no iPhone: Ajustes › Notificações › Drinkeros).
+              {isIOSDevice()
+                ? 'Se mudar de ideia, ative em Ajustes › Notificações › Drinkeros no seu iPhone.'
+                : 'Se mudar de ideia, ative as notificações do Drinkeros nas configurações do site no navegador (ícone ao lado do endereço) ou nas configurações de notificações do aparelho.'}
             </DialogDescription>
             <Button size="lg" variant="secondary" className="w-full" onClick={close}>
               Continuar

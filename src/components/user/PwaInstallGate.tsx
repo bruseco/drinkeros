@@ -19,12 +19,8 @@ export function shouldShowPwaGate(opts: {
   loading: boolean;
 }): boolean {
   // Banner substituído pelo EngagementOrchestrator (modal pós-login): nunca empilha mais.
+  void opts;
   return false;
-  if (opts.loading) return true;
-  if (opts.isStandalone) return false;
-  if (opts.hasInstalledBefore) return false;
-  if (typeof window !== 'undefined' && localStorage.getItem(DISMISS_KEY) === '1') return false;
-  return true;
 }
 
 /** Banner exibido acima do menu inferior (mobile) e no topo (desktop) até
