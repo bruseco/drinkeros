@@ -4,6 +4,8 @@ import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePageFunnel, type FunnelRange, type FunnelCounts } from '@/hooks/usePageFunnel';
 import { getFunnel } from '@/lib/funnels';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const ORIGIN = typeof window !== 'undefined' ? window.location.origin : '';
 
@@ -150,6 +152,50 @@ const AdminFunnelDetail: React.FC = () => {
 
           </div>
         )}
+      </div>
+      {funnel.key === 'rand' && <RandUpsellMetrics />}
+    </div>
+  );
+};
+
+const RandUpsellMetrics: React.FC = () => {
+  const { data } = useQuery({
+    queryKey: ['rand-upsell-metrics'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('post_purchase_offers' as any)
+        .select('viewed_at, accepted_at, declined_at, checkout_started_at, paid_at, amount')
+        .eq('offer_key', 'rand-xperience-workshop');
+      if (error) throw error;
+      return (data || []) as any[];
+    },
+  });
+  const rows = data ?? [];
+  const n = (k: string) => rows.filter((r) => r[k]).length;
+  const revenue = rows.filter((r) => r.paid_at).reduce((s, r) => s + Number(r.amount || 0), 0);
+  const items = [
+    ['Viu a página pós-compra', n('viewed_at')],
+    ['Aceitou', n('accepted_at')],
+    ['Recusou', n('declined_at')],
+    ['Iniciou o pagamento', n('checkout_started_at')],
+    ['Upsell aprovado', n('paid_at')],
+  ] as const;
+  return (
+    <div className="rounded-xl border border-border bg-card p-5 space-y-3">
+      <h2 className="text-lg font-semibold text-foreground">Pós-compra: Xperience + Workshop (R$ 97)</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {items.map(([label, v]) => (
+          <div key={label} className="rounded-lg bg-muted/40 p-3">
+            <p className="text-xs text-muted-foreground">{label}</p>
+            <p className="text-2xl font-bold text-foreground">{fmt(v)}</p>
+          </div>
+        ))}
+        <div className="rounded-lg bg-muted/40 p-3">
+          <p className="text-xs text-muted-foreground">Receita do upsell</p>
+          <p className="text-2xl font-bold text-foreground">
+            {revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+          </p>
+        </div>
       </div>
     </div>
   );
