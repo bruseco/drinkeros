@@ -1,4 +1,7 @@
-// Oferta pós-compra do RAND: "Drinkeros Xperience + Workshop Além dos Clássicos" por R$97.
+// Oferta pós-compra do RAND: combo existente "Pacote Business" (slug pacote-business) por R$97 fixos.
+//  - progress { ref, watched }  → progresso assistido (validado contra o relógio do servidor)
+//  - reveal   { ref }           → após 3:45 assistidos grava revealed_at e prazo real de 5 min (uma vez)
+//  - track    { ref, event }    → eventos idempotentes (video_*, accept, decline)
 // Ações:
 //  - create  { source_payment_id }            → valida compra RAND aprovada/recente no MP, devolve referência opaca
 //  - get     { ref }                          → estado da oferta (sem PII além do e-mail do próprio comprador)
@@ -17,12 +20,15 @@ const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
 const MP_API = "https://api.mercadopago.com";
-const OFFER_KEY = "rand-xperience-workshop";
+const OFFER_KEY = "rand-pacote-business";
 const SOURCE_SLUG = "rand";
-const UPSELL_SLUG = "xperience-workshop-upsell";
+const UPSELL_SLUG = "pacote-business";
 const UPSELL_PRICE = 97;
 const RECENT_HOURS = 24;
 const MAX_CHECKOUT_ATTEMPTS = 5;
+const REVEAL_AFTER_SECONDS = 225;
+const OFFER_WINDOW_SECONDS = 300;
+const TRACK_EVENTS = new Set(["video_start", "video_25", "video_50", "video_75", "video_90", "video_complete", "accept", "decline"]);
 export const ONE_CLICK_ENABLED = false;
 
 const UUID_RE = /^[0-9a-f-]{36}$/i;
@@ -48,7 +54,8 @@ serve(async (req) => {
     const { data: upsell } = await db.from("combos")
       .select("id, name, slug, price, cover_image_url").eq("slug", UPSELL_SLUG).maybeSingle();
     if (!upsell) return json({ error: "Oferta indisponível" }, 404);
-    const price = Math.min(UPSELL_PRICE, Number(upsell.price) || UPSELL_PRICE);
+    // Preço exclusivo do upsell, fixo no servidor (o preço normal do combo não é usado nem alterado).
+    const price = UPSELL_PRICE;
 
     const ownsBoth = async (userId: string | null) => {
       if (!userId) return false;
@@ -109,7 +116,10 @@ serve(async (req) => {
       .eq("id", ref).eq("offer_key", OFFER_KEY).maybeSingle();
     if (!offer) return json({ error: "Oferta não encontrada" }, 404);
     const o = offer as any;
-    const expired = new Date(o.expires_at).getTime() < Date.now();
+    const nowMs = Date.now();
+    const deadlineMs = o.offer_deadline_at ? new Date(o.offer_deadline_at).getTime() : null;
+    // Antes da revelação vale a janela segura (expires_at, 6h após a compra); depois, o prazo real de 5 min.
+    const expired = deadlineMs !== null ? deadlineMs < nowMs : new Date(o.expires_at).getTime() < nowMs;
     const buyerUserId = o.source_user_id || (await userIdByEmail(o.buyer_email));
 
     const baseState = async () => ({
@@ -124,6 +134,12 @@ serve(async (req) => {
       product: { id: upsell.id, name: upsell.name, slug: upsell.slug, cover_image_url: upsell.cover_image_url },
       price,
       one_click_available: ONE_CLICK_ENABLED,
+      watched_seconds: Number(o.watched_seconds) || 0,
+      revealed_at: o.revealed_at,
+      offer_deadline_at: o.offer_deadline_at,
+      server_now: new Date().toISOString(),
+      reveal_after_seconds: REVEAL_AFTER_SECONDS,
+      checkout_open: !!o.upsell_payment_id && o.status !== "paid",
     });
 
     const patch = async (fields: Record<string, unknown>) => {
@@ -133,18 +149,56 @@ serve(async (req) => {
 
     if (action === "get") return json(await baseState());
 
+    const mark = (ev: string) => db.rpc("ppo_mark_event", { _offer_id: o.id, _event: ev });
+
     if (action === "track") {
       const ev = String(body?.event || "");
       const now = new Date().toISOString();
-      if (ev === "view" && !o.viewed_at) await patch({ viewed_at: now });
+      if (ev === "view") { if (!o.viewed_at) await patch({ viewed_at: now }); return json({ ok: true }); }
+      if (!TRACK_EVENTS.has(ev)) return json({ error: "Evento inválido" }, 400);
+      if (o.status === "paid") return json({ ok: true });
+      if ((ev === "accept" || ev === "decline") && !o.revealed_at) return json({ error: "Oferta ainda não revelada" }, 409);
+      if (ev === "accept" && o.status === "declined") return json({ error: "Oferta recusada", code: "declined" }, 409);
+      await mark(ev);
       if (ev === "accept" && !o.accepted_at) await patch({ accepted_at: now, status: o.status === "offered" ? "accepted" : o.status });
-      if (ev === "decline" && !o.declined_at && o.status !== "paid") await patch({ declined_at: now, status: "declined" });
+      if (ev === "decline" && !o.declined_at) await patch({ declined_at: now, status: "declined" });
       return json({ ok: true });
+    }
+
+    if (action === "progress") {
+      // Não confiamos no cliente: o avanço é limitado pelo tempo real decorrido desde a última atualização.
+      const reported = Math.max(0, Math.min(Number(body?.watched) || 0, 7200));
+      const prev = Number(o.watched_seconds) || 0;
+      const lastMs = o.progress_updated_at ? new Date(o.progress_updated_at).getTime() : null;
+      const allowed = lastMs === null ? 20 : ((nowMs - lastMs) / 1000) * 1.1 + 5;
+      const next = Math.min(reported, prev + allowed);
+      if (next > prev) await patch({ watched_seconds: Math.round(next * 10) / 10, progress_updated_at: new Date(nowMs).toISOString() });
+      else if (lastMs === null) await patch({ progress_updated_at: new Date(nowMs).toISOString() });
+      return json({ watched_seconds: Number(o.watched_seconds) || 0 });
+    }
+
+    if (action === "reveal") {
+      if (o.revealed_at) return json(await baseState());
+      if (o.status === "paid" || o.status === "declined" || expired) return json(await baseState());
+      if ((Number(o.watched_seconds) || 0) < REVEAL_AFTER_SECONDS - 10) {
+        return json({ error: "Vídeo ainda não assistido", code: "not_ready", watched_seconds: Number(o.watched_seconds) || 0 }, 409);
+      }
+      const revealedAt = new Date(nowMs);
+      const deadline = new Date(nowMs + OFFER_WINDOW_SECONDS * 1000);
+      // Atômico: só a primeira aba grava; as demais leem o mesmo prazo (não reinicia).
+      await db.from("post_purchase_offers")
+        .update({ revealed_at: revealedAt.toISOString(), offer_deadline_at: deadline.toISOString(), updated_at: revealedAt.toISOString() })
+        .eq("id", o.id).is("revealed_at", null);
+      await mark("offer_revealed");
+      const { data: fresh } = await db.from("post_purchase_offers").select("*").eq("id", o.id).single();
+      Object.assign(o, fresh);
+      return json(await baseState());
     }
 
     const markPaidIfApproved = async (payment: any) => {
       if (payment?.status === "approved" && o.status !== "paid") {
         await patch({ status: "paid", paid_at: new Date().toISOString(), amount: Number(payment.transaction_amount) || price });
+        await mark("paid");
       }
     };
 
@@ -159,7 +213,8 @@ serve(async (req) => {
     if (action === "pay") {
       if (o.status === "paid") return json({ error: "Oferta já utilizada", code: "already_paid" }, 409);
       if (o.status === "declined") return json({ error: "Oferta recusada", code: "declined" }, 409);
-      if (expired) return json({ error: "Oferta expirada", code: "expired" }, 409);
+      if (!o.revealed_at || !o.offer_deadline_at) return json({ error: "Oferta ainda não revelada", code: "not_revealed" }, 409);
+      if (expired) return json({ error: "O prazo da oferta terminou", code: "expired" }, 409);
       if (o.checkout_attempts >= MAX_CHECKOUT_ATTEMPTS) return json({ error: "Limite de tentativas atingido", code: "limit" }, 429);
       if (await ownsBoth(buyerUserId)) return json({ error: "Você já possui estes cursos", code: "already_owned" }, 409);
 
@@ -199,17 +254,23 @@ serve(async (req) => {
         if (formData.issuer_id) paymentBody.issuer_id = formData.issuer_id;
       }
 
-      await patch({
-        checkout_attempts: (o.checkout_attempts || 0) + 1,
+      // Trava otimista: cliques duplos / múltiplas abas não geram duas cobranças na mesma tentativa.
+      const attempt = (o.checkout_attempts || 0) + 1;
+      const { data: locked } = await db.from("post_purchase_offers").update({
+        checkout_attempts: attempt,
         checkout_started_at: o.checkout_started_at || new Date().toISOString(),
-      });
+        updated_at: new Date().toISOString(),
+      }).eq("id", o.id).eq("checkout_attempts", o.checkout_attempts || 0).neq("status", "paid").select("id");
+      if (!locked?.length) return json({ error: "Pagamento já em processamento", code: "busy" }, 409);
+      o.checkout_attempts = attempt;
+      await mark("checkout_started");
 
       const r = await fetch(`${MP_API}/v1/payments`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${mpToken}`,
           "Content-Type": "application/json",
-          "X-Idempotency-Key": `upsell:${o.id}:${o.checkout_attempts}`,
+          "X-Idempotency-Key": `upsell:${o.id}:${attempt}`,
         },
         body: JSON.stringify(paymentBody),
       });

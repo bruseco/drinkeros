@@ -70,6 +70,8 @@
 
   <!-- Meta Pixel Code (carregado direto para garantir detecção pelo Pixel Helper) -->
   <script>
+    // Demonstração segura do pós-compra RAND nunca carrega o Pixel.
+    if (!(location.pathname === '/rand/obrigado' && new URLSearchParams(location.search).get('demo') === '1')) {
     !function(f,b,e,v,n,t,s)
     {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
     n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -85,6 +87,7 @@
     window.__META_PIXEL_READY__ = true;
     window.__META_PIXEL_LAST_PAGEVIEW_PATH__ = window.location.pathname;
     window.__META_PIXEL_LAST_PAGEVIEW_TIME__ = Date.now();
+    }
   </script>
   <!-- End Meta Pixel Code -->
 </head>

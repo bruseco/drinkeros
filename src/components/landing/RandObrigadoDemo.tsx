@@ -91,17 +91,19 @@ const offerButtonClassName =
 const declineButtonClassName =
   "mt-3 h-auto w-full whitespace-normal px-2 py-2 text-sm font-normal leading-relaxed text-muted-foreground underline decoration-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:text-foreground focus-visible:underline visited:text-muted-foreground";
 
-function DemoOfferActions() {
+function DemoOfferActions({ onAccept = showDemoNotice, onDecline = showDemoNotice, disabled = false }: {
+  onAccept?: () => void; onDecline?: () => void; disabled?: boolean;
+}) {
   return (
     <div className="mx-auto max-w-2xl text-center">
-      <Button type="button" size="lg" onClick={showDemoNotice} className={offerButtonClassName}>
+      <Button type="button" size="lg" onClick={onAccept} disabled={disabled} className={offerButtonClassName}>
         <span className="rand-demo-offer-shine" aria-hidden="true" />
         <span className="relative z-10">QUERO APROVEITAR A SUPER OFERTA!</span>
       </Button>
       <Button
         type="button"
         variant="link"
-        onClick={showDemoNotice}
+        onClick={onDecline}
         className={declineButtonClassName}
       >
         Perder esta oferta e deixar mais de R$ 2.000 em conhecimento ir embora.
@@ -114,18 +116,56 @@ interface RandObrigadoDemoProps {
   forceReveal: boolean;
 }
 
+export interface RandUpsellExperienceProps {
+  /** Demo: nunca chama backend; real: callbacks conectados ao servidor. */
+  mode: "demo" | "real";
+  forceReveal?: boolean;
+  /** Progresso já assistido (retomado após refresh). */
+  initialWatched?: number;
+  /** Real: revelado no servidor. */
+  revealed?: boolean;
+  /** Real: prazo da oferta (ms, relógio local já corrigido pelo servidor). */
+  deadlineMs?: number | null;
+  onProgress?: (watched: number) => void;
+  onMilestone?: (key: string) => void;
+  onRevealReached?: () => void;
+  onAccept?: () => void;
+  onDecline?: () => void;
+  onContinue?: () => void;
+  busy?: boolean;
+}
+
 export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps) {
+  return <RandUpsellExperience mode="demo" forceReveal={forceReveal} />;
+}
+
+export function RandUpsellExperience({
+  mode, forceReveal = false, initialWatched = 0, revealed: revealedProp, deadlineMs = null,
+  onProgress, onMilestone, onRevealReached, onAccept, onDecline, onContinue, busy = false,
+}: RandUpsellExperienceProps) {
+  const isReal = mode === "real";
   const playerHostRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YouTubePlayer | null>(null);
   const isPlayingRef = useRef(false);
   const lastTickRef = useRef<number | null>(null);
-  const watchedSecondsRef = useRef(forceReveal ? REVEAL_AFTER_SECONDS : 0);
+  const watchedSecondsRef = useRef(forceReveal ? REVEAL_AFTER_SECONDS : initialWatched);
+  const revealRequestedRef = useRef(false);
+  const lastReportRef = useRef(0);
+  const cbRef = useRef({ onProgress, onMilestone, onRevealReached });
+  cbRef.current = { onProgress, onMilestone, onRevealReached };
   const milestoneKeysRef = useRef(new Set<string>());
   const [playerReady, setPlayerReady] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [soundActivationPending, setSoundActivationPending] = useState(false);
-  const [revealed, setRevealed] = useState(forceReveal);
+  const [localRevealed, setLocalRevealed] = useState(forceReveal);
+  const revealed = isReal ? !!revealedProp : localRevealed;
   const [countdown, setCountdown] = useState(OFFER_SECONDS);
+  const setRevealed = useCallback((v: boolean) => {
+    if (!v) return;
+    if (isReal) {
+      if (!revealRequestedRef.current) { revealRequestedRef.current = true; cbRef.current.onRevealReached?.(); }
+    } else setLocalRevealed(true);
+  }, [isReal]);
 
   const collectFutureMilestones = useCallback((currentTime: number, duration: number) => {
     // Intencionalmente não envia nada no demo. Esta função mantém os marcos prontos
@@ -133,7 +173,11 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
     if (duration <= 0) return;
     VIDEO_MILESTONES.forEach(({ key, ratio }) => {
       const reached = ratio === 0 ? currentTime > 0 : currentTime / duration >= ratio;
-      if (reached) milestoneKeysRef.current.add(key);
+      if (reached && !milestoneKeysRef.current.has(key)) {
+        milestoneKeysRef.current.add(key);
+        // Demo não recebe callback: nada é registrado.
+        cbRef.current.onMilestone?.(key);
+      }
     });
   }, []);
 
@@ -151,18 +195,39 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
       watchedSecondsRef.current += Math.min((now - last) / 1000, 1.5);
       const player = playerRef.current;
       if (player) collectFutureMilestones(player.getCurrentTime(), player.getDuration());
-      if (watchedSecondsRef.current >= REVEAL_AFTER_SECONDS) setRevealed(true);
+      if (now - lastReportRef.current > 10_000) {
+        lastReportRef.current = now;
+        cbRef.current.onProgress?.(watchedSecondsRef.current);
+      }
+      if (watchedSecondsRef.current >= REVEAL_AFTER_SECONDS) {
+        cbRef.current.onProgress?.(watchedSecondsRef.current);
+        setRevealed(true);
+      }
     }, 500);
     return () => window.clearInterval(interval);
-  }, [collectFutureMilestones, forceReveal]);
+  }, [collectFutureMilestones, forceReveal, setRevealed]);
+
+  // Real: retomada após refresh já acima de 3:45 (servidor ainda não revelou).
+  useEffect(() => {
+    if (isReal && !revealedProp && initialWatched >= REVEAL_AFTER_SECONDS) setRevealed(true);
+  }, [isReal, revealedProp, initialWatched, setRevealed]);
+
+  // Real: cronômetro derivado do prazo gravado no servidor (não reinicia com refresh).
+  useEffect(() => {
+    if (!isReal || !revealed || deadlineMs == null) return;
+    const tick = () => setCountdown(Math.max(0, Math.ceil((deadlineMs - Date.now()) / 1000)));
+    tick();
+    const interval = window.setInterval(tick, 1000);
+    return () => window.clearInterval(interval);
+  }, [isReal, revealed, deadlineMs]);
 
   useEffect(() => {
-    if (!revealed || countdown <= 0) return;
+    if (isReal || !revealed || countdown <= 0) return;
     const interval = window.setInterval(() => {
       setCountdown((current) => Math.max(0, current - 1));
     }, 1000);
     return () => window.clearInterval(interval);
-  }, [countdown, revealed]);
+  }, [countdown, revealed, isReal]);
 
   const activateVideo = useCallback(() => {
     const player = playerRef.current;
@@ -243,7 +308,15 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
     };
   }, []);
 
-  const demoEnded = countdown === 0;
+  const demoEnded = countdown === 0 && (!isReal || deadlineMs != null);
+  const offerActions = !isReal ? <DemoOfferActions /> : demoEnded ? (
+    <div className="mx-auto max-w-2xl text-center">
+      <p className="text-sm text-muted-foreground">Esta condição especial não está mais disponível.</p>
+      <Button type="button" size="lg" className="mt-3 w-full h-12" onClick={onContinue}>Continuar para o meu acesso</Button>
+    </div>
+  ) : (
+    <DemoOfferActions onAccept={onAccept} onDecline={onDecline} disabled={busy} />
+  );
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-[env(safe-area-inset-bottom)]">
@@ -261,7 +334,7 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
             <>
               <Clock3 className="h-5 w-5 shrink-0" aria-hidden="true" />
               {demoEnded ? (
-                <span>A demonstração terminou</span>
+                <span>{isReal ? "O prazo desta condição terminou" : "A demonstração terminou"}</span>
               ) : (
                 <span>Condição especial disponível por {formatCountdown(countdown)}</span>
               )}
@@ -313,7 +386,7 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
             </div>
             {revealed && (
               <div className="mt-5 animate-fade-in sm:mt-7">
-                <DemoOfferActions />
+                {offerActions}
               </div>
             )}
         </section>
@@ -328,10 +401,10 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
                 Quatro caminhos para transformar coquetelaria em negócio
               </h2>
               <div className="mt-6 flex flex-wrap items-end justify-center gap-x-4 gap-y-1">
-                <p className="text-lg text-muted-foreground line-through">Valor avulso R$ 2.288</p>
+                <p className="text-lg text-muted-foreground">de <span className="line-through">R$ 797</span> por</p>
                 <p className="text-4xl font-black text-success sm:text-5xl">R$ 97</p>
               </div>
-              <p className="mt-2 text-sm font-medium text-muted-foreground">condição promocional · pagamento único</p>
+              <p className="mt-2 text-sm font-medium text-muted-foreground">condição exclusiva deste pós-compra · pagamento único · os quatro cursos somam R$ 2.288 em conhecimento</p>
             </div>
 
             <h3 className="mx-auto mt-14 max-w-3xl text-balance text-center text-2xl font-black leading-tight sm:mt-16 sm:text-4xl">
@@ -358,10 +431,12 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
             </div>
 
             <div className="mt-10 sm:mt-12">
-              <DemoOfferActions />
-              <p className="mt-4 text-xs text-muted-foreground">
-                Demonstração visual: nenhum pagamento ou alteração de acesso será realizado.
-              </p>
+              {offerActions}
+              {!isReal && (
+                <p className="mt-4 text-xs text-muted-foreground">
+                  Demonstração visual: nenhum pagamento ou alteração de acesso será realizado.
+                </p>
+              )}
             </div>
           </section>
         )}
