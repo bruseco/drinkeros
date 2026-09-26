@@ -679,6 +679,18 @@ serve(async (req) => {
 
     console.log("[mp-webhook] access granted:", { userId, productType, productId, paymentId });
 
+    // Oferta pós-compra (upsell RAND): marca como paga para as métricas (idempotente).
+    const upsellOfferId = String((metadata as any)?.upsell_offer_id || "");
+    if (/^[0-9a-f-]{36}$/i.test(upsellOfferId)) {
+      await supabase.from("post_purchase_offers").update({
+        status: "paid",
+        paid_at: new Date().toISOString(),
+        amount: Number(payment?.transaction_amount || 0),
+        upsell_payment_id: String(paymentId),
+        updated_at: new Date().toISOString(),
+      }).eq("id", upsellOfferId).neq("status", "paid");
+    }
+
     return new Response(JSON.stringify({ ok: true, granted: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
