@@ -1,68 +1,61 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUserPlan } from './useUserPlan';
 
+/**
+ * Regra de negócio: e-books NUNCA expiram por tempo.
+ * Só um estorno real (refunded_at preenchido) revoga o acesso.
+ */
 export interface UserEbookAccess {
   ebook_id: string;
-  expires_at: string | null;
-  is_expired: boolean;
-  effective_expires_at: string | null;
+  expires_at: null;
+  is_expired: false;
+  effective_expires_at: null;
 }
+
+interface EbookRow {
+  ebook_id: string;
+  refunded_at: string | null;
+}
+
+/** IDs de e-books ativos (não estornados). Função pura, testável. */
+export const activeEbookIds = (rows: EbookRow[]): string[] =>
+  rows.filter((r) => !r.refunded_at).map((r) => r.ebook_id);
+
+/** Converte registros em acessos permanentes, ocultando estornados. */
+export const toEbookAccess = (rows: EbookRow[]): UserEbookAccess[] =>
+  activeEbookIds(rows).map((ebook_id) => ({
+    ebook_id,
+    expires_at: null,
+    is_expired: false,
+    effective_expires_at: null,
+  }));
+
+const fetchRows = async (userId: string): Promise<EbookRow[]> => {
+  const { data, error } = await supabase
+    .from('user_ebooks')
+    .select('ebook_id, refunded_at')
+    .eq('user_id', userId);
+  if (error) throw error;
+  return (data || []) as EbookRow[];
+};
 
 /** Retorna apenas os IDs (mantém compat com chamadas existentes). */
 export const useUserEbooks = () => {
   const { user } = useAuth();
-  const { data: planData } = useUserPlan();
-
   return useQuery({
-    queryKey: ['user-ebooks', user?.id, planData?.expires_at, planData?.isVip],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_ebooks')
-        .select('ebook_id, expires_at')
-        .eq('user_id', user!.id);
-
-      if (error) throw error;
-
-      const now = new Date();
-      const vipExpires = planData?.isVip ? planData?.expires_at ?? null : null;
-
-      // Acesso "ativo" = sem expires_at OU ainda no prazo OU VIP cobrindo
-      return (data || [])
-        .filter((d) => {
-          if (!d.expires_at) return true;
-          if (new Date(d.expires_at) > now) return true;
-          if (vipExpires && new Date(vipExpires) > now) return true;
-          return false;
-        })
-        .map((d) => d.ebook_id);
-    },
+    queryKey: ['user-ebooks', user?.id],
+    queryFn: async () => activeEbookIds(await fetchRows(user!.id)),
     enabled: !!user?.id,
   });
 };
 
-/** Retorna detalhes de expiração de cada e-book do usuário. */
+/** Detalhes de acesso de cada e-book — sempre permanentes. */
 export const useUserEbooksWithExpiry = () => {
   const { user } = useAuth();
-
   return useQuery<UserEbookAccess[]>({
     queryKey: ['user-ebooks-expiry', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_ebooks')
-        .select('ebook_id, expires_at')
-        .eq('user_id', user!.id);
-      if (error) throw error;
-      const now = new Date();
-      return (data || []).map((d) => ({
-        ebook_id: d.ebook_id,
-        expires_at: d.expires_at,
-        is_expired: !!d.expires_at && new Date(d.expires_at) < now,
-        effective_expires_at: d.expires_at,
-      }));
-    },
+    queryFn: async () => toEbookAccess(await fetchRows(user!.id)),
     enabled: !!user?.id,
   });
 };
-

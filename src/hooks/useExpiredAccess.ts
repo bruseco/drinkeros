@@ -34,11 +34,11 @@ export const useExpiredAccess = () => {
       const vipExpiresAt = vipActive ? planData?.expires_at ?? null : null;
       const vipCovers = vipExpiresAt ? new Date(vipExpiresAt) > now : false;
 
-      const [{ data: lifetime }, { data: courses }, { data: ebooks }, { data: combos }] =
+      // E-books nunca expiram por tempo (só estorno revoga) — ebook_ids fica sempre vazio.
+      const [{ data: lifetime }, { data: courses }, { data: combos }] =
         await Promise.all([
           supabase.from('user_lifetime_access').select('id').eq('user_id', user.id).maybeSingle(),
           supabase.from('user_courses').select('course_id, expires_at').eq('user_id', user.id),
-          supabase.from('user_ebooks').select('ebook_id, expires_at').eq('user_id', user.id),
           supabase.from('user_combos').select('combo_id, expires_at').eq('user_id', user.id),
         ]);
 
@@ -51,7 +51,7 @@ export const useExpiredAccess = () => {
 
       const result: ExpiredAccess = {
         course_ids: new Set((courses || []).filter((r) => isExpired(r.expires_at)).map((r) => r.course_id)),
-        ebook_ids: new Set((ebooks || []).filter((r) => isExpired(r.expires_at)).map((r) => r.ebook_id)),
+        ebook_ids: new Set(),
         combo_ids: new Set((combos || []).filter((r) => isExpired(r.expires_at)).map((r) => r.combo_id)),
       };
       return result;
