@@ -176,8 +176,8 @@ const RandUpsellMetrics: React.FC<{ range: FunnelRange }> = ({ range }) => {
     },
   });
   const all = data ?? [];
-  const rows = since ? all.filter((r) => r.created_at >= since) : all;
-  const paidRows = since ? all.filter((r) => r.paid_at && r.paid_at >= since) : all.filter((r) => r.paid_at);
+  const rows = since ? all.filter((r) => new Date(r.created_at).getTime() >= Date.parse(since)) : all;
+  const paidRows = since ? all.filter((r) => r.paid_at && Date.parse(r.paid_at) >= Date.parse(since)) : all.filter((r) => r.paid_at);
   const n = (k: string) => rows.filter((r) => r[k]).length;
   const revenue = paidRows.reduce((s, r) => s + Number(r.amount || 0), 0);
   const e = (k: string) => rows.filter((r) => r.events && r.events[k]).length;
