@@ -48,3 +48,6 @@ project_id = "pvjlcfhqueibjnkuzzna"
 
   [functions.send-clube-discount-ending]
     verify_jwt = false
+
+  [functions.rand-upsell]
+    verify_jwt = false
