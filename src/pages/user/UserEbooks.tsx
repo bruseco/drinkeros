@@ -2,8 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useEbooks } from '@/hooks/useEbooks';
 import { useUserEbooks } from '@/hooks/useUserEbooks';
-import { useExpiredAccess } from '@/hooks/useExpiredAccess';
-import { Loader2, FileText, Download, Lock, Crown } from 'lucide-react';
+import { Loader2, FileText, Download, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,14 +10,14 @@ import { trackEbookDownload } from '@/hooks/useAccessTracking';
 import { openSignedFile } from '@/lib/signedFileUrl';
 import { useToast } from '@/hooks/use-toast';
 
+// E-books são permanentes: nunca aparecem como "Expirado".
+// Só um estorno revoga (o registro estornado deixa de vir em useUserEbooks).
 const UserEbooks: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { data: ebooks = [], isLoading } = useEbooks();
   const { data: userEbookIds = [], isLoading: userLoading } = useUserEbooks();
-  const { data: expiredAccess } = useExpiredAccess();
   const ownedSet = new Set(userEbookIds);
-  const expiredSet = expiredAccess?.ebook_ids ?? new Set<string>();
 
   const handleOpenEbook = async (ebookId: string) => {
     try {
@@ -32,7 +31,6 @@ const UserEbooks: React.FC = () => {
       });
     }
   };
-
 
   const activeEbooks = ebooks
     .filter(e => e.is_active)
@@ -67,20 +65,12 @@ const UserEbooks: React.FC = () => {
         <div className="grid gap-8 grid-cols-1 lg:grid-cols-3">
           {activeEbooks.map((ebook) => {
             const owned = ownedSet.has(ebook.id);
-            const expired = expiredSet.has(ebook.id);
-
-            // Define a ação única do card
-            // file_url é column-restricted (apenas admin lê); para o usuário,
-            // basta ter acesso ativo — a edge function valida e gera signed URL.
-            const canDownload = owned && !expired;
-            const cardHref = canDownload ? '#' : `/ebook/${ebook.slug}`;
-            const isExternal = canDownload;
 
             const cardInner = (
               <>
                 <div className="relative w-full">
                   {ebook.cover_image_url ? (
-                    <div className={`w-full rounded-2xl overflow-hidden flex items-center justify-center ${expired ? 'opacity-40 grayscale' : !owned ? 'opacity-60 grayscale-[30%]' : ''}`}>
+                    <div className={`w-full rounded-2xl overflow-hidden flex items-center justify-center ${!owned ? 'opacity-60 grayscale-[30%]' : ''}`}>
                       <img
                         src={ebook.cover_image_url}
                         alt={ebook.name}
@@ -93,12 +83,7 @@ const UserEbooks: React.FC = () => {
                     </div>
                   )}
                   <div className="absolute top-[22%] right-[52px] z-10">
-                    {expired ? (
-                      <Badge className="bg-destructive text-destructive-foreground border-0 shadow-md text-xs gap-1">
-                        <Crown className="h-3 w-3" />
-                        Expirado
-                      </Badge>
-                    ) : owned ? (
+                    {owned ? (
                       <Badge className="bg-success text-success-foreground border-0 shadow-md text-xs">
                         ✓ Adquirido
                       </Badge>
@@ -119,12 +104,7 @@ const UserEbooks: React.FC = () => {
                 </h3>
 
                 <div className="mt-2 pointer-events-none">
-                  {expired ? (
-                    <Button size="sm" className="bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:from-purple-500 hover:to-fuchsia-400 text-white">
-                      <Crown className="mr-2 h-4 w-4" />
-                      Renovar no Clube
-                    </Button>
-                  ) : canDownload ? (
+                  {owned ? (
                     <Button size="sm">
                       <Download className="mr-2 h-4 w-4" />
                       Abrir e-book
@@ -139,16 +119,7 @@ const UserEbooks: React.FC = () => {
             const wrapperClass =
               'flex flex-col items-center w-full max-w-[390px] mx-auto cursor-pointer transition-transform active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl';
 
-            // Para expirados, sempre vai para o /pv-clube
-            if (expired) {
-              return (
-                <Link key={ebook.id} to="/pv-clube" className={wrapperClass} aria-label={`${ebook.name} — Renovar no Clube`}>
-                  {cardInner}
-                </Link>
-              );
-            }
-
-            if (isExternal) {
+            if (owned) {
               return (
                 <button
                   key={ebook.id}
@@ -165,7 +136,7 @@ const UserEbooks: React.FC = () => {
             return (
               <Link
                 key={ebook.id}
-                to={cardHref}
+                to={`/ebook/${ebook.slug}`}
                 className={wrapperClass}
                 aria-label={`Saiba mais sobre ${ebook.name}`}
               >
