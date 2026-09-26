@@ -1,22 +1,22 @@
-// Push automático de início de fase sazonal — 18:00 America/Sao_Paulo.
+// Push sazonal — 18:00 America/Sao_Paulo. Slots: abertura da fase, D-3 e dia do evento
+// (D-3/dia só para Carnaval, Festa Junina, Halloween e Natal).
 // Calendário: ../_shared/seasonalPhases.ts (MESMA fonte usada pelo app em /app/receitas).
 // - Cron diário 20:00 e 21:00 UTC; só envia quando é 18h em São Paulo e a fase principal
 //   mudou em relação ao dia anterior (sem retroativo).
-// - Idempotência: push_campaign_runs.run_key = "seasonal-phase:<fase>:<ano>" (1 por fase/ano).
+// - Idempotência: push_campaign_runs.run_key = "seasonal-phase:<fase>:<ano>:<slot>".
 // - { dry_run: true, date?: "YYYY-MM-DD" } simula sem enviar. { force: true } ignora a hora (interno/admin).
 // - Remove endpoints 404/410, igual a send-push-notification / send-weekly-saturday-push.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import webpush from "npm:web-push@3.6.7";
 import { assertInternalOrAdmin } from "../_shared/internalAuth.ts";
-import { getPrimaryPhaseStartingOn, PHASE_PUSH_TITLES } from "../_shared/seasonalPhases.ts";
+import { getSeasonalPushForDate } from "../_shared/seasonalPhases.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-internal-secret",
 };
 const CAMPAIGN = "seasonal-phase";
-const BODY = "Já separamos receitas especiais para esta época. Abra o Clube dos Drinkeros e escolha a sua.";
 const SEND_HOUR = 18;
 
 const json = (b: unknown, status = 200) =>
@@ -49,14 +49,15 @@ serve(async (req) => {
   const sp = spNow();
   // Data simulada só é aceita em dry-run
   const dateIso = dryRun && /^\d{4}-\d{2}-\d{2}$/.test(body?.date ?? "") ? body.date : sp.date;
-  const phase = getPrimaryPhaseStartingOn(localDate(dateIso));
+  const plan = getSeasonalPushForDate(localDate(dateIso));
   const isHour = sp.hour === SEND_HOUR;
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-  const payloadObj = phase
-    ? { title: PHASE_PUSH_TITLES[phase.id], body: BODY, url: `/app/receitas?categoria=${encodeURIComponent(phase.tags[0])}` }
+  const payloadObj = plan
+    ? { title: plan.title, body: plan.body, url: `/app/receitas?categoria=${encodeURIComponent(plan.categoryTag)}` }
     : null;
-  const runKey = phase ? `${CAMPAIGN}:${phase.id}:${dateIso.slice(0, 4)}` : null;
+  // Idempotência por fase + ano + slot (opening | d3 | event_day)
+  const runKey = plan ? `${CAMPAIGN}:${plan.phaseId}:${plan.year}:${plan.slot}` : null;
 
   if (dryRun) {
     const { count } = await supabase.from("push_subscriptions").select("id", { count: "exact", head: true });
@@ -65,11 +66,11 @@ serve(async (req) => {
       const { data } = await supabase.from("push_campaign_runs").select("run_key").eq("run_key", runKey).maybeSingle();
       alreadySent = !!data;
     }
-    return json({ ok: true, dry_run: true, date: dateIso, sp_time: sp, phase_starting: phase?.id ?? null, run_key: runKey, already_sent: alreadySent, total_subscriptions: count ?? 0, payload: payloadObj });
+    return json({ ok: true, dry_run: true, date: dateIso, sp_time: sp, phase: plan?.phaseId ?? null, slot: plan?.slot ?? null, run_key: runKey, already_sent: alreadySent, total_subscriptions: count ?? 0, payload: payloadObj });
   }
 
   if (!isHour && !force) return json({ ok: true, skipped: "outside_window", sp_time: sp });
-  if (!phase || !payloadObj || !runKey) return json({ ok: true, skipped: "no_phase_start", date: dateIso });
+  if (!plan || !payloadObj || !runKey) return json({ ok: true, skipped: "no_seasonal_slot", date: dateIso });
 
   const { error: claimErr } = await supabase.from("push_campaign_runs").insert({ run_key: runKey, campaign: CAMPAIGN });
   if (claimErr) {
