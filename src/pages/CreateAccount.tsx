@@ -14,7 +14,11 @@ export default function CreateAccount() {
   const navigate = useNavigate();
 
   const paymentId = params.get("pid") || "";
-  const [email, setEmail] = useState((params.get("email") || "").toLowerCase());
+  const [email, setEmail] = useState(() => {
+    let stored = "";
+    try { stored = sessionStorage.getItem("purchase-account-email") || ""; } catch { /* ignore */ }
+    return (params.get("email") || stored).toLowerCase();
+  });
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
