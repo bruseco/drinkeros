@@ -50,7 +50,10 @@ export const WelcomeOverlay: React.FC = () => {
 
   const close = () => {
     setClosing(true);
-    window.setTimeout(() => setVisible(false), 450);
+    window.setTimeout(() => {
+      setVisible(false);
+      window.dispatchEvent(new Event('welcome-overlay-closed'));
+    }, 450);
   };
 
   const handleNext = () => {

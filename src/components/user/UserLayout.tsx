@@ -4,9 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { UserNavbar } from './UserNavbar';
 import { UserSidebar } from './UserSidebar';
-import { PushNotificationPrompt } from './PushNotificationPrompt';
 import { PageTransition } from './PageTransition';
-import { PwaInstallGate } from './PwaInstallGate';
+import { EngagementOrchestrator } from './EngagementOrchestrator';
 import { PwaSplashScreen } from './PwaSplashScreen';
 import { VipDiscountCountdownBanner } from './VipDiscountCountdownBanner';
 import { WelcomeOverlay } from './WelcomeOverlay';
@@ -63,15 +62,14 @@ export const UserLayout: React.FC = () => {
       <ClubeRetriggerWatcher />
 
       <WelcomeOverlay />
+      <EngagementOrchestrator />
 
       <PwaSplashScreen />
       <UserSidebar />
       <div className="flex flex-1 flex-col min-w-0">
-        <PwaInstallGate />
         <FiscalPendingBanner />
         <VipDiscountCountdownBanner />
         <UserNavbar />
-        <PushNotificationPrompt />
         <main className="flex-1 pb-20 lg:pb-0">
           <PageTransition>
             <Outlet />

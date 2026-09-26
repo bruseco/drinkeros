@@ -18,7 +18,9 @@ export function shouldShowPwaGate(opts: {
   hasInstalledBefore: boolean | null;
   loading: boolean;
 }): boolean {
-  if (opts.loading) return true; // enquanto carrega, assume que pode aparecer (evita flash do banner do Clube)
+  // Banner substituído pelo EngagementOrchestrator (modal pós-login): nunca empilha mais.
+  return false;
+  if (opts.loading) return true;
   if (opts.isStandalone) return false;
   if (opts.hasInstalledBefore) return false;
   if (typeof window !== 'undefined' && localStorage.getItem(DISMISS_KEY) === '1') return false;

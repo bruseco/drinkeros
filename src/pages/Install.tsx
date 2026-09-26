@@ -53,7 +53,7 @@ const Install: React.FC = () => {
   };
 
   const features = [
-    "Acesse suas aulas mesmo offline",
+    "Abra suas receitas com um toque",
     "Receba notificações de novos conteúdos",
     "Experiência de app nativo",
     "Inicie rapidamente da tela inicial",

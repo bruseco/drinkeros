@@ -1936,7 +1936,11 @@ export type Database = {
           last_pwa_open_at: string | null
           last_sign_in_provider: string | null
           phone: string | null
+          push_opted_out_at: string | null
+          push_prompt_last_shown_at: string | null
           pwa_installed_at: string | null
+          pwa_prompt_dismissed_at: string | null
+          pwa_prompt_last_shown_at: string | null
           updated_at: string
           user_id: string
         }
@@ -1967,7 +1971,11 @@ export type Database = {
           last_pwa_open_at?: string | null
           last_sign_in_provider?: string | null
           phone?: string | null
+          push_opted_out_at?: string | null
+          push_prompt_last_shown_at?: string | null
           pwa_installed_at?: string | null
+          pwa_prompt_dismissed_at?: string | null
+          pwa_prompt_last_shown_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1998,7 +2006,11 @@ export type Database = {
           last_pwa_open_at?: string | null
           last_sign_in_provider?: string | null
           phone?: string | null
+          push_opted_out_at?: string | null
+          push_prompt_last_shown_at?: string | null
           pwa_installed_at?: string | null
+          pwa_prompt_dismissed_at?: string | null
+          pwa_prompt_last_shown_at?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -3945,6 +3957,10 @@ export type Database = {
       purge_expired_welcome_passwords: { Args: never; Returns: undefined }
       recalc_yearly_winner_stats: {
         Args: { _winner_id: string }
+        Returns: undefined
+      }
+      record_engagement_prompt: {
+        Args: { _action: string; _prompt: string }
         Returns: undefined
       }
       resolve_redirect_link: { Args: { link_code: string }; Returns: string }
