@@ -107,7 +107,10 @@ self.addEventListener('notificationclick', (event) => {
       .then((clientList) => {
         for (const client of clientList) {
           if ('focus' in client) {
-            return client.focus();
+            const wc = client as WindowClient;
+            // Abre a rota da notificação (ex.: /app/receitas) na janela existente
+            return (wc.navigate ? wc.navigate(url).catch(() => wc) : Promise.resolve(wc))
+              .then((c) => (c || wc).focus());
           }
         }
         return self.clients.openWindow(url);
