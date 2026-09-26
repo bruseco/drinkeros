@@ -158,6 +158,7 @@ serve(async (req) => {
 
     if (action === "pay") {
       if (o.status === "paid") return json({ error: "Oferta já utilizada", code: "already_paid" }, 409);
+      if (o.status === "declined") return json({ error: "Oferta recusada", code: "declined" }, 409);
       if (expired) return json({ error: "Oferta expirada", code: "expired" }, 409);
       if (o.checkout_attempts >= MAX_CHECKOUT_ATTEMPTS) return json({ error: "Limite de tentativas atingido", code: "limit" }, 429);
       if (await ownsBoth(buyerUserId)) return json({ error: "Você já possui estes cursos", code: "already_owned" }, 409);
