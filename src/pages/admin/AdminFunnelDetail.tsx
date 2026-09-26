@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { usePageFunnel, type FunnelRange, type FunnelCounts } from '@/hooks/usePageFunnel';
+import { usePageFunnel, sinceFromRange, type FunnelRange, type FunnelCounts } from '@/hooks/usePageFunnel';
 import { getFunnel } from '@/lib/funnels';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -153,26 +153,33 @@ const AdminFunnelDetail: React.FC = () => {
           </div>
         )}
       </div>
-      {funnel.key === 'rand' && <RandUpsellMetrics />}
+      {funnel.key === 'rand' && <RandUpsellMetrics range={range} />}
     </div>
   );
 };
 
-const RandUpsellMetrics: React.FC = () => {
+// Coorte por período: ofertas criadas no período (eventos do funil) e pagamentos aprovados no período (aprovado/receita).
+const RandUpsellMetrics: React.FC<{ range: FunnelRange }> = ({ range }) => {
+  const since = sinceFromRange(range);
   const { data } = useQuery({
-    queryKey: ['rand-upsell-metrics'],
+    queryKey: ['rand-upsell-metrics', range],
+    refetchInterval: 30_000,
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from('post_purchase_offers' as any)
-        .select('viewed_at, accepted_at, declined_at, checkout_started_at, paid_at, amount, events')
+        .select('created_at, viewed_at, accepted_at, declined_at, checkout_started_at, paid_at, amount, events')
         .eq('offer_key', 'rand-pacote-business');
+      if (since) q = q.or(`created_at.gte.${since},paid_at.gte.${since}`);
+      const { data, error } = await q.limit(10000);
       if (error) throw error;
       return (data || []) as any[];
     },
   });
-  const rows = data ?? [];
+  const all = data ?? [];
+  const rows = since ? all.filter((r) => r.created_at >= since) : all;
+  const paidRows = since ? all.filter((r) => r.paid_at && r.paid_at >= since) : all.filter((r) => r.paid_at);
   const n = (k: string) => rows.filter((r) => r[k]).length;
-  const revenue = rows.filter((r) => r.paid_at).reduce((s, r) => s + Number(r.amount || 0), 0);
+  const revenue = paidRows.reduce((s, r) => s + Number(r.amount || 0), 0);
   const e = (k: string) => rows.filter((r) => r.events && r.events[k]).length;
   const items = [
     ['Viu a página pós-compra', n('viewed_at')],
@@ -186,7 +193,7 @@ const RandUpsellMetrics: React.FC = () => {
     ['Aceitou', e('accept')],
     ['Recusou', e('decline')],
     ['Iniciou o pagamento', e('checkout_started')],
-    ['Upsell aprovado', e('paid')],
+    ['Upsell aprovado', paidRows.length],
   ] as const;
   return (
     <div className="rounded-xl border border-border bg-card p-5 space-y-3">
