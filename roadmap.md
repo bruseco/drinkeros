@@ -9,4 +9,4 @@
 
 ## Demonstração segura do pós-compra RAND (set/2026)
 - [x] Modo visual isolado em /rand/obrigado?demo=1, sem compras, dados, tracking ou concessão de acesso
-- [ ] Validar visualmente em mobile e desktop e confirmar ausência de chamadas sensíveis
+- [x] Validar visualmente em mobile e desktop e confirmar ausência de chamadas sensíveis
