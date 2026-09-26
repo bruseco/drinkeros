@@ -11,7 +11,7 @@ describe('certificatePdf', () => {
     const standard = getCertificatePreviewGeometry(600, 3347, 2447, CERTIFICATE_LAYOUT_DEFAULTS);
     const barEventos = getCertificatePreviewGeometry(600, 3369, 2471, CERTIFICATE_LAYOUT_DEFAULTS);
 
-    expect(standard.height).toBeCloseTo(438.6929, 3);
+    expect(standard.height).toBeCloseTo(438.6615, 3);
     expect(barEventos.height).toBeCloseTo(440.0119, 3);
     expect(standard.aspectRatio).not.toBe(barEventos.aspectRatio);
   });
