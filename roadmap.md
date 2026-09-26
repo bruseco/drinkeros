@@ -13,3 +13,4 @@
 
 ## Demonstração Pacote Business (set/2026)
 - [x] Atualizar e validar o novo design seguro de /rand/obrigado?demo=1, sem afetar o fluxo real
+- [ ] Simplificar o estado pré-revelação para faixa de processamento e vídeo, mantendo o pós-revelação aprovado
