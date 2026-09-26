@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CheckCircle2, Clock3, Loader2, Sparkles, Volume2 } from "lucide-react";
+import { Clock3, Loader2, Sparkles, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import drinkerosLogo from "@/assets/logotipo-drinkeros.png";
 import barEventosCover from "@/assets/landing/rand-business/bar-eventos.jpg";
 import bartenderBordoCover from "@/assets/landing/rand-business/bartender-bordo.jpg";
 import drinkDeliveryCover from "@/assets/landing/rand-business/drinkdelivery.jpg";
@@ -277,21 +276,6 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
       </div>
 
       <main className="mx-auto max-w-6xl px-4 pb-12 pt-[calc(env(safe-area-inset-top)+7.25rem)] sm:px-6 sm:pt-32">
-        {revealed && (
-          <header className="mx-auto mb-8 max-w-3xl animate-fade-in text-center">
-            <img src={drinkerosLogo} alt="Drinkeros" className="mx-auto h-8 w-auto opacity-90 sm:h-10" />
-            <div className="mt-6 inline-flex items-center gap-2 rounded-md border border-success/40 bg-success/10 px-3 py-2 text-sm font-semibold text-success">
-              <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
-              Compra do RAND garantida
-            </div>
-            <h1 className="mt-5 text-balance text-3xl font-bold leading-tight sm:text-5xl">
-              Seus clássicos estão garantidos. Agora falta transformar técnica em oportunidade.
-            </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Assista ao recado abaixo enquanto preparamos seu acesso.
-            </p>
-          </header>
-        )}
 
         <section className="mx-auto max-w-4xl" aria-label="Apresentação do Pacote Business">
             <div className="relative aspect-video overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
