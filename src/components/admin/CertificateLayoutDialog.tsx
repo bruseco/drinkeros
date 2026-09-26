@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import {
   CERTIFICATE_LAYOUT_DEFAULTS,
   CERTIFICATE_LONG_NAME,
   downloadCertificatePdf,
+  getCertificateNameLayout,
   getCertificatePreviewGeometry,
 } from '@/lib/certificatePdf';
 
@@ -126,7 +127,16 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
 
   const geometry = getCertificatePreviewGeometry(600, imageSize.width, imageSize.height, currentLayout);
   const pdfWidthPt = (297 * 72) / 25.4;
-  const fictionalNameFontSize = nameFontSize * (19.5 / 26);
+  const previewName = useMemo(() => {
+    try {
+      return { layout: getCertificateNameLayout(CERTIFICATE_LONG_NAME, nameFontSize), error: null };
+    } catch (error) {
+      return {
+        layout: null,
+        error: error instanceof Error ? error.message : 'O nome não cabe na área segura do certificado.',
+      };
+    }
+  }, [nameFontSize]);
 
   const nameStyle: React.CSSProperties = {
     position: 'absolute',
@@ -135,12 +145,12 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
     top: `${geometry.nameTopPercent}%`,
     transform: 'translate(-50%, -50%)',
     color: textColor,
-    fontSize: `${(fictionalNameFontSize * 100) / pdfWidthPt}cqw`,
+    fontSize: previewName.layout ? `${(previewName.layout.fontSizePt * 100) / pdfWidthPt}cqw` : undefined,
     fontFamily: 'Helvetica, Arial, sans-serif',
     lineHeight: 1.15,
     maxWidth: '68%',
     width: '68%',
-    whiteSpace: 'nowrap',
+    whiteSpace: 'pre-line',
     WebkitTextSizeAdjust: 'none',
     textSizeAdjust: 'none',
     textAlign: 'center',
@@ -187,9 +197,13 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
                   Sem imagem de fundo
                 </div>
               )}
-              <span style={nameStyle}>{CERTIFICATE_LONG_NAME}</span>
+              {previewName.layout && <span style={nameStyle}>{previewName.layout.lines.join('\n')}</span>}
               <span style={dateStyle}>16 de abril de 2026</span>
             </div>
+
+            {previewName.error && (
+              <p role="alert" className="text-sm text-destructive">{previewName.error}</p>
+            )}
 
             {/* Controls */}
             <div className="grid gap-4 sm:grid-cols-2">
@@ -212,7 +226,7 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
             </p>
 
             <div className="flex flex-wrap justify-end gap-2">
-              <Button type="button" variant="secondary" onClick={handleFictionalTest} disabled={!bgUrl || isGeneratingTest}>
+              <Button type="button" variant="secondary" onClick={handleFictionalTest} disabled={!bgUrl || isGeneratingTest || !!previewName.error}>
                 {isGeneratingTest && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Baixar teste fictício
               </Button>
