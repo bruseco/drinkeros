@@ -1,3 +1,4 @@
+- [x] Corrigir e validar os oito modelos de certificado com dados fictícios, sem publicar.
 
 ## Desconto do Sócio do Clube (set/2026)
 - [x] Contagem dos 7 dias a partir da PRIMEIRA ENTRADA NO APP (mantido)
