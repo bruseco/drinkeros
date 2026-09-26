@@ -151,6 +151,7 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
 
   const nameStyle: React.CSSProperties = {
     position: 'absolute',
+    display: 'block',
     left: `${geometry.nameLeftPercent}%`,
     top: `${geometry.nameTopPercent}%`,
     transform: 'translate(-50%, -50%)',
@@ -161,12 +162,15 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
     maxWidth: `${geometry.maxNameWidthPx}px`,
     width: `${geometry.maxNameWidthPx}px`,
     whiteSpace: 'nowrap',
+    WebkitTextSizeAdjust: 'none',
+    textSizeAdjust: 'none',
     textAlign: 'center',
     pointerEvents: 'none',
   };
 
   const dateStyle: React.CSSProperties = {
     position: 'absolute',
+    display: 'block',
     left: `${geometry.dateLeftPercent}%`,
     top: `${geometry.dateTopPercent}%`,
     transform: 'translate(-50%, -50%)',
@@ -174,6 +178,8 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
     fontSize: `${geometry.dateFontSizePx}px`,
     fontFamily: 'Helvetica, Arial, sans-serif',
     whiteSpace: 'nowrap',
+    WebkitTextSizeAdjust: 'none',
+    textSizeAdjust: 'none',
     pointerEvents: 'none',
   };
 
