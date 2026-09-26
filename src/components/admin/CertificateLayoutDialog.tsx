@@ -148,19 +148,24 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
       return context.measureText(value).width;
     },
   );
+  const nameRenderFontSize = Math.max(previewNameFontSize, 16);
+  const nameRenderScale = previewNameFontSize / nameRenderFontSize;
+  const dateRenderFontSize = Math.max(geometry.dateFontSizePx, 16);
+  const dateRenderScale = geometry.dateFontSizePx / dateRenderFontSize;
 
   const nameStyle: React.CSSProperties = {
     position: 'absolute',
     display: 'block',
     left: `${geometry.nameLeftPercent}%`,
     top: `${geometry.nameTopPercent}%`,
-    transform: 'translate(-50%, -50%)',
+    transform: `translate(-50%, -50%) scale(${nameRenderScale})`,
+    transformOrigin: 'center',
     color: textColor,
-    fontSize: `${previewNameFontSize}px`,
+    fontSize: `${nameRenderFontSize}px`,
     fontFamily: 'Helvetica, Arial, sans-serif',
     lineHeight: 1.15,
-    maxWidth: `${geometry.maxNameWidthPx}px`,
-    width: `${geometry.maxNameWidthPx}px`,
+    maxWidth: `${geometry.maxNameWidthPx / nameRenderScale}px`,
+    width: `${geometry.maxNameWidthPx / nameRenderScale}px`,
     whiteSpace: 'nowrap',
     WebkitTextSizeAdjust: 'none',
     textSizeAdjust: 'none',
@@ -173,9 +178,10 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
     display: 'block',
     left: `${geometry.dateLeftPercent}%`,
     top: `${geometry.dateTopPercent}%`,
-    transform: 'translate(-50%, -50%)',
+    transform: `translate(-50%, -50%) scale(${dateRenderScale})`,
+    transformOrigin: 'center',
     color: textColor,
-    fontSize: `${geometry.dateFontSizePx}px`,
+    fontSize: `${dateRenderFontSize}px`,
     fontFamily: 'Helvetica, Arial, sans-serif',
     whiteSpace: 'nowrap',
     WebkitTextSizeAdjust: 'none',
