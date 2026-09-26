@@ -1,21 +1,22 @@
-# Novo design da demonstração pós-compra RAND
+# Corrigir certificados em todos os modelos
 
-## Objetivo
-Atualizar exclusivamente `/rand/obrigado?demo=1` para aprovação visual do Pacote Business, mantendo o fluxo real, pagamentos, dados e métricas intactos.
+## Escopo
+- Medir os oito fundos PNG cadastrados e identificar proporção, dimensões e área útil de cada modelo.
+- Centralizar a geometria do certificado para que prévia e PDF usem a dimensão intrínseca real da imagem.
+- Renderizar o PNG inteiro, sem corte, deformação ou conversão indevida para JPEG.
+- Proteger nome longo com ajuste de fonte e quebra controlada, mantendo data e conteúdo impresso dentro do modelo.
+- Tornar a prévia administrativa responsiva e fiel ao PDF em desktop e celular.
+- Adicionar teste local explícito com dados fictícios, sem emissão, gravação, acesso ou tracking.
+- Validar os oito modelos em prévia e PDF, registrar medidas e inspecionar visualmente os arquivos exportados.
 
-## Alterações
-- Separar a experiência demo em uma apresentação própria dentro da página existente, retornando antes de qualquer lógica real.
-- Exibir faixa superior de processamento, confirmação da compra e vídeo do YouTube com autoplay sem som, ativação de áudio por interação e fallback manual.
-- Medir 3:45 pela reprodução efetiva do player; pausas não avançam a revelação.
-- Revelar CTA, recusa, preço promocional e os quatro cursos somente após 3:45 assistidos.
-- Usar as capas oficiais já cadastradas, incorporadas como recursos locais da demonstração para evitar consultas ao banco.
-- Alterar a faixa para amarelo na revelação e iniciar contagem visual de 5:00; ao zerar, encerrar apenas a demonstração.
-- Suportar `demo=1&reveal=1` para abrir diretamente no estado revelado.
-- Fazer CTA e recusa exibirem somente o aviso de demonstração, sem navegação, pagamento, tracking ou acesso.
-- Deixar definidos, sem disparo no demo, os marcos futuros do vídeo: start, 25%, 50%, 75%, 90% e conclusão.
+## Segurança
+- Nenhum dado de aluno, conclusão, certificado ou acesso será alterado.
+- Nenhuma chamada a `issue_course_certificate` será feita no modo de teste.
+- Os PNGs e as configurações atuais do banco serão preservados; ajustes individuais só serão adicionados se as medições provarem necessidade.
+- Nada será publicado.
 
-## Validação
-- Confirmar ausência de chamadas ao backend, Mercado Pago e tracking nos dois estados demo.
-- Validar visualmente em 390×844 e 1280×1800.
-- Conferir reprodução/pausa, revelação, timer, teclado, aviso dos botões, testes e diagnóstico automático.
-- Não publicar nem alterar banco, combos ou fluxo real.
+## Detalhes técnicos
+- Criar uma utilidade compartilhada para carregar metadados da imagem, detectar PNG/JPEG, calcular página proporcional e posicionar texto no mesmo sistema de coordenadas da imagem.
+- Separar a geração pura do arquivo da emissão real para permitir exportação fictícia segura.
+- Trocar dimensões fixas e `object-cover` por proporção intrínseca e `object-contain`.
+- Cobrir cálculo, formato, nome longo e oito fundos com testes automatizados e inspeção visual dos PDFs renderizados.
