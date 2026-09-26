@@ -10,7 +10,7 @@ import SeoHead from "@/components/SeoHead";
 import { trackInitiateCheckout } from "@/lib/metaPixel";
 import { mpRejectionMessage } from "@/lib/mpErrors";
 import { PixDisplay } from "@/pages/Checkout";
-import RandObrigadoDemo from "@/components/landing/RandObrigadoDemo";
+import RandObrigadoDemo, { RandUpsellExperience } from "@/components/landing/RandObrigadoDemo";
 
 interface OfferState {
   status: string;
@@ -22,6 +22,10 @@ interface OfferState {
   first_name: string | null;
   product: { id: string; name: string; slug: string; cover_image_url: string | null };
   price: number;
+  watched_seconds?: number;
+  revealed_at?: string | null;
+  offer_deadline_at?: string | null;
+  server_now?: string;
 }
 
 type Stage = "loading" | "offer" | "paying" | "pix" | "done" | "unavailable";
@@ -56,6 +60,8 @@ export default function RandObrigado() {
   const [brickReady, setBrickReady] = useState(false);
   const [hasSession, setHasSession] = useState(false);
   const purchaseFired = useRef(false);
+  const clockOffsetRef = useRef(0);
+  const [busy, setBusy] = useState(false);
 
   const call = (body: Record<string, unknown>) =>
     supabase.functions.invoke("rand-upsell", { body: { ref, ...body } });
@@ -67,6 +73,7 @@ export default function RandObrigado() {
       const { data, error } = await call({ action: "get" });
       if (error || !data || data.error) { setStage("unavailable"); return; }
       const s = data as OfferState;
+      if (s.server_now) clockOffsetRef.current = new Date(s.server_now).getTime() - Date.now();
       setState(s);
       try { sessionStorage.setItem("purchase-account-email", s.email); } catch { /* ignore */ }
       if (s.status === "paid") setStage("done");
@@ -142,6 +149,32 @@ export default function RandObrigado() {
     else toast.error("Pagamento recusado", { description: mpRejectionMessage(data.status_detail) });
   };
 
+  const applyState = (s: OfferState) => {
+    if (s.server_now) clockOffsetRef.current = new Date(s.server_now).getTime() - Date.now();
+    setState(s);
+  };
+
+  const requestReveal = async (tries = 0): Promise<void> => {
+    const { data, error } = await call({ action: "reveal" });
+    if (!error && data && !data.error) { applyState(data as OfferState); return; }
+    // Servidor ainda não confirmou o tempo assistido: tenta de novo (sem reiniciar prazo).
+    if (tries < 20) setTimeout(() => { void requestReveal(tries + 1); }, 6000);
+  };
+
+  const deadlineMs = state?.offer_deadline_at
+    ? new Date(state.offer_deadline_at).getTime() - clockOffsetRef.current
+    : null;
+
+  const acceptReal = async () => {
+    if (busy) return;
+    if (deadlineMs !== null && deadlineMs <= Date.now()) return;
+    setBusy(true);
+    const { data, error } = await call({ action: "track", event: "accept" });
+    setBusy(false);
+    if (error || data?.error) { toast.error("Esta condição não está mais disponível."); return; }
+    setStage("paying");
+  };
+
   const continueLabel = hasSession ? "Ir para meus cursos" : "Criar minha senha e acessar";
 
   if (isDemo) {
@@ -149,6 +182,27 @@ export default function RandObrigado() {
       <>
         <SeoHead title="Demonstração pós-compra RAND | Drinkeros" description="Prévia segura do pós-compra RAND." path="/rand/obrigado" />
         <RandObrigadoDemo forceReveal={forceDemoReveal} />
+      </>
+    );
+  }
+
+  if (stage === "offer" && state) {
+    return (
+      <>
+        <SeoHead title="Compra confirmada | Drinkeros" description="Sua compra do RAND está garantida." path="/rand/obrigado" />
+        <RandUpsellExperience
+          mode="real"
+          initialWatched={Number(state.watched_seconds) || 0}
+          revealed={!!state.revealed_at}
+          deadlineMs={deadlineMs}
+          busy={busy}
+          onProgress={(w) => { void call({ action: "progress", watched: w }); }}
+          onMilestone={(k) => { void call({ action: "track", event: k }); }}
+          onRevealReached={() => { void requestReveal(); }}
+          onAccept={() => { void acceptReal(); }}
+          onDecline={() => { void decline(); }}
+          onContinue={finish}
+        />
       </>
     );
   }
@@ -179,30 +233,6 @@ export default function RandObrigado() {
 
         {stage === "loading" && (
           <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
-        )}
-
-        {stage === "offer" && state && (
-          <section className="rounded-2xl border border-primary/40 bg-white/5 p-5 space-y-4">
-            <p className="inline-flex items-center gap-1.5 text-xs uppercase tracking-wider text-primary">
-              <Sparkles className="w-3.5 h-3.5" /> Oferta única, só nesta página
-            </p>
-            <h1 className="text-2xl font-bold leading-tight">
-              Você garantiu os clássicos; agora aprenda a criar seus próprios drinks.
-            </h1>
-            {state.product.cover_image_url && (
-              <img src={state.product.cover_image_url} alt={state.product.name} className="w-full h-auto rounded-xl object-contain" />
-            )}
-            <p className="text-white/80">
-              Leve <strong>Drinkeros Xperience + Workshop Além dos Clássicos</strong> e saia da receita pronta para a criação autoral.
-            </p>
-            <p className="text-3xl font-bold">{brl(state.price)} <span className="text-sm font-normal text-white/60">pagamento único</span></p>
-            <Button size="lg" className="w-full h-14 text-base font-bold" onClick={accept}>
-              Sim, quero criar meus próprios drinks
-            </Button>
-            <button type="button" onClick={decline} className="w-full text-center text-sm text-white/50 underline underline-offset-4 py-2">
-              Não, obrigado. Continuar para o meu acesso
-            </button>
-          </section>
         )}
 
         {stage === "paying" && state && (
@@ -241,8 +271,8 @@ export default function RandObrigado() {
         {stage === "done" && (
           <section className="rounded-2xl border border-white/10 bg-white/5 p-5 text-center space-y-3">
             <CheckCircle2 className="w-10 h-10 text-green-500 mx-auto" />
-            <p className="font-semibold">Xperience + Workshop garantidos!</p>
-            <p className="text-sm text-white/70">Os dois cursos serão liberados na sua conta.</p>
+            <p className="font-semibold">Pacote Business garantido!</p>
+            <p className="text-sm text-white/70">Os quatro cursos serão liberados na sua conta.</p>
             <Button size="lg" className="w-full h-12" onClick={finish}>{continueLabel}</Button>
           </section>
         )}
