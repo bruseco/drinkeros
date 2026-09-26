@@ -43,7 +43,7 @@ export interface CertificateNameLayout {
 
 export const CERTIFICATE_LAYOUT_REFERENCE = { width: 3347, height: 2447 } as const;
 export const CERTIFICATE_PDF_WIDTH_MM = 297;
-export const CERTIFICATE_LONG_NAME = 'Maria Fernanda de Oliveira Nascimento Albuquerque dos Santos';
+export const CERTIFICATE_LONG_NAME = 'Maria Fernanda de Oliveira Nascimento Albuquerque dos Santos Pereira Cavalcante de Almeida Rodrigues Montenegro';
 
 export const CERTIFICATE_LAYOUT_DEFAULTS: CertificateLayoutValues = {
   name_x: 1674,

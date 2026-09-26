@@ -58,4 +58,13 @@ describe('certificatePdf', () => {
     expect(at26.lines.join(' ')).toBe(name);
     expect(at18.lines.join(' ')).toBe(name);
   });
+
+  it('usa duas linhas sem perder texto no nome fictício da prévia', () => {
+    const name = 'Maria Fernanda de Oliveira Nascimento Albuquerque dos Santos Pereira Cavalcante de Almeida Rodrigues Montenegro';
+    const fitted = getCertificateNameLayout(name, 26);
+
+    expect(fitted.lines).toHaveLength(2);
+    expect(fitted.lines.join(' ')).toBe(name);
+    expect(fitted.fontSizePt).toBe(12);
+  });
 });
