@@ -200,3 +200,87 @@ export function getPrimaryPhaseStartingOn(date: Date): SeasonalPhase | null {
   if (!cur || cur.id === prev?.id) return null;
   return cur;
 }
+
+// ---------- Datas principais das comemorações + slots de push ----------
+
+export type SeasonalPushSlot = 'opening' | 'd3' | 'event_day';
+
+/** Comemorações com data principal (Verão/Inverno só têm push de abertura). */
+export type CelebrationPhaseId = 'carnaval' | 'festa_junina' | 'halloween' | 'natal';
+
+/** Data principal de cada comemoração no ano informado (componentes locais). */
+export function celebrationMainDates(year: number): Record<CelebrationPhaseId, Date> {
+  const t = carnivalTuesday(year);
+  return {
+    carnaval: new Date(t.getFullYear(), t.getMonth(), t.getDate()), // terça de Carnaval
+    festa_junina: md(year, 6, 24), // São João
+    halloween: md(year, 10, 31),
+    natal: md(year, 12, 25),
+  };
+}
+
+export const OPENING_BODY =
+  'Já separamos receitas especiais para esta época. Abra o Clube dos Drinkeros e escolha a sua.';
+
+export const CELEBRATION_PUSH_TEXTS: Record<CelebrationPhaseId, Record<'d3' | 'event_day', { title: string; body: string }>> = {
+  carnaval: {
+    d3: { title: 'Faltam 3 dias para o Carnaval 🎉', body: 'Hora de preparar os drinks da galera! Escolha suas receitas no Clube dos Drinkeros.' },
+    event_day: { title: 'Hoje é Carnaval! 🎉', body: 'Chama a galera e prepare um drink pra festa. Suas receitas estão no Clube dos Drinkeros.' },
+  },
+  festa_junina: {
+    d3: { title: 'Faltam 3 dias para o São João 🌽', body: 'Já pensou nos drinks do arraial? Veja as receitas juninas no Clube dos Drinkeros.' },
+    event_day: { title: 'Hoje é dia de São João! 🌽', body: 'Arraial pede drink temático. Abra o Clube dos Drinkeros e prepare o seu.' },
+  },
+  halloween: {
+    d3: { title: 'Faltam 3 dias para o Halloween 🎃', body: 'Escolha seus drinks assustadores e prepare tudo com calma no Clube dos Drinkeros.' },
+    event_day: { title: 'Hoje é Halloween! 🎃', body: 'Prepare os drinks da noite. As receitas temáticas estão no Clube dos Drinkeros.' },
+  },
+  natal: {
+    d3: { title: 'Faltam 3 dias para o Natal 🎄', body: 'Escolha os drinks para brindar com a família. As receitas estão no Clube dos Drinkeros.' },
+    event_day: { title: 'Hoje é Natal! 🎄', body: 'Prepare um drink especial para celebrar com a família. Abra o Clube dos Drinkeros.' },
+  },
+};
+
+export interface SeasonalPushPlan {
+  phaseId: SeasonalPhaseId;
+  slot: SeasonalPushSlot;
+  /** Ano da comemoração (usado na chave idempotente). */
+  year: number;
+  title: string;
+  body: string;
+  /** Tag usada no deep link /app/receitas?categoria=<tag>. */
+  categoryTag: string;
+}
+
+const sameDay = (a: Date, b: Date) =>
+  a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+/**
+ * Decide qual push sazonal (se algum) cabe no dia local informado.
+ * Prioridade se coincidirem: event_day > d3 > opening (1 push sazonal por dia).
+ */
+export function getSeasonalPushForDate(date: Date): SeasonalPushPlan | null {
+  const day = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12);
+  const mains = celebrationMainDates(day.getFullYear());
+  const ids = Object.keys(mains) as CelebrationPhaseId[];
+
+  for (const slot of ['event_day', 'd3'] as const) {
+    for (const id of ids) {
+      const target = new Date(mains[id]);
+      if (slot === 'd3') target.setDate(target.getDate() - 3);
+      if (sameDay(day, target)) {
+        const t = CELEBRATION_PUSH_TEXTS[id][slot];
+        return { phaseId: id, slot, year: mains[id].getFullYear(), title: t.title, body: t.body, categoryTag: PHASES[id].tags[0] };
+      }
+    }
+  }
+
+  const opening = getPrimaryPhaseStartingOn(day);
+  if (opening) {
+    return {
+      phaseId: opening.id, slot: 'opening', year: day.getFullYear(),
+      title: PHASE_PUSH_TITLES[opening.id], body: OPENING_BODY, categoryTag: opening.tags[0],
+    };
+  }
+  return null;
+}
