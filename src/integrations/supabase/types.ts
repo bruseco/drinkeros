@@ -2070,6 +2070,45 @@ export type Database = {
         }
         Relationships: []
       }
+      push_campaign_runs: {
+        Row: {
+          campaign: string
+          failed_count: number
+          finished_at: string | null
+          last_error: string | null
+          removed_count: number
+          run_key: string
+          sent_count: number
+          started_at: string
+          status: string
+          total_subscriptions: number
+        }
+        Insert: {
+          campaign: string
+          failed_count?: number
+          finished_at?: string | null
+          last_error?: string | null
+          removed_count?: number
+          run_key: string
+          sent_count?: number
+          started_at?: string
+          status?: string
+          total_subscriptions?: number
+        }
+        Update: {
+          campaign?: string
+          failed_count?: number
+          finished_at?: string | null
+          last_error?: string | null
+          removed_count?: number
+          run_key?: string
+          sent_count?: number
+          started_at?: string
+          status?: string
+          total_subscriptions?: number
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth: string
