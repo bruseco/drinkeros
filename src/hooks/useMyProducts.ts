@@ -52,7 +52,7 @@ export const useMyProducts = () => {
             .eq('user_id', user.id),
           supabase
             .from('user_ebooks')
-            .select('id, ebook_id, purchased_at, expires_at, ebook:ebooks(id, name, cover_image_url, is_active)')
+            .select('id, ebook_id, purchased_at, refunded_at, ebook:ebooks(id, name, cover_image_url, is_active)')
             .eq('user_id', user.id),
           supabase
             .from('user_exclusive_access')
@@ -111,10 +111,19 @@ export const useMyProducts = () => {
         products.push(buildProduct('course', c.id, c.name, c.cover_image_url, uc.purchased_at, uc.expires_at, uc.id));
       }
 
+      // E-books são permanentes: nunca expiram; estornados não aparecem.
       for (const ue of ebooks || []) {
+        if ((ue as { refunded_at?: string | null }).refunded_at) continue;
         const e = ue.ebook as unknown as { id: string; name: string; cover_image_url: string | null; is_active: boolean } | null;
         if (!e) continue;
-        products.push(buildProduct('ebook', e.id, e.name, e.cover_image_url, ue.purchased_at, ue.expires_at, ue.id));
+        products.push({
+          ...buildProduct('ebook', e.id, e.name, e.cover_image_url, ue.purchased_at, null, ue.id),
+          expires_at: null,
+          is_lifetime: true,
+          effective_expires_at: null,
+          is_expired: false,
+          extended_by_vip: false,
+        });
       }
 
       for (const ex of exclusives || []) {
