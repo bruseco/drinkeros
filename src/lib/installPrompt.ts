@@ -27,7 +27,9 @@ export const clearDeferredInstallPrompt = () => {
 };
 export function onInstallPromptChange(cb: () => void) {
   listeners.add(cb);
-  return () => listeners.delete(cb);
+  return () => {
+    listeners.delete(cb);
+  };
 }
 
 export const isIOSDevice = () =>
