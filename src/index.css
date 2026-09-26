@@ -124,6 +124,58 @@ All colors MUST be HSL.
   }
 }
 
+@keyframes rand-demo-sound-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 hsl(var(--foreground) / 0.34);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 14px hsl(var(--foreground) / 0);
+  }
+}
+
+@keyframes rand-demo-offer-glow {
+  0%, 100% { box-shadow: 0 0 24px hsl(var(--success) / 0.3); }
+  50% { box-shadow: 0 0 42px hsl(var(--success) / 0.62); }
+}
+
+@keyframes rand-demo-offer-shine {
+  from { transform: translateX(-160%) skewX(-18deg); }
+  to { transform: translateX(420%) skewX(-18deg); }
+}
+
+.rand-demo-sound-pulse {
+  animation: rand-demo-sound-pulse 1.45s ease-in-out infinite;
+  will-change: transform, box-shadow;
+}
+
+.rand-demo-offer-cta {
+  background-image: linear-gradient(120deg, hsl(var(--success)), hsl(var(--success) / 0.72), hsl(var(--success)));
+  animation: rand-demo-offer-glow 1.8s ease-in-out infinite;
+}
+
+.rand-demo-offer-shine {
+  position: absolute;
+  inset: -40% auto -40% -30%;
+  width: 22%;
+  background: linear-gradient(90deg, transparent, hsl(var(--success-foreground) / 0.3), transparent);
+  animation: rand-demo-offer-shine 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rand-demo-sound-pulse,
+  .rand-demo-offer-cta,
+  .rand-demo-offer-shine {
+    animation: none;
+  }
+
+  .rand-demo-offer-cta {
+    box-shadow: 0 0 28px hsl(var(--success) / 0.4);
+  }
+}
+
 /* Page transition animations */
 .page-transition {
   will-change: transform, opacity;

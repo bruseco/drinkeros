@@ -86,6 +86,31 @@ const showDemoNotice = () => toast.info("Modo de demonstração", {
   description: "Nenhuma cobrança será realizada",
 });
 
+const offerButtonClassName =
+  "rand-demo-offer-cta relative min-h-20 w-full overflow-hidden whitespace-normal border border-success/70 bg-success px-5 py-4 text-base font-black text-success-foreground shadow-[0_0_28px_hsl(var(--success)/0.38)] transition-[transform,filter,box-shadow] hover:bg-success hover:brightness-110 hover:shadow-[0_0_38px_hsl(var(--success)/0.55)] focus-visible:ring-2 focus-visible:ring-success focus-visible:ring-offset-4 focus-visible:ring-offset-background active:scale-[0.99] sm:min-h-24 sm:text-xl";
+
+const declineButtonClassName =
+  "mt-3 h-auto w-full whitespace-normal px-2 py-2 text-sm font-normal leading-relaxed text-muted-foreground underline decoration-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:text-foreground focus-visible:underline visited:text-muted-foreground";
+
+function DemoOfferActions() {
+  return (
+    <div className="mx-auto max-w-2xl text-center">
+      <Button type="button" size="lg" onClick={showDemoNotice} className={offerButtonClassName}>
+        <span className="rand-demo-offer-shine" aria-hidden="true" />
+        <span className="relative z-10">QUERO APROVEITAR A SUPER OFERTA!</span>
+      </Button>
+      <Button
+        type="button"
+        variant="link"
+        onClick={showDemoNotice}
+        className={declineButtonClassName}
+      >
+        Perder esta oferta e deixar mais de R$ 2.000 em conhecimento ir embora.
+      </Button>
+    </div>
+  );
+}
+
 interface RandObrigadoDemoProps {
   forceReveal: boolean;
 }
@@ -292,7 +317,7 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
                   {soundActivationPending ? (
                     <Loader2 className="h-10 w-10 animate-spin" aria-hidden="true" />
                   ) : (
-                    <span className="grid h-16 w-16 place-items-center rounded-full border border-foreground/30 bg-background/90 shadow-xl">
+                    <span className="rand-demo-sound-pulse grid h-16 w-16 place-items-center rounded-full border border-foreground/30 bg-background/90 shadow-xl motion-reduce:animate-none">
                       <Volume2 className="h-8 w-8" aria-hidden="true" />
                     </span>
                   )}
@@ -302,10 +327,15 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
                 </Button>
               )}
             </div>
+            {revealed && (
+              <div className="mt-5 animate-fade-in sm:mt-7">
+                <DemoOfferActions />
+              </div>
+            )}
         </section>
 
         {revealed && (
-          <section className="mt-9 animate-fade-in" aria-labelledby="business-offer-title">
+          <section className="mt-16 animate-fade-in sm:mt-24" aria-labelledby="business-offer-title">
             <div className="mx-auto max-w-3xl text-center">
               <p className="inline-flex items-center gap-2 text-sm font-bold uppercase text-primary">
                 <Sparkles className="h-4 w-4" aria-hidden="true" /> Pacote Business
@@ -320,7 +350,11 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
               <p className="mt-2 text-sm font-medium text-muted-foreground">condição promocional · pagamento único</p>
             </div>
 
-            <div className="mt-8 grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-4">
+            <h3 className="mx-auto mt-14 max-w-3xl text-balance text-center text-2xl font-black leading-tight sm:mt-16 sm:text-4xl">
+              Veja tudo o que você leva neste pacote
+            </h3>
+
+            <div className="mt-7 grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-4 sm:mt-9">
               {COURSES.map((course) => (
                 <article key={course.name} className="overflow-hidden rounded-lg border border-border bg-card shadow-lg">
                   <div className="aspect-[3/2] overflow-hidden bg-muted">
@@ -339,23 +373,8 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
               ))}
             </div>
 
-            <div className="mx-auto mt-8 max-w-2xl text-center">
-              <Button
-                type="button"
-                size="lg"
-                onClick={showDemoNotice}
-                className="min-h-16 w-full whitespace-normal bg-success px-5 py-3 text-base font-black text-success-foreground hover:bg-success/90 sm:text-lg"
-              >
-                QUERO APROVEITAR A SUPER OFERTA!
-              </Button>
-              <Button
-                type="button"
-                variant="link"
-                onClick={showDemoNotice}
-                className="mt-3 h-auto w-full whitespace-normal px-2 py-2 text-sm font-normal leading-relaxed text-muted-foreground"
-              >
-                Perder esta oferta e deixar mais de R$ 2.000 em conhecimento ir embora.
-              </Button>
+            <div className="mt-10 sm:mt-12">
+              <DemoOfferActions />
               <p className="mt-4 text-xs text-muted-foreground">
                 Demonstração visual: nenhum pagamento ou alteração de acesso será realizado.
               </p>
