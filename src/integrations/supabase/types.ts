@@ -1919,10 +1919,14 @@ export type Database = {
           checkout_started_at: string | null
           created_at: string
           declined_at: string | null
+          events: Json
           expires_at: string
           id: string
+          offer_deadline_at: string | null
           offer_key: string
           paid_at: string | null
+          progress_updated_at: string | null
+          revealed_at: string | null
           source_payment_id: string
           source_user_id: string | null
           status: string
@@ -1930,6 +1934,7 @@ export type Database = {
           upsell_payment_id: string | null
           upsell_payment_method: string | null
           viewed_at: string | null
+          watched_seconds: number
         }
         Insert: {
           accepted_at?: string | null
@@ -1941,10 +1946,14 @@ export type Database = {
           checkout_started_at?: string | null
           created_at?: string
           declined_at?: string | null
+          events?: Json
           expires_at?: string
           id?: string
+          offer_deadline_at?: string | null
           offer_key: string
           paid_at?: string | null
+          progress_updated_at?: string | null
+          revealed_at?: string | null
           source_payment_id: string
           source_user_id?: string | null
           status?: string
@@ -1952,6 +1961,7 @@ export type Database = {
           upsell_payment_id?: string | null
           upsell_payment_method?: string | null
           viewed_at?: string | null
+          watched_seconds?: number
         }
         Update: {
           accepted_at?: string | null
@@ -1963,10 +1973,14 @@ export type Database = {
           checkout_started_at?: string | null
           created_at?: string
           declined_at?: string | null
+          events?: Json
           expires_at?: string
           id?: string
+          offer_deadline_at?: string | null
           offer_key?: string
           paid_at?: string | null
+          progress_updated_at?: string | null
+          revealed_at?: string | null
           source_payment_id?: string
           source_user_id?: string | null
           status?: string
@@ -1974,6 +1988,7 @@ export type Database = {
           upsell_payment_id?: string | null
           upsell_payment_method?: string | null
           viewed_at?: string | null
+          watched_seconds?: number
         }
         Relationships: []
       }
@@ -4022,6 +4037,10 @@ export type Database = {
           source: string
           user_id: string
         }[]
+      }
+      ppo_mark_event: {
+        Args: { _event: string; _offer_id: string }
+        Returns: boolean
       }
       purge_expired_welcome_passwords: { Args: never; Returns: undefined }
       recalc_yearly_winner_stats: {
