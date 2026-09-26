@@ -1,0 +1,1 @@
+ALTER FUNCTION public.record_engagement_prompt(text, text) SECURITY INVOKER;
