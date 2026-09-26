@@ -114,7 +114,7 @@ export default function RandObrigado() {
 
   return (
     <div className="min-h-screen bg-black text-white pb-[env(safe-area-inset-bottom)]">
-      <SeoHead title="Compra confirmada | Drinkeros" description="Sua compra do RAND está garantida." />
+      <SeoHead title="Compra confirmada | Drinkeros" description="Sua compra do RAND está garantida." path="/rand/obrigado" />
       <header className="border-b border-white/10 pt-[env(safe-area-inset-top)]">
         <div className="max-w-xl mx-auto px-4 h-14 flex items-center justify-center">
           <img src={drinkerosLogo} alt="Drinkeros" className="h-7 w-auto opacity-90" />
