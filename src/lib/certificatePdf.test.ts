@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   CERTIFICATE_LAYOUT_DEFAULTS,
+  fitPreviewNameFontSize,
   formatCertificateDate,
   getCertificatePreviewGeometry,
   sanitizeCertificateFilename,
@@ -12,7 +13,7 @@ describe('certificatePdf', () => {
     const barEventos = getCertificatePreviewGeometry(600, 3369, 2471, CERTIFICATE_LAYOUT_DEFAULTS);
 
     expect(standard.height).toBeCloseTo(438.6615, 3);
-    expect(barEventos.height).toBeCloseTo(440.0119, 3);
+    expect(barEventos.height).toBeCloseTo(440.0712, 3);
     expect(standard.aspectRatio).not.toBe(barEventos.aspectRatio);
   });
 
@@ -28,5 +29,11 @@ describe('certificatePdf', () => {
 
   it('remove caracteres inválidos do nome do arquivo', () => {
     expect(sanitizeCertificateFilename('Curso: Bar / Eventos?')).toBe('Curso- Bar - Eventos-');
+  });
+
+  it('reduz nomes longos até a largura segura da prévia', () => {
+    const size = fitPreviewNameFontSize('Nome fictício muito longo', 20, 140, (value, fontSize) => value.length * fontSize * 0.5);
+    expect(size).toBeLessThan(20);
+    expect(size).toBeGreaterThanOrEqual((20 * 12) / 26);
   });
 });

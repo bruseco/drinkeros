@@ -87,6 +87,18 @@ export function getCertificatePreviewGeometry(
   };
 }
 
+export function fitPreviewNameFontSize(
+  name: string,
+  preferredSizePx: number,
+  maxWidthPx: number,
+  measureText: (value: string, fontSizePx: number) => number,
+): number {
+  let fontSize = preferredSizePx;
+  const minimum = preferredSizePx * (MIN_NAME_FONT_SIZE_PT / 26);
+  while (measureText(name, fontSize) > maxWidthPx && fontSize > minimum) fontSize -= 0.25;
+  return Math.max(fontSize, minimum);
+}
+
 function parseTextColor(textColor: string): [number, number, number] {
   const match = /^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(textColor);
   if (!match) return [255, 255, 255];

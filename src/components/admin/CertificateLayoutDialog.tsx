@@ -5,10 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Minus, Plus } from 'lucide-react';
 import { useCertificateLayout, useUpdateCertificateLayout, CertificateLayout } from '@/hooks/useCertificateLayout';
+import { useToast } from '@/hooks/use-toast';
 import {
   CERTIFICATE_LAYOUT_DEFAULTS,
   CERTIFICATE_LONG_NAME,
   downloadCertificatePdf,
+  fitPreviewNameFontSize,
   getCertificatePreviewGeometry,
 } from '@/lib/certificatePdf';
 
@@ -22,6 +24,7 @@ interface Props {
 const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, textColor }) => {
   const { data: layout, isLoading } = useCertificateLayout();
   const updateLayout = useUpdateCertificateLayout();
+  const { toast } = useToast();
 
   const [nameX, setNameX] = useState(CERTIFICATE_LAYOUT_DEFAULTS.name_x);
   const [nameY, setNameY] = useState(CERTIFICATE_LAYOUT_DEFAULTS.name_y);
@@ -94,6 +97,13 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
         textColor,
         layout: currentLayout,
       });
+      toast({ title: 'Teste fictício gerado', description: 'Nenhum certificado ou progresso foi registrado.' });
+    } catch (error) {
+      toast({
+        title: 'Não foi possível gerar o teste',
+        description: error instanceof Error ? error.message : 'Tente novamente.',
+        variant: 'destructive',
+      });
     } finally {
       setIsGeneratingTest(false);
     }
@@ -126,6 +136,18 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
   );
 
   const geometry = getCertificatePreviewGeometry(previewWidth, imageSize.width, imageSize.height, currentLayout);
+  const previewNameFontSize = fitPreviewNameFontSize(
+    CERTIFICATE_LONG_NAME,
+    geometry.nameFontSizePx,
+    geometry.maxNameWidthPx,
+    (value, size) => {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      if (!context) return value.length * size * 0.5;
+      context.font = `${size}px Helvetica, Arial, sans-serif`;
+      return context.measureText(value).width;
+    },
+  );
 
   const nameStyle: React.CSSProperties = {
     position: 'absolute',
@@ -133,12 +155,12 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
     top: `${geometry.nameTopPercent}%`,
     transform: 'translate(-50%, -50%)',
     color: textColor,
-    fontSize: `${geometry.nameFontSizePx}px`,
+    fontSize: `${previewNameFontSize}px`,
     fontFamily: 'Helvetica, Arial, sans-serif',
     lineHeight: 1.15,
     maxWidth: `${geometry.maxNameWidthPx}px`,
     width: `${geometry.maxNameWidthPx}px`,
-    overflowWrap: 'normal',
+    whiteSpace: 'nowrap',
     textAlign: 'center',
     pointerEvents: 'none',
   };
