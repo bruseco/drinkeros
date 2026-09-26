@@ -17,10 +17,12 @@ describe('certificatePdf', () => {
     expect(standard.aspectRatio).not.toBe(barEventos.aspectRatio);
   });
 
-  it('mantém as coordenadas globais como percentuais da referência histórica', () => {
+  it('mantém as coordenadas globais confirmadas como percentuais da referência histórica', () => {
     const geometry = getCertificatePreviewGeometry(600, 3347, 2447, CERTIFICATE_LAYOUT_DEFAULTS);
     expect(geometry.nameLeftPercent).toBeCloseTo(50.0149, 3);
-    expect(geometry.nameTopPercent).toBeCloseTo(54.5157, 3);
+    expect(geometry.nameTopPercent).toBeCloseTo(50.4291, 3);
+    expect(geometry.dateLeftPercent).toBeCloseTo(23.5435, 3);
+    expect(geometry.dateTopPercent).toBeCloseTo(77.6869, 3);
   });
 
   it('formata a data em português', () => {

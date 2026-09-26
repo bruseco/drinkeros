@@ -47,10 +47,10 @@ export const CERTIFICATE_LONG_NAME = 'Maria Fernanda de Oliveira Nascimento Albu
 
 export const CERTIFICATE_LAYOUT_DEFAULTS: CertificateLayoutValues = {
   name_x: 1674,
-  name_y: 1334,
-  date_x: 897,
-  date_y: 1886,
-  name_font_size: 28,
+  name_y: 1234,
+  date_x: 788,
+  date_y: 1901,
+  name_font_size: 26,
   date_font_size: 14,
 };
 
