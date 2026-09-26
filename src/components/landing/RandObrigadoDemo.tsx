@@ -112,7 +112,7 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
   }, []);
 
   useEffect(() => {
-    if (forceReveal || !isPlayingRef.current) return;
+    if (forceReveal) return;
     const interval = window.setInterval(() => {
       if (!isPlayingRef.current || document.hidden) {
         lastTickRef.current = null;
@@ -151,7 +151,6 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
   }, []);
 
   useEffect(() => {
-    if (forceReveal) return;
     const host = playerHostRef.current;
     if (!host) return;
 
@@ -205,7 +204,7 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
       if (event instanceof KeyboardEvent && !["Enter", " "].includes(event.key)) return;
       activateVideo();
     };
-    document.addEventListener("pointerdown", activateFromPage, { once: true });
+    document.addEventListener("pointerdown", activateFromPage);
     document.addEventListener("keydown", activateFromPage);
 
     return () => {
@@ -215,7 +214,7 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
       playerRef.current?.destroy();
       playerRef.current = null;
     };
-  }, [activateVideo, forceReveal]);
+  }, [activateVideo]);
 
   const demoEnded = countdown === 0;
 
@@ -264,8 +263,7 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
           </p>
         </header>
 
-        {!forceReveal && (
-          <section className="mx-auto mt-8 max-w-4xl" aria-label="Apresentação do Pacote Business">
+        <section className="mx-auto mt-8 max-w-4xl" aria-label="Apresentação do Pacote Business">
             <div className="relative aspect-video overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
               <div ref={playerHostRef} className="absolute inset-0 h-full w-full" />
               {!playerReady && (
@@ -294,8 +292,7 @@ export default function RandObrigadoDemo({ forceReveal }: RandObrigadoDemoProps)
             <p className="mt-3 text-center text-sm text-muted-foreground">
               A oferta será apresentada após 3:45 de reprodução do vídeo.
             </p>
-          </section>
-        )}
+        </section>
 
         {revealed && (
           <section className="mt-9 animate-fade-in" aria-labelledby="business-offer-title">
