@@ -401,7 +401,7 @@ export function RandUpsellExperience({
                 Quatro caminhos para transformar coquetelaria em negócio
               </h2>
               <div className="mt-6 flex flex-wrap items-end justify-center gap-x-4 gap-y-1">
-                <p className="text-lg text-muted-foreground line-through">Valor avulso R$ 2.288</p>
+                <p className="text-lg text-muted-foreground">de <span className="line-through">R$ 797</span> por</p>
                 <p className="text-4xl font-black text-success sm:text-5xl">R$ 97</p>
               </div>
               <p className="mt-2 text-sm font-medium text-muted-foreground">condição promocional · pagamento único</p>
