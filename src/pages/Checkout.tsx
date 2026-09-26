@@ -220,8 +220,21 @@ export default function Checkout() {
 
   // Etapa 3: após o pagamento, pede o endereço fiscal (não bloqueante).
   // Convidado (sem conta logada) → vai para a criação de conta com e-mail preenchido.
-  const finishAfterPayment = (redirect: string, delay = 1500, paymentId?: string | null) => {
+  const finishAfterPayment = async (redirect: string, delay = 1500, paymentId?: string | null) => {
     const pid = paymentId || lastPaymentId || pixPaymentId;
+    // RAND aprovado → página pós-compra dedicada (referência opaca validada no servidor).
+    // Se algo falhar, segue o fluxo normal abaixo (acesso já está garantido pelo webhook).
+    if (productType === "combo" && product?.slug === "rand" && pid) {
+      try {
+        const { data } = await supabase.functions.invoke("rand-upsell", {
+          body: { action: "create", source_payment_id: String(pid) },
+        });
+        if (data?.ref) {
+          navigate(`/rand/obrigado?ref=${encodeURIComponent(data.ref)}`, { replace: true });
+          return;
+        }
+      } catch { /* fallback */ }
+    }
     const target = !userId
       ? `/criar-conta?pid=${encodeURIComponent(String(pid || ""))}&email=${encodeURIComponent(payerEmail || "")}`
       : redirect;
