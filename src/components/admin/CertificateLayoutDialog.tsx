@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,6 @@ import {
   CERTIFICATE_LAYOUT_DEFAULTS,
   CERTIFICATE_LONG_NAME,
   downloadCertificatePdf,
-  fitPreviewNameFontSize,
   getCertificatePreviewGeometry,
 } from '@/lib/certificatePdf';
 
@@ -33,9 +32,7 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
   const [nameFontSize, setNameFontSize] = useState(CERTIFICATE_LAYOUT_DEFAULTS.name_font_size);
   const [dateFontSize, setDateFontSize] = useState(CERTIFICATE_LAYOUT_DEFAULTS.date_font_size);
   const [imageSize, setImageSize] = useState({ width: 3347, height: 2447 });
-  const [previewWidth, setPreviewWidth] = useState(600);
   const [isGeneratingTest, setIsGeneratingTest] = useState(false);
-  const previewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (layout) {
@@ -54,14 +51,6 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
     image.onload = () => setImageSize({ width: image.naturalWidth, height: image.naturalHeight });
     image.src = bgUrl;
   }, [bgUrl]);
-
-  useEffect(() => {
-    const preview = previewRef.current;
-    if (!preview) return;
-    const observer = new ResizeObserver(([entry]) => setPreviewWidth(entry.contentRect.width));
-    observer.observe(preview);
-    return () => observer.disconnect();
-  }, [isLoading]);
 
   const handleSave = () => {
     if (!layout?.id) return;
@@ -135,37 +124,22 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
     </div>
   );
 
-  const geometry = getCertificatePreviewGeometry(previewWidth, imageSize.width, imageSize.height, currentLayout);
-  const previewNameFontSize = fitPreviewNameFontSize(
-    CERTIFICATE_LONG_NAME,
-    geometry.nameFontSizePx,
-    geometry.maxNameWidthPx,
-    (value, size) => {
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      if (!context) return value.length * size * 0.5;
-      context.font = `${size}px Helvetica, Arial, sans-serif`;
-      return context.measureText(value).width;
-    },
-  );
-  const nameRenderFontSize = Math.max(previewNameFontSize, 16);
-  const nameRenderScale = previewNameFontSize / nameRenderFontSize;
-  const dateRenderFontSize = Math.max(geometry.dateFontSizePx, 16);
-  const dateRenderScale = geometry.dateFontSizePx / dateRenderFontSize;
+  const geometry = getCertificatePreviewGeometry(600, imageSize.width, imageSize.height, currentLayout);
+  const pdfWidthPt = (297 * 72) / 25.4;
+  const fictionalNameFontSize = nameFontSize * (19.5 / 26);
 
   const nameStyle: React.CSSProperties = {
     position: 'absolute',
     display: 'block',
     left: `${geometry.nameLeftPercent}%`,
     top: `${geometry.nameTopPercent}%`,
-    transform: `translate(-50%, -50%) scale(${nameRenderScale})`,
-    transformOrigin: 'center',
+    transform: 'translate(-50%, -50%)',
     color: textColor,
-    fontSize: `${nameRenderFontSize}px`,
+    fontSize: `${(fictionalNameFontSize * 100) / pdfWidthPt}cqw`,
     fontFamily: 'Helvetica, Arial, sans-serif',
     lineHeight: 1.15,
-    maxWidth: `${geometry.maxNameWidthPx / nameRenderScale}px`,
-    width: `${geometry.maxNameWidthPx / nameRenderScale}px`,
+    maxWidth: '68%',
+    width: '68%',
     whiteSpace: 'nowrap',
     WebkitTextSizeAdjust: 'none',
     textSizeAdjust: 'none',
@@ -178,10 +152,9 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
     display: 'block',
     left: `${geometry.dateLeftPercent}%`,
     top: `${geometry.dateTopPercent}%`,
-    transform: `translate(-50%, -50%) scale(${dateRenderScale})`,
-    transformOrigin: 'center',
+    transform: 'translate(-50%, -50%)',
     color: textColor,
-    fontSize: `${dateRenderFontSize}px`,
+    fontSize: `${(dateFontSize * 100) / pdfWidthPt}cqw`,
     fontFamily: 'Helvetica, Arial, sans-serif',
     whiteSpace: 'nowrap',
     WebkitTextSizeAdjust: 'none',
@@ -204,9 +177,8 @@ const CertificateLayoutDialog: React.FC<Props> = ({ open, onOpenChange, bgUrl, t
           <div className="space-y-4">
             {/* Preview */}
             <div
-              ref={previewRef}
               className="relative mx-auto w-full overflow-hidden rounded-lg border"
-              style={{ aspectRatio: geometry.aspectRatio }}
+              style={{ aspectRatio: geometry.aspectRatio, containerType: 'inline-size' }}
             >
               {bgUrl ? (
                 <img src={bgUrl} alt="Certificado" className="h-full w-full object-contain" />
