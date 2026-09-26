@@ -12,4 +12,4 @@
 - [x] Validar visualmente em mobile e desktop e confirmar ausência de chamadas sensíveis
 
 ## Demonstração Pacote Business (set/2026)
-- [ ] Atualizar e validar o novo design seguro de /rand/obrigado?demo=1, sem afetar o fluxo real (implementação concluída; validação em andamento)
+- [x] Atualizar e validar o novo design seguro de /rand/obrigado?demo=1, sem afetar o fluxo real
