@@ -17,4 +17,4 @@
 - [x] Destacar áudio e CTAs revelados, separar a vitrine e validar acessibilidade visual
 - [x] Remover header pós-revelação (logo, selo, título e subtítulo) — página começa na faixa amarela com timer
 
-- [x] Pós-compra RAND real: ancoragem "de R$797 por R$97" (R$2.288 só como soma dos cursos); cadastro R$797 intacto; cobrança R$97
+- [x] Pós-compra RAND real: ancoragem "de R$2.288 por R$97" (R$2.288 = soma dos quatro cursos avulsos; R$797 é só o preço oficial no painel); cobrança R$97
