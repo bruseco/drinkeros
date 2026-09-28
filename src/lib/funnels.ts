@@ -46,6 +46,22 @@ export const FUNNELS: FunnelDef[] = [
       { key: 'sales_197', sales: { max: 149.99 }, label: 'Comprou por R$ 97', hint: 'Pagamento aprovado (banco)' },
     ],
   },
+  {
+    key: 'quiz',
+    pageKey: 'quiz',
+    name: 'Quiz de segmentação',
+    description: 'Topo de funil /quiz que direciona para a landing do perfil',
+    publicPath: '/quiz',
+    steps: [
+      { key: 'pageview', event: 'pageview', label: 'Acessou o quiz', hint: 'Visitantes únicos' },
+      { key: 'started', event: 'quiz_started', label: 'Começou o quiz' },
+      { key: 'q1', event: 'quiz_q1_answered', label: 'Respondeu a pergunta 1' },
+      { key: 'q2', event: 'quiz_q2_answered', label: 'Respondeu a pergunta 2' },
+      { key: 'q3', event: 'quiz_q3_answered', label: 'Respondeu a pergunta 3' },
+      { key: 'result', event: 'quiz_result', label: 'Viu o resultado' },
+      { key: 'cta', event: 'quiz_cta_clicked', label: 'Clicou para a landing' },
+    ],
+  },
 ];
 
 

@@ -24,6 +24,7 @@ import DrinkDeliveryEngarrafados from "./pages/landing/DrinkDeliveryEngarrafados
 import IngredientesArtesanais from "./pages/landing/IngredientesArtesanais";
 import ClassicosDestilados from "./pages/landing/ClassicosDestilados";
 import Rand from "./pages/landing/Rand";
+import Quiz from "./pages/landing/Quiz";
 import RandObrigado from "./pages/landing/RandObrigado";
 import WorkshopAlemDosClassicos from "./pages/landing/WorkshopAlemDosClassicos";
 import BartenderABordo from "./pages/landing/BartenderABordo";
@@ -170,6 +171,7 @@ const App = () => (
             <Route path="/ingredientes-artesanais" element={<IngredientesArtesanais />} />
             <Route path="/producao-de-ingredientes-artesanais" element={<IngredientesArtesanais />} />
             <Route path="/classicos-destilados" element={<ClassicosDestilados />} />
+            <Route path="/quiz" element={<Quiz />} />
             <Route path="/rand" element={<Rand />} />
             <Route path="/rand/obrigado" element={<RandObrigado />} />
             <Route path="/workshop-alem-dos-classicos" element={<WorkshopAlemDosClassicos />} />
