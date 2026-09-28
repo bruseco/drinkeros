@@ -30,6 +30,7 @@ export const PUBLIC_SALES_ROUTES: string[] = [
   '/workshop-alem-dos-classicos',
   '/bebida-decifrada',
   '/rand',
+  '/quiz',
   // Ebooks (rota dinâmica /ebook/:slug)
   '/ebook/o-velho-guia-do-bartender',
   '/ebook/drinks-tematicos',

@@ -13,7 +13,14 @@ export type FunnelEvent =
   | 'checkout_1_started'
   | 'offer_2_revealed'
   | 'checkout_2_started'
-  | 'subscription_confirmed';
+  | 'subscription_confirmed'
+  | 'quiz_started'
+  | 'quiz_q1_answered'
+  | 'quiz_q2_answered'
+  | 'quiz_q3_answered'
+  | 'quiz_q4_answered'
+  | 'quiz_result'
+  | 'quiz_cta_clicked';
 
 const SESSION_KEY = 'funnel:sid';
 
