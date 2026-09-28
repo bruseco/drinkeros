@@ -64,7 +64,7 @@ export default function Quiz() {
     const nextOrder = getQuestionOrder(nextAnswers);
     (['q1', 'q2', 'q3', 'q4'] as const).forEach((q) => { if (!nextOrder.includes(q)) delete nextAnswers[q]; });
     setAnswers(nextAnswers);
-    trackFunnel(PAGE_KEY, `quiz_${qid}_answered` as any, { metadata: { answer: key } });
+    trackFunnel(PAGE_KEY, `quiz_${qid}_answered` , { metadata: { answer: key } });
 
     window.setTimeout(() => {
       if (index + 1 < nextOrder.length) {
