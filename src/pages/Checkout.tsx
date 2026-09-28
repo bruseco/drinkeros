@@ -424,7 +424,7 @@ export default function Checkout() {
 
   if (loading || !publicKeyReady) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -433,15 +433,15 @@ export default function Checkout() {
   if (!product) return null;
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <header className="border-b border-white/10 bg-black/80 backdrop-blur sticky top-0 z-20">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
+      <header className="border-b border-gray-200 bg-white/80 backdrop-blur sticky top-0 z-20">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to={isClub ? "/pv-clube" : `/${product.slug}`} className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
+          <Link to={isClub ? "/pv-clube" : `/${product.slug}`} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900">
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
-          <img src={drinkerosLogo} alt="Drinkeros" className="h-7 w-auto opacity-90" />
-          <div className="flex items-center gap-1.5 text-xs text-white/60">
-            <ShieldCheck className="w-4 h-4 text-green-500" />
+          <img src={drinkerosLogo} alt="Drinkeros" className="h-7 w-auto" />
+          <div className="flex items-center gap-1.5 text-xs text-gray-600">
+            <ShieldCheck className="w-4 h-4 text-green-600" />
             <span className="hidden sm:inline">Pagamento seguro</span>
           </div>
         </div>
@@ -450,17 +450,17 @@ export default function Checkout() {
       <div className="max-w-5xl mx-auto px-4 py-6 grid md:grid-cols-[1fr_380px] gap-6">
         <div>
           <h1 className="text-xl font-semibold mb-1">Finalizar compra</h1>
-          <p className="text-sm text-white/60 mb-5">
+          <p className="text-sm text-gray-600 mb-5">
             {isClub
               ? "Escolha cartão (renovação automática) ou Pix (1 ano sem renovação)."
               : "Escolha cartão ou Pix abaixo. Tudo dentro da Drinkeros."}
           </p>
 
           {paid ? (
-            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-8 text-center">
-              <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
+            <div className="bg-green-50 border border-green-200 rounded-xl p-8 text-center">
+              <CheckCircle2 className="w-12 h-12 text-green-600 mx-auto mb-3" />
               <h2 className="text-lg font-semibold mb-1">Tudo certo!</h2>
-              <p className="text-sm text-white/70">Liberando seu acesso...</p>
+              <p className="text-sm text-gray-600">Liberando seu acesso...</p>
             </div>
           ) : pixResult ? (
             <PixDisplay
@@ -473,10 +473,10 @@ export default function Checkout() {
             />
 
           ) : submitting ? (
-            <div className="flex flex-col items-center justify-center gap-3 py-16 text-white">
+            <div className="flex flex-col items-center justify-center gap-3 py-16 text-gray-900">
               <Loader2 className="w-10 h-10 animate-spin text-primary" />
               <p className="text-base font-medium">Processando...</p>
-              <p className="text-sm text-white/60">Aguarde enquanto confirmamos seu pagamento.</p>
+              <p className="text-sm text-gray-600">Aguarde enquanto confirmamos seu pagamento.</p>
             </div>
           ) : (
             <>
