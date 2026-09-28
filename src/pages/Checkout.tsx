@@ -424,7 +424,7 @@ export default function Checkout() {
 
   if (loading || !publicKeyReady) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -433,15 +433,15 @@ export default function Checkout() {
   if (!product) return null;
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <header className="border-b border-white/10 bg-black/80 backdrop-blur sticky top-0 z-20">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
+      <header className="border-b border-gray-200 bg-white/80 backdrop-blur sticky top-0 z-20">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to={isClub ? "/pv-clube" : `/${product.slug}`} className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
+          <Link to={isClub ? "/pv-clube" : `/${product.slug}`} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900">
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
-          <img src={drinkerosLogo} alt="Drinkeros" className="h-7 w-auto opacity-90" />
-          <div className="flex items-center gap-1.5 text-xs text-white/60">
-            <ShieldCheck className="w-4 h-4 text-green-500" />
+          <img src={drinkerosLogo} alt="Drinkeros" className="h-7 w-auto" />
+          <div className="flex items-center gap-1.5 text-xs text-gray-600">
+            <ShieldCheck className="w-4 h-4 text-green-600" />
             <span className="hidden sm:inline">Pagamento seguro</span>
           </div>
         </div>
@@ -450,17 +450,17 @@ export default function Checkout() {
       <div className="max-w-5xl mx-auto px-4 py-6 grid md:grid-cols-[1fr_380px] gap-6">
         <div>
           <h1 className="text-xl font-semibold mb-1">Finalizar compra</h1>
-          <p className="text-sm text-white/60 mb-5">
+          <p className="text-sm text-gray-600 mb-5">
             {isClub
               ? "Escolha cartão (renovação automática) ou Pix (1 ano sem renovação)."
               : "Escolha cartão ou Pix abaixo. Tudo dentro da Drinkeros."}
           </p>
 
           {paid ? (
-            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-8 text-center">
-              <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
+            <div className="bg-green-50 border border-green-200 rounded-xl p-8 text-center">
+              <CheckCircle2 className="w-12 h-12 text-green-600 mx-auto mb-3" />
               <h2 className="text-lg font-semibold mb-1">Tudo certo!</h2>
-              <p className="text-sm text-white/70">Liberando seu acesso...</p>
+              <p className="text-sm text-gray-600">Liberando seu acesso...</p>
             </div>
           ) : pixResult ? (
             <PixDisplay
@@ -473,10 +473,10 @@ export default function Checkout() {
             />
 
           ) : submitting ? (
-            <div className="flex flex-col items-center justify-center gap-3 py-16 text-white">
+            <div className="flex flex-col items-center justify-center gap-3 py-16 text-gray-900">
               <Loader2 className="w-10 h-10 animate-spin text-primary" />
               <p className="text-base font-medium">Processando...</p>
-              <p className="text-sm text-white/60">Aguarde enquanto confirmamos seu pagamento.</p>
+              <p className="text-sm text-gray-600">Aguarde enquanto confirmamos seu pagamento.</p>
             </div>
           ) : (
             <>
@@ -485,37 +485,37 @@ export default function Checkout() {
                   <button
                     type="button"
                     onClick={() => setClubMethod("card")}
-                    className={`rounded-xl border p-3 text-left transition ${
+                    className={`rounded-xl border p-3 text-left transition bg-white ${
                       clubMethod === "card"
-                        ? "border-primary bg-primary/10"
-                        : "border-white/10 bg-white/5 hover:border-white/20"
+                        ? "border-primary bg-primary/5"
+                        : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <CreditCard className="w-4 h-4" />
                       <span className="text-sm font-medium">Cartão</span>
-                      <span className="ml-auto text-[10px] uppercase tracking-wider bg-primary/20 text-primary px-1.5 py-0.5 rounded">
+                      <span className="ml-auto text-[10px] uppercase tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded">
                         Recomendado
                       </span>
                     </div>
-                    <p className="text-xs text-white/60 flex items-center gap-1">
+                    <p className="text-xs text-gray-500 flex items-center gap-1">
                       <RefreshCw className="w-3 h-3" /> Renovação automática anual
                     </p>
                   </button>
                   <button
                     type="button"
                     onClick={() => setClubMethod("pix")}
-                    className={`rounded-xl border p-3 text-left transition ${
+                    className={`rounded-xl border p-3 text-left transition bg-white ${
                       clubMethod === "pix"
-                        ? "border-primary bg-primary/10"
-                        : "border-white/10 bg-white/5 hover:border-white/20"
+                        ? "border-primary bg-primary/5"
+                        : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <QrCode className="w-4 h-4" />
                       <span className="text-sm font-medium">Pix</span>
                     </div>
-                    <p className="text-xs text-white/60">Acesso por 12 meses · sem renovação</p>
+                    <p className="text-xs text-gray-500">Acesso por 12 meses · sem renovação</p>
                   </button>
                 </div>
               )}
@@ -568,28 +568,28 @@ export default function Checkout() {
           )}
         </div>
 
-        <aside className="bg-white/5 border border-white/10 rounded-xl p-5 h-fit md:sticky md:top-20">
-          <p className="text-xs uppercase tracking-wider text-white/50 mb-3">Resumo do pedido</p>
+        <aside className="bg-white border border-gray-200 shadow-sm rounded-xl p-5 h-fit md:sticky md:top-20">
+          <p className="text-xs uppercase tracking-wider text-gray-500 mb-3">Resumo do pedido</p>
           <div className="flex gap-3 mb-4">
             {product.cover_image_url && (
               <img
                 src={product.cover_image_url}
                 alt={product.name}
-                className="w-16 h-16 rounded object-cover bg-white/5"
+                className="w-16 h-16 rounded object-cover bg-gray-100"
               />
             )}
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sm leading-tight">{product.name}</p>
               {product.description && (
-                <p className="text-xs text-white/50 mt-1 line-clamp-2">{product.description}</p>
+                <p className="text-xs text-gray-500 mt-1 line-clamp-2">{product.description}</p>
               )}
             </div>
           </div>
 
-          <div className="border-t border-white/10 pt-4 space-y-2">
+          <div className="border-t border-gray-200 pt-4 space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-white/60">Subtotal</span>
-              <span className={isVip && !isClub ? "line-through text-white/40" : ""}>
+              <span className="text-gray-600">Subtotal</span>
+              <span className={isVip && !isClub ? "line-through text-gray-400" : ""}>
                 R$ {Number(product.price).toFixed(2).replace(".", ",")}
               </span>
             </div>
@@ -599,12 +599,12 @@ export default function Checkout() {
                 <span>−R$ {(Number(product.price) - finalPrice).toFixed(2).replace(".", ",")}</span>
               </div>
             )}
-            <div className="flex justify-between text-base font-semibold pt-2 border-t border-white/10">
+            <div className="flex justify-between text-base font-semibold pt-2 border-t border-gray-200">
               <span>Total {isClub && clubMethod === "card" ? "/ ano" : ""}</span>
               <span>R$ {finalPrice.toFixed(2).replace(".", ",")}</span>
             </div>
             {isClub && (
-              <p className="text-[11px] text-white/50 pt-1">
+              <p className="text-[11px] text-gray-500 pt-1">
                 {clubMethod === "card"
                   ? "Cobrança automática a cada 12 meses. Cancele quando quiser."
                   : "Pagamento único. Avisamos antes do vencimento para renovar."}
@@ -612,8 +612,8 @@ export default function Checkout() {
             )}
           </div>
 
-          <div className="mt-5 flex items-start gap-2 text-xs text-white/50">
-            <ShieldCheck className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+          <div className="mt-5 flex items-start gap-2 text-xs text-gray-500">
+            <ShieldCheck className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
             <p>Pagamento processado com criptografia. Seus dados de cartão não passam pelos nossos servidores.</p>
           </div>
         </aside>
