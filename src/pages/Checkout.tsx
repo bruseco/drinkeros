@@ -168,7 +168,24 @@ export default function Checkout() {
           navigate("/");
           return;
         }
-        setProduct(prod as unknown as Product);
+        let checkoutProduct = prod as unknown as Product;
+
+        // O combo RAND não possui capa própria no cadastro. Exibe a capa oficial
+        // do curso Clássicos & Destilados para representar visualmente a compra.
+        if (productType === "combo" && slug === "rand" && !checkoutProduct.cover_image_url) {
+          const { data: randCourse } = await supabase
+            .from("courses")
+            .select("cover_image_url")
+            .eq("slug", "classicos-destilados")
+            .maybeSingle();
+
+          checkoutProduct = {
+            ...checkoutProduct,
+            cover_image_url: randCourse?.cover_image_url ?? null,
+          };
+        }
+
+        setProduct(checkoutProduct);
 
         if (user) {
           setPayerEmail(user.email ?? "");
