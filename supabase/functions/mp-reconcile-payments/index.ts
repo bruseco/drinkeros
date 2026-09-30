@@ -92,8 +92,19 @@ serve(async (req) => {
       .in("transaction_id", ids);
     const known = new Set((existing || []).map((r: any) => String(r.transaction_id)));
 
+    // Pagamentos sem produto identificável (sem metadata nem external_reference,
+    // ex.: link/cobrança manual no MP) já foram registrados como falha; não
+    // adianta reprocessar a cada 15 min — exigem liberação manual pelo admin.
+    const { data: unresolvable } = await supabase
+      .from("webhook_purchase_logs")
+      .select("transaction_id")
+      .in("transaction_id", ids)
+      .like("error_message", "metadata_invalid%");
+    const skip = new Set((unresolvable || []).map((r: any) => String(r.transaction_id)));
+
     // Ignora autorizações de R$ 0 (assinatura recém-criada): não geram venda.
-    const missing = approved.filter((p) => !known.has(p.id) && p.amount > 0);
+    const missing = approved.filter((p) => !known.has(p.id) && !skip.has(p.id) && p.amount > 0);
+    if (skip.size) console.warn("[mp-reconcile] ignorando pagamentos sem produto identificável (liberação manual):", [...skip]);
 
 
     if (dryRun) {
