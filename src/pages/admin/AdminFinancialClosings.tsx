@@ -96,7 +96,7 @@ export default function AdminFinancialClosings() {
     },
   });
   const buyerName = (paymentId: string) => buyers.isLoading ? 'Carregando nome…' : buyers.data?.[paymentId] || 'Nome não disponível';
-  const refundStyle = 'bg-orange-50 text-orange-950 hover:bg-orange-100/80 dark:bg-orange-950/40 dark:text-orange-100 dark:hover:bg-orange-950/60';
+  const refundStyle = 'text-orange-600 dark:text-orange-400';
   const refresh = useMutation({
     mutationFn: async (selectedMonth: string) => {
       const { data, error } = await supabase.functions.invoke('rand-financial-closing', { body: { month: selectedMonth } });
