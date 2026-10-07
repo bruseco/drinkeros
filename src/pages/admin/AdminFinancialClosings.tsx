@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { CheckCircle2, FileText, Loader2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -128,7 +128,8 @@ export default function AdminFinancialClosings() {
 
   return <div className="mx-auto max-w-6xl space-y-6">
     <div className="flex items-center gap-3"><FileText className="h-7 w-7 text-primary" />
-      <div><h1 className="text-2xl font-bold sm:text-3xl">Fechamentos</h1>
+      <div><Link to="/admin/fechamentos" className="text-sm text-muted-foreground hover:text-primary">← Todos os parceiros</Link>
+        <h1 className="text-2xl font-bold sm:text-3xl">Fechamento RAND</h1>
         <p className="text-muted-foreground">RAND · demonstrativo mensal e controle dos repasses</p></div>
     </div>
     <Card><CardContent className="flex flex-wrap items-end gap-4 pt-6">
