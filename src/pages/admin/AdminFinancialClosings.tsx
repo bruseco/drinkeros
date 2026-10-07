@@ -68,6 +68,35 @@ export default function AdminFinancialClosings() {
       return data ?? [];
     },
   });
+  const visiblePayments = query.data?.find(c => c.month.slice(0, 7) === month)?.report.lines.map(l => l.payment_id) ?? [];
+  const buyers = useQuery({
+    queryKey: ['rand-closing-buyers', month, visiblePayments],
+    enabled: isSuperAdmin && visiblePayments.length > 0,
+    queryFn: async () => {
+      const names: Record<string, string> = {};
+      for (let offset = 0; offset < visiblePayments.length; offset += 200) {
+        const { data: purchases, error } = await supabase.from('purchases')
+          .select('transaction_id,buyer_name,user_id').eq('gateway', 'mercado_pago')
+          .eq('product_type', 'combo').in('transaction_id', visiblePayments.slice(offset, offset + 200));
+        if (error) throw error;
+        const missing = [...new Set((purchases ?? []).filter(p => !p.buyer_name?.trim()).map(p => p.user_id).filter(Boolean))];
+        const profiles = new Map<string, string>();
+        if (missing.length) {
+          const { data, error: profileError } = await supabase.from('profiles')
+            .select('user_id,full_name').in('user_id', missing);
+          if (profileError) throw profileError;
+          for (const profile of data ?? []) if (profile.full_name?.trim()) profiles.set(profile.user_id, profile.full_name.trim());
+        }
+        for (const purchase of purchases ?? []) {
+          const name = purchase.buyer_name?.trim() || profiles.get(purchase.user_id);
+          if (name) names[purchase.transaction_id] = name;
+        }
+      }
+      return names;
+    },
+  });
+  const buyerName = (paymentId: string) => buyers.isLoading ? 'Carregando nome…' : buyers.data?.[paymentId] || 'Nome não disponível';
+  const refundStyle = 'bg-orange-50 text-orange-950 hover:bg-orange-100/80 dark:bg-orange-950/40 dark:text-orange-100 dark:hover:bg-orange-950/60';
   const refresh = useMutation({
     mutationFn: async (selectedMonth: string) => {
       const { data, error } = await supabase.functions.invoke('rand-financial-closing', { body: { month: selectedMonth } });
@@ -150,14 +179,18 @@ export default function AdminFinancialClosings() {
           </div>}
       </CardContent></Card>
       {adjustments.length > 0 && <Card><CardHeader><CardTitle>Ajustes de períodos anteriores</CardTitle></CardHeader><CardContent>
-        <Table><TableHeader><TableRow><TableHead>Mês original</TableHead><TableHead>Pagamento</TableHead><TableHead className="text-right">Ajuste líquido</TableHead></TableRow></TableHeader>
-          <TableBody>{adjustments.map(l => <TableRow key={l.payment_id}><TableCell>{monthLabel(l.original_month)}{l.carried && <span className="block text-xs text-muted-foreground">Saldo de mês pendente</span>}</TableCell>
+        <Table><TableHeader><TableRow><TableHead>Mês original</TableHead><TableHead>Comprador</TableHead><TableHead>Pagamento</TableHead><TableHead className="text-right">Ajuste líquido</TableHead></TableRow></TableHeader>
+          <TableBody>{adjustments.map(l => <TableRow key={l.payment_id} className={l.refund_cents > 0 ? refundStyle : undefined}><TableCell>{monthLabel(l.original_month)}{l.carried && <span className="block text-xs text-muted-foreground">Saldo de mês pendente</span>}</TableCell>
+            <TableCell className="min-w-40 font-medium">{buyerName(l.payment_id)}</TableCell>
             <TableCell>{l.payment_id}</TableCell><TableCell className="text-right">{brl(l.delta_cents)}</TableCell></TableRow>)}</TableBody></Table>
       </CardContent></Card>}
       <Card><CardHeader><CardTitle>Vendas e estornos do mês</CardTitle></CardHeader><CardContent>
-        <Table><TableHeader><TableRow><TableHead>Pagamento</TableHead><TableHead>Data</TableHead><TableHead>Meio</TableHead>
+        {buyers.isError && <p role="alert" className="mb-3 text-sm text-muted-foreground">Não foi possível carregar os nomes dos compradores. <Button variant="link" onClick={() => buyers.refetch()}>Tentar novamente</Button></p>}
+        <Table><TableHeader><TableRow><TableHead>Comprador</TableHead><TableHead>Pagamento</TableHead><TableHead>Data</TableHead><TableHead>Meio</TableHead>
           <TableHead className="text-right">Bruto</TableHead><TableHead className="text-right">Estorno</TableHead><TableHead className="text-right">Taxa</TableHead></TableRow></TableHeader>
-          <TableBody>{sales.map(l => <TableRow key={l.payment_id}><TableCell>{l.payment_id}</TableCell><TableCell className="whitespace-nowrap">{dateLabel(l.paid_at)}</TableCell>
+          <TableBody>{sales.map(l => <TableRow key={l.payment_id} className={l.refund_cents > 0 ? refundStyle : undefined}>
+            <TableCell className="min-w-40 font-medium">{buyerName(l.payment_id)}{l.refund_cents > 0 && <span className="mt-1 block text-xs font-semibold text-orange-700 dark:text-orange-300">{l.refund_cents < l.gross_cents ? 'Estorno parcial' : 'Estornado'}</span>}</TableCell>
+            <TableCell>{l.payment_id}</TableCell><TableCell className="whitespace-nowrap">{dateLabel(l.paid_at)}</TableCell>
             <TableCell>{l.method === 'pix' ? 'Pix' : 'Cartão'}</TableCell><TableCell className="text-right whitespace-nowrap">{brl(l.gross_cents)}</TableCell>
             <TableCell className="text-right whitespace-nowrap">{brl(l.refund_cents)}</TableCell><TableCell className="text-right whitespace-nowrap">{brl(l.fee_cents)}</TableCell></TableRow>)}</TableBody></Table>
         {!sales.length && <p className="py-4 text-sm text-muted-foreground">Sem pagamentos RAND neste mês.</p>}
