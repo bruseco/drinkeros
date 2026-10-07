@@ -55,6 +55,7 @@ import AdminTeam from "./pages/admin/AdminTeam";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminUserDetail from "./pages/admin/AdminUserDetail";
 import AdminOrders from "./pages/admin/AdminOrders";
+import AdminFinancialClosings from "./pages/admin/AdminFinancialClosings";
 import AdminNibo from "./pages/admin/AdminNibo";
 import AdminEmailSettings from "./pages/admin/AdminEmailSettings";
 import AdminNotifications from "./pages/admin/AdminNotifications";
@@ -209,6 +210,7 @@ const App = () => (
               <Route path="users" element={<AdminUsers />} />
               <Route path="users/:userId" element={<AdminUserDetail />} />
               <Route path="pedidos" element={<AdminOrders />} />
+              <Route path="fechamentos" element={<AdminFinancialClosings />} />
               <Route path="nibo" element={<AdminNibo />} />
               <Route path="configuracoes" element={<AdminEmailSettings />} />
               <Route path="notificacoes" element={<AdminNotifications />} />

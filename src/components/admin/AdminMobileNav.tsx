@@ -19,6 +19,7 @@ const moreItems = [
   { title: 'Pacotes', icon: ShoppingBag, href: '/admin/produtos' },
   { title: 'Usuários', icon: UserCog, href: '/admin/users' },
   { title: 'Vendas', icon: ShoppingCart, href: '/admin/pedidos' },
+  { title: 'Fechamentos', icon: FileText, href: '/admin/fechamentos' },
   { title: 'NIBO (NF-e)', icon: FileText, href: '/admin/nibo' },
   { title: 'Equipe', icon: Users, href: '/admin/team' },
   { title: 'Email', icon: Mail, href: '/admin/configuracoes' },

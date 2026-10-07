@@ -1,5 +1,8 @@
 project_id = "pvjlcfhqueibjnkuzzna"
 
+[functions.rand-financial-closing]
+verify_jwt = true
+
 [functions]
   [functions.auth-email-hook]
     verify_jwt = false
