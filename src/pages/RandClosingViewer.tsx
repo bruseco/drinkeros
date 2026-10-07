@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import type { ReactNode } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +16,24 @@ const accessDb = supabase as unknown as SupabaseClient<{ public: {
   };
 } }>;
 
+async function checkAccess() {
+  const { data, error } = await accessDb.rpc('can_view_rand_closing', {});
+  if (error) throw error;
+  return data === true;
+}
+
+// Dedicated financial accounts always enter their read-only area after login.
+export function RandViewerScope({ children }: { children: ReactNode }) {
+  const { user, isLoading } = useAuth();
+  const { pathname } = useLocation();
+  const accountPage = pathname === '/' || pathname === '/login'
+    || pathname.startsWith('/admin') || pathname.startsWith('/app');
+  const access = useQuery({ queryKey: ['rand-view-access', user?.id], enabled: !!user, queryFn: checkAccess });
+  if (accountPage && (isLoading || (user && access.isLoading))) return <p className="p-6">Carregando…</p>;
+  if (accountPage && user && access.data) return <Navigate to="/fechamentos/rand" replace />;
+  return children;
+}
+
 export default function RandClosingViewer() {
   const { user, isLoading, signIn, signOut } = useAuth();
   const [email, setEmail] = useState('');
@@ -22,11 +42,7 @@ export default function RandClosingViewer() {
   const [pending, setPending] = useState(false);
   const access = useQuery({
     queryKey: ['rand-view-access', user?.id], enabled: !!user,
-    queryFn: async () => {
-      const { data, error } = await accessDb.rpc('can_view_rand_closing', {});
-      if (error) throw error;
-      return data === true;
-    },
+    queryFn: checkAccess,
   });
   if (isLoading) return <p className="p-6">Carregando…</p>;
   if (!user) return <main className="mx-auto max-w-sm space-y-5 px-4 py-12">

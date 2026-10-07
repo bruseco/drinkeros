@@ -57,7 +57,7 @@ import AdminUserDetail from "./pages/admin/AdminUserDetail";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminFinancialClosings from "./pages/admin/AdminFinancialClosings";
 import AdminClosingPartners from "./pages/admin/AdminClosingPartners";
-import RandClosingViewer from "./pages/RandClosingViewer";
+import RandClosingViewer, { RandViewerScope } from "./pages/RandClosingViewer";
 import AdminNibo from "./pages/admin/AdminNibo";
 import AdminEmailSettings from "./pages/admin/AdminEmailSettings";
 import AdminNotifications from "./pages/admin/AdminNotifications";
@@ -147,7 +147,7 @@ const App = () => (
           <ScrollToTop />
           <FacebookPixel />
           <WhatsAppFloatingButton />
-          <Routes>
+          <RandViewerScope><Routes>
             {/* Public routes */}
             <Route path="/" element={<RootRedirect />} />
             <Route path="/login" element={<Login />} />
@@ -263,7 +263,7 @@ const App = () => (
 
             {/* Catch all */}
             <Route path="*" element={<NotFound />} />
-          </Routes>
+          </Routes></RandViewerScope>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
