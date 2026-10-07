@@ -26,6 +26,7 @@ type Closing = {
   paid_at: string | null;
   carried_to: string | null;
   report: RandReport;
+  buyer_names?: Record<string, string>;
 };
 type ClosingDatabase = { public: Omit<Database['public'], 'Tables' | 'Functions'> & {
   Tables: Database['public']['Tables'] & { rand_financial_closings: {
@@ -33,7 +34,7 @@ type ClosingDatabase = { public: Omit<Database['public'], 'Tables' | 'Functions'
   } };
   Functions: Database['public']['Functions'] & { mark_rand_closing_paid: {
     Args: { p_month: string; p_draft_id: string }; Returns: Closing;
-  } };
+  }; view_rand_closings: { Args: Record<string, never>; Returns: Closing[] } };
 } };
 const db = supabase as unknown as SupabaseClient<ClosingDatabase>;
 const brl = (cents: number) => (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -55,14 +56,19 @@ function availableOn(month: string) {
   return `${num === 12 ? year + 1 : year}-${String(num === 12 ? 1 : num + 1).padStart(2, '0')}-05`;
 }
 
-export default function AdminFinancialClosings() {
-  const { isSuperAdmin } = useAuth();
+export default function AdminFinancialClosings({ readOnly = false }: { readOnly?: boolean }) {
+  const { isSuperAdmin, user } = useAuth();
   const [month, setMonth] = useState(suggestedMonth);
   const [confirm, setConfirm] = useState<Closing | null>(null);
   const client = useQueryClient();
   const query = useQuery({
-    queryKey: ['rand-closings'], enabled: isSuperAdmin,
+    queryKey: ['rand-closings', readOnly ? user?.id : 'admin'], enabled: readOnly ? !!user : isSuperAdmin,
     queryFn: async (): Promise<Closing[]> => {
+      if (readOnly) {
+        const { data, error } = await db.rpc('view_rand_closings', {});
+        if (error) throw error;
+        return data ?? [];
+      }
       const { data, error } = await db.from('rand_financial_closings').select('*').order('month', { ascending: false });
       if (error) throw error;
       return data ?? [];
@@ -70,8 +76,8 @@ export default function AdminFinancialClosings() {
   });
   const visiblePayments = query.data?.find(c => c.month.slice(0, 7) === month)?.report.lines.map(l => l.payment_id) ?? [];
   const buyers = useQuery({
-    queryKey: ['rand-closing-buyers', month, visiblePayments],
-    enabled: isSuperAdmin && visiblePayments.length > 0,
+    queryKey: ['rand-closing-buyers', user?.id, month, visiblePayments],
+    enabled: !readOnly && isSuperAdmin && visiblePayments.length > 0,
     queryFn: async () => {
       const names: Record<string, string> = {};
       for (let offset = 0; offset < visiblePayments.length; offset += 200) {
@@ -95,10 +101,13 @@ export default function AdminFinancialClosings() {
       return names;
     },
   });
-  const buyerName = (paymentId: string) => buyers.isLoading ? 'Carregando nome…' : buyers.data?.[paymentId] || 'Nome não disponível';
+  const buyerName = (paymentId: string) => readOnly
+    ? query.data?.find(c => c.month.slice(0, 7) === month)?.buyer_names?.[paymentId] || 'Nome não disponível'
+    : buyers.isLoading ? 'Carregando nome…' : buyers.data?.[paymentId] || 'Nome não disponível';
   const refundStyle = 'text-orange-600 dark:text-orange-400';
   const refresh = useMutation({
     mutationFn: async (selectedMonth: string) => {
+      if (readOnly) throw new Error('Acesso somente para visualização.');
       const { data, error } = await supabase.functions.invoke('rand-financial-closing', { body: { month: selectedMonth } });
       if (error) {
         const details = await error.context?.json?.().catch(() => null);
@@ -111,13 +120,14 @@ export default function AdminFinancialClosings() {
   });
   const markPaid = useMutation({
     mutationFn: async (closing: Closing) => {
+      if (readOnly) throw new Error('Acesso somente para visualização.');
       const { error } = await db.rpc('mark_rand_closing_paid', { p_month: closing.month, p_draft_id: closing.draft_id });
       if (error) throw error;
     },
     onSuccess: () => { setConfirm(null); client.invalidateQueries({ queryKey: ['rand-closings'] }); toast.success('Fechamento marcado como acertado.'); },
     onError: (error: Error) => toast.error(error.message),
   });
-  if (!isSuperAdmin) return <Navigate to="/admin" replace />;
+  if (!readOnly && !isSuperAdmin) return <Navigate to="/admin" replace />;
   const closing = query.data?.find(c => c.month.slice(0, 7) === month);
   const report = closing?.report;
   const paid = closing != null && closing.status !== 'draft';
@@ -128,16 +138,16 @@ export default function AdminFinancialClosings() {
 
   return <div className="mx-auto max-w-6xl space-y-6">
     <div className="flex items-center gap-3"><FileText className="h-7 w-7 text-primary" />
-      <div><Link to="/admin/fechamentos" className="text-sm text-muted-foreground hover:text-primary">← Todos os parceiros</Link>
+      <div>{!readOnly && <Link to="/admin/fechamentos" className="text-sm text-muted-foreground hover:text-primary">← Todos os parceiros</Link>}
         <h1 className="text-2xl font-bold sm:text-3xl">Fechamento RAND</h1>
         <p className="text-muted-foreground">RAND · demonstrativo mensal e controle dos repasses</p></div>
     </div>
     <Card><CardContent className="flex flex-wrap items-end gap-4 pt-6">
       <div className="space-y-2"><Label htmlFor="closing-month">Mês do pagamento do cliente</Label>
         <Input id="closing-month" type="month" value={month} onChange={e => { setMonth(e.target.value); setConfirm(null); refresh.reset(); }} /></div>
-      <Button variant="outline" disabled={!month || paid || refresh.isPending || markPaid.isPending} onClick={() => refresh.mutate(month)}>
+      {!readOnly && <Button variant="outline" disabled={!month || paid || refresh.isPending || markPaid.isPending} onClick={() => refresh.mutate(month)}>
         {refresh.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-        {refresh.isPending ? 'Consultando Mercado Pago…' : 'Atualizar demonstrativo'}</Button>
+        {refresh.isPending ? 'Consultando Mercado Pago…' : 'Atualizar demonstrativo'}</Button>}
       {closing && <Badge variant={paid ? 'default' : 'secondary'}>{closing.status === 'carried' ? 'Compensado' : paid ? 'Acertado' : 'Pendente'}</Badge>}
     </CardContent></Card>
     <p className="text-sm text-muted-foreground">Somente vendas do combo RAND. Datas no horário de Brasília. O fechamento fica disponível no dia 5 do mês seguinte.</p>
@@ -170,7 +180,7 @@ export default function AdminFinancialClosings() {
           Taxas consultadas em {dateLabel(closing.synced_at)}. Ajustes também consideram devoluções de taxas informadas pelo Mercado Pago.</p>
         {closing.status === 'carried' ? <p className="mt-4 text-sm">Saldo compensado no fechamento de {monthLabel(closing.carried_to!)}.</p> : paid ? <p className="mt-4 flex items-center gap-2 text-sm"><CheckCircle2 className="h-4 w-4" />
           Acertado em {dateLabel(closing.paid_at!)}. Este demonstrativo está preservado; alterações posteriores entram no próximo fechamento.</p>
-          : <div className="mt-5 space-y-3">
+          : readOnly ? <p className="mt-4 text-sm text-muted-foreground">Fechamento pendente. A atualização e o registro dos repasses são feitos pela administração.</p> : <div className="mt-5 space-y-3">
             {!eligible && <p className="text-sm text-muted-foreground">Disponível para acerto a partir de {availableOn(month).split('-').reverse().join('/')}.</p>}
             {stale && <p className="text-sm text-muted-foreground">Atualize os dados antes de marcar como acertado.</p>}
             {report.net_cents < 0 && <Alert><AlertDescription>Os ajustes superaram as vendas. Mantenha este mês pendente para compensar o saldo no próximo fechamento.</AlertDescription></Alert>}

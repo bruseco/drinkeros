@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:financial-db": "node scripts/test-rand-closing-db.mjs"
+    "test:financial-db": "node scripts/test-rand-closing-db.mjs && node scripts/test-rand-viewer-db.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

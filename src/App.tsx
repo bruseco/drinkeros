@@ -57,6 +57,7 @@ import AdminUserDetail from "./pages/admin/AdminUserDetail";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminFinancialClosings from "./pages/admin/AdminFinancialClosings";
 import AdminClosingPartners from "./pages/admin/AdminClosingPartners";
+import RandClosingViewer from "./pages/RandClosingViewer";
 import AdminNibo from "./pages/admin/AdminNibo";
 import AdminEmailSettings from "./pages/admin/AdminEmailSettings";
 import AdminNotifications from "./pages/admin/AdminNotifications";
@@ -150,6 +151,7 @@ const App = () => (
             {/* Public routes */}
             <Route path="/" element={<RootRedirect />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/fechamentos/rand" element={<RandClosingViewer />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/pv-clube" element={<Navigate to="/pv-clube-b" replace />} />
             <Route path="/pv-clube-b" element={<VipLandingB />} />

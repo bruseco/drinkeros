@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   superAdmin: true, rows: [] as unknown[], error: null as unknown,
   rpc: vi.fn(), invoke: vi.fn(), toastError: vi.fn(),
 }));
-vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ isSuperAdmin: mocks.superAdmin }) }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ isSuperAdmin: mocks.superAdmin, user: { id: 'viewer' } }) }));
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: mocks.toastError } }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: {
   from: () => ({ select: () => ({ order: async () => ({ data: mocks.rows, error: mocks.error }) }) }),
@@ -21,9 +21,9 @@ const fixture = (month: string, status = 'draft') => ({
     tax_base_cents: 10000, pix_fee_cents: 100, card_fee_cents: 0, tax_cents: 700,
     adjustments_cents: 0, net_cents: 9200, rand_cents: 5520, drinkeros_cents: 3680, lines: [] },
 });
-function show() {
+function show(readOnly = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<MemoryRouter><QueryClientProvider client={client}><AdminFinancialClosings /></QueryClientProvider></MemoryRouter>);
+  return render(<MemoryRouter><QueryClientProvider client={client}><AdminFinancialClosings readOnly={readOnly} /></QueryClientProvider></MemoryRouter>);
 }
 beforeEach(() => {
   mocks.superAdmin = true; mocks.rows = []; mocks.error = null;
@@ -34,6 +34,21 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('financial closing admin flow', () => {
+  it('lets a viewer filter months without refresh or settlement controls', async () => {
+    mocks.superAdmin = false;
+    mocks.rpc.mockResolvedValue({ data: [fixture('2020-09'), fixture('2020-08', 'paid')], error: null });
+    show(true);
+    fireEvent.change(screen.getByLabelText('Mês do pagamento do cliente'), { target: { value: '2020-09' } });
+    await screen.findByText(/A atualização e o registro dos repasses são feitos pela administração/);
+    expect(mocks.rpc).toHaveBeenCalledWith('view_rand_closings', {});
+    expect(screen.queryByRole('button', { name: 'Atualizar demonstrativo' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Marcar como acertado' })).not.toBeInTheDocument();
+    expect(screen.queryByText('← Todos os parceiros')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Mês do pagamento do cliente'), { target: { value: '2020-08' } });
+    await screen.findByText(/Este demonstrativo está preservado/);
+    expect(mocks.invoke).not.toHaveBeenCalled();
+    expect(mocks.rpc.mock.calls.every(([name]) => name === 'view_rand_closings')).toBe(true);
+  });
   it('requires super-admin access before reading financial statements', () => {
     mocks.superAdmin = false;
     show();
