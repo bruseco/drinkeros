@@ -67,6 +67,8 @@ const EbookLanding: React.FC = () => {
     }
   }, [searchParams, toast]);
 
+  if (searchParams.get('checkout') === 'success' && user) return <Navigate to="/app/ebooks" replace />;
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] text-white">

@@ -15,11 +15,13 @@ import { useVipDiscount } from '@/hooks/useVipDiscount';
 import { VipDiscountCountdownBanner } from '@/components/user/VipDiscountCountdownBanner';
 import drinkerosFooterLogo from '@/assets/logotipo-drinkeros.png';
 import { useViewContent } from '@/hooks/useViewContent';
+import { useAuth } from '@/contexts/AuthContext';
 
 const PackageLanding: React.FC = () => {
   const { packageSlug } = useParams<{ packageSlug: string }>();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [checkoutLoading, setCheckoutLoading] = React.useState(false);
 
   const { data: pkg, isLoading: pkgLoading } = usePackageBySlug(packageSlug || '');
@@ -88,6 +90,10 @@ const PackageLanding: React.FC = () => {
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
+  }
+
+  if (searchParams.get('checkout') === 'success' && user && (isEbook || isCourse)) {
+    return <Navigate to={isEbook ? '/app/ebooks' : '/app/cursos'} replace />;
   }
 
   if (!item) {

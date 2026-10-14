@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { accountDestination } from '@/lib/purchaseDestination';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
@@ -41,6 +42,8 @@ const Login: React.FC = () => {
   });
   const { signIn, user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const destination = accountDestination(params.get('redirect'));
   const { toast } = useToast();
 
   useEffect(() => {
@@ -70,7 +73,7 @@ const Login: React.FC = () => {
         if (error) throw error;
         // Limpa o hash para não vazar tokens na URL
         window.history.replaceState(null, '', window.location.pathname + window.location.search);
-        navigate('/app', { replace: true });
+        navigate(destination, { replace: true });
       } catch (err: any) {
         console.error('[Login] erro ao consumir hash OAuth:', err);
         toast({
@@ -82,13 +85,13 @@ const Login: React.FC = () => {
         setIsProcessingHash(false);
       }
     })();
-  }, [navigate, toast]);
+  }, [navigate, toast, destination]);
 
   useEffect(() => {
     if (user && !authLoading) {
-      navigate('/app');
+      navigate(destination);
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, destination]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -111,7 +114,7 @@ const Login: React.FC = () => {
         variant: 'destructive',
       });
     } else {
-      navigate('/app');
+      navigate(destination);
     }
 
     setIsLoading(false);

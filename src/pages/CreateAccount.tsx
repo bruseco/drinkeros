@@ -8,10 +8,12 @@ import { Loader2, CheckCircle2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import drinkerosLogo from "@/assets/logotipo-drinkeros.png";
 import SeoHead from "@/components/SeoHead";
+import { accountDestination } from '@/lib/purchaseDestination';
 
 export default function CreateAccount() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const destination = accountDestination(params.get('redirect'));
 
   const paymentId = params.get("pid") || "";
   const [email, setEmail] = useState(() => {
@@ -27,9 +29,9 @@ export default function CreateAccount() {
   // Já logado? vai direto para o app.
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate("/app", { replace: true });
+      if (session) navigate(destination, { replace: true });
     });
-  }, [navigate]);
+  }, [navigate, destination]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,7 +72,7 @@ export default function CreateAccount() {
       if (serverMsg || error) {
         if (code === "already_active") {
           toast.info(serverMsg);
-          navigate(`/login?email=${encodeURIComponent(email.trim().toLowerCase())}`);
+          navigate(`/login?email=${encodeURIComponent(email.trim().toLowerCase())}&redirect=${encodeURIComponent(destination)}`);
           return;
         }
         throw new Error(serverMsg || "Não foi possível criar sua conta. Tente novamente.");
@@ -82,13 +84,13 @@ export default function CreateAccount() {
       });
       if (signInError) {
         toast.success("Senha definida! Faça login para entrar.");
-        navigate(`/login?email=${encodeURIComponent(email.trim().toLowerCase())}`);
+        navigate(`/login?email=${encodeURIComponent(email.trim().toLowerCase())}&redirect=${encodeURIComponent(destination)}`);
         return;
       }
 
       setDone(true);
       toast.success("Conta criada! Bem-vindo(a) à Drinkeros 🎉");
-      setTimeout(() => navigate("/app", { replace: true }), 800);
+      setTimeout(() => navigate(destination, { replace: true }), 800);
     } catch (err: any) {
       toast.error("Erro ao criar conta", { description: err?.message });
     } finally {

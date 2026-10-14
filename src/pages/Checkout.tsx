@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { initMercadoPago, Payment } from "@mercadopago/sdk-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +13,7 @@ import { applyVipDiscountFor, getVipPriceFor } from "@/lib/vipDiscount";
 import { useYouthDiscount } from "@/hooks/useYouthDiscount";
 import FiscalAddressDialog from "@/components/user/FiscalAddressDialog";
 import { mpRejectionMessage } from "@/lib/mpErrors";
+import { purchaseDestination } from '@/lib/purchaseDestination';
 
 type ClubMethod = "card" | "pix";
 
@@ -63,6 +65,7 @@ let mpInitialized = false;
 export default function Checkout() {
   const { productType, slug } = useParams<{ productType: ProductType; slug: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [publicKeyReady, setPublicKeyReady] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
@@ -252,9 +255,18 @@ export default function Checkout() {
         }
       } catch { /* fallback */ }
     }
-    const target = !userId
-      ? `/criar-conta?pid=${encodeURIComponent(String(pid || ""))}&email=${encodeURIComponent(payerEmail || "")}`
-      : redirect;
+    const destination = purchaseDestination(productType) || redirect;
+    if (purchaseDestination(productType)) {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['user-ebooks'] }),
+        queryClient.invalidateQueries({ queryKey: ['user-ebooks-expiry'] }),
+        queryClient.invalidateQueries({ queryKey: ['user-courses'] }),
+      ]);
+    }
+    const { data: { session } } = await supabase.auth.getSession();
+    const target = !session
+      ? `/criar-conta?pid=${encodeURIComponent(String(pid || ""))}&email=${encodeURIComponent(payerEmail || "")}&redirect=${encodeURIComponent(purchaseDestination(productType) || '/app')}`
+      : destination;
     if (addressComplete) {
       setTimeout(() => navigate(target), delay);
     } else {
@@ -701,4 +713,3 @@ export function PixDisplay({ pix, amount, onBack }: { pix: PixData; amount: numb
     </div>
   );
 }
-
