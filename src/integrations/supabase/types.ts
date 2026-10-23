@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.4"
   }
   public: {
     Tables: {
@@ -2232,6 +2232,104 @@ export type Database = {
         }
         Relationships: []
       }
+      rand_closing_state: {
+        Row: {
+          id: boolean
+          revision: number
+        }
+        Insert: {
+          id?: boolean
+          revision?: number
+        }
+        Update: {
+          id?: boolean
+          revision?: number
+        }
+        Relationships: []
+      }
+      rand_closing_viewers: {
+        Row: {
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      rand_financial_closings: {
+        Row: {
+          base_revision: number
+          carried_to: string | null
+          draft_id: string
+          month: string
+          paid_at: string | null
+          paid_by: string | null
+          report: Json
+          status: string
+          synced_at: string
+        }
+        Insert: {
+          base_revision: number
+          carried_to?: string | null
+          draft_id?: string
+          month: string
+          paid_at?: string | null
+          paid_by?: string | null
+          report: Json
+          status?: string
+          synced_at?: string
+        }
+        Update: {
+          base_revision?: number
+          carried_to?: string | null
+          draft_id?: string
+          month?: string
+          paid_at?: string | null
+          paid_by?: string | null
+          report?: Json
+          status?: string
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rand_financial_closings_carried_to_fkey"
+            columns: ["carried_to"]
+            isOneToOne: false
+            referencedRelation: "rand_financial_closings"
+            referencedColumns: ["month"]
+          },
+        ]
+      }
+      rand_recognized_payments: {
+        Row: {
+          month: string
+          net_cents: number
+          payment_id: string
+          refund_cents: number
+          tax_cents: number
+        }
+        Insert: {
+          month: string
+          net_cents: number
+          payment_id: string
+          refund_cents: number
+          tax_cents: number
+        }
+        Update: {
+          month?: string
+          net_cents?: number
+          payment_id?: string
+          refund_cents?: number
+          tax_cents?: number
+        }
+        Relationships: []
+      }
       recipe_materials: {
         Row: {
           created_at: string
@@ -3767,6 +3865,7 @@ export type Database = {
         }[]
       }
       can_edit: { Args: { _user_id: string }; Returns: boolean }
+      can_view_rand_closing: { Args: never; Returns: boolean }
       claim_whatsapp_queue_items: {
         Args: { batch_size?: number }
         Returns: {
@@ -4018,6 +4117,26 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      mark_rand_closing_paid: {
+        Args: { p_draft_id: string; p_month: string }
+        Returns: {
+          base_revision: number
+          carried_to: string | null
+          draft_id: string
+          month: string
+          paid_at: string | null
+          paid_by: string | null
+          report: Json
+          status: string
+          synced_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rand_financial_closings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       nibo_claim_order: {
         Args: {
           p_amount: number
@@ -4052,6 +4171,26 @@ export type Database = {
       ppo_mark_event: {
         Args: { _event: string; _offer_id: string }
         Returns: boolean
+      }
+      prepare_rand_closing: {
+        Args: { p_month: string; p_report: Json; p_revision: number }
+        Returns: {
+          base_revision: number
+          carried_to: string | null
+          draft_id: string
+          month: string
+          paid_at: string | null
+          paid_by: string | null
+          report: Json
+          status: string
+          synced_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rand_financial_closings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       purge_expired_welcome_passwords: { Args: never; Returns: undefined }
       recalc_yearly_winner_stats: {
@@ -4140,6 +4279,7 @@ export type Database = {
           workload_seconds: number
         }[]
       }
+      view_rand_closings: { Args: never; Returns: Json }
     }
     Enums: {
       app_role: "super_admin" | "editor" | "viewer" | "parceiro"
