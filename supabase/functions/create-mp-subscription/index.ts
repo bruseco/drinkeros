@@ -11,7 +11,7 @@ const corsHeaders = {
 const MP_API = "https://api.mercadopago.com";
 
 const PLANS: Record<string, { amount: number; frequency: number; reason: string }> = {
-  "clube-anual": { amount: 47, frequency: 12, reason: "Clube dos Drinkeros · Anual" },
+  "clube-anual": { amount: 97, frequency: 12, reason: "Clube dos Drinkeros · Anual" },
   clube:         { amount: 9.9, frequency: 1,  reason: "Clube dos Drinkeros · Mensal" },
 };
 
@@ -78,7 +78,7 @@ serve(async (req) => {
           const m = now.getMonth() - d.getMonth();
           if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
           if (age >= 14 && age <= 24) {
-            amount = 27;
+            amount = 47;
             reason = `${plan.reason} · Jovem Bartender`;
           }
         }

@@ -41,7 +41,7 @@ const CLUB_PRODUCTS: Record<string, { id: string; name: string; slug: string; pr
     id: "club",
     name: "Clube dos Drinkeros · Anual",
     slug: "clube-anual",
-    price: 47,
+    price: 97,
     cover_image_url: null,
     description: "Acesso por 12 meses ao Clube.",
     period_days: 365,
@@ -175,7 +175,7 @@ serve(async (req) => {
     const VIP_FIXED_PRICE_BY_SLUG: Record<string, number> = { "classicos-destilados": 197 };
     const vipFixed = VIP_FIXED_PRICE_BY_SLUG[product.slug];
     const vipPrice = product_type === "club"
-      ? (youthDiscount ? 27 : basePrice)
+      ? (youthDiscount ? 47 : basePrice)
       : applyDiscount
       ? (vipFixed !== undefined
         ? Math.min(vipFixed, basePrice)

@@ -17,7 +17,7 @@ const Countdown: React.FC<{ untilMs: number }> = ({ untilMs }) => {
 export const ClubeIntroStickyBar: React.FC = () => {
   const { isActive, eligibleUntilMs, hasRevealed } = useClubeIntroOffer();
   const youth = useYouthDiscount();
-  const price = youth.isYouth ? youth.price : 47;
+  const price = youth.isYouth ? youth.price : 97;
   const off = 197 - price;
   const barRef = React.useRef<HTMLDivElement>(null);
   const visible = isActive && hasRevealed;

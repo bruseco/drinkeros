@@ -31,7 +31,7 @@ const CLUB_PRODUCTS: Record<string, Product> = {
     id: "club",
     name: "Clube dos Drinkeros · Anual",
     slug: "clube-anual",
-    price: 47,
+    price: 97,
     cover_image_url: null,
     description: "Acesso por 12 meses às receitas exclusivas e benefícios do Clube.",
   },
@@ -89,7 +89,7 @@ export default function Checkout() {
   // Sócio/Vitalício recebem desconto escalonado (80% por 7d → 50% depois) apenas em produtos avulsos.
   const vipPercent = !isClub && vip.ready && vip.isVip ? vip.percent : 0;
   const isVip = vipPercent > 0;
-  // Jovem Bartender (≤24 anos): R$27 no anual do Clube.
+  // Jovem Bartender (≤24 anos): R$47 no anual do Clube.
   const isYouthClubAnual = isClub && slug === "clube-anual" && youth.isYouth;
 
   // 1. Carrega Public Key e inicializa MP SDK (Clube e produtos avulsos agora usam Mercado Pago)
