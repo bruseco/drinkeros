@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 /**
  * Desconto "Jovem Bartender": usuários com 24 anos ou menos
- * pagam R$27 no anual do Clube (em vez de R$47).
+ * pagam R$47 no anual do Clube (em vez de R$97).
  *
  * Frase: "Condição especial para estudantes e jovens bartenders em início de carreira."
  *
@@ -13,7 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
  * para que o cliente não consiga falsificar o preço.
  */
 export const YOUTH_MAX_AGE = 24;
-export const YOUTH_PRICE = 27;
+export const YOUTH_PRICE = 47;
 
 function calcAge(birthDate: string | null | undefined): number | null {
   if (!birthDate) return null;
@@ -57,7 +57,7 @@ export function useYouthDiscount(): YouthDiscountState {
   return {
     isYouth,
     age,
-    price: isYouth ? YOUTH_PRICE : 47,
+    price: isYouth ? YOUTH_PRICE : 97,
     loading: isLoading,
   };
 }

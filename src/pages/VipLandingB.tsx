@@ -113,7 +113,7 @@ const IntroCountdownPill: React.FC<{ untilMs: number }> = ({ untilMs }) => {
   return (
     <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs font-semibold text-yellow-200">
       <Timer className="h-3.5 w-3.5" />
-      <span className="text-yellow-100">Desconto de R$ 150 expira em</span>
+      <span className="text-yellow-100">Desconto de R$ 100 expira em</span>
       <span className="font-mono font-bold text-white tabular-nums">
         {mm}:{ss}
       </span>
@@ -198,7 +198,7 @@ const VipLandingB: React.FC = () => {
   const [isClosing] = useState(false);
   const promo = useClubeIntroOffer();
   const youth = useYouthDiscount();
-  // Preço efetivo após considerar Jovem Bartender (≤24 anos): R$27.
+  // Preço efetivo após considerar Jovem Bartender (≤24 anos): R$47.
   const effectivePromoPrice = youth.isYouth ? youth.price : promo.promoPrice;
   const effectiveSavings = promo.fullPrice - effectivePromoPrice;
 

@@ -27,7 +27,7 @@ type Phase =
  */
 export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
   const youth = useYouthDiscount();
-  const discountAmount = youth.isYouth ? 170 : 150;
+  const discountAmount = youth.isYouth ? 150 : 100;
   const [phase, setPhase] = useState<Phase>('idle');
   const onCloseRef = React.useRef(onClose);
   useEffect(() => { onCloseRef.current = onClose; }, [onClose]);

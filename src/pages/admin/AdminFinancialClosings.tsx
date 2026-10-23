@@ -65,7 +65,7 @@ export default function AdminFinancialClosings({ readOnly = false }: { readOnly?
     queryKey: ['rand-closings', readOnly ? user?.id : 'admin'], enabled: readOnly ? !!user : isSuperAdmin,
     queryFn: async (): Promise<Closing[]> => {
       if (readOnly) {
-        const { data, error } = await db.rpc('view_rand_closings', {});
+        const { data, error } = await (db.rpc as any)('view_rand_closings', {});
         if (error) throw error;
         return data ?? [];
       }

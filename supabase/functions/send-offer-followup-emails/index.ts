@@ -118,7 +118,7 @@ serve(async (req: Request) => {
       for (const raw of leads as any[]) {
         const lead = raw as { id: string; name: string | null; email: string; user_id: string | null; discount_token: string };
         try {
-          const signal = await purchaseSignal(supabase, offer, productId, lead);
+          const signal = await purchaseSignal(supabase as any, offer, productId, lead);
           if (signal) {
             await supabase
               .from("landing_offer_leads")
