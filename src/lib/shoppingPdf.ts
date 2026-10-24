@@ -46,13 +46,19 @@ export function createShoppingPdf(plan: ShoppingPlan, images: Record<string, str
   write('Estimativa de compra. O total de drinks é distribuído entre as receitas selecionadas.', 9, '#aaaaaa');
   heading('Lista de compras');
   if (!plan.items.length) write('Ingredientes não cadastrados. Consulte as receitas.', 11);
-  for (const item of plan.items) {
+  for (const optional of [false, true]) {
+    const group = plan.items.filter(item => !!item.optional === optional); if (!group.length) continue;
+    room(optional ? 45 : 30);
+    write(optional ? 'DECORAÇÕES - OPCIONAL' : 'INGREDIENTES', 14, '#ff8a31', 4);
+    if (optional) write('Somente para enfeitar os drinks. Você pode dispensar estes itens.', 10, '#aaaaaa');
+  for (const item of group) {
     room(19); doc.setDrawColor('#ff8a31'); doc.setLineWidth(.5);
     doc.line(margin, y - 1.5, margin + 1, y - .5); doc.line(margin + 1, y - .5, margin + 3, y - 3);
     write(`     ${item.name}`, 12, '#ffffff', 1);
     write(shoppingQuantity(item), 10, item.quantity == null ? '#ffb877' : '#cccccc', 5);
   }
-  if (plan.warnings.length) { heading('Confira antes de comprar'); for (const warning of plan.warnings) write(warning, 10, '#ffb877'); }
+  }
+  if (plan.warnings.length) { heading('Estimativas utilizadas'); for (const warning of plan.warnings) write(warning, 10, '#ffb877'); }
   write('Referências: dose de 50 ml; completar = 100 ml por drink (estimativa). Embalagens são referências de compra; escolha o tamanho indicado. Gelo: estimativa de 300 g por drink, em sacos de 3 kg.', 9, '#aaaaaa');
   doc.addPage(); background(); y = 13; heading('Drinks selecionados');
   for (let i = 0; i < plan.recipes.length; i += 2) {

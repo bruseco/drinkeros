@@ -58,3 +58,13 @@ it('keeps the confirmation open on failure and preserves the current list', asyn
   fireEvent.click(screen.getByRole('button', { name: 'Excluir lista' }));
   await screen.findByRole('alert'); expect(screen.getByRole('alertdialog')).toBeInTheDocument(); expect(onSelect).not.toHaveBeenCalled();
 });
+it('separates optional decorations without preventing checklist completion', () => {
+  const list = mocks.lists[0] as { plan: ReturnType<typeof makeShoppingPlan> };
+  list.plan.items.push({ name: 'Pimenta', quantity: 5, unit: 'unidade(s)', measures: { 'unidade(s)': 5 }, notes: [], missing: [], estimated: true, optional: true });
+  mocks.checks = [0, 1].map(item_index => ({ list_id: 'l', item_index, is_checked: true }));
+  render(<EventShoppingLists selectedId="l" onSelect={vi.fn()} />);
+  expect(screen.getByText('Decorações — opcional')).toBeInTheDocument();
+  expect(screen.getByText('Lista completa!')).toBeInTheDocument();
+  expect(screen.getByRole('checkbox', { name: /Pimenta/ })).not.toBeChecked();
+  expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuemax', '2');
+});

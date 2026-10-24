@@ -353,6 +353,7 @@ export const useToggleFavorite = () => {
     },
     onSuccess: (_, { isFavorite }) => {
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['collection-recipes'] });
       toast({
         title: isFavorite ? 'Eliminado de favoritos' : 'Agregado a favoritos',
       });

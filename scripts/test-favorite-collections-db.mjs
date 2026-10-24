@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { PGlite } from '@electric-sql/pglite';
+const db = new PGlite();
+await db.exec(`CREATE ROLE anon; CREATE ROLE authenticated;
+CREATE TABLE collections(id text PRIMARY KEY,user_id text);
+CREATE TABLE collection_recipes(collection_id text REFERENCES collections(id),recipe_id text);
+CREATE TABLE favorites(user_id text,recipe_id text);
+INSERT INTO collections VALUES ('a','owner'),('b','other'),('c','owner');
+INSERT INTO collection_recipes VALUES ('a','drink'),('b','drink'),('c','drink'),('a','keep');
+INSERT INTO favorites VALUES ('owner','drink'),('other','drink'),('owner','keep');`);
+await db.exec(await readFile(new URL('../supabase/migrations/20261024170000_remove_unfavorited_collection_recipes.sql', import.meta.url), 'utf8'));
+await db.query("DELETE FROM favorites WHERE user_id='owner' AND recipe_id='drink'");
+assert.equal((await db.query("SELECT * FROM collection_recipes WHERE collection_id IN ('a','c') AND recipe_id='drink'")).rows.length, 0);
+assert.equal((await db.query("SELECT * FROM collection_recipes WHERE collection_id='b' AND recipe_id='drink'")).rows.length, 1);
+assert.equal((await db.query("SELECT * FROM collection_recipes WHERE recipe_id='keep'")).rows.length, 1);
+assert.equal((await db.query('SELECT * FROM collections')).rows.length, 3);
+await db.close(); console.log('PASS: removing a favorite removes only its own collection memberships, preserving other users and recipes');

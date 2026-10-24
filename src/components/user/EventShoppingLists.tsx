@@ -27,13 +27,14 @@ export function EventShoppingLists({ selectedId, onSelect }: { selectedId: strin
   </div>;
   const checked = new Set((checks.data || []).filter(c => c.is_checked).map(c => c.item_index));
   const items = selected.plan.items.map((item, index) => ({ item, index, done: checked.has(index) }));
-  const completed = items.filter(i => i.done).length;
-  const allDone = items.length > 0 && completed === items.length;
+  const required = items.filter(i => !i.item.optional);
+  const completed = required.filter(i => i.done).length;
+  const allDone = required.length > 0 && completed === required.length;
   return <section className="space-y-5">
     <div className="relative hidden h-12 items-center lg:flex"><Button variant="ghost" size="icon" aria-label="Voltar para listas de compras" onClick={() => onSelect(null)}><ArrowLeft className="h-5 w-5" /></Button><img src={logoUrl} alt="Drinkeros" className="absolute left-1/2 h-10 -translate-x-1/2 object-contain" /></div>
     <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-xs uppercase tracking-wider text-muted-foreground">Lista de compras</p><h1 className="mt-1 break-words text-2xl font-bold">{selected.name}</h1><p className="mt-2 text-sm text-muted-foreground">{selected.plan.people} pessoas · {selected.plan.perPerson} drinks por pessoa · {selected.plan.total} drinks no total</p></div><DeleteEventShoppingList id={selected.id} name={selected.name} onDeleted={() => onSelect(null)} /></div>
     <div className="flex items-end gap-3">
-      <div className="min-w-0 flex-1"><p className="mb-2 text-sm text-muted-foreground">{checks.isLoading ? 'Carregando checklist…' : checks.isError ? 'Progresso indisponível' : `${completed} de ${items.length} itens comprados`}</p><div role="progressbar" aria-label="Itens comprados" aria-valuemin={0} aria-valuemax={items.length} aria-valuenow={checks.isLoading || checks.isError ? undefined : completed} className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary transition-all" style={{ width: `${items.length && !checks.isError && !checks.isLoading ? completed / items.length * 100 : 0}%` }} /></div></div>
+      <div className="min-w-0 flex-1"><p className="mb-2 text-sm text-muted-foreground">{checks.isLoading ? 'Carregando checklist…' : checks.isError ? 'Progresso indisponível' : `${completed} de ${required.length} ingredientes comprados`}</p><div role="progressbar" aria-label="Itens comprados" aria-valuemin={0} aria-valuemax={required.length} aria-valuenow={checks.isLoading || checks.isError ? undefined : completed} className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary transition-all" style={{ width: `${required.length && !checks.isError && !checks.isLoading ? completed / required.length * 100 : 0}%` }} /></div></div>
       <Button variant="outline" disabled={exporting} onClick={async () => {
         setExporting(true); setExportError('');
         try { const { downloadShoppingPdf } = await import('@/lib/shoppingPdf'); await downloadShoppingPdf(selected.plan); }
@@ -43,15 +44,17 @@ export function EventShoppingLists({ selectedId, onSelect }: { selectedId: strin
     </div>
     {exportError && <p role="alert" className="text-sm text-destructive">{exportError}</p>}
     {checks.isLoading ? <p role="status">Carregando checklist…</p> : checks.isError ? <div role="alert"><p>Não foi possível carregar os itens comprados.</p><Button variant="outline" onClick={() => checks.refetch()}>Tentar novamente</Button></div> : <>
-      {allDone && <div role="status" className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/10 p-4"><CheckCircle2 className="h-6 w-6 text-primary" /><div><p className="font-semibold">Lista completa!</p><p className="text-sm text-muted-foreground">Todos os itens foram comprados.</p></div></div>}
+      {allDone && <div role="status" className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/10 p-4"><CheckCircle2 className="h-6 w-6 text-primary" /><div><p className="font-semibold">Lista completa!</p><p className="text-sm text-muted-foreground">Todos os ingredientes foram comprados. Decorações são opcionais.</p></div></div>}
       {toggle.isError && <p role="alert" className="text-sm text-destructive">Não foi possível salvar a marcação. Tente novamente.</p>}
-      {[false, true].map(done => {
-        const group = items.filter(i => i.done === done); if (!group.length) return null;
-        return <div key={String(done)} className="space-y-2"><h3 className="pt-2 text-sm font-semibold text-muted-foreground">{done ? 'Comprados' : 'Falta comprar'}</h3>{group.map(({ item, index }) => <div key={index} data-testid="shopping-item" className={'flex items-start gap-3 rounded-xl border p-4 ' + (done ? 'bg-muted/30' : 'bg-card')}>
+      {['ingredients', 'decorations', 'bought'].map(section => {
+        const done = section === 'bought';
+        const group = items.filter(i => done ? i.done : !i.done && !!i.item.optional === (section === 'decorations')); if (!group.length) return null;
+        return <div key={section} className="space-y-2"><h3 className="pt-2 text-sm font-semibold text-muted-foreground">{done ? 'Comprados' : section === 'decorations' ? 'Decorações — opcional' : 'Ingredientes'}</h3>{section === 'decorations' && <p className="text-sm text-muted-foreground">Só se quiser enfeitar. Não é necessário comprar para completar a lista.</p>}{group.map(({ item, index }) => <div key={index} data-testid="shopping-item" className={'flex items-start gap-3 rounded-xl border p-4 ' + (done ? 'bg-muted/30' : 'bg-card')}>
           <Checkbox id={'shopping-check-' + selected.id + '-' + index} checked={done} disabled={toggle.isPending} onCheckedChange={value => toggle.mutate({ index, checked: value === true })} className="mt-1" />
           <Label htmlFor={'shopping-check-' + selected.id + '-' + index} className="flex-1 cursor-pointer space-y-1"><span className={'block font-semibold ' + (done ? 'text-muted-foreground line-through' : '')}>{item.name}</span><span className="block text-sm font-normal leading-relaxed text-muted-foreground">{shoppingQuantity(item)}</span></Label>
         </div>)}</div>;
       })}
+      {selected.plan.warnings.length > 0 && <details className="text-sm text-muted-foreground"><summary className="cursor-pointer">Estimativas utilizadas ({selected.plan.warnings.length})</summary><ul className="mt-2 space-y-2">{selected.plan.warnings.map((warning, index) => <li key={index}>{warning}</li>)}</ul></details>}
       <p className="text-xs text-muted-foreground">Medidas de embalagem são referências de compra. “Complete” usa 100 ml por drink; gelo usa 300 g por drink, como estimativa.</p>
     </>}
   </section>;

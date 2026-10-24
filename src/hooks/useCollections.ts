@@ -53,17 +53,20 @@ export const useCollectionRecipes = () => {
       const recipeIds = [...new Set(crs.map((cr) => cr.recipe_id))];
 
       // Recipes can live in `recipes` (aulas), `exclusive_posts` (drinks) ou `club_recipes` (Clube)
-      const [recipesRes, postsRes, clubRes] = await Promise.all([
+      const [recipesRes, postsRes, clubRes, favoritesRes] = await Promise.all([
         supabase.from('recipes').select('id, name, image_url, servings').in('id', recipeIds),
         supabase.from('exclusive_posts').select('id, title, cover_image_url').in('id', recipeIds),
         supabase.from('club_recipes').select('id, name, image_url').in('id', recipeIds),
+        supabase.from('favorites').select('recipe_id').eq('user_id', user.id).in('recipe_id', recipeIds),
       ]);
+      if (favoritesRes.error) throw favoritesRes.error;
+      const favoriteIds = new Set((favoritesRes.data || []).map(f => f.recipe_id));
 
       const recipesMap = new Map((recipesRes.data || []).map((r) => [r.id, r]));
       const postsMap = new Map((postsRes.data || []).map((p) => [p.id, p]));
       const clubMap = new Map((clubRes.data || []).map((c) => [c.id, c]));
 
-      return crs.map((cr) => {
+      return crs.filter(cr => favoriteIds.has(cr.recipe_id)).map((cr) => {
         const r = recipesMap.get(cr.recipe_id);
         const p = postsMap.get(cr.recipe_id);
         const c = clubMap.get(cr.recipe_id);
@@ -274,7 +277,7 @@ export const useSaveClubRecipe = () => {
       }
 
       // 2) Garantir coleção "Clube dos Drinkeros"
-      let { data: existingCol } = await supabase
+      const { data: existingCol } = await supabase
         .from('collections')
         .select('id')
         .eq('user_id', user.id)
@@ -319,7 +322,7 @@ export const useSaveClubRecipe = () => {
         title: res?.alreadySaved ? 'Já estava salva' : 'Salva em Clube dos Drinkeros',
       });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast({
         title: 'Erro ao salvar',
         description: error?.message,

@@ -14,13 +14,14 @@ it('recognizes explicit fractional measures in preparation instructions', () => 
   const p = makeShoppingPlan('Festa', [recipe('A', ['Rum'], { instructions: '1 1/2 dose de Rum' })], 2, 1);
   expect(p.items.find(i => i.name === 'Rum')?.quantity).toBe(150);
 });
-it('never invents missing quantities or yields', () => {
+it('uses labeled estimates for missing quantities or yields', () => {
   const p = makeShoppingPlan('Festa', [recipe('A', ['Rum', 'gelo']), recipe('B', ['50 ml de Rum'], { yield: null })], 2, 1);
-  expect(p.items.filter(i => i.name !== 'Gelo').every(i => i.quantity === null)).toBe(true); expect(p.warnings).toHaveLength(1);
+  expect(p.items.every(i => i.quantity != null)).toBe(true); expect(p.warnings.length).toBeGreaterThanOrEqual(2);
+  expect(p.items.find(i => i.name === 'Rum')?.estimated).toBe(true);
 });
-it('flags ambiguous preparation measures rather than counting one arbitrarily', () => {
+it('sums explicit measures from multiple preparation steps', () => {
   const p = makeShoppingPlan('Festa', [recipe('A', ['Rum'], { instructions: '1 dose de Rum\n2 doses de Rum' })], 2, 1);
-  expect(p.items.find(i => i.name === 'Rum')?.quantity).toBeNull();
+  expect(p.items.find(i => i.name === 'Rum')?.quantity).toBe(300);
 });
 it('excludes ingredients of recipes allocated zero servings', () => {
   const p = makeShoppingPlan('Festa', [recipe('A', ['50 ml de Rum']), recipe('B', ['50 ml de Vodka'])], 1, 1);
@@ -49,11 +50,13 @@ it('uses approved top-up and ice estimates and rounds purchases up to full packa
 it('has one ingredient row even when some recipes still lack a measure', () => {
   const p = makeShoppingPlan('Festa', [recipe('A', ['Xarope de Gengibre'], { instructions: '1/2 dose de xarope de gengibre' }), recipe('B', ['Xarope de Gengibre'])], 2, 1);
   expect(p.items.filter(i => i.name === 'Xarope de Gengibre')).toHaveLength(1);
-  expect(() => requireCompleteShoppingPlan(p)).toThrow(/Xarope de Gengibre.*B/);
+  expect(() => requireCompleteShoppingPlan(p)).not.toThrow();
+  expect(p.items.find(i => i.name === 'Xarope de Gengibre')?.estimated).toBe(true);
 });
 it('does not assign a generic lime measure to both named varieties', () => {
   const p = makeShoppingPlan('Festa', [recipe('A', ['Limão Siciliano', 'Limão Taiti'], { instructions: 'Suco de 1 limão' })], 1, 1);
-  expect(() => requireCompleteShoppingPlan(p)).toThrow();
+  expect(() => requireCompleteShoppingPlan(p)).not.toThrow();
+  expect(p.items.filter(i => i.name.startsWith('Limão')).every(i => i.estimated)).toBe(true);
 });
 it('applies the top-up reference per final drink rather than per recipe batch', () => {
   const p = makeShoppingPlan('Festa', [recipe('A', ['Energético'], { yield: 4, instructions: 'Complete com energético' })], 3, 1);
@@ -63,5 +66,21 @@ it('does not double count identical ingredient entries or confuse gin with ginge
   const p = makeShoppingPlan('Festa', [recipe('A', ['Gin', 'gin'], { instructions: '1 dose de Gin' })], 1, 1);
   expect(p.items.find(i => i.name === 'Gin')?.quantity).toBe(50);
   const other = makeShoppingPlan('Festa', [recipe('A', ['Gin'], { instructions: '1 dose de ginger beer' })], 1, 1);
-  expect(() => requireCompleteShoppingPlan(other)).toThrow();
+  expect(other.items.find(i => i.name === 'Gin')?.estimated).toBe(true);
+});
+it('calculates the real Da Malvada preparation and marks only its garnish optional', () => {
+  const p = makeShoppingPlan('Malvada', [recipe('Da Malvada', ['Água Tônica', 'Gin', 'Limão Siciliano', 'Pimenta', 'Tequila Ouro', 'Xarope de Pitaya', 'Xarope Preto'], {
+    instructions: 'Em uma taça de gin com gelo\nAdicione suco de 1/2 limão siciliano\n1/2 dose de xarope de pitaya\n1 dose de gin Bombay Sapphire\nCompleta com água tônica\nMistura levemente\nEm um mixing glass com gelo\nAdicione 1/2 dose de tequila José Cuervo\n1/2 dose de xarope preto\nMisture\nDespeja com ajuda de uma colher por cima do drink\nDecore com pimenta na borda\nPronto!! Bora beber!',
+  })], 5, 3);
+  expect(() => requireCompleteShoppingPlan(p)).not.toThrow();
+  expect(p.items.find(i => i.name === 'Tequila Ouro')?.quantity).toBe(375);
+  expect(p.items.find(i => i.name === 'Água Tônica')?.quantity).toBe(1500);
+  expect(p.items.find(i => i.name === 'Limão Siciliano')?.quantity).toBe(7.5);
+  expect(p.items.filter(i => i.optional).map(i => i.name)).toEqual(['Pimenta']);
+});
+it('retains an ingredient as required when another drink uses it in preparation', () => {
+  const p = makeShoppingPlan('Festa', [recipe('A', ['Pimenta'], { instructions: 'Decore com pimenta na borda' }), recipe('B', ['Pimenta'], { instructions: 'Adicione 1 unidade de pimenta' })], 2, 1);
+  expect(p.items.find(i => i.name === 'Pimenta')?.optional).toBe(false);
+  expect(p.items.find(i => i.name === 'Pimenta')?.quantity).toBe(1);
+  expect(p.items.filter(i => i.name === 'Pimenta')).toHaveLength(1);
 });

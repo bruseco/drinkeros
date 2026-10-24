@@ -3,7 +3,7 @@ import { expect, it } from 'vitest';
 import { makeShoppingPlan } from './shoppingPlan';
 import { createShoppingPdf } from './shoppingPdf';
 it('paginates a mobile shopping document with long names and missing measures', async () => {
-  const plan = makeShoppingPlan('Churrasco de sábado', Array.from({ length: 9 }, (_, i) => ({ id: String(i), name: `Drink especial ${i + 1} com maracujá e especiarias`, ingredients: ['50 ml de Rum', 'Gelo a gosto', `${i + 1} unidades de Limão Taiti`], yield: 1 })), 15, 3);
+  const plan = makeShoppingPlan('Churrasco de sábado', Array.from({ length: 9 }, (_, i) => ({ id: String(i), name: `Drink especial ${i + 1} com maracujá e especiarias`, ingredients: ['50 ml de Rum', 'Gelo a gosto', `${i + 1} unidades de Limão Taiti`, ...(i === 0 ? ['Pimenta'] : [])], instructions: i === 0 ? 'Decore com pimenta na borda' : '', yield: 1 })), 15, 3);
   const font = (await readFile('public/fonts/Montserrat-Light.ttf')).toString('base64');
   const logo = 'data:image/png;base64,' + (await readFile('src/assets/logotipo-drinkeros.png')).toString('base64');
   const pdf = createShoppingPdf(plan, {}, logo, font); expect(pdf.getNumberOfPages()).toBeGreaterThanOrEqual(3);
