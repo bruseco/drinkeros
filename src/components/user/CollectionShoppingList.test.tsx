@@ -3,7 +3,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { CollectionShoppingList } from './CollectionShoppingList';
 const mocks = vi.hoisted(() => ({ save: vi.fn(), build: vi.fn(), read: vi.fn() }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: () => ({ select: () => ({ in: mocks.read }) }) } }));
-vi.mock('@/lib/shoppingPdf', () => ({ createShoppingPdf: mocks.build, shoppingImage: async () => undefined }));
+vi.mock('@/lib/shoppingPdf', () => ({ createShoppingPdf: mocks.build, shoppingImage: async () => undefined, shoppingTitleFont: async () => 'font' }));
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 it('asks one question at a time and exports the resulting plan', async () => {
   mocks.read.mockResolvedValue({ data: [{ id: 'r', title: 'Rum Soda', ingredients: ['50 ml de Rum'], drinks_count: 1 }], error: null });
@@ -17,7 +17,7 @@ it('asks one question at a time and exports the resulting plan', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Gerar PDF' }));
   await screen.findByText('Sua lista está pronta!');
   expect(mocks.build.mock.calls[0][0].total).toBe(15);
-  expect(mocks.build.mock.calls[0][0].items[0].quantity).toBe(750);
+  expect(mocks.build.mock.calls[0][0].items.find((i: { name: string }) => i.name === 'Rum').quantity).toBe(750);
   expect(mocks.save).toHaveBeenCalledWith('lista-de-compras-Churrasco.pdf');
 });
 it('preserves the form and avoids generating an incomplete list after a read error', async () => {

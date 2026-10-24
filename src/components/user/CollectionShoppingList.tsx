@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { makeShoppingPlan, type ShoppingRecipe } from '@/lib/shoppingPlan';
+import { makeShoppingPlan, requireCompleteShoppingPlan, type ShoppingRecipe } from '@/lib/shoppingPlan';
 import logoUrl from '@/assets/logotipo-drinkeros.png';
 
 type Entry = { recipe_id: string; kind: 'aula' | 'receita' | 'clube' | null };
@@ -52,14 +52,16 @@ export function CollectionShoppingList({ name, entries }: { name: string; entrie
     try {
       const recipes = await loadShoppingRecipes(entries);
       const plan = makeShoppingPlan(name, recipes, Number(people), Number(perPerson));
-      const { createShoppingPdf, shoppingImage } = await import('@/lib/shoppingPdf');
+      requireCompleteShoppingPlan(plan);
+      const { createShoppingPdf, shoppingImage, shoppingTitleFont } = await import('@/lib/shoppingPdf');
+      const titleFont = await shoppingTitleFont();
       const images: Record<string, string> = {};
       // Bounded parallel image loading keeps long lists responsive on mobile.
       for (let offset = 0; offset < recipes.length; offset += 4) await Promise.all(recipes.slice(offset, offset + 4).map(async r => {
         if (r.image) { const image = await shoppingImage(r.image); if (image) images[r.id] = image; }
       }));
       const logo = await shoppingImage(logoUrl);
-      createShoppingPdf(plan, images, logo).save(`lista-de-compras-${name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/gi, '-').slice(0, 60) || 'drinkeros'}.pdf`);
+      createShoppingPdf(plan, images, logo, titleFont).save(`lista-de-compras-${name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/gi, '-').slice(0, 60) || 'drinkeros'}.pdf`);
       setWarningCount(plan.items.filter(i => i.quantity == null).length + plan.warnings.length); setStep(4);
     } catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível gerar o PDF. Tente novamente.'); setStep(2); }
   };
@@ -75,7 +77,7 @@ export function CollectionShoppingList({ name, entries }: { name: string; entrie
       {step === 2 && <form className="space-y-4" onSubmit={e => { e.preventDefault(); void generate(); }}>
         <Label htmlFor="shopping-drinks">Drinks por pessoa</Label><Input id="shopping-drinks" autoFocus type="number" min={1} max={20} step={1} required value={perPerson} onChange={e => setPerPerson(e.target.value)} />
         <p className="text-sm text-muted-foreground">Começamos com 3 como estimativa ajustável. {validPeople && validDrinks ? `${Number(people) * Number(perPerson)} porções no total, distribuídas entre os drinks da lista.` : ''}</p>
-        <p className="text-xs text-muted-foreground">Medidas e rendimentos ausentes serão sinalizados no PDF como quantidades a conferir. Sem estimativa de preços.</p>
+        <p className="text-xs text-muted-foreground">Dose de 50 ml. “Complete” considera 100 ml por drink. Gelo estimado em 300 g por drink. Compras arredondadas para embalagens inteiras, sem preços.</p>
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         <div className="flex gap-2"><Button type="button" variant="outline" onClick={() => setStep(1)}>Voltar</Button><Button className="flex-1" disabled={!validPeople || !validDrinks}>Gerar PDF</Button></div>
       </form>}
