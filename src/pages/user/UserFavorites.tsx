@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Heart, FolderOpen, Trash2, ChevronDown, ChevronUp, GraduationCap } from 'lucide-react';
 import { LessonCard, LessonCardSkeleton } from '@/components/user/LessonCard';
 import { CollectionShoppingList } from '@/components/user/CollectionShoppingList';
+import { EventShoppingLists } from '@/components/user/EventShoppingLists';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +29,8 @@ const UserFavorites: React.FC = () => {
   const deleteCollection = useDeleteCollection();
   const [expandedLists, setExpandedLists] = useState<Set<string>>(new Set());
   const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState('favorites');
+  const [shoppingListId, setShoppingListId] = useState<string | null>(null);
 
   // Only block on favorites — collections render progressively as they arrive
   const isLoading = loadingFavs;
@@ -151,6 +155,10 @@ const UserFavorites: React.FC = () => {
         </p>
       </div>
 
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <TabsList className="mb-4 grid w-full grid-cols-2 sm:w-auto sm:inline-flex"><TabsTrigger value="favorites">Favoritos</TabsTrigger><TabsTrigger value="shopping">Listas de compras</TabsTrigger></TabsList>
+      <TabsContent value="shopping"><EventShoppingLists key={shoppingListId || 'all'} selectedId={shoppingListId} onSelect={setShoppingListId} /></TabsContent>
+      <TabsContent value="favorites">
       {totalCount === 0 && collections.length === 0 ? (
         <div className="rounded-3xl border-2 border-dashed border-muted p-12 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
@@ -254,7 +262,7 @@ const UserFavorites: React.FC = () => {
                   </button>
 
                   <div className="flex items-center gap-2">
-                  {isExpanded && <CollectionShoppingList name={col.name} entries={colRecipes} />}
+                  {isExpanded && <CollectionShoppingList name={col.name} entries={colRecipes} onCreated={id => { setShoppingListId(id); setActiveTab('shopping'); }} />}
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
@@ -340,6 +348,7 @@ const UserFavorites: React.FC = () => {
           )}
         </>
       )}
+      </TabsContent></Tabs>
     </div>
   );
 };

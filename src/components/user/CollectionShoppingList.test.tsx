@@ -2,30 +2,31 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, expect, it, vi } from 'vitest';
 import { CollectionShoppingList } from './CollectionShoppingList';
 const mocks = vi.hoisted(() => ({ save: vi.fn(), build: vi.fn(), read: vi.fn() }));
+vi.mock('@/hooks/useEventShoppingLists', () => ({ useCreateEventShoppingList: () => ({ mutateAsync: mocks.save }) }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: () => ({ select: () => ({ in: mocks.read }) }) } }));
 vi.mock('@/lib/shoppingPdf', () => ({ createShoppingPdf: mocks.build, shoppingImage: async () => undefined, shoppingTitleFont: async () => 'font' }));
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
-it('asks one question at a time and exports the resulting plan', async () => {
+it('asks one question at a time and saves the resulting list without downloading a PDF', async () => {
   mocks.read.mockResolvedValue({ data: [{ id: 'r', title: 'Rum Soda', ingredients: ['50 ml de Rum'], drinks_count: 1 }], error: null });
-  mocks.build.mockReturnValue({ save: mocks.save });
-  render(<CollectionShoppingList name="Churrasco" entries={[{ recipe_id: 'r', kind: 'receita' }]} />);
+  mocks.save.mockResolvedValue({ id: 'saved-list' }); const onCreated = vi.fn();
+  render(<CollectionShoppingList name="Churrasco" entries={[{ recipe_id: 'r', kind: 'receita' }]} onCreated={onCreated} />);
   fireEvent.click(screen.getByRole('button', { name: 'Gerar lista de compras' }));
   expect(screen.queryByLabelText('Drinks por pessoa')).not.toBeInTheDocument();
   fireEvent.change(screen.getByLabelText('Número de pessoas'), { target: { value: '5' } });
   fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
   expect(screen.getByLabelText('Drinks por pessoa')).toHaveValue(3);
-  fireEvent.click(screen.getByRole('button', { name: 'Gerar PDF' }));
-  await screen.findByText('Sua lista está pronta!');
-  expect(mocks.build.mock.calls[0][0].total).toBe(15);
-  expect(mocks.build.mock.calls[0][0].items.find((i: { name: string }) => i.name === 'Rum').quantity).toBe(750);
-  expect(mocks.save).toHaveBeenCalledWith('lista-de-compras-Churrasco.pdf');
+  fireEvent.click(screen.getByRole('button', { name: 'Criar lista de compras' }));
+  await waitFor(() => expect(onCreated).toHaveBeenCalledWith('saved-list'));
+  expect(mocks.save.mock.calls[0][0].total).toBe(15);
+  expect(mocks.save.mock.calls[0][0].items.find((i: { name: string }) => i.name === 'Rum').quantity).toBe(750);
+  expect(mocks.build).not.toHaveBeenCalled();
 });
 it('preserves the form and avoids generating an incomplete list after a read error', async () => {
   mocks.read.mockResolvedValue({ data: null, error: new Error('Falha ao carregar receitas') });
   render(<CollectionShoppingList name="Churrasco" entries={[{ recipe_id: 'r', kind: 'receita' }]} />);
   fireEvent.click(screen.getByRole('button', { name: 'Gerar lista de compras' }));
   fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Gerar PDF' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Criar lista de compras' }));
   await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Falha ao carregar receitas'));
   expect(mocks.save).not.toHaveBeenCalled();
 });

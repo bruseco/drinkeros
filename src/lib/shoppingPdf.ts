@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import { requireCompleteShoppingPlan, shoppingQuantity, type ShoppingPlan } from './shoppingPlan';
+import logoUrl from '@/assets/logotipo-drinkeros.png';
 
 export function createShoppingPdf(plan: ShoppingPlan, images: Record<string, string> = {}, logo?: string, titleFont?: string) {
   requireCompleteShoppingPlan(plan);
@@ -84,6 +85,16 @@ export async function shoppingTitleFont(): Promise<string> {
   if (!response.ok) throw new Error('Não foi possível carregar a fonte do PDF. Tente novamente.');
   const bytes = new Uint8Array(await response.arrayBuffer());
   return btoa(Array.from(bytes, byte => String.fromCharCode(byte)).join(''));
+}
+
+export async function downloadShoppingPdf(plan: ShoppingPlan) {
+  const titleFont = await shoppingTitleFont();
+  const images: Record<string, string> = {};
+  for (let offset = 0; offset < plan.recipes.length; offset += 4) await Promise.all(plan.recipes.slice(offset, offset + 4).map(async r => {
+    if (r.image) { const image = await shoppingImage(r.image); if (image) images[r.id] = image; }
+  }));
+  const logo = await shoppingImage(logoUrl);
+  createShoppingPdf(plan, images, logo, titleFont).save('lista-de-compras-' + (plan.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/gi, '-').slice(0, 60) || 'drinkeros') + '.pdf');
 }
 
 export async function shoppingImage(url: string): Promise<string | undefined> {
