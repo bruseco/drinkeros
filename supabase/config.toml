@@ -26,7 +26,8 @@ verify_jwt = true
     verify_jwt = false
 
   [functions.create-mp-subscription]
-    verify_jwt = true
+    # GET is a public version check. POST authenticates with auth.getUser in the handler.
+    verify_jwt = false
 
   [functions.get-mp-payment-status]
     verify_jwt = false
