@@ -19,11 +19,12 @@ import { trackInitiateCheckout, waitForPixelFlush } from '@/lib/metaPixel';
 import { useViewContent } from '@/hooks/useViewContent';
 import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
 import { useTotalClubMembers, TOTAL_CLUB_MEMBERS_FALLBACK } from '@/hooks/useTotalClubMembers';
-import { useClubeIntroOffer, useIntroCountdown } from '@/hooks/useClubeIntroOffer';
+import { useIntroCountdown } from '@/hooks/useClubeIntroOffer';
 import { useYouthDiscount } from '@/hooks/useYouthDiscount';
 import { useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
 import { trackFunnel } from '@/lib/funnelTracking';
 import ClubeDiscountReveal from '@/components/user/ClubeDiscountReveal';
+import { useClubeLandingOffer } from '@/hooks/useClubeLandingOffer';
 import ClubeIntroStickyBar from '@/components/user/ClubeIntroStickyBar';
 
 
@@ -196,7 +197,7 @@ const VipLandingB: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [isClosing] = useState(false);
-  const promo = useClubeIntroOffer();
+  const promo = useClubeLandingOffer();
   const youth = useYouthDiscount();
   // Preço efetivo após considerar Jovem Bartender (≤24 anos): R$47.
   const effectivePromoPrice = youth.isYouth ? youth.price : promo.promoPrice;
@@ -386,7 +387,7 @@ const VipLandingB: React.FC = () => {
     chosenOffer?: 'intro' | 'full',
   ) => {
     if (!user) {
-      navigate('/signup?redirect=/pv-clube');
+      navigate('/signup?redirect=/pv-clube-b');
       return;
     }
     if (loading) return;
@@ -620,7 +621,7 @@ const VipLandingB: React.FC = () => {
                 {unlocked ? (
                   <>Você economiza <strong className="text-yellow-300">R$ {effectiveSavings}</strong> agora.</>
                 ) : (
-                  <>Equivale a menos de <strong className="text-white">R$ 6 por mês</strong>.</>
+                  <>Equivale a <strong className="text-white">{(displayPrice / 12).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} por mês</strong> no plano anual.</>
                 )}
               </p>
               {unlocked && youth.isYouth && (
@@ -812,7 +813,7 @@ const VipLandingB: React.FC = () => {
                   <PriceAmount value={displayPrice} className="text-7xl font-black viplanding-gold-text" />
                 </div>
                 <div className="text-sm text-purple-300">
-                  por ano{unlocked ? ` · economize R$ ${effectiveSavings}` : ' · menos de R$ 4/mês'}
+                  por ano{unlocked ? ` · economize R$ ${effectiveSavings}` : ` · equivalente a ${(displayPrice / 12).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/mês`}
                 </div>
                 {unlocked && youth.isYouth && (
                   <div className="mt-2 text-[12px] text-yellow-200 leading-snug px-2">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { accountDestination } from '@/lib/purchaseDestination';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
@@ -47,6 +48,8 @@ const Signup: React.FC = () => {
   };
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const destination = accountDestination(params.get('redirect'));
   const { toast } = useToast();
 
   useEffect(() => {
@@ -55,9 +58,9 @@ const Signup: React.FC = () => {
         sessionStorage.setItem('drinkeros:recipes_force_top', '1');
         sessionStorage.removeItem('user-recipes:scroll-to-key');
       } catch {}
-      navigate('/app', { replace: true });
+      navigate(destination, { replace: true });
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, destination]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,7 +114,7 @@ const Signup: React.FC = () => {
 
     setIsLoading(true);
 
-    const redirectUrl = `${window.location.origin}/app`;
+    const redirectUrl = `${window.location.origin}/login?redirect=${encodeURIComponent(destination)}`;
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -164,11 +167,11 @@ const Signup: React.FC = () => {
       console.log('[Signup] CompleteRegistration enfileirado, aguardando flush...');
       // garante que o fbq enfileirou e a request CAPI iniciou antes do redirect
       await waitForPixelFlush(600);
-      console.log('[Signup] redirect after signup → /app');
+      console.log('[Signup] redirect after signup →', destination);
     } catch (err) {
       console.warn('[Signup] CompleteRegistration falhou', err);
     }
-    navigate('/app', { replace: true, state: { justSignedUp: true } });
+    navigate(destination, { replace: true, state: { justSignedUp: true } });
 
     setIsLoading(false);
   };
@@ -184,7 +187,7 @@ const Signup: React.FC = () => {
     }
 
     const { error } = await lovable.auth.signInWithOAuth(provider, {
-      redirect_uri: window.location.origin + '/login',
+      redirect_uri: window.location.origin + '/login?redirect=' + encodeURIComponent(destination),
     });
 
     if (error) {
