@@ -50,10 +50,11 @@ const DEPTHS = [
 const LOOP_WIDTH = 1900;
 const SPEEDS = [52, 31.2, 13];
 
-function CategoryScene({ category }: { category: Category }) {
+function CategoryScene({ category, direction }: { category: Category; direction: 1 | -1 }) {
   const scene = useRef<HTMLElement>(null);
   const heading = useRef<HTMLDivElement>(null);
   const subtitle = useRef<HTMLParagraphElement>(null);
+  const covers = useRef<HTMLDivElement>(null);
   const [countReady, setCountReady] = useState(false);
   const surfaces = useRef<Array<HTMLDivElement | null>>([]);
   const offsets = useRef([0, 0, 0]);
@@ -73,11 +74,12 @@ function CategoryScene({ category }: { category: Category }) {
         if (!element) return 0;
         const top = element.getBoundingClientRect().top - viewport.top;
         const progress = media.matches ? 0 : Math.max(0, Math.min(1, (top - viewport.height * .55) / (viewport.height * .45)));
-        element.style.transform = `translate3d(${progress * width * .55}px,0,0)`;
+        element.style.transform = `translate3d(${direction * progress * width * .55}px,0,0)`;
         return progress;
       };
       const progress = position(heading.current);
       position(subtitle.current);
+      position(covers.current);
       const next = progress === 0 && !!scene.current && scene.current.getBoundingClientRect().bottom > viewport.top;
       if (next !== ready) { ready = next; setCountReady(next); }
     };
@@ -87,7 +89,7 @@ function CategoryScene({ category }: { category: Category }) {
     media.addEventListener('change', onScroll);
     update();
     return () => { scroller.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); media.removeEventListener('change', onScroll); cancelAnimationFrame(frame); };
-  }, []);
+  }, [direction]);
   const move = (distance: number) => {
     surfaces.current.forEach((layer, index) => {
       offsets.current[index] = ((offsets.current[index] + distance * SPEEDS[index] / SPEEDS[0]) % LOOP_WIDTH + LOOP_WIDTH) % LOOP_WIDTH;
@@ -102,7 +104,7 @@ function CategoryScene({ category }: { category: Category }) {
     const tick = (time: number) => {
       const dt = previous ? Math.min(time - previous, 60) / 1000 : 0;
       previous = time;
-      if (!media.matches && !dragging.current) move(dt * SPEEDS[0]);
+      if (!media.matches && !dragging.current) move(dt * SPEEDS[0] * direction);
       if (visible) frame = requestAnimationFrame(tick);
     };
     const observer = new IntersectionObserver(entries => {
@@ -114,7 +116,7 @@ function CategoryScene({ category }: { category: Category }) {
     }, { threshold: .02 });
     if (scene.current) observer.observe(scene.current);
     return () => { observer.disconnect(); cancelAnimationFrame(frame); };
-  }, []);
+  }, [direction]);
   const cards = (layer: number) => [0, 1].flatMap(cycle => category.recipes.flatMap((recipe, index) => {
     const [y, scale, opacity, rotation] = DEPTHS[index % DEPTHS.length];
     if (layer < 2 && (scale >= .95 ? 0 : 1) !== layer) return [];
@@ -135,7 +137,7 @@ function CategoryScene({ category }: { category: Category }) {
         <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.label === 'Frozens' ? <><strong><AnimatedClubCount value={20} start={countReady} />+ frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
       </div>
       <p className="club-category-subtitle" ref={subtitle}>{category.subtitle}</p>
-      <div className="club-covers-window" aria-label="Capas das receitas; arraste para explorar"
+      <div className="club-covers-window" ref={covers} aria-label="Capas das receitas; arraste para explorar"
         onPointerDown={event => { dragging.current = true; lastX.current = event.clientX; event.currentTarget.setPointerCapture(event.pointerId); }}
         onPointerMove={event => { if (dragging.current) { move(lastX.current - event.clientX); lastX.current = event.clientX; } }}
         onPointerUp={() => { dragging.current = false; }} onPointerCancel={() => { dragging.current = false; }}>
@@ -185,7 +187,7 @@ export default function ClubePublicLanding(props: Props) {
       <p className="club-discover">Descubra o que espera por você</p>
       <ArrowDown className="club-down" aria-hidden="true" />
     </header>
-    {catalog.map(category => <CategoryScene key={category.id} category={category} />)}
+    {catalog.map((category,index) => <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} />)}
     <section className="club-tools" aria-label="Organize seus drinks">
       <div><Play aria-hidden="true" /><h2>Veja como preparar</h2><p>Acompanhe o passo a passo das receitas em vídeo.</p></div>
       <div><Heart aria-hidden="true" /><h2>Salve suas escolhas</h2><p>Monte listas de favoritos para cada ocasião.</p></div>

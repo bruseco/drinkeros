@@ -40,3 +40,5 @@
 .club-public-testimonials>div{margin-top:0;padding-top:0}
 
 .club-category-subtitle{margin:5px auto 8px}.club-category-heading{margin-bottom:0}@media(max-width:600px){.club-category-subtitle{margin:5px auto 4px}.club-category-heading{margin-bottom:0}}
+
+.club-discount-banner{background:#d92762;color:#ffeb8a}.club-discount-banner strong{color:#fff;font-weight:800}.club-covers-window{will-change:transform}
