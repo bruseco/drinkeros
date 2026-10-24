@@ -3,6 +3,7 @@
 import { sendTemplateEmailWithLog } from "../_shared/send-email-helper.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { publicClubPrice, PublicClubPriceChanged } from '../_shared/publicClubPrice.ts';
 import { OFFERS, normalizeEmail } from "../_shared/offerLeads.ts";
 
 const corsHeaders = {
@@ -59,6 +60,7 @@ const CLUB_PRODUCTS: Record<string, { id: string; name: string; slug: string; pr
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method === 'GET') return new Response(JSON.stringify({public_club_offer_version:1}),{headers:{...corsHeaders,'Content-Type':'application/json'}});
 
   try {
     const mpToken = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
@@ -135,10 +137,14 @@ serve(async (req) => {
     if (product_type === "club" && !userId) {
       throw new Error("Faça login para assinar o Clube dos Drinkeros");
     }
+    const publicAmount = product_type === 'club' && product.slug === 'clube-anual'
+      ? await publicClubPrice(supabase,userId!,body.expected_amount,!!body.public_offer_token) : null;
+    const publicOffer=publicAmount !== null;
+    if (publicOffer) product = { ...product, price: publicAmount };
 
     // Desconto Jovem Bartender (≤24 anos): R$27 no clube-anual.
     let youthDiscount = false;
-    if (product_type === "club" && product.slug === "clube-anual" && userId) {
+    if (product_type === "club" && product.slug === "clube-anual" && userId && !publicOffer) {
       const { data: prof } = await supabase
         .from("profiles")
         .select("birth_date")
@@ -302,6 +308,7 @@ serve(async (req) => {
 
     const idempotencyKey = `${externalRef}:${Math.random().toString(36).slice(2, 10)}`;
 
+    if(product_type==='club'&&product.slug==='clube-anual')await publicClubPrice(supabase,userId!,finalPrice,!!body.public_offer_token);
     const mpResp = await fetch(`${MP_API}/v1/payments`, {
       method: "POST",
       headers: {
@@ -417,6 +424,7 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
+    if (err instanceof PublicClubPriceChanged) return new Response(JSON.stringify({error:err.message,code:'public_club_price_changed',amount:err.amount}),{status:409,headers:{...corsHeaders,'Content-Type':'application/json'}});
     console.error("[create-mp-payment]", err);
     return new Response(
       JSON.stringify({ error: (err as Error).message }),

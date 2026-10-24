@@ -27,6 +27,8 @@ import ClubeDiscountReveal from '@/components/user/ClubeDiscountReveal';
 import { useClubeLandingOffer } from '@/hooks/useClubeLandingOffer';
 import ClubeIntroStickyBar from '@/components/user/ClubeIntroStickyBar';
 import ClubePublicLanding from '@/components/landing/ClubePublicLanding';
+import { usePublicClubeOffer } from '@/hooks/usePublicClubeOffer';
+import { usePublicClubBackendReady } from '@/hooks/usePublicClubBackendReady';
 
 
 import drinksStrip from '@/assets/1000-drinks.jpg';
@@ -198,7 +200,10 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [isClosing] = useState(false);
-  const promo = useClubeLandingOffer();
+  const legacyPromo = useClubeLandingOffer();
+  const publicBackendReady=usePublicClubBackendReady(publicPage);
+  const publicPromo = usePublicClubeOffer(publicPage&&publicBackendReady);
+  const promo = publicPage&&publicBackendReady ? publicPromo : legacyPromo;
   const youth = useYouthDiscount();
   // Preço efetivo após considerar Jovem Bartender (≤24 anos): R$47.
   const effectivePromoPrice = youth.isYouth ? youth.price : promo.promoPrice;
@@ -275,7 +280,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
       setUnlocked(true);
       setPriceSettled(true);
       setDisplayPrice(effectivePromoPrice);
-    } else if (!promo.isActive) {
+    } else {
       setUnlocked(false);
       setPriceSettled(false);
       setDisplayPrice(promo.fullPrice);
@@ -339,11 +344,14 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
 
 
   // Ao fechar overlay → roll-down 197 → 97 + marca revealed no banco.
-  const handleRevealClose = React.useCallback(() => {
+  const handleRevealClose = React.useCallback(async () => {
     setRevealOpen(false);
+    try { await promo.markRevealed(); } catch {
+      toast.error('Não foi possível confirmar a oferta. Atualize a página antes de continuar.');
+      return;
+    }
     setUnlocked(true);
     setPriceSettled(false);
-    promo.markRevealed();
     setDisplayPrice(effectivePromoPrice);
     if (priceSettleTimerRef.current !== null) window.clearTimeout(priceSettleTimerRef.current);
     priceSettleTimerRef.current = window.setTimeout(() => setPriceSettled(true), 620);
@@ -417,7 +425,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
       await waitForPixelFlush();
 
       // Mercado Pago checkout transparente (cartão recorrente + PIX) na página /checkout
-      navigate('/checkout/club/clube-anual');
+      navigate(publicPage&&publicBackendReady ? '/checkout/club/clube-anual?oferta=publica' : '/checkout/club/clube-anual');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Tente novamente em alguns instantes.';
       toast.error('Erro ao iniciar checkout', { description: message });
@@ -441,6 +449,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
     fullPrice={promo.fullPrice}
     unlocked={unlocked}
     savings={effectiveSavings}
+    offerDeadline={publicBackendReady ? promo.eligibleUntilMs : 0}
     loading={loading || promo.isLoading}
     onSubscribe={() => handleSubscribe('card')}
     reveal={<ClubeDiscountReveal open={revealOpen} onClose={handleRevealClose} />}

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams, Link } from "react-router-dom";
 import { initMercadoPago, Payment } from "@mercadopago/sdk-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ShieldCheck, ArrowLeft, CheckCircle2, Copy, CreditCard, QrCode, RefreshCw } from "lucide-react";
@@ -14,6 +14,7 @@ import { useYouthDiscount } from "@/hooks/useYouthDiscount";
 import FiscalAddressDialog from "@/components/user/FiscalAddressDialog";
 import { mpRejectionMessage } from "@/lib/mpErrors";
 import { purchaseDestination } from '@/lib/purchaseDestination';
+import { fetchPublicClubOffer, publicClubOfferToken } from '@/lib/publicClubOffer';
 
 type ClubMethod = "card" | "pix";
 
@@ -65,6 +66,10 @@ let mpInitialized = false;
 export default function Checkout() {
   const { productType, slug } = useParams<{ productType: ProductType; slug: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const publicOfferRequested=searchParams.get('oferta')==='publica';
+  const [publicOfferDeadline,setPublicOfferDeadline]=useState(0);
+  const [hasPublicOffer,setHasPublicOffer]=useState(false);
   const queryClient = useQueryClient();
 
   const [publicKeyReady, setPublicKeyReady] = useState(false);
@@ -147,9 +152,24 @@ export default function Checkout() {
             return;
           }
           const clubProd = CLUB_PRODUCTS[slug as string] || CLUB_PRODUCTS["clube-anual"];
-          const adjusted = (slug === "clube-anual" && youth.isYouth)
+          let adjusted = (slug === "clube-anual" && youth.isYouth)
             ? { ...clubProd, price: youth.price }
             : clubProd;
+          if(slug==='clube-anual'){
+            let quote: {price:number;expires_at:string|null;server_now:string}|null=null;
+            if(publicOfferRequested) quote=await fetchPublicClubOffer();
+            else {
+              const result=await supabase.rpc('clube_public_account_quote' as never);
+              if(result.error)throw result.error;
+              quote=(result.data as unknown as typeof quote[])?.[0]??null;
+            }
+            if(quote){
+              adjusted={...clubProd,price:Number(quote.price)};
+              setHasPublicOffer(true);
+              const remaining=quote.expires_at?new Date(quote.expires_at).getTime()-new Date(quote.server_now).getTime():0;
+              setPublicOfferDeadline(remaining>0?Date.now()+remaining:0);
+            }
+          }
           setProduct(adjusted);
           setPayerEmail(user.email ?? "");
           setLoading(false);
@@ -312,6 +332,20 @@ export default function Checkout() {
     return () => clearInterval(interval);
   }, [pixPaymentId, paid, navigate, product, isClub]);
 
+  useEffect(()=>{
+    if(!hasPublicOffer||!publicOfferDeadline||paid||pixPaymentId)return;
+    const expire=()=>{setProduct(current=>current?{...current,price:197}:current);setPublicOfferDeadline(0);toast.info('O desconto expirou. Confira o novo valor de R$197 antes de pagar.');};
+    const timer=window.setTimeout(expire,Math.max(0,publicOfferDeadline-Date.now()));
+    return()=>window.clearTimeout(timer);
+  },[hasPublicOffer,publicOfferDeadline,paid,pixPaymentId]);
+
+  const refreshPublicPrice=async()=>{
+    const {data,error}=await supabase.rpc('clube_public_account_quote' as never);
+    if(error)throw error;
+    const row=(data as unknown as Array<{price:number}>)?.[0];
+    if(row)setProduct(current=>current?{...current,price:Number(row.price)}:current);
+  };
+
   const onSubmit = async (formData: any) => {
     if (!product) return;
     // CPF e nome vêm do próprio formulário do Mercado Pago.
@@ -333,6 +367,8 @@ export default function Checkout() {
             card_token_id: formData.token,
             payer_email: formData?.payer?.email || payerEmail,
             identification: formData?.payer?.identification,
+            expected_amount: finalPrice,
+            public_offer_token: publicOfferRequested ? publicClubOfferToken() : undefined,
           },
         });
         if (error) {
@@ -350,6 +386,7 @@ export default function Checkout() {
             setTimeout(() => navigate("/pv-clube?clube=success"), 1500);
             return;
           }
+          if(code==='public_club_price_changed'){await refreshPublicPrice();toast.info(serverMsg);return;}
           throw new Error(serverMsg || error.message);
         }
         if (data?.code === "subscription_exists") {
@@ -389,7 +426,8 @@ export default function Checkout() {
 
       // Pix (Clube ou produto avulso) ou Cartão de produto avulso → pagamento único
       const { data, error } = await supabase.functions.invoke("create-mp-payment", {
-        body: { product_type: productType, slug: product.slug, formData, fiscal: fiscalData, coupon_token: couponToken || undefined },
+        body: { product_type: productType, slug: product.slug, formData, fiscal: fiscalData, coupon_token: couponToken || undefined,
+          expected_amount:finalPrice,public_offer_token:publicOfferRequested?publicClubOfferToken():undefined },
       });
       if (error) {
         // Erro 400 do servidor (ex.: dados fiscais incompletos) vem no corpo da resposta.
@@ -401,6 +439,7 @@ export default function Checkout() {
           serverMsg = body?.error || "";
           code = body?.code || "";
         } catch { /* ignore */ }
+        if(code==='public_club_price_changed'){await refreshPublicPrice();toast.info(serverMsg);return;}
         throw new Error(serverMsg || error.message);
       }
       if (data?.error) throw new Error(data.error);

@@ -20,9 +20,11 @@ jobs:
       - run: node scripts/test-event-shopping-db.mjs
       - run: node scripts/test-favorite-collections-db.mjs
       - run: node scripts/test-required-favorite-lists-db.mjs
+      - run: node scripts/test-public-club-offer-db.mjs
       - run: npx tsc --noEmit -p tsconfig.app.json
       - run: npm run build
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
       - run: deno check supabase/functions/rand-financial-closing/index.ts
+      - run: deno check supabase/functions/create-mp-payment/index.ts supabase/functions/create-mp-subscription/index.ts

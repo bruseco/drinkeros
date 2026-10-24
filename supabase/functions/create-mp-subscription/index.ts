@@ -2,6 +2,7 @@
 // usando o token do cartão gerado pelo Brick — checkout transparente, sem redirect.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { publicClubPrice, PublicClubPriceChanged } from '../_shared/publicClubPrice.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -34,6 +35,7 @@ async function invokeWebhookFallback(preapprovalId: unknown) {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method === 'GET') return new Response(JSON.stringify({public_club_offer_version:1}),{headers:{...corsHeaders,'Content-Type':'application/json'}});
 
   try {
     const mpToken = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
@@ -64,6 +66,8 @@ serve(async (req) => {
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
         { auth: { persistSession: false } },
       );
+      const publicAmount = await publicClubPrice(admin,user.id,body.expected_amount,!!body.public_offer_token);
+      if(publicAmount !== null) amount=publicAmount;
       const { data: prof } = await admin
         .from("profiles")
         .select("birth_date")
@@ -77,7 +81,7 @@ serve(async (req) => {
           let age = now.getFullYear() - d.getFullYear();
           const m = now.getMonth() - d.getMonth();
           if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
-          if (age >= 14 && age <= 24) {
+          if (age >= 14 && age <= 24 && publicAmount === null) {
             amount = 47;
             reason = `${plan.reason} · Jovem Bartender`;
           }
@@ -138,6 +142,10 @@ serve(async (req) => {
       status: "authorized",
     };
 
+    if(slug==='clube-anual') {
+      const priceAdmin=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,{auth:{persistSession:false}});
+      await publicClubPrice(priceAdmin,user.id,amount,!!body.public_offer_token);
+    }
     const resp = await fetch(`${MP_API}/preapproval`, {
       method: "POST",
       headers: {
@@ -176,6 +184,7 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
+    if (err instanceof PublicClubPriceChanged) return new Response(JSON.stringify({error:err.message,code:'public_club_price_changed',amount:err.amount}),{status:409,headers:{...corsHeaders,'Content-Type':'application/json'}});
     console.error("[create-mp-subscription]", err);
     return new Response(
       JSON.stringify({ error: (err as Error).message }),

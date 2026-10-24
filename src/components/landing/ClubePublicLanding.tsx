@@ -9,6 +9,7 @@ import payPix from '@/assets/pagamento-pix.png';
 import TestimonialsCarousel from './TestimonialsCarousel';
 import catalog from './clubLandingCatalog.json';
 import './clubePublicLanding.css';
+import { useIntroCountdown } from '@/hooks/useClubeIntroOffer';
 
 export function AnimatedClubCount({ value, className = '', start = true }: { value: number; className?: string; start?: boolean }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -151,10 +152,18 @@ type Props = {
   fullPrice: number;
   unlocked: boolean;
   savings: number;
+  offerDeadline: number;
   loading: boolean;
   onSubscribe: () => void;
   reveal: React.ReactNode;
 };
+
+function PublicOfferBanner({ savings, deadline }: { savings: number; deadline: number }) {
+  const { mm, ss, isActive } = useIntroCountdown(deadline);
+  if (!deadline) return <div className="club-discount-banner" role="status">Desconto de R$ {savings} ativo</div>;
+  if (!isActive) return null;
+  return <div className="club-discount-banner" role="status">Desconto de R$ {savings} ativo <span>· Nesta visita: <strong className="tabular-nums">{mm}:{ss}</strong></span></div>;
+}
 
 export default function ClubePublicLanding(props: Props) {
   const pricing = useRef<HTMLElement>(null);
@@ -166,7 +175,7 @@ export default function ClubePublicLanding(props: Props) {
   }, []);
   return <div className={`club-public${props.unlocked ? ' club-unlocked' : ''}`} ref={props.scrollRef}>
     {props.reveal}
-    {props.unlocked && <div className="club-discount-banner" role="status">Desconto de R$ {props.savings} ativo</div>}
+    {props.unlocked && <PublicOfferBanner savings={props.savings} deadline={props.offerDeadline} />}
     <button type="button" className="club-floating-cta" disabled={props.unlocked && props.loading} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar para o</span><strong>CLUBE</strong></span><ArrowRight aria-hidden="true" /></button>
     <header className="club-public-hero">
       <p className="club-invite">Torne-se membro do</p>
