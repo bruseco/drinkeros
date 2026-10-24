@@ -44,3 +44,27 @@
 .club-discount-banner{background:#d92762;color:#ffeb8a}.club-discount-banner strong{color:#fff;font-weight:800}.club-covers-window{will-change:transform}
 
 .club-category-heading,.club-category-subtitle{opacity:0;will-change:transform,opacity}@media(prefers-reduced-motion:reduce){.club-category-heading,.club-category-subtitle{opacity:1}}
+
+/* Lote local: revelação do bloco inteiro e CTA após as caipirinhas. */
+.club-covers-window{opacity:0;will-change:transform,opacity}.club-floating-cta{opacity:0;pointer-events:none;transform:translateY(14px);transition:opacity .4s ease,transform .4s ease,box-shadow .3s ease;background:linear-gradient(135deg,#fff0b5 0%,#ffda78 48%,#efb740 100%);box-shadow:0 0 25px #f6c85f40,0 8px 26px #0007,inset 0 1px 0 #fff9,inset 0 -1px 0 #9d6f2f50}.club-floating-cta.club-cta-visible{opacity:1;pointer-events:auto;transform:translateY(0)}.club-floating-cta.club-cta-visible:hover{box-shadow:0 0 34px #f6c85f60,0 10px 28px #0008,inset 0 1px 0 #fffb}.club-unlocked .club-floating-cta{background:linear-gradient(135deg,#c3f470 0%,#a3e635 52%,#8dcb22 100%);box-shadow:0 0 25px #a3e63538,0 8px 26px #0007,inset 0 1px 0 #eeffd48c}.club-unlocked .club-floating-cta:hover{box-shadow:0 0 34px #a3e63555,0 10px 28px #0008,inset 0 1px 0 #f5ffe0a0}
+@media(prefers-reduced-motion:reduce){.club-covers-window{opacity:1}.club-floating-cta{transition:none;transform:none}}
+
+/* Lote local: iluminação após a contagem e verde mais profundo nos botões. */
+.club-highlight-complete .club-category-copy strong{background-image:linear-gradient(110deg,#e6ad32 0%,#ffdc87 30%,#fff8d7 48%,#ffdc87 63%,#e6ad32 100%);background-size:240% 100%;background-clip:text;-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 0 7px #ffd68a50);animation:club-highlight-sweep 1.4s ease-out both}.club-syrups.club-highlight-complete .club-category-copy strong{background-image:linear-gradient(110deg,#a039e4 0%,#d598ff 30%,#f9eaff 48%,#d598ff 63%,#a039e4 100%);color:transparent;filter:drop-shadow(0 0 8px #c568ff66)}
+@keyframes club-highlight-sweep{from{background-position:140% 50%}to{background-position:-100% 50%}}
+.club-floating-cta{min-height:82px;padding-top:15px;padding-bottom:15px;border-radius:12px 44px 44px 12px}.club-purchase{min-height:62px}.club-unlocked .club-floating-cta,.club-unlocked .club-purchase{background:linear-gradient(115deg,#225c19 0%,#3f8b23 34%,#71a948 48%,#3f8b23 62%,#225c19 100%);background-size:230% 100%;color:#fff;border-color:#7dbd5c;box-shadow:0 0 23px #4c972c3d,0 9px 28px #0007,inset 0 1px 0 #e9ffd780;animation:club-button-shine 5s ease-in-out infinite}.club-unlocked .club-floating-cta:hover{box-shadow:0 0 32px #4c972c66,0 11px 30px #0008,inset 0 1px 0 #f1ffe099}
+@keyframes club-button-shine{0%,20%{background-position:130% 50%}70%,100%{background-position:-100% 50%}}
+@media(max-width:450px){.club-floating-cta{min-height:78px;border-radius:12px 40px 40px 12px;padding-top:14px;padding-bottom:14px}}@media(prefers-reduced-motion:reduce){.club-highlight-complete .club-category-copy strong,.club-unlocked .club-floating-cta,.club-unlocked .club-purchase{animation:none}}
+
+/* Lote local: tag sobre os prints e rodapé institucional. */
+.club-public-testimonials h2{position:absolute;top:25px;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100% - 40px);margin:0;background:#1877f2;color:#fff;box-shadow:0 5px 18px #0005}.club-floating-cta{bottom:calc(18px + env(safe-area-inset-bottom,0px) + var(--club-footer-overlap,0px))}
+.club-public-footer{background:#0c0c0c;text-align:left;padding:48px 28px 25px;color:#c4c4c4}.club-footer-main{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:34px;max-width:980px;margin:auto}.club-footer-brand img{width:180px;height:auto;object-fit:contain;display:block}.club-footer-brand p{font-size:13px;margin:15px 0;max-width:250px}.club-footer-main nav{display:flex;flex-direction:column;gap:13px}.club-footer-main h2{font-size:14px;font-weight:700;color:#fff;margin:0 0 5px}.club-footer-main a,.club-footer-main span{font-size:13px;color:#c4c4c4;text-decoration:none}.club-footer-main a:hover{color:#fff}.club-footer-copyright{max-width:980px;margin:36px auto 0;padding-top:20px;font-size:11px;color:#999}@media(max-width:600px){.club-footer-main{grid-template-columns:1fr 1fr;gap:30px 22px}.club-footer-brand{grid-column:1/-1}.club-public-footer{padding:36px 24px 25px}}
+
+/* Never reveal a zero placeholder while the category enters the viewport. */
+.club-category-heading{transition:opacity .35s ease}
+.club-category-heading:has(.club-count[data-started="false"]){opacity:0!important}
+.club-category-heading:has(.club-count[data-started="false"])+.club-category-subtitle{opacity:0!important}
+.club-category-subtitle{transition:opacity .35s ease}
+.club-down-bouncing{animation:club-discover-bounce 1.5s ease-in-out infinite}
+@keyframes club-discover-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(9px)}}
+@media(prefers-reduced-motion:reduce){.club-down-bouncing{animation:none}.club-category-heading,.club-category-subtitle{transition:none}}

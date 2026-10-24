@@ -8,6 +8,7 @@ import { useYouthDiscount } from '@/hooks/useYouthDiscount';
 interface Props {
   open: boolean;
   onClose: () => void;
+  newVisitor?: boolean;
 }
 
 type Phase =
@@ -25,7 +26,7 @@ type Phase =
  *  1) INTRO: presente brilhante entra na tela, com "O que tem dentro?" e botão.
  *  2) REVEAL: ao clicar, a tampa voa e revela "Você ganhou R$100 de desconto."
  */
-export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
+export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose, newVisitor = false }) => {
   const youth = useYouthDiscount();
   const discountAmount = youth.isYouth ? 150 : 100;
   const [phase, setPhase] = useState<Phase>('idle');
@@ -179,7 +180,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose }) => {
               textShadow: '0 2px 18px rgba(236,72,153,0.55)',
             }}
           >
-            SUPER OFERTA PARA <span className="text-yellow-300">NOVOS CADASTRADOS!</span>
+            {newVisitor ? <>SUPER OFERTA PARA VOCÊ QUE É <span className="text-yellow-300">NOVO VISITANTE!</span></> : <>SUPER OFERTA PARA <span className="text-yellow-300">NOVOS CADASTRADOS!</span></>}
           </div>
 
           <div className="relative mx-auto mt-7 mb-6 h-[300px] sm:h-[340px] w-full">

@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowDown, ArrowRight, Heart, Play, ShoppingBag } from 'lucide-react';
 import drinksStrip from '@/assets/1000-drinks.jpg';
+import drinkerosLogo from '@/assets/logotipo-drinkeros.png';
+import { Link } from 'react-router-dom';
 import payVisa from '@/assets/pagamento-visa.png';
 import payMaster from '@/assets/pagamento-mastercard.png';
 import payApple from '@/assets/pagamento-apple.png';
@@ -11,14 +13,14 @@ import catalog from './clubLandingCatalog.json';
 import './clubePublicLanding.css';
 import { useIntroCountdown } from '@/hooks/useClubeIntroOffer';
 
-export function AnimatedClubCount({ value, className = '', start = true }: { value: number; className?: string; start?: boolean }) {
+export function AnimatedClubCount({ value, className = '', start = true, onComplete }: { value: number; className?: string; start?: boolean; onComplete?: () => void }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [display, setDisplay] = useState(0);
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
     if (!start) { setDisplay(0); return; }
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setDisplay(value); return; }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setDisplay(value); onComplete?.(); return; }
     let frame = 0;
     let visible = false;
     const observer = new IntersectionObserver(entries => {
@@ -32,14 +34,15 @@ export function AnimatedClubCount({ value, className = '', start = true }: { val
         const progress = Math.min((now - start) / 1600, 1);
         setDisplay(Math.round(value * (1 - (1 - progress) ** 3)));
         if (progress < 1) frame = requestAnimationFrame(tick);
+        else onComplete?.();
       };
       setDisplay(0);
       frame = requestAnimationFrame(tick);
     }, { root: element.closest('.club-public'), rootMargin: '0px 0px -18% 0px', threshold: 0.7 });
     observer.observe(element);
     return () => { observer.disconnect(); cancelAnimationFrame(frame); };
-  }, [value, start]);
-  return <span className={`club-count ${className}`} aria-label={value.toLocaleString('pt-BR')} ref={ref}><span aria-hidden="true">{display.toLocaleString('pt-BR')}</span></span>;
+  }, [value, start, onComplete]);
+  return <span className={`club-count ${className}`} data-started={display > 0} aria-label={value.toLocaleString('pt-BR')} ref={ref}><span aria-hidden="true">{display.toLocaleString('pt-BR')}</span></span>;
 }
 
 type Category = typeof catalog[number];
@@ -50,12 +53,15 @@ const DEPTHS = [
 const LOOP_WIDTH = 1900;
 const SPEEDS = [52, 31.2, 13];
 
-function CategoryScene({ category, direction }: { category: Category; direction: 1 | -1 }) {
+function CategoryScene({ category, direction, onCountComplete }: { category: Category; direction: 1 | -1; onCountComplete?: () => void }) {
   const scene = useRef<HTMLElement>(null);
   const heading = useRef<HTMLDivElement>(null);
   const subtitle = useRef<HTMLParagraphElement>(null);
   const covers = useRef<HTMLDivElement>(null);
   const [countReady, setCountReady] = useState(false);
+  const [highlighted,setHighlighted]=useState(false);
+  const handleCountComplete=React.useCallback(()=>{setHighlighted(true);onCountComplete?.()},[onCountComplete]);
+  useEffect(()=>{if(!countReady)setHighlighted(false);else if(category.number===null)setHighlighted(true)},[countReady,category.number]);
   const surfaces = useRef<Array<HTMLDivElement | null>>([]);
   const offsets = useRef([0, 0, 0]);
   const dragging = useRef(false);
@@ -74,8 +80,8 @@ function CategoryScene({ category, direction }: { category: Category; direction:
         if (!element) return 0;
         const top = element.getBoundingClientRect().top - viewport.top;
         const progress = media.matches ? 0 : Math.max(0, Math.min(1, (top - viewport.height * .55) / (viewport.height * .45)));
-        element.style.transform = `translate3d(${direction * progress * width * .55}px,0,0)`;
-        if(element === heading.current || element === subtitle.current) element.style.opacity = String(1 - progress);
+        element.style.transform = `translate3d(${direction * progress * width * .9}px,0,0)`;
+        element.style.opacity = String(1 - progress);
         return progress;
       };
       const progress = position(heading.current);
@@ -132,10 +138,10 @@ function CategoryScene({ category, direction }: { category: Category; direction:
       </figure>
     ));
   }));
-  return <section className={`club-scene${category.id === 'syrups' ? ' club-syrups' : ''}`} ref={scene} aria-label={category.label}>
+  return <section className={`club-scene${category.id === 'syrups' ? ' club-syrups' : ''}${highlighted ? ' club-highlight-complete' : ''}`} ref={scene} aria-label={category.label}>
     <div className="club-stage">
       <div className="club-category-copy club-category-heading" ref={heading}>
-        <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.label === 'Frozens' ? <><strong><AnimatedClubCount value={20} start={countReady} />+ frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
+        <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.label === 'Frozens' ? <><strong><AnimatedClubCount value={20} start={countReady} onComplete={handleCountComplete} /> Frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} onComplete={handleCountComplete} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
       </div>
       <p className="club-category-subtitle" ref={subtitle}>{category.subtitle}</p>
       <div className="club-covers-window" ref={covers} aria-label="Capas das receitas; arraste para explorar"
@@ -165,12 +171,45 @@ function PublicOfferBanner({ savings, deadline }: { savings: number; deadline: n
   const { mm, ss, isActive } = useIntroCountdown(deadline);
   if (!deadline) return <div className="club-discount-banner" role="status">Desconto de R$ {savings} ativo</div>;
   if (!isActive) return null;
-  return <div className="club-discount-banner" role="status">Desconto de R$ {savings} ativo <span>· Expira em <strong className="tabular-nums">{mm}:{ss}</strong> nesta visita</span></div>;
+  return <div className="club-discount-banner" role="status">Desconto de R$ {savings} ativo <span>· Expira em <strong className="tabular-nums">{mm}:{ss}</strong></span></div>;
 }
 
 export default function ClubePublicLanding(props: Props) {
+  const [ctaVisible,setCtaVisible]=useState(false);
+  const [hasScrolled,setHasScrolled]=useState(false);
+  const hero=useRef<HTMLElement>(null);
+  useEffect(()=>{
+    const scroller=hero.current?.closest('.club-public');
+    if(!scroller)return;
+    const stop=()=>{if(scroller.scrollTop>0){setHasScrolled(true);scroller.removeEventListener('scroll',stop)}};
+    scroller.addEventListener('scroll',stop,{passive:true});stop();
+    return()=>scroller.removeEventListener('scroll',stop);
+  },[]);
+  const [footerReplacesCta,setFooterReplacesCta]=useState(false);
+  const footer=useRef<HTMLElement>(null);
+  const floatingCta=useRef<HTMLButtonElement>(null);
+  const revealCta=React.useCallback(()=>setCtaVisible(true),[]);
   const pricing = useRef<HTMLElement>(null);
   const scrollToPricing = () => pricing.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+  useEffect(()=>{
+    const element=footer.current;
+    const scroller=element?.closest('.club-public');
+    const button=floatingCta.current;
+    if(!element||!scroller||!button)return;
+    let frame=0;
+    const update=()=>{
+      frame=0;
+      const bounds=scroller.getBoundingClientRect();
+      const footerTop=element.getBoundingClientRect().top;
+      button.style.setProperty('--club-footer-overlap',`${Math.max(0,bounds.bottom-footerTop)}px`);
+      setFooterReplacesCta(footerTop<bounds.top+button.offsetHeight+24);
+    };
+    const schedule=()=>{if(!frame)frame=requestAnimationFrame(update)};
+    scroller.addEventListener('scroll',schedule,{passive:true});
+    window.addEventListener('resize',schedule);
+    const observer=new ResizeObserver(schedule);observer.observe(element);observer.observe(scroller);update();
+    return()=>{scroller.removeEventListener('scroll',schedule);window.removeEventListener('resize',schedule);observer.disconnect();cancelAnimationFrame(frame)};
+  },[]);
   useEffect(() => {
     const previous = document.title;
     document.title = 'Clube dos Drinkeros · Mais de mil receitas em vídeo';
@@ -179,16 +218,16 @@ export default function ClubePublicLanding(props: Props) {
   return <div className={`club-public${props.unlocked ? ' club-unlocked' : ''}`} ref={props.scrollRef}>
     {props.reveal}
     {props.unlocked && <PublicOfferBanner savings={props.savings} deadline={props.offerDeadline} />}
-    <button type="button" className="club-floating-cta" disabled={props.unlocked && props.loading} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar para o</span><strong>CLUBE</strong></span><ArrowRight aria-hidden="true" /></button>
-    <header className="club-public-hero">
+    <button ref={floatingCta} type="button" className={`club-floating-cta${ctaVisible&&!footerReplacesCta ? ' club-cta-visible' : ''}`} aria-hidden={!ctaVisible||footerReplacesCta} tabIndex={ctaVisible&&!footerReplacesCta?0:-1} disabled={!ctaVisible || footerReplacesCta || (props.unlocked && props.loading)} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar para o</span><strong>CLUBE</strong></span><ArrowRight aria-hidden="true" /></button>
+    <header className="club-public-hero" ref={hero}>
       <p className="club-invite">Torne-se membro do</p>
       <h1><img className="club-logo" src="/club-landing/logo.png" alt="Clube dos Drinkeros" width="500" height="140" fetchPriority="high" /></h1>
       <p className="club-pocket">Mais de <strong><AnimatedClubCount value={1000} /></strong> receitas no seu bolso.</p>
       <div className="club-hero-strip" aria-hidden="true"><div><img src={drinksStrip} alt="" /><img src={drinksStrip} alt="" /></div></div>
       <p className="club-discover">Descubra o que espera por você</p>
-      <ArrowDown className="club-down" aria-hidden="true" />
+      <ArrowDown className={`club-down${hasScrolled ? '' : ' club-down-bouncing'}`} aria-hidden="true" />
     </header>
-    {catalog.map((category,index) => <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} />)}
+    {catalog.map((category,index) => <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCountComplete={index===0?revealCta:undefined} />)}
     <section className="club-tools" aria-label="Organize seus drinks">
       <div><Play aria-hidden="true" /><h2>Veja como preparar</h2><p>Acompanhe o passo a passo das receitas em vídeo.</p></div>
       <div><Heart aria-hidden="true" /><h2>Salve suas escolhas</h2><p>Monte listas de favoritos para cada ocasião.</p></div>
@@ -215,6 +254,13 @@ export default function ClubePublicLanding(props: Props) {
       <details><summary>Posso usar no celular?</summary><p>Sim. Acesse o aplicativo pelo navegador do seu celular e salve suas receitas favoritas na sua conta.</p></details>
       <details><summary>Como recebo acesso?</summary><p>Crie sua conta, conclua o pagamento e aguarde a confirmação. O acesso será vinculado à sua conta.</p></details>
     </section>
-    <footer className="club-public-footer">Clube dos Drinkeros · Receitas para cada momento.</footer>
+    <footer className="club-public-footer" ref={footer}>
+      <div className="club-footer-main"><div className="club-footer-brand"><img src={drinkerosLogo} alt="Drinkeros" width="180" height="55" /><p>Receitas para transformar cada momento.</p></div>
+        <nav aria-label="Institucional"><h2>Drinkeros</h2><Link to="/login">Minha conta</Link><a href="https://wa.me/5548991601025" target="_blank" rel="noopener noreferrer">Atendimento</a></nav>
+        <nav aria-label="Informações legais"><h2>Informações</h2>
+          <a href="https://wa.me/5548991601025?text=Gostaria%20de%20consultar%20a%20pol%C3%ADtica%20de%20privacidade" target="_blank" rel="noopener noreferrer">Solicitar política de privacidade</a><a href="https://wa.me/5548991601025?text=Gostaria%20de%20consultar%20os%20termos%20de%20uso" target="_blank" rel="noopener noreferrer">Solicitar termos de uso</a>
+        </nav>
+      </div><p className="club-footer-copyright">© {new Date().getFullYear()} Drinkeros. Todos os direitos reservados.</p>
+    </footer>
   </div>;
 }
