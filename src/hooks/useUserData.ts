@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMemo } from 'react';
+import { favoriteLists } from '@/lib/favoriteLists';
 
 export interface UserPackageWithDetails {
   id: string;
@@ -332,7 +333,7 @@ export const useToggleFavorite = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ recipeId, isFavorite }: { recipeId: string; isFavorite: boolean }) => {
+    mutationFn: async ({ recipeId, isFavorite, collectionName }: { recipeId: string; isFavorite: boolean; collectionName?: string }) => {
       if (!user) throw new Error('Not authenticated');
 
       if (isFavorite) {
@@ -344,9 +345,8 @@ export const useToggleFavorite = () => {
 
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from('favorites')
-          .insert({ user_id: user.id, recipe_id: recipeId });
+        if (!collectionName) throw new Error('Escolha ou crie uma lista para salvar o favorito.');
+        const { error } = await favoriteLists.rpc('save_favorite_to_list', { p_recipe_id: recipeId, p_collection_name: collectionName });
 
         if (error) throw error;
       }
@@ -354,6 +354,7 @@ export const useToggleFavorite = () => {
     onSuccess: (_, { isFavorite }) => {
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
       queryClient.invalidateQueries({ queryKey: ['collection-recipes'] });
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
       toast({
         title: isFavorite ? 'Eliminado de favoritos' : 'Agregado a favoritos',
       });

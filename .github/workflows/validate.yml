@@ -19,6 +19,7 @@ jobs:
       - run: npm run test:financial-db
       - run: node scripts/test-event-shopping-db.mjs
       - run: node scripts/test-favorite-collections-db.mjs
+      - run: node scripts/test-required-favorite-lists-db.mjs
       - run: npx tsc --noEmit -p tsconfig.app.json
       - run: npm run build
       - uses: denoland/setup-deno@v2

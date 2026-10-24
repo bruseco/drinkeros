@@ -112,12 +112,6 @@ const UserFavorites: React.FC = () => {
     });
   };
 
-  // Recipes in any collection (to separate from "ungrouped" favorites)
-  const recipesInCollections = new Set(collectionRecipes.map((cr) => cr.recipe_id));
-
-  // Ungrouped favorites = favorites NOT in any collection
-  const ungroupedFavorites = favorites.filter((f) => !recipesInCollections.has(f.recipe_id));
-
   // Other collections (not "Cursos")
   const otherCollections = collections.filter((c) => c.name !== 'Cursos' && c.name !== 'Aulas' && c.name !== 'Aulas Favoritas');
 
@@ -276,7 +270,7 @@ const UserFavorites: React.FC = () => {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Excluir lista "{col.name}"?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          As receitas continuarão nos seus favoritos, mas a lista será removida.
+                          Os drinks exclusivos desta lista também serão removidos dos favoritos. Drinks presentes em outra lista serão mantidos.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -319,36 +313,6 @@ const UserFavorites: React.FC = () => {
             );
           })}
 
-          {/* Ungrouped favorites */}
-          {ungroupedFavorites.length > 0 && (
-            <div className="space-y-3">
-              {(otherCollections.length > 0 || cursosCollection) && (
-                <div className="flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-red-500" />
-                  <span className="font-semibold text-foreground">Sem lista</span>
-                  <span className="text-sm text-muted-foreground">({ungroupedFavorites.length})</span>
-                </div>
-              )}
-              <div className="grid gap-3 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {ungroupedFavorites.map((fav) =>
-                  fav.recipe ? (
-                    <LessonCard
-                      key={fav.id}
-                      lesson={{
-                        id: fav.recipe_id,
-                        name: fav.recipe.name,
-                        image_url: fav.recipe.image_url,
-                        servings: fav.recipe.servings,
-                      }}
-                      to={(fav as any).kind === 'clube' ? `/app/clube` : (fav as any).kind === 'receita' ? `/app/receita/${fav.recipe_id}` : `/app/aula/${fav.recipe_id}`}
-                      compact
-                      hideTitle
-                    />
-                  ) : null
-                )}
-              </div>
-            </div>
-          )}
         </>
       )}
       </TabsContent></Tabs>

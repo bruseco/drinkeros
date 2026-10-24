@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useRecipe } from '@/hooks/useRecipes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites, useToggleFavorite } from '@/hooks/useUserData';
-import { useAddToCursosCollection } from '@/hooks/useCollections';
+import FavoriteDialog from '@/components/user/FavoriteDialog';
 import { useTrackRecipeView, useToggleLessonComplete } from '@/hooks/useRecipeViews';
 import { useLessonWatchHeartbeat } from '@/hooks/useAccessTracking';
 import CourseCompletionCelebration from '@/components/user/CourseCompletionCelebration';
@@ -43,7 +43,7 @@ const UserLesson: React.FC = () => {
   const { data: lesson, isLoading } = useRecipe(id || '');
   const { data: favorites = [] } = useFavorites();
   const toggleFavorite = useToggleFavorite();
-  const addToCursos = useAddToCursosCollection();
+  const [showFavoriteDialog, setShowFavoriteDialog] = useState(false);
   const trackLessonView = useTrackRecipeView();
   const toggleComplete = useToggleLessonComplete();
 
@@ -370,10 +370,8 @@ const UserLesson: React.FC = () => {
           variant="ghost"
           size="icon"
           onClick={() => {
-            toggleFavorite.mutate({ recipeId: lesson.id, isFavorite });
-            if (!isFavorite && isCourseLesson) {
-              addToCursos.mutate(lesson.id);
-            }
+            if (isFavorite || isCourseLesson) toggleFavorite.mutate({ recipeId: lesson.id, isFavorite, collectionName: 'Aulas Favoritas' });
+            else setShowFavoriteDialog(true);
           }}
         >
           <Heart
@@ -896,6 +894,7 @@ const UserLesson: React.FC = () => {
       </div>
 
       {/* Course completion celebration */}
+      {lesson && <FavoriteDialog open={showFavoriteDialog} onOpenChange={setShowFavoriteDialog} recipeId={lesson.id} isFavorite={isFavorite} />}
       {celebrationCourse && (
         <CourseCompletionCelebration
           open={showCelebration}

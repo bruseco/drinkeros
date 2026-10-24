@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useCallback } from 'react';
+import { favoriteLists } from '@/lib/favoriteLists';
 
 export const useCollections = () => {
   const { user } = useAuth();
@@ -120,17 +121,28 @@ export const useDeleteCollection = () => {
 
   return useMutation({
     mutationFn: async (collectionId: string) => {
-      // Delete recipes in collection first
-      await supabase.from('collection_recipes').delete().eq('collection_id', collectionId);
-      const { error } = await supabase.from('collections').delete().eq('id', collectionId);
+      const { error } = await favoriteLists.rpc('delete_favorite_list', { p_collection_id: collectionId });
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['collections'] });
       queryClient.invalidateQueries({ queryKey: ['collection-recipes'] });
       toast({ title: 'Lista excluída!' });
+      queryClient.invalidateQueries({ queryKey: ['favorites'] });
     },
+    onError: () => toast({ title: 'Não foi possível excluir a lista', variant: 'destructive' }),
   });
+};
+
+export const useSaveFavoriteToList = () => {
+  const queryClient = useQueryClient(); const { toast } = useToast();
+  return useMutation({ mutationFn: async ({ recipeId, collectionId, name }: { recipeId: string; collectionId?: string; name?: string }) => {
+    const { data, error } = await favoriteLists.rpc('save_favorite_to_list', { p_recipe_id: recipeId, p_collection_id: collectionId, p_collection_name: name });
+    if (error) throw error; return data;
+  }, onSuccess: () => {
+    for (const key of ['favorites', 'collections', 'collection-recipes']) queryClient.invalidateQueries({ queryKey: [key] });
+    toast({ title: 'Salvo na lista!' });
+  }, onError: () => toast({ title: 'Não foi possível salvar na lista', variant: 'destructive' }) });
 };
 
 export const useAddToCollection = () => {

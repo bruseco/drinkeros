@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { Heart, MessageCircle, Search, Trophy, Loader2, Sparkles, ChefHat, Plus, Bookmark } from 'lucide-react';
-import { useSaveClubRecipe } from '@/hooks/useCollections';
+import FavoriteDialog from '@/components/user/FavoriteDialog';
 
 import { format, formatDistanceToNow, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -118,7 +118,7 @@ const RecipeCard: React.FC<{
   isLiked: boolean;
 }> = ({ recipe, isLiked }) => {
   const toggle = useToggleRecipeLike();
-  const save = useSaveClubRecipe();
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const { user } = useAuth();
   const isOwn = user?.id === recipe.user_id;
 
@@ -167,17 +167,17 @@ const RecipeCard: React.FC<{
           {!isOwn && (
             <button
               className="ml-auto inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition disabled:opacity-50"
-              disabled={save.isPending}
-              onClick={() => save.mutate(recipe.id)}
-              title="Salvar em Favoritos (Clube dos Drinkeros)"
+              onClick={() => setSaveDialogOpen(true)}
+              title="Salvar em uma lista de favoritos"
             >
-              {save.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bookmark className="h-4 w-4" />}
+              <Bookmark className="h-4 w-4" />
               <span className="hidden sm:inline">Salvar</span>
             </button>
           )}
         </div>
 
         <CommentsBlock targetId={recipe.id} />
+        <FavoriteDialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen} recipeId={recipe.id} isFavorite={false} />
       </div>
     </Card>
   );
