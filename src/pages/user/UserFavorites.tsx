@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useFavorites } from '@/hooks/useUserData';
 import { useCollections, useCollectionRecipes, useDeleteCollection } from '@/hooks/useCollections';
 import { Button } from '@/components/ui/button';
-import { Heart, FolderOpen, Trash2, ChevronDown, ChevronUp, GraduationCap } from 'lucide-react';
+import { CalendarDays, Heart, FolderOpen, Trash2, ChevronDown, ChevronUp, GraduationCap } from 'lucide-react';
 import { LessonCard, LessonCardSkeleton } from '@/components/user/LessonCard';
 import { CollectionShoppingList } from '@/components/user/CollectionShoppingList';
 import { EventShoppingLists } from '@/components/user/EventShoppingLists';
@@ -176,16 +176,16 @@ const UserFavorites: React.FC = () => {
       ) : (
         <>
           {/* "Cursos" collection with sub-grouping */}
-          {cursosCollection && cursosRecipes.length > 0 && (
-            <div className="space-y-3">
+          {cursosCollection && (
+            <div className="space-y-4 rounded-2xl border bg-card p-4 sm:p-5">
               <div className="flex items-center justify-between">
                 <button
                   onClick={() => toggleExpand(cursosCollection.id)}
-                  className="flex items-center gap-2 text-left"
+                  className="flex w-full items-center gap-3 rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  aria-expanded={expandedLists.has(cursosCollection.id)}
                 >
-                  <GraduationCap className="h-5 w-5 text-primary" />
-                  <span className="font-semibold text-foreground">Aulas Favoritas</span>
-                  <span className="text-sm text-muted-foreground">({cursosRecipes.length})</span>
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10"><GraduationCap className="h-6 w-6 text-primary" /></span>
+                  <span className="min-w-0 flex-1"><span className="block text-xl font-semibold text-foreground">Aulas Favoritas</span><span className="mt-1 block text-sm text-muted-foreground">{cursosRecipes.length} {cursosRecipes.length === 1 ? 'aula salva' : 'aulas salvas'}</span></span>
                   {expandedLists.has(cursosCollection.id) ? (
                     <ChevronUp className="h-4 w-4 text-muted-foreground" />
                   ) : (
@@ -196,6 +196,7 @@ const UserFavorites: React.FC = () => {
 
               {expandedLists.has(cursosCollection.id) && (
                 <div className="space-y-2 pl-2">
+                  {cursosRecipes.length === 0 && <p className="py-3 text-sm text-muted-foreground">Você ainda não tem aulas favoritas.</p>}
                   {Object.entries(courseGroups).map(([courseName, recipes]) => {
                     const isCourseExpanded = expandedCourses.has(courseName);
                     return (
@@ -247,15 +248,15 @@ const UserFavorites: React.FC = () => {
             const isExpanded = expandedLists.has(col.id);
 
             return (
-              <div key={col.id} className="space-y-3">
+              <div key={col.id} className="space-y-4 rounded-2xl border bg-card p-4 sm:p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <button
                     onClick={() => toggleExpand(col.id)}
-                    className="flex items-center gap-2 text-left"
+                    className="flex min-w-0 grow basis-56 items-center gap-3 rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-expanded={isExpanded}
                   >
-                    <FolderOpen className="h-5 w-5 text-primary" />
-                    <span className="font-semibold text-foreground">{col.name}</span>
-                    <span className="text-sm text-muted-foreground">({colRecipes.length})</span>
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10"><FolderOpen className="h-6 w-6 text-primary" /></span>
+                    <span className="min-w-0 flex-1"><span className="block break-words text-xl font-semibold text-foreground">{col.name}</span><span className="mt-1 block text-sm text-muted-foreground">{colRecipes.length} {colRecipes.length === 1 ? 'drink salvo' : 'drinks salvos'}</span><span className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"><CalendarDays className="h-3.5 w-3.5 shrink-0" />Criada em <time dateTime={col.created_at}>{new Date(col.created_at).toLocaleDateString('pt-BR')}</time></span></span>
                     {isExpanded ? (
                       <ChevronUp className="h-4 w-4 text-muted-foreground" />
                     ) : (
