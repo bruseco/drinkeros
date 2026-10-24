@@ -187,6 +187,7 @@ async function upsertCustomer(order: OrderRow): Promise<{
   id: string | null;
   status: "success" | "skipped" | "failed";
   hasCpf: boolean;
+  pendingFiscal?: boolean;
   error?: string;
   raw?: unknown;
 }> {
