@@ -38,8 +38,8 @@ export function AnimatedClubCount({ value, className = '', start = true, onCompl
       };
       setDisplay(0);
       frame = requestAnimationFrame(tick);
-    }, { root: element.closest('.club-public'), rootMargin: '0px 0px -18% 0px', threshold: 0.7 });
-    observer.observe(element);
+    }, { root: element.closest('.club-public'), rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+    observer.observe(element.closest('.club-category-heading') ?? element);
     return () => { observer.disconnect(); cancelAnimationFrame(frame); };
   }, [value, start, onComplete]);
   return <span className={`club-count ${className}`} data-started={display > 0} aria-label={value.toLocaleString('pt-BR')} ref={ref}><span aria-hidden="true">{display.toLocaleString('pt-BR')}</span></span>;
@@ -88,7 +88,7 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
       const progress = position(heading.current);
       position(subtitle.current);
       position(covers.current);
-      const next = progress === 0 && !!scene.current && scene.current.getBoundingClientRect().bottom > viewport.top;
+      const next = progress < .75 && !!scene.current && scene.current.getBoundingClientRect().bottom > viewport.top;
       if (next !== ready) { ready = next; setCountReady(next); }
       const headingBounds = heading.current?.getBoundingClientRect();
       const coversBounds = covers.current?.getBoundingClientRect();
