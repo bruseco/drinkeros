@@ -75,6 +75,7 @@ function CategoryScene({ category, direction }: { category: Category; direction:
         const top = element.getBoundingClientRect().top - viewport.top;
         const progress = media.matches ? 0 : Math.max(0, Math.min(1, (top - viewport.height * .55) / (viewport.height * .45)));
         element.style.transform = `translate3d(${direction * progress * width * .55}px,0,0)`;
+        if(element === heading.current || element === subtitle.current) element.style.opacity = String(1 - progress);
         return progress;
       };
       const progress = position(heading.current);

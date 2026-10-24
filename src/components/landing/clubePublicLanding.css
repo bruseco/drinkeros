@@ -42,3 +42,5 @@
 .club-category-subtitle{margin:5px auto 8px}.club-category-heading{margin-bottom:0}@media(max-width:600px){.club-category-subtitle{margin:5px auto 4px}.club-category-heading{margin-bottom:0}}
 
 .club-discount-banner{background:#d92762;color:#ffeb8a}.club-discount-banner strong{color:#fff;font-weight:800}.club-covers-window{will-change:transform}
+
+.club-category-heading,.club-category-subtitle{opacity:0;will-change:transform,opacity}@media(prefers-reduced-motion:reduce){.club-category-heading,.club-category-subtitle{opacity:1}}
