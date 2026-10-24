@@ -134,13 +134,13 @@ function CategoryScene({ category }: { category: Category }) {
       <div className="club-category-copy club-category-heading" ref={heading}>
         <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.label === 'Frozens' ? <><strong><AnimatedClubCount value={20} start={countReady} />+ frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
       </div>
+      <p className="club-category-subtitle" ref={subtitle}>{category.subtitle}</p>
       <div className="club-covers-window" aria-label="Capas das receitas; arraste para explorar"
         onPointerDown={event => { dragging.current = true; lastX.current = event.clientX; event.currentTarget.setPointerCapture(event.pointerId); }}
         onPointerMove={event => { if (dragging.current) { move(lastX.current - event.clientX); lastX.current = event.clientX; } }}
         onPointerUp={() => { dragging.current = false; }} onPointerCancel={() => { dragging.current = false; }}>
         {[0, 1, 2].map(layer => <div key={layer} className={`club-depth-layer club-depth-${layer}`} ref={el => { surfaces.current[layer] = el; }}>{cards(layer)}</div>)}
       </div>
-      <p className="club-category-subtitle" ref={subtitle}>{category.subtitle}</p>
     </div>
   </section>;
 }
@@ -162,7 +162,7 @@ function PublicOfferBanner({ savings, deadline }: { savings: number; deadline: n
   const { mm, ss, isActive } = useIntroCountdown(deadline);
   if (!deadline) return <div className="club-discount-banner" role="status">Desconto de R$ {savings} ativo</div>;
   if (!isActive) return null;
-  return <div className="club-discount-banner" role="status">Desconto de R$ {savings} ativo <span>· Nesta visita: <strong className="tabular-nums">{mm}:{ss}</strong></span></div>;
+  return <div className="club-discount-banner" role="status">Desconto de R$ {savings} ativo <span>· Expira em <strong className="tabular-nums">{mm}:{ss}</strong> nesta visita</span></div>;
 }
 
 export default function ClubePublicLanding(props: Props) {

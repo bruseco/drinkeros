@@ -38,3 +38,5 @@
 
 .club-floating-cta{border-radius:12px 36px 36px 12px}@media(max-width:450px){.club-floating-cta{border-radius:12px 33px 33px 12px}}
 .club-public-testimonials>div{margin-top:0;padding-top:0}
+
+.club-category-subtitle{margin:5px auto 8px}.club-category-heading{margin-bottom:0}@media(max-width:600px){.club-category-subtitle{margin:5px auto 4px}.club-category-heading{margin-bottom:0}}
