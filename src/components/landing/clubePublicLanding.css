@@ -21,3 +21,9 @@
 @media(max-width:600px){.club-depth-0 figure{width:330px}.club-depth-1 figure{width:300px}.club-covers-window{height:415px}.club-depth-layer{height:410px}.club-stage{min-height:0}.club-floating-cta{min-width:190px;gap:17px}}
 
 .club-floating-cta .club-cta-copy>span{font-weight:700}.club-floating-cta strong{font-size:27px;font-weight:800}@media(max-width:450px){.club-floating-cta strong{font-size:25px}}
+
+/* Acabamento dos blocos e estado da oferta revelada. */
+.club-floating-cta{border-radius:12px 999px 999px 12px;padding-right:23px}.club-floating-cta:disabled{opacity:.65;cursor:wait}
+.club-hero-strip img{height:110px}.club-covers-window{height:360px}.club-stage{padding-top:20px;padding-bottom:55px}.club-category-copy{margin-top:-8px}.club-category-copy h2{margin-top:0}.club-syrups .club-category-copy strong{color:#c568ff}
+.club-unlocked .club-price,.club-unlocked .club-saving{color:#4ade80}.club-unlocked .club-purchase,.club-unlocked .club-floating-cta{background:#4ade80;color:#0b2615;border-color:#86efac}
+@media(max-width:600px){.club-hero-strip img{height:90px}.club-covers-window{height:385px}.club-category-copy{margin-top:-18px}}

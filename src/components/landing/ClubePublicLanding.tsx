@@ -90,7 +90,7 @@ function CategoryScene({ category }: { category: Category }) {
       </figure>
     ));
   }));
-  return <section className="club-scene" ref={scene} aria-label={category.label}>
+  return <section className={`club-scene${category.id === 'syrups' ? ' club-syrups' : ''}`} ref={scene} aria-label={category.label}>
     <div className="club-stage">
       <div className="club-covers-window" aria-label="Capas das receitas; arraste para explorar"
         onPointerDown={event => { dragging.current = true; lastX.current = event.clientX; event.currentTarget.setPointerCapture(event.pointerId); }}
@@ -98,7 +98,7 @@ function CategoryScene({ category }: { category: Category }) {
         onPointerUp={() => { dragging.current = false; }} onPointerCancel={() => { dragging.current = false; }}>
         {[0, 1, 2].map(layer => <div key={layer} className={`club-depth-layer club-depth-${layer}`} ref={el => { surfaces.current[layer] = el; }}>{cards(layer)}</div>)}
       </div>
-      <div className="club-category-copy"><small>Receitas em vídeo</small>
+      <div className="club-category-copy">
         <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.label === 'Frozens' ? <><strong><AnimatedClubCount value={20} />+ frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
         <p>{category.subtitle}</p>
       </div>
@@ -126,9 +126,9 @@ export default function ClubePublicLanding(props: Props) {
     document.title = 'Clube dos Drinkeros · Mais de mil receitas em vídeo';
     return () => { document.title = previous; };
   }, []);
-  return <div className="club-public" ref={props.scrollRef}>
+  return <div className={`club-public${props.unlocked ? ' club-unlocked' : ''}`} ref={props.scrollRef}>
     {props.reveal}
-    <button type="button" className="club-floating-cta" onClick={scrollToPricing}><span className="club-cta-copy"><span>Quero entrar para o</span><strong>CLUBE</strong></span><ArrowRight aria-hidden="true" /></button>
+    <button type="button" className="club-floating-cta" disabled={props.unlocked && props.loading} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar para o</span><strong>CLUBE</strong></span><ArrowRight aria-hidden="true" /></button>
     <header className="club-public-hero">
       <p className="club-invite">Torne-se membro do</p>
       <h1><img className="club-logo" src="/club-landing/logo.png" alt="Clube dos Drinkeros" width="500" height="140" fetchPriority="high" /></h1>
