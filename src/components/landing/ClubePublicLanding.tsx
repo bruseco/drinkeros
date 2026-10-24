@@ -86,7 +86,7 @@ function CategoryScene({ category }: { category: Category }) {
         opacity: layer === 2 ? (ghost ? .10 : .16) : opacity,
         transform: `scale(${layer === 2 ? [.39, .47, .35][index % 3] : scale}) rotate(${rotation}deg)`,
       }} aria-hidden={cycle === 1 || layer === 2 ? true : undefined}>
-        <img src={recipe.image} alt={cycle === 1 || layer === 2 ? '' : recipe.title} width="260" height="146" loading="lazy" decoding="async" draggable={false} />
+        <img src={recipe.image} alt={cycle === 1 || layer === 2 ? '' : recipe.title} width="1280" height="720" loading="lazy" decoding="async" draggable={false} />
       </figure>
     ));
   }));
