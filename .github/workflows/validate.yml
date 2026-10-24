@@ -27,4 +27,4 @@ jobs:
         with:
           deno-version: v2.x
       - run: deno check supabase/functions/rand-financial-closing/index.ts
-      - run: deno check supabase/functions/create-mp-payment/index.ts supabase/functions/create-mp-subscription/index.ts
+      - run: deno check --node-modules-dir=auto --no-lock supabase/functions/create-mp-payment/index.ts supabase/functions/create-mp-subscription/index.ts
