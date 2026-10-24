@@ -12,7 +12,9 @@ export const UserNavbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isInternalPage = !mainRoutes.includes(location.pathname);
+  const query = new URLSearchParams(location.search);
+  const isShoppingDetail = location.pathname === '/app/favoritos' && query.get('tab') === 'shopping' && !!query.get('list');
+  const isInternalPage = isShoppingDetail || !mainRoutes.includes(location.pathname);
   const isRecipesListPage = location.pathname === '/app/receitas';
 
   const navItems = [
@@ -39,7 +41,7 @@ export const UserNavbar: React.FC = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate(-1)}
+                onClick={() => isShoppingDetail ? navigate('/app/favoritos?tab=shopping') : navigate(-1)}
                 className="h-9 w-9 rounded-full"
                 aria-label="Voltar"
               >
