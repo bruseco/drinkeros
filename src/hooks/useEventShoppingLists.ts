@@ -45,3 +45,14 @@ export function useSetEventShoppingCheck(listId: string | null) {
     if (error) throw error;
   }, onSuccess: () => client.invalidateQueries({ queryKey: ['event-shopping-checks', user?.id, listId] }) });
 }
+export function useDeleteEventShoppingList() {
+  const { user } = useAuth(), client = useQueryClient();
+  return useMutation({ mutationFn: async (id: string) => {
+    if (!user) throw new Error('Entre na sua conta para excluir a lista.');
+    const { error } = await db.from('event_shopping_lists').delete().eq('id', id).eq('user_id', user.id);
+    if (error) throw error;
+  }, onSuccess: async (_, id) => {
+    client.removeQueries({ queryKey: ['event-shopping-checks', user?.id, id] });
+    await client.invalidateQueries({ queryKey: ['event-shopping-lists', user?.id] });
+  } });
+}
