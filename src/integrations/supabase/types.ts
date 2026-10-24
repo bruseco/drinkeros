@@ -493,6 +493,30 @@ export type Database = {
           },
         ]
       }
+      clube_public_offers: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          revealed_at: string | null
+          token_hash: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          revealed_at?: string | null
+          token_hash: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          revealed_at?: string | null
+          token_hash?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       clube_settings: {
         Row: {
           benefits: Json
@@ -1309,6 +1333,56 @@ export type Database = {
           id?: string
           token?: string
           used_at?: string | null
+        }
+        Relationships: []
+      }
+      event_shopping_checks: {
+        Row: {
+          is_checked: boolean
+          item_index: number
+          list_id: string
+        }
+        Insert: {
+          is_checked?: boolean
+          item_index: number
+          list_id: string
+        }
+        Update: {
+          is_checked?: boolean
+          item_index?: number
+          list_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_shopping_checks_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "event_shopping_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_shopping_lists: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          plan: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          plan: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          plan?: Json
+          user_id?: string
         }
         Relationships: []
       }
@@ -3915,8 +3989,37 @@ export type Database = {
       }
       close_monthly_battle: { Args: { _target_month?: string }; Returns: Json }
       close_yearly_battle: { Args: { _target_year?: number }; Returns: Json }
+      clube_public_account_quote: {
+        Args: never
+        Returns: {
+          expires_at: string
+          price: number
+          server_now: string
+        }[]
+      }
+      clube_public_checkout_quote: {
+        Args: { _user_id: string }
+        Returns: {
+          expires_at: string
+          price: number
+          server_now: string
+        }[]
+      }
+      clube_public_offer: {
+        Args: { _new_visit?: boolean; _reveal?: boolean; _token: string }
+        Returns: {
+          expires_at: string
+          price: number
+          revealed_at: string
+          server_now: string
+        }[]
+      }
       count_daily_views: { Args: { _user_id: string }; Returns: number }
       count_weekly_views: { Args: { _user_id: string }; Returns: number }
+      delete_favorite_list: {
+        Args: { p_collection_id: string }
+        Returns: undefined
+      }
       ensure_clube_intro_offer: {
         Args: never
         Returns: {
@@ -4208,6 +4311,14 @@ export type Database = {
           clube_intro_eligible_until: string
           clube_intro_revealed_at: string
         }[]
+      }
+      save_favorite_to_list: {
+        Args: {
+          p_collection_id?: string
+          p_collection_name?: string
+          p_recipe_id: string
+        }
+        Returns: string
       }
       search_club_recipes: {
         Args: { _limit?: number; _q: string }
