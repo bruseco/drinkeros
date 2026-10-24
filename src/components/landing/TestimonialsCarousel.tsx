@@ -27,7 +27,7 @@ const AUTO_SPEED = 12; // px/s para a esquerda (mais lento)
 const FRICTION = 0.94; // decay da inércia
 const MIN_VELOCITY = 0.05;
 
-const TestimonialsCarousel: React.FC = () => {
+const TestimonialsCarousel: React.FC<{ hideHeading?: boolean }> = ({ hideHeading = false }) => {
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
@@ -140,12 +140,12 @@ const TestimonialsCarousel: React.FC = () => {
 
   return (
     <div className="relative w-screen left-1/2 -translate-x-1/2 mb-12">
-      <h3 className="text-center text-xl md:text-2xl font-black text-white mb-1">
+      {!hideHeading && <><h3 className="text-center text-xl md:text-2xl font-black text-white mb-1">
         O que os <span className="text-yellow-300">Drinkeros</span> dizem
       </h3>
       <p className="text-center text-purple-200 text-sm mb-6">
         Depoimentos reais de quem já vive a experiência
-      </p>
+      </p></>}
 
       <div
         ref={viewportRef}

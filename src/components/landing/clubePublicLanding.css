@@ -27,3 +27,14 @@
 .club-hero-strip img{height:110px}.club-covers-window{height:360px}.club-stage{padding-top:20px;padding-bottom:55px}.club-category-copy{margin-top:-8px}.club-category-copy h2{margin-top:0}.club-syrups .club-category-copy strong{color:#c568ff}
 .club-unlocked .club-price,.club-unlocked .club-saving{color:#4ade80}.club-unlocked .club-purchase,.club-unlocked .club-floating-cta{background:#4ade80;color:#0b2615;border-color:#86efac}
 @media(max-width:600px){.club-hero-strip img{height:90px}.club-covers-window{height:385px}.club-category-copy{margin-top:-18px}}
+
+/* Entrada horizontal das frases sem prender a rolagem. */
+.club-scene{border:0}.club-stage{padding-top:36px;padding-bottom:36px;overflow:hidden}.club-category-heading{margin:0 0 -8px;will-change:transform}.club-category-heading h2{margin:0 auto 12px}.club-category-subtitle{position:relative;z-index:4;text-align:center;max-width:520px;padding:0 25px;margin:-15px auto 18px;color:#c9bccf;font-size:14px;will-change:transform}.club-covers-window{flex:none}
+.club-floating-cta{border-top-left-radius:12px;border-bottom-left-radius:12px;overflow:visible}.club-unlocked .club-price,.club-unlocked .club-saving{color:#a3e635}.club-unlocked .club-purchase,.club-unlocked .club-floating-cta{background:#a3e635;border-color:#bef264;color:#1a2b05}
+.club-discount-banner{position:fixed;top:0;left:0;right:0;z-index:80;padding:calc(9px + env(safe-area-inset-top,0px)) 14px 9px;text-align:center;background:#a3e635;color:#1a2b05;font-size:13px;font-weight:700;box-shadow:0 3px 18px #0005}.club-unlocked .club-public-hero{padding-top:100px}
+.club-payment-brands{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;margin:18px 0 12px}.club-payment-brands span{display:flex;align-items:center;justify-content:center;border-radius:5px;background:#fff;padding:5px 7px;height:29px}.club-payment-brands img{height:19px;width:auto;max-width:42px;object-fit:contain}
+.club-public-pricing{padding-bottom:18px}.club-public-testimonials{position:relative;padding-top:0;margin-top:0}.club-public-testimonials h2{position:relative;z-index:2;display:table;max-width:calc(100% - 40px);margin:0 auto -20px;padding:11px 18px;border-radius:16px;background:#303030;font-size:17px;font-weight:500}.club-faq details{border:0}
+@media(max-width:600px){.club-category-heading{margin-bottom:-8px}.club-category-subtitle{margin-top:-10px}.club-stage{padding-top:30px;padding-bottom:30px}}
+
+.club-floating-cta{border-radius:12px 36px 36px 12px}@media(max-width:450px){.club-floating-cta{border-radius:12px 33px 33px 12px}}
+.club-public-testimonials>div{margin-top:0;padding-top:0}

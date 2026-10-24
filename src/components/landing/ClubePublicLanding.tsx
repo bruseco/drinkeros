@@ -1,16 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowDown, ArrowRight, Heart, Play, ShoppingBag } from 'lucide-react';
 import drinksStrip from '@/assets/1000-drinks.jpg';
+import payVisa from '@/assets/pagamento-visa.png';
+import payMaster from '@/assets/pagamento-mastercard.png';
+import payApple from '@/assets/pagamento-apple.png';
+import payGoogle from '@/assets/pagamento-google.png';
+import payPix from '@/assets/pagamento-pix.png';
 import TestimonialsCarousel from './TestimonialsCarousel';
 import catalog from './clubLandingCatalog.json';
 import './clubePublicLanding.css';
 
-export function AnimatedClubCount({ value, className = '' }: { value: number; className?: string }) {
+export function AnimatedClubCount({ value, className = '', start = true }: { value: number; className?: string; start?: boolean }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [display, setDisplay] = useState(0);
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
+    if (!start) { setDisplay(0); return; }
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setDisplay(value); return; }
     let frame = 0;
     let visible = false;
@@ -31,7 +37,7 @@ export function AnimatedClubCount({ value, className = '' }: { value: number; cl
     }, { root: element.closest('.club-public'), rootMargin: '0px 0px -18% 0px', threshold: 0.7 });
     observer.observe(element);
     return () => { observer.disconnect(); cancelAnimationFrame(frame); };
-  }, [value]);
+  }, [value, start]);
   return <span className={`club-count ${className}`} aria-label={value.toLocaleString('pt-BR')} ref={ref}><span aria-hidden="true">{display.toLocaleString('pt-BR')}</span></span>;
 }
 
@@ -45,10 +51,42 @@ const SPEEDS = [52, 31.2, 13];
 
 function CategoryScene({ category }: { category: Category }) {
   const scene = useRef<HTMLElement>(null);
+  const heading = useRef<HTMLDivElement>(null);
+  const subtitle = useRef<HTMLParagraphElement>(null);
+  const [countReady, setCountReady] = useState(false);
   const surfaces = useRef<Array<HTMLDivElement | null>>([]);
   const offsets = useRef([0, 0, 0]);
   const dragging = useRef(false);
   const lastX = useRef(0);
+  useEffect(() => {
+    const scroller = scene.current?.closest('.club-public');
+    if (!scroller) return;
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let frame = 0;
+    let ready = false;
+    const update = () => {
+      frame = 0;
+      const viewport = scroller.getBoundingClientRect();
+      const width = viewport.width;
+      const position = (element: HTMLElement | null) => {
+        if (!element) return 0;
+        const top = element.getBoundingClientRect().top - viewport.top;
+        const progress = media.matches ? 0 : Math.max(0, Math.min(1, (top - viewport.height * .55) / (viewport.height * .45)));
+        element.style.transform = `translate3d(${progress * width * .55}px,0,0)`;
+        return progress;
+      };
+      const progress = position(heading.current);
+      position(subtitle.current);
+      const next = progress === 0 && !!scene.current && scene.current.getBoundingClientRect().bottom > viewport.top;
+      if (next !== ready) { ready = next; setCountReady(next); }
+    };
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(update); };
+    scroller.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    media.addEventListener('change', onScroll);
+    update();
+    return () => { scroller.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); media.removeEventListener('change', onScroll); cancelAnimationFrame(frame); };
+  }, []);
   const move = (distance: number) => {
     surfaces.current.forEach((layer, index) => {
       offsets.current[index] = ((offsets.current[index] + distance * SPEEDS[index] / SPEEDS[0]) % LOOP_WIDTH + LOOP_WIDTH) % LOOP_WIDTH;
@@ -92,16 +130,16 @@ function CategoryScene({ category }: { category: Category }) {
   }));
   return <section className={`club-scene${category.id === 'syrups' ? ' club-syrups' : ''}`} ref={scene} aria-label={category.label}>
     <div className="club-stage">
+      <div className="club-category-copy club-category-heading" ref={heading}>
+        <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.label === 'Frozens' ? <><strong><AnimatedClubCount value={20} start={countReady} />+ frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
+      </div>
       <div className="club-covers-window" aria-label="Capas das receitas; arraste para explorar"
         onPointerDown={event => { dragging.current = true; lastX.current = event.clientX; event.currentTarget.setPointerCapture(event.pointerId); }}
         onPointerMove={event => { if (dragging.current) { move(lastX.current - event.clientX); lastX.current = event.clientX; } }}
         onPointerUp={() => { dragging.current = false; }} onPointerCancel={() => { dragging.current = false; }}>
         {[0, 1, 2].map(layer => <div key={layer} className={`club-depth-layer club-depth-${layer}`} ref={el => { surfaces.current[layer] = el; }}>{cards(layer)}</div>)}
       </div>
-      <div className="club-category-copy">
-        <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.label === 'Frozens' ? <><strong><AnimatedClubCount value={20} />+ frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
-        <p>{category.subtitle}</p>
-      </div>
+      <p className="club-category-subtitle" ref={subtitle}>{category.subtitle}</p>
     </div>
   </section>;
 }
@@ -128,6 +166,7 @@ export default function ClubePublicLanding(props: Props) {
   }, []);
   return <div className={`club-public${props.unlocked ? ' club-unlocked' : ''}`} ref={props.scrollRef}>
     {props.reveal}
+    {props.unlocked && <div className="club-discount-banner" role="status">Desconto de R$ {props.savings} ativo</div>}
     <button type="button" className="club-floating-cta" disabled={props.unlocked && props.loading} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar para o</span><strong>CLUBE</strong></span><ArrowRight aria-hidden="true" /></button>
     <header className="club-public-hero">
       <p className="club-invite">Torne-se membro do</p>
@@ -152,10 +191,13 @@ export default function ClubePublicLanding(props: Props) {
         {props.unlocked && <p className="club-saving">Você economiza R$ {props.savings} agora.</p>}
         <ul><li>Acesso às receitas em vídeo do Clube</li><li>Xaropes artesanais e novas combinações</li><li>Listas de favoritos e listas de compras</li></ul>
         <button type="button" className="club-purchase" disabled={props.loading} onClick={props.onSubscribe}>{props.loading ? 'Abrindo checkout…' : 'Quero entrar para o Clube'}</button>
+        <div className="club-payment-brands" aria-label="Meios de pagamento">
+          {[[payVisa, 'Visa'], [payMaster, 'Mastercard'], [payApple, 'Apple Pay'], [payGoogle, 'Google Pay'], [payPix, 'Pix']].map(([src, alt]) => <span key={alt}><img src={src} alt={alt} width="42" height="20" /></span>)}
+        </div>
         <p className="club-payment-note">Pagamento por cartão ou Pix. No cartão, assinatura com renovação automática; no Pix, acesso por 12 meses.</p>
       </div>
     </section>
-    <section className="club-public-testimonials"><h2>Olha o que o pessoal acha da gente.</h2><TestimonialsCarousel /></section>
+    <section className="club-public-testimonials"><h2>Olhe o que o pessoal acha da gente.</h2><TestimonialsCarousel hideHeading /></section>
     <section className="club-faq"><h2>Ficou alguma dúvida?</h2>
       <details><summary>Preciso ter experiência?</summary><p>Você pode acompanhar o preparo em vídeo e escolher as receitas que combinam com os ingredientes que tem.</p></details>
       <details><summary>Posso usar no celular?</summary><p>Sim. Acesse o aplicativo pelo navegador do seu celular e salve suas receitas favoritas na sua conta.</p></details>
