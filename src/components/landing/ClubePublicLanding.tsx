@@ -148,7 +148,7 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
   return <section className={`club-scene${category.id === 'syrups' ? ' club-syrups' : ''}${highlighted ? ' club-highlight-complete' : ''}`} ref={scene} aria-label={category.label}>
     <div className="club-stage">
       <div className="club-category-copy club-category-heading" ref={heading}>
-        <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.label === 'Frozens' ? <><strong><AnimatedClubCount value={20} start={countReady} onComplete={handleCountComplete} /> Frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} onComplete={handleCountComplete} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
+        <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.label === 'Frozens' ? <>Mais de <strong><AnimatedClubCount value={20} start={countReady} onComplete={handleCountComplete} /> Frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} onComplete={handleCountComplete} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
       </div>
       <p className="club-category-subtitle" ref={subtitle}>{category.subtitle}</p>
       <div className="club-covers-window" ref={covers} aria-label="Capas das receitas; arraste para explorar"
