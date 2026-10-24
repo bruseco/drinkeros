@@ -68,3 +68,9 @@
 .club-down-bouncing{animation:club-discover-bounce 1.5s ease-in-out infinite}
 @keyframes club-discover-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(9px)}}
 @media(prefers-reduced-motion:reduce){.club-down-bouncing{animation:none}.club-category-heading,.club-category-subtitle{transition:none}}
+
+/* Keep nested counter glyphs in the parent text gradient painting context. */
+.club-category-copy .club-count{display:inline}
+
+.club-floating-cta:not(.club-cta-visible){visibility:hidden;opacity:0;pointer-events:none}
+.club-floating-cta.club-cta-visible{visibility:visible}

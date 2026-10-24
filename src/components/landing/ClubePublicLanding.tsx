@@ -53,14 +53,14 @@ const DEPTHS = [
 const LOOP_WIDTH = 1900;
 const SPEEDS = [52, 31.2, 13];
 
-function CategoryScene({ category, direction, onCountComplete }: { category: Category; direction: 1 | -1; onCountComplete?: () => void }) {
+function CategoryScene({ category, direction, onCoversReached }: { category: Category; direction: 1 | -1; onCoversReached?: () => void }) {
   const scene = useRef<HTMLElement>(null);
   const heading = useRef<HTMLDivElement>(null);
   const subtitle = useRef<HTMLParagraphElement>(null);
   const covers = useRef<HTMLDivElement>(null);
   const [countReady, setCountReady] = useState(false);
   const [highlighted,setHighlighted]=useState(false);
-  const handleCountComplete=React.useCallback(()=>{setHighlighted(true);onCountComplete?.()},[onCountComplete]);
+  const handleCountComplete=React.useCallback(()=>{setHighlighted(true)},[]);
   useEffect(()=>{if(!countReady)setHighlighted(false);else if(category.number===null)setHighlighted(true)},[countReady,category.number]);
   const surfaces = useRef<Array<HTMLDivElement | null>>([]);
   const offsets = useRef([0, 0, 0]);
@@ -72,6 +72,7 @@ function CategoryScene({ category, direction, onCountComplete }: { category: Cat
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
     let frame = 0;
     let ready = false;
+    let ctaRevealed = false;
     const update = () => {
       frame = 0;
       const viewport = scroller.getBoundingClientRect();
@@ -89,6 +90,12 @@ function CategoryScene({ category, direction, onCountComplete }: { category: Cat
       position(covers.current);
       const next = progress === 0 && !!scene.current && scene.current.getBoundingClientRect().bottom > viewport.top;
       if (next !== ready) { ready = next; setCountReady(next); }
+      const headingBounds = heading.current?.getBoundingClientRect();
+      const coversBounds = covers.current?.getBoundingClientRect();
+      if (!ctaRevealed && headingBounds && coversBounds && headingBounds.bottom <= viewport.top && coversBounds.top + coversBounds.height / 2 <= viewport.top + viewport.height * .15) {
+        ctaRevealed = true;
+        onCoversReached?.();
+      }
     };
     const onScroll = () => { if (!frame) frame = requestAnimationFrame(update); };
     scroller.addEventListener('scroll', onScroll, { passive: true });
@@ -96,7 +103,7 @@ function CategoryScene({ category, direction, onCountComplete }: { category: Cat
     media.addEventListener('change', onScroll);
     update();
     return () => { scroller.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); media.removeEventListener('change', onScroll); cancelAnimationFrame(frame); };
-  }, [direction]);
+  }, [direction, onCoversReached]);
   const move = (distance: number) => {
     surfaces.current.forEach((layer, index) => {
       offsets.current[index] = ((offsets.current[index] + distance * SPEEDS[index] / SPEEDS[0]) % LOOP_WIDTH + LOOP_WIDTH) % LOOP_WIDTH;
@@ -123,7 +130,7 @@ function CategoryScene({ category, direction, onCountComplete }: { category: Cat
     }, { threshold: .02 });
     if (scene.current) observer.observe(scene.current);
     return () => { observer.disconnect(); cancelAnimationFrame(frame); };
-  }, [direction]);
+  }, [direction, onCoversReached]);
   const cards = (layer: number) => [0, 1].flatMap(cycle => category.recipes.flatMap((recipe, index) => {
     const [y, scale, opacity, rotation] = DEPTHS[index % DEPTHS.length];
     if (layer < 2 && (scale >= .95 ? 0 : 1) !== layer) return [];
@@ -227,7 +234,7 @@ export default function ClubePublicLanding(props: Props) {
       <p className="club-discover">Descubra o que espera por você</p>
       <ArrowDown className={`club-down${hasScrolled ? '' : ' club-down-bouncing'}`} aria-hidden="true" />
     </header>
-    {catalog.map((category,index) => <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCountComplete={index===0?revealCta:undefined} />)}
+    {catalog.map((category,index) => <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCoversReached={index===0?revealCta:undefined} />)}
     <section className="club-tools" aria-label="Organize seus drinks">
       <div><Play aria-hidden="true" /><h2>Veja como preparar</h2><p>Acompanhe o passo a passo das receitas em vídeo.</p></div>
       <div><Heart aria-hidden="true" /><h2>Salve suas escolhas</h2><p>Monte listas de favoritos para cada ocasião.</p></div>
