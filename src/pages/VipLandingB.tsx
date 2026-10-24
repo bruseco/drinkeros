@@ -26,6 +26,7 @@ import { trackFunnel } from '@/lib/funnelTracking';
 import ClubeDiscountReveal from '@/components/user/ClubeDiscountReveal';
 import { useClubeLandingOffer } from '@/hooks/useClubeLandingOffer';
 import ClubeIntroStickyBar from '@/components/user/ClubeIntroStickyBar';
+import ClubePublicLanding from '@/components/landing/ClubePublicLanding';
 
 
 import drinksStrip from '@/assets/1000-drinks.jpg';
@@ -169,7 +170,7 @@ const PriceAmount = React.memo(({ value, className = '' }: { value: number; clas
 PriceAmount.displayName = 'PriceAmount';
 
 
-const VipLandingB: React.FC = () => {
+const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false }) => {
   useAbVariantTrack('clube', 'b');
   const { user } = useAuth();
   // Funil: pageview da página /pv-clube-b (dedup por sessão).
@@ -387,7 +388,7 @@ const VipLandingB: React.FC = () => {
     chosenOffer?: 'intro' | 'full',
   ) => {
     if (!user) {
-      navigate('/signup?redirect=/pv-clube-b');
+      navigate(`/signup?redirect=${publicPage ? '/clube-receitas' : '/pv-clube-b'}`);
       return;
     }
     if (loading) return;
@@ -432,6 +433,18 @@ const VipLandingB: React.FC = () => {
 
   const scrollToPricing = () =>
     document.getElementById('clube-pricing')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  if (publicPage) return <ClubePublicLanding
+    scrollRef={landingScrollRef}
+    registerPriceCard={registerPriceCard}
+    price={<PriceAmount value={displayPrice} />}
+    fullPrice={promo.fullPrice}
+    unlocked={unlocked}
+    savings={effectiveSavings}
+    loading={loading || promo.isLoading}
+    onSubscribe={() => handleSubscribe('card')}
+    reveal={<ClubeDiscountReveal open={revealOpen} onClose={handleRevealClose} />}
+  />;
 
   return (
     <div

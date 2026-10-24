@@ -155,6 +155,7 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/pv-clube" element={<Navigate to="/pv-clube-b" replace />} />
             <Route path="/pv-clube-b" element={<VipLandingB />} />
+            <Route path="/clube-receitas" element={<VipLandingB publicPage />} />
             <Route path="/vip" element={<Navigate to="/pv-clube-b" replace />} />
             {/* Legacy redirects (links antigos) */}
             <Route path="/clube-b" element={<Navigate to="/pv-clube-b" replace />} />
