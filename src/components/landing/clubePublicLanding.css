@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700;800&display=swap');
 .club-public{position:fixed;inset:0;z-index:60;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;background:#1c1029;color:#fff8ef;font:400 16px/1.5 Montserrat,Arial,sans-serif;--club-gold:#ffd68a}
 .club-public *{box-sizing:border-box}.club-public button{cursor:pointer}.club-public button:focus-visible,.club-public summary:focus-visible{outline:3px solid #ffe19b;outline-offset:4px}
 .club-public-hero{background:#141414;text-align:center;padding:64px 20px 40px}.club-invite{font-weight:300;font-size:20px;margin:0 0 8px}.club-public h1{margin:0 auto 26px;max-width:500px}.club-logo{width:100%;height:auto;display:block;margin:20px auto 30px}.club-pocket{font-size:22px;font-weight:300;margin:0 0 30px}.club-count{font-weight:700;font-size:1.08em;font-variant-numeric:tabular-nums;display:inline-block}.club-pocket strong{color:var(--club-gold);font-size:1.45em}
@@ -14,3 +14,10 @@
 @media(min-width:1000px){.club-covers-window{max-width:1300px;width:100%;margin:auto}}
 @media(max-width:450px){.club-public-hero{padding-top:40px}.club-invite{font-size:17px}.club-pocket{font-size:19px}.club-hero-strip img{height:72px}.club-stage{min-height:610px;padding-top:30px}.club-covers-window{height:365px}.club-depth-layer figure{width:260px}.club-floating-cta{right:14px;padding:10px 13px;min-height:61px}.club-floating-cta strong{font-size:21px}.club-tools{grid-template-columns:1fr;padding:35px 28px 55px;gap:25px}.club-price{font-size:62px}}
 @media(prefers-reduced-motion:reduce){.club-hero-strip>div{animation:none}.club-scene{height:auto;min-height:650px}.club-stage{position:relative;top:0}}
+
+/* Fundo contínuo e chamada fixa; capas maiores no celular. */
+.club-public,.club-scene,.club-scene:nth-of-type(even),.club-public-pricing{background:#141414}.club-offer{background:linear-gradient(140deg,#292929,#151515)}
+.club-floating-cta{flex-direction:row;min-width:200px;gap:18px}.club-cta-copy{display:flex;flex-direction:column;align-items:center;gap:2px}.club-floating-cta svg{width:24px;height:24px;flex:none}
+@media(max-width:600px){.club-depth-0 figure{width:330px}.club-depth-1 figure{width:300px}.club-covers-window{height:415px}.club-depth-layer{height:410px}.club-stage{min-height:670px}.club-floating-cta{min-width:190px;gap:17px}}
+
+.club-floating-cta .club-cta-copy>span{font-weight:700}.club-floating-cta strong{font-size:27px;font-weight:800}@media(max-width:450px){.club-floating-cta strong{font-size:25px}}

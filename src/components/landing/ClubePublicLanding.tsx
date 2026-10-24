@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowDown, Heart, Play, ShoppingBag } from 'lucide-react';
+import { ArrowDown, ArrowRight, Heart, Play, ShoppingBag } from 'lucide-react';
 import drinksStrip from '@/assets/1000-drinks.jpg';
 import TestimonialsCarousel from './TestimonialsCarousel';
 import catalog from './clubLandingCatalog.json';
@@ -7,14 +7,19 @@ import './clubePublicLanding.css';
 
 export function AnimatedClubCount({ value, className = '' }: { value: number; className?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const [display, setDisplay] = useState(value);
+  const [display, setDisplay] = useState(0);
   useEffect(() => {
     const element = ref.current;
-    if (!element || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!element) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setDisplay(value); return; }
     let frame = 0;
+    let visible = false;
     const observer = new IntersectionObserver(entries => {
-      if (!entries.some(entry => entry.isIntersecting)) return;
-      observer.disconnect();
+      const next = entries.some(entry => entry.isIntersecting);
+      if (next === visible) return;
+      visible = next;
+      cancelAnimationFrame(frame);
+      if (!visible) { setDisplay(0); return; }
       const start = performance.now();
       const tick = (now: number) => {
         const progress = Math.min((now - start) / 1600, 1);
@@ -23,7 +28,7 @@ export function AnimatedClubCount({ value, className = '' }: { value: number; cl
       };
       setDisplay(0);
       frame = requestAnimationFrame(tick);
-    }, { threshold: 0.7 });
+    }, { root: element.closest('.club-public'), rootMargin: '0px 0px -18% 0px', threshold: 0.7 });
     observer.observe(element);
     return () => { observer.disconnect(); cancelAnimationFrame(frame); };
   }, [value]);
@@ -38,14 +43,12 @@ const DEPTHS = [
 const LOOP_WIDTH = 1900;
 const SPEEDS = [52, 31.2, 13];
 
-function CategoryScene({ category, paused }: { category: Category; paused: boolean }) {
+function CategoryScene({ category }: { category: Category }) {
   const scene = useRef<HTMLElement>(null);
   const surfaces = useRef<Array<HTMLDivElement | null>>([]);
   const offsets = useRef([0, 0, 0]);
   const dragging = useRef(false);
   const lastX = useRef(0);
-  const pausedRef = useRef(paused);
-  pausedRef.current = paused;
   const move = (distance: number) => {
     surfaces.current.forEach((layer, index) => {
       offsets.current[index] = ((offsets.current[index] + distance * SPEEDS[index] / SPEEDS[0]) % LOOP_WIDTH + LOOP_WIDTH) % LOOP_WIDTH;
@@ -60,7 +63,7 @@ function CategoryScene({ category, paused }: { category: Category; paused: boole
     const tick = (time: number) => {
       const dt = previous ? Math.min(time - previous, 60) / 1000 : 0;
       previous = time;
-      if (!pausedRef.current && !media.matches && !dragging.current) move(dt * SPEEDS[0]);
+      if (!media.matches && !dragging.current) move(dt * SPEEDS[0]);
       if (visible) frame = requestAnimationFrame(tick);
     };
     const observer = new IntersectionObserver(entries => {
@@ -96,7 +99,7 @@ function CategoryScene({ category, paused }: { category: Category; paused: boole
         {[0, 1, 2].map(layer => <div key={layer} className={`club-depth-layer club-depth-${layer}`} ref={el => { surfaces.current[layer] = el; }}>{cards(layer)}</div>)}
       </div>
       <div className="club-category-copy"><small>Receitas em vídeo</small>
-        <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.label === 'Frozens' ? <><strong><AnimatedClubCount value={20} />+ frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} /> {category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
+        <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.label === 'Frozens' ? <><strong><AnimatedClubCount value={20} />+ frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
         <p>{category.subtitle}</p>
       </div>
     </div>
@@ -116,7 +119,6 @@ type Props = {
 };
 
 export default function ClubePublicLanding(props: Props) {
-  const [paused, setPaused] = useState(false);
   const pricing = useRef<HTMLElement>(null);
   const scrollToPricing = () => pricing.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
   useEffect(() => {
@@ -124,19 +126,18 @@ export default function ClubePublicLanding(props: Props) {
     document.title = 'Clube dos Drinkeros · Mais de mil receitas em vídeo';
     return () => { document.title = previous; };
   }, []);
-  return <div className={`club-public ${paused ? 'club-paused' : ''}`} ref={props.scrollRef}>
+  return <div className="club-public" ref={props.scrollRef}>
     {props.reveal}
-    <button type="button" className="club-floating-cta" onClick={scrollToPricing}><span>Quero entrar para o</span><strong>CLUBE</strong></button>
+    <button type="button" className="club-floating-cta" onClick={scrollToPricing}><span className="club-cta-copy"><span>Quero entrar para o</span><strong>CLUBE</strong></span><ArrowRight aria-hidden="true" /></button>
     <header className="club-public-hero">
       <p className="club-invite">Torne-se membro do</p>
       <h1><img className="club-logo" src="/club-landing/logo.png" alt="Clube dos Drinkeros" width="500" height="140" fetchPriority="high" /></h1>
       <p className="club-pocket">Mais de <strong><AnimatedClubCount value={1000} /></strong> receitas no seu bolso.</p>
       <div className="club-hero-strip" aria-hidden="true"><div><img src={drinksStrip} alt="" /><img src={drinksStrip} alt="" /></div></div>
       <p className="club-discover">Descubra o que espera por você</p>
-      <button className="club-motion-toggle" type="button" aria-pressed={paused} onClick={() => setPaused(value => !value)}>{paused ? 'Reproduzir capas' : 'Pausar capas'}</button>
       <ArrowDown className="club-down" aria-hidden="true" />
     </header>
-    {catalog.map(category => <CategoryScene key={category.id} category={category} paused={paused} />)}
+    {catalog.map(category => <CategoryScene key={category.id} category={category} />)}
     <section className="club-tools" aria-label="Organize seus drinks">
       <div><Play aria-hidden="true" /><h2>Veja como preparar</h2><p>Acompanhe o passo a passo das receitas em vídeo.</p></div>
       <div><Heart aria-hidden="true" /><h2>Salve suas escolhas</h2><p>Monte listas de favoritos para cada ocasião.</p></div>
