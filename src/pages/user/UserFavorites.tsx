@@ -7,6 +7,7 @@ import { useCollections, useCollectionRecipes, useDeleteCollection } from '@/hoo
 import { Button } from '@/components/ui/button';
 import { Heart, FolderOpen, Trash2, ChevronDown, ChevronUp, GraduationCap } from 'lucide-react';
 import { LessonCard, LessonCardSkeleton } from '@/components/user/LessonCard';
+import { CollectionShoppingList } from '@/components/user/CollectionShoppingList';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -237,7 +238,7 @@ const UserFavorites: React.FC = () => {
 
             return (
               <div key={col.id} className="space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <button
                     onClick={() => toggleExpand(col.id)}
                     className="flex items-center gap-2 text-left"
@@ -252,6 +253,8 @@ const UserFavorites: React.FC = () => {
                     )}
                   </button>
 
+                  <div className="flex items-center gap-2">
+                  {isExpanded && <CollectionShoppingList name={col.name} entries={colRecipes} />}
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
@@ -273,6 +276,7 @@ const UserFavorites: React.FC = () => {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
+                  </div>
                 </div>
 
                 {isExpanded && (
