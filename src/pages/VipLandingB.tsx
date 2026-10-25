@@ -313,7 +313,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
   // IntersectionObserver — exige 40% do card visível, sem rootMargin negativo
   // para não disparar antes do usuário chegar no preço.
   React.useEffect(() => {
-    if (!canRevealIntro || revealScheduled) return;
+    if (publicPage || !canRevealIntro || revealScheduled) return;
     const els = Array.from(priceCardEls.current);
     if (els.length === 0) return;
 
@@ -327,11 +327,11 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
     );
     els.forEach((el) => obs.observe(el));
     return () => obs.disconnect();
-  }, [canRevealIntro, revealScheduled, scheduleReveal, priceCardVersion]);
+  }, [publicPage, canRevealIntro, revealScheduled, scheduleReveal, priceCardVersion]);
 
   // Fallback scroll/touch — usa o mesmo critério estrito do rect-check.
   React.useEffect(() => {
-    if (!canRevealIntro || revealScheduled) return;
+    if (publicPage || !canRevealIntro || revealScheduled) return;
     const scroller = landingScrollRef.current;
     const onScroll = () => window.requestAnimationFrame(checkPriceCardInView);
     if (scroller) scroller.addEventListener('scroll', onScroll, { passive: true });
@@ -340,8 +340,32 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
       if (scroller) scroller.removeEventListener('scroll', onScroll);
       window.removeEventListener('scroll', onScroll);
     };
-  }, [canRevealIntro, revealScheduled, checkPriceCardInView, priceCardVersion]);
+  }, [publicPage, canRevealIntro, revealScheduled, checkPriceCardInView, priceCardVersion]);
 
+
+  // Public offer: the full price itself must stay visible for two seconds.
+  React.useEffect(() => {
+    if (!publicPage || !canRevealIntro) return;
+    const scroller=landingScrollRef.current;
+    const cancelPending=()=>{
+      if(revealTimerRef.current===null)return;
+      window.clearTimeout(revealTimerRef.current);revealTimerRef.current=null;
+      revealScheduledRef.current=false;setRevealScheduled(false);
+    };
+    const check=()=>{
+      const bounds=scroller?.getBoundingClientRect();
+      const top=Math.max(0,bounds?.top??0),bottom=Math.min(window.innerHeight,bounds?.bottom??window.innerHeight);
+      const visible=!document.hidden&&Array.from(priceCardEls.current).some(el=>{
+        if(!el.isConnected)return false;
+        const r=el.getBoundingClientRect();return r.height>0&&r.top>=top&&r.bottom<=bottom;
+      });
+      if(visible)scheduleReveal('public-price-visible');else cancelPending();
+    };
+    const observer=new IntersectionObserver(check,{root:scroller,threshold:[0,1]});
+    priceCardEls.current.forEach(el=>{if(el.isConnected)observer.observe(el)});
+    scroller?.addEventListener('scroll',check,{passive:true});window.addEventListener('resize',check);document.addEventListener('visibilitychange',check);check();
+    return()=>{observer.disconnect();scroller?.removeEventListener('scroll',check);window.removeEventListener('resize',check);document.removeEventListener('visibilitychange',check);cancelPending()};
+  },[publicPage,canRevealIntro,priceCardVersion,scheduleReveal]);
 
   // Ao fechar overlay → roll-down 197 → 97 + marca revealed no banco.
   const handleRevealClose = React.useCallback(async (claimed = true) => {

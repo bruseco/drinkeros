@@ -235,3 +235,17 @@
 @keyframes club-community-comment{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .club-community-demo:not([data-motion-active="true"]) *{animation-play-state:paused!important}
 @media(prefers-reduced-motion:reduce){.club-community-comments p{animation:none}.club-community-cursor{transition:none}}
+
+/* Apenas a textura varia de opacidade; o fundo chumbo nunca escurece. */
+.club-public{background:#141414}
+.club-brick-image{position:absolute;inset:0 0 auto;height:var(--club-brick-height,390px);background:url('../../assets/bg-clube.jpg') center top / auto 100% no-repeat;opacity:.7;pointer-events:none;z-index:0;animation:club-brick-opacity 13s linear infinite;animation-play-state:paused}
+.club-brick-image[data-motion-active="true"]{animation-play-state:running}
+@keyframes club-brick-opacity{0%,21%,23%,59%,62%,84%,100%{opacity:.7}21.4%,22.2%{opacity:.45}60%,61%{opacity:.25}60.5%{opacity:.65}85%{opacity:.5}86%{opacity:.7}}
+.club-video-eyebrow{display:flex;align-items:center;justify-content:center;gap:9px}.club-video-eyebrow svg{width:25px;height:18px;flex:none}
+.club-category-0{--category-base:#71cb55;--category-light:#bcfda5;--category-glow:#71cb5566}
+.club-category-1{--category-base:#f04b91;--category-light:#ffb6d6;--category-glow:#f04b9166}
+.club-category-2{--category-base:#36d9e3;--category-light:#b3fbff;--category-glow:#36d9e366}
+.club-category-4{--category-base:#ff963c;--category-light:#ffd0a7;--category-glow:#ff963c66}
+.club-category-0 .club-category-copy strong,.club-category-1 .club-category-copy strong,.club-category-2 .club-category-copy strong,.club-category-4 .club-category-copy strong{color:var(--category-base)}
+.club-category-0.club-highlight-complete .club-category-copy strong,.club-category-1.club-highlight-complete .club-category-copy strong,.club-category-2.club-highlight-complete .club-category-copy strong,.club-category-4.club-highlight-complete .club-category-copy strong{color:transparent;background-image:linear-gradient(110deg,var(--category-base) 0%,var(--category-light) 30%,#fff 48%,var(--category-light) 63%,var(--category-base) 100%);filter:drop-shadow(0 0 8px var(--category-glow))}
+@media(prefers-reduced-motion:reduce){.club-brick-image{animation:none;opacity:.7}}

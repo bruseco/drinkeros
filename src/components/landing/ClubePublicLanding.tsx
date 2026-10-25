@@ -151,7 +151,7 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
       </figure>
     ));
   }));
-  return <section className={`club-scene${category.id === 'syrups' ? ' club-syrups' : ''}${highlighted ? ' club-highlight-complete' : ''}`} ref={scene} data-motion-active={motionActive} aria-label={category.label}>
+  return <section className={`club-scene club-${category.id}${highlighted ? ' club-highlight-complete' : ''}`} ref={scene} data-motion-active={motionActive} aria-label={category.label}>
     <div className="club-stage">
       <div className="club-category-copy club-category-heading" ref={heading}>
         <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.id === 'latest-recipes' ? <>São as receitas <strong>mais criativas da internet</strong> no seu celular.</> : category.label === 'Frozens' ? <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} onComplete={handleCountComplete} /> Frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} onComplete={handleCountComplete} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
@@ -195,6 +195,8 @@ function PublicOfferBanner({ savings, deadline }: { savings: number; deadline: n
 }
 
 export default function ClubePublicLanding(props: Props) {
+  const brick=useRef<HTMLDivElement>(null);
+  const brickActive=useViewportMotion(brick);
   const [ctaVisible,setCtaVisible]=useState(false);
   const [hasScrolled,setHasScrolled]=useState(false);
   const hero=useRef<HTMLElement>(null);
@@ -276,6 +278,7 @@ export default function ClubePublicLanding(props: Props) {
     return () => { document.title = previous; };
   }, []);
   return <div className={`club-public${props.unlocked ? ' club-unlocked' : ''}`} ref={props.scrollRef}>
+    <div className="club-brick-image" ref={brick} data-motion-active={brickActive} aria-hidden="true"/>
     {props.reveal}
     {props.unlocked && <PublicOfferBanner savings={props.savings} deadline={props.offerDeadline} />}
     <button ref={floatingCta} type="button" className={`club-floating-cta${showFloatingCta ? ' club-cta-visible' : ''}`} aria-hidden={!showFloatingCta} tabIndex={showFloatingCta?0:-1} disabled={!showFloatingCta || (props.unlocked && props.loading)} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar p/ o</span><strong>CLUBE</strong></span><ClubButtonIcons /></button>
@@ -289,19 +292,19 @@ export default function ClubePublicLanding(props: Props) {
     </header>
     {landingCategories.map((category,index) => <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCoversReached={category.id === 'category-1' ? revealCta : undefined} />)}
     <section className="club-tools" aria-label="Organize seus drinks">
-      <article className="club-feature"><p className="club-eyebrow">Receitas em vídeo</p><h2>Assista como preparar.</h2><p>Todas as receitas foram realizadas e testadas.</p><ClubRecipeLoop /></article>
+      <article className="club-feature"><p className="club-eyebrow club-video-eyebrow">Receitas em vídeo <svg role="img" aria-label="YouTube" viewBox="0 0 28 20"><rect width="28" height="20" rx="5" fill="#ff0033"/><path d="m11 5 8 5-8 5Z" fill="#fff"/></svg></p><h2>Assista como preparar.</h2><p>Todas as receitas foram realizadas e testadas.</p><ClubRecipeLoop /></article>
       <article className="club-feature"><h2>Salve suas receitas.</h2><p>Monte listas de favoritos para cada ocasião.</p><ClubFavoriteDemo /></article>
       <article className="club-feature club-shopping-feature"><h2>Organize a festa.</h2><p>Monte sua lista e gere o checklist de compras para a sua festa.</p><ClubShoppingDemo /></article>
       <article className="club-feature club-community-feature"><h2>Comunidade.</h2><p>Compartilhe e descubra receitas com outros usuários.</p><ClubCommunityDemo /></article>
     </section>
     <section id="clube-pricing" className="club-public-pricing" ref={pricing}>
       <h2>Entre para o Clube!</h2>
-      <div className="club-offer" ref={props.registerPriceCard}>
+      <div className="club-offer">
         <p>Clube dos Drinkeros · Plano anual</p>
         <ul className="club-benefits">{[{text:'Acesso a mais de mil receitas em vídeo',value:47},{text:'Mais de 40 receitas de xaropes artesanais',value:53},{text:'Organizador de festas: crie listas de favoritos e gere listas de compras',value:97}].map(benefit => <li key={benefit.text}><Check aria-hidden="true" /><span>{benefit.text}</span><strong>R$ {benefit.value}</strong></li>)}</ul>
         {props.unlocked && <p className="club-comparison"><X aria-hidden="true" /><span>Quanto você pagaria</span><del>R$ {props.fullPrice}</del></p>}
         {!props.unlocked && <p className="club-total-label">Total</p>}
-        <div className="club-price"><span>R$</span> {props.price}</div>
+        <div className="club-price" ref={props.registerPriceCard}><span>R$</span> {props.price}</div>
         <p className="club-access-label">Acesso anual</p>
         <button ref={purchase} type="button" data-motion-active={purchaseVisible} className="club-purchase" disabled={props.loading} onClick={props.onSubscribe}><span className="club-purchase-copy">{props.loading ? 'Abrindo checkout…' : 'Quero entrar p/ o Clube'}</span><ClubButtonIcons /></button>
         <div className="club-payment-brands" aria-label="Meios de pagamento">
