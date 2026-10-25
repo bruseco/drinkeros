@@ -175,3 +175,9 @@
 .club-shopping-feature>h2,.club-shopping-feature>p{flex:none}
 .club-shopping-feature .club-shopping-demo{flex:1;min-height:0;overflow:hidden}
 .club-shopping-feature .club-shopping-scene{height:100%;overflow:hidden}
+
+/* Movimento curto só na seta da chamada junto ao preço. */
+.club-purchase .club-cta-icons>svg:first-child{animation:club-purchase-arrow 1s ease-in-out infinite;animation-play-state:paused}
+.club-purchase[data-motion-active="true"] .club-cta-icons>svg:first-child{animation-play-state:running}
+@keyframes club-purchase-arrow{0%,100%{transform:translateX(-2px)}50%{transform:translateX(3px)}}
+@media(prefers-reduced-motion:reduce){.club-purchase .club-cta-icons>svg:first-child{animation:none}}
