@@ -41,6 +41,8 @@ async function recordPurchase(supabase: any, p: {
   userWasCreated?: boolean;
 }) {
   if (!p.transactionId || !(p.amountPaid > 0)) return;
+  const { data: recorded } = await supabase.from("purchases").select("user_was_created").eq("gateway","mercado_pago").eq("transaction_id",p.transactionId).maybeSingle();
+  const buyerWasCreated = !!p.userWasCreated || recorded?.user_was_created === true;
   const { error } = await supabase.from("purchases").upsert(
     {
       user_id: p.userId,
@@ -55,7 +57,7 @@ async function recordPurchase(supabase: any, p: {
       metadata: p.metadata || {},
       buyer_email: p.buyerEmail ?? null,
       buyer_name: p.buyerName ?? null,
-      user_was_created: !!p.userWasCreated,
+      user_was_created: buyerWasCreated,
     },
     { onConflict: "gateway,transaction_id" },
   );
@@ -82,12 +84,13 @@ async function recordPurchase(supabase: any, p: {
       userId: p.userId,
       email: p.buyerEmail,
       fullName: p.buyerName ?? null,
-      wasCreated: !!p.userWasCreated,
+      wasCreated: buyerWasCreated,
       productName: p.productName,
       productType: p.productType,
       amountPaid: p.amountPaid,
       currency: p.currency || "BRL",
-      siteUrl: SITE_URL,
+      siteUrl: p.metadata?.guest_checkout_id ? "https://drinkeros.com" : SITE_URL,
+      secureSetup: !!p.metadata?.guest_checkout_id,
     });
   }
 
@@ -337,7 +340,7 @@ serve(async (req) => {
         console.error("[mp-webhook] authorized_payment fetch failed:", ap);
         return new Response(JSON.stringify({ ok: false }), { status: 200, headers: corsHeaders });
       }
-      if (ap?.status !== "approved") {
+      if (ap?.status !== "approved" && ap?.payment?.status !== "approved") {
         return new Response(JSON.stringify({ ok: true, status: ap?.status }), {
           status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -349,7 +352,14 @@ serve(async (req) => {
       });
       const pre = await preR.json();
       const externalRef = pre?.external_reference as string | undefined;
-      const payerEmail = pre?.payer_email;
+      const guestId = externalRef?.startsWith("club-guest:") ? externalRef.split(":")[1] : null;
+      let guest: any = null;
+      if (guestId) {
+        const result = await supabase.from("club_guest_checkouts").select("id,email,amount").eq("id",guestId).maybeSingle();
+        if(result.error || !result.data || Number(result.data.amount)!==Number(ap?.transaction_amount || pre?.auto_recurring?.transaction_amount)) throw new Error("Invalid guest subscription");
+        guest=result.data;
+      }
+      const payerEmail = guest?.email || pre?.payer_email;
       const payerName = pre?.payer_first_name || null;
       const knownUserId = externalRef?.startsWith("club:") ? (externalRef.split(":")[1] || null) : null;
 
@@ -414,9 +424,9 @@ serve(async (req) => {
         amountPaid: Number(ap?.transaction_amount || pre?.auto_recurring?.transaction_amount || 0),
         currency: "BRL",
         status: "approved",
-        transactionId: String(resourceId),
+        transactionId: guest && ap?.payment?.id ? String(ap.payment.id) : String(resourceId),
         niboOrderId: vipPaymentId ? `vip:${vipPaymentId}` : null,
-        metadata: { mp_preapproval_id: String(preapprovalId) },
+        metadata: { mp_preapproval_id: String(preapprovalId), ...(guest ? {guest_checkout_id:guest.id}: {}) },
         buyerEmail: payerEmail,
         buyerName: payerName,
         userWasCreated: resolved.wasCreated,
@@ -464,7 +474,7 @@ serve(async (req) => {
       typeof e === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.trim());
     const overrideEmail = isAdminReplay ? body?.override_email : null;
     const rawPayerEmail = payment?.payer?.email;
-    const payerEmail =
+    let payerEmail =
       (isValidEmail(overrideEmail) ? overrideEmail.trim().toLowerCase() : null) ||
       (isValidEmail(metadata?.buyer_email) ? String(metadata.buyer_email).trim().toLowerCase() : null) ||
       (isValidEmail(rawPayerEmail) ? String(rawPayerEmail).trim().toLowerCase() : null);
@@ -472,6 +482,16 @@ serve(async (req) => {
       console.warn("[mp-webhook] payer email invalid/masked:", rawPayerEmail);
     }
     const payerName = [payment?.payer?.first_name, payment?.payer?.last_name].filter(Boolean).join(" ") || null;
+
+    if(externalRef?.startsWith("club-guest:")) {
+      const guestId=externalRef.split(":")[1];
+      const result=await supabase.from("club_guest_checkouts").select("id,email,amount,method").eq("id",guestId).maybeSingle();
+      if(result.error || !result.data || Number(result.data.amount)!==Number(payment.transaction_amount))throw new Error("Invalid guest payment");
+      payerEmail=result.data.email;
+      metadata.product_type="club";metadata.product_id="club";metadata.product_slug="clube-anual";metadata.access_period_days=365;metadata.guest_checkout_id=guestId;
+      // Guest references never supply an authenticated user ID.
+      delete metadata.user_id;
+    }
 
     if (status !== "approved") {
       console.log("[mp-webhook] payment not approved, status:", status);
@@ -615,7 +635,7 @@ serve(async (req) => {
         status: "approved",
         transactionId: String(paymentId),
         niboOrderId: vipPaymentId ? `vip:${vipPaymentId}` : null,
-        metadata: { period_days: periodDays, payment_method: payment?.payment_method_id === "pix" ? "pix" : "card" },
+        metadata: { period_days: periodDays, payment_method: payment?.payment_method_id === "pix" ? "pix" : "card", ...(metadata.guest_checkout_id ? {guest_checkout_id:metadata.guest_checkout_id}: {}) },
         buyerEmail: payerEmail,
         buyerName: payerName,
         userWasCreated: resolved.wasCreated,

@@ -40,6 +40,7 @@ export interface SendPurchaseEmailsArgs {
   amountPaid: number;
   currency: string;
   siteUrl: string;
+  secureSetup?: boolean;
 }
 
 /**
@@ -111,7 +112,12 @@ export async function sendPurchaseEmails(supabase: any, args: SendPurchaseEmails
     const site = args.siteUrl.replace(/\/$/, '');
     // Tela de criação de conta: e-mail já preenchido, usuário só define a senha
     // e entra logado no app (validada pelo payment_id da compra).
-    const passwordSetupUrl = `${site}/criar-conta?pid=${encodeURIComponent(args.transactionId)}&email=${encodeURIComponent(args.email)}`;
+    let passwordSetupUrl = `${site}/criar-conta?pid=${encodeURIComponent(args.transactionId)}&email=${encodeURIComponent(args.email)}`;
+    if(args.secureSetup){
+      const generated=await supabase.auth.admin.generateLink({type:'recovery',email:args.email,options:{redirectTo:`${site}/reset-password?redirect=/clube/boas-vindas`}});
+      if(generated.error || !generated.data?.properties?.action_link)throw new Error('Não foi possível gerar o link seguro de acesso');
+      passwordSetupUrl=generated.data.properties.action_link;
+    }
     await invokeTemplate(
       supabase,
       'account-created',

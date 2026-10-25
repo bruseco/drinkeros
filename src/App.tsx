@@ -32,6 +32,7 @@ import BartenderABordo from "./pages/landing/BartenderABordo";
 import BebidaDecifrada from "./pages/landing/BebidaDecifrada";
 import EbookLanding from "./pages/landing/EbookLanding";
 import Checkout from "./pages/Checkout";
+import ClubWelcome from "./pages/ClubWelcome";
 import SSO from "./pages/SSO";
 import Migracao from "./pages/Migracao";
 import CompleteProfile from "./pages/CompleteProfile";
@@ -158,6 +159,7 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/pv-clube" element={<Navigate to="/pv-clube-b" replace />} />
             <Route path="/pv-clube-b" element={<VipLandingB />} />
+            <Route path="/clube/boas-vindas" element={<ClubWelcome />} />
             <Route path="/clube-receitas" element={<VipLandingB publicPage />} />
             <Route path="/vip" element={<Navigate to="/pv-clube-b" replace />} />
             {/* Legacy redirects (links antigos) */}

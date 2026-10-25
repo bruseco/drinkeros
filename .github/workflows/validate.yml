@@ -21,6 +21,7 @@ jobs:
       - run: node scripts/test-favorite-collections-db.mjs
       - run: node scripts/test-required-favorite-lists-db.mjs
       - run: node scripts/test-public-club-offer-db.mjs
+      - run: node scripts/test-club-guest-checkout-db.mjs
       - run: npx tsc --noEmit -p tsconfig.app.json
       - run: npm run build
       - uses: denoland/setup-deno@v2
@@ -28,3 +29,5 @@ jobs:
           deno-version: v2.x
       - run: deno check supabase/functions/rand-financial-closing/index.ts
       - run: deno check --node-modules-dir=auto --no-lock supabase/functions/create-mp-payment/index.ts supabase/functions/create-mp-subscription/index.ts
+
+      - run: deno check --node-modules-dir=auto --no-lock supabase/functions/club-guest-checkout/index.ts supabase/functions/mercadopago-webhook/index.ts supabase/functions/activate-purchase-account/index.ts

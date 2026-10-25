@@ -401,10 +401,6 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
     _chosenMethod: 'card' | 'pix' = 'card',
     chosenOffer?: 'intro' | 'full',
   ) => {
-    if (!user) {
-      navigate(`/signup?redirect=${publicPage ? '/clube-receitas' : '/pv-clube-b'}`);
-      return;
-    }
     if (loading) return;
     const offer: 'intro' | 'full' =
       chosenOffer ?? ((promo.isLoading || promo.isActive) ? 'intro' : 'full');

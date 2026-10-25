@@ -310,7 +310,7 @@ export default function ClubePublicLanding(props: Props) {
     <section className="club-faq"><h2>Ficou alguma dúvida?</h2>
       <details><summary>Preciso ter experiência?</summary><p>Você pode acompanhar o preparo em vídeo e escolher as receitas que combinam com os ingredientes que tem.</p></details>
       <details><summary>Posso usar no celular?</summary><p>Sim. Acesse o aplicativo pelo navegador do seu celular e salve suas receitas favoritas na sua conta.</p></details>
-      <details><summary>Como recebo acesso?</summary><p>Crie sua conta, conclua o pagamento e aguarde a confirmação. O acesso será vinculado à sua conta.</p></details>
+      <details><summary>Como recebo acesso?</summary><p>Conclua o pagamento e aguarde a confirmação. Depois, defina sua senha para entrar. Se já tiver conta, use seu login atual.</p></details>
     </section>
     <footer className="club-public-footer" ref={footer}>
       <div className="club-footer-main"><div className="club-footer-brand"><img src={drinkerosLogo} alt="Drinkeros" width="180" height="55" /></div>

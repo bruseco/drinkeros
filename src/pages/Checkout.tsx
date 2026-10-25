@@ -16,6 +16,8 @@ import { mpRejectionMessage } from "@/lib/mpErrors";
 import { purchaseDestination } from '@/lib/purchaseDestination';
 import { fetchPublicClubOffer, publicClubOfferToken } from '@/lib/publicClubOffer';
 
+import GuestClubCheckout from '@/components/landing/GuestClubCheckout';
+
 type ClubMethod = "card" | "pix";
 
 type ProductType = "course" | "ebook" | "combo" | "package" | "club";
@@ -64,6 +66,17 @@ interface PixData {
 let mpInitialized = false;
 
 export default function Checkout() {
+  const { productType, slug }=useParams();
+  const [guest,setGuest]=useState<boolean|null>(null);
+  useEffect(()=>{let live=true;supabase.auth.getSession().then(({data:{session}})=>{if(live)setGuest(!session)}).catch(()=>{if(live)setGuest(true)});return()=>{live=false}},[]);
+  if(productType==='club'&&slug==='clube-anual'){
+    if(guest===null)return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin"/></div>;
+    if(guest)return <GuestClubCheckout/>;
+  }
+  return <RegisteredCheckout/>;
+}
+
+function RegisteredCheckout() {
   const { productType, slug } = useParams<{ productType: ProductType; slug: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

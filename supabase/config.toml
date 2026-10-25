@@ -55,3 +55,6 @@ verify_jwt = true
 
   [functions.rand-upsell]
     verify_jwt = false
+
+  [functions.club-guest-checkout]
+    verify_jwt = false

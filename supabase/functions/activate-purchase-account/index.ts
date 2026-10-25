@@ -45,9 +45,11 @@ serve(async (req) => {
     // 1) Compra registrada pelo webhook
     const { data: purchase } = await supabase
       .from("purchases")
-      .select("user_id, buyer_email")
+      .select("user_id, buyer_email, metadata")
       .eq("transaction_id", paymentId)
       .maybeSingle();
+
+    if(purchase?.metadata?.guest_checkout_id)return json({error:"Use a confirmação da compra ou o link seguro enviado por e-mail.",code:"secure_setup_required"},403);
 
     let userId: string | null = purchase?.user_id ?? null;
     let purchaseEmail = norm(purchase?.buyer_email);
@@ -61,6 +63,7 @@ serve(async (req) => {
       });
       if (!mpResp.ok) return json({ error: "Pagamento não encontrado", code: "not_found" }, 404);
       const payment = await mpResp.json();
+      if(String(payment?.external_reference||'').startsWith('club-guest:'))return json({error:"Use o link seguro enviado por e-mail.",code:"secure_setup_required"},403);
       if (!["approved", "authorized"].includes(String(payment?.status))) {
         return json({ error: "Pagamento ainda não confirmado", code: "pending" }, 409);
       }

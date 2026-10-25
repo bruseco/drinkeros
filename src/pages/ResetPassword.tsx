@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,8 @@ const ResetPassword: React.FC = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [hasSession, setHasSession] = useState<boolean | null>(null);
   const navigate = useNavigate();
+  const [params]=useSearchParams();
+  const clubWelcome=params.get('redirect')==='/clube/boas-vindas';
   const { toast } = useToast();
 
   useEffect(() => {
@@ -123,7 +125,7 @@ const ResetPassword: React.FC = () => {
           </CardHeader>
           <CardContent className="flex justify-center">
             <Button asChild>
-              <Link to="/login">Fazer login</Link>
+              <Link to={clubWelcome?"/clube/boas-vindas":"/login"}>{clubWelcome?"Continuar para o Clube":"Fazer login"}</Link>
             </Button>
           </CardContent>
         </Card>

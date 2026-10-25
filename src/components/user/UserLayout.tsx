@@ -34,7 +34,11 @@ export const UserLayout: React.FC = () => {
         .eq('user_id', user.id)
         .maybeSingle();
       if (cancelled) return;
-      setPhoneCheck(data?.phone ? 'ok' : 'missing');
+      if(data?.phone){setPhoneCheck('ok');return;}
+      // A paid Club purchase must not be blocked by optional profile completion.
+      const {data:plan}=await supabase.rpc('get_user_plan_v2' as any,{_user_id:user.id});
+      if(cancelled)return;
+      setPhoneCheck(plan==='socio'||plan==='vitalicio'?'ok':'missing');
     })();
     return () => { cancelled = true; };
   }, [user]);
