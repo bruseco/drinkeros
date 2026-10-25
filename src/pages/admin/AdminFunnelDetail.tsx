@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import QuizAnswerMetrics from './QuizAnswerMetrics';
 import { usePageFunnel, sinceFromRange, type FunnelRange, type FunnelCounts } from '@/hooks/usePageFunnel';
 import { getFunnel } from '@/lib/funnels';
 import { useQuery } from '@tanstack/react-query';
@@ -155,6 +156,7 @@ const AdminFunnelDetail: React.FC = () => {
         )}
       </div>
       {funnel.key === 'rand' && <RandUpsellMetrics range={range} />}
+      {funnel.key === 'quiz' && <QuizAnswerMetrics range={range} />}
     </div>
   );
 };

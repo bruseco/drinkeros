@@ -201,6 +201,9 @@ export default function ClubePublicLanding(props: Props) {
   const [hasScrolled,setHasScrolled]=useState(false);
   const hero=useRef<HTMLElement>(null);
   const pocket=useRef<HTMLParagraphElement>(null);
+  const pocketMotion=useViewportMotion(pocket);
+  const benefits=useRef<HTMLUListElement>(null);
+  const benefitsMotion=useViewportMotion(benefits);
   useLayoutEffect(()=>{
     const scroller=hero.current?.closest<HTMLElement>('.club-public');
     if(!scroller||!hero.current||!pocket.current)return;
@@ -285,7 +288,7 @@ export default function ClubePublicLanding(props: Props) {
     <header className="club-public-hero" ref={hero}>
       <p className="club-invite">Torne-se membro do</p>
       <h1><img className="club-logo" src="/club-landing/logo.png" alt="Clube dos Drinkeros" width="500" height="140" fetchPriority="high" /></h1>
-      <p className="club-pocket" ref={pocket}>Mais de <strong><AnimatedClubCount value={1000} /></strong> receitas no seu bolso.</p>
+      <p className="club-pocket" ref={pocket} data-motion-active={pocketMotion}>Mais de <strong><AnimatedClubCount value={1000} /></strong> receitas no seu bolso.</p>
       <div ref={heroStrip} data-motion-active={heroMotion} className="club-hero-strip" aria-hidden="true"><div><img src={drinksStrip} alt="" /><img src={drinksStrip} alt="" /></div></div>
       <p className="club-discover">Descubra o que espera por você</p>
       <div className="club-down-slot" aria-hidden="true"><ArrowDown className={`club-down${hasScrolled ? '' : ' club-down-bouncing'}`} aria-hidden="true" /></div>
@@ -300,7 +303,7 @@ export default function ClubePublicLanding(props: Props) {
     <section id="clube-pricing" className="club-public-pricing" ref={pricing}>
       <h2>Entre para o Clube!</h2>
       <div className="club-offer">
-        <ul className="club-benefits">{[{text:'Acesso a mais de mil receitas em vídeo',value:47},{text:'Mais de 40 receitas de xaropes artesanais',value:53},{text:'Organizador de festas: crie listas de favoritos e gere listas de compras',value:97}].map(benefit => <li key={benefit.text}><Check aria-hidden="true" /><span>{benefit.text}</span><strong>R$ {benefit.value}</strong></li>)}</ul>
+        <ul className="club-benefits" ref={benefits} data-motion-active={benefitsMotion}>{[{text:'Acesso a mais de 1.000 receitas em vídeo',value:47},{text:'Mais de 40 receitas de xaropes artesanais',value:53},{text:'Organizador de festas: crie listas de favoritos e gere listas de compras',value:97}].map(benefit => <li key={benefit.text}><Check aria-hidden="true" /><span>{benefit.text.startsWith('Organizador de festas:')?<><b className="club-benefit-highlight">Organizador de festas</b>{benefit.text.slice('Organizador de festas'.length)}</>:benefit.text}</span><strong>R$ {benefit.value}</strong></li>)}</ul>
         {props.unlocked && <p className="club-comparison"><X aria-hidden="true" /><span>Quanto você pagaria</span><del>R$ {props.fullPrice}</del></p>}
         {!props.unlocked && <p className="club-total-label">Total</p>}
         <div className="club-price" ref={props.registerPriceCard}><span>R$</span> {props.price}</div>

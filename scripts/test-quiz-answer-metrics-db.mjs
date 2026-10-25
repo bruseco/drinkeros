@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {PGlite} from '@electric-sql/pglite';
+const db=new PGlite();
+await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE SCHEMA auth;CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql AS $$SELECT NULL::uuid$$;
+CREATE FUNCTION public.is_admin(uuid) RETURNS boolean LANGUAGE sql AS $$SELECT coalesce(current_setting('test.admin',true),'false')='true'$$;
+CREATE TABLE page_funnel_events(page_key text,event text,session_id text,metadata jsonb,created_at timestamptz DEFAULT now());
+INSERT INTO page_funnel_events VALUES('quiz','quiz_q1_answered','one','{"answer":"A"}',now()),('quiz','quiz_q1_answered','one','{"answer":"A"}',now()),('quiz','quiz_q1_answered','two','{"answer":"B"}',now()-interval '60 days'),('quiz','quiz_q4_answered','three','{"answer":"C"}',now()),('quiz','quiz_q2_answered','four','{}',now()),('rand','quiz_q1_answered','five','{"answer":"D"}',now()),('quiz','pageview','six','{}',now());`);
+await db.exec(await readFile(new URL('../supabase/migrations/20261025200000_quiz_answer_metrics.sql',import.meta.url),'utf8'));
+await db.exec('SET ROLE anon');await assert.rejects(()=>db.query('SELECT * FROM get_quiz_answer_metrics()'),/permission denied/);
+await db.exec('RESET ROLE;SET ROLE authenticated');await assert.rejects(()=>db.query('SELECT * FROM get_quiz_answer_metrics()'),/restrito/);
+await db.exec("SELECT set_config('test.admin','true',false)");
+const all=(await db.query('SELECT * FROM get_quiz_answer_metrics()')).rows;assert.equal(all.length,4);assert.equal(Number(all.find(r=>r.question==='q1'&&r.answer==='A').count),1);assert.ok(all.some(r=>r.question==='q4'&&r.answer==='C'));assert.ok(all.some(r=>r.question==='q2'&&r.answer===null));
+const recent=(await db.query("SELECT * FROM get_quiz_answer_metrics(now()-interval '30 days')")).rows;assert.equal(recent.length,3);assert.equal(recent.some(r=>r.answer==='B'),false);assert.equal(recent.some(r=>r.answer==='D'),false);
+console.log('Quiz aggregates: admin-only access, session deduplication, period filter, conditional question and unknown answers verified');await db.close();

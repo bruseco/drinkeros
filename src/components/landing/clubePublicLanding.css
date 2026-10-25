@@ -251,3 +251,8 @@
 @media(prefers-reduced-motion:reduce){.club-brick-image{animation:none;opacity:.7}}
 
 .club-community-comments .club-comment-right{--comment-from:40px;margin-left:18px}.club-community-comments .club-comment-left{margin-right:18px}.club-community-comments img{width:26px;height:26px;flex:none;border-radius:50%;object-fit:cover;display:block}
+
+.club-pocket>strong,.club-benefit-highlight{color:var(--club-gold);font-weight:700;text-shadow:0 0 7px #ffd68a55;animation:club-gold-glow 2.8s ease-in-out infinite;animation-play-state:paused}
+.club-pocket[data-motion-active="true"]>strong,.club-benefits[data-motion-active="true"] .club-benefit-highlight{animation-play-state:running}
+@keyframes club-gold-glow{0%,100%{text-shadow:0 0 7px #ffd68a55}50%{text-shadow:0 0 10px #ffd68ab3,0 0 20px #efb74066}}
+@media(prefers-reduced-motion:reduce){.club-pocket>strong,.club-benefit-highlight{animation:none}}
