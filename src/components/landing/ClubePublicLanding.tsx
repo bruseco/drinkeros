@@ -96,7 +96,7 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
       if (next !== ready) { ready = next; setCountReady(next); }
       const headingBounds = heading.current?.getBoundingClientRect();
       const coversBounds = covers.current?.getBoundingClientRect();
-      if (!ctaRevealed && headingBounds && coversBounds && headingBounds.bottom <= viewport.top && coversBounds.top + coversBounds.height / 2 <= viewport.top + viewport.height * .15) {
+      if (!ctaRevealed && headingBounds && coversBounds && headingBounds.bottom <= viewport.top && coversBounds.top + coversBounds.height * .75 <= viewport.top + viewport.height * .15) {
         ctaRevealed = true;
         onCoversReached?.();
       }
@@ -238,7 +238,7 @@ export default function ClubePublicLanding(props: Props) {
       <p className="club-discover">Descubra o que espera por você</p>
       <ArrowDown className={`club-down${hasScrolled ? '' : ' club-down-bouncing'}`} aria-hidden="true" />
     </header>
-    {catalog.map((category,index) => <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCoversReached={index===0?revealCta:undefined} />)}
+    {catalog.map((category,index) => <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCoversReached={category.id === 'category-1' ? revealCta : undefined} />)}
     <section className="club-tools" aria-label="Organize seus drinks">
       <div><Play aria-hidden="true" /><h2>Veja como preparar</h2><p>Acompanhe o passo a passo das receitas em vídeo.</p></div>
       <div><Heart aria-hidden="true" /><h2>Salve suas escolhas</h2><p>Monte listas de favoritos para cada ocasião.</p></div>
