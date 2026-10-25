@@ -145,3 +145,15 @@
 .club-banner-discount,.club-banner-expiry{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}.club-discount-banner .club-banner-money,.club-discount-banner .club-banner-timer{font-size:26px;line-height:1.15;font-weight:800;text-shadow:1px 2px 2px #0009}.club-discount-banner .club-banner-money{color:#fff200}.club-discount-banner .club-banner-timer{color:#fff}
 .club-floating-cta .club-cta-icons svg.club-door-filled,.club-purchase .club-cta-icons svg.club-door-filled{height:44px;width:33px}.club-purchase .club-cta-icons svg:first-child{width:16px;height:20px}.club-purchase{display:flex;align-items:center;justify-content:center;gap:12px;padding-top:8px;padding-bottom:8px}.club-purchase-copy{min-width:0;line-height:1.25}.club-unlocked .club-purchase{min-height:84px;padding-top:14px;padding-bottom:14px}.club-unlocked .club-public-pricing{scroll-margin-top:100px}
 .club-feature:nth-child(-n+2){min-height:0}
+
+/* Benefícios antes do preço e acabamento das chamadas da oferta pública. */
+.club-public{background-size:100% 100%,auto clamp(480px,65vw,900px)}
+.club-offer .club-benefits{list-style:none;padding:8px 0 20px;margin:0 0 20px}
+.club-benefits li{display:flex;align-items:flex-start;gap:12px;line-height:1.55;margin:18px 0}
+.club-benefits svg{width:21px;height:21px;flex:none;color:#a3e635;margin-top:1px;stroke-width:3}
+.club-floating-cta .club-cta-icons>svg:first-child,.club-purchase .club-cta-icons>svg:first-child{width:21px;height:24px}
+.club-purchase{position:relative;isolation:isolate}
+.club-purchase::after{content:"";position:absolute;inset:5px;border:1px solid #94702e;border-radius:inherit;pointer-events:none}
+.club-unlocked .club-purchase::after,.club-unlocked .club-floating-cta::after{border-color:#204d17}
+.club-floating-cta,.club-purchase{background-image:linear-gradient(115deg,transparent 32%,#ffffff55 48%,transparent 64%),linear-gradient(180deg,#fff0b5,#efb740);background-size:230% 100%,100% 100%}
+.club-unlocked .club-floating-cta,.club-unlocked .club-purchase{background-image:linear-gradient(115deg,transparent 32%,#ffffff26 48%,transparent 64%),linear-gradient(180deg,#568e34,#225c19);background-size:230% 100%,100% 100%}

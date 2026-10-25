@@ -18,32 +18,32 @@
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/7865a624-f53d-46a5-888a-85e5d7407961.webp"
       },
       {
-        "title": "Caipijarra de Morango",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/db5b0906-66b3-4fd3-a26c-af00f59306ab.webp"
+        "title": "Caipi Jarra de Carnaval",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-73f1d321-94b1-474a-be85-02c40376a49a.jpg"
       },
       {
-        "title": "Caipicitrus Vermelhas",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-30f8ad52-f04f-4c2b-809e-9a5a377a3bc8.jpg"
+        "title": "CaipiJack de Maracujá",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-916f881d-929e-475d-aea9-9dbd93c6a6d6.png"
       },
       {
-        "title": "Caipirão do Noel",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251380130-141.jpg"
-      },
-      {
-        "title": "CaipiGrinch",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251394181-558.png"
+        "title": "Caipiroska de Flores",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-9d589b37-d31d-4717-9029-0e409bb31118.jpg"
       },
       {
         "title": "Caipirinha de Melancia c/ Gengibre",
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-179e0ccb-e19a-4003-89da-5c2fb79ee80d.jpg"
       },
       {
-        "title": "Caipirinha de Espumante",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251393459-664.png"
+        "title": "Caipira Tônica",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-a2967875-66c0-46d0-bff6-9693bc13115e.jpg"
       },
       {
-        "title": "Caipi Jarra de Carnaval",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-73f1d321-94b1-474a-be85-02c40376a49a.jpg"
+        "title": "Caipicitrus Vermelhas",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-30f8ad52-f04f-4c2b-809e-9a5a377a3bc8.jpg"
+      },
+      {
+        "title": "Caipijarra de Morango",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/db5b0906-66b3-4fd3-a26c-af00f59306ab.webp"
       }
     ]
   },
@@ -78,20 +78,20 @@
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/7a6153b6-810a-493c-902b-d2023d49063f.webp"
       },
       {
+        "title": "Milkshake de Frutas Vermelhas",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-82db4380-3779-44df-bbfd-732ab845ca87.jpg"
+      },
+      {
+        "title": "Maluco Beleza",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-0ea0ecad-4773-4aed-9c2e-b4bc32ab103b.jpg"
+      },
+      {
+        "title": "FrappuJack",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-c275df8c-9871-40d5-ba1e-fabae8712a68.jpg"
+      },
+      {
         "title": "Double Malibu Colada",
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/7567ce63-00b0-46e8-8c42-c765226941da.webp"
-      },
-      {
-        "title": "Amarula Caramel Shake",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251391345-431.jpg"
-      },
-      {
-        "title": "Martini 3 Chocolates",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251389004-350.png"
-      },
-      {
-        "title": "Cremosinho de Natal",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251380502-181.jpg"
       }
     ]
   },
@@ -102,44 +102,44 @@
     "subtitle": "Prepare seus próprios xaropes e descubra novas combinações.",
     "recipes": [
       {
-        "title": "Xarope de Açúcar ",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/8a57e61e-848d-4b17-8156-db5eb3623540.webp"
+        "title": "Xarope de Hibisco",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/c9bfad17-4580-4b4c-98d9-26c42d1f9ac9.webp"
       },
       {
         "title": "Xarope de Framboesa",
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/9849145b-66a0-42dc-be76-4f7ec7f8f58f.webp"
       },
       {
-        "title": "Xarope de Hibisco",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/c9bfad17-4580-4b4c-98d9-26c42d1f9ac9.webp"
+        "title": "Xarope de Açúcar ",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/8a57e61e-848d-4b17-8156-db5eb3623540.webp"
       },
       {
-        "title": "Xarope de Alecrim C/ Limão",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-65bf45d6-bff3-4eb2-9707-d7821b01fd3e.jpg"
+        "title": "Xarope de Melancia",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-49a1ed30-e444-4955-b08d-f17642039e22.jpg"
+      },
+      {
+        "title": "Xarope de Manga c/ Pimenta Rosa",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-34cd87ea-a9d4-4390-9f5a-4d32d24e2f1b.jpg"
+      },
+      {
+        "title": "Xarope Love Spell",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-92ca04b7-0046-4d1d-9a39-eaf8d280c4c1.jpg"
+      },
+      {
+        "title": "Xarope de Pipoca",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-5e75a432-a188-4ff4-ab4d-5947d38b62fa.jpg"
+      },
+      {
+        "title": "Xarope Japonês",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-6338cf0d-0009-4b7b-98c6-cf5a991345b3.jpg"
       },
       {
         "title": "Xarope Curaçau Blue",
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-1a803b1f-6aea-40a6-9011-c164479cf476.jpg"
       },
       {
-        "title": "Xarope de Pêssego",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251395123-682.jpg"
-      },
-      {
-        "title": "Xarope de Goiabada",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251392742-536.jpg"
-      },
-      {
-        "title": "Xarope Black Ink",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251395128-679.jpg"
-      },
-      {
-        "title": "Xarope de Abacaxi",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251392739-528.jpg"
-      },
-      {
-        "title": "Xarope de Coco (Polpa Congelada)",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251392088-519.jpg"
+        "title": "Xarope Mexicano",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-993d8c46-8e1c-4a8c-9c22-550d32ded066.jpg"
       }
     ]
   },
@@ -158,12 +158,12 @@
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/0bbee930-bef1-467a-b160-ae61bf4dd157.webp"
       },
       {
-        "title": "Libido",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/4db2cef4-dc58-41c8-a1d7-0ef4d2b59b35.webp"
-      },
-      {
         "title": "Raspadinha Jack & Coke",
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/87d0fcdb-3fc5-46de-a577-f98b437694e7.webp"
+      },
+      {
+        "title": "Libido",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/4db2cef4-dc58-41c8-a1d7-0ef4d2b59b35.webp"
       },
       {
         "title": "Frosé",
@@ -174,20 +174,20 @@
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251396032-377.jpg"
       },
       {
+        "title": "Juru Frozen de Pitaya",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251395769-314.jpg"
+      },
+      {
+        "title": "Frozerita de Melancia",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251395220-640.jpg"
+      },
+      {
         "title": "Sake Frozen de Melancia",
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251395128-678.jpg"
       },
       {
         "title": "Jack Peach Frozen",
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251394632-669.jpg"
-      },
-      {
-        "title": "Melancita Amarela",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251394088-620.png"
-      },
-      {
-        "title": "Frozerita de Melancia",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251395220-640.jpg"
       }
     ]
   },
@@ -226,16 +226,16 @@
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/0f98e228-9c18-4ed6-ac9f-6ce4025f8378.webp"
       },
       {
-        "title": "Cuba Libre",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/a0b4a385-c3e4-426e-a3aa-cfc9bdc7b696.webp"
+        "title": "Mojito de Maracujá",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-c6dafc52-fc89-4893-8477-011b0e28d2d9.png"
       },
       {
-        "title": "Jack Cherry Coke",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775242293637-3.jpg"
+        "title": "New York Sour",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-7f9923aa-4095-4d9f-b860-3153404af1ef.png"
       },
       {
-        "title": "Cosmopolitan (Rand)",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251395139-698.jpg"
+        "title": "Caipiroska de Flores",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-9d589b37-d31d-4717-9029-0e409bb31118.jpg"
       }
     ]
   },
@@ -254,10 +254,6 @@
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/4323c512-040a-4541-b3b5-7d3f75360012.webp"
       },
       {
-        "title": "Shot Pé de Moleque",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/203fa393-7622-430b-98a3-3e2e26301a01.webp"
-      },
-      {
         "title": "Mini Caipirinhas ",
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/2026a496-15e6-4091-b379-f17fe8fb05af.webp"
       },
@@ -268,6 +264,10 @@
       {
         "title": "Shots de Nutella",
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/97ecc461-c58e-4d41-ac8c-f34cbff15fe3.webp"
+      },
+      {
+        "title": "Shot Pé de Moleque",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/203fa393-7622-430b-98a3-3e2e26301a01.webp"
       },
       {
         "title": "Banoffe",
@@ -282,8 +282,8 @@
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-6dad118e-adad-4f24-b181-627d8fde70c6.png"
       },
       {
-        "title": "Rainbow Shot",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251394624-630.jpg"
+        "title": "Suruba",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-d2430363-4d5d-4138-bb27-c9bdacd3f4f3.png"
       }
     ]
   }

@@ -359,6 +359,12 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
     trackFunnel('clube-b', 'offer_1_revealed', { amountCents: effectivePromoPrice * 100, userId: user?.id ?? null });
   }, [promo, user?.id, effectivePromoPrice]);
 
+  // Na página pública, revela no próprio cartão, mantendo a confirmação
+  // e o prazo da oferta no servidor. O fluxo interno mantém seu overlay.
+  useEffect(() => {
+    if (publicPage && revealOpen) void handleRevealClose();
+  }, [publicPage, revealOpen, handleRevealClose]);
+
   useViewContent({
     key: 'clube-dos-drinkeros',
     content_name: 'Clube dos Drinkeros',
@@ -452,7 +458,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
     offerDeadline={publicBackendReady ? promo.eligibleUntilMs : 0}
     loading={loading || promo.isLoading}
     onSubscribe={() => handleSubscribe('card')}
-    reveal={<ClubeDiscountReveal open={revealOpen} onClose={handleRevealClose} newVisitor />}
+    reveal={null}
   />;
 
   return (

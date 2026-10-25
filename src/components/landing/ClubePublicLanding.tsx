@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowDown, ArrowRight } from 'lucide-react';
+import { ArrowDown, ArrowRight, Check } from 'lucide-react';
 import drinksStrip from '@/assets/1000-drinks.jpg';
 import drinkerosLogo from '@/assets/logotipo-drinkeros.png';
 import { Link } from 'react-router-dom';
@@ -261,7 +261,7 @@ export default function ClubePublicLanding(props: Props) {
   return <div className={`club-public${props.unlocked ? ' club-unlocked' : ''}`} ref={props.scrollRef}>
     {props.reveal}
     {props.unlocked && <PublicOfferBanner savings={props.savings} deadline={props.offerDeadline} />}
-    <button ref={floatingCta} type="button" className={`club-floating-cta${showFloatingCta ? ' club-cta-visible' : ''}`} aria-hidden={!showFloatingCta} tabIndex={showFloatingCta?0:-1} disabled={!showFloatingCta || (props.unlocked && props.loading)} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar para o</span><strong>CLUBE</strong></span><ClubButtonIcons /></button>
+    <button ref={floatingCta} type="button" className={`club-floating-cta${showFloatingCta ? ' club-cta-visible' : ''}`} aria-hidden={!showFloatingCta} tabIndex={showFloatingCta?0:-1} disabled={!showFloatingCta || (props.unlocked && props.loading)} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar p/ o</span><strong>CLUBE</strong></span><ClubButtonIcons /></button>
     <header className="club-public-hero" ref={hero}>
       <p className="club-invite">Torne-se membro do</p>
       <h1><img className="club-logo" src="/club-landing/logo.png" alt="Clube dos Drinkeros" width="500" height="140" fetchPriority="high" /></h1>
@@ -277,14 +277,14 @@ export default function ClubePublicLanding(props: Props) {
       <article className="club-feature"><h2>Organize a festa.</h2><p>Monte sua lista e gere o checklist de compras para a sua festa.</p><ClubShoppingDemo /></article>
     </section>
     <section id="clube-pricing" className="club-public-pricing" ref={pricing}>
-      <p className="club-eyebrow">Seu próximo drink começa aqui</p><h2>Entre para o Clube.</h2>
+      <h2>Entre para o Clube.</h2>
       <div className="club-offer" ref={props.registerPriceCard}>
         <p>Clube dos Drinkeros · Plano anual</p>
+        <ul className="club-benefits">{['Acesso a mais de mil receitas em vídeo', 'Mais de 40 receitas de xaropes artesanais', 'Organizador de festas: crie listas de favoritos e gere listas de compras'].map(benefit => <li key={benefit}><Check aria-hidden="true" /><span>{benefit}</span></li>)}</ul>
         {props.unlocked && <p className="club-old-price">De R$ {props.fullPrice}</p>}
         <div className="club-price"><span>R$</span> {props.price}<small>/ ano</small></div>
         {props.unlocked && <p className="club-saving">Você economiza R$ {props.savings} por ano enquanto sua assinatura no cartão permanecer ativa.</p>}
-        <ul><li>Acesso às receitas em vídeo do Clube</li><li>Xaropes artesanais e novas combinações</li><li>Listas de favoritos e listas de compras</li></ul>
-        <button ref={purchase} type="button" className="club-purchase" disabled={props.loading} onClick={props.onSubscribe}><span className="club-purchase-copy">{props.loading ? 'Abrindo checkout…' : 'Quero entrar para o Clube'}</span><ClubButtonIcons /></button>
+        <button ref={purchase} type="button" className="club-purchase" disabled={props.loading} onClick={props.onSubscribe}><span className="club-purchase-copy">{props.loading ? 'Abrindo checkout…' : 'Quero entrar p/ o Clube'}</span><ClubButtonIcons /></button>
         <div className="club-payment-brands" aria-label="Meios de pagamento">
           {[[payVisa, 'Visa'], [payMaster, 'Mastercard'], [payApple, 'Apple Pay'], [payGoogle, 'Google Pay'], [payPix, 'Pix']].map(([src, alt]) => <span key={alt}><img src={src} alt={alt} width="42" height="20" /></span>)}
         </div>
