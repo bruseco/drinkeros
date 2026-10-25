@@ -16,6 +16,7 @@ import catalog from './clubLandingCatalog.json';
 import latestRecipes from './clubLatestCovers.json';
 const landingCategories = [...catalog, latestRecipes];
 import './clubePublicLanding.css';
+import { useViewportMotion } from './useViewportMotion';
 import { useIntroCountdown } from '@/hooks/useClubeIntroOffer';
 
 export function AnimatedClubCount({ value, className = '', start = true, onComplete }: { value: number; className?: string; start?: boolean; onComplete?: () => void }) {
@@ -63,6 +64,7 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
   const heading = useRef<HTMLDivElement>(null);
   const subtitle = useRef<HTMLParagraphElement>(null);
   const covers = useRef<HTMLDivElement>(null);
+  const motionActive = useViewportMotion(covers);
   const [countReady, setCountReady] = useState(false);
   const [highlighted,setHighlighted]=useState(false);
   const handleCountComplete=React.useCallback(()=>{setHighlighted(true)},[]);
@@ -120,26 +122,20 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
     });
   };
   useEffect(() => {
-    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let visible = false;
-    let previous = 0;
-    let frame = 0;
-    const tick = (time: number) => {
-      const dt = previous ? Math.min(time - previous, 60) / 1000 : 0;
-      previous = time;
-      if (!media.matches && !dragging.current) move(dt * SPEEDS[0] * direction);
-      if (visible) frame = requestAnimationFrame(tick);
+    if(!motionActive)return;
+    let previous=0,frame=0;
+    const tick=(time:number)=>{
+      const dt=previous?Math.min(time-previous,60)/1000:0;
+      previous=time;
+      if(!dragging.current)move(dt*SPEEDS[0]*direction);
+      frame=requestAnimationFrame(tick);
     };
-    const observer = new IntersectionObserver(entries => {
-      const next = entries.some(entry => entry.isIntersecting);
-      if (next === visible) return;
-      visible = next;
+    frame=requestAnimationFrame(tick);
+    return()=>{
       cancelAnimationFrame(frame);
-      if (visible) { previous = 0; frame = requestAnimationFrame(tick); }
-    }, { threshold: .02 });
-    if (scene.current) observer.observe(scene.current);
-    return () => { observer.disconnect(); cancelAnimationFrame(frame); };
-  }, [direction, onCoversReached]);
+      surfaces.current.forEach((layer,index)=>{if(layer)layer.style.transform=`translateX(${-offsets.current[index]}px)`});
+    };
+  },[motionActive,direction]);
   const cards = (layer: number) => [0, 1].flatMap(cycle => category.recipes.flatMap((recipe, index) => {
     const [y, scale, opacity, rotation] = DEPTHS[index % DEPTHS.length];
     if (layer < 2 && (scale >= .95 ? 0 : 1) !== layer) return [];
@@ -154,7 +150,7 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
       </figure>
     ));
   }));
-  return <section className={`club-scene${category.id === 'syrups' ? ' club-syrups' : ''}${highlighted ? ' club-highlight-complete' : ''}`} ref={scene} aria-label={category.label}>
+  return <section className={`club-scene${category.id === 'syrups' ? ' club-syrups' : ''}${highlighted ? ' club-highlight-complete' : ''}`} ref={scene} data-motion-active={motionActive} aria-label={category.label}>
     <div className="club-stage">
       <div className="club-category-copy club-category-heading" ref={heading}>
         <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.id === 'latest-recipes' ? <>São as receitas <strong>mais criativas da internet</strong> no seu celular.</> : category.label === 'Frozens' ? <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} onComplete={handleCountComplete} /> Frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} onComplete={handleCountComplete} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
@@ -194,6 +190,8 @@ export default function ClubePublicLanding(props: Props) {
   const [ctaVisible,setCtaVisible]=useState(false);
   const [hasScrolled,setHasScrolled]=useState(false);
   const hero=useRef<HTMLElement>(null);
+  const heroStrip=useRef<HTMLDivElement>(null);
+  const heroMotion=useViewportMotion(heroStrip);
   useEffect(()=>{
     const scroller=hero.current?.closest('.club-public');
     if(!scroller)return;
@@ -248,12 +246,12 @@ export default function ClubePublicLanding(props: Props) {
   return <div className={`club-public${props.unlocked ? ' club-unlocked' : ''}`} ref={props.scrollRef}>
     {props.reveal}
     {props.unlocked && <PublicOfferBanner savings={props.savings} deadline={props.offerDeadline} />}
-    <button ref={floatingCta} type="button" className={`club-floating-cta${showFloatingCta ? ' club-cta-visible' : ''}`} aria-hidden={!showFloatingCta} tabIndex={showFloatingCta?0:-1} disabled={!showFloatingCta || (props.unlocked && props.loading)} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar para o</span><strong>CLUBE</strong></span><span className="club-cta-icons" aria-hidden="true"><ArrowRight /><svg className="club-door-filled" viewBox="0 0 24 32" fill="currentColor"><path fillRule="evenodd" d="M2 3h13v2H4v24h4v2H0v-2h2V3Zm6-2 14 4v26l-14-4V1Zm4 13a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Z" /></svg></span></button>
+    <button ref={floatingCta} type="button" className={`club-floating-cta${showFloatingCta ? ' club-cta-visible' : ''}`} aria-hidden={!showFloatingCta} tabIndex={showFloatingCta?0:-1} disabled={!showFloatingCta || (props.unlocked && props.loading)} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar para o</span><strong>CLUBE</strong></span><span className="club-cta-icons" aria-hidden="true"><ArrowRight /><svg className="club-door-filled" viewBox="0 0 32 40" fill="currentColor"><path fillRule="evenodd" d="M5 3h22v34H5V3Zm3 3v28h16V6H8Zm2 2h12v24H10V8Zm3 11a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" /></svg></span></button>
     <header className="club-public-hero" ref={hero}>
       <p className="club-invite">Torne-se membro do</p>
       <h1><img className="club-logo" src="/club-landing/logo.png" alt="Clube dos Drinkeros" width="500" height="140" fetchPriority="high" /></h1>
       <p className="club-pocket">Mais de <strong><AnimatedClubCount value={1000} /></strong> receitas no seu bolso.</p>
-      <div className="club-hero-strip" aria-hidden="true"><div><img src={drinksStrip} alt="" /><img src={drinksStrip} alt="" /></div></div>
+      <div ref={heroStrip} data-motion-active={heroMotion} className="club-hero-strip" aria-hidden="true"><div><img src={drinksStrip} alt="" /><img src={drinksStrip} alt="" /></div></div>
       <p className="club-discover">Descubra o que espera por você</p>
       <div className="club-down-slot" aria-hidden="true"><ArrowDown className={`club-down${hasScrolled ? '' : ' club-down-bouncing'}`} aria-hidden="true" /></div>
     </header>

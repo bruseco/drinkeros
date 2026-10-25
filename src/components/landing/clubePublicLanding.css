@@ -130,3 +130,12 @@
 .club-floating-cta{min-width:214px}.club-floating-cta .club-cta-icons .club-door-filled{height:42px;width:31px}.club-floating-cta .club-cta-icons>svg:first-child{height:20px}
 @media(max-width:600px){.club-feature .club-recipe-loop{width:50vw}.club-footer-brand img{width:clamp(52px,calc(100vw - 290px),120px)}}
 @media(max-width:360px){.club-feature{padding-left:18px;padding-right:18px}.club-feature .club-shopping-scene{padding-left:0;padding-right:0}}
+/* Nenhum looping decorativo continua ativo fora da área visível. */
+.club-hero-strip>div{animation-play-state:paused}.club-hero-strip[data-motion-active="true"]>div{animation-play-state:running}
+.club-scene .club-depth-layer{will-change:auto}.club-scene[data-motion-active="true"] .club-depth-layer{will-change:transform}
+.club-unlocked .club-floating-cta:not(.club-cta-visible){animation-play-state:paused}
+.club-favorite-demo:not([data-motion-active="true"]) *,.club-shopping-demo:not([data-motion-active="true"]) *{animation-play-state:paused!important}
+.club-scene:not([data-motion-active="true"]) .club-category-copy strong{animation-play-state:paused}
+
+.club-floating-cta .club-cta-icons .club-door-filled{height:48px;width:38px}
+.club-floating-cta .club-cta-icons svg.club-door-filled{height:48px;width:38px}

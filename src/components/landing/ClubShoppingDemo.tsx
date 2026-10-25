@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useViewportMotion } from './useViewportMotion';
 import { Check, Loader2, MousePointer2, ShoppingCart, Users, Wine } from 'lucide-react';
 import { makeShoppingPlan, shoppingQuantity } from '@/lib/shoppingPlan';
 
@@ -13,7 +14,7 @@ const items = [...plan.items].sort((a,b) => order.indexOf(a.name)-order.indexOf(
 
 export default function ClubShoppingDemo() {
   const frame = useRef<HTMLElement>(null);
-  const [visible,setVisible] = useState(false);
+  const visible = useViewportMotion(frame);
   const [reduced,setReduced] = useState(false);
   const [elapsed,setElapsed] = useState(0);
   const [point,setPoint] = useState({left:0,top:0});
@@ -21,8 +22,7 @@ export default function ClubShoppingDemo() {
     const element=frame.current;if(!element)return;
     const media=window.matchMedia('(prefers-reduced-motion: reduce)');
     const sync=()=>setReduced(media.matches);sync();media.addEventListener('change',sync);
-    const observer=new IntersectionObserver(([entry])=>setVisible(entry.isIntersecting),{root:element.closest('.club-public'),threshold:.15});
-    observer.observe(element);return()=>{observer.disconnect();media.removeEventListener('change',sync)};
+    return()=>{media.removeEventListener('change',sync)};
   },[]);
   useEffect(()=>{
     if(reduced){setElapsed(18000);return}if(!visible)return;
@@ -42,7 +42,7 @@ export default function ClubShoppingDemo() {
     };
     update();const observer=new ResizeObserver(update);observer.observe(element);return()=>observer.disconnect();
   },[phase,cursor,checked]);
-  return <figure className="club-shopping-demo" ref={frame} data-phase={phase} aria-label="Demonstração: lista de compras de caipirinha para 5 pessoas, 3 drinks por pessoa">
+  return <figure className="club-shopping-demo" ref={frame} data-motion-active={visible} data-phase={phase} aria-label="Demonstração: lista de compras de caipirinha para 5 pessoas, 3 drinks por pessoa">
     <div className="club-shopping-scene" aria-hidden="true"><span className="club-demo-label">Demonstração</span>
       {phase==='list'&&<div className="club-shopping-start"><span className="club-demo-dialog-title">Festa com caipirinha</span><div className="club-shopping-recipe"><Wine size={28}/><div><strong>Caipirinha</strong><span>Receita selecionada</span></div></div><div className="club-shopping-action"><ShoppingCart size={16}/> Gerar lista de compras</div></div>}
       {(phase==='people'||phase==='drinks')&&<div className="club-shopping-question"><span className="club-shopping-step">Etapa {phase==='people'?'1':'2'} de 2</span><span className="club-demo-dialog-title">{phase==='people'?'Quantas pessoas vão participar?':'Quantos drinks por pessoa?'}</span><div className="club-shopping-number">{phase==='people'?(elapsed>3600?'5':''):(elapsed>6300?'3':'')}</div><div className="club-shopping-action">{phase==='people'?'Continuar':'Gerar lista de compras'}</div></div>}

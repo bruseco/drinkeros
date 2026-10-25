@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useViewportMotion } from './useViewportMotion';
 import { Check, FolderPlus, Heart, MousePointer2, Plus } from 'lucide-react';
 
 const LIST_NAME = 'Jantar mexicano';
@@ -7,7 +8,7 @@ const COVER = 'https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public
 /** Decorative animation only: never authenticates or mutates real favorites. */
 export default function ClubFavoriteDemo() {
   const frame = useRef<HTMLElement>(null);
-  const [visible, setVisible] = useState(false);
+  const visible = useViewportMotion(frame);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [point,setPoint] = useState({left:0,top:0});
@@ -17,9 +18,7 @@ export default function ClubFavoriteDemo() {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
     const sync = () => setReducedMotion(media.matches);
     sync(); media.addEventListener('change', sync);
-    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { root: element.closest('.club-public'), threshold: .15 });
-    observer.observe(element);
-    return () => { observer.disconnect(); media.removeEventListener('change', sync); };
+    return () => { media.removeEventListener('change', sync); };
   }, []);
   useEffect(() => {
     if (reducedMotion) { setElapsed(10000); return; }
@@ -49,7 +48,7 @@ export default function ClubFavoriteDemo() {
     return()=>observer.disconnect();
   },[cursor,phase]);
   const click = (elapsed >= 2400 && elapsed < 2700) || (elapsed >= 3550 && elapsed < 3800) || (elapsed >= 8150 && elapsed < 8450);
-  return <figure className="club-favorite-demo" ref={frame} data-phase={phase} aria-label="Demonstração: salvar Margarita Tropicante na lista Jantar mexicano">
+  return <figure className="club-favorite-demo" ref={frame} data-motion-active={visible} data-phase={phase} aria-label="Demonstração: salvar Margarita Tropicante na lista Jantar mexicano">
     <div className="club-demo-scene" aria-hidden="true">
       <span className="club-demo-label">Demonstração</span>
       <div className="club-demo-card"><img src={COVER} alt="" loading="lazy" /><div className="club-demo-card-info"><span>Margarita Tropicante</span><span className={`club-demo-heart${saved ? ' is-saved' : ''}`}><Heart fill={saved ? 'currentColor' : 'none'} /></span></div></div>
