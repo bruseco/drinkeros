@@ -118,3 +118,7 @@
 .club-favorite-demo svg,.club-shopping-demo svg{margin-bottom:0}.club-shopping-demo .club-shopping-estimate{font-size:9px;line-height:1.4}
 /* Equivale à imagem a 70%, sem alterar a opacidade dos textos e botões. */
 .club-public{background-image:linear-gradient(#1414144d,#1414144d),url('../../assets/bg-clube.jpg');background-size:100% 100%,100% auto}
+
+/* Seta em destaque na abertura; espaço reservado evita saltos ao encolher. */
+.club-down-slot{height:48px;margin:20px auto 0;display:flex;justify-content:center;align-items:center}.club-down-slot .club-down{margin:0;width:24px;height:24px;filter:none;transition:width .35s ease,height .35s ease,filter .35s ease}.club-down-slot .club-down-bouncing{width:48px;height:48px;filter:drop-shadow(0 0 5px #ffd68acc) drop-shadow(0 0 14px #e7ac3680)}
+@media(prefers-reduced-motion:reduce){.club-down-slot .club-down{transition:none}}

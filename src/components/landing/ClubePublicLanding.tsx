@@ -255,7 +255,7 @@ export default function ClubePublicLanding(props: Props) {
       <p className="club-pocket">Mais de <strong><AnimatedClubCount value={1000} /></strong> receitas no seu bolso.</p>
       <div className="club-hero-strip" aria-hidden="true"><div><img src={drinksStrip} alt="" /><img src={drinksStrip} alt="" /></div></div>
       <p className="club-discover">Descubra o que espera por você</p>
-      <ArrowDown className={`club-down${hasScrolled ? '' : ' club-down-bouncing'}`} aria-hidden="true" />
+      <div className="club-down-slot" aria-hidden="true"><ArrowDown className={`club-down${hasScrolled ? '' : ' club-down-bouncing'}`} aria-hidden="true" /></div>
     </header>
     {landingCategories.map((category,index) => <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCoversReached={category.id === 'category-1' ? revealCta : undefined} />)}
     <section className="club-tools" aria-label="Organize seus drinks">
