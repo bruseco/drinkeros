@@ -238,10 +238,10 @@
 
 /* Apenas a textura varia de opacidade; o fundo chumbo nunca escurece. */
 .club-public{background:#141414}
-.club-brick-image{position:absolute;inset:0 0 auto;height:var(--club-brick-height,390px);background:url('../../assets/bg-clube.jpg') center top / auto 100% no-repeat;opacity:.7;pointer-events:none;z-index:0;animation:club-brick-opacity 13s linear infinite;animation-play-state:paused}
+.club-brick-image{position:absolute;inset:0 0 auto;height:var(--club-brick-height,390px);background:url('../../assets/bg-clube.jpg') center top / auto 100% no-repeat;opacity:.7;pointer-events:none;z-index:0;animation:club-brick-opacity 7s linear infinite;animation-play-state:paused}
 .club-brick-image[data-motion-active="true"]{animation-play-state:running}
 @keyframes club-brick-opacity{0%,21%,23%,59%,62%,84%,100%{opacity:.7}21.4%,22.2%{opacity:.45}60%,61%{opacity:.25}60.5%{opacity:.65}85%{opacity:.5}86%{opacity:.7}}
-.club-video-eyebrow{display:flex;align-items:center;justify-content:center;gap:9px}.club-video-eyebrow svg{width:25px;height:18px;flex:none}
+.club-video-eyebrow{display:flex;align-items:center;justify-content:center;gap:9px}.club-video-eyebrow svg{width:25px;height:18px;flex:none;margin:0;display:block}
 .club-category-0{--category-base:#71cb55;--category-light:#bcfda5;--category-glow:#71cb5566}
 .club-category-1{--category-base:#f04b91;--category-light:#ffb6d6;--category-glow:#f04b9166}
 .club-category-2{--category-base:#36d9e3;--category-light:#b3fbff;--category-glow:#36d9e366}
