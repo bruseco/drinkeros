@@ -18,5 +18,5 @@ it('exposes the three requested stages under a separate Club funnel',()=>{
 });
 
 it('announces the R$110 discount before the gift is claimed',()=>{
- render(<ClubeDiscountReveal open onClose={vi.fn()} newVisitor savings={110}/>);expect(screen.getByText('Você ganhou R$ 110 de desconto')).toBeVisible();expect(screen.queryByText('O que tem dentro?')).toBeNull();expect(screen.getByRole('button',{name:'Pegar desconto'})).toBeVisible();
+ render(<ClubeDiscountReveal open onClose={vi.fn()} newVisitor savings={110}/>);expect(screen.getByText('R$ 110 de desconto')).toBeVisible();expect(screen.queryByText('O que tem dentro?')).toBeNull();expect(screen.getByRole('button',{name:'Pegar desconto'})).toBeVisible();
 });

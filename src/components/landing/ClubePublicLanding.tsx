@@ -199,8 +199,6 @@ export default function ClubePublicLanding(props: Props) {
   const [hasScrolled,setHasScrolled]=useState(false);
   const hero=useRef<HTMLElement>(null);
   const pocket=useRef<HTMLParagraphElement>(null);
-  const atmosphere=useRef<HTMLDivElement>(null);
-  const atmosphereActive=useViewportMotion(atmosphere);
   useLayoutEffect(()=>{
     const scroller=hero.current?.closest<HTMLElement>('.club-public');
     if(!scroller||!hero.current||!pocket.current)return;
@@ -278,10 +276,6 @@ export default function ClubePublicLanding(props: Props) {
     return () => { document.title = previous; };
   }, []);
   return <div className={`club-public${props.unlocked ? ' club-unlocked' : ''}`} ref={props.scrollRef}>
-    <div ref={atmosphere} className="club-brick-atmosphere" data-motion-active={atmosphereActive} aria-hidden="true">
-      <div className="club-lamp-flicker"/>
-      <div className="club-lamp-motes">{Array.from({length:8},(_,index)=><i key={index} style={{left:`calc(50% + ${(index%4-1.5)*23}px)`,top:`${10+(index*11)%25}%`,animationDuration:`${3.1+(index%4)*.7}s`,animationDelay:`-${index*.53}s`}}/>)}</div>
-    </div>
     {props.reveal}
     {props.unlocked && <PublicOfferBanner savings={props.savings} deadline={props.offerDeadline} />}
     <button ref={floatingCta} type="button" className={`club-floating-cta${showFloatingCta ? ' club-cta-visible' : ''}`} aria-hidden={!showFloatingCta} tabIndex={showFloatingCta?0:-1} disabled={!showFloatingCta || (props.unlocked && props.loading)} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar p/ o</span><strong>CLUBE</strong></span><ClubButtonIcons /></button>

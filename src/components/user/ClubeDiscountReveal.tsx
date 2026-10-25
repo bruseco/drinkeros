@@ -270,7 +270,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose, newVisitor
             className="text-white text-2xl sm:text-3xl font-light tracking-wide"
             style={{ animation: 'clube-fade-up 520ms ease 480ms both' }}
           >
-            {newVisitor ? `Você ganhou R$ ${discountAmount} de desconto` : 'O que tem dentro?'}
+            {newVisitor ? <>Você ganhou <strong className="font-bold" style={{color:'#ffeb00',textShadow:'0 0 10px #ffeb0080,0 0 24px #ffcf004d'}}>R$ {discountAmount} de desconto</strong></> : 'O que tem dentro?'}
           </div>
 
           <button
