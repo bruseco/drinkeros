@@ -14,8 +14,8 @@ import ClubFavoriteDemo from './ClubFavoriteDemo';
 import ClubShoppingDemo from './ClubShoppingDemo';
 import ClubCommunityDemo from './ClubCommunityDemo';
 import catalog from './clubLandingCatalog.json';
-import latestRecipes from './clubLatestCovers.json';
-const landingCategories = [...catalog, latestRecipes];
+import dessertRecipes from './clubDessertCovers.json';
+const landingCategories = [...catalog, dessertRecipes];
 import './clubePublicLanding.css';
 import { useViewportMotion } from './useViewportMotion';
 import { useIntroCountdown } from '@/hooks/useClubeIntroOffer';
@@ -154,9 +154,9 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
   return <section className={`club-scene club-${category.id}${highlighted ? ' club-highlight-complete' : ''}`} ref={scene} data-motion-active={motionActive} aria-label={category.label}>
     <div className="club-stage">
       <div className="club-category-copy club-category-heading" ref={heading}>
-        <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.id === 'latest-recipes' ? <>São as receitas <strong>mais criativas da internet</strong> no seu celular.</> : category.label === 'Frozens' ? <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} onComplete={handleCountComplete} /> Frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} onComplete={handleCountComplete} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
+        <h2>{category.id === 'desserts' ? <>Diversas <strong>sobremesas</strong> para fazer em datas comemorativas.</> : category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.id === 'latest-recipes' ? <>São as receitas <strong>mais criativas da internet</strong> no seu celular.</> : category.label === 'Frozens' ? <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} onComplete={handleCountComplete} /> Frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} onComplete={handleCountComplete} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
       </div>
-      <p className="club-category-subtitle" ref={subtitle}>{category.subtitle}</p>
+      {category.subtitle&&<p className="club-category-subtitle" ref={subtitle}>{category.subtitle}</p>}
       <div className="club-covers-window" ref={covers} aria-label="Capas das receitas; arraste para explorar"
         onPointerDown={event => { dragging.current = true; lastX.current = event.clientX; event.currentTarget.setPointerCapture(event.pointerId); }}
         onPointerMove={event => { if (dragging.current) { move(lastX.current - event.clientX); lastX.current = event.clientX; } }}
@@ -202,6 +202,8 @@ export default function ClubePublicLanding(props: Props) {
   const hero=useRef<HTMLElement>(null);
   const pocket=useRef<HTMLParagraphElement>(null);
   const pocketMotion=useViewportMotion(pocket);
+  const creativity=useRef<HTMLElement>(null);
+  const creativityMotion=useViewportMotion(creativity);
   const benefits=useRef<HTMLUListElement>(null);
   const benefitsMotion=useViewportMotion(benefits);
   useLayoutEffect(()=>{
@@ -290,10 +292,11 @@ export default function ClubePublicLanding(props: Props) {
       <h1><img className="club-logo" src="/club-landing/logo.png" alt="Clube dos Drinkeros" width="500" height="140" fetchPriority="high" /></h1>
       <p className="club-pocket" ref={pocket} data-motion-active={pocketMotion}>Mais de <strong><AnimatedClubCount value={1000} /></strong> receitas no seu bolso.</p>
       <div ref={heroStrip} data-motion-active={heroMotion} className="club-hero-strip" aria-hidden="true"><div><img src={drinksStrip} alt="" /><img src={drinksStrip} alt="" /></div></div>
-      <p className="club-discover">Descubra o que espera por você</p>
+      <p className="club-discover">Descubra o que esse aplicativo<br/>tem a lhe oferecer</p>
       <div className="club-down-slot" aria-hidden="true"><ArrowDown className={`club-down${hasScrolled ? '' : ' club-down-bouncing'}`} aria-hidden="true" /></div>
     </header>
     {landingCategories.map((category,index) => <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCoversReached={category.id === 'category-1' ? revealCta : undefined} />)}
+    <section className="club-creativity" ref={creativity} data-motion-active={creativityMotion}><h2>São as receitas <strong>mais criativas da internet</strong> no seu celular.</h2><p>Para acessar quando quiser.</p></section>
     <section className="club-tools" aria-label="Organize seus drinks">
       <article className="club-feature"><p className="club-eyebrow club-video-eyebrow"><span>Receitas em vídeo</span><svg role="img" aria-label="YouTube" viewBox="0 0 28 20"><rect width="28" height="20" rx="5" fill="#fff"/><path d="m11 5 8 5-8 5Z" fill="#111"/></svg></p><h2>Assista como preparar.</h2><p>Todas as receitas foram realizadas e testadas.</p><ClubRecipeLoop /></article>
       <article className="club-feature"><h2>Salve suas receitas.</h2><p>Monte listas de favoritos para cada ocasião.</p><ClubFavoriteDemo /></article>

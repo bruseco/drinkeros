@@ -243,8 +243,8 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
       revealTimerRef.current = null;
       console.log('[clube-reveal] opening overlay');
       setRevealOpen(true);
-    }, 2000);
-  }, [canRevealIntro]);
+    }, publicPage ? 3000 : 2000);
+  }, [canRevealIntro,publicPage]);
 
   React.useEffect(() => {
     return () => {
@@ -343,7 +343,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
   }, [publicPage, canRevealIntro, revealScheduled, checkPriceCardInView, priceCardVersion]);
 
 
-  // Public offer: the full price itself must stay visible for two seconds.
+  // Public offer: the full price itself must stay visible for three seconds.
   React.useEffect(() => {
     if (!publicPage || !canRevealIntro) return;
     const scroller=landingScrollRef.current;

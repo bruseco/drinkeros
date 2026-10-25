@@ -1,0 +1,48 @@
+{
+  "id": "desserts",
+  "label": "Sobremesas",
+  "number": null,
+  "subtitle": "",
+  "recipes": [
+    {
+      "title": "Paletas Toddy Shake",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/2567db89-3718-40ca-a40b-e4eaaaa837f6.webp"
+    },
+    {
+      "title": "Nescaccino Alcoólico",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/7f4be995-ef34-48a3-92f4-b9bb5b8338fb.webp"
+    },
+    {
+      "title": "Turbo Shake",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/56600f31-4073-44eb-99aa-192f4afde001.webp"
+    },
+    {
+      "title": "Pudinzinho de Tequila",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/89e94b5b-fd8e-46c7-acb4-6f6dc3f8255d.webp"
+    },
+    {
+      "title": "Jack Terrorista",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/ab3eeab7-cab6-4e76-a3dd-1c204c230c45.webp"
+    },
+    {
+      "title": "Picolé de Cerveja",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/d9711283-f17c-4ef1-9620-afbd14f5bd53.webp"
+    },
+    {
+      "title": "Jackttone",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/7fdf0327-d1f0-4625-a0c0-8004edd6aa98.webp"
+    },
+    {
+      "title": "Pudim de Amarula",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/f093998d-e1f0-46b7-8045-249626942fe3.webp"
+    },
+    {
+      "title": "Pudim de Milho c/ Bourbon",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/cc1755c1-1907-4e7b-8426-5e37dd99ba74.webp"
+    },
+    {
+      "title": "Reeses Gigante c/ Licor 43",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/0a0fad4f-74b7-4f27-9178-f481c09f989a.webp"
+    }
+  ]
+}

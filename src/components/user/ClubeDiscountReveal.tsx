@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+import { X, ArrowLeft, ArrowRight } from 'lucide-react';
+import {useViewportMotion} from '@/components/landing/useViewportMotion';
 import giftBody from '@/assets/gift-box-body.png';
 import giftLid from '@/assets/gift-box-lid.png';
 import { useYouthDiscount } from '@/hooks/useYouthDiscount';
@@ -10,6 +11,13 @@ interface Props {
   onClose: (claimed?: boolean) => void;
   newVisitor?: boolean;
   savings?: number;
+}
+
+function GiftClaimRow({children,newVisitor}:{children:React.ReactNode;newVisitor:boolean}){
+ const ref=React.useRef<HTMLDivElement>(null);const motion=useViewportMotion(ref);
+ return <div ref={ref} className={newVisitor?'clube-gift-claim-row':'mt-7'} data-motion-active={motion}>
+  {newVisitor&&<ArrowRight className="clube-claim-arrow clube-claim-left" aria-hidden="true"/>}{children}{newVisitor&&<ArrowLeft className="clube-claim-arrow clube-claim-right" aria-hidden="true"/>}
+ </div>;
 }
 
 type Phase =
@@ -184,7 +192,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose, newVisitor
               textShadow: '0 2px 18px rgba(236,72,153,0.55)',
             }}
           >
-            {newVisitor ? <>SUPER OFERTA PARA VOCÊ QUE É <span className="text-yellow-300">NOVO VISITANTE!</span></> : <>SUPER OFERTA PARA <span className="text-yellow-300">NOVOS CADASTRADOS!</span></>}
+            {newVisitor ? <><span className="block">SUPER OFERTA PARA VOCÊ</span><span className="block">QUE É <span className="text-yellow-300">NOVO VISITANTE!</span></span></> : <>SUPER OFERTA PARA <span className="text-yellow-300">NOVOS CADASTRADOS!</span></>}
           </div>
 
           <div className="relative mx-auto mt-7 mb-6 h-[300px] sm:h-[340px] w-full">
@@ -270,14 +278,15 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose, newVisitor
             className="text-white text-2xl sm:text-3xl font-light tracking-wide"
             style={{ animation: 'clube-fade-up 520ms ease 480ms both' }}
           >
-            {newVisitor ? <>Você ganhou <strong className="font-bold" style={{color:'#ffeb00',textShadow:'0 0 10px #ffeb0080,0 0 24px #ffcf004d'}}>R$ {discountAmount} de desconto</strong></> : 'O que tem dentro?'}
+            {newVisitor ? <>Você ganhou<br/><strong className="font-bold" style={{color:'#ffeb00',textShadow:'0 0 10px #ffeb0080,0 0 24px #ffcf004d'}}>R$ {discountAmount} de desconto</strong></> : 'O que tem dentro?'}
           </div>
 
-          <button
+          <GiftClaimRow newVisitor={newVisitor}><button
             type="button"
             onClick={startReveal}
-            className="mt-7 inline-flex items-center justify-center rounded-full px-9 py-3.5 text-primary-foreground font-bold text-lg hover:scale-[1.03] active:scale-[0.98] transition-transform"
+            className="inline-flex items-center justify-center rounded-full px-9 py-3.5 text-primary-foreground font-bold text-lg hover:scale-[1.03] active:scale-[0.98] transition-transform"
             style={{
+              minHeight:newVisitor?64:undefined,paddingInline:newVisitor?20:undefined,
               backgroundImage:
                 'linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(350 90% 58%) 25%, hsl(45 95% 65%) 50%, hsl(350 90% 58%) 75%, hsl(var(--primary)) 100%)',
               backgroundSize: '300% 100%',
@@ -287,7 +296,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose, newVisitor
             }}
           >
             {newVisitor ? 'Pegar desconto' : 'Ver oferta!'}
-          </button>
+          </button></GiftClaimRow>
         </div>
       )}
 
@@ -434,6 +443,13 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose, newVisitor
           0% { background-position: 0% 50%; }
           100% { background-position: 300% 50%; }
         }
+        .clube-gift-claim-row{display:grid;grid-template-columns:26px minmax(0,1fr) 26px;gap:9px;align-items:center;width:100%;max-width:350px;margin:28px auto 0}
+        .clube-claim-arrow{width:26px;height:26px;color:white;animation:clube-claim-left 1.2s ease-in-out infinite;animation-play-state:paused}
+        .clube-claim-right{animation-name:clube-claim-right}
+        .clube-gift-claim-row[data-motion-active="true"] .clube-claim-arrow{animation-play-state:running}
+        @keyframes clube-claim-left{0%,100%{transform:translateX(-4px)}50%{transform:translateX(3px)}}
+        @keyframes clube-claim-right{0%,100%{transform:translateX(4px)}50%{transform:translateX(-3px)}}
+        @media(prefers-reduced-motion:reduce){.clube-claim-arrow{animation:none}}
         @keyframes clube-btn-glow {
           0%, 100% { box-shadow: 0 10px 26px hsl(var(--primary) / 0.55), 0 0 40px hsl(var(--primary) / 0.4); }
           50% { box-shadow: 0 10px 32px hsl(var(--primary) / 0.7), 0 0 60px hsl(45 95% 65% / 0.55); }

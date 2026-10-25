@@ -2,6 +2,7 @@ import {act,cleanup,fireEvent,render,screen} from '@testing-library/react';
 import {afterEach,beforeEach,expect,it,vi} from 'vitest';
 import ClubeDiscountReveal from './ClubeDiscountReveal';
 import {getFunnel} from '@/lib/funnels';
+vi.mock('@/components/landing/useViewportMotion',()=>({useViewportMotion:()=>true}));
 vi.mock('@/hooks/useYouthDiscount',()=>({useYouthDiscount:()=>({isYouth:false})}));
 beforeEach(()=>vi.useFakeTimers());afterEach(()=>{cleanup();vi.useRealTimers()});
 it('closing the gift before claiming does not claim the public discount',()=>{
