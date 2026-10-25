@@ -76,5 +76,5 @@
 .club-floating-cta.club-cta-visible{visibility:visible}
 
 /* Hero: chamada próxima das imagens e convite para rolar mais abaixo. */
-.club-public h1{margin-bottom:90px}.club-pocket{margin-bottom:8px}.club-discover{margin-top:60px}
+.club-public h1{margin-bottom:90px}.club-pocket{margin-bottom:8px;position:relative;top:12px}.club-discover{margin-top:60px}
 .club-floating-cta::after{content:"";position:absolute;inset:5px;border:1px solid #94702e;border-radius:inherit;pointer-events:none}
