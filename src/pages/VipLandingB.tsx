@@ -378,6 +378,13 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
     setUnlocked(true);
     setPriceSettled(false);
     setDisplayPrice(effectivePromoPrice);
+    if(publicPage)window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>{
+      const root=landingScrollRef.current;
+      const heading=root?.querySelector('#clube-pricing > h2');
+      if(!root?.isConnected||!heading)return;
+      const bannerHeight=root.querySelector('.club-discount-banner')?.getBoundingClientRect().height??0;
+      root.scrollTo({top:root.scrollTop+heading.getBoundingClientRect().top-root.getBoundingClientRect().top-bannerHeight-10,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+    }));
     if (priceSettleTimerRef.current !== null) window.clearTimeout(priceSettleTimerRef.current);
     priceSettleTimerRef.current = window.setTimeout(() => setPriceSettled(true), 620);
     // Funil: 1ª oferta revelada
