@@ -1,0 +1,48 @@
+{
+  "id": "latest-recipes",
+  "label": "Receitas no seu celular",
+  "number": 1000,
+  "subtitle": "Para acessar quando quiser.",
+  "recipes": [
+    {
+      "title": "Paletas Toddy Shake",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/2567db89-3718-40ca-a40b-e4eaaaa837f6.webp"
+    },
+    {
+      "title": "Caipi Hibisco",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/45f93273-4bc7-4f19-bb94-90be4b2851f5.webp"
+    },
+    {
+      "title": "Fronzerita de Melancia",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/1496ebbd-9457-4d65-b592-2df26dfaab7d.webp"
+    },
+    {
+      "title": "S'mores Milkshake",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/a3a86119-5841-49c9-830d-66b23a462a8b.webp"
+    },
+    {
+      "title": "Chocolate Quente de Morango",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/435f6047-9f18-4081-b07f-44d7af63034e.webp"
+    },
+    {
+      "title": "Jackshake Oreo",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/8433d73f-eb62-4b14-bfed-b9a3ecc3c0bc.webp"
+    },
+    {
+      "title": "CaipiCerveja Na Jarra",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/f252e635-ddd2-428e-9976-86535f154874.webp"
+    },
+    {
+      "title": "Nescaccino Alcoólico",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/7f4be995-ef34-48a3-92f4-b9bb5b8338fb.webp"
+    },
+    {
+      "title": "Campari Collins",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/2f6e4f32-b1f5-434b-bd64-c43163c9d46a.webp"
+    },
+    {
+      "title": "Turbo Shake",
+      "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/56600f31-4073-44eb-99aa-192f4afde001.webp"
+    }
+  ]
+}

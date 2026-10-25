@@ -10,6 +10,8 @@ import payGoogle from '@/assets/pagamento-google.png';
 import payPix from '@/assets/pagamento-pix.png';
 import TestimonialsCarousel from './TestimonialsCarousel';
 import catalog from './clubLandingCatalog.json';
+import latestRecipes from './clubLatestCovers.json';
+const landingCategories = [...catalog, latestRecipes];
 import './clubePublicLanding.css';
 import { useIntroCountdown } from '@/hooks/useClubeIntroOffer';
 
@@ -152,7 +154,7 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
   return <section className={`club-scene${category.id === 'syrups' ? ' club-syrups' : ''}${highlighted ? ' club-highlight-complete' : ''}`} ref={scene} aria-label={category.label}>
     <div className="club-stage">
       <div className="club-category-copy club-category-heading" ref={heading}>
-        <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.label === 'Frozens' ? <>Mais de <strong><AnimatedClubCount value={20} start={countReady} onComplete={handleCountComplete} /> Frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} onComplete={handleCountComplete} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
+        <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.id === 'latest-recipes' ? <>São mais de <strong><AnimatedClubCount value={1000} start={countReady} onComplete={handleCountComplete} /> receitas no seu celular.</strong></> : category.label === 'Frozens' ? <>Mais de <strong><AnimatedClubCount value={20} start={countReady} onComplete={handleCountComplete} /> Frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} onComplete={handleCountComplete} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
       </div>
       <p className="club-category-subtitle" ref={subtitle}>{category.subtitle}</p>
       <div className="club-covers-window" ref={covers} aria-label="Capas das receitas; arraste para explorar"
@@ -223,8 +225,11 @@ export default function ClubePublicLanding(props: Props) {
       frame=0;
       const bounds=scroller.getBoundingClientRect();
       const footerTop=element.getBoundingClientRect().top;
-      button.style.setProperty('--club-footer-overlap',`${Math.max(0,bounds.bottom-footerTop)}px`);
-      setFooterReplacesCta(footerTop<bounds.top+button.offsetHeight+24);
+      const brand=element.querySelector('.club-footer-brand')?.getBoundingClientRect();
+      const besideLogo=window.matchMedia('(max-width:600px)').matches && brand;
+      const stopBottom=besideLogo ? brand.top+brand.height/2+button.offsetHeight/2 : footerTop-18;
+      button.style.setProperty('--club-footer-overlap',`${Math.max(0,bounds.bottom-stopBottom-18)}px`);
+      setFooterReplacesCta(stopBottom<bounds.top+button.offsetHeight+24);
     };
     const schedule=()=>{if(!frame)frame=requestAnimationFrame(update)};
     scroller.addEventListener('scroll',schedule,{passive:true});
@@ -249,7 +254,7 @@ export default function ClubePublicLanding(props: Props) {
       <p className="club-discover">Descubra o que espera por você</p>
       <ArrowDown className={`club-down${hasScrolled ? '' : ' club-down-bouncing'}`} aria-hidden="true" />
     </header>
-    {catalog.map((category,index) => <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCoversReached={category.id === 'category-1' ? revealCta : undefined} />)}
+    {landingCategories.map((category,index) => <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCoversReached={category.id === 'category-1' ? revealCta : undefined} />)}
     <section className="club-tools" aria-label="Organize seus drinks">
       <div><Play aria-hidden="true" /><h2>Veja como preparar</h2><p>Acompanhe o passo a passo das receitas em vídeo.</p></div>
       <div><Heart aria-hidden="true" /><h2>Salve suas escolhas</h2><p>Monte listas de favoritos para cada ocasião.</p></div>
@@ -261,13 +266,13 @@ export default function ClubePublicLanding(props: Props) {
         <p>Clube dos Drinkeros · Plano anual</p>
         {props.unlocked && <p className="club-old-price">De R$ {props.fullPrice}</p>}
         <div className="club-price"><span>R$</span> {props.price}<small>/ ano</small></div>
-        {props.unlocked && <p className="club-saving">Você economiza R$ {props.savings} agora.</p>}
+        {props.unlocked && <p className="club-saving">Você economiza R$ {props.savings} por ano enquanto sua assinatura no cartão permanecer ativa.</p>}
         <ul><li>Acesso às receitas em vídeo do Clube</li><li>Xaropes artesanais e novas combinações</li><li>Listas de favoritos e listas de compras</li></ul>
         <button ref={purchase} type="button" className="club-purchase" disabled={props.loading} onClick={props.onSubscribe}>{props.loading ? 'Abrindo checkout…' : 'Quero entrar para o Clube'}</button>
         <div className="club-payment-brands" aria-label="Meios de pagamento">
           {[[payVisa, 'Visa'], [payMaster, 'Mastercard'], [payApple, 'Apple Pay'], [payGoogle, 'Google Pay'], [payPix, 'Pix']].map(([src, alt]) => <span key={alt}><img src={src} alt={alt} width="42" height="20" /></span>)}
         </div>
-        <p className="club-payment-note">Pagamento por cartão ou Pix. No cartão, assinatura com renovação automática; no Pix, acesso por 12 meses.</p>
+        <p className="club-payment-note">Pagamento por cartão ou Pix. No cartão, renovação automática pelo valor contratado enquanto a assinatura permanecer ativa. No Pix, acesso por 12 meses. Após cancelamento, uma nova contratação segue a oferta vigente.</p>
       </div>
     </section>
     <section className="club-public-testimonials"><h2>Olhe o que o pessoal acha da gente.</h2><TestimonialsCarousel hideHeading /></section>
@@ -277,7 +282,7 @@ export default function ClubePublicLanding(props: Props) {
       <details><summary>Como recebo acesso?</summary><p>Crie sua conta, conclua o pagamento e aguarde a confirmação. O acesso será vinculado à sua conta.</p></details>
     </section>
     <footer className="club-public-footer" ref={footer}>
-      <div className="club-footer-main"><div className="club-footer-brand"><img src={drinkerosLogo} alt="Drinkeros" width="180" height="55" /><p>Receitas para transformar cada momento.</p></div>
+      <div className="club-footer-main"><div className="club-footer-brand"><img src={drinkerosLogo} alt="Drinkeros" width="180" height="55" /></div>
         <nav aria-label="Institucional"><h2>Drinkeros</h2><Link to="/login">Minha conta</Link><a href="https://wa.me/5548991601025" target="_blank" rel="noopener noreferrer">Atendimento</a></nav>
         <nav aria-label="Informações legais"><h2>Informações</h2>
           <Link to="/politica-de-privacidade">Política de privacidade</Link><Link to="/termos-de-uso">Termos de uso</Link>

@@ -84,3 +84,7 @@
 .club-floating-cta:not(.club-cta-visible){transform:translate3d(calc(100% + 32px),0,0) scale(.88)}
 .club-floating-cta.club-cta-visible{transform:translate3d(0,0,0) scale(1);transition-delay:0s}
 @media(prefers-reduced-motion:reduce){.club-floating-cta{transition:none}.club-floating-cta:not(.club-cta-visible){transform:none}}
+
+/* Lote em revisão local: respiro dos depoimentos e botão ao lado da marca. */
+.club-public-pricing{padding-bottom:36px}.club-footer-brand img{width:140px}
+@media(max-width:600px){.club-footer-brand{min-height:82px;display:flex;align-items:center}.club-footer-brand img{width:clamp(76px,calc(100vw - 260px),120px)}}
