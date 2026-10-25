@@ -1,9 +1,10 @@
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {Check,Heart,ImagePlus,MessageCircle,MousePointer2,Send,UserRound} from 'lucide-react';
 import {useViewportMotion} from './useViewportMotion';
-import latestRecipes from './clubLatestCovers.json';
-const TITLE='Caipi Hibisco';
-const COVER=latestRecipes.recipes.find(recipe=>recipe.title===TITLE)!.image;
+import COVER from '@/assets/community-demo/homemade-lime.webp';
+import womanAvatar from '@/assets/community-demo/fictional-woman.webp';
+import manAvatar from '@/assets/community-demo/fictional-man.webp';
+const TITLE='Minha caipirinha de limão';
 /** An illustrative local loop, never an actual post, like, testimonial or upload. */
 export default function ClubCommunityDemo(){
  const frame=useRef<HTMLElement>(null);const visible=useViewportMotion(frame);
@@ -25,7 +26,7 @@ export default function ClubCommunityDemo(){
   update();const observer=new ResizeObserver(update);observer.observe(element);return()=>observer.disconnect();
  },[published,hasImage]);
  return <figure ref={frame} className="club-community-demo" data-motion-active={running} data-phase={phase} aria-label="Demonstração fictícia: publicar uma receita e receber curtidas e comentários">
-  <div className="club-community-scene" aria-hidden="true"><span className="club-demo-label">Demonstração</span>
+  <div className="club-community-scene" aria-hidden="true"><span className="club-demo-label">Demonstração · perfis fictícios</span>
    {!published?<div className="club-community-compose"><strong>Compartilhar receita</strong>
     <div className={`club-community-upload${hasImage?' has-photo':''}`}>{hasImage?<img src={COVER} alt="" loading="lazy"/>:<><ImagePlus size={30}/><span>Adicionar foto da receita</span></>}</div>
     {uploading?<div className="club-community-upload-state"><span>Enviando foto…</span><div><i style={{width:`${Math.min(100,(elapsed-1400)/2200*100)}%`}}/></div></div>:hasImage?<p className="club-community-upload-state"><Check size={14}/> Foto adicionada</p>:null}
@@ -34,9 +35,9 @@ export default function ClubCommunityDemo(){
    </div>:<div className="club-community-post"><div className="club-community-author"><span className="club-community-avatar"><UserRound size={15}/></span><span><strong>Você</strong><small>Receita compartilhada · agora</small></span></div>
     <img className="club-community-photo" src={COVER} alt="" loading="lazy"/><strong className="club-community-title">{TITLE}</strong>
     <div className="club-community-reactions"><span className={`club-community-heart${likes?' is-liked':''}`}><Heart size={17} fill={likes?'currentColor':'none'}/>{likes}</span><span><MessageCircle size={17}/>{comments}</span></div>
-    <div className="club-community-comments">{comments>=1&&<p><UserRound size={13}/><span>Como você fez?</span></p>}{comments>=2&&<p><UserRound size={13}/><span>Adorei sua receita!</span></p>}</div>
+    <div className="club-community-comments">{comments>=1&&<p className="club-comment-left"><img src={womanAvatar} alt="" width="26" height="26" loading="lazy"/><span>Como você fez?</span></p>}{comments>=2&&<p className="club-comment-right"><img src={manAvatar} alt="" width="26" height="26" loading="lazy"/><span>Adorei sua receita!</span></p>}</div>
    </div>}
    {!reduced&&running&&!uploading&&elapsed<6800&&<span className="club-community-cursor" style={point}><MousePointer2 size={26} fill="white" stroke="#141414" strokeWidth={1.5}/></span>}
-  </div><figcaption className="sr-only">Simulação visual. Nenhuma foto é enviada e nenhuma curtida ou comentário real é criado.</figcaption>
+  </div><figcaption className="sr-only">Simulação visual com imagem de drink e perfis gerados por IA. Nenhuma foto é enviada e nenhuma curtida ou comentário real é criado.</figcaption>
  </figure>;
 }
