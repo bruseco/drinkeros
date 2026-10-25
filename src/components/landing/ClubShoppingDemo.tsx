@@ -14,6 +14,7 @@ export default function ClubShoppingDemo() {
   const visible = useViewportMotion(frame);
   const [reduced,setReduced] = useState(false);
   const [elapsed,setElapsed] = useState(0);
+  const [running,setRunning]=useState(false);
   const [point,setPoint] = useState({left:0,top:0});
   useEffect(()=>{
     const element=frame.current;if(!element)return;
@@ -22,10 +23,15 @@ export default function ClubShoppingDemo() {
     return()=>{media.removeEventListener('change',sync)};
   },[]);
   useEffect(()=>{
-    if(reduced){setElapsed(26000);return}if(!visible)return;
-    const start=performance.now();setElapsed(0);
-    const timer=window.setInterval(()=>setElapsed((performance.now()-start)%30000),80);
-    return()=>window.clearInterval(timer);
+    setRunning(false);
+    if(reduced){setElapsed(26000);return}
+    setElapsed(0);if(!visible)return;
+    let timer:number|undefined;
+    const delay=window.setTimeout(()=>{
+      setRunning(true);const start=performance.now();
+      timer=window.setInterval(()=>setElapsed((performance.now()-start)%30000),80);
+    },1000);
+    return()=>{window.clearTimeout(delay);window.clearInterval(timer)};
   },[visible,reduced]);
   const phase=elapsed<1800?'choose':elapsed<4800?'list':elapsed<7500?'people':elapsed<10200?'drinks':elapsed<11500?'loading':'result';
   const checked=phase==='result'?Math.max(0,Math.min(items.length,Math.floor((elapsed-13000)/900)+1)):0;
@@ -39,7 +45,7 @@ export default function ClubShoppingDemo() {
     };
     update();const observer=new ResizeObserver(update);observer.observe(element);return()=>observer.disconnect();
   },[phase,cursor,checked]);
-  return <figure className="club-shopping-demo" ref={frame} data-motion-active={visible} data-phase={phase} aria-label="Demonstração: lista Jantar mexicano com Margarita Tropicante e Paloma para 5 pessoas, 3 drinks por pessoa">
+  return <figure className="club-shopping-demo" ref={frame} data-motion-active={running} data-phase={phase} aria-label="Demonstração: lista Jantar mexicano com Margarita Tropicante e Paloma para 5 pessoas, 3 drinks por pessoa">
     <div className="club-shopping-scene" aria-hidden="true"><span className="club-demo-label">Demonstração</span>
       {phase==='choose'&&<div className="club-shopping-start"><span className="club-demo-dialog-title">Suas listas de favoritos</span><div className="club-shopping-folder"><strong>Jantar mexicano</strong><span>2 receitas salvas</span></div></div>}
       {phase==='list'&&<div className="club-shopping-start"><span className="club-demo-dialog-title">Jantar mexicano</span><div className="club-shopping-recipes">{demoRecipes.map(recipe=><div key={recipe.id}><img src={recipe.image} alt="" loading="lazy"/><strong>{recipe.name}</strong></div>)}</div><div className="club-shopping-action"><ShoppingCart size={16}/> Gerar lista de compras</div></div>}

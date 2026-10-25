@@ -171,7 +171,7 @@
 @media(max-width:600px){.club-feature .club-recipe-loop{width:60vw;max-width:310px}}
 
 /* Máscara fixa: o checklist não altera a altura do cartão durante o loop. */
-.club-feature.club-shopping-feature{height:1250px;min-height:0;max-height:1250px;overflow:hidden;justify-content:flex-start}
+.club-feature.club-shopping-feature{height:625px;min-height:0;max-height:625px;overflow:hidden;justify-content:flex-start}
 .club-shopping-feature>h2,.club-shopping-feature>p{flex:none}
 .club-shopping-feature .club-shopping-demo{flex:1;min-height:0;overflow:hidden}
 .club-shopping-feature .club-shopping-scene{height:100%;overflow:hidden}
@@ -181,3 +181,12 @@
 .club-purchase[data-motion-active="true"] .club-cta-icons>svg:first-child{animation-play-state:running}
 @keyframes club-purchase-arrow{0%,100%{transform:translateX(-2px)}50%{transform:translateX(3px)}}
 @media(prefers-reduced-motion:reduce){.club-purchase .club-cta-icons>svg:first-child{animation:none}}
+
+/* Seta flutuante mais discreta que a chamada principal. */
+.club-floating-cta .club-cta-icons>svg:first-child{animation:club-floating-arrow 1.4s ease-in-out infinite;animation-play-state:paused}
+.club-floating-cta.club-cta-visible .club-cta-icons>svg:first-child{animation-play-state:running}
+@keyframes club-floating-arrow{0%,100%{transform:translateX(-1px)}50%{transform:translateX(1px)}}
+@media(prefers-reduced-motion:reduce){.club-floating-cta .club-cta-icons>svg:first-child{animation:none}}
+
+/* Mesma altura nos estados dourado e verde; canto direito em cápsula. */
+.club-purchase{min-height:84px;padding-top:14px;padding-bottom:14px;border-radius:12px 999px 999px 12px}

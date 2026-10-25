@@ -11,6 +11,7 @@ export default function ClubFavoriteDemo() {
   const visible = useViewportMotion(frame);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [elapsed, setElapsed] = useState(0);
+  const [running,setRunning] = useState(false);
   const [point,setPoint] = useState({left:0,top:0});
   useEffect(() => {
     const element = frame.current;
@@ -21,12 +22,17 @@ export default function ClubFavoriteDemo() {
     return () => { media.removeEventListener('change', sync); };
   }, []);
   useEffect(() => {
+    setRunning(false);
     if (reducedMotion) { setElapsed(10000); return; }
-    if (!visible) return;
-    const start = performance.now();
     setElapsed(0);
-    const timer = window.setInterval(() => setElapsed((performance.now() - start) % 12000), 80);
-    return () => window.clearInterval(timer);
+    if (!visible) return;
+    let timer: number | undefined;
+    const delay=window.setTimeout(()=>{
+      setRunning(true);
+      const start=performance.now();
+      timer=window.setInterval(()=>setElapsed((performance.now()-start)%12000),80);
+    },1000);
+    return ()=>{window.clearTimeout(delay);window.clearInterval(timer)};
   }, [visible, reducedMotion]);
 
   const modal = elapsed >= 2700 && elapsed < 8500;
@@ -48,7 +54,7 @@ export default function ClubFavoriteDemo() {
     return()=>observer.disconnect();
   },[cursor,phase]);
   const click = (elapsed >= 2400 && elapsed < 2700) || (elapsed >= 3550 && elapsed < 3800) || (elapsed >= 8150 && elapsed < 8450);
-  return <figure className="club-favorite-demo" ref={frame} data-motion-active={visible} data-phase={phase} aria-label="Demonstração: salvar Margarita Tropicante na lista Jantar mexicano">
+  return <figure className="club-favorite-demo" ref={frame} data-motion-active={running} data-phase={phase} aria-label="Demonstração: salvar Margarita Tropicante na lista Jantar mexicano">
     <div className="club-demo-scene" aria-hidden="true">
       <span className="club-demo-label">Demonstração</span>
       <div className="club-demo-card"><img src={COVER} alt="" loading="lazy" /><div className="club-demo-card-info"><span>Margarita Tropicante</span><span className={`club-demo-heart${saved ? ' is-saved' : ''}`}><Heart fill={saved ? 'currentColor' : 'none'} /></span></div></div>

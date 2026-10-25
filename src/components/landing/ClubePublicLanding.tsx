@@ -306,7 +306,7 @@ export default function ClubePublicLanding(props: Props) {
         <p className="club-payment-note">Pagamento por cartão ou Pix. No cartão, renovação automática pelo valor contratado enquanto a assinatura permanecer ativa. No Pix, acesso por 12 meses. Após cancelamento, uma nova contratação segue a oferta vigente.</p>
       </div>
     </section>
-    <section className="club-public-testimonials"><h2>Olhe o que o pessoal acha da gente.</h2><TestimonialsCarousel hideHeading /></section>
+    <section className="club-public-testimonials"><h2>Olhe o que o pessoal acha da gente. <span aria-hidden="true">👀</span></h2><TestimonialsCarousel hideHeading /></section>
     <section className="club-faq"><h2>Ficou alguma dúvida?</h2>
       <details><summary>Preciso ter experiência?</summary><p>Você pode acompanhar o preparo em vídeo e escolher as receitas que combinam com os ingredientes que tem.</p></details>
       <details><summary>Posso usar no celular?</summary><p>Sim. Acesse o aplicativo pelo navegador do seu celular e salve suas receitas favoritas na sua conta.</p></details>
