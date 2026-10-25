@@ -151,7 +151,9 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
     };
   },[motionActive,direction,loopWidth]);
   const cards = (layer: number) => Array.from({length:repeatCount},(_,cycle)=>cycle).flatMap(cycle => category.recipes.flatMap((recipe, index) => {
-    const [y, scale, opacity, rotation] = DEPTHS[index % DEPTHS.length];
+    const [y, scale, opacity, rotation] = category.id==='category-4'&&recipe.title==='Sangue de Cobra'
+      ? [28,.72,.42,3]
+      : DEPTHS[index % DEPTHS.length];
     if (layer < 2 && (scale >= .95 ? 0 : 1) !== layer) return [];
     return (layer === 2 ? [0, 1] : [0]).map(ghost => (
       <figure key={`${cycle}-${index}-${ghost}`} style={{
