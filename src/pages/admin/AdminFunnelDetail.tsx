@@ -3,19 +3,14 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import QuizAnswerMetrics from './QuizAnswerMetrics';
+import FunnelPeriodPicker from './FunnelPeriodPicker';
+import {isFunnelRange,funnelPeriodBounds,EMPTY_FUNNEL_DATES,type FunnelDates} from '@/lib/funnelPeriod';
 import { usePageFunnel, sinceFromRange, type FunnelRange, type FunnelCounts } from '@/hooks/usePageFunnel';
 import { getFunnel } from '@/lib/funnels';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 const ORIGIN = typeof window !== 'undefined' ? window.location.origin : '';
-
-const RANGE_LABELS: Array<{ value: FunnelRange; label: string }> = [
-  { value: 'today', label: 'Hoje' },
-  { value: '7d', label: '7 dias' },
-  { value: '30d', label: '30 dias' },
-  { value: 'all', label: 'Tudo' },
-];
 
 const fmt = (n: number) => n.toLocaleString('pt-BR');
 const pct = (n: number, base: number) => (base > 0 ? `${((n / base) * 100).toFixed(1)}%` : '—');
@@ -24,8 +19,9 @@ const AdminFunnelDetail: React.FC = () => {
   const { funnelKey } = useParams<{ funnelKey: string }>();
   const funnel = getFunnel(funnelKey ?? '');
   const [params]=useSearchParams();
-  const [range, setRange] = useState<FunnelRange>(()=>{const value=params.get('periodo');return ['today','7d','30d','all'].includes(value??'')?value as FunnelRange:'30d'});
-  const { data: counts, isLoading } = usePageFunnel(funnel, range);
+  const [range, setRange] = useState<FunnelRange>(()=>{const value=params.get('periodo');return isFunnelRange(value)?value:'30d'});
+  const [dates,setDates]=useState<FunnelDates>(()=>({from:params.get('de')??'',to:params.get('ate')??''}));
+  const { data: counts, isLoading,isError } = usePageFunnel(funnel, range,dates);
 
 
   if (!funnel) {
@@ -64,23 +60,12 @@ const AdminFunnelDetail: React.FC = () => {
               {ORIGIN}{funnel.publicPath} <ExternalLink className="h-3 w-3" />
             </a>
           </div>
-          <div className="flex gap-1.5">
-            {RANGE_LABELS.map((r) => (
-              <Button
-                key={r.value}
-                size="sm"
-                variant={range === r.value ? 'default' : 'outline'}
-                onClick={() => setRange(r.value)}
-              >
-                {r.label}
-              </Button>
-            ))}
-          </div>
+          <FunnelPeriodPicker range={range} dates={dates} onChange={(r,d)=>{setRange(r);setDates(d);}}/>
         </div>
       </div>
 
       <div className="rounded-lg border p-5">
-        {isLoading && !counts ? (
+        {isError ? <p role="alert" className="text-sm text-destructive">Não foi possível carregar as métricas deste período.</p> : isLoading && !counts ? (
           <div className="text-sm text-muted-foreground py-12 text-center">Carregando funil…</div>
         ) : topCount === 0 ? (
           <div className="text-sm text-muted-foreground py-8 text-center space-y-2">
@@ -155,17 +140,19 @@ const AdminFunnelDetail: React.FC = () => {
           </div>
         )}
       </div>
-      {funnel.key === 'rand' && <RandUpsellMetrics range={range} />}
-      {funnel.key === 'quiz' && <QuizAnswerMetrics range={range} />}
+      {funnel.key === 'rand' && <RandUpsellMetrics range={range} dates={dates} />}
+      {funnel.key === 'quiz' && <QuizAnswerMetrics range={range} dates={dates} />}
     </div>
   );
 };
 
 // Coorte por período: ofertas criadas no período (eventos do funil) e pagamentos aprovados no período (aprovado/receita).
-const RandUpsellMetrics: React.FC<{ range: FunnelRange }> = ({ range }) => {
-  const since = sinceFromRange(range);
+const RandUpsellMetrics: React.FC<{ range: FunnelRange;dates:FunnelDates }> = ({ range,dates }) => {
+  const bounds=funnelPeriodBounds(range,dates);
+  const since=bounds?.since??null,until=bounds?.until??null;
   const { data } = useQuery({
-    queryKey: ['rand-upsell-metrics', range],
+    queryKey: ['rand-upsell-metrics', range,dates.from,dates.to],
+    enabled:!!bounds,
     refetchInterval: 30_000,
     queryFn: async () => {
       let q = supabase
@@ -179,8 +166,9 @@ const RandUpsellMetrics: React.FC<{ range: FunnelRange }> = ({ range }) => {
     },
   });
   const all = data ?? [];
-  const rows = since ? all.filter((r) => new Date(r.created_at).getTime() >= Date.parse(since)) : all;
-  const paidRows = since ? all.filter((r) => r.paid_at && Date.parse(r.paid_at) >= Date.parse(since)) : all.filter((r) => r.paid_at);
+  const inWindow=(date:string|null)=>!!date&&(!since||Date.parse(date)>=Date.parse(since))&&(!until||Date.parse(date)<Date.parse(until));
+  const rows = all.filter(r=>inWindow(r.created_at));
+  const paidRows = all.filter(r=>inWindow(r.paid_at));
   const n = (k: string) => rows.filter((r) => r[k]).length;
   const revenue = paidRows.reduce((s, r) => s + Number(r.amount || 0), 0);
   const e = (k: string) => rows.filter((r) => r.events && r.events[k]).length;

@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom';
 import { ExternalLink, Filter } from 'lucide-react';
 import { FUNNELS, type FunnelDef } from '@/lib/funnels';
 import {usePageFunnel, type FunnelRange} from '@/hooks/usePageFunnel';
-import {Button} from '@/components/ui/button';
+import FunnelPeriodPicker from './FunnelPeriodPicker';
+import {EMPTY_FUNNEL_DATES,funnelPeriodQuery,type FunnelDates} from '@/lib/funnelPeriod';
 
-const RANGES:Array<{key:FunnelRange;label:string}>=[{key:'today',label:'Hoje'},{key:'7d',label:'7 dias'},{key:'30d',label:'30 dias'},{key:'all',label:'Tudo'}];
 const fmt=(value:number)=>value.toLocaleString('pt-BR');
-function FunnelSummaryCard({funnel,range}:{funnel:FunnelDef;range:FunnelRange}){
- const {data:counts,isLoading,isError}=usePageFunnel(funnel,range);
+function FunnelSummaryCard({funnel,range,dates}:{funnel:FunnelDef;range:FunnelRange;dates:FunnelDates}){
+ const {data:counts,isLoading,isError}=usePageFunnel(funnel,range,dates);
  const top=counts?.[funnel.steps[0]?.key]??0;
  return <article className="rounded-lg border p-5 space-y-4">
   <div className="flex items-start justify-between gap-3">
@@ -22,14 +22,15 @@ function FunnelSummaryCard({funnel,range}:{funnel:FunnelDef;range:FunnelRange}){
     <div className="h-2 rounded-full bg-muted/50 overflow-hidden" role="meter" aria-label={step.label} aria-valuemin={0} aria-valuemax={Math.max(top,count,1)} aria-valuenow={count} aria-valuetext={`${fmt(count)}${top?`, ${percent.toFixed(1)}% dos acessos`:''}`}><div className="h-full rounded-full bg-primary transition-[width]" style={{width:`${Math.min(100,Math.max(0,percent))}%`}}/></div>
    </div>
   })}</div>}
-  <Link to={`/admin/funis/${funnel.key}?periodo=${range}`} className="inline-flex text-sm font-medium text-primary hover:underline">Ver métricas →</Link>
+  <Link to={`/admin/funis/${funnel.key}?${funnelPeriodQuery(range,dates)}`} className="inline-flex text-sm font-medium text-primary hover:underline">Ver métricas →</Link>
  </article>;
 }
 const AdminFunnels: React.FC=()=>{
  const [range,setRange]=useState<FunnelRange>('30d');
+ const [dates,setDates]=useState(EMPTY_FUNNEL_DATES);
  return <div className="space-y-6">
-  <div className="flex justify-between items-start gap-4 flex-wrap"><div><h1 className="text-3xl font-bold text-foreground">Métricas de Funil</h1><p className="text-muted-foreground">Veja os resultados de cada etapa. Os percentuais comparam cada etapa aos acessos iniciais.</p></div><div className="flex gap-1.5" aria-label="Período das métricas">{RANGES.map(item=><Button key={item.key} size="sm" variant={range===item.key?'default':'outline'} aria-pressed={range===item.key} onClick={()=>setRange(item.key)}>{item.label}</Button>)}</div></div>
-  <div className="grid gap-4 xl:grid-cols-2">{FUNNELS.map(funnel=><FunnelSummaryCard key={funnel.key} funnel={funnel} range={range}/>)}</div>
+  <div className="flex justify-between items-start gap-4 flex-wrap"><div><h1 className="text-3xl font-bold text-foreground">Métricas de Funil</h1><p className="text-muted-foreground">Veja os resultados de cada etapa. Os percentuais comparam cada etapa aos acessos iniciais.</p></div><FunnelPeriodPicker range={range} dates={dates} onChange={(r,d)=>{setRange(r);setDates(d)}}/></div>
+  <div className="grid gap-4 xl:grid-cols-2">{FUNNELS.map(funnel=><FunnelSummaryCard key={funnel.key} funnel={funnel} range={range} dates={dates}/>)}</div>
   <p className="text-xs text-muted-foreground">Atualização automática a cada 30 segundos. Abra “Ver métricas” para analisar os detalhes.</p>
  </div>;
 };

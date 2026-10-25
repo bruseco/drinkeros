@@ -1,13 +1,14 @@
 import {useQuery} from '@tanstack/react-query';
 import {supabase} from '@/integrations/supabase/client';
-import {sinceFromRange,type FunnelRange} from '@/hooks/usePageFunnel';
+import {funnelPeriodBounds,EMPTY_FUNNEL_DATES,type FunnelDates,type FunnelRange} from '@/lib/funnelPeriod';
 import {QUESTIONS,type QuestionId} from '@/lib/quizLogic';
 import {Button} from '@/components/ui/button';
 type AnswerCount={question:string;answer:string|null;count:number};
 const format=(n:number)=>n.toLocaleString('pt-BR');
-export default function QuizAnswerMetrics({range}:{range:FunnelRange}){
- const {data,isLoading,isError,refetch}=useQuery({queryKey:['quiz-answer-metrics',range],refetchInterval:30000,queryFn:async()=>{
-  const {data,error}=await supabase.rpc('get_quiz_answer_metrics' as never,{_since:sinceFromRange(range)} as never);
+export default function QuizAnswerMetrics({range,dates=EMPTY_FUNNEL_DATES}:{range:FunnelRange;dates?:FunnelDates}){
+ const bounds=funnelPeriodBounds(range,dates);
+ const {data,isLoading,isError,refetch}=useQuery({queryKey:range==='custom'?['quiz-answer-metrics',range,dates.from,dates.to]:['quiz-answer-metrics',range],enabled:!!bounds,refetchInterval:30000,queryFn:async()=>{
+  const {data,error}=await supabase.rpc((range==='custom'?'get_quiz_answer_metrics_window':'get_quiz_answer_metrics') as never,{_since:bounds?.since??null,...(range==='custom'?{_until:bounds?.until}: {})} as never);
   if(error)throw error;
   return (data??[]) as AnswerCount[];
  }});
