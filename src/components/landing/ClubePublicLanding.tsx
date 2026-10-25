@@ -12,6 +12,7 @@ import TestimonialsCarousel from './TestimonialsCarousel';
 import ClubRecipeLoop from './ClubRecipeLoop';
 import ClubFavoriteDemo from './ClubFavoriteDemo';
 import ClubShoppingDemo from './ClubShoppingDemo';
+import ClubCommunityDemo from './ClubCommunityDemo';
 import catalog from './clubLandingCatalog.json';
 import latestRecipes from './clubLatestCovers.json';
 const landingCategories = [...catalog, latestRecipes];
@@ -279,7 +280,6 @@ export default function ClubePublicLanding(props: Props) {
   return <div className={`club-public${props.unlocked ? ' club-unlocked' : ''}`} ref={props.scrollRef}>
     <div ref={atmosphere} className="club-brick-atmosphere" data-motion-active={atmosphereActive} aria-hidden="true">
       <div className="club-lamp-flicker"/>
-      <div className="club-lamp-sway"/>
       <div className="club-lamp-motes">{Array.from({length:8},(_,index)=><i key={index} style={{left:`calc(50% + ${(index%4-1.5)*23}px)`,top:`${10+(index*11)%25}%`,animationDuration:`${3.1+(index%4)*.7}s`,animationDelay:`-${index*.53}s`}}/>)}</div>
     </div>
     {props.reveal}
@@ -298,6 +298,7 @@ export default function ClubePublicLanding(props: Props) {
       <article className="club-feature"><p className="club-eyebrow">Receitas em vídeo</p><h2>Assista como preparar.</h2><p>Todas as receitas foram realizadas e testadas.</p><ClubRecipeLoop /></article>
       <article className="club-feature"><h2>Salve suas receitas.</h2><p>Monte listas de favoritos para cada ocasião.</p><ClubFavoriteDemo /></article>
       <article className="club-feature club-shopping-feature"><h2>Organize a festa.</h2><p>Monte sua lista e gere o checklist de compras para a sua festa.</p><ClubShoppingDemo /></article>
+      <article className="club-feature club-community-feature"><h2>Comunidade.</h2><p>Compartilhe e descubra receitas com outros usuários.</p><ClubCommunityDemo /></article>
     </section>
     <section id="clube-pricing" className="club-public-pricing" ref={pricing}>
       <h2>Entre para o Clube!</h2>

@@ -9,6 +9,7 @@ interface Props {
   open: boolean;
   onClose: (claimed?: boolean) => void;
   newVisitor?: boolean;
+  savings?: number;
 }
 
 type Phase =
@@ -26,9 +27,9 @@ type Phase =
  *  1) INTRO: presente brilhante entra na tela, com "O que tem dentro?" e botão.
  *  2) REVEAL: ao clicar, a tampa voa e revela "Você ganhou R$100 de desconto."
  */
-export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose, newVisitor = false }) => {
+export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose, newVisitor = false, savings }) => {
   const youth = useYouthDiscount();
-  const discountAmount = youth.isYouth ? 150 : 100;
+  const discountAmount = savings ?? (youth.isYouth ? 150 : newVisitor ? 110 : 100);
   const [phase, setPhase] = useState<Phase>('idle');
   const claimedRef=React.useRef(false);
   const onCloseRef = React.useRef(onClose);
@@ -269,7 +270,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose, newVisitor
             className="text-white text-2xl sm:text-3xl font-light tracking-wide"
             style={{ animation: 'clube-fade-up 520ms ease 480ms both' }}
           >
-            O que tem dentro?
+            {newVisitor ? `Você ganhou R$ ${discountAmount} de desconto` : 'O que tem dentro?'}
           </div>
 
           <button
@@ -285,7 +286,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose, newVisitor
                 'clube-fade-up 520ms ease 640ms both, clube-btn-shimmer 2.6s linear 1100ms infinite, clube-btn-glow 2.2s ease-in-out 1100ms infinite',
             }}
           >
-            {newVisitor ? 'Pegar oferta!' : 'Ver oferta!'}
+            {newVisitor ? 'Pegar desconto' : 'Ver oferta!'}
           </button>
         </div>
       )}

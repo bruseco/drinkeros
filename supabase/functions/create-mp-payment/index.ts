@@ -60,7 +60,7 @@ const CLUB_PRODUCTS: Record<string, { id: string; name: string; slug: string; pr
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  if (req.method === 'GET') return new Response(JSON.stringify({public_club_offer_version:1}),{headers:{...corsHeaders,'Content-Type':'application/json'}});
+  if (req.method === 'GET') return new Response(JSON.stringify({public_club_offer_version:2}),{headers:{...corsHeaders,'Content-Type':'application/json'}});
 
   try {
     const mpToken = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");

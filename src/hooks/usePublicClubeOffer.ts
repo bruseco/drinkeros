@@ -22,6 +22,6 @@ export function usePublicClubeOffer(enabled: boolean): ClubeIntroOfferState {
   const row = query.data?.row;
   const active = !!row && (!row.revealed_at || localDeadline>now);
   return { isLoading:enabled&&(authLoading||query.isLoading),isActive:active,eligibleUntilMs:localDeadline,
-    hasRevealed:!!row?.revealed_at,price:active&&row?.revealed_at?Number(row.price):197,promoPrice:97,fullPrice:197,
+    hasRevealed:!!row?.revealed_at,price:active&&row?.revealed_at?Number(row.price):197,promoPrice:87,fullPrice:197,
     markRevealed:async()=>{const next:PublicClubOffer=await fetchPublicClubOffer(true);queryClient.setQueryData(key,{row:next,receivedAt:Date.now()});setNow(Date.now())} };
 }

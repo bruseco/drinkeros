@@ -5,7 +5,7 @@ const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,
 const site='https://drinkeros.com';
 export async function handleGuestCheckout(req:Request,{admin,mpToken,supabaseUrl,serviceKey}:{admin:any;mpToken:string;supabaseUrl:string;serviceKey:string}){
  if(req.method==='OPTIONS')return new Response(null,{headers:cors});
- if(req.method==='GET')return json({club_guest_checkout_version:1});
+ if(req.method==='GET')return json({club_guest_checkout_version:2});
  if(req.method!=='POST')return json({error:'Método inválido'},405);
  try{
   const body=await req.json();
@@ -30,7 +30,7 @@ export async function handleGuestCheckout(req:Request,{admin,mpToken,supabaseUrl
    const {data,error}=await admin.from('clube_public_offers').select('user_id,expires_at').eq('token_hash',offerHash).maybeSingle();
    if(error)throw error;
    if(data?.user_id)throw Error('Faça login para usar a oferta vinculada à sua conta.');
-   return {price:data?.expires_at&&new Date(data.expires_at).getTime()>Date.now()?97:197};
+   return {price:data?.expires_at&&new Date(data.expires_at).getTime()>Date.now()?87:197};
   };
   if(action==='quote')return json(await quote());
   let row=await read();

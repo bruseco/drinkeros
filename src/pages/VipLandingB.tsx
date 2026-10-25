@@ -449,7 +449,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
     offerDeadline={publicBackendReady ? promo.eligibleUntilMs : 0}
     loading={loading || promo.isLoading}
     onSubscribe={() => handleSubscribe('card')}
-    reveal={<ClubeDiscountReveal open={revealOpen} onClose={handleRevealClose} newVisitor />}
+    reveal={<ClubeDiscountReveal open={revealOpen} onClose={handleRevealClose} newVisitor savings={effectiveSavings} />}
   />;
 
   return (

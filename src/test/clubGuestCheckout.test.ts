@@ -49,8 +49,17 @@ it('permits a single activation only for a newly created matching paid account',
 });
 
 it('creates one subscription using the server quote and only then waits for the actual charge',async()=>{
- const s=setup({row:null});const result=await s.request({action:'create',method:'card',public_offer_token:'b'.repeat(64),expected_amount:97,formData:{token:'fake-card',payer:{email:'buyer@example.com'}}});
- expect(result.body.status).toBe('pending');const charge=s.gateway.mock.calls.find(([url,init])=>String(url).endsWith('/preapproval')&&init?.method==='POST');expect(charge).toBeDefined();expect(JSON.parse(String(charge![1].body)).auto_recurring.transaction_amount).toBe(97);
- await s.request({action:'create',method:'card',expected_amount:97});expect(s.gateway.mock.calls.filter(([url,init])=>String(url).endsWith('/preapproval')&&init?.method==='POST')).toHaveLength(1);
+ const s=setup({row:null});const result=await s.request({action:'create',method:'card',public_offer_token:'b'.repeat(64),expected_amount:87,formData:{token:'fake-card',payer:{email:'buyer@example.com'}}});
+ expect(result.body.status).toBe('pending');const charge=s.gateway.mock.calls.find(([url,init])=>String(url).endsWith('/preapproval')&&init?.method==='POST');expect(charge).toBeDefined();expect(JSON.parse(String(charge![1].body)).auto_recurring.transaction_amount).toBe(87);
+ await s.request({action:'create',method:'card',expected_amount:87});expect(s.gateway.mock.calls.filter(([url,init])=>String(url).endsWith('/preapproval')&&init?.method==='POST')).toHaveLength(1);
  expect(s.updates.some(u=>'password' in u||'token' in u)).toBe(false);
+});
+
+it.each(['card','pix'])('uses the server R$87 quote for new %s payments',async(method)=>{
+ const s=setup({row:null});
+ const quote=await s.request({action:'quote',public_offer_token:'b'.repeat(64)});expect(quote.body.price).toBe(87);
+ const stale=await s.request({action:'create',method,public_offer_token:'b'.repeat(64),expected_amount:97,formData:{token:'card',payer:{email:'buyer@example.com'}}});expect(stale.status).toBe(409);expect(stale.body.amount).toBe(87);expect(s.gateway).not.toHaveBeenCalled();
+ await s.request({action:'create',method,public_offer_token:'b'.repeat(64),expected_amount:87,formData:{token:'card',payer:{email:'buyer@example.com'}}});
+ const call=s.gateway.mock.calls.find(([url,init])=>init?.method==='POST'&&!String(url).includes('/mercadopago-webhook'));
+ expect(call).toBeDefined();const payload=JSON.parse(call![1].body as string);expect(method==='card'?payload.auto_recurring.transaction_amount:payload.transaction_amount).toBe(87);
 });

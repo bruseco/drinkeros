@@ -207,12 +207,12 @@
 .club-public-hero{position:relative;z-index:1}
 .club-brick-atmosphere{position:absolute;top:0;left:0;width:100%;height:var(--club-brick-height,390px);overflow:hidden;pointer-events:none;z-index:0}
 .club-lamp-flicker,.club-lamp-motes{position:absolute;inset:0}
-.club-lamp-flicker{background:radial-gradient(ellipse at 50% 7%,#ffe2a84d 0%,#fbd48916 30%,transparent 65%);opacity:.36;animation:club-lamp-flicker 11s linear infinite;animation-play-state:paused}
+.club-lamp-flicker{background:#000;opacity:0;animation:club-lamp-flicker 13s linear infinite;animation-play-state:paused}
 .club-lamp-motes i{position:absolute;width:2px;height:3px;border-radius:50%;background:#bfa478;opacity:.45;animation:club-lamp-mote 4s ease-in-out infinite;animation-play-state:paused}
 .club-lamp-motes i::before,.club-lamp-motes i::after{content:"";position:absolute;top:0;width:4px;height:1px;background:#e3d3af80;border-radius:50%;transform:rotate(35deg);left:-3px}
 .club-lamp-motes i::after{left:1px;transform:rotate(-35deg)}
 .club-brick-atmosphere[data-motion-active="true"] .club-lamp-flicker,.club-brick-atmosphere[data-motion-active="true"] .club-lamp-motes i{animation-play-state:running}
-@keyframes club-lamp-flicker{0%,19%,24%,53%,61%,83%,100%{opacity:.36}20%,23%,57%{opacity:.24}21%,55%,59%,86%{opacity:.42}85%,89%{opacity:.29}}
+@keyframes club-lamp-flicker{0%,21%,23%,59%,62%,84%,100%{opacity:0}21.4%,22.2%{opacity:.18}60%,61%{opacity:.32}60.5%{opacity:.06}85%{opacity:.12}86%{opacity:0}}
 @keyframes club-lamp-mote{0%,100%{transform:translate(0,0) rotate(0deg);opacity:.32}18%{transform:translate(14px,-9px) rotate(22deg);opacity:.6}39%{transform:translate(-9px,12px) rotate(-17deg);opacity:.4}63%{transform:translate(18px,7px) rotate(35deg);opacity:.55}82%{transform:translate(-6px,-13px) rotate(-26deg);opacity:.35}}
 /* Mais respiro antes do texto, mantendo a ancoragem na direita. */
 .club-floating-cta{padding-left:28px;min-width:228px}
@@ -221,14 +221,30 @@
 
 /* Dois filetes de 1px, preto e branco a 30%, entre os grupos da faixa. */
 .club-banner-separator{display:block;flex:none;width:2px;height:26px;border-left:1px solid #0000004d;border-right:1px solid #ffffff4d}
+.club-discount-banner{flex-wrap:nowrap}
 @media(max-width:600px){
- .club-discount-banner{row-gap:5px}
- .club-banner-discount,.club-banner-expiry{flex-basis:100%;justify-content:center}
- .club-banner-separator{width:min(250px,70%);height:2px;border:0;border-top:1px solid #0000004d;border-bottom:1px solid #ffffff4d}
+ .club-discount-banner{gap:8px;padding-left:8px;padding-right:8px;font-size:clamp(9px,2.7vw,12px)}
+ .club-banner-discount,.club-banner-expiry{flex-basis:auto;gap:4px;justify-content:center}
+ .club-discount-banner .club-banner-money,.club-discount-banner .club-banner-timer{font-size:clamp(18px,5vw,24px)}
+ .club-banner-separator{height:clamp(20px,6vw,26px)}
 }
 
 /* Feixe branco em Soft Light, como uma lâmpada balançando suavemente. */
-.club-lamp-sway{position:absolute;inset:-10%;background:radial-gradient(ellipse at 50% 7%,#fff 0%,#ffffff80 20%,transparent 65%);mix-blend-mode:soft-light;opacity:.15;transform-origin:50% 0;animation:club-lamp-sway 8s ease-in-out infinite;animation-play-state:paused}
-.club-brick-atmosphere[data-motion-active="true"] .club-lamp-sway{animation-play-state:running}
-@keyframes club-lamp-sway{0%,100%{transform:translateX(-14px) rotate(-1deg)}50%{transform:translateX(18px) rotate(1.2deg)}}
-@media(prefers-reduced-motion:reduce){.club-lamp-sway{animation:none}}
+
+/* Demonstração da comunidade, isolada de publicações e reações reais. */
+.club-community-feature{min-height:0}.club-community-demo{width:100%;max-width:350px;margin:0;pointer-events:none}.club-community-demo svg{margin:0;color:inherit}
+.club-community-scene{height:430px;position:relative;padding:34px 8px 10px;overflow:hidden;text-align:left}
+.club-community-compose,.club-community-post{background:#151515;border:1px solid #ffffff1a;border-radius:14px;overflow:hidden}.club-community-compose{padding:16px}.club-community-compose>strong{font-size:14px}
+.club-community-upload{margin:14px 0 10px;height:155px;border:1px dashed #ffffff40;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:8px;flex-direction:column;font-size:11px;color:#bcb4c1;overflow:hidden}.club-community-upload.has-photo{border:0}.club-community-upload img{width:100%;height:100%;object-fit:cover}
+.club-community-upload-state{font-size:10px;color:#a6c985;display:flex;align-items:center;gap:5px;margin:7px 0}.club-community-upload-state>div{height:4px;background:#444;flex:1;border-radius:5px;overflow:hidden}.club-community-upload-state i{display:block;background:#b36de0;height:100%}
+.club-community-name{background:#242424;border:1px solid #ffffff26;padding:8px 10px;margin:10px 0;border-radius:8px;font-size:12px}
+.club-community-publish{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;margin-top:14px;border-radius:9px;background:#8b35c9;color:#fff;font-size:12px;font-weight:600}
+.club-community-author{display:flex;align-items:center;gap:9px;padding:10px 12px}.club-community-avatar{width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:#4d315f}.club-community-author>span:last-child{display:flex;flex-direction:column;gap:2px;font-size:11px}.club-community-author small{font-size:9px;color:#aaa}
+.club-community-photo{display:block;width:100%;height:155px;object-fit:cover}.club-community-title{display:block;padding:10px 12px 0;font-size:13px}.club-community-reactions{display:flex;align-items:center;gap:16px;padding:10px 12px;font-size:11px}.club-community-reactions>span{display:flex;align-items:center;gap:5px}.club-community-heart.is-liked{color:#ed4e83}
+.club-community-comments{padding:0 12px 12px}.club-community-comments p{display:flex;align-items:center;gap:7px;padding:8px 10px;margin:5px 0 0;border-radius:8px;background:#ffffff0a;font-size:10px;color:#dfd5e3;animation:club-community-comment .4s ease both}
+.club-community-cursor{position:absolute;z-index:2;filter:drop-shadow(0 2px 3px #0008);transition:left .65s ease,top .65s ease}
+@keyframes club-community-comment{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.club-community-demo:not([data-motion-active="true"]) *{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.club-community-comments p{animation:none}.club-community-cursor{transition:none}}
+
+@media(prefers-reduced-motion:reduce){.club-lamp-flicker{opacity:0}}

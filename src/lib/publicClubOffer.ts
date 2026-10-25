@@ -18,6 +18,6 @@ export async function fetchPublicClubOffer(reveal = false, newVisit = false): Pr
   }
   if (error) throw error;
   const row = (data as unknown as PublicClubOffer[])?.[0];
-  if (!row || ![47,97,197].includes(Number(row.price))) throw new Error('Não foi possível confirmar o preço da oferta.');
+  if (!row || ![47,87,97,197].includes(Number(row.price))) throw new Error('Não foi possível confirmar o preço da oferta.');
   return { ...row, price: Number(row.price) };
 }

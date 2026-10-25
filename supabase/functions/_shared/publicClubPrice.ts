@@ -6,7 +6,7 @@ export async function publicClubPrice(admin: any, userId: string, expectedAmount
   if(error) throw new Error('Não foi possível validar o preço do Clube. Atualize a página.');
   if(!data?.[0]) { if(required)throw new Error('Oferta não vinculada à conta. Atualize a página.');return null; }
   const amount=Number(data[0].price);
-  if(![47,97,197].includes(amount))throw new Error('Preço do Clube inválido.');
+  if(![47,87,97,197].includes(amount))throw new Error('Preço do Clube inválido.');
   if(Number(expectedAmount)!==amount)throw new PublicClubPriceChanged(amount);
   return amount;
 }
