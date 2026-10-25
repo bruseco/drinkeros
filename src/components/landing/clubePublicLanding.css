@@ -157,3 +157,15 @@
 .club-unlocked .club-purchase::after,.club-unlocked .club-floating-cta::after{border-color:#204d17}
 .club-floating-cta,.club-purchase{background-image:linear-gradient(115deg,transparent 32%,#ffffff55 48%,transparent 64%),linear-gradient(180deg,#fff0b5,#efb740);background-size:230% 100%,100% 100%}
 .club-unlocked .club-floating-cta,.club-unlocked .club-purchase{background-image:linear-gradient(115deg,transparent 32%,#ffffff26 48%,transparent 64%),linear-gradient(180deg,#568e34,#225c19);background-size:230% 100%,100% 100%}
+
+/* Valores por benefício, acesso anual e demonstração do jantar mexicano. */
+.club-benefits li>span{flex:1;min-width:0}.club-benefits li>strong{flex:none;white-space:nowrap;font-size:15px;color:#fff}
+.club-offer .club-benefits{border-bottom:1px solid #ffffff24;padding-bottom:22px}
+.club-comparison{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#b8acbd;font-size:13px}.club-comparison svg{width:20px;height:20px;flex:none;color:#f47777}.club-comparison del{white-space:nowrap}
+.club-access-label{font-size:14px;color:#c9bccf;margin:0 0 22px}
+.club-feature .club-recipe-loop{width:60%;max-width:310px}
+.club-shopping-folder{display:flex;flex-direction:column;gap:5px;background:#252525;border:1px solid #ffffff30;padding:20px;border-radius:14px;margin-top:24px}.club-shopping-folder>span{font-size:11px;color:#bbb}
+.club-shopping-recipes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:20px 0}.club-shopping-recipes>div{overflow:hidden;border-radius:10px;background:#252525}.club-shopping-recipes img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}.club-shopping-recipes strong{display:block;padding:10px 8px;font-size:11px}
+.club-shopping-question .club-demo-dialog-title{display:flex;align-items:center;gap:8px}
+.club-feature .club-shopping-scene{height:560px}.club-shopping-result .club-shopping-items{max-height:none;overflow:visible}.club-shopping-result .club-shopping-item{padding:4px 0;gap:7px}.club-shopping-result .club-shopping-item strong{font-size:10px}.club-shopping-result .club-shopping-item>div>span{font-size:9px}.club-shopping-result .club-shopping-checkbox{height:14px;width:14px}
+@media(max-width:600px){.club-feature .club-recipe-loop{width:60vw;max-width:310px}}

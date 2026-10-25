@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { ArrowDown, ArrowRight, Check } from 'lucide-react';
+import { ArrowDown, ArrowRight, Check, X } from 'lucide-react';
 import drinksStrip from '@/assets/1000-drinks.jpg';
 import drinkerosLogo from '@/assets/logotipo-drinkeros.png';
 import { Link } from 'react-router-dom';
@@ -295,10 +295,10 @@ export default function ClubePublicLanding(props: Props) {
       <h2>Entre para o Clube.</h2>
       <div className="club-offer" ref={props.registerPriceCard}>
         <p>Clube dos Drinkeros · Plano anual</p>
-        <ul className="club-benefits">{['Acesso a mais de mil receitas em vídeo', 'Mais de 40 receitas de xaropes artesanais', 'Organizador de festas: crie listas de favoritos e gere listas de compras'].map(benefit => <li key={benefit}><Check aria-hidden="true" /><span>{benefit}</span></li>)}</ul>
-        {props.unlocked && <p className="club-old-price">De R$ {props.fullPrice}</p>}
-        <div className="club-price"><span>R$</span> {props.price}<small>/ ano</small></div>
-        {props.unlocked && <p className="club-saving">Você economiza R$ {props.savings} por ano enquanto sua assinatura no cartão permanecer ativa.</p>}
+        <ul className="club-benefits">{[{text:'Acesso a mais de mil receitas em vídeo',value:47},{text:'Mais de 40 receitas de xaropes artesanais',value:53},{text:'Organizador de festas: crie listas de favoritos e gere listas de compras',value:97}].map(benefit => <li key={benefit.text}><Check aria-hidden="true" /><span>{benefit.text}</span><strong>R$ {benefit.value}</strong></li>)}</ul>
+        {props.unlocked && <p className="club-comparison"><X aria-hidden="true" /><span>Quanto você pagaria</span><del>R$ {props.fullPrice}</del></p>}
+        <div className="club-price"><span>R$</span> {props.price}</div>
+        <p className="club-access-label">Acesso anual</p>
         <button ref={purchase} type="button" className="club-purchase" disabled={props.loading} onClick={props.onSubscribe}><span className="club-purchase-copy">{props.loading ? 'Abrindo checkout…' : 'Quero entrar p/ o Clube'}</span><ClubButtonIcons /></button>
         <div className="club-payment-brands" aria-label="Meios de pagamento">
           {[[payVisa, 'Visa'], [payMaster, 'Mastercard'], [payApple, 'Apple Pay'], [payGoogle, 'Google Pay'], [payPix, 'Pix']].map(([src, alt]) => <span key={alt}><img src={src} alt={alt} width="42" height="20" /></span>)}

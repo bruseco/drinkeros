@@ -1,0 +1,32 @@
+[
+  {
+    "id": "804c6976-86ac-431b-bdb4-c9fe7409c247",
+    "name": "Margarita Tropicante",
+    "ingredients": [
+      "Abacaxi",
+      "Açúcar",
+      "Licor de Laranja",
+      "Limão Cravo",
+      "Manga",
+      "Pimenta Sriracha",
+      "Tajin",
+      "Tequila Ouro"
+    ],
+    "instructions": "No liquidificador\nAdicione uma porção de abacaxi congelado\nE uma porção de manga congelada\n2 doses de Tequila Ouro José Cuervo\n1 dose de Licor de laranja\n1 colher de sopa de açúcar\nSuco de 1 limão cravo\n1 dash de molho de pimenta Sriracha\nBata tudo no liquidificador, adicione mais gelo e bata novamente\nPasse limão na borda e salpique Tajin na borda da taça\nAdicione na taça um pouco de xarope de Grenadine e espalhe\nAdicione o Frozen na taça em cima do xarope de grenadine\nColoque uma rodela de limão na borda para decorar e Tajin em cima do frozen\nPronto! Bora beber!!",
+    "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251374265-97.jpg",
+    "yield": 1
+  },
+  {
+    "id": "3e75e519-c85d-41da-a03f-f860238b238a",
+    "name": "Paloma",
+    "ingredients": [
+      "Água com gás",
+      "Limão Taiti",
+      "Tequila Prata",
+      "Toranja"
+    ],
+    "instructions": "Comece bordeando metade do copo alto com toranja, sal e páprica\nColoque 2 cubos de gelo translucido no copo\n2 doses de tequila prata José Cuervo\n1/4 de suco de limão Taiti\n1 dose e meia de suco de toranja\nMisture bem\nAdicione mais gelo\nComplete com água com gás\nMisture levemente\nDecore com uma fatia de toranja em meia lua\nPronto! Bora beber!!",
+    "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251380258-163.jpg",
+    "yield": 1
+  }
+]
