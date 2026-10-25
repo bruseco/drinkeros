@@ -88,3 +88,9 @@
 /* Lote em revisão local: respiro dos depoimentos e botão ao lado da marca. */
 .club-public-pricing{padding-bottom:36px}.club-footer-brand img{width:140px}
 @media(max-width:600px){.club-footer-brand{min-height:82px;display:flex;align-items:center}.club-footer-brand img{width:clamp(76px,calc(100vw - 260px),120px)}}
+
+/* Textura da página: centralizada no topo, sem repetir ao longo da rolagem. */
+.club-public{background-color:#141414;background-image:url('../../assets/bg-clube.jpg');background-position:center top;background-size:100% auto;background-repeat:no-repeat;background-attachment:local}
+.club-public-hero,.club-scene,.club-scene:nth-of-type(even),.club-public-pricing,.club-public-footer{background:transparent}
+
+.club-invite{color:#fff;opacity:1;text-shadow:0 2px 3px #000,0 0 10px #000,0 4px 16px #000;font-weight:400}.club-logo{filter:drop-shadow(0 3px 5px #000) drop-shadow(0 0 10px #0009)}
