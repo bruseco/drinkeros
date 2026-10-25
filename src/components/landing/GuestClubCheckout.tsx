@@ -72,8 +72,8 @@ export default function GuestClubCheckout(){
   }catch(e){setError((e as Error).message)}finally{setBusy(false)}
  };
  const paid=result.status==='paid'||result.status==='activated';
- return <main className="min-h-screen bg-[#141414] text-white px-4 py-7">
-  <header className="max-w-4xl mx-auto flex items-center justify-between mb-9"><Link to="/clube-receitas" className="flex items-center gap-2 text-sm"><ArrowLeft size={17}/>Voltar</Link><img src={logo} alt="Drinkeros" className="h-7 w-auto"/><ShieldCheck className="text-green-400"/></header>
+ return <main className="min-h-screen bg-white text-gray-900 px-4 py-7">
+  <header className="max-w-4xl mx-auto flex items-center justify-between mb-9"><Link to="/clube-receitas" className="flex items-center gap-2 text-sm"><ArrowLeft size={17}/>Voltar</Link><img src={logo} alt="Drinkeros" className="h-7 w-auto"/><ShieldCheck className="text-green-700"/></header>
   <section className="max-w-lg mx-auto bg-white rounded-2xl p-5 sm:p-8 text-gray-900">
    <h1 className="text-2xl font-bold mb-2">{paid?'Pagamento confirmado':'Entre para o Clube'}</h1>
    {!paid&&<><p className="text-sm text-gray-600">Pague primeiro. Defina sua senha depois da confirmação.</p><p className="text-4xl font-bold mt-5 mb-1">R$ {amount}</p><p className="text-sm text-gray-500 mb-6">Acesso por 12 meses</p></>}
