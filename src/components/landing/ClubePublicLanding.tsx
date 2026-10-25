@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowDown, ArrowRight, Heart, Play, ShoppingBag } from 'lucide-react';
+import { ArrowDown, ArrowRight, DoorOpen } from 'lucide-react';
 import drinksStrip from '@/assets/1000-drinks.jpg';
 import drinkerosLogo from '@/assets/logotipo-drinkeros.png';
 import { Link } from 'react-router-dom';
@@ -9,6 +9,9 @@ import payApple from '@/assets/pagamento-apple.png';
 import payGoogle from '@/assets/pagamento-google.png';
 import payPix from '@/assets/pagamento-pix.png';
 import TestimonialsCarousel from './TestimonialsCarousel';
+import ClubRecipeLoop from './ClubRecipeLoop';
+import ClubFavoriteDemo from './ClubFavoriteDemo';
+import ClubShoppingDemo from './ClubShoppingDemo';
 import catalog from './clubLandingCatalog.json';
 import latestRecipes from './clubLatestCovers.json';
 const landingCategories = [...catalog, latestRecipes];
@@ -63,7 +66,7 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
   const [countReady, setCountReady] = useState(false);
   const [highlighted,setHighlighted]=useState(false);
   const handleCountComplete=React.useCallback(()=>{setHighlighted(true)},[]);
-  useEffect(()=>{if(!countReady)setHighlighted(false);else if(category.number===null)setHighlighted(true)},[countReady,category.number]);
+  useEffect(()=>{if(!countReady)setHighlighted(false);else if(category.number===null||category.id==='latest-recipes')setHighlighted(true)},[countReady,category.number,category.id]);
   const surfaces = useRef<Array<HTMLDivElement | null>>([]);
   const offsets = useRef([0, 0, 0]);
   const dragging = useRef(false);
@@ -154,7 +157,7 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
   return <section className={`club-scene${category.id === 'syrups' ? ' club-syrups' : ''}${highlighted ? ' club-highlight-complete' : ''}`} ref={scene} aria-label={category.label}>
     <div className="club-stage">
       <div className="club-category-copy club-category-heading" ref={heading}>
-        <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.id === 'latest-recipes' ? <>São mais de <strong><AnimatedClubCount value={1000} start={countReady} onComplete={handleCountComplete} /> receitas no seu celular.</strong></> : category.label === 'Frozens' ? <>Mais de <strong><AnimatedClubCount value={20} start={countReady} onComplete={handleCountComplete} /> Frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} onComplete={handleCountComplete} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
+        <h2>{category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.id === 'latest-recipes' ? <>São as receitas <strong>mais criativas da internet</strong> no seu celular.</> : category.label === 'Frozens' ? <>Mais de <strong><AnimatedClubCount value={20} start={countReady} onComplete={handleCountComplete} /> Frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} onComplete={handleCountComplete} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
       </div>
       <p className="club-category-subtitle" ref={subtitle}>{category.subtitle}</p>
       <div className="club-covers-window" ref={covers} aria-label="Capas das receitas; arraste para explorar"
@@ -245,7 +248,7 @@ export default function ClubePublicLanding(props: Props) {
   return <div className={`club-public${props.unlocked ? ' club-unlocked' : ''}`} ref={props.scrollRef}>
     {props.reveal}
     {props.unlocked && <PublicOfferBanner savings={props.savings} deadline={props.offerDeadline} />}
-    <button ref={floatingCta} type="button" className={`club-floating-cta${showFloatingCta ? ' club-cta-visible' : ''}`} aria-hidden={!showFloatingCta} tabIndex={showFloatingCta?0:-1} disabled={!showFloatingCta || (props.unlocked && props.loading)} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar para o</span><strong>CLUBE</strong></span><ArrowRight aria-hidden="true" /></button>
+    <button ref={floatingCta} type="button" className={`club-floating-cta${showFloatingCta ? ' club-cta-visible' : ''}`} aria-hidden={!showFloatingCta} tabIndex={showFloatingCta?0:-1} disabled={!showFloatingCta || (props.unlocked && props.loading)} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar para o</span><strong>CLUBE</strong></span><span className="club-cta-icons" aria-hidden="true"><ArrowRight /><DoorOpen /></span></button>
     <header className="club-public-hero" ref={hero}>
       <p className="club-invite">Torne-se membro do</p>
       <h1><img className="club-logo" src="/club-landing/logo.png" alt="Clube dos Drinkeros" width="500" height="140" fetchPriority="high" /></h1>
@@ -256,9 +259,9 @@ export default function ClubePublicLanding(props: Props) {
     </header>
     {landingCategories.map((category,index) => <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCoversReached={category.id === 'category-1' ? revealCta : undefined} />)}
     <section className="club-tools" aria-label="Organize seus drinks">
-      <div><Play aria-hidden="true" /><h2>Veja como preparar</h2><p>Acompanhe o passo a passo das receitas em vídeo.</p></div>
-      <div><Heart aria-hidden="true" /><h2>Salve suas escolhas</h2><p>Monte listas de favoritos para cada ocasião.</p></div>
-      <div><ShoppingBag aria-hidden="true" /><h2>Organize a festa</h2><p>Defina pessoas e drinks e gere sua lista de compras.</p></div>
+      <article className="club-feature"><p className="club-eyebrow">Receitas em vídeo</p><h2>Assista como preparar.</h2><p>Todas as receitas foram realizadas e testadas.</p><ClubRecipeLoop /></article>
+      <article className="club-feature"><h2>Salve suas receitas.</h2><p>Monte listas de favoritos para cada ocasião.</p><ClubFavoriteDemo /></article>
+      <article className="club-feature"><h2>Organize a festa.</h2><p>Monte sua lista e gere o checklist de compras para a sua festa.</p><ClubShoppingDemo /></article>
     </section>
     <section id="clube-pricing" className="club-public-pricing" ref={pricing}>
       <p className="club-eyebrow">Seu próximo drink começa aqui</p><h2>Entre para o Clube.</h2>
