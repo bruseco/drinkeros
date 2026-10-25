@@ -115,7 +115,10 @@ export async function sendPurchaseEmails(supabase: any, args: SendPurchaseEmails
     let passwordSetupUrl = `${site}/criar-conta?pid=${encodeURIComponent(args.transactionId)}&email=${encodeURIComponent(args.email)}`;
     if(args.secureSetup){
       const generated=await supabase.auth.admin.generateLink({type:'recovery',email:args.email,options:{redirectTo:`${site}/reset-password?redirect=/clube/boas-vindas`}});
-      if(generated.error || !generated.data?.properties?.action_link)throw new Error('Não foi possível gerar o link seguro de acesso');
+      if(generated.error || !generated.data?.properties?.action_link){
+        await supabase.from('purchases').update({emails_dispatched_at:null}).eq('gateway',args.gateway).eq('transaction_id',args.transactionId);
+        throw new Error('Não foi possível gerar o link seguro de acesso');
+      }
       passwordSetupUrl=generated.data.properties.action_link;
     }
     await invokeTemplate(

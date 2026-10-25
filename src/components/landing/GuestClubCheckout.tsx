@@ -79,7 +79,7 @@ export default function GuestClubCheckout(){
    {!paid&&<><p className="text-sm text-gray-600">Pague primeiro. Defina sua senha depois da confirmação.</p><p className="text-4xl font-bold mt-5 mb-1">R$ {amount}</p><p className="text-sm text-gray-500 mb-6">Acesso por 12 meses</p></>}
    {error&&<p role="alert" className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm my-4">{error}</p>}
    {paid?<>
-    <CheckCircle2 className="text-green-600 my-4" size={40}/><p className="text-sm mb-5">Seu acesso está vinculado a {result.email}. Enviamos também a confirmação por e-mail.</p>
+    <CheckCircle2 className="text-green-600 my-4" size={40}/><p className="text-sm mb-5">Seu acesso está vinculado a {result.email}. Você também receberá a confirmação por e-mail.</p>
     {result.can_activate&&result.status!=='activated'?<form onSubmit={activate} className="space-y-4"><h2 className="font-semibold">Defina sua senha para entrar</h2><label className="block text-sm">Senha<input className="block border rounded-lg p-3 w-full mt-1" type="password" autoComplete="new-password" minLength={8} required value={password} onChange={e=>setPassword(e.target.value)}/></label><label className="block text-sm">Confirmar senha<input className="block border rounded-lg p-3 w-full mt-1" type="password" autoComplete="new-password" minLength={8} required value={confirm} onChange={e=>setConfirm(e.target.value)}/></label><button disabled={busy} className="rounded-lg bg-green-700 text-white p-3 w-full font-semibold">{busy?'Salvando…':'Criar senha e entrar no Clube'}</button></form>:<Link className="block text-center rounded-lg bg-green-700 text-white p-3" to="/login?redirect=/clube/boas-vindas">Entrar com minha conta</Link>}
     <p className="mt-5 text-xs text-gray-500">Os dados da nota fiscal podem ser completados após o acesso, sem bloquear sua entrada.</p>
    </>:started?<div className="space-y-4">
@@ -93,6 +93,7 @@ export default function GuestClubCheckout(){
     <Payment key={`${method}-${amount}`} initialization={{amount}} customization={{paymentMethods:{creditCard:method==='card'?'all':undefined,bankTransfer:method==='pix'?['pix']:undefined,maxInstallments:1,minInstallments:1},visual:{style:{theme:'default'},hideFormTitle:true}}} onSubmit={({formData})=>submit(formData)} onError={()=>setError('Não foi possível carregar o formulário. Recarregue a página.')}/>
     <p className="text-xs text-gray-500 mt-5">{method==='card'?'Assinatura anual com renovação automática pelo valor contratado.':'Pix: 12 meses de acesso, sem renovação automática.'} Ao continuar, você concorda com os <Link className="underline" to="/termos-de-uso">Termos de uso</Link> e a <Link className="underline" to="/politica-de-privacidade">Política de privacidade</Link>.</p>
    </>:!error?<Loader2 className="animate-spin mx-auto my-6"/>:<button className="underline" onClick={()=>window.location.reload()}>Recarregar</button>}
+   {!paid&&<p className="mt-5 text-sm text-gray-600">Já tem conta? <Link to="/login?redirect=/clube/boas-vindas" className="underline">Entrar com meu login</Link></p>}
   </section>
  </main>;
 }

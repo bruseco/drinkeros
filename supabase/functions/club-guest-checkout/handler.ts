@@ -36,7 +36,7 @@ export async function handleGuestCheckout(req:Request,{admin,mpToken,supabaseUrl
   let row=await read();
   if(action==='create'&&!row){
    const email=String(body.formData?.payer?.email||'').trim().toLowerCase();
-   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return json({error:'Informe um e-mail válido para receber seu acesso.'},400);
+   if(email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return json({error:'Informe um e-mail válido para receber seu acesso.'},400);
    const method=body.method;
    if(!['card','pix'].includes(method))return json({error:'Método inválido'},400);
    const {price}=await quote();
