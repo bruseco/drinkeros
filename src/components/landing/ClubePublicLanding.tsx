@@ -179,11 +179,17 @@ type Props = {
   reveal: React.ReactNode;
 };
 
+function ClubButtonIcons() {
+  return <span className="club-cta-icons" aria-hidden="true"><ArrowRight /><svg className="club-door-filled" viewBox="0 0 24 32" fill="currentColor"><path fillRule="evenodd" d="M2 3h13v2H4v24h4v2H0v-2h2V3Zm6-2 14 4v26l-14-4V1Zm4 13a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5Z" /></svg></span>;
+}
+
 function PublicOfferBanner({ savings, deadline }: { savings: number; deadline: number }) {
   const { mm, ss, isActive } = useIntroCountdown(deadline);
-  if (!deadline) return <div className="club-discount-banner" role="status">Desconto de R$ {savings} ativo</div>;
-  if (!isActive) return null;
-  return <div className="club-discount-banner" role="status">Desconto de R$ {savings} ativo <span>· Expira em <strong className="tabular-nums">{mm}:{ss}</strong></span></div>;
+  if (deadline && !isActive) return null;
+  return <div className="club-discount-banner" role="status">
+    <span className="club-banner-discount">Desconto de <strong className="club-banner-money">R$ {savings}</strong> ativo</span>
+    {!!deadline && <span className="club-banner-expiry" aria-live="off">Expira em <strong className="club-banner-timer tabular-nums">{mm}:{ss}</strong></span>}
+  </div>;
 }
 
 export default function ClubePublicLanding(props: Props) {
@@ -206,9 +212,18 @@ export default function ClubePublicLanding(props: Props) {
     const button=purchase.current;
     const root=button?.closest('.club-public');
     if(!button||!root)return;
-    const observer=new IntersectionObserver(([entry])=>setPurchaseVisible(entry.isIntersecting),{root,rootMargin:props.unlocked?'-64px 0px 0px 0px':'0px',threshold:0});
-    observer.observe(button);
-    return()=>observer.disconnect();
+    let observer:IntersectionObserver|undefined;
+    let previousInset=-1;
+    const connect=()=>{
+      const inset=props.unlocked?Math.ceil(root.querySelector('.club-discount-banner')?.getBoundingClientRect().height??0):0;
+      if(observer&&inset===previousInset)return;
+      previousInset=inset;observer?.disconnect();
+      observer=new IntersectionObserver(([entry])=>setPurchaseVisible(entry.isIntersecting),{root,rootMargin:`-${inset}px 0px 0px 0px`,threshold:0});
+      observer.observe(button);
+    };
+    connect();const resize=new ResizeObserver(connect);resize.observe(root);
+    const banner=root.querySelector('.club-discount-banner');if(banner)resize.observe(banner);
+    return()=>{observer?.disconnect();resize.disconnect()};
   },[props.unlocked]);
   const footer=useRef<HTMLElement>(null);
   const floatingCta=useRef<HTMLButtonElement>(null);
@@ -246,7 +261,7 @@ export default function ClubePublicLanding(props: Props) {
   return <div className={`club-public${props.unlocked ? ' club-unlocked' : ''}`} ref={props.scrollRef}>
     {props.reveal}
     {props.unlocked && <PublicOfferBanner savings={props.savings} deadline={props.offerDeadline} />}
-    <button ref={floatingCta} type="button" className={`club-floating-cta${showFloatingCta ? ' club-cta-visible' : ''}`} aria-hidden={!showFloatingCta} tabIndex={showFloatingCta?0:-1} disabled={!showFloatingCta || (props.unlocked && props.loading)} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar para o</span><strong>CLUBE</strong></span><span className="club-cta-icons" aria-hidden="true"><ArrowRight /><svg className="club-door-filled" viewBox="0 0 32 40" fill="currentColor"><path fillRule="evenodd" d="M5 3h22v34H5V3Zm3 3v28h16V6H8Zm2 2h12v24H10V8Zm3 11a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" /></svg></span></button>
+    <button ref={floatingCta} type="button" className={`club-floating-cta${showFloatingCta ? ' club-cta-visible' : ''}`} aria-hidden={!showFloatingCta} tabIndex={showFloatingCta?0:-1} disabled={!showFloatingCta || (props.unlocked && props.loading)} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar para o</span><strong>CLUBE</strong></span><ClubButtonIcons /></button>
     <header className="club-public-hero" ref={hero}>
       <p className="club-invite">Torne-se membro do</p>
       <h1><img className="club-logo" src="/club-landing/logo.png" alt="Clube dos Drinkeros" width="500" height="140" fetchPriority="high" /></h1>
@@ -269,7 +284,7 @@ export default function ClubePublicLanding(props: Props) {
         <div className="club-price"><span>R$</span> {props.price}<small>/ ano</small></div>
         {props.unlocked && <p className="club-saving">Você economiza R$ {props.savings} por ano enquanto sua assinatura no cartão permanecer ativa.</p>}
         <ul><li>Acesso às receitas em vídeo do Clube</li><li>Xaropes artesanais e novas combinações</li><li>Listas de favoritos e listas de compras</li></ul>
-        <button ref={purchase} type="button" className="club-purchase" disabled={props.loading} onClick={props.onSubscribe}>{props.loading ? 'Abrindo checkout…' : 'Quero entrar para o Clube'}</button>
+        <button ref={purchase} type="button" className="club-purchase" disabled={props.loading} onClick={props.onSubscribe}><span className="club-purchase-copy">{props.loading ? 'Abrindo checkout…' : 'Quero entrar para o Clube'}</span><ClubButtonIcons /></button>
         <div className="club-payment-brands" aria-label="Meios de pagamento">
           {[[payVisa, 'Visa'], [payMaster, 'Mastercard'], [payApple, 'Apple Pay'], [payGoogle, 'Google Pay'], [payPix, 'Pix']].map(([src, alt]) => <span key={alt}><img src={src} alt={alt} width="42" height="20" /></span>)}
         </div>

@@ -139,3 +139,9 @@
 
 .club-floating-cta .club-cta-icons .club-door-filled{height:48px;width:38px}
 .club-floating-cta .club-cta-icons svg.club-door-filled{height:48px;width:38px}
+
+/* Lote: números da oferta em destaque e ícones iguais nas duas chamadas. */
+.club-discount-banner{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 18px;padding-top:calc(8px + env(safe-area-inset-top,0px));padding-bottom:8px;font-size:13px;line-height:1.15}
+.club-banner-discount,.club-banner-expiry{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}.club-discount-banner .club-banner-money,.club-discount-banner .club-banner-timer{font-size:26px;line-height:1.15;font-weight:800;text-shadow:1px 2px 2px #0009}.club-discount-banner .club-banner-money{color:#fff200}.club-discount-banner .club-banner-timer{color:#fff}
+.club-floating-cta .club-cta-icons svg.club-door-filled,.club-purchase .club-cta-icons svg.club-door-filled{height:44px;width:33px}.club-purchase .club-cta-icons svg:first-child{width:16px;height:20px}.club-purchase{display:flex;align-items:center;justify-content:center;gap:12px;padding-top:8px;padding-bottom:8px}.club-purchase-copy{min-width:0;line-height:1.25}.club-unlocked .club-purchase{min-height:84px;padding-top:14px;padding-bottom:14px}.club-unlocked .club-public-pricing{scroll-margin-top:100px}
+.club-feature:nth-child(-n+2){min-height:0}
