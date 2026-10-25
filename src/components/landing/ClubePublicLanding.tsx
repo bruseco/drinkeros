@@ -289,10 +289,10 @@ export default function ClubePublicLanding(props: Props) {
     <section className="club-tools" aria-label="Organize seus drinks">
       <article className="club-feature"><p className="club-eyebrow">Receitas em vídeo</p><h2>Assista como preparar.</h2><p>Todas as receitas foram realizadas e testadas.</p><ClubRecipeLoop /></article>
       <article className="club-feature"><h2>Salve suas receitas.</h2><p>Monte listas de favoritos para cada ocasião.</p><ClubFavoriteDemo /></article>
-      <article className="club-feature"><h2>Organize a festa.</h2><p>Monte sua lista e gere o checklist de compras para a sua festa.</p><ClubShoppingDemo /></article>
+      <article className="club-feature club-shopping-feature"><h2>Organize a festa.</h2><p>Monte sua lista e gere o checklist de compras para a sua festa.</p><ClubShoppingDemo /></article>
     </section>
     <section id="clube-pricing" className="club-public-pricing" ref={pricing}>
-      <h2>Entre para o Clube.</h2>
+      <h2>Entre para o Clube!</h2>
       <div className="club-offer" ref={props.registerPriceCard}>
         <p>Clube dos Drinkeros · Plano anual</p>
         <ul className="club-benefits">{[{text:'Acesso a mais de mil receitas em vídeo',value:47},{text:'Mais de 40 receitas de xaropes artesanais',value:53},{text:'Organizador de festas: crie listas de favoritos e gere listas de compras',value:97}].map(benefit => <li key={benefit.text}><Check aria-hidden="true" /><span>{benefit.text}</span><strong>R$ {benefit.value}</strong></li>)}</ul>

@@ -169,3 +169,9 @@
 .club-shopping-question .club-demo-dialog-title{display:flex;align-items:center;gap:8px}
 .club-feature .club-shopping-scene{height:560px}.club-shopping-result .club-shopping-items{max-height:none;overflow:visible}.club-shopping-result .club-shopping-item{padding:4px 0;gap:7px}.club-shopping-result .club-shopping-item strong{font-size:10px}.club-shopping-result .club-shopping-item>div>span{font-size:9px}.club-shopping-result .club-shopping-checkbox{height:14px;width:14px}
 @media(max-width:600px){.club-feature .club-recipe-loop{width:60vw;max-width:310px}}
+
+/* Máscara fixa: o checklist não altera a altura do cartão durante o loop. */
+.club-feature.club-shopping-feature{height:1250px;min-height:0;max-height:1250px;overflow:hidden;justify-content:flex-start}
+.club-shopping-feature>h2,.club-shopping-feature>p{flex:none}
+.club-shopping-feature .club-shopping-demo{flex:1;min-height:0;overflow:hidden}
+.club-shopping-feature .club-shopping-scene{height:100%;overflow:hidden}
