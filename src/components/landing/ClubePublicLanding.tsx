@@ -197,10 +197,21 @@ export default function ClubePublicLanding(props: Props) {
     return()=>scroller.removeEventListener('scroll',stop);
   },[]);
   const [footerReplacesCta,setFooterReplacesCta]=useState(false);
+  const [purchaseVisible,setPurchaseVisible]=useState(false);
+  const purchase=useRef<HTMLButtonElement>(null);
+  useEffect(()=>{
+    const button=purchase.current;
+    const root=button?.closest('.club-public');
+    if(!button||!root)return;
+    const observer=new IntersectionObserver(([entry])=>setPurchaseVisible(entry.isIntersecting),{root,rootMargin:props.unlocked?'-64px 0px 0px 0px':'0px',threshold:0});
+    observer.observe(button);
+    return()=>observer.disconnect();
+  },[props.unlocked]);
   const footer=useRef<HTMLElement>(null);
   const floatingCta=useRef<HTMLButtonElement>(null);
   const revealCta=React.useCallback(()=>setCtaVisible(true),[]);
   const pricing = useRef<HTMLElement>(null);
+  const showFloatingCta=ctaVisible&&!footerReplacesCta&&!purchaseVisible;
   const scrollToPricing = () => pricing.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
   useEffect(()=>{
     const element=footer.current;
@@ -229,7 +240,7 @@ export default function ClubePublicLanding(props: Props) {
   return <div className={`club-public${props.unlocked ? ' club-unlocked' : ''}`} ref={props.scrollRef}>
     {props.reveal}
     {props.unlocked && <PublicOfferBanner savings={props.savings} deadline={props.offerDeadline} />}
-    <button ref={floatingCta} type="button" className={`club-floating-cta${ctaVisible&&!footerReplacesCta ? ' club-cta-visible' : ''}`} aria-hidden={!ctaVisible||footerReplacesCta} tabIndex={ctaVisible&&!footerReplacesCta?0:-1} disabled={!ctaVisible || footerReplacesCta || (props.unlocked && props.loading)} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar para o</span><strong>CLUBE</strong></span><ArrowRight aria-hidden="true" /></button>
+    <button ref={floatingCta} type="button" className={`club-floating-cta${showFloatingCta ? ' club-cta-visible' : ''}`} aria-hidden={!showFloatingCta} tabIndex={showFloatingCta?0:-1} disabled={!showFloatingCta || (props.unlocked && props.loading)} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar para o</span><strong>CLUBE</strong></span><ArrowRight aria-hidden="true" /></button>
     <header className="club-public-hero" ref={hero}>
       <p className="club-invite">Torne-se membro do</p>
       <h1><img className="club-logo" src="/club-landing/logo.png" alt="Clube dos Drinkeros" width="500" height="140" fetchPriority="high" /></h1>
@@ -252,7 +263,7 @@ export default function ClubePublicLanding(props: Props) {
         <div className="club-price"><span>R$</span> {props.price}<small>/ ano</small></div>
         {props.unlocked && <p className="club-saving">Você economiza R$ {props.savings} agora.</p>}
         <ul><li>Acesso às receitas em vídeo do Clube</li><li>Xaropes artesanais e novas combinações</li><li>Listas de favoritos e listas de compras</li></ul>
-        <button type="button" className="club-purchase" disabled={props.loading} onClick={props.onSubscribe}>{props.loading ? 'Abrindo checkout…' : 'Quero entrar para o Clube'}</button>
+        <button ref={purchase} type="button" className="club-purchase" disabled={props.loading} onClick={props.onSubscribe}>{props.loading ? 'Abrindo checkout…' : 'Quero entrar para o Clube'}</button>
         <div className="club-payment-brands" aria-label="Meios de pagamento">
           {[[payVisa, 'Visa'], [payMaster, 'Mastercard'], [payApple, 'Apple Pay'], [payGoogle, 'Google Pay'], [payPix, 'Pix']].map(([src, alt]) => <span key={alt}><img src={src} alt={alt} width="42" height="20" /></span>)}
         </div>
