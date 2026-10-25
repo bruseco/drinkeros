@@ -80,8 +80,12 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
       const position = (element: HTMLElement | null) => {
         if (!element) return 0;
         const top = element.getBoundingClientRect().top - viewport.top;
-        const progress = media.matches ? 0 : Math.max(0, Math.min(1, (top - viewport.height * .55) / (viewport.height * .45)));
-        element.style.transform = `translate3d(${direction * progress * width * .9}px,0,0)`;
+        const entryStart = Math.min(viewport.height, top + scroller.scrollTop);
+        const entryEnd = Math.min(viewport.height * .55, entryStart - viewport.height * .35);
+        const progress = media.matches ? 0 : Math.max(0, Math.min(1, (top - entryEnd) / (entryStart - entryEnd)));
+        // A full viewport plus a small gutter keeps the entire surface offscreen.
+        const eased = progress * progress * (3 - 2 * progress);
+        element.style.transform = `translate3d(${direction * eased * (width + 32)}px,0,0)`;
         element.style.opacity = String(1 - progress);
         return progress;
       };
