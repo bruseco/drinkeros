@@ -189,4 +189,13 @@
 @media(prefers-reduced-motion:reduce){.club-floating-cta .club-cta-icons>svg:first-child{animation:none}}
 
 /* Mesma altura nos estados dourado e verde; canto direito em cápsula. */
-.club-purchase{min-height:84px;padding-top:14px;padding-bottom:14px;border-radius:12px 999px 999px 12px}
+.club-purchase{min-height:84px;padding-top:14px;padding-bottom:14px;border-radius:12px 42px 42px 12px}
+
+/* A cápsula direita usa metade da altura, preservando os 12px à esquerda. */
+@media(min-width:1024px){
+ .club-floating-cta{min-width:270px;min-height:104px;padding:20px 28px;gap:18px;border-radius:16px 52px 52px 16px}
+ .club-floating-cta .club-cta-copy>span{font-size:13px}
+ .club-floating-cta strong{font-size:34px}
+ .club-floating-cta .club-cta-icons>svg:first-child{width:26px;height:28px}
+ .club-floating-cta .club-cta-icons svg.club-door-filled{height:54px;width:40px}
+}
