@@ -265,7 +265,7 @@ export default function ClubePublicLanding(props: Props) {
       <div className="club-footer-main"><div className="club-footer-brand"><img src={drinkerosLogo} alt="Drinkeros" width="180" height="55" /><p>Receitas para transformar cada momento.</p></div>
         <nav aria-label="Institucional"><h2>Drinkeros</h2><Link to="/login">Minha conta</Link><a href="https://wa.me/5548991601025" target="_blank" rel="noopener noreferrer">Atendimento</a></nav>
         <nav aria-label="Informações legais"><h2>Informações</h2>
-          <a href="https://wa.me/5548991601025?text=Gostaria%20de%20consultar%20a%20pol%C3%ADtica%20de%20privacidade" target="_blank" rel="noopener noreferrer">Solicitar política de privacidade</a><a href="https://wa.me/5548991601025?text=Gostaria%20de%20consultar%20os%20termos%20de%20uso" target="_blank" rel="noopener noreferrer">Solicitar termos de uso</a>
+          <Link to="/politica-de-privacidade">Política de privacidade</Link><Link to="/termos-de-uso">Termos de uso</Link>
         </nav>
       </div><p className="club-footer-copyright">© {new Date().getFullYear()} Drinkeros. Todos os direitos reservados.</p>
     </footer>

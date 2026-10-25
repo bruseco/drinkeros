@@ -9,6 +9,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 
 // Public pages
 import Login from "./pages/Login";
+import LegalPage from "./pages/LegalPage";
 import Signup from "./pages/Signup";
 import VipLanding from "./pages/VipLanding";
 import VipLandingB from "./pages/VipLandingB";
@@ -151,6 +152,8 @@ const App = () => (
             {/* Public routes */}
             <Route path="/" element={<RootRedirect />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/politica-de-privacidade" element={<LegalPage kind="privacy" />} />
+            <Route path="/termos-de-uso" element={<LegalPage kind="terms" />} />
             <Route path="/fechamentos/rand" element={<RandClosingViewer />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/pv-clube" element={<Navigate to="/pv-clube-b" replace />} />
