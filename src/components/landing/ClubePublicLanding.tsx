@@ -57,10 +57,12 @@ const DEPTHS = [
   [122, 1, 1, -3], [12, .72, .42, 4], [162, 1, 1, 2], [46, .83, .62, -4], [113, 1, 1, 3],
   [8, .7, .4, -3], [155, .98, 1, -2], [53, .84, .65, 3], [120, 1, 1, -4], [15, .73, .46, 4],
 ];
-const LOOP_WIDTH = 1900;
 const SPEEDS = [52, 31.2, 13];
 
 function CategoryScene({ category, direction, onCoversReached }: { category: Category; direction: 1 | -1; onCoversReached?: () => void }) {
+  const loopWidth=category.recipes.length*190;
+  const [sceneWidth,setSceneWidth]=useState(()=>window.innerWidth);
+  const repeatCount=Math.max(2,Math.ceil(sceneWidth/loopWidth)+1);
   const scene = useRef<HTMLElement>(null);
   const heading = useRef<HTMLDivElement>(null);
   const subtitle = useRef<HTMLParagraphElement>(null);
@@ -74,6 +76,8 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
   const offsets = useRef([0, 0, 0]);
   const dragging = useRef(false);
   const lastX = useRef(0);
+  const lastDragTime = useRef(0);
+  const glideVelocity = useRef(0);
   useEffect(() => {
     const scroller = scene.current?.closest('.club-public');
     if (!scroller) return;
@@ -85,6 +89,7 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
       frame = 0;
       const viewport = scroller.getBoundingClientRect();
       const width = viewport.width;
+      setSceneWidth(width);
       const position = (element: HTMLElement | null) => {
         if (!element) return 0;
         const top = element.getBoundingClientRect().top - viewport.top;
@@ -118,7 +123,7 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
   }, [direction, onCoversReached]);
   const move = (distance: number) => {
     surfaces.current.forEach((layer, index) => {
-      offsets.current[index] = ((offsets.current[index] + distance * SPEEDS[index] / SPEEDS[0]) % LOOP_WIDTH + LOOP_WIDTH) % LOOP_WIDTH;
+      offsets.current[index] = ((offsets.current[index] + distance * SPEEDS[index] / SPEEDS[0]) % loopWidth + loopWidth) % loopWidth;
       if (layer) layer.style.transform = `translate3d(${-offsets.current[index]}px,0,0)`;
     });
   };
@@ -128,26 +133,33 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
     const tick=(time:number)=>{
       const dt=previous?Math.min(time-previous,60)/1000:0;
       previous=time;
-      if(!dragging.current)move(dt*SPEEDS[0]*direction);
+      if(!dragging.current){
+        const cruise=SPEEDS[0]*direction;
+        const decay=Math.exp(-dt/.9);
+        move(cruise*dt+(glideVelocity.current-cruise)*.9*(1-decay));
+        glideVelocity.current=cruise+(glideVelocity.current-cruise)*decay;
+      }
       frame=requestAnimationFrame(tick);
     };
     frame=requestAnimationFrame(tick);
     return()=>{
       cancelAnimationFrame(frame);
+      glideVelocity.current=0;
+      dragging.current=false;
       surfaces.current.forEach((layer,index)=>{if(layer)layer.style.transform=`translateX(${-offsets.current[index]}px)`});
     };
-  },[motionActive,direction]);
-  const cards = (layer: number) => [0, 1].flatMap(cycle => category.recipes.flatMap((recipe, index) => {
+  },[motionActive,direction,loopWidth]);
+  const cards = (layer: number) => Array.from({length:repeatCount},(_,cycle)=>cycle).flatMap(cycle => category.recipes.flatMap((recipe, index) => {
     const [y, scale, opacity, rotation] = DEPTHS[index % DEPTHS.length];
     if (layer < 2 && (scale >= .95 ? 0 : 1) !== layer) return [];
     return (layer === 2 ? [0, 1] : [0]).map(ghost => (
       <figure key={`${cycle}-${index}-${ghost}`} style={{
-        left: index * 190 + cycle * LOOP_WIDTH + (layer === 2 ? ghost * 98 : 0),
+        left: index * 190 + cycle * loopWidth + (layer === 2 ? ghost * 98 : 0),
         top: layer === 2 ? (ghost ? 175 + index % 3 * 20 : index % 3 * 34 - 15) : y,
         opacity: layer === 2 ? (ghost ? .10 : .16) : opacity,
         transform: `scale(${layer === 2 ? [.39, .47, .35][index % 3] : scale}) rotate(${rotation}deg)`,
-      }} aria-hidden={cycle === 1 || layer === 2 ? true : undefined}>
-        <img src={recipe.image} alt={cycle === 1 || layer === 2 ? '' : recipe.title} width="1280" height="720" loading="lazy" decoding="async" draggable={false} />
+      }} aria-hidden={cycle > 0 || layer === 2 ? true : undefined}>
+        <img src={recipe.image} alt={cycle > 0 || layer === 2 ? '' : recipe.title} width="1280" height="720" loading="lazy" decoding="async" draggable={false} />
       </figure>
     ));
   }));
@@ -158,9 +170,11 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
       </div>
       {category.subtitle&&<p className="club-category-subtitle" ref={subtitle}>{category.subtitle}</p>}
       <div className="club-covers-window" ref={covers} aria-label="Capas das receitas; arraste para explorar"
-        onPointerDown={event => { dragging.current = true; lastX.current = event.clientX; event.currentTarget.setPointerCapture(event.pointerId); }}
-        onPointerMove={event => { if (dragging.current) { move(lastX.current - event.clientX); lastX.current = event.clientX; } }}
-        onPointerUp={() => { dragging.current = false; }} onPointerCancel={() => { dragging.current = false; }}>
+        onPointerDown={event => { if(event.pointerType==='mouse'&&event.button!==0)return; dragging.current = true; lastX.current = event.clientX; lastDragTime.current=event.timeStamp; glideVelocity.current=0; event.currentTarget.setPointerCapture(event.pointerId); }}
+        onPointerMove={event => { if (dragging.current) { const distance=lastX.current-event.clientX; const elapsed=event.timeStamp-lastDragTime.current; move(distance); if(elapsed>0){const speed=Math.max(-2400,Math.min(2400,distance/elapsed*1000));glideVelocity.current=elapsed>100?speed:glideVelocity.current*.35+speed*.65;} lastX.current = event.clientX; lastDragTime.current=event.timeStamp; } }}
+        onPointerUp={event => { if(event.timeStamp-lastDragTime.current>100)glideVelocity.current=0; dragging.current = false; }}
+        onPointerCancel={() => { dragging.current = false; glideVelocity.current=0; }}
+        onLostPointerCapture={() => { dragging.current = false; }}>
         {[0, 1, 2].map(layer => <div key={layer} className={`club-depth-layer club-depth-${layer}`} ref={el => { surfaces.current[layer] = el; }}>{cards(layer)}</div>)}
       </div>
     </div>
