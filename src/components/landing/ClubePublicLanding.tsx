@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ArrowDown, ArrowRight, Check } from 'lucide-react';
 import drinksStrip from '@/assets/1000-drinks.jpg';
 import drinkerosLogo from '@/assets/logotipo-drinkeros.png';
@@ -196,6 +196,21 @@ export default function ClubePublicLanding(props: Props) {
   const [ctaVisible,setCtaVisible]=useState(false);
   const [hasScrolled,setHasScrolled]=useState(false);
   const hero=useRef<HTMLElement>(null);
+  const pocket=useRef<HTMLParagraphElement>(null);
+  useLayoutEffect(()=>{
+    const scroller=hero.current?.closest<HTMLElement>('.club-public');
+    if(!scroller||!hero.current||!pocket.current)return;
+    const update=()=>{
+      if(!pocket.current)return;
+      const end=pocket.current.getBoundingClientRect().top-scroller.getBoundingClientRect().top+scroller.scrollTop;
+      scroller.style.setProperty('--club-brick-height',`${Math.round(end)}px`);
+    };
+    const observer=new ResizeObserver(update);
+    observer.observe(hero.current);
+    observer.observe(pocket.current);
+    update();
+    return()=>observer.disconnect();
+  },[]);
   const heroStrip=useRef<HTMLDivElement>(null);
   const heroMotion=useViewportMotion(heroStrip);
   useEffect(()=>{
@@ -265,7 +280,7 @@ export default function ClubePublicLanding(props: Props) {
     <header className="club-public-hero" ref={hero}>
       <p className="club-invite">Torne-se membro do</p>
       <h1><img className="club-logo" src="/club-landing/logo.png" alt="Clube dos Drinkeros" width="500" height="140" fetchPriority="high" /></h1>
-      <p className="club-pocket">Mais de <strong><AnimatedClubCount value={1000} /></strong> receitas no seu bolso.</p>
+      <p className="club-pocket" ref={pocket}>Mais de <strong><AnimatedClubCount value={1000} /></strong> receitas no seu bolso.</p>
       <div ref={heroStrip} data-motion-active={heroMotion} className="club-hero-strip" aria-hidden="true"><div><img src={drinksStrip} alt="" /><img src={drinksStrip} alt="" /></div></div>
       <p className="club-discover">Descubra o que espera por você</p>
       <div className="club-down-slot" aria-hidden="true"><ArrowDown className={`club-down${hasScrolled ? '' : ' club-down-bouncing'}`} aria-hidden="true" /></div>

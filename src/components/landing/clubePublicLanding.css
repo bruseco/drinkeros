@@ -147,7 +147,7 @@
 .club-feature:nth-child(-n+2){min-height:0}
 
 /* Benefícios antes do preço e acabamento das chamadas da oferta pública. */
-.club-public{background-size:100% 100%,auto clamp(480px,65vw,900px)}
+.club-public{background-size:100% 100%,auto var(--club-brick-height,390px)}
 .club-offer .club-benefits{list-style:none;padding:8px 0 20px;margin:0 0 20px}
 .club-benefits li{display:flex;align-items:flex-start;gap:12px;line-height:1.55;margin:18px 0}
 .club-benefits svg{width:21px;height:21px;flex:none;color:#a3e635;margin-top:1px;stroke-width:3}
