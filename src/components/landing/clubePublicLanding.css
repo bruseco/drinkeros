@@ -122,3 +122,11 @@
 /* Seta em destaque na abertura; espaço reservado evita saltos ao encolher. */
 .club-down-slot{height:48px;margin:20px auto 0;display:flex;justify-content:center;align-items:center}.club-down-slot .club-down{margin:0;width:24px;height:24px;filter:none;transition:width .35s ease,height .35s ease,filter .35s ease}.club-down-slot .club-down-bouncing{width:48px;height:48px;filter:drop-shadow(0 0 5px #ffd68acc) drop-shadow(0 0 14px #e7ac3680)}
 @media(prefers-reduced-motion:reduce){.club-down-slot .club-down{transition:none}}
+
+/* Lote local: cartões completos, do título até a demonstração. */
+.club-feature{min-height:650px;margin:26px 0;padding:28px 24px;border:1px solid #ffffff16;border-radius:28px;background:linear-gradient(135deg,#262626,#1a1a1a);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px}
+.club-feature h2{margin:0;font-size:clamp(30px,4.8vw,44px)}.club-feature>p{margin:0}.club-feature .club-recipe-loop{margin:0;width:50%;max-width:270px}.club-feature .club-favorite-demo,.club-feature .club-shopping-demo{width:100%;margin:0}
+.club-feature .club-demo-scene,.club-feature .club-shopping-scene{background:transparent;border:0;border-radius:0}.club-feature .club-demo-scene{height:320px;padding:40px 0 18px}.club-feature .club-shopping-scene{height:480px;padding:32px 4px 14px}.club-feature .club-shopping-start,.club-feature .club-shopping-question{margin-top:40px}.club-demo-heart svg{color:inherit}
+.club-floating-cta{min-width:214px}.club-floating-cta .club-cta-icons .club-door-filled{height:42px;width:31px}.club-floating-cta .club-cta-icons>svg:first-child{height:20px}
+@media(max-width:600px){.club-feature .club-recipe-loop{width:50vw}.club-footer-brand img{width:clamp(52px,calc(100vw - 290px),120px)}}
+@media(max-width:360px){.club-feature{padding-left:18px;padding-right:18px}.club-feature .club-shopping-scene{padding-left:0;padding-right:0}}
