@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePageFunnel, sinceFromRange, type FunnelRange, type FunnelCounts } from '@/hooks/usePageFunnel';
@@ -22,7 +22,8 @@ const pct = (n: number, base: number) => (base > 0 ? `${((n / base) * 100).toFix
 const AdminFunnelDetail: React.FC = () => {
   const { funnelKey } = useParams<{ funnelKey: string }>();
   const funnel = getFunnel(funnelKey ?? '');
-  const [range, setRange] = useState<FunnelRange>('30d');
+  const [params]=useSearchParams();
+  const [range, setRange] = useState<FunnelRange>(()=>{const value=params.get('periodo');return ['today','7d','30d','all'].includes(value??'')?value as FunnelRange:'30d'});
   const { data: counts, isLoading } = usePageFunnel(funnel, range);
 
 

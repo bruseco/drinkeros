@@ -7,7 +7,7 @@ import { useYouthDiscount } from '@/hooks/useYouthDiscount';
 
 interface Props {
   open: boolean;
-  onClose: () => void;
+  onClose: (claimed?: boolean) => void;
   newVisitor?: boolean;
 }
 
@@ -30,6 +30,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose, newVisitor
   const youth = useYouthDiscount();
   const discountAmount = youth.isYouth ? 150 : 100;
   const [phase, setPhase] = useState<Phase>('idle');
+  const claimedRef=React.useRef(false);
   const onCloseRef = React.useRef(onClose);
   useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
   const timersRef = React.useRef<number[]>([]);
@@ -45,6 +46,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose, newVisitor
       clearTimers();
       return;
     }
+    claimedRef.current=false;
     setPhase('intro');
     return () => clearTimers();
   }, [open]);
@@ -52,20 +54,21 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose, newVisitor
   const startReveal = () => {
     if (phase !== 'intro') return;
     clearTimers();
+    claimedRef.current=true;
     setPhase('lidOff');
     const t1 = window.setTimeout(() => setPhase('won'), 650);
     const t2 = window.setTimeout(() => setPhase('amount'), 650 + 400);
     const t3 = window.setTimeout(() => setPhase('discount'), 650 + 1350);
     const t4 = window.setTimeout(() => setPhase('hold'), 650 + 2000);
     const t5 = window.setTimeout(() => setPhase('out'), 650 + 4350);
-    const t6 = window.setTimeout(() => onCloseRef.current(), 650 + 4950);
+    const t6 = window.setTimeout(() => onCloseRef.current(true), 650 + 4950);
     timersRef.current.push(t1, t2, t3, t4, t5, t6);
   };
 
   const handleClose = () => {
     clearTimers();
     setPhase('out');
-    window.setTimeout(() => onCloseRef.current(), 350);
+    window.setTimeout(() => onCloseRef.current(claimedRef.current), 350);
   };
 
   // Sparkles para fundo (ambiente, contínuos)
@@ -282,7 +285,7 @@ export const ClubeDiscountReveal: React.FC<Props> = ({ open, onClose, newVisitor
                 'clube-fade-up 520ms ease 640ms both, clube-btn-shimmer 2.6s linear 1100ms infinite, clube-btn-glow 2.2s ease-in-out 1100ms infinite',
             }}
           >
-            Ver oferta!
+            {newVisitor ? 'Pegar oferta!' : 'Ver oferta!'}
           </button>
         </div>
       )}

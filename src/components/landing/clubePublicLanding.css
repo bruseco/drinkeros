@@ -199,3 +199,6 @@
  .club-floating-cta .club-cta-icons>svg:first-child{width:26px;height:28px}
  .club-floating-cta .club-cta-icons svg.club-door-filled{height:54px;width:40px}
 }
+
+/* Prévia do lote: cápsula completa nas duas chamadas. */
+.club-purchase,.club-floating-cta{border-radius:999px}

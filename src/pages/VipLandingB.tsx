@@ -175,8 +175,8 @@ PriceAmount.displayName = 'PriceAmount';
 const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false }) => {
   useAbVariantTrack('clube', 'b');
   const { user } = useAuth();
-  // Funil: pageview da página /pv-clube-b (dedup por sessão).
-  useEffect(() => { trackFunnel('clube-b', 'pageview', { userId: user?.id ?? null }); }, [user?.id]);
+  const funnelKey=publicPage?'clube-receitas':'clube-b';
+  useEffect(() => { trackFunnel(funnelKey, 'pageview', { userId: user?.id ?? null }); }, [funnelKey,user?.id]);
   const { data: planData } = useUserPlan();
   const { data: totalMembers } = useTotalClubMembers();
   const memberCount = (totalMembers ?? TOTAL_CLUB_MEMBERS_FALLBACK) + 1000;
@@ -344,8 +344,9 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
 
 
   // Ao fechar overlay → roll-down 197 → 97 + marca revealed no banco.
-  const handleRevealClose = React.useCallback(async () => {
+  const handleRevealClose = React.useCallback(async (claimed = true) => {
     setRevealOpen(false);
+    if(publicPage&&!claimed)return;
     try { await promo.markRevealed(); } catch {
       toast.error('Não foi possível confirmar a oferta. Atualize a página antes de continuar.');
       return;
@@ -356,14 +357,8 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
     if (priceSettleTimerRef.current !== null) window.clearTimeout(priceSettleTimerRef.current);
     priceSettleTimerRef.current = window.setTimeout(() => setPriceSettled(true), 620);
     // Funil: 1ª oferta revelada
-    trackFunnel('clube-b', 'offer_1_revealed', { amountCents: effectivePromoPrice * 100, userId: user?.id ?? null });
-  }, [promo, user?.id, effectivePromoPrice]);
-
-  // Na página pública, revela no próprio cartão, mantendo a confirmação
-  // e o prazo da oferta no servidor. O fluxo interno mantém seu overlay.
-  useEffect(() => {
-    if (publicPage && revealOpen) void handleRevealClose();
-  }, [publicPage, revealOpen, handleRevealClose]);
+    trackFunnel(funnelKey, 'offer_1_revealed', { amountCents: effectivePromoPrice * 100, userId: user?.id ?? null });
+  }, [promo, user?.id, effectivePromoPrice,publicPage,funnelKey]);
 
   useViewContent({
     key: 'clube-dos-drinkeros',
@@ -379,7 +374,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
     if (status === 'success') {
       toast.success('🎉 Acesso desbloqueado! Bem-vindo ao Clube dos Drinkeros.');
       queryClient.invalidateQueries({ queryKey: ['user-plan'] });
-      trackFunnel('clube-b', 'subscription_confirmed', { userId: user?.id ?? null });
+      trackFunnel(funnelKey, 'subscription_confirmed', { userId: user?.id ?? null });
       import('@/lib/firePurchaseFromBackend').then(m => m.firePurchaseFromBackend({ source: 'clube-success' }));
       searchParams.delete('vip');
       searchParams.delete('clube');
@@ -416,7 +411,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
       });
       trackAbConversion('clube');
       trackFunnel(
-        'clube-b',
+        funnelKey,
         'checkout_1_started',
         {
           amountCents: amount * 100,
@@ -454,7 +449,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
     offerDeadline={publicBackendReady ? promo.eligibleUntilMs : 0}
     loading={loading || promo.isLoading}
     onSubscribe={() => handleSubscribe('card')}
-    reveal={null}
+    reveal={<ClubeDiscountReveal open={revealOpen} onClose={handleRevealClose} newVisitor />}
   />;
 
   return (

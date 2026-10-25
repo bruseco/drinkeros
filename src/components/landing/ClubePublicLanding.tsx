@@ -297,6 +297,7 @@ export default function ClubePublicLanding(props: Props) {
         <p>Clube dos Drinkeros · Plano anual</p>
         <ul className="club-benefits">{[{text:'Acesso a mais de mil receitas em vídeo',value:47},{text:'Mais de 40 receitas de xaropes artesanais',value:53},{text:'Organizador de festas: crie listas de favoritos e gere listas de compras',value:97}].map(benefit => <li key={benefit.text}><Check aria-hidden="true" /><span>{benefit.text}</span><strong>R$ {benefit.value}</strong></li>)}</ul>
         {props.unlocked && <p className="club-comparison"><X aria-hidden="true" /><span>Quanto você pagaria</span><del>R$ {props.fullPrice}</del></p>}
+        {!props.unlocked && <p className="club-total-label">Total</p>}
         <div className="club-price"><span>R$</span> {props.price}</div>
         <p className="club-access-label">Acesso anual</p>
         <button ref={purchase} type="button" data-motion-active={purchaseVisible} className="club-purchase" disabled={props.loading} onClick={props.onSubscribe}><span className="club-purchase-copy">{props.loading ? 'Abrindo checkout…' : 'Quero entrar p/ o Clube'}</span><ClubButtonIcons /></button>

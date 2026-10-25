@@ -29,6 +29,16 @@ export interface FunnelDef {
 
 export const FUNNELS: FunnelDef[] = [
   {
+    key:'clube-receitas', pageKey:'clube-receitas', name:'Funil Clube dos Drinkeros',
+    description:'Da página pública do Clube até o desconto e o clique de compra.',
+    publicPath:'/clube-receitas',
+    steps:[
+      {key:'pageview',event:'pageview',label:'Acessou a página',hint:'Sessões únicas na página pública'},
+      {key:'discount',event:'offer_1_revealed',label:'Pegou o desconto',hint:'Abriu o presente e confirmou a oferta'},
+      {key:'checkout',event:'checkout_1_started',label:'Clicou em comprar',hint:'Seguiu para o checkout'},
+    ],
+  },
+  {
     key: 'rand',
     pageKey: 'rand',
     name: 'Funil RAND',
