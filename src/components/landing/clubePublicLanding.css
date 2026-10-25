@@ -93,7 +93,7 @@
 .club-public{background-color:#141414;background-image:url('../../assets/bg-clube.jpg');background-position:center top;background-size:100% auto;background-repeat:no-repeat;background-attachment:local}
 .club-public-hero,.club-scene,.club-scene:nth-of-type(even),.club-public-pricing,.club-public-footer{background:transparent}
 
-.club-invite{color:#fff;opacity:1;text-shadow:0 2px 3px #000,0 0 10px #000,0 4px 16px #000;font-weight:400}.club-logo{filter:drop-shadow(0 3px 5px #000) drop-shadow(0 0 10px #0009)}
+.club-invite{color:#fff;opacity:1;text-shadow:0 2px 3px #000,0 0 10px #000,0 4px 16px #000;font-weight:400}.club-public-hero h1{overflow:visible;filter:drop-shadow(0 3px 5px #000) drop-shadow(0 0 10px #0009)}.club-logo{filter:none}
 
 /* Lote local: demonstração do preparo em vídeo próprio, sem player externo. */
 .club-tools{display:block;max-width:1120px;text-align:center;padding-top:45px}.club-feature{padding:34px 0 54px}.club-feature h2{font-size:clamp(30px,5.5vw,46px);font-weight:300;line-height:1.18;margin:12px auto 18px}.club-feature>p{max-width:520px;margin:12px auto 24px}.club-feature .club-eyebrow{color:var(--club-gold)}

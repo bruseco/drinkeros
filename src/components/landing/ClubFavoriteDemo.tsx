@@ -3,7 +3,7 @@ import { useViewportMotion } from './useViewportMotion';
 import { Check, FolderPlus, Heart, MousePointer2, Plus } from 'lucide-react';
 
 const LIST_NAME = 'Jantar mexicano';
-const COVER = 'https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251374265-97.jpg';
+const COVER = 'https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/1f5d2a60-92d2-49d4-a1dc-d084a60ee2a6.webp';
 
 /** Decorative animation only: never authenticates or mutates real favorites. */
 export default function ClubFavoriteDemo() {

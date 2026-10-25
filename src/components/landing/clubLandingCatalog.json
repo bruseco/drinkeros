@@ -6,12 +6,12 @@
     "subtitle": "Para ir muito além do limão.",
     "recipes": [
       {
-        "title": "Caipirinha de Cerveja Escura",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/137732fc-4def-4b28-957b-d66f78f1c1bd.webp"
-      },
-      {
         "title": "Caipicerva Tropical",
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/19c24fca-70c8-4c5e-9954-852f6937f0b5.webp"
+      },
+      {
+        "title": "Caipirinha de Espumante",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/dd972fb4-dcf5-4859-a4d5-64a155f70682.webp"
       },
       {
         "title": "Caipirinha de Milho",
@@ -23,7 +23,7 @@
       },
       {
         "title": "CaipiJack de Maracujá",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-916f881d-929e-475d-aea9-9dbd93c6a6d6.png"
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/c4fe0713-baaf-4d5d-a3f2-bf0e8eb14fa7.webp"
       },
       {
         "title": "Caipiroska de Flores",
@@ -31,7 +31,7 @@
       },
       {
         "title": "Caipirinha de Melancia c/ Gengibre",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-179e0ccb-e19a-4003-89da-5c2fb79ee80d.jpg"
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/3862a45a-8a4c-4197-81f4-bebb3bf95a78.webp"
       },
       {
         "title": "Caipira Tônica",
@@ -39,7 +39,7 @@
       },
       {
         "title": "Caipicitrus Vermelhas",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-30f8ad52-f04f-4c2b-809e-9a5a377a3bc8.jpg"
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/2ef84a08-4b81-429f-b1e1-b025adb9f031.webp"
       },
       {
         "title": "Caipijarra de Morango",
@@ -78,8 +78,8 @@
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/7a6153b6-810a-493c-902b-d2023d49063f.webp"
       },
       {
-        "title": "Milkshake de Frutas Vermelhas",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-82db4380-3779-44df-bbfd-732ab845ca87.jpg"
+        "title": "Batida de Churros",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/124519d2-da8f-492d-8739-083030ecf938.webp"
       },
       {
         "title": "Maluco Beleza",
@@ -87,7 +87,7 @@
       },
       {
         "title": "FrappuJack",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-c275df8c-9871-40d5-ba1e-fabae8712a68.jpg"
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/737c96da-8a76-4999-ba85-da0157e68ec8.webp"
       },
       {
         "title": "Double Malibu Colada",
@@ -167,7 +167,7 @@
       },
       {
         "title": "Frosé",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/4490954f-7dfd-489d-9a6a-8b88cacdb8dd.webp"
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/7532f3c3-17f0-4692-9033-b2042f61e6f8.webp"
       },
       {
         "title": "Frozen Black Princess",
@@ -175,7 +175,7 @@
       },
       {
         "title": "Juru Frozen de Pitaya",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251395769-314.jpg"
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/5f4bce8a-8dbc-4456-bec7-4cb2b5aee2d8.webp"
       },
       {
         "title": "Frozerita de Melancia",
@@ -183,7 +183,7 @@
       },
       {
         "title": "Sake Frozen de Melancia",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251395128-678.jpg"
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/994dc999-b8a9-4635-8367-d82496fd84ae.webp"
       },
       {
         "title": "Jack Peach Frozen",
@@ -206,8 +206,8 @@
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/5b28c95d-88e7-4c1e-b94d-3841bb926101.webp"
       },
       {
-        "title": "Vinho Quente de Caneca",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/61e2b581-5593-4d82-8ad8-772687230912.webp"
+        "title": "Old Fashioned",
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/2ef4b426-8f18-4e5e-943e-e72155127adf.webp"
       },
       {
         "title": "Quentão de Caneca",
@@ -231,7 +231,7 @@
       },
       {
         "title": "New York Sour",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-7f9923aa-4095-4d9f-b860-3153404af1ef.png"
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/9c99937f-1888-4f22-9e86-ddbae9c00b97.webp"
       },
       {
         "title": "Caipiroska de Flores",
@@ -283,7 +283,7 @@
       },
       {
         "title": "Suruba",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-d2430363-4d5d-4138-bb27-c9bdacd3f4f3.png"
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/0cfaa877-c66f-4834-aaf7-b1dec472f4ac.webp"
       }
     ]
   }
