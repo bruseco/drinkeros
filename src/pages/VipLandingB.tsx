@@ -29,6 +29,7 @@ import ClubeIntroStickyBar from '@/components/user/ClubeIntroStickyBar';
 import ClubePublicLanding from '@/components/landing/ClubePublicLanding';
 import { usePublicClubeOffer } from '@/hooks/usePublicClubeOffer';
 import { usePublicClubBackendReady } from '@/hooks/usePublicClubBackendReady';
+import { useClubFunnelMilestones } from '@/hooks/useClubFunnelMilestones';
 
 
 import drinksStrip from '@/assets/1000-drinks.jpg';
@@ -216,6 +217,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
   const priceCardEls = React.useRef<Set<HTMLDivElement>>(new Set());
   const landingScrollRef = React.useRef<HTMLDivElement | null>(null);
   const [revealOpen, setRevealOpen] = useState(false);
+  useClubFunnelMilestones(landingScrollRef,publicPage,revealOpen,user?.id);
   const [revealScheduled, setRevealScheduled] = useState(false);
   const [priceCardVersion, setPriceCardVersion] = useState(0);
   // unlocked = exibir UI com R$97 + strikethrough. Antes do reveal fica false

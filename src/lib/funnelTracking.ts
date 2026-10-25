@@ -9,6 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 
 export type FunnelEvent =
   | 'pageview'
+  | 'scroll_50'
+  | 'offer_viewed'
   | 'offer_1_revealed'
   | 'checkout_1_started'
   | 'offer_2_revealed'
