@@ -55,7 +55,7 @@
     "recipes": [
       {
         "title": "S'mores Milkshake",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/a3a86119-5841-49c9-830d-66b23a462a8b.webp"
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/3c962202-a28c-488d-815e-99a848ee3c1f.webp"
       },
       {
         "title": "Copinho de Muleke",
@@ -63,7 +63,7 @@
       },
       {
         "title": "Batida MaracuWhisky",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/1f02dc56-57b8-4bd2-9752-91549887ebe4.webp"
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/de184d1b-54b1-4778-9f85-978c67998bf8.webp"
       },
       {
         "title": "Shots de Nutella",
@@ -119,7 +119,7 @@
       },
       {
         "title": "Xarope de Manga c/ Pimenta Rosa",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-34cd87ea-a9d4-4390-9f5a-4d32d24e2f1b.jpg"
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/b7a80662-aea9-4a61-b5c7-9f324d91fd6d.webp"
       },
       {
         "title": "Xarope Love Spell",
@@ -159,7 +159,7 @@
       },
       {
         "title": "Raspadinha Jack & Coke",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/87d0fcdb-3fc5-46de-a577-f98b437694e7.webp"
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/706e51c2-e30c-498a-8c40-9f416912359e.webp"
       },
       {
         "title": "Libido",
@@ -179,7 +179,7 @@
       },
       {
         "title": "Frozerita de Melancia",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-1775251395220-640.jpg"
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/549ebe02-8d0b-4d72-9741-13d977e62bf5.webp"
       },
       {
         "title": "Sake Frozen de Melancia",
@@ -199,7 +199,7 @@
     "recipes": [
       {
         "title": "Campari Collins",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/2f6e4f32-b1f5-434b-bd64-c43163c9d46a.webp"
+        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/41e0d27f-5330-4396-b2ca-bd0ffd4ddba0.webp"
       },
       {
         "title": "White Lady",
@@ -270,16 +270,8 @@
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/203fa393-7622-430b-98a3-3e2e26301a01.webp"
       },
       {
-        "title": "Banoffe",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/f4f6a193-e18e-452c-8f69-b8f5b6ff29e3.webp"
-      },
-      {
         "title": "Sangue de Cobra",
         "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/recipe-cover-6dad118e-adad-4f24-b181-627d8fde70c6.png"
-      },
-      {
-        "title": "Suruba",
-        "image": "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/package-covers/0cfaa877-c66f-4834-aaf7-b1dec472f4ac.webp"
       }
     ]
   }
