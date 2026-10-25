@@ -78,6 +78,7 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
   const lastX = useRef(0);
   const lastDragTime = useRef(0);
   const glideVelocity = useRef(0);
+  const travelDirection = useRef<number>(direction);
   useEffect(() => {
     const scroller = scene.current?.closest('.club-public');
     if (!scroller) return;
@@ -134,7 +135,7 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
       const dt=previous?Math.min(time-previous,60)/1000:0;
       previous=time;
       if(!dragging.current){
-        const cruise=SPEEDS[0]*direction;
+        const cruise=SPEEDS[0]*travelDirection.current;
         const decay=Math.exp(-dt/.9);
         move(cruise*dt+(glideVelocity.current-cruise)*.9*(1-decay));
         glideVelocity.current=cruise+(glideVelocity.current-cruise)*decay;
@@ -171,8 +172,8 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
       {category.subtitle&&<p className="club-category-subtitle" ref={subtitle}>{category.subtitle}</p>}
       <div className="club-covers-window" ref={covers} aria-label="Capas das receitas; arraste para explorar"
         onPointerDown={event => { if(event.pointerType==='mouse'&&event.button!==0)return; dragging.current = true; lastX.current = event.clientX; lastDragTime.current=event.timeStamp; glideVelocity.current=0; event.currentTarget.setPointerCapture(event.pointerId); }}
-        onPointerMove={event => { if (dragging.current) { const distance=lastX.current-event.clientX; const elapsed=event.timeStamp-lastDragTime.current; move(distance); if(elapsed>0){const speed=Math.max(-2400,Math.min(2400,distance/elapsed*1000));glideVelocity.current=elapsed>100?speed:glideVelocity.current*.35+speed*.65;} lastX.current = event.clientX; lastDragTime.current=event.timeStamp; } }}
-        onPointerUp={event => { if(event.timeStamp-lastDragTime.current>100)glideVelocity.current=0; dragging.current = false; }}
+        onPointerMove={event => { if (dragging.current) { const distance=lastX.current-event.clientX; const elapsed=event.timeStamp-lastDragTime.current; move(distance); if(Math.abs(distance)>.5)travelDirection.current=Math.sign(distance); if(elapsed>0){const speed=Math.max(-2400,Math.min(2400,distance/elapsed*1000));glideVelocity.current=elapsed>100?speed:glideVelocity.current*.35+speed*.65;} lastX.current = event.clientX; lastDragTime.current=event.timeStamp; } }}
+        onPointerUp={event => { if(event.timeStamp-lastDragTime.current>100||glideVelocity.current*travelDirection.current<0)glideVelocity.current=0; dragging.current = false; }}
         onPointerCancel={() => { dragging.current = false; glideVelocity.current=0; }}
         onLostPointerCapture={() => { dragging.current = false; }}>
         {[0, 1, 2].map(layer => <div key={layer} className={`club-depth-layer club-depth-${layer}`} ref={el => { surfaces.current[layer] = el; }}>{cards(layer)}</div>)}
