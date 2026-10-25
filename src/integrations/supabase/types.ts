@@ -170,6 +170,45 @@ export type Database = {
         }
         Relationships: []
       }
+      club_guest_checkouts: {
+        Row: {
+          activation_claimed_at: string | null
+          amount: number
+          created_at: string
+          email: string
+          id: string
+          last_checked_at: string | null
+          method: string
+          mp_id: string | null
+          status: string
+          token_hash: string
+        }
+        Insert: {
+          activation_claimed_at?: string | null
+          amount: number
+          created_at?: string
+          email: string
+          id?: string
+          last_checked_at?: string | null
+          method: string
+          mp_id?: string | null
+          status?: string
+          token_hash: string
+        }
+        Update: {
+          activation_claimed_at?: string | null
+          amount?: number
+          created_at?: string
+          email?: string
+          id?: string
+          last_checked_at?: string | null
+          method?: string
+          mp_id?: string | null
+          status?: string
+          token_hash?: string
+        }
+        Relationships: []
+      }
       club_monthly_winners: {
         Row: {
           avg_rating: number
@@ -3940,6 +3979,18 @@ export type Database = {
       }
       can_edit: { Args: { _user_id: string }; Returns: boolean }
       can_view_rand_closing: { Args: never; Returns: boolean }
+      claim_club_guest_checkout: {
+        Args: {
+          _amount: number
+          _email: string
+          _hash: string
+          _method: string
+        }
+        Returns: {
+          claimed: boolean
+          id: string
+        }[]
+      }
       claim_whatsapp_queue_items: {
         Args: { batch_size?: number }
         Returns: {
