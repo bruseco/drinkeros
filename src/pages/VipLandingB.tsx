@@ -444,6 +444,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
         currency: 'BRL',
         product_name: 'Clube dos Drinkeros · Anual',
         product_type: 'subscription',
+        dedupe_key: 'clube-anual',
       });
       rememberClubCheckoutVariant(publicPage ? (staticVariant ? 'b' : _ab.readVariant('clube-receitas')) : null);
       trackAbConversion(publicPage ? 'clube-receitas' : 'clube');
