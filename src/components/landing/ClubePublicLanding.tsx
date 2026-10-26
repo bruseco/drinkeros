@@ -317,7 +317,7 @@ export default function ClubePublicLanding(props: Props) {
     {landingCategories.map((category,index) => props.staticVariant ? <section key={category.id} className={`club-static-category club-${category.id}`} aria-label={category.label}>
       <h2>{category.id === 'category-1' ? 'Centenas de' : 'Várias'} receitas de <strong>{category.id === 'syrups' ? 'xaropes artesanais' : category.label.toLocaleLowerCase('pt-BR')}</strong>{category.id === 'desserts' ? ' para fazer em datas comemorativas.' : '.'}</h2>
       <div className="club-static-recipes">{(variantBSelection[category.id as keyof typeof variantBSelection] ?? []).map(title=>category.recipes.find(recipe=>recipe.title===title)).filter((recipe): recipe is NonNullable<typeof recipe>=>!!recipe).map((recipe,index)=><figure key={`${recipe.title}-${index}`}><img src={recipe.image} alt={recipe.title} loading="lazy"/></figure>)}</div>
-      {['syrups','category-3','desserts'].includes(category.id) && <button type="button" className="club-static-block-cta" onClick={scrollToPricing}><span>Quero entrar para o Clube</span><ClubButtonIcons /></button>}
+      {['syrups','category-3','desserts'].includes(category.id) && <button type="button" className="club-static-block-cta" onClick={scrollToPricing}><span>Quero entrar p/ o Clube</span><ClubButtonIcons /></button>}
     </section> : <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCoversReached={category.id === 'category-1' ? revealCta : undefined} />)}
     <section className="club-creativity" ref={creativity} data-motion-active={creativityMotion}><h2>São as receitas <strong>mais criativas da internet</strong> no seu celular.</h2><p>Para acessar quando quiser.</p></section>
     <section className="club-tools" aria-label="Organize seus drinks">
@@ -330,10 +330,10 @@ export default function ClubePublicLanding(props: Props) {
       <h2>Entre para o Clube!</h2>
       <div className="club-offer">
         <ul className="club-benefits" ref={benefits} data-motion-active={benefitsMotion}>{[{text:'Acesso a mais de 1.000 receitas em vídeo',value:47},{text:'Mais de 40 receitas de xaropes artesanais',value:53},{text:'Organizador de festas: crie listas de favoritos e gere listas de compras',value:97}].map(benefit => <li key={benefit.text}><Check aria-hidden="true" /><span>{benefit.text.startsWith('Organizador de festas:')?<><b className="club-benefit-highlight">Organizador de festas</b>{benefit.text.slice('Organizador de festas'.length)}</>:benefit.text}</span><strong>R$ {benefit.value}</strong></li>)}</ul>
+        <p className="club-access-label">* Você tem um ano de acesso para usar todos esses benefícios.</p>
         {props.unlocked && <p className="club-comparison"><X aria-hidden="true" /><span>Quanto você pagaria</span><del>R$ {props.fullPrice}</del></p>}
         {!props.unlocked && <p className="club-total-label">Total</p>}
         <div className="club-price" ref={props.registerPriceCard}><span>R$</span> {props.price}</div>
-        <p className="club-access-label">* Você tem um ano de acesso para usar todos esses benefícios.</p>
         <button ref={purchase} type="button" data-motion-active={purchaseVisible} className="club-purchase" disabled={props.loading} onClick={props.onSubscribe}><span className="club-purchase-copy">{props.loading ? 'Abrindo checkout…' : 'Quero entrar p/ o Clube'}</span><ClubButtonIcons /></button>
         <div className="club-payment-brands" aria-label="Meios de pagamento">
           {[[payVisa, 'Visa'], [payMaster, 'Mastercard'], [payApple, 'Apple Pay'], [payGoogle, 'Google Pay'], [payPix, 'Pix']].map(([src, alt]) => <span key={alt}><img src={src} alt={alt} width="42" height="20" /></span>)}
