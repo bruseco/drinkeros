@@ -22,7 +22,9 @@ export type FunnelEvent =
   | 'quiz_q3_answered'
   | 'quiz_q4_answered'
   | 'quiz_result'
-  | 'quiz_cta_clicked';
+  | 'quiz_cta_clicked'
+  | 'quiz_landing_viewed'
+  | 'quiz_checkout_viewed';
 
 const SESSION_KEY = 'funnel:sid';
 

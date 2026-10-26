@@ -78,6 +78,8 @@ export const FUNNELS: FunnelDef[] = [
       { key: 'q3', event: 'quiz_q3_answered', label: 'Respondeu a pergunta 3' },
       { key: 'result', event: 'quiz_result', label: 'Viu o resultado' },
       { key: 'cta', event: 'quiz_cta_clicked', label: 'Clicou para a landing' },
+      { key: 'landing', event: 'quiz_landing_viewed', label: 'Chegou à landing indicada' },
+      { key: 'checkout', event: 'quiz_checkout_viewed', label: 'Chegou ao checkout da landing' },
     ],
   },
 ];

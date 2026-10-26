@@ -4,6 +4,7 @@ import {
   ArrowLeft, ArrowRight, BookOpen, FlaskConical, Library, Music, PartyPopper, RotateCcw,
   Ship, Shuffle, Sparkles, Sprout, Store, Target, Trophy, Truck, Wallet, Wand2, type LucideIcon,
 } from 'lucide-react';
+import { rememberQuizJourney } from '@/lib/quizJourney';
 import { SeoHead } from '@/components/SeoHead';
 import { trackFunnel, trackFunnelAsync } from '@/lib/funnelTracking';
 import { trackFbEvent, waitForPixelFlush } from '@/lib/metaPixel';
@@ -95,7 +96,8 @@ export default function Quiz() {
   const clickCta = async (profile: ProfileId) => {
     const p = PROFILES[profile];
     trackFbEvent('Lead', { content_name: p.product, content_category: 'quiz', content_ids: [profile] }, { dedupeKey: `quiz:lead:${profile}` });
-    await trackFunnelAsync(PAGE_KEY, 'quiz_cta_clicked', { metadata: { profile } });
+    rememberQuizJourney(profile);
+    await trackFunnelAsync(PAGE_KEY, 'quiz_cta_clicked', { metadata: { profile, destination: p.path } });
     await waitForPixelFlush();
     window.location.href = buildDestinationUrl(p, location.search);
   };

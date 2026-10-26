@@ -22,6 +22,7 @@ jobs:
       - run: node scripts/test-required-favorite-lists-db.mjs
       - run: node scripts/test-public-club-offer-db.mjs
       - run: node scripts/test-quiz-answer-metrics-db.mjs
+      - run: node scripts/test-quiz-destinations-db.mjs
       - run: node scripts/test-funnel-custom-period-db.mjs
       - run: node scripts/test-club-purchase-funnel-db.mjs
       - run: node scripts/test-club-ab-purchases-db.mjs
