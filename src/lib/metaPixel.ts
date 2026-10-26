@@ -86,6 +86,8 @@ export function trackInitiateCheckout(checkout: {
   preference_id?: string;
   session_id?: string;
   id?: string | number;
+  /** Chave estável por produto (ex.: slug) — garante 1 InitiateCheckout por produto na sessão. */
+  dedupe_key?: string;
 }) {
   const contentId =
     checkout.product_id ||
@@ -104,7 +106,10 @@ export function trackInitiateCheckout(checkout: {
       content_ids: contentId ? [contentId] : undefined,
       num_items: 1,
     },
-    { dedupeKey: `ic:${contentId || checkout.product_name || 'unknown'}` },
+    (() => {
+      const key = checkout.dedupe_key || contentId || checkout.product_name || 'unknown';
+      return { dedupeKey: `ic:${key}`, eventId: `ic:${key}:${Date.now()}` };
+    })(),
   );
 }
 

@@ -421,6 +421,7 @@ function RegisteredCheckout() {
           product_id: data.product_id,
           preference_id: String(data.id || ''),
           id: data.id,
+          dedupe_key: product.slug,
         });
 
         if (data?.status === "authorized") {
@@ -469,6 +470,7 @@ function RegisteredCheckout() {
         product_id: data.product_id,
         preference_id: String(data.id || ''),
         id: data.id,
+        dedupe_key: product.slug,
       });
 
       const isPixResponse =
