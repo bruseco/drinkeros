@@ -54,6 +54,9 @@ export function AnimatedClubCount({ value, className = '', start = true, onCompl
 }
 
 type Category = typeof catalog[number];
+function ClubCategoryTitle({category,start=true,onComplete}: {category:Category;start?:boolean;onComplete?:()=>void}) {
+  return <h2>{category.id === 'desserts' ? <>Diversas <strong>sobremesas</strong> para fazer em datas comemorativas.</> : category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.id === 'latest-recipes' ? <>São as receitas <strong>mais criativas da internet</strong> no seu celular.</> : category.label === 'Frozens' ? <>Mais de <strong><AnimatedClubCount value={category.number} start={start} onComplete={onComplete} /> Frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={start} onComplete={onComplete} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>;
+}
 const DEPTHS = [
   [122, 1, 1, -3], [12, .72, .42, 4], [162, 1, 1, 2], [46, .83, .62, -4], [113, 1, 1, 3],
   [8, .7, .4, -3], [155, .98, 1, -2], [53, .84, .65, 3], [120, 1, 1, -4], [15, .73, .46, 4],
@@ -170,7 +173,7 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
   return <section className={`club-scene club-${category.id}${highlighted ? ' club-highlight-complete' : ''}`} ref={scene} data-motion-active={motionActive} aria-label={category.label}>
     <div className="club-stage">
       <div className="club-category-copy club-category-heading" ref={heading}>
-        <h2>{category.id === 'desserts' ? <>Diversas <strong>sobremesas</strong> para fazer em datas comemorativas.</> : category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.id === 'latest-recipes' ? <>São as receitas <strong>mais criativas da internet</strong> no seu celular.</> : category.label === 'Frozens' ? <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} onComplete={handleCountComplete} /> Frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={countReady} onComplete={handleCountComplete} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
+        <ClubCategoryTitle category={category} start={countReady} onComplete={handleCountComplete} />
       </div>
       {category.subtitle&&<p className="club-category-subtitle" ref={subtitle}>{category.subtitle}</p>}
       <div className="club-covers-window" ref={covers} aria-label="Capas das receitas; arraste para explorar"
@@ -309,13 +312,14 @@ export default function ClubePublicLanding(props: Props) {
     <header className="club-public-hero" ref={hero}>
       {!props.staticVariant && <p className="club-invite">Torne-se membro do</p>}
       <h1><img className="club-logo" src="/club-landing/logo.png" alt="Clube dos Drinkeros" width="500" height="140" fetchPriority="high" /></h1>
-      <p className="club-pocket" ref={pocket} data-motion-active={pocketMotion}>Mais de <strong>{props.staticVariant ? '1.000' : <AnimatedClubCount value={1000} />}</strong> receitas no seu bolso.</p>
+      <p className="club-pocket" ref={pocket} data-motion-active={pocketMotion}>Mais de <strong><AnimatedClubCount value={1000} /></strong> receitas no seu bolso.</p>
       <div ref={heroStrip} data-motion-active={heroMotion} className="club-hero-strip" aria-hidden="true"><div><img src={drinksStrip} alt="" /><img src={drinksStrip} alt="" /></div></div>
       <p className="club-discover">{props.staticVariant ? <>Veja tudo que você ganha<br/>no Clube dos Drinkeros</> : <>Descubra o que esse aplicativo<br/>tem a lhe oferecer</>}</p>
       <div className="club-down-slot" aria-hidden="true"><ArrowDown className={`club-down${hasScrolled ? '' : ' club-down-bouncing'}`} aria-hidden="true" /></div>
     </header>
     {landingCategories.map((category,index) => props.staticVariant ? <section key={category.id} className={`club-static-category club-${category.id}`} aria-label={category.label}>
-      <h2>{category.id === 'category-1' ? 'Centenas de' : 'Várias'} receitas de <strong>{category.id === 'syrups' ? 'xaropes artesanais' : category.label.toLocaleLowerCase('pt-BR')}</strong>{category.id === 'desserts' ? ' para fazer em datas comemorativas.' : '.'}</h2>
+      <ClubCategoryTitle category={category} />
+      {category.subtitle && <p className="club-category-subtitle">{category.subtitle}</p>}
       <div className="club-static-recipes">{(variantBSelection[category.id as keyof typeof variantBSelection] ?? []).map(title=>category.recipes.find(recipe=>recipe.title===title)).filter((recipe): recipe is NonNullable<typeof recipe>=>!!recipe).map((recipe,index)=><figure key={`${recipe.title}-${index}`}><img src={recipe.image} alt={recipe.title} loading="lazy"/></figure>)}</div>
       {['syrups','category-3','desserts'].includes(category.id) && <button type="button" className="club-static-block-cta" onClick={scrollToPricing}><span>Quero entrar p/ o Clube</span><ClubButtonIcons /></button>}
     </section> : <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCoversReached={category.id === 'category-1' ? revealCta : undefined} />)}
