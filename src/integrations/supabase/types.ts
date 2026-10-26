@@ -2258,6 +2258,8 @@ export type Database = {
           emails_dispatched_at: string | null
           gateway: string
           id: string
+          meta_capi_event_time: string | null
+          meta_capi_sent_at: string | null
           meta_purchase_sent: boolean
           meta_purchase_sent_at: string | null
           metadata: Json | null
@@ -2279,6 +2281,8 @@ export type Database = {
           emails_dispatched_at?: string | null
           gateway: string
           id?: string
+          meta_capi_event_time?: string | null
+          meta_capi_sent_at?: string | null
           meta_purchase_sent?: boolean
           meta_purchase_sent_at?: string | null
           metadata?: Json | null
@@ -2300,6 +2304,8 @@ export type Database = {
           emails_dispatched_at?: string | null
           gateway?: string
           id?: string
+          meta_capi_event_time?: string | null
+          meta_capi_sent_at?: string | null
           meta_purchase_sent?: boolean
           meta_purchase_sent_at?: string | null
           metadata?: Json | null
