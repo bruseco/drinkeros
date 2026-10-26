@@ -170,6 +170,41 @@ export type Database = {
         }
         Relationships: []
       }
+      club_ab_attributions: {
+        Row: {
+          created_at: string
+          guest_checkout_id: string | null
+          id: string
+          payment_id: string | null
+          preapproval_id: string | null
+          variant: string
+        }
+        Insert: {
+          created_at?: string
+          guest_checkout_id?: string | null
+          id?: string
+          payment_id?: string | null
+          preapproval_id?: string | null
+          variant: string
+        }
+        Update: {
+          created_at?: string
+          guest_checkout_id?: string | null
+          id?: string
+          payment_id?: string | null
+          preapproval_id?: string | null
+          variant?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_ab_attributions_guest_checkout_id_fkey"
+            columns: ["guest_checkout_id"]
+            isOneToOne: true
+            referencedRelation: "club_guest_checkouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       club_guest_checkouts: {
         Row: {
           activation_claimed_at: string | null
@@ -4093,6 +4128,13 @@ export type Database = {
         Args: { p_from: string; p_to: string }
         Returns: Json
       }
+      get_club_ab_purchases: {
+        Args: { _since?: string; _until?: string }
+        Returns: {
+          purchases: number
+          variant: string
+        }[]
+      }
       get_club_feed: {
         Args: { _before?: string; _filter?: string; _limit?: number }
         Returns: {
@@ -4112,6 +4154,13 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_club_landing_covers: {
+        Args: never
+        Returns: {
+          cover_image_url: string
+          recipe_id: string
+        }[]
+      }
       get_club_points_leaderboard: {
         Args: { _limit?: number }
         Returns: {
@@ -4123,6 +4172,10 @@ export type Database = {
           votes_given: number
           votes_received: number
         }[]
+      }
+      get_club_purchase_funnel: {
+        Args: { _since?: string; _until?: string }
+        Returns: number
       }
       get_club_ranking: {
         Args: { _limit?: number; _scope?: string }
@@ -4178,11 +4231,45 @@ export type Database = {
         }
         Returns: number
       }
+      get_page_funnel_sales_window: {
+        Args: {
+          _max_amount?: number
+          _min_amount?: number
+          _product_slug: string
+          _product_type: string
+          _since?: string
+          _until?: string
+        }
+        Returns: number
+      }
+      get_page_funnel_window: {
+        Args: { _page_key: string; _since?: string; _until?: string }
+        Returns: {
+          count: number
+          event: string
+        }[]
+      }
       get_public_tracking_settings: {
         Args: never
         Returns: {
           facebook_pixel_enabled: boolean
           facebook_pixel_id: string
+        }[]
+      }
+      get_quiz_answer_metrics: {
+        Args: { _since?: string }
+        Returns: {
+          answer: string
+          count: number
+          question: string
+        }[]
+      }
+      get_quiz_answer_metrics_window: {
+        Args: { _since?: string; _until?: string }
+        Returns: {
+          answer: string
+          count: number
+          question: string
         }[]
       }
       get_retention_metrics: {
