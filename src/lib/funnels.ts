@@ -23,21 +23,23 @@ export interface FunnelDef {
   publicPath: string;
   steps: FunnelStepDef[];
   /** Produto vinculado, usado nas etapas medidas por vendas do banco. */
-  productType?: 'course' | 'combo' | 'ebook' | 'package';
+  productType?: 'course' | 'combo' | 'ebook' | 'package' | 'club';
   productSlug?: string;
 }
 
 export const FUNNELS: FunnelDef[] = [
   {
     key:'clube-receitas', pageKey:'clube-receitas', name:'Funil Clube dos Drinkeros',
-    description:'Da página pública do Clube até o desconto e o clique de compra.',
+    description:'Da página pública do Clube até o pagamento aprovado.',
     publicPath:'/clube-receitas',
+    productType:'club',productSlug:'clube-anual',
     steps:[
       {key:'pageview',event:'pageview',label:'Acessou a página',hint:'Sessões únicas na página pública'},
       {key:'scroll_50',event:'scroll_50',label:'Rolou 50% da página',hint:'Percorreu metade da rolagem da página pública'},
       {key:'offer_viewed',event:'offer_viewed',label:'Viu o desconto',hint:'A tela da oferta abriu com a página em foco'},
       {key:'discount',event:'offer_1_revealed',label:'Pegou o desconto',hint:'Abriu o presente e confirmou a oferta'},
       {key:'checkout',event:'checkout_1_started',label:'Clicou em comprar',hint:'Seguiu para o checkout'},
+      {key:'purchase',sales:{},label:'Compra aprovada',hint:'Pagamentos do Clube confirmados no banco, no período'},
     ],
   },
   {

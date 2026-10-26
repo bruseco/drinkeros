@@ -42,7 +42,9 @@ export const usePageFunnel = (funnel: FunnelDef | undefined, range: FunnelRange 
       if (salesSteps.length && funnel.productType && funnel.productSlug) {
         await Promise.all(
           salesSteps.map(async (s) => {
-            const { data: sales, error: salesError } = await supabase.rpc(
+            const { data: sales, error: salesError } = funnel.productType==='club'
+              ? await supabase.rpc('get_club_purchase_funnel' as any,{_since:since,_until:until})
+              : await supabase.rpc(
               (range==='custom'?'get_page_funnel_sales_window':'get_page_funnel_sales_range') as any,
               {
                 _product_type: funnel.productType,

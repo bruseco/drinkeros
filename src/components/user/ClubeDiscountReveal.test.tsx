@@ -14,8 +14,8 @@ it('claiming the public offer completes the gift before applying the discount',(
 it('keeps a claimed offer when the animation is dismissed early',()=>{
  const close=vi.fn();render(<ClubeDiscountReveal open onClose={close} newVisitor/>);fireEvent.click(screen.getByRole('button',{name:'Pegar desconto'}));fireEvent.click(screen.getByRole('button',{name:'Fechar'}));act(()=>vi.advanceTimersByTime(350));expect(close).toHaveBeenCalledWith(true);
 });
-it('exposes the five requested stages under a separate Club funnel',()=>{
- const funnel=getFunnel('clube-receitas')!;expect(funnel.name).toBe('Funil Clube dos Drinkeros');expect(funnel.publicPath).toBe('/clube-receitas');expect(funnel.steps.map(s=>s.event)).toEqual(['pageview','scroll_50','offer_viewed','offer_1_revealed','checkout_1_started']);
+it('exposes the six requested stages under a separate Club funnel',()=>{
+ const funnel=getFunnel('clube-receitas')!;expect(funnel.name).toBe('Funil Clube dos Drinkeros');expect(funnel.publicPath).toBe('/clube-receitas');expect(funnel.steps.map(s=>s.event)).toEqual(['pageview','scroll_50','offer_viewed','offer_1_revealed','checkout_1_started',undefined]);
 });
 
 it('announces the R$110 discount before the gift is claimed',()=>{

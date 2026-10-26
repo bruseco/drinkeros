@@ -23,6 +23,7 @@ jobs:
       - run: node scripts/test-public-club-offer-db.mjs
       - run: node scripts/test-quiz-answer-metrics-db.mjs
       - run: node scripts/test-funnel-custom-period-db.mjs
+      - run: node scripts/test-club-purchase-funnel-db.mjs
       - run: node scripts/test-club-guest-checkout-db.mjs
       - run: npx tsc --noEmit -p tsconfig.app.json
       - run: npm run build

@@ -22,6 +22,7 @@ function FunnelSummaryCard({funnel,range,dates}:{funnel:FunnelDef;range:FunnelRa
     <div className="h-2 rounded-full bg-muted/50 overflow-hidden" role="meter" aria-label={step.label} aria-valuemin={0} aria-valuemax={Math.max(top,count,1)} aria-valuenow={count} aria-valuetext={`${fmt(count)}${top?`, ${percent.toFixed(1)}% dos acessos`:''}`}><div className="h-full rounded-full bg-primary transition-[width]" style={{width:`${Math.min(100,Math.max(0,percent))}%`}}/></div>
    </div>
   })}</div>}
+  {funnel.productType==='club'&&<p className="text-xs text-muted-foreground">Compras aprovadas no banco; podem incluir outros caminhos e renovações.</p>}
   <Link to={`/admin/funis/${funnel.key}?${funnelPeriodQuery(range,dates)}`} className="inline-flex text-sm font-medium text-primary hover:underline">Ver métricas →</Link>
  </article>;
 }

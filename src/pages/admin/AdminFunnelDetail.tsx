@@ -126,7 +126,8 @@ const AdminFunnelDetail: React.FC = () => {
               ))}
             </div>
 
-            {funnel.productType && funnel.productSlug && (
+            {funnel.productType==='club'&&<p className="text-xs text-muted-foreground pt-2">“Compra aprovada” conta pagamentos do Clube confirmados no banco no período selecionado. Pode incluir compras de outros caminhos e renovações; não depende do retorno do comprador à página.</p>}
+            {funnel.productType && funnel.productType!=='club' && funnel.productSlug && (
               <p className="text-xs text-muted-foreground pt-2">
                 As etapas de navegação são contadas por sessão na página. As etapas “Comprou por
                 R$ 197” e “Comprou por R$ 97” são contadas pelos pagamentos aprovados do produto

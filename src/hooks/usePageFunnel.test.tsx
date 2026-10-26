@@ -24,3 +24,10 @@ it('reports failed sales queries instead of presenting a false zero',async()=>{
  renderHook(()=>usePageFunnel(getFunnel('rand'),'all'));
  await expect(mocks.query.mock.calls.at(-1)![0].queryFn()).rejects.toThrow('sales unavailable');
 });
+it('reads confirmed Club payments separately from purchase clicks',async()=>{
+ mocks.rpc.mockImplementation((name:string)=>Promise.resolve({data:name==='get_club_purchase_funnel'?3:[{event:'checkout_1_started',count:12}],error:null}));
+ renderHook(()=>usePageFunnel(getFunnel('clube-receitas'),'all'));
+ const result=await mocks.query.mock.calls.at(-1)![0].queryFn();
+ expect(result.checkout).toBe(12);expect(result.purchase).toBe(3);
+ expect(mocks.rpc).toHaveBeenCalledWith('get_club_purchase_funnel',{_since:null,_until:null});
+});
