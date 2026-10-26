@@ -104,9 +104,7 @@ const TestimonialsCarousel: React.FC<{ hideHeading?: boolean; staticLayout?: boo
     );
     if (viewportRef.current) io.observe(viewportRef.current);
 
-    if (staticLayout) return <div className="club-static-recipes">{TESTIMONIALS.map((src,index)=><img key={src} src={src} alt={`Depoimento ${index+1}`} loading="lazy" style={{aspectRatio:'auto',objectFit:'contain'}}/>)}</div>;
-
-  return () => {
+    return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       ro.disconnect();
       io.disconnect();
@@ -140,6 +138,8 @@ const TestimonialsCarousel: React.FC<{ hideHeading?: boolean; staticLayout?: boo
       (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {}
   };
+
+  if (staticLayout) return <div className="club-static-recipes">{TESTIMONIALS.map((src,index)=><img key={src} src={src} alt={`Depoimento ${index+1}`} loading="lazy" style={{aspectRatio:'auto',objectFit:'contain'}}/>)}</div>;
 
   return (
     <div className="relative w-screen left-1/2 -translate-x-1/2 mb-12">
