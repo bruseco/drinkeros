@@ -35,6 +35,7 @@ export interface MetaCapiPurchaseInput {
   contentType?: string | null;        // 'product' | 'subscription'
   contentIds?: string[] | null;
   orderId?: string | null;
+  eventTime?: number | null;          // unix seconds da aprovação real
   user: {
     email?: string | null;
     phone?: string | null;            // E.164 sem '+'
@@ -47,11 +48,11 @@ export interface MetaCapiPurchaseInput {
   };
 }
 
-export async function sendMetaCapiPurchase(input: MetaCapiPurchaseInput): Promise<void> {
+export async function sendMetaCapiPurchase(input: MetaCapiPurchaseInput): Promise<boolean> {
   try {
     if (!input.pixelId || !input.accessToken) {
       console.log("[meta-capi] missing pixelId/accessToken — skip");
-      return;
+      return false;
     }
 
     const { fn, ln } = splitName(input.user.fullName);
@@ -81,7 +82,7 @@ export async function sendMetaCapiPurchase(input: MetaCapiPurchaseInput): Promis
       data: [
         {
           event_name: "Purchase",
-          event_time: Math.floor(Date.now() / 1000),
+          event_time: input.eventTime || Math.floor(Date.now() / 1000),
           event_id: input.eventId,
           action_source: "website",
           event_source_url: input.eventSourceUrl || undefined,
@@ -101,11 +102,13 @@ export async function sendMetaCapiPurchase(input: MetaCapiPurchaseInput): Promis
     const json = await res.json().catch(() => ({}));
     if (!res.ok) {
       console.error("[meta-capi] FAILED", { status: res.status, json, eventId: input.eventId });
-    } else {
-      console.log("[meta-capi] sent Purchase", { eventId: input.eventId, json });
+      return false;
     }
+    console.log("[meta-capi] sent Purchase", { status: res.status, eventId: input.eventId, json });
+    return true;
   } catch (e) {
     console.error("[meta-capi] exception", (e as Error).message);
+    return false;
   }
 }
 
@@ -143,6 +146,27 @@ export async function fireCapiPurchaseFromWebhook(supabase: any, args: {
   const testEventCode = ts.meta_test_event_code || null;
 
 
+  // Trava atômica: só um processamento do webhook envia o Purchase por pedido.
+  const nowIso = new Date().toISOString();
+  const { data: claimed, error: claimErr } = await supabase
+    .from("purchases")
+    .update({ meta_capi_sent_at: nowIso })
+    .eq("gateway", args.gateway)
+    .eq("transaction_id", args.transactionId)
+    .is("meta_capi_sent_at", null)
+    .select("created_at, meta_capi_event_time")
+    .maybeSingle();
+  if (claimErr) {
+    console.error("[meta-capi] lock error — skip", claimErr.message);
+    return;
+  }
+  if (!claimed) {
+    console.log("[meta-capi] Purchase já enviado (ou pedido não gravado) — skip", args.transactionId);
+    return;
+  }
+  const approvedIso = claimed.meta_capi_event_time || claimed.created_at || nowIso;
+  const eventTime = Math.floor(new Date(approvedIso).getTime() / 1000);
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("email, full_name, phone")
@@ -152,7 +176,8 @@ export async function fireCapiPurchaseFromWebhook(supabase: any, args: {
   // event_id = `purchase:{gateway}:{transaction_id}` (mesma chave usada no Pixel client-side)
   const eventId = `purchase:${args.gateway}:${args.transactionId}`;
 
-  await sendMetaCapiPurchase({
+  const ok = await sendMetaCapiPurchase({
+    eventTime,
     pixelId: ts.facebook_pixel_id,
     accessToken,
     eventId,
@@ -171,6 +196,14 @@ export async function fireCapiPurchaseFromWebhook(supabase: any, args: {
       externalId: args.userId,
     },
   });
+
+  await supabase
+    .from("purchases")
+    .update(ok
+      ? { meta_capi_event_time: approvedIso }
+      : { meta_capi_sent_at: null, meta_capi_event_time: approvedIso })
+    .eq("gateway", args.gateway)
+    .eq("transaction_id", args.transactionId);
 }
 
 // ============================================================
