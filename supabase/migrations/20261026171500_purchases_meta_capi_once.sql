@@ -1,0 +1,2 @@
+ALTER TABLE public.purchases ADD COLUMN IF NOT EXISTS meta_capi_sent_at timestamptz, ADD COLUMN IF NOT EXISTS meta_capi_event_time timestamptz;
+COMMENT ON COLUMN public.purchases.meta_capi_sent_at IS 'Trava de envio único do Purchase via Meta CAPI (servidor).';
