@@ -317,7 +317,7 @@ export default function ClubePublicLanding(props: Props) {
     {landingCategories.map((category,index) => props.staticVariant ? <section key={category.id} className={`club-static-category club-${category.id}`} aria-label={category.label}>
       <h2>{category.id === 'category-1' ? 'Centenas de' : 'Várias'} receitas de <strong>{category.id === 'syrups' ? 'xaropes artesanais' : category.label.toLocaleLowerCase('pt-BR')}</strong>{category.id === 'desserts' ? ' para fazer em datas comemorativas.' : '.'}</h2>
       <div className="club-static-recipes">{(variantBSelection[category.id as keyof typeof variantBSelection] ?? []).map(title=>category.recipes.find(recipe=>recipe.title===title)).filter((recipe): recipe is NonNullable<typeof recipe>=>!!recipe).map((recipe,index)=><figure key={`${recipe.title}-${index}`}><img src={recipe.image} alt={recipe.title} loading="lazy"/></figure>)}</div>
-      <button type="button" className="club-static-block-cta" onClick={scrollToPricing}>Quero entrar para o Clube ↓</button>
+      {['syrups','category-3','desserts'].includes(category.id) && <button type="button" className="club-static-block-cta" onClick={scrollToPricing}>Quero entrar para o Clube ↓</button>}
     </section> : <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCoversReached={category.id === 'category-1' ? revealCta : undefined} />)}
     <section className="club-creativity" ref={creativity} data-motion-active={creativityMotion}><h2>São as receitas <strong>mais criativas da internet</strong> no seu celular.</h2><p>Para acessar quando quiser.</p></section>
     <section className="club-tools" aria-label="Organize seus drinks">
