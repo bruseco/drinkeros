@@ -117,7 +117,7 @@ const AdminSalesPage: React.FC = () => {
     <div className="space-y-6">
       <div>
         <Link
-          to={`/admin/paginas-venda/${encodeURIComponent(productKey)}`}
+          to={`/admin/paginas-venda/${productKey === 'clube' ? 'clube-v1' : encodeURIComponent(productKey)}`}
           className="text-sm text-primary inline-flex items-center gap-1 mb-3"
         >
           <ArrowLeft className="h-3 w-3" /> Voltar para o produto

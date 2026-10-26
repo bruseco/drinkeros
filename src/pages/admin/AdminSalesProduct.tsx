@@ -52,12 +52,12 @@ const useProductInfo = (productKey: string): ProductInfo | null => {
   if (productKey === 'clube') {
     return {
       productKey,
-      name: 'Clube dos Drinkeros',
+      name: 'Clube dos Drinkeros V1',
       originalPath: '/pv-clube',
       pageKeyA: 'clube',
       pageKeyB: 'clube-b',
       defaultVariantPath: '/pv-clube-b',
-      backPath: '/admin/paginas-venda',
+      backPath: '/admin/paginas-venda/clube',
     };
   }
   if (productKey.startsWith('course:')) {
@@ -93,7 +93,8 @@ const useProductInfo = (productKey: string): ProductInfo | null => {
 
 const AdminSalesProduct: React.FC = () => {
   const { productKey: raw } = useParams<{ productKey: string }>();
-  const productKey = decodeURIComponent(raw ?? '');
+  const decoded = decodeURIComponent(raw ?? '');
+  const productKey = decoded === 'clube-v1' ? 'clube' : decoded;
   const info = useProductInfo(productKey);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -113,6 +114,10 @@ const AdminSalesProduct: React.FC = () => {
     refetchInterval: 30_000,
   });
 
+  const {data: approvedPurchases=[],isError:purchasesError}=useQuery({
+    queryKey:['club-ab-purchases',productKey],enabled:productKey==='clube-receitas',refetchInterval:30_000,
+    queryFn:async()=>{const {data,error}=await supabase.rpc('get_club_ab_purchases' as any,{_since:null,_until:null});if(error)throw error;return (data??[]) as Array<{variant:string;purchases:number}>;},
+  });
   const [variantPath, setVariantPath] = useState('');
   const [split, setSplit] = useState(50);
   const [busy, setBusy] = useState(false);
@@ -254,13 +259,7 @@ const AdminSalesProduct: React.FC = () => {
         <p className="text-muted-foreground">Páginas e variantes A/B deste produto. Clique numa página para ver o funil.</p>
       </div>
 
-      {productKey === 'clube' && <section className="rounded-lg border border-primary/40 p-5 space-y-3">
-        <h2 className="font-semibold">Clube dos Drinkeros V2</h2>
-        <p className="text-sm text-muted-foreground">A página nova pertence a esta assinatura. Seu teste A/B e suas métricas ficam separados das páginas anteriores.</p>
-        <a className="block text-sm text-primary" href="/clube-receitas" target="_blank" rel="noopener noreferrer">Abrir página pública ↗</a>
-        <div className="flex flex-wrap gap-3"><Button asChild variant="outline"><Link to="/admin/funis/clube-receitas">Ver métricas</Link></Button><Button asChild><Link to="/admin/paginas-venda/clube-receitas">Configurar teste A/B da V2</Link></Button></div>
-      </section>}
-      {productKey === 'clube-receitas' && <p className="text-sm text-muted-foreground">A página atual é a variante A. Primeiro construa a outra página; depois informe seu caminho abaixo para ativar a distribuição de tráfego. Nenhum teste é ativado automaticamente.</p>}
+      {productKey === 'clube-receitas' && !test && <p className="text-sm text-muted-foreground">A página atual é a variante A. Primeiro construa a outra página; depois informe seu caminho abaixo para ativar a distribuição de tráfego. Nenhum teste é ativado automaticamente.</p>}
       <div className="rounded-lg border divide-y">
         {pages.map((pg) => (
           <Link
@@ -294,6 +293,7 @@ const AdminSalesProduct: React.FC = () => {
               <div className="hidden sm:flex items-center gap-4 text-xs text-muted-foreground">
                 <span>{pg.visits.toLocaleString('pt-BR')} visitas</span>
                 <span>{pg.conversions.toLocaleString('pt-BR')} checkouts</span>
+                {productKey==='clube-receitas' && <span>{purchasesError ? 'Compras indisponíveis' : `${Number(approvedPurchases.find(row=>row.variant===pg.variant)?.purchases??0).toLocaleString('pt-BR')} compras aprovadas`}</span>}
               </div>
               <Button variant="ghost" size="sm" onClick={(e) => { e.preventDefault(); e.stopPropagation(); copyLink(pg.path); }}>
                 <Copy className="h-4 w-4" />
@@ -381,4 +381,18 @@ const AdminSalesProduct: React.FC = () => {
   );
 };
 
-export default AdminSalesProduct;
+const AdminClubVersions: React.FC = () => <div className="space-y-6">
+  <Link to="/admin/paginas-venda" className="text-sm text-primary">← Todos os produtos</Link>
+  <h1 className="text-3xl font-bold">Clube dos Drinkeros</h1>
+  <p className="text-muted-foreground">Escolha a versão para ver suas páginas, métricas e teste A/B.</p>
+  <div className="grid gap-4 md:grid-cols-2">{[
+    {name:'Clube dos Drinkeros V1',path:'clube-v1',description:'Páginas anteriores e histórico do teste original.'},
+    {name:'Clube dos Drinkeros V2',path:'clube-receitas',description:'Página pública atual, variantes A e B e seu teste.'},
+  ].map(version=><Link key={version.path} to={`/admin/paginas-venda/${version.path}`} className="rounded-lg border p-6 hover:border-primary transition-colors"><h2 className="font-semibold text-xl">{version.name}</h2><p className="text-sm text-muted-foreground mt-2">{version.description}</p><span className="block text-primary mt-4">Ver páginas e teste A/B →</span></Link>)}</div>
+</div>;
+
+const AdminSalesProductRoute: React.FC = () => {
+  const {productKey}=useParams<{productKey:string}>();
+  return productKey==='clube' ? <AdminClubVersions/> : <AdminSalesProduct/>;
+};
+export default AdminSalesProductRoute;

@@ -1,3 +1,4 @@
+import {clubCheckoutVariant} from '@/lib/clubAbCheckout';
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams, useSearchParams, Link } from "react-router-dom";
@@ -378,6 +379,7 @@ function RegisteredCheckout() {
           body: {
             slug: product.slug,
             card_token_id: formData.token,
+            club_ab_variant: publicOfferRequested ? clubCheckoutVariant() : undefined,
             payer_email: formData?.payer?.email || payerEmail,
             identification: formData?.payer?.identification,
             expected_amount: finalPrice,
@@ -439,7 +441,7 @@ function RegisteredCheckout() {
 
       // Pix (Clube ou produto avulso) ou Cartão de produto avulso → pagamento único
       const { data, error } = await supabase.functions.invoke("create-mp-payment", {
-        body: { product_type: productType, slug: product.slug, formData, fiscal: fiscalData, coupon_token: couponToken || undefined,
+        body: { product_type: productType, slug: product.slug, formData, fiscal: fiscalData, club_ab_variant:isClub&&publicOfferRequested?clubCheckoutVariant():undefined, coupon_token: couponToken || undefined,
           expected_amount:finalPrice,public_offer_token:publicOfferRequested?publicClubOfferToken():undefined },
       });
       if (error) {

@@ -25,9 +25,15 @@ it('reports failed sales queries instead of presenting a false zero',async()=>{
  await expect(mocks.query.mock.calls.at(-1)![0].queryFn()).rejects.toThrow('sales unavailable');
 });
 it('reads confirmed Club payments separately from purchase clicks',async()=>{
- mocks.rpc.mockImplementation((name:string)=>Promise.resolve({data:name==='get_club_purchase_funnel'?3:[{event:'checkout_1_started',count:12}],error:null}));
+ mocks.rpc.mockImplementation((name:string)=>Promise.resolve({data:name==='get_club_ab_purchases'?[{variant:'a',purchases:3},{variant:'b',purchases:2}]:[{event:'checkout_1_started',count:12}],error:null}));
  renderHook(()=>usePageFunnel(getFunnel('clube-receitas'),'all'));
  const result=await mocks.query.mock.calls.at(-1)![0].queryFn();
  expect(result.checkout).toBe(12);expect(result.purchase).toBe(3);
- expect(mocks.rpc).toHaveBeenCalledWith('get_club_purchase_funnel',{_since:null,_until:null});
+ expect(mocks.rpc).toHaveBeenCalledWith('get_club_ab_purchases',{_since:null,_until:null});
+});
+
+it('keeps purchases from variant B separate from A',async()=>{
+ mocks.rpc.mockImplementation((name:string)=>Promise.resolve({data:name==='get_club_ab_purchases'?[{variant:'a',purchases:3},{variant:'b',purchases:2}]:[],error:null}));
+ renderHook(()=>usePageFunnel(getFunnel('clube-receitas-b'),'all'));
+ expect((await mocks.query.mock.calls.at(-1)![0].queryFn()).purchase).toBe(2);
 });

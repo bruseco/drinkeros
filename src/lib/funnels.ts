@@ -25,10 +25,10 @@ export interface FunnelDef {
   /** Produto vinculado, usado nas etapas medidas por vendas do banco. */
   productType?: 'course' | 'combo' | 'ebook' | 'package' | 'club';
   productSlug?: string;
+  abVariant?: 'a' | 'b';
 }
 
-export const FUNNELS: FunnelDef[] = [
-  {
+const clubFunnel: FunnelDef = {
     key:'clube-receitas', pageKey:'clube-receitas', name:'Funil Clube dos Drinkeros',
     description:'Da página pública do Clube até o pagamento aprovado.',
     publicPath:'/clube-receitas',
@@ -41,7 +41,11 @@ export const FUNNELS: FunnelDef[] = [
       {key:'checkout',event:'checkout_1_started',label:'Clicou em comprar',hint:'Seguiu para o checkout'},
       {key:'purchase',sales:{},label:'Compra aprovada',hint:'Pagamentos do Clube confirmados no banco, no período'},
     ],
-  },
+  };
+
+export const FUNNELS: FunnelDef[] = [
+  {...clubFunnel,abVariant:'a',name:'Funil Clube dos Drinkeros — teste A'},
+  {...clubFunnel,key:'clube-receitas-b',pageKey:'clube-receitas-b',publicPath:'/clube-receitas-b',abVariant:'b',name:'Funil Clube dos Drinkeros — teste B'},
   {
     key: 'rand',
     pageKey: 'rand',
@@ -80,4 +84,4 @@ export const FUNNELS: FunnelDef[] = [
 
 
 export const getFunnel = (key: string): FunnelDef | undefined =>
-  key === 'clube-receitas-b' ? { ...FUNNELS[0], key, pageKey:key, name:'Funil Clube dos Drinkeros V2 — variante B', publicPath:'/clube-receitas-b', productType:undefined, steps:FUNNELS[0].steps.filter(step=>!step.sales) } : FUNNELS.find((f) => f.key === key);
+  FUNNELS.find((f) => f.key === key);

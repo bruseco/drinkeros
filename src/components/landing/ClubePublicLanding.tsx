@@ -16,7 +16,8 @@ import ClubCommunityDemo from './ClubCommunityDemo';
 import catalog from './clubLandingCatalog.json';
 import dessertRecipes from './clubDessertCovers.json';
 import variantBSelection from './clubVariantBSelection.json';
-const landingCategories = [...catalog, dessertRecipes];
+const fallbackCategories = [...catalog, dessertRecipes];
+import {useClubLandingCovers} from './useClubLandingCovers';
 import './clubePublicLanding.css';
 import { useViewportMotion } from './useViewportMotion';
 import { useIntroCountdown } from '@/hooks/useClubeIntroOffer';
@@ -55,7 +56,7 @@ export function AnimatedClubCount({ value, className = '', start = true, onCompl
 
 type Category = typeof catalog[number];
 function ClubCategoryTitle({category,start=true,onComplete}: {category:Category;start?:boolean;onComplete?:()=>void}) {
-  return <h2>{category.id === 'desserts' ? <>Diversas <strong>sobremesas</strong> para fazer em datas comemorativas.</> : category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.id === 'latest-recipes' ? <>São as receitas <strong>mais criativas da internet</strong> no seu celular.</> : category.label === 'Frozens' ? <>Mais de <strong><AnimatedClubCount value={category.number} start={start} onComplete={onComplete} /> Frozens</strong> para descobrir.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={start} onComplete={onComplete} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>;
+  return <h2>{category.id === 'desserts' ? <>Diversas <strong>sobremesas</strong> para fazer em datas comemorativas.</> : category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : category.id === 'latest-recipes' ? <>São as receitas <strong>mais criativas da internet</strong> no seu celular.</> : category.label === 'Frozens' ? <>Mais de <strong><AnimatedClubCount value={category.number} start={start} onComplete={onComplete} /> Frozens</strong> para dias calorosos.</> : <>Mais de <strong><AnimatedClubCount value={category.number} start={start} onComplete={onComplete} /> {category.id === 'syrups' ? 'receitas de Xaropes Artesanais' : category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>;
 }
 const DEPTHS = [
   [122, 1, 1, -3], [12, .72, .42, 4], [162, 1, 1, 2], [46, .83, .62, -4], [113, 1, 1, 3],
@@ -217,6 +218,7 @@ function PublicOfferBanner({ savings, deadline }: { savings: number; deadline: n
 }
 
 export default function ClubePublicLanding(props: Props) {
+  const landingCategories=useClubLandingCovers(fallbackCategories);
   const brick=useRef<HTMLDivElement>(null);
   const brickActive=useViewportMotion(brick);
   const [ctaVisible,setCtaVisible]=useState(false);
@@ -327,7 +329,7 @@ export default function ClubePublicLanding(props: Props) {
     <section className="club-tools" aria-label="Organize seus drinks">
       <article className="club-feature"><p className="club-eyebrow club-video-eyebrow"><span>Receitas em vídeo</span><svg role="img" aria-label="YouTube" viewBox="0 0 28 20"><rect width="28" height="20" rx="5" fill="#fff"/><path d="m11 5 8 5-8 5Z" fill="#111"/></svg></p><h2>Assista como preparar.</h2><p>Todas as receitas foram realizadas e testadas.</p><ClubRecipeLoop /></article>
       <article className="club-feature"><h2>Salve suas receitas.</h2><p>Monte listas de favoritos para cada ocasião.</p><ClubFavoriteDemo /></article>
-      <article className="club-feature club-shopping-feature"><h2>Organize a festa.</h2><p>Monte sua lista e gere o checklist de compras para a sua festa.</p><ClubShoppingDemo /></article>
+      <article className="club-feature club-shopping-feature"><h2>Organizador de festa</h2><p>Monte sua lista e gere o checklist de compras para a sua festa.</p><ClubShoppingDemo /></article>
       <article className="club-feature club-community-feature"><h2>Comunidade.</h2><p>Compartilhe e descubra receitas com outros usuários.</p><ClubCommunityDemo /></article>
     </section>
     <section id="clube-pricing" className="club-public-pricing" ref={pricing}>

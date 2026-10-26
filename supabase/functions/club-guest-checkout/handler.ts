@@ -1,3 +1,4 @@
+import {recordClubAbAttribution} from '../_shared/clubAbAttribution.ts';
 import { approvedInvoice, guestCanActivate, guestTokenHash, validGuestToken } from '../_shared/clubGuest.ts';
 
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,x-client-info,apikey,content-type,x-supabase-client-platform,x-supabase-client-platform-version,x-supabase-client-runtime,x-supabase-client-runtime-version'};
@@ -5,7 +6,7 @@ const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,
 const site='https://drinkeros.com';
 export async function handleGuestCheckout(req:Request,{admin,mpToken,supabaseUrl,serviceKey}:{admin:any;mpToken:string;supabaseUrl:string;serviceKey:string}){
  if(req.method==='OPTIONS')return new Response(null,{headers:cors});
- if(req.method==='GET')return json({club_guest_checkout_version:2});
+ if(req.method==='GET')return json({club_guest_checkout_version:2,club_ab_attribution_version:1});
  if(req.method!=='POST')return json({error:'Método inválido'},405);
  try{
   const body=await req.json();
@@ -49,6 +50,7 @@ export async function handleGuestCheckout(req:Request,{admin,mpToken,supabaseUrl
    if(claimed.error)throw claimed.error;
    row=await read();
    if(claimed.data?.[0]?.claimed){
+    await recordClubAbAttribution(admin,body.club_ab_variant,{guest_checkout_id:row.id});
     // Only this request may submit a charge. Replays poll/reconcile; they never POST again.
     if(method==='card'){
      const duplicate=await mp(`/preapproval/search?payer_email=${encodeURIComponent(email)}&limit=100`);

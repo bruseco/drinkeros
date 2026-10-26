@@ -1,3 +1,4 @@
+import {clubCheckoutVariant} from '@/lib/clubAbCheckout';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
@@ -53,7 +54,7 @@ export default function GuestClubCheckout(){
   try{
    try{sessionStorage.setItem(STORAGE,token.current)}catch{}
    setStarted(true);
-   accept(await call('create',{method,formData,expected_amount:amount}));
+   accept(await call('create',{method,formData,expected_amount:amount,club_ab_variant:clubCheckoutVariant()}));
   }catch(e){
    const failure=e as Error&{code?:string;amount?:number};setError(failure.message);
    if(failure.code==='public_club_price_changed'){retry();setAmount(Number(failure.amount));setError(failure.message);}

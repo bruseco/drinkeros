@@ -43,7 +43,7 @@ export const usePageFunnel = (funnel: FunnelDef | undefined, range: FunnelRange 
         await Promise.all(
           salesSteps.map(async (s) => {
             const { data: sales, error: salesError } = funnel.productType==='club'
-              ? await supabase.rpc('get_club_purchase_funnel' as any,{_since:since,_until:until})
+              ? await supabase.rpc((funnel.abVariant?'get_club_ab_purchases':'get_club_purchase_funnel') as any,{_since:since,_until:until})
               : await supabase.rpc(
               (range==='custom'?'get_page_funnel_sales_window':'get_page_funnel_sales_range') as any,
               {
@@ -58,7 +58,7 @@ export const usePageFunnel = (funnel: FunnelDef | undefined, range: FunnelRange 
             if (salesError) {
               throw salesError;
             }
-            out[s.key] = Number(sales) || 0;
+            out[s.key] = funnel.abVariant ? Number((sales as any[])?.find(row=>row.variant===funnel.abVariant)?.purchases)||0 : Number(sales) || 0;
           }),
         );
       }

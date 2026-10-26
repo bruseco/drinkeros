@@ -1,3 +1,4 @@
+import {rememberClubCheckoutVariant} from '@/lib/clubAbCheckout';
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Crown, Check, X, GlassWater, Sparkles, Zap, GraduationCap, Loader2, RefreshCw, Gift, PlayCircle, Trophy, Timer, Smartphone, Lock, ShieldCheck } from 'lucide-react';
@@ -21,7 +22,7 @@ import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
 import { useTotalClubMembers, TOTAL_CLUB_MEMBERS_FALLBACK } from '@/hooks/useTotalClubMembers';
 import { useIntroCountdown } from '@/hooks/useClubeIntroOffer';
 import { useYouthDiscount } from '@/hooks/useYouthDiscount';
-import { useAbTest, useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
+import { useAbTest, useAbVariantTrack, trackAbConversion, _ab } from '@/hooks/useAbTest';
 import { trackFunnel } from '@/lib/funnelTracking';
 import ClubeDiscountReveal from '@/components/user/ClubeDiscountReveal';
 import { useClubeLandingOffer } from '@/hooks/useClubeLandingOffer';
@@ -176,10 +177,10 @@ PriceAmount.displayName = 'PriceAmount';
 const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> = ({ publicPage = false, staticVariant = false }) => {
   useAbVariantTrack('clube', 'b', !publicPage);
   useAbVariantTrack('clube-receitas', 'b', publicPage && staticVariant);
-  useAbTest('clube-receitas', publicPage && !staticVariant);
+  const publicAbReady=useAbTest('clube-receitas', publicPage && !staticVariant);
   const { user } = useAuth();
   const funnelKey=publicPage?(staticVariant?'clube-receitas-b':'clube-receitas'):'clube-b';
-  useEffect(() => { trackFunnel(funnelKey, 'pageview', { userId: user?.id ?? null }); }, [funnelKey,user?.id]);
+  useEffect(() => { if(publicPage&&!staticVariant&&!publicAbReady)return;trackFunnel(funnelKey, 'pageview', { userId: user?.id ?? null }); }, [funnelKey,user?.id,publicPage,staticVariant,publicAbReady]);
   const { data: planData } = useUserPlan();
   const { data: totalMembers } = useTotalClubMembers();
   const memberCount = (totalMembers ?? TOTAL_CLUB_MEMBERS_FALLBACK) + 1000;
@@ -219,7 +220,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
   const priceCardEls = React.useRef<Set<HTMLDivElement>>(new Set());
   const landingScrollRef = React.useRef<HTMLDivElement | null>(null);
   const [revealOpen, setRevealOpen] = useState(false);
-  useClubFunnelMilestones(landingScrollRef,publicPage,revealOpen,user?.id,funnelKey);
+  useClubFunnelMilestones(landingScrollRef,publicPage&&publicAbReady,revealOpen,user?.id,funnelKey);
   const [revealScheduled, setRevealScheduled] = useState(false);
   const [priceCardVersion, setPriceCardVersion] = useState(0);
   // unlocked = exibir UI com R$97 + strikethrough. Antes do reveal fica false
@@ -444,6 +445,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
         product_name: 'Clube dos Drinkeros · Anual',
         product_type: 'subscription',
       });
+      rememberClubCheckoutVariant(publicPage ? (staticVariant ? 'b' : _ab.readVariant('clube-receitas')) : null);
       trackAbConversion(publicPage ? 'clube-receitas' : 'clube');
       trackFunnel(
         funnelKey,
@@ -483,7 +485,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
     unlocked={unlocked}
     savings={effectiveSavings}
     offerDeadline={publicBackendReady ? promo.eligibleUntilMs : 0}
-    loading={loading || promo.isLoading}
+    loading={loading || promo.isLoading || !publicAbReady}
     onSubscribe={() => handleSubscribe('card')}
     reveal={staticVariant ? (revealOpen && <div role="dialog" aria-modal="true" aria-label="Desconto do Clube" className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-6"><div className="rounded-2xl bg-neutral-900 text-center p-8 max-w-sm"><h2>Super oferta para você que é novo visitante!</h2><p className="my-6">Você ganhou <strong className="font-bold" style={{color:'#ffeb00',textShadow:'0 0 10px #ffeb0080,0 0 24px #ffcf004d'}}>R$ {effectiveSavings} de desconto</strong></p><button type="button" className="club-static-block-cta" onClick={()=>handleRevealClose(true)}>Pegar desconto</button><button type="button" className="mt-5" onClick={()=>handleRevealClose(false)}>Agora não</button></div></div>) : <ClubeDiscountReveal open={revealOpen} onClose={handleRevealClose} newVisitor savings={effectiveSavings} />}
   />;

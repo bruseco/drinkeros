@@ -1,3 +1,4 @@
+import {recordClubAbAttribution} from '../_shared/clubAbAttribution.ts';
 // Cria assinatura recorrente (preapproval) do Clube no Mercado Pago
 // usando o token do cartão gerado pelo Brick — checkout transparente, sem redirect.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
@@ -35,7 +36,7 @@ async function invokeWebhookFallback(preapprovalId: unknown) {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  if (req.method === 'GET') return new Response(JSON.stringify({public_club_offer_version:2}),{headers:{...corsHeaders,'Content-Type':'application/json'}});
+  if (req.method === 'GET') return new Response(JSON.stringify({public_club_offer_version:2,club_ab_attribution_version:1}),{headers:{...corsHeaders,'Content-Type':'application/json'}});
 
   try {
     const mpToken = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
@@ -162,6 +163,10 @@ serve(async (req) => {
       throw new Error(data?.message || "Falha ao criar assinatura");
     }
 
+    if(slug==='clube-anual'&&body.club_ab_variant){
+      const attributionAdmin=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,{auth:{persistSession:false}});
+      await recordClubAbAttribution(attributionAdmin,body.club_ab_variant,{preapproval_id:String(data.id)});
+    }
     console.log("[create-mp-subscription] created:", { id: data.id, status: data.status });
 
     // Rede de segurança para assinaturas aprovadas no ato: se a notificação do MP falhar,

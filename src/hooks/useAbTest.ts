@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -82,7 +82,8 @@ export function useAbTest(pageKey: string, enabled = true) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { data: test } = useQuery({
+  const [ready,setReady]=useState(false);
+  const { data: test, isFetched } = useQuery({
     queryKey: ['ab-test', pageKey],
     enabled,
     queryFn: () => fetchTest(pageKey),
@@ -90,15 +91,16 @@ export function useAbTest(pageKey: string, enabled = true) {
   });
 
   useEffect(() => {
-    if (!enabled || !test) return;
+    if (!enabled || !isFetched) return;
+    if (!test) {setReady(true);return;}
     // Teste encerrado: força o vencedor
     if (test.status === 'finished' && test.winner) {
       if (test.winner === 'b' && location.pathname === test.original_path) {
-        navigate(test.variant_path + location.search + location.hash, { replace: true });
-      }
+        setReady(false);navigate(test.variant_path + location.search + location.hash, { replace: true });
+      } else setReady(true);
       return;
     }
-    if (test.status !== 'active') return;
+    if (test.status !== 'active') {setReady(true);return;}
 
     let variant = readVariant(pageKey);
     if (!variant) {
@@ -106,13 +108,13 @@ export function useAbTest(pageKey: string, enabled = true) {
       writeVariant(pageKey, variant);
     }
 
-    // conta uma visita real por sessão, mesmo para visitantes que já tinham cookie antigo
-    trackVisitOnce(pageKey, variant);
-
     if (variant === 'b' && location.pathname === test.original_path) {
-      navigate(test.variant_path + location.search + location.hash, { replace: true });
+      setReady(false);navigate(test.variant_path + location.search + location.hash, { replace: true });
+      return; // B records its own visit after arriving; never count the redirect twice.
     }
-  }, [enabled, test, pageKey, navigate, location.pathname, location.search, location.hash]);
+    if(variant==='a') {trackVisitOnce(pageKey,variant);setReady(true);}
+  }, [enabled, isFetched, test, pageKey, navigate, location.pathname, location.search, location.hash]);
+  return !enabled || ready;
 }
 
 /** Página VARIANTE B: garante cookie e conta visita se visitante chegou direto. */

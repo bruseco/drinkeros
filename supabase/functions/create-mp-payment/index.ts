@@ -1,3 +1,4 @@
+import {recordClubAbAttribution} from '../_shared/clubAbAttribution.ts';
 // Checkout transparente: cria pagamento direto via API do Mercado Pago (Cartão ou Pix)
 // usando o token gerado pelo Payment Brick no frontend.
 import { sendTemplateEmailWithLog } from "../_shared/send-email-helper.ts";
@@ -60,7 +61,7 @@ const CLUB_PRODUCTS: Record<string, { id: string; name: string; slug: string; pr
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  if (req.method === 'GET') return new Response(JSON.stringify({public_club_offer_version:2}),{headers:{...corsHeaders,'Content-Type':'application/json'}});
+  if (req.method === 'GET') return new Response(JSON.stringify({public_club_offer_version:2,club_ab_attribution_version:1}),{headers:{...corsHeaders,'Content-Type':'application/json'}});
 
   try {
     const mpToken = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
@@ -324,6 +325,8 @@ serve(async (req) => {
       console.error("[create-mp-payment] MP error:", mpData);
       throw new Error(mpData?.message || "Falha ao processar pagamento");
     }
+
+    if(product_type==='club')await recordClubAbAttribution(supabase,body.club_ab_variant,{payment_id:String(mpData.id)});
 
     console.log("[create-mp-payment] payment created:", {
       id: mpData.id,

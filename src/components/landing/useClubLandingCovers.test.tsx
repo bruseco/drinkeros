@@ -1,0 +1,32 @@
+import React from 'react';
+import {cleanup,renderHook,waitFor,act} from '@testing-library/react';
+import {QueryClient,QueryClientProvider} from '@tanstack/react-query';
+import {afterEach,expect,it,vi} from 'vitest';
+import {useClubLandingCovers} from './useClubLandingCovers';
+const mocks=vi.hoisted(()=>({rpc:vi.fn()}));
+vi.mock('@/integrations/supabase/client',()=>({supabase:{rpc:mocks.rpc}}));
+afterEach(()=>{cleanup();vi.clearAllMocks();});
+it('replaces a fixed cover by recipe ID and refreshes without changing the chosen recipes',async()=>{
+ const id='6dad118e-adad-4f24-b181-627d8fde70c6';
+ mocks.rpc.mockResolvedValue({data:[{recipe_id:id,cover_image_url:'https://example.com/new.webp'}],error:null});
+ const client=new QueryClient({defaultOptions:{queries:{retry:false}}});
+ const wrapper=({children}:{children:React.ReactNode})=><QueryClientProvider client={client}>{children}</QueryClientProvider>;
+ const categories=[{id:'shots',recipes:[{title:'Sangue de Cobra',image:'https://example.com/old.png'},{title:'Other',image:'https://example.com/other.png'}]}];
+ const {result}=renderHook(()=>useClubLandingCovers(categories),{wrapper});
+ await waitFor(()=>expect(result.current[0].recipes[0].image).toBe('https://example.com/new.webp'));
+ mocks.rpc.mockResolvedValue({data:[{recipe_id:id,cover_image_url:'https://example.com/newer.webp'}],error:null});
+ await act(()=>client.invalidateQueries({queryKey:['club-landing-live-covers']}));
+ await waitFor(()=>expect(result.current[0].recipes[0].image).toBe('https://example.com/newer.webp'));
+ expect(result.current[0].recipes.map(r=>r.title)).toEqual(['Sangue de Cobra','Other']);
+ expect(result.current[0].recipes[1].image).toBe('https://example.com/other.png');
+ client.clear();
+});
+it('keeps fallback covers when the metadata endpoint fails',async()=>{
+ mocks.rpc.mockResolvedValue({data:null,error:new Error('offline')});
+ const client=new QueryClient({defaultOptions:{queries:{retry:false}}});
+ const wrapper=({children}:{children:React.ReactNode})=><QueryClientProvider client={client}>{children}</QueryClientProvider>;
+ const categories=[{recipes:[{title:'Sangue de Cobra',image:'https://example.com/fallback.webp'}]}];
+ const {result}=renderHook(()=>useClubLandingCovers(categories),{wrapper});
+ await waitFor(()=>expect(mocks.rpc).toHaveBeenCalled());
+ expect(result.current).toEqual(categories);client.clear();
+});
