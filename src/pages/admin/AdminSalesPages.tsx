@@ -53,6 +53,7 @@ const AdminSalesPages: React.FC = () => {
       type: 'club',
       is_available_for_sale: true,
       pages: [
+        { path: '/clube-receitas', pageKey: 'clube-receitas', variant: 'a' },
         { path: '/pv-clube', pageKey: 'clube', variant: 'a' },
         ...(testByKey.get('clube')
           ? [{ path: testByKey.get('clube')!.variant_path, pageKey: 'clube-b', variant: 'b' as const }]
@@ -148,7 +149,7 @@ const AdminSalesPages: React.FC = () => {
                         <Layers className="h-3 w-3" />
                         {p.pages.length} {p.pages.length === 1 ? 'página' : 'páginas'}
                       </span>
-                      {p.pages.length > 1 && (
+                      {tests.some((t) => t.page_key === p.productKey || (p.productKey === 'clube' && t.page_key === 'clube-receitas')) && (
                         <span className="inline-flex items-center gap-1 text-primary">
                           <FlaskConical className="h-3 w-3" /> A/B
                         </span>

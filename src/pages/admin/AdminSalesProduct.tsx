@@ -46,6 +46,9 @@ const useProductInfo = (productKey: string): ProductInfo | null => {
   const { data: courses = [] } = useCourses();
   const { data: ebooks = [] } = useEbooks();
 
+  if (productKey === 'clube-receitas') {
+    return { productKey, name: 'Clube dos Drinkeros V2', originalPath: '/clube-receitas', pageKeyA: 'clube-receitas', pageKeyB: 'clube-receitas-b', defaultVariantPath: '/clube-receitas-b', backPath: '/admin/paginas-venda/clube' };
+  }
   if (productKey === 'clube') {
     return {
       productKey,
@@ -176,6 +179,10 @@ const AdminSalesProduct: React.FC = () => {
   };
 
   const activate = async () => {
+    if (!variantPath.startsWith('/') || variantPath.startsWith('//') || variantPath.includes('?') || variantPath.includes('#') || variantPath === info.originalPath) {
+      toast({ title: 'Informe um caminho diferente para a variante B', variant: 'destructive' });
+      return;
+    }
     setBusy(true);
     try {
       const { error } = await supabase.from('ab_tests' as any).upsert(
@@ -247,11 +254,18 @@ const AdminSalesProduct: React.FC = () => {
         <p className="text-muted-foreground">Páginas e variantes A/B deste produto. Clique numa página para ver o funil.</p>
       </div>
 
+      {productKey === 'clube' && <section className="rounded-lg border border-primary/40 p-5 space-y-3">
+        <h2 className="font-semibold">Clube dos Drinkeros V2</h2>
+        <p className="text-sm text-muted-foreground">A página nova pertence a esta assinatura. Seu teste A/B e suas métricas ficam separados das páginas anteriores.</p>
+        <a className="block text-sm text-primary" href="/clube-receitas" target="_blank" rel="noopener noreferrer">Abrir página pública ↗</a>
+        <div className="flex flex-wrap gap-3"><Button asChild variant="outline"><Link to="/admin/funis/clube-receitas">Ver métricas</Link></Button><Button asChild><Link to="/admin/paginas-venda/clube-receitas">Configurar teste A/B da V2</Link></Button></div>
+      </section>}
+      {productKey === 'clube-receitas' && <p className="text-sm text-muted-foreground">A página atual é a variante A. Primeiro construa a outra página; depois informe seu caminho abaixo para ativar a distribuição de tráfego. Nenhum teste é ativado automaticamente.</p>}
       <div className="rounded-lg border divide-y">
         {pages.map((pg) => (
           <Link
             key={pg.pageKey}
-            to={`/admin/paginas-venda/${encodeURIComponent(productKey)}/${encodeURIComponent(pg.pageKey)}`}
+            to={productKey === 'clube-receitas' ? `/admin/funis/${pg.pageKey}` : `/admin/paginas-venda/${encodeURIComponent(productKey)}/${encodeURIComponent(pg.pageKey)}`}
             className="flex items-center justify-between gap-4 p-4 hover:bg-muted/30 transition group"
           >
             <div className="flex items-center gap-3 min-w-0">
@@ -326,7 +340,7 @@ const AdminSalesProduct: React.FC = () => {
                 <Slider value={[split]} onValueChange={(v) => setSplit(v[0])} max={100} step={5} className="w-48" />
               </div>
             </div>
-            <Button onClick={activate} disabled={busy} size="sm">
+            <Button onClick={activate} disabled={busy || !variantPath.trim()} size="sm">
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Play className="h-4 w-4 mr-1" /> Ativar Teste A/B</>}
             </Button>
           </div>

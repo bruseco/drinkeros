@@ -21,7 +21,7 @@ import TestimonialsCarousel from '@/components/landing/TestimonialsCarousel';
 import { useTotalClubMembers, TOTAL_CLUB_MEMBERS_FALLBACK } from '@/hooks/useTotalClubMembers';
 import { useIntroCountdown } from '@/hooks/useClubeIntroOffer';
 import { useYouthDiscount } from '@/hooks/useYouthDiscount';
-import { useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
+import { useAbTest, useAbVariantTrack, trackAbConversion } from '@/hooks/useAbTest';
 import { trackFunnel } from '@/lib/funnelTracking';
 import ClubeDiscountReveal from '@/components/user/ClubeDiscountReveal';
 import { useClubeLandingOffer } from '@/hooks/useClubeLandingOffer';
@@ -173,10 +173,12 @@ const PriceAmount = React.memo(({ value, className = '' }: { value: number; clas
 PriceAmount.displayName = 'PriceAmount';
 
 
-const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false }) => {
-  useAbVariantTrack('clube', 'b');
+const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> = ({ publicPage = false, staticVariant = false }) => {
+  useAbVariantTrack('clube', 'b', !publicPage);
+  useAbVariantTrack('clube-receitas', 'b', publicPage && staticVariant);
+  useAbTest('clube-receitas', publicPage && !staticVariant);
   const { user } = useAuth();
-  const funnelKey=publicPage?'clube-receitas':'clube-b';
+  const funnelKey=publicPage?(staticVariant?'clube-receitas-b':'clube-receitas'):'clube-b';
   useEffect(() => { trackFunnel(funnelKey, 'pageview', { userId: user?.id ?? null }); }, [funnelKey,user?.id]);
   const { data: planData } = useUserPlan();
   const { data: totalMembers } = useTotalClubMembers();
@@ -217,7 +219,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
   const priceCardEls = React.useRef<Set<HTMLDivElement>>(new Set());
   const landingScrollRef = React.useRef<HTMLDivElement | null>(null);
   const [revealOpen, setRevealOpen] = useState(false);
-  useClubFunnelMilestones(landingScrollRef,publicPage,revealOpen,user?.id);
+  useClubFunnelMilestones(landingScrollRef,publicPage,revealOpen,user?.id,funnelKey);
   const [revealScheduled, setRevealScheduled] = useState(false);
   const [priceCardVersion, setPriceCardVersion] = useState(0);
   // unlocked = exibir UI com R$97 + strikethrough. Antes do reveal fica false
@@ -442,7 +444,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
         product_name: 'Clube dos Drinkeros · Anual',
         product_type: 'subscription',
       });
-      trackAbConversion('clube');
+      trackAbConversion(publicPage ? 'clube-receitas' : 'clube');
       trackFunnel(
         funnelKey,
         'checkout_1_started',
@@ -473,16 +475,17 @@ const VipLandingB: React.FC<{ publicPage?: boolean }> = ({ publicPage = false })
     document.getElementById('clube-pricing')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   if (publicPage) return <ClubePublicLanding
+    staticVariant={staticVariant}
     scrollRef={landingScrollRef}
     registerPriceCard={registerPriceCard}
-    price={<PriceAmount value={displayPrice} />}
+    price={staticVariant ? displayPrice.toLocaleString('pt-BR') : <PriceAmount value={displayPrice} />}
     fullPrice={promo.fullPrice}
     unlocked={unlocked}
     savings={effectiveSavings}
     offerDeadline={publicBackendReady ? promo.eligibleUntilMs : 0}
     loading={loading || promo.isLoading}
     onSubscribe={() => handleSubscribe('card')}
-    reveal={<ClubeDiscountReveal open={revealOpen} onClose={handleRevealClose} newVisitor savings={effectiveSavings} />}
+    reveal={staticVariant ? (revealOpen && <div role="dialog" aria-modal="true" aria-label="Desconto do Clube" className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-6"><div className="rounded-2xl bg-neutral-900 text-center p-8 max-w-sm"><h2>Super oferta para você que é novo visitante!</h2><p className="my-6">Você ganhou <strong>R$ {effectiveSavings} de desconto</strong></p><button type="button" className="club-static-block-cta" onClick={()=>handleRevealClose(true)}>Pegar desconto</button><button type="button" className="mt-5" onClick={()=>handleRevealClose(false)}>Agora não</button></div></div>) : <ClubeDiscountReveal open={revealOpen} onClose={handleRevealClose} newVisitor savings={effectiveSavings} />}
   />;
 
   return (

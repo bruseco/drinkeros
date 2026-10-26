@@ -16,6 +16,8 @@
  * Rotas internas pagas (ex.: /app/**, /admin/**) NÃO entram aqui.
  */
 export const PUBLIC_SALES_ROUTES: string[] = [
+  '/clube-receitas',
+  '/clube-receitas-b',
   '/pv-clube',
   '/pv-clube-b',
   '/vip',

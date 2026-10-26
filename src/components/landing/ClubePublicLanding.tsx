@@ -185,6 +185,7 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
 }
 
 type Props = {
+  staticVariant?: boolean;
   scrollRef: React.Ref<HTMLDivElement>;
   registerPriceCard: (element: HTMLDivElement | null) => void;
   price: React.ReactNode;
@@ -271,7 +272,7 @@ export default function ClubePublicLanding(props: Props) {
   const revealCta=React.useCallback(()=>setCtaVisible(true),[]);
   const pricing = useRef<HTMLElement>(null);
   const showFloatingCta=ctaVisible&&!footerReplacesCta&&!purchaseVisible;
-  const scrollToPricing = () => pricing.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+  const scrollToPricing = () => pricing.current?.scrollIntoView({ behavior: props.staticVariant || window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
   useEffect(()=>{
     const element=footer.current;
     const scroller=element?.closest('.club-public');
@@ -299,7 +300,7 @@ export default function ClubePublicLanding(props: Props) {
     document.title = 'Clube dos Drinkeros · Mais de mil receitas em vídeo';
     return () => { document.title = previous; };
   }, []);
-  return <div className={`club-public${props.unlocked ? ' club-unlocked' : ''}`} ref={props.scrollRef}>
+  return <div className={`club-public${props.staticVariant ? ' club-static' : ''}${props.unlocked ? ' club-unlocked' : ''}`} ref={props.scrollRef}>
     <div className="club-brick-image" ref={brick} data-motion-active={brickActive} aria-hidden="true"/>
     {props.reveal}
     {props.unlocked && <PublicOfferBanner savings={props.savings} deadline={props.offerDeadline} />}
@@ -307,19 +308,30 @@ export default function ClubePublicLanding(props: Props) {
     <header className="club-public-hero" ref={hero}>
       <p className="club-invite">Torne-se membro do</p>
       <h1><img className="club-logo" src="/club-landing/logo.png" alt="Clube dos Drinkeros" width="500" height="140" fetchPriority="high" /></h1>
-      <p className="club-pocket" ref={pocket} data-motion-active={pocketMotion}>Mais de <strong><AnimatedClubCount value={1000} /></strong> receitas no seu bolso.</p>
+      <p className="club-pocket" ref={pocket} data-motion-active={pocketMotion}>Mais de <strong>{props.staticVariant ? '1.000' : <AnimatedClubCount value={1000} />}</strong> receitas no seu bolso.</p>
       <div ref={heroStrip} data-motion-active={heroMotion} className="club-hero-strip" aria-hidden="true"><div><img src={drinksStrip} alt="" /><img src={drinksStrip} alt="" /></div></div>
       <p className="club-discover">Descubra o que esse aplicativo<br/>tem a lhe oferecer</p>
       <div className="club-down-slot" aria-hidden="true"><ArrowDown className={`club-down${hasScrolled ? '' : ' club-down-bouncing'}`} aria-hidden="true" /></div>
     </header>
-    {landingCategories.map((category,index) => <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCoversReached={category.id === 'category-1' ? revealCta : undefined} />)}
+    {landingCategories.map((category,index) => props.staticVariant ? <section key={category.id} className={`club-static-category club-${category.id}`} aria-label={category.label}>
+      <h2>{category.id === 'desserts' ? <>Diversas <strong>sobremesas</strong> para fazer em datas comemorativas.</> : category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : <>Mais de <strong>{category.number.toLocaleString('pt-BR')} {category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
+      <div className="club-static-recipes">{category.recipes.map((recipe,index)=><figure key={`${recipe.title}-${index}`}><img src={recipe.image} alt={recipe.title} loading="lazy"/><figcaption>{recipe.title}</figcaption></figure>)}</div>
+      <button type="button" className="club-static-block-cta" onClick={scrollToPricing}>Quero entrar para o Clube ↓</button>
+    </section> : <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCoversReached={category.id === 'category-1' ? revealCta : undefined} />)}
     <section className="club-creativity" ref={creativity} data-motion-active={creativityMotion}><h2>São as receitas <strong>mais criativas da internet</strong> no seu celular.</h2><p>Para acessar quando quiser.</p></section>
-    <section className="club-tools" aria-label="Organize seus drinks">
+    {props.staticVariant && <section className="club-tools" aria-label="Organize seus drinks">{[
+      ['Receitas em vídeo.','Assista como preparar. Todas as receitas foram realizadas e testadas.'],
+      ['Salve suas receitas.','Monte listas de favoritos para cada ocasião.'],
+      ['Organize a festa.','Monte sua lista e gere o checklist de compras para a sua festa.'],
+      ['Comunidade.','Compartilhe e descubra receitas com outros usuários.'],
+    ].map(([title,text])=><article key={title} className="club-feature"><h2>{title}</h2><p>{text}</p><button className="club-static-block-cta" type="button" onClick={scrollToPricing}>Quero entrar para o Clube ↓</button></article>)}</section>}
+    {!props.staticVariant && <section className="club-tools" aria-label="Organize seus drinks">
       <article className="club-feature"><p className="club-eyebrow club-video-eyebrow"><span>Receitas em vídeo</span><svg role="img" aria-label="YouTube" viewBox="0 0 28 20"><rect width="28" height="20" rx="5" fill="#fff"/><path d="m11 5 8 5-8 5Z" fill="#111"/></svg></p><h2>Assista como preparar.</h2><p>Todas as receitas foram realizadas e testadas.</p><ClubRecipeLoop /></article>
       <article className="club-feature"><h2>Salve suas receitas.</h2><p>Monte listas de favoritos para cada ocasião.</p><ClubFavoriteDemo /></article>
       <article className="club-feature club-shopping-feature"><h2>Organize a festa.</h2><p>Monte sua lista e gere o checklist de compras para a sua festa.</p><ClubShoppingDemo /></article>
       <article className="club-feature club-community-feature"><h2>Comunidade.</h2><p>Compartilhe e descubra receitas com outros usuários.</p><ClubCommunityDemo /></article>
     </section>
+    }
     <section id="clube-pricing" className="club-public-pricing" ref={pricing}>
       <h2>Entre para o Clube!</h2>
       <div className="club-offer">
@@ -335,7 +347,7 @@ export default function ClubePublicLanding(props: Props) {
         <p className="club-payment-note">Pagamento por cartão ou Pix. No cartão, renovação automática pelo valor contratado enquanto a assinatura permanecer ativa. No Pix, acesso por 12 meses. Após cancelamento, uma nova contratação segue a oferta vigente.</p>
       </div>
     </section>
-    <section className="club-public-testimonials"><h2>Olhe o que o pessoal acha da gente. <span aria-hidden="true">👀</span></h2><TestimonialsCarousel hideHeading /></section>
+    <section className="club-public-testimonials"><h2>Olhe o que o pessoal acha da gente. <span aria-hidden="true">👀</span></h2><TestimonialsCarousel hideHeading staticLayout={props.staticVariant} /></section>
     <section className="club-faq"><h2>Ficou alguma dúvida?</h2>
       <details><summary>Preciso ter experiência?</summary><p>Você pode acompanhar o preparo em vídeo e escolher as receitas que combinam com os ingredientes que tem.</p></details>
       <details><summary>Posso usar no celular?</summary><p>Sim. Acesse o aplicativo pelo navegador do seu celular e salve suas receitas favoritas na sua conta.</p></details>

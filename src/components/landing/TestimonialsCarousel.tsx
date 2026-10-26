@@ -27,7 +27,7 @@ const AUTO_SPEED = 12; // px/s para a esquerda (mais lento)
 const FRICTION = 0.94; // decay da inércia
 const MIN_VELOCITY = 0.05;
 
-const TestimonialsCarousel: React.FC<{ hideHeading?: boolean }> = ({ hideHeading = false }) => {
+const TestimonialsCarousel: React.FC<{ hideHeading?: boolean; staticLayout?: boolean }> = ({ hideHeading = false, staticLayout = false }) => {
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
@@ -42,6 +42,7 @@ const TestimonialsCarousel: React.FC<{ hideHeading?: boolean }> = ({ hideHeading
   const items = [...TESTIMONIALS, ...TESTIMONIALS];
 
   useEffect(() => {
+    if (staticLayout) return;
     const track = trackRef.current;
     if (!track) return;
 
@@ -103,12 +104,14 @@ const TestimonialsCarousel: React.FC<{ hideHeading?: boolean }> = ({ hideHeading
     );
     if (viewportRef.current) io.observe(viewportRef.current);
 
-    return () => {
+    if (staticLayout) return <div className="club-static-recipes">{TESTIMONIALS.map((src,index)=><img key={src} src={src} alt={`Depoimento ${index+1}`} loading="lazy" style={{aspectRatio:'auto',objectFit:'contain'}}/>)}</div>;
+
+  return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       ro.disconnect();
       io.disconnect();
     };
-  }, []);
+  }, [staticLayout]);
 
   const onPointerDown = (e: React.PointerEvent) => {
     draggingRef.current = true;

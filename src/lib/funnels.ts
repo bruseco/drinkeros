@@ -80,4 +80,4 @@ export const FUNNELS: FunnelDef[] = [
 
 
 export const getFunnel = (key: string): FunnelDef | undefined =>
-  FUNNELS.find((f) => f.key === key);
+  key === 'clube-receitas-b' ? { ...FUNNELS[0], key, pageKey:key, name:'Funil Clube dos Drinkeros V2 — variante B', publicPath:'/clube-receitas-b', productType:undefined, steps:FUNNELS[0].steps.filter(step=>!step.sales) } : FUNNELS.find((f) => f.key === key);

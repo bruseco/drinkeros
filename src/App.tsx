@@ -160,7 +160,8 @@ const App = () => (
             <Route path="/pv-clube" element={<Navigate to="/pv-clube-b" replace />} />
             <Route path="/pv-clube-b" element={<VipLandingB />} />
             <Route path="/clube/boas-vindas" element={<ClubWelcome />} />
-            <Route path="/clube-receitas" element={<VipLandingB publicPage />} />
+            <Route path="/clube-receitas" element={<VipLandingB key="club-public-a" publicPage />} />
+            <Route path="/clube-receitas-b" element={<VipLandingB key="club-public-b" publicPage staticVariant />} />
             <Route path="/vip" element={<Navigate to="/pv-clube-b" replace />} />
             {/* Legacy redirects (links antigos) */}
             <Route path="/clube-b" element={<Navigate to="/pv-clube-b" replace />} />

@@ -78,18 +78,19 @@ function pickVariant(splitPct: number): 'a' | 'b' {
 }
 
 /** Página ORIGINAL: sorteia, redireciona se necessário, conta visita. */
-export function useAbTest(pageKey: string) {
+export function useAbTest(pageKey: string, enabled = true) {
   const navigate = useNavigate();
   const location = useLocation();
 
   const { data: test } = useQuery({
     queryKey: ['ab-test', pageKey],
+    enabled,
     queryFn: () => fetchTest(pageKey),
     staleTime: 60_000,
   });
 
   useEffect(() => {
-    if (!test) return;
+    if (!enabled || !test) return;
     // Teste encerrado: força o vencedor
     if (test.status === 'finished' && test.winner) {
       if (test.winner === 'b' && location.pathname === test.original_path) {
@@ -111,18 +112,19 @@ export function useAbTest(pageKey: string) {
     if (variant === 'b' && location.pathname === test.original_path) {
       navigate(test.variant_path + location.search + location.hash, { replace: true });
     }
-  }, [test, pageKey, navigate, location.pathname, location.search, location.hash]);
+  }, [enabled, test, pageKey, navigate, location.pathname, location.search, location.hash]);
 }
 
 /** Página VARIANTE B: garante cookie e conta visita se visitante chegou direto. */
-export function useAbVariantTrack(pageKey: string, variant: 'b' = 'b') {
+export function useAbVariantTrack(pageKey: string, variant: 'b' = 'b', enabled = true) {
   useEffect(() => {
+    if (!enabled) return;
     const current = readVariant(pageKey);
     if (current !== variant) {
       writeVariant(pageKey, variant);
     }
     trackVisitOnce(pageKey, variant);
-  }, [pageKey, variant]);
+  }, [pageKey, variant, enabled]);
 }
 
 /** Dispara conversão pra variante atual do visitante (lê do cookie). */
