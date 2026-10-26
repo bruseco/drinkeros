@@ -307,17 +307,17 @@ export default function ClubePublicLanding(props: Props) {
     {props.unlocked && <PublicOfferBanner savings={props.savings} deadline={props.offerDeadline} />}
     <button ref={floatingCta} type="button" className={`club-floating-cta${showFloatingCta ? ' club-cta-visible' : ''}`} aria-hidden={!showFloatingCta} tabIndex={showFloatingCta?0:-1} disabled={!showFloatingCta || (props.unlocked && props.loading)} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar p/ o</span><strong>CLUBE</strong></span><ClubButtonIcons /></button>
     <header className="club-public-hero" ref={hero}>
-      <p className="club-invite">Torne-se membro do</p>
+      {!props.staticVariant && <p className="club-invite">Torne-se membro do</p>}
       <h1><img className="club-logo" src="/club-landing/logo.png" alt="Clube dos Drinkeros" width="500" height="140" fetchPriority="high" /></h1>
       <p className="club-pocket" ref={pocket} data-motion-active={pocketMotion}>Mais de <strong>{props.staticVariant ? '1.000' : <AnimatedClubCount value={1000} />}</strong> receitas no seu bolso.</p>
       <div ref={heroStrip} data-motion-active={heroMotion} className="club-hero-strip" aria-hidden="true"><div><img src={drinksStrip} alt="" /><img src={drinksStrip} alt="" /></div></div>
-      <p className="club-discover">Descubra o que esse aplicativo<br/>tem a lhe oferecer</p>
+      <p className="club-discover">{props.staticVariant ? <>Veja tudo que você ganha<br/>no Clube dos Drinkeros</> : <>Descubra o que esse aplicativo<br/>tem a lhe oferecer</>}</p>
       <div className="club-down-slot" aria-hidden="true"><ArrowDown className={`club-down${hasScrolled ? '' : ' club-down-bouncing'}`} aria-hidden="true" /></div>
     </header>
     {landingCategories.map((category,index) => props.staticVariant ? <section key={category.id} className={`club-static-category club-${category.id}`} aria-label={category.label}>
       <h2>{category.id === 'category-1' ? 'Centenas de' : 'Várias'} receitas de <strong>{category.id === 'syrups' ? 'xaropes artesanais' : category.label.toLocaleLowerCase('pt-BR')}</strong>{category.id === 'desserts' ? ' para fazer em datas comemorativas.' : '.'}</h2>
       <div className="club-static-recipes">{(variantBSelection[category.id as keyof typeof variantBSelection] ?? []).map(title=>category.recipes.find(recipe=>recipe.title===title)).filter((recipe): recipe is NonNullable<typeof recipe>=>!!recipe).map((recipe,index)=><figure key={`${recipe.title}-${index}`}><img src={recipe.image} alt={recipe.title} loading="lazy"/></figure>)}</div>
-      {['syrups','category-3','desserts'].includes(category.id) && <button type="button" className="club-static-block-cta" onClick={scrollToPricing}>Quero entrar para o Clube ↓</button>}
+      {['syrups','category-3','desserts'].includes(category.id) && <button type="button" className="club-static-block-cta" onClick={scrollToPricing}><span>Quero entrar para o Clube</span><ClubButtonIcons /></button>}
     </section> : <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCoversReached={category.id === 'category-1' ? revealCta : undefined} />)}
     <section className="club-creativity" ref={creativity} data-motion-active={creativityMotion}><h2>São as receitas <strong>mais criativas da internet</strong> no seu celular.</h2><p>Para acessar quando quiser.</p></section>
     <section className="club-tools" aria-label="Organize seus drinks">

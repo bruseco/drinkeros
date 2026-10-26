@@ -247,8 +247,8 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
       revealTimerRef.current = null;
       console.log('[clube-reveal] opening overlay');
       setRevealOpen(true);
-    }, publicPage ? 3000 : 2000);
-  }, [canRevealIntro,publicPage]);
+    }, publicPage && !staticVariant ? 3000 : 2000);
+  }, [canRevealIntro,publicPage,staticVariant]);
 
   React.useEffect(() => {
     return () => {

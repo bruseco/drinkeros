@@ -270,7 +270,7 @@
 .club-static .club-public-hero > :not(.club-hero-strip), .club-static-category > h2, .club-static-category figure, .club-static .club-creativity *, .club-static-recipes * { animation:none!important; transition:none!important; }
 .club-static .club-floating-cta { display:none; }
 
-.club-static .club-brick-image { opacity:.7!important; }
+
 .club-static-category { max-width:1080px; margin:0 auto; padding:40px 20px; text-align:center; }
 .club-static-category h2 { font-size:clamp(26px,4vw,42px); margin:0 0 28px; line-height:1.2; }
 .club-static-category strong { color:var(--category-base,var(--club-gold)); text-transform:uppercase; }
@@ -280,5 +280,11 @@
 .club-static-recipes figure { margin:0; }
 .club-static-recipes img { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:14px; }
 .club-static-recipes figcaption { margin-top:8px; font-size:14px; color:#ccc; }
-.club-static-block-cta { display:block; width:min(100%,520px); min-height:80px; margin:36px auto 0; padding:22px 32px; border:1px solid #ffe4a3; border-radius:999px; background:linear-gradient(135deg,#fff0b7 0%,#edc064 35%,#d69a2d 70%,#ffe2a0 100%); color:#241809; font-size:clamp(18px,3vw,23px); font-weight:800; box-shadow:inset 0 2px 1px #fff8,inset 0 -3px 2px #8d55094d,0 8px 24px #edc06440; }
+.club-static-block-cta { display:flex; align-items:center; justify-content:center; gap:20px; width:min(100%,520px); min-height:80px; margin:36px auto 0; padding:22px 32px; border:1px solid #ffe4a3; border-radius:999px; background:linear-gradient(135deg,#fff0b7 0%,#edc064 35%,#d69a2d 70%,#ffe2a0 100%); color:#241809; font-size:clamp(18px,3vw,23px); font-weight:800; box-shadow:inset 0 2px 1px #fff8,inset 0 -3px 2px #8d55094d,0 8px 24px #edc06440; }
 @media(max-width:600px) { .club-static-recipes { grid-template-columns:1fr; } }
+
+.club-static .club-public-hero { padding-top:26px; }
+.club-static .club-public-hero h1 { max-width:380px; margin-top:0; margin-bottom:58px; }
+.club-static .club-logo { margin-top:0; }
+.club-static-block-cta .club-cta-icons { flex-shrink:0; }
+@media(max-width:600px) { .club-static .club-public-hero h1 { max-width:300px; } .club-static-block-cta { padding-inline:22px; gap:12px; } }
