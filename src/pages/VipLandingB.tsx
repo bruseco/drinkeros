@@ -478,14 +478,14 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
     staticVariant={staticVariant}
     scrollRef={landingScrollRef}
     registerPriceCard={registerPriceCard}
-    price={staticVariant ? displayPrice.toLocaleString('pt-BR') : <PriceAmount value={displayPrice} />}
+    price={<PriceAmount value={displayPrice} />}
     fullPrice={promo.fullPrice}
     unlocked={unlocked}
     savings={effectiveSavings}
     offerDeadline={publicBackendReady ? promo.eligibleUntilMs : 0}
     loading={loading || promo.isLoading}
     onSubscribe={() => handleSubscribe('card')}
-    reveal={staticVariant ? (revealOpen && <div role="dialog" aria-modal="true" aria-label="Desconto do Clube" className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-6"><div className="rounded-2xl bg-neutral-900 text-center p-8 max-w-sm"><h2>Super oferta para você que é novo visitante!</h2><p className="my-6">Você ganhou <strong>R$ {effectiveSavings} de desconto</strong></p><button type="button" className="club-static-block-cta" onClick={()=>handleRevealClose(true)}>Pegar desconto</button><button type="button" className="mt-5" onClick={()=>handleRevealClose(false)}>Agora não</button></div></div>) : <ClubeDiscountReveal open={revealOpen} onClose={handleRevealClose} newVisitor savings={effectiveSavings} />}
+    reveal={staticVariant ? (revealOpen && <div role="dialog" aria-modal="true" aria-label="Desconto do Clube" className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-6"><div className="rounded-2xl bg-neutral-900 text-center p-8 max-w-sm"><h2>Super oferta para você que é novo visitante!</h2><p className="my-6">Você ganhou <strong className="font-bold" style={{color:'#ffeb00',textShadow:'0 0 10px #ffeb0080,0 0 24px #ffcf004d'}}>R$ {effectiveSavings} de desconto</strong></p><button type="button" className="club-static-block-cta" onClick={()=>handleRevealClose(true)}>Pegar desconto</button><button type="button" className="mt-5" onClick={()=>handleRevealClose(false)}>Agora não</button></div></div>) : <ClubeDiscountReveal open={revealOpen} onClose={handleRevealClose} newVisitor savings={effectiveSavings} />}
   />;
 
   return (

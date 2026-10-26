@@ -15,6 +15,7 @@ import ClubShoppingDemo from './ClubShoppingDemo';
 import ClubCommunityDemo from './ClubCommunityDemo';
 import catalog from './clubLandingCatalog.json';
 import dessertRecipes from './clubDessertCovers.json';
+import variantBSelection from './clubVariantBSelection.json';
 const landingCategories = [...catalog, dessertRecipes];
 import './clubePublicLanding.css';
 import { useViewportMotion } from './useViewportMotion';
@@ -314,24 +315,17 @@ export default function ClubePublicLanding(props: Props) {
       <div className="club-down-slot" aria-hidden="true"><ArrowDown className={`club-down${hasScrolled ? '' : ' club-down-bouncing'}`} aria-hidden="true" /></div>
     </header>
     {landingCategories.map((category,index) => props.staticVariant ? <section key={category.id} className={`club-static-category club-${category.id}`} aria-label={category.label}>
-      <h2>{category.id === 'desserts' ? <>Diversas <strong>sobremesas</strong> para fazer em datas comemorativas.</> : category.number === null ? <>Diversos <strong>shots para curtir.</strong></> : <>Mais de <strong>{category.number.toLocaleString('pt-BR')} {category.label.toLocaleLowerCase('pt-BR')}.</strong></>}</h2>
-      <div className="club-static-recipes">{category.recipes.map((recipe,index)=><figure key={`${recipe.title}-${index}`}><img src={recipe.image} alt={recipe.title} loading="lazy"/><figcaption>{recipe.title}</figcaption></figure>)}</div>
+      <h2>{category.id === 'category-1' ? 'Centenas de' : 'Várias'} receitas de <strong>{category.id === 'syrups' ? 'xaropes artesanais' : category.label.toLocaleLowerCase('pt-BR')}</strong>{category.id === 'desserts' ? ' para fazer em datas comemorativas.' : '.'}</h2>
+      <div className="club-static-recipes">{(variantBSelection[category.id as keyof typeof variantBSelection] ?? []).map(title=>category.recipes.find(recipe=>recipe.title===title)).filter((recipe): recipe is NonNullable<typeof recipe>=>!!recipe).map((recipe,index)=><figure key={`${recipe.title}-${index}`}><img src={recipe.image} alt={recipe.title} loading="lazy"/></figure>)}</div>
       <button type="button" className="club-static-block-cta" onClick={scrollToPricing}>Quero entrar para o Clube ↓</button>
     </section> : <CategoryScene key={category.id} category={category} direction={index % 2 === 0 ? 1 : -1} onCoversReached={category.id === 'category-1' ? revealCta : undefined} />)}
     <section className="club-creativity" ref={creativity} data-motion-active={creativityMotion}><h2>São as receitas <strong>mais criativas da internet</strong> no seu celular.</h2><p>Para acessar quando quiser.</p></section>
-    {props.staticVariant && <section className="club-tools" aria-label="Organize seus drinks">{[
-      ['Receitas em vídeo.','Assista como preparar. Todas as receitas foram realizadas e testadas.'],
-      ['Salve suas receitas.','Monte listas de favoritos para cada ocasião.'],
-      ['Organize a festa.','Monte sua lista e gere o checklist de compras para a sua festa.'],
-      ['Comunidade.','Compartilhe e descubra receitas com outros usuários.'],
-    ].map(([title,text])=><article key={title} className="club-feature"><h2>{title}</h2><p>{text}</p><button className="club-static-block-cta" type="button" onClick={scrollToPricing}>Quero entrar para o Clube ↓</button></article>)}</section>}
-    {!props.staticVariant && <section className="club-tools" aria-label="Organize seus drinks">
+    <section className="club-tools" aria-label="Organize seus drinks">
       <article className="club-feature"><p className="club-eyebrow club-video-eyebrow"><span>Receitas em vídeo</span><svg role="img" aria-label="YouTube" viewBox="0 0 28 20"><rect width="28" height="20" rx="5" fill="#fff"/><path d="m11 5 8 5-8 5Z" fill="#111"/></svg></p><h2>Assista como preparar.</h2><p>Todas as receitas foram realizadas e testadas.</p><ClubRecipeLoop /></article>
       <article className="club-feature"><h2>Salve suas receitas.</h2><p>Monte listas de favoritos para cada ocasião.</p><ClubFavoriteDemo /></article>
       <article className="club-feature club-shopping-feature"><h2>Organize a festa.</h2><p>Monte sua lista e gere o checklist de compras para a sua festa.</p><ClubShoppingDemo /></article>
       <article className="club-feature club-community-feature"><h2>Comunidade.</h2><p>Compartilhe e descubra receitas com outros usuários.</p><ClubCommunityDemo /></article>
     </section>
-    }
     <section id="clube-pricing" className="club-public-pricing" ref={pricing}>
       <h2>Entre para o Clube!</h2>
       <div className="club-offer">

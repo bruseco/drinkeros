@@ -1,0 +1,51 @@
+{
+  "category-0": [
+    "Caipicerva Tropical",
+    "Caipirinha de Espumante",
+    "Caipirinha de Milho",
+    "CaipiJack de Maracujá",
+    "Caipirinha de Melancia c/ Gengibre"
+  ],
+  "category-1": [
+    "S'mores Milkshake",
+    "Batida MaracuWhisky",
+    "Batida de Paçoca",
+    "Batida de Churros",
+    "FrappuJack"
+  ],
+  "syrups": [
+    "Xarope de Hibisco",
+    "Xarope de Framboesa",
+    "Xarope de Manga c/ Pimenta Rosa",
+    "Xarope Love Spell",
+    "Xarope Mexicano"
+  ],
+  "category-2": [
+    "Raspadinha Jack & Coke",
+    "Frosé",
+    "Juru Frozen de Pitaya",
+    "Froserita de Melancia",
+    "Jack Peach Frozen"
+  ],
+  "category-3": [
+    "Campari Collins",
+    "Old Fashioned",
+    "Whisky Sour",
+    "New York Sour",
+    "Bloody Mary"
+  ],
+  "category-4": [
+    "Shot Pé de Moleque",
+    "Shots de Nutella",
+    "Mini Caipirinhas ",
+    "Shot Pipoca",
+    "Sangue de Cobra"
+  ],
+  "desserts": [
+    "Pudim de Amarula",
+    "Banoffe ao Rum",
+    "Jackttone",
+    "Pudim de Milho c/ Bourbon",
+    "Picolé de Cerveja"
+  ]
+}

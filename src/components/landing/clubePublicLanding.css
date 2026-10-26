@@ -267,13 +267,15 @@
 @media(prefers-reduced-motion:reduce){.club-creativity strong{animation:none}}
 
 /* Static B: all covers remain in normal vertical document flow. */
-.club-static *, .club-static *::before, .club-static *::after { animation:none!important; transition:none!important; }
+.club-static .club-public-hero *, .club-static-category *, .club-static .club-creativity *, .club-static-recipes * { animation:none!important; transition:none!important; }
 .club-static .club-floating-cta { display:none; }
 .club-static .club-hero-strip>div { transform:none!important; }
 .club-static .club-brick-image { opacity:.7!important; }
 .club-static-category { max-width:1080px; margin:0 auto; padding:40px 20px; text-align:center; }
 .club-static-category h2 { font-size:clamp(26px,4vw,42px); margin:0 0 28px; line-height:1.2; }
-.club-static-category strong { color:#f4c66a; }
+.club-static-category strong { color:var(--category-base,var(--club-gold)); }
+.club-static-category.club-syrups strong { color:#c568ff; }
+.club-static-category.club-desserts strong { color:#bd8b61; }
 .club-static-recipes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
 .club-static-recipes figure { margin:0; }
 .club-static-recipes img { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:14px; }
