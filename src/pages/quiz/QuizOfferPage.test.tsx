@@ -1,0 +1,13 @@
+import {afterEach,expect,it,vi} from 'vitest';
+import {cleanup,render,screen} from '@testing-library/react';
+import {MemoryRouter} from 'react-router-dom';
+import QuizOfferPage from './QuizOfferPage';
+const m=vi.hoisted(()=>({quote:vi.fn()}));
+vi.mock('@/lib/quizOffer',()=>({fetchQuizQuote:m.quote,quizCall:vi.fn(),trackQuizOffer:vi.fn()}));
+vi.mock('@/lib/metaPixel',()=>({trackFbEvent:vi.fn()}));
+vi.mock('@/lib/funnelTracking',()=>({trackFunnel:vi.fn(),trackFunnelAsync:vi.fn()}));
+vi.mock('./QuizProductContent',()=>({default:()=> <section>Conteúdo da oferta</section>}));
+afterEach(cleanup);
+const q={session_id:'test',path:'casa',recommended:'clube',product:'clube',price:87,full_price:97,active:true,server_now:new Date().toISOString(),expires_at:new Date(Date.now()+1200000).toISOString(),attribution:{utm_content:'original'}};
+it('shows the cheaper server-quoted plan B on the recommended offer',async()=>{m.quote.mockResolvedValue({...q,alternatives:[{product:'pack',price:47,full_price:147}]});render(<MemoryRouter><QuizOfferPage product="clube"/></MemoryRouter>);expect(await screen.findByRole('link',{name:/Prefere começar por Pack 6 e-books por R\$\s*47/})).toHaveAttribute('href','/quiz-pack-ebooks?utm_content=original');});
+it('does not suggest the original, more expensive product as plan B after a down-sell',async()=>{m.quote.mockResolvedValue({...q,recommended:'xperience',alternatives:[{product:'xperience',price:197,full_price:497}]});render(<MemoryRouter><QuizOfferPage product="clube"/></MemoryRouter>);await screen.findByRole('button',{name:'Quero aproveitar esta oferta'});expect(screen.queryByRole('link',{name:/Prefere começar/})).toBeNull();});

@@ -107,7 +107,7 @@ export default function QuizOfferPage({ product }: { product: ProfileId }) {
     setBusy(true);
     try {
       const fresh = await refresh();
-      await trackQuizOffer(fresh, "quiz_checkout_clicked");
+      await Promise.race([trackQuizOffer(fresh, "quiz_checkout_clicked"),new Promise(resolve=>setTimeout(resolve,1200))]);
       const params = new URLSearchParams(fresh.attribution);
       params.set("quiz", "1");
       params.set("quiz_profile", product);
