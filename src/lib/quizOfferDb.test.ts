@@ -27,6 +27,7 @@ beforeAll(async () => {
       "20261027190000_quiz_exclusive_offers.sql",
       "20261027190100_quiz_consented_leads.sql",
       "20261027190200_quiz_admin_reporting.sql",
+      "20261027223000_quiz_art_experiment_reporting.sql",
     ]
   ) await db.exec(readFileSync(`supabase/migrations/${file}`, "utf8"));
   await db.query("select quiz_complete($1,$2,$3,$4,$5)", [
@@ -177,4 +178,16 @@ describe("server quiz offers", () => {
     expect(r.can_read).toBe(false);
     expect(r.can_quote).toBe(false);
   });
+});
+
+it("reports A/B destinations and purchases without inferring historical variants or duplicating payments",async()=>{
+ await db.exec("set test.admin='yes'");
+ const sid='11111111-1111-1111-1111-111111111111';
+ await db.query("insert into page_funnel_events(page_key,event,session_id,metadata,created_at) values ('quiz','quiz_offer_viewed','art-b',$1,now()-interval '1 minute'),('quiz','quiz_checkout_clicked','art-b',$1,now()-interval '30 seconds')",[JSON.stringify({quiz_experiment:'quiz-art-v1',quiz_variant:'b',quiz_session_id:sid,path:'casa',product:'pack'})]);
+ await db.query("insert into purchases(status,metadata) values ('approved',$1),('pending',$1),('approved',$2)",[JSON.stringify({quiz_session_id:sid,quiz_product:'pack',quiz_path:'casa'}),JSON.stringify({quiz_session_id:'old-unassigned',quiz_product:'pack',quiz_path:'casa'})]);
+ const rows=(await db.query<any>("select * from quiz_admin_experiment(null,null)")).rows;
+ expect(rows.find(r=>r.variant==='b'&&r.event==='quiz_purchase')?.count).toBe(1);
+ expect(rows.find(r=>r.variant==='unassigned'&&r.product==='pack'&&r.event==='quiz_purchase')?.count).toBe(1);
+ const future=(await db.query<any>("select * from quiz_admin_experiment(now()+interval '1 day',null)")).rows;expect(future).toEqual([]);
+ await db.exec("set test.admin='no'");await expect(db.query("select * from quiz_admin_experiment(null,null)")).rejects.toThrow('Acesso restrito');
 });

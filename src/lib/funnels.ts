@@ -1,4 +1,3 @@
-import {PROFILES} from './quizLogic';
 import type { FunnelEvent } from '@/lib/funnelTracking';
 
 export interface FunnelStepDef {
@@ -46,7 +45,6 @@ const clubFunnel: FunnelDef = {
   };
 
 export const FUNNELS: FunnelDef[] = [
-  ...Object.values(PROFILES).map((p):FunnelDef=>({key:`quiz-${p.id}`,pageKey:`quiz-offer-${p.id}`,quizProduct:p.id,name:`Quiz — ${p.product}`,description:'Oferta exclusiva do quiz, com compras vinculadas ao pedido.',publicPath:p.path,steps:[{key:'offer',event:'quiz_offer_viewed',label:'Viu a oferta'},{key:'checkout',event:'quiz_checkout_clicked',label:'Clicou para comprar'},{key:'arrived',event:'quiz_checkout_viewed',label:'Chegou ao checkout'},{key:'purchase',label:'Compra aprovada'}]})),
   {...clubFunnel,abVariant:'a',name:'Funil Clube dos Drinkeros — teste A'},
   {...clubFunnel,key:'clube-receitas-b',pageKey:'clube-receitas-b',publicPath:'/clube-receitas-b',abVariant:'b',name:'Funil Clube dos Drinkeros — teste B'},
   {
@@ -86,6 +84,7 @@ export const FUNNELS: FunnelDef[] = [
       { key: 'lead', event: 'quiz_lead_captured', label: 'Enviou WhatsApp com consentimento' },
       { key: 'expired', event: 'quiz_discount_expired', label: 'Desconto expirou' },
       { key: 'checkout', event: 'quiz_checkout_viewed', label: 'Chegou ao checkout da landing' },
+      { key: 'purchase', label: 'Compra aprovada' },
     ],
   },
 ];

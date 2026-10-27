@@ -28,6 +28,12 @@ export const usePageFunnel = (funnel: FunnelDef | undefined, range: FunnelRange 
         for(const step of funnel.steps)out[step.key]=((data||[]) as Array<{product:string;event:string;count:number}>).filter(r=>r.product===funnel.quizProduct&&r.event===(step.key==='purchase'?'quiz_purchase':step.event)).reduce((sum,r)=>sum+Number(r.count),0);
         return out;
       }
+      if(funnel.key==='quiz') {
+        const {data,error}=await supabase.rpc('quiz_admin_experiment' as never,{_since:since,_until:until} as never);
+        if(error)throw error;
+        for(const step of funnel.steps) out[step.key]=((data||[]) as Array<{event:string;count:number}>).filter(r=>r.event===(step.key==='purchase'?'quiz_purchase':step.event)).reduce((sum,r)=>sum+Number(r.count),0);
+        return out;
+      }
       // Etapas medidas por evento no navegador
       const { data, error } = await supabase.rpc((range==='custom'?'get_page_funnel_window':'get_page_funnel') as any, {
         _page_key: funnel.pageKey,

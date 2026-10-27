@@ -1,3 +1,5 @@
+import {assignQuizVariant,quizExperimentMetadata,type QuizVariant} from "@/lib/quizExperiment";
+import {QUIZ_ART} from "../quiz/quizArt";
 import QuizFooter from '../quiz/QuizFooter';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -32,6 +34,13 @@ type Stage = { kind: 'intro' } | { kind: 'question'; index: number } | { kind: '
 
 export default function Quiz() {
   const location = useLocation();
+  const previewParam = new URLSearchParams(location.search).get('quiz_preview');
+  const preview = previewParam === 'a' || previewParam === 'b';
+  const [variant] = useState<QuizVariant>(() => preview ? previewParam as QuizVariant : assignQuizVariant());
+  const experimentMeta = () => preview ? {} : quizExperimentMetadata();
+  const trackQuiz = (...args: Parameters<typeof trackFunnel>) => { if (!preview) trackFunnel(...args); };
+  const trackQuizAsync = (...args: Parameters<typeof trackFunnelAsync>) => preview ? Promise.resolve() : trackFunnelAsync(...args);
+
   const [stage, setStage] = useState<Stage>({ kind: 'intro' });
   const [checkoutError,setCheckoutError]=useState('');
   const [answers, setAnswers] = useState<Answers>({});
@@ -41,7 +50,7 @@ export default function Quiz() {
 
   const order = useMemo(() => getQuestionOrder(answers), [answers]);
 
-  useEffect(() => { trackFunnel(PAGE_KEY, 'pageview', {metadata:quizAdParams(location.search)}); }, []);
+  useEffect(() => { trackQuiz(PAGE_KEY, 'pageview', {metadata:{...quizAdParams(location.search),...experimentMeta()}}); }, []);
 
   const go = (next: Stage, direction: 'fwd' | 'back' = 'fwd') => {
     setDir(direction);
@@ -55,7 +64,7 @@ export default function Quiz() {
   };
 
   const start = () => {
-    trackFunnel(PAGE_KEY, 'quiz_started', {metadata:quizAdParams(location.search)});
+    trackQuiz(PAGE_KEY, 'quiz_started', {metadata:{...quizAdParams(location.search),...experimentMeta()}});
     go({ kind: 'question', index: 0 });
   };
 
@@ -69,7 +78,7 @@ export default function Quiz() {
     const nextOrder = getQuestionOrder(nextAnswers);
     (['q1','q2_casa','q2_profissional','q2_empreender','q3'] as const).forEach((q) => { if (!nextOrder.includes(q)) delete nextAnswers[q]; });
     setAnswers(nextAnswers);
-    trackFunnel(PAGE_KEY, qid==='q1'?'quiz_p1_answered':qid==='q3'?'quiz_p3_answered':'quiz_p2_answered', {metadata:{...quizAdParams(location.search),path:quizPath(nextAnswers),question:qid,answer:key}});
+    trackQuiz(PAGE_KEY, qid==='q1'?'quiz_p1_answered':qid==='q3'?'quiz_p3_answered':'quiz_p2_answered', {metadata:{...quizAdParams(location.search),...experimentMeta(),path:quizPath(nextAnswers),question:qid,answer:key}});
 
     window.setTimeout(() => {
       if (index + 1 < nextOrder.length) {
@@ -80,8 +89,8 @@ export default function Quiz() {
         window.setTimeout(() => {
           go({ kind: 'result', profile });
           const p = PROFILES[profile];
-          trackFunnel(PAGE_KEY, 'quiz_result', { metadata: {...quizAdParams(location.search), profile, product:profile, path:quizPath(nextAnswers), answers:cleanQuizAnswers(nextAnswers)} });
-          trackFbEvent('ViewContent', {
+          trackQuiz(PAGE_KEY, 'quiz_result', { metadata: {...quizAdParams(location.search),...experimentMeta(), profile, product:profile, path:quizPath(nextAnswers), answers:cleanQuizAnswers(nextAnswers)} });
+          !preview && trackFbEvent('ViewContent', {
             content_name: p.title, content_category: 'quiz', content_type: 'quiz_result', content_ids: [profile],
           }, { dedupeKey: `quiz:result:${profile}` });
         }, 1300);
@@ -99,9 +108,10 @@ export default function Quiz() {
 
   const clickCta = async (profile: ProfileId) => {
     const p = PROFILES[profile];
+    if (preview) return;
     try { await completeQuiz(answers, location.search); } catch { setCheckoutError('Não foi possível liberar sua oferta. Tente novamente.'); return; }
     rememberQuizJourney(profile);
-    await trackFunnelAsync(PAGE_KEY, 'quiz_cta_clicked', { metadata: {...quizAdParams(location.search), profile, product:profile, path:quizPath(answers), destination:p.path} });
+    await trackQuizAsync(PAGE_KEY, 'quiz_cta_clicked', { metadata: {...quizAdParams(location.search),...experimentMeta(), profile, product:profile, path:quizPath(answers), destination:p.path} });
     await waitForPixelFlush();
     window.location.href = buildDestinationUrl(p, location.search);
   };
@@ -121,6 +131,7 @@ export default function Quiz() {
         description="Responda 2 ou 3 perguntas rápidas e descubra o caminho certo pra você no mundo dos drinks."
         path="/quiz"
       />
+      {preview && <p role="status" className="text-center p-2 bg-amber-900 text-white">Prévia {variant.toUpperCase()} · funil do quiz e compra desativados</p>}
       <header className="sticky top-0 z-10 quiz-header" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="mx-auto flex max-w-xl items-center gap-3 px-4 py-3">
           {stage.kind === 'question' ? (
@@ -170,10 +181,10 @@ export default function Quiz() {
                         onClick={() => answer(stage.index, o.key)}
                         className={`quiz-card flex w-full items-center gap-4 rounded-2xl p-4 text-left transition-all duration-200 active:scale-[0.98] ${isSel ? 'quiz-card-selected' : ''}`}
                       >
-                        <span className="quiz-icon flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
-                          <Icon className="h-6 w-6" />
+                        <span className="quiz-icon flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl">
+                          {variant === 'b' ? <img src={QUIZ_ART[q.id][o.key]} alt="" width={96} height={96} className="h-full w-full object-cover" decoding="async" /> : <Icon className="h-10 w-10" />}
                         </span>
-                        <span className="text-[15px] font-medium leading-snug">{o.label}</span>
+                        <span className="text-[17px] font-medium leading-snug">{o.label}</span>
                       </button>
                     );
                   })}
