@@ -28,6 +28,8 @@ import ClubeDiscountReveal from '@/components/user/ClubeDiscountReveal';
 import { useClubeLandingOffer } from '@/hooks/useClubeLandingOffer';
 import ClubeIntroStickyBar from '@/components/user/ClubeIntroStickyBar';
 import ClubePublicLanding from '@/components/landing/ClubePublicLanding';
+import ClubeVariantBLanding from '@/components/landing/ClubeVariantBLanding';
+import { preserveClubBAdParams } from '@/components/landing/ClubeVariantBHero';
 import { usePublicClubeOffer } from '@/hooks/usePublicClubeOffer';
 import { usePublicClubBackendReady } from '@/hooks/usePublicClubBackendReady';
 import { useClubFunnelMilestones } from '@/hooks/useClubFunnelMilestones';
@@ -460,7 +462,9 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
       await waitForPixelFlush();
 
       // Mercado Pago checkout transparente (cartão recorrente + PIX) na página /checkout
-      navigate(publicPage&&publicBackendReady ? '/checkout/club/clube-anual?oferta=publica' : '/checkout/club/clube-anual');
+      navigate(publicPage && staticVariant
+        ? preserveClubBAdParams(publicBackendReady ? '/checkout/club/clube-anual?oferta=publica' : '/checkout/club/clube-anual', location.search)
+        : publicPage&&publicBackendReady ? '/checkout/club/clube-anual?oferta=publica' : '/checkout/club/clube-anual');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Tente novamente em alguns instantes.';
       toast.error('Erro ao iniciar checkout', { description: message });
@@ -477,7 +481,9 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
   const scrollToPricing = () =>
     document.getElementById('clube-pricing')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  if (publicPage) return <ClubePublicLanding
+  const PublicLanding = staticVariant ? ClubeVariantBLanding : ClubePublicLanding;
+  if (publicPage) return <PublicLanding
+    heroPrice={promo.isActive || promo.isLoading ? effectivePromoPrice : promo.fullPrice}
     staticVariant={staticVariant}
     scrollRef={landingScrollRef}
     registerPriceCard={registerPriceCard}
