@@ -190,6 +190,8 @@ function CategoryScene({ category, direction, onCoversReached }: { category: Cat
 }
 
 type Props = {
+  /** Usado apenas pela versão B; aceito aqui para compartilhar a mesma chamada. */
+  heroPrice?: number;
   staticVariant?: boolean;
   scrollRef: React.Ref<HTMLDivElement>;
   registerPriceCard: (element: HTMLDivElement | null) => void;
