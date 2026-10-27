@@ -2,13 +2,14 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import ClubeVariantBHero, { preserveClubBAdParams } from './ClubeVariantBHero';
 vi.mock('./useViewportMotion', () => ({ useViewportMotion: () => true }));
+vi.mock('./ClubePublicLanding', () => ({ AnimatedClubCount: ({ value }: { value: number }) => <span>{value.toLocaleString('pt-BR')}</span> }));
 afterEach(cleanup);
 
 describe('exclusive B hero', () => {
   it('shows the annual promise, offer and benefits, and uses the supplied purchase callback', () => {
     const buy = vi.fn();
     render(<ClubeVariantBHero price={87} loading={false} onSubscribe={buy} />);
-    expect(screen.getByRole('heading', { level: 1 }).textContent).toContain('1.000 receitas de drinks.');
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toContain('App com mais de 1.000receitas de drinks em vídeo.');
     expect(screen.queryByText('R$ 97')).toBeNull();
     expect(screen.queryByText('Desconto de lançamento')).toBeNull();
     expect(screen.getByText('R$ 87')).toBeTruthy();
@@ -19,7 +20,7 @@ describe('exclusive B hero', () => {
     expect(access.previousElementSibling?.className).toBe('club-b-hero-price');
     expect(screen.getByText('Pesquise os drinks por ingredientes.')).toBeTruthy();
     const loop = screen.getByRole('img', { name: 'Uma seleção de drinks do Clube dos Drinkeros' });
-    expect(loop.previousElementSibling?.className).toBe('club-b-hero-categories');
+    expect(loop.previousElementSibling?.className).toBe('club-b-hero-benefits');
     fireEvent.click(screen.getByRole('button', { name: 'Quero entrar p/ o Clube' }));
     expect(buy).toHaveBeenCalledTimes(1);
   });
