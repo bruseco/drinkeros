@@ -1,5 +1,6 @@
+import "./QuizResultVideo.css";
 import { useEffect, useRef, useState } from "react";
-import { Play, Volume2 } from "lucide-react";
+import { Volume2 } from "lucide-react";
 import type { ProfileId } from "@/lib/quizLogic";
 const ROOT =
   "https://pvjlcfhqueibjnkuzzna.supabase.co/storage/v1/object/public/landing-assets/quiz-results-20261027";
@@ -86,12 +87,12 @@ export default function QuizResultVideo(
               <button
                 type="button"
                 onClick={hearFromStart}
-                className="absolute inset-x-2 bottom-2 flex items-center justify-center gap-2 rounded-xl bg-black/85 p-3 text-sm font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+                data-autoplay-blocked={blocked}
+                title="Reproduzir desde o início com som"
+                className="quiz-result-video-play absolute left-1/2 top-1/2 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-2 rounded-xl bg-black/80 p-3 text-sm font-bold text-white shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
               >
-                {blocked
-                  ? <Play className="h-4 w-4" />
-                  : <Volume2 className="h-4 w-4" />}
-                {blocked ? "Reproduzir com som" : "Ouvir do início"}
+                <Volume2 aria-hidden="true" className="quiz-result-sound-icon h-9 w-9" />
+                <span>Ver vídeo</span>
               </button>
             )}
           </>
