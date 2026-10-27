@@ -145,3 +145,8 @@ Arquivos por etapa e estado final da instalação são registrados na entrega. A
 - `src/lib/quizOfferDb.test.ts`
 - `src/pages/admin/AdminFunnels.test.tsx`
 - `src/test/setup.ts`
+
+### Complemento de verificação da oferta alternativa
+
+- `src/pages/quiz/QuizOfferPage.tsx`: plano B só na oferta recomendada; uma falha de métricas não bloqueia o checkout.
+- `src/pages/quiz/QuizOfferPage.test.tsx`: preço do plano B cotado pelo servidor e ausência de sugestão mais cara após a alternativa.
