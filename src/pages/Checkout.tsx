@@ -1,3 +1,4 @@
+import QuizCheckout from './quiz/QuizCheckout';
 import {clubCheckoutVariant} from '@/lib/clubAbCheckout';
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from '@tanstack/react-query';
@@ -68,8 +69,10 @@ let mpInitialized = false;
 
 export default function Checkout() {
   const { productType, slug }=useParams();
+  const quizRequested=new URLSearchParams(window.location.search).get('quiz')==='1';
   const [guest,setGuest]=useState<boolean|null>(null);
   useEffect(()=>{let live=true;supabase.auth.getSession().then(({data:{session}})=>{if(live)setGuest(!session)}).catch(()=>{if(live)setGuest(true)});return()=>{live=false}},[]);
+  if(quizRequested)return <QuizCheckout/>;
   if(productType==='club'&&slug==='clube-anual'){
     if(guest===null)return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin"/></div>;
     if(guest)return <GuestClubCheckout/>;

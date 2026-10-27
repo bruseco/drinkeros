@@ -1,3 +1,4 @@
+import QuizOfferPage from './pages/quiz/QuizOfferPage';
 import QuizJourneyTracker from './components/QuizJourneyTracker';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -185,6 +186,13 @@ const App = () => (
             <Route path="/producao-de-ingredientes-artesanais" element={<IngredientesArtesanais />} />
             <Route path="/classicos-destilados" element={<ClassicosDestilados />} />
             <Route path="/quiz" element={<Quiz />} />
+            <Route path="/quiz-pack-ebooks" element={<QuizOfferPage product="pack" />} />
+            <Route path="/quiz-clube" element={<QuizOfferPage product="clube" />} />
+            <Route path="/quiz-xperience" element={<QuizOfferPage product="xperience" />} />
+            <Route path="/quiz-mixologia-avancada" element={<QuizOfferPage product="mixologia" />} />
+            <Route path="/quiz-bartender-a-bordo" element={<QuizOfferPage product="bordo" />} />
+            <Route path="/quiz-drink-delivery" element={<QuizOfferPage product="delivery" />} />
+            <Route path="/quiz-bar-para-eventos" element={<QuizOfferPage product="eventos" />} />
             <Route path="/rand" element={<Rand />} />
             <Route path="/rand/obrigado" element={<RandObrigado />} />
             <Route path="/workshop-alem-dos-classicos" element={<WorkshopAlemDosClassicos />} />
