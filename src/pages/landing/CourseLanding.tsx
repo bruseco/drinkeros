@@ -1,3 +1,4 @@
+import GuaranteeNote from "@/components/landing/GuaranteeNote";
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
@@ -638,8 +639,9 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     document.getElementById('oferta')?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const CTAButton: React.FC<{ children: React.ReactNode; size?: 'lg' | 'xl' }> = ({ children, size = 'lg' }) => (
-    <button
+  const refreshedContent = ["mixologia-avancada", "producao-de-ingredientes-artesanais", "bar-p-eventos"].includes(slug);
+  const CTAButton: React.FC<{ children: React.ReactNode; size?: 'lg' | 'xl' }> = ({ children, size = 'lg' }) => {
+    const button = (<button
       onClick={scrollToOffer}
       className={`cl-cta group relative inline-flex items-center justify-center gap-2 rounded-full font-extrabold text-white transition-transform duration-300 hover:scale-[1.03] overflow-hidden isolate ${
         size === 'xl' ? 'px-10 py-6 text-xl' : 'px-8 py-5 text-base sm:text-lg'
@@ -647,8 +649,9 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     >
       <span className="cl-cta-liquid" aria-hidden="true" />
       <span className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">{children}</span>
-    </button>
-  );
+    </button>);
+    return refreshedContent ? <div>{button}<GuaranteeNote /></div> : button;
+  };
 
   // CSS dinâmico baseado no tema
   const themeStyles = `
@@ -938,9 +941,9 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
           </div>
 
           {instructorSrc && (
-            <div className="mt-12 flex flex-col items-center">
+            <div className={refreshedContent ? "mt-8 mx-auto flex max-w-2xl items-center justify-center gap-6 text-left" : "mt-12 flex flex-col items-center"}>
               <div
-                className="rounded-full p-1"
+                className="shrink-0 rounded-full p-1"
                 style={{
                   background: `linear-gradient(135deg, ${theme.accent}, ${theme.secondary})`,
                 }}
@@ -953,9 +956,12 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                 />
               </div>
               {instructorName && (
+                <div className="min-w-0">
                 <p className="mt-3 text-sm uppercase tracking-[0.2em] text-white/80">
                   com <strong className="text-white">{instructorName}</strong>
                 </p>
+                {refreshedContent && aboutInstructor?.paragraphs[0] && <p className="mt-3 text-sm leading-relaxed text-white/75">{aboutInstructor.paragraphs[0]}</p>}
+                </div>
               )}
             </div>
           )}

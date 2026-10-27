@@ -1,3 +1,4 @@
+import GuaranteeNote from "@/components/landing/GuaranteeNote";
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
@@ -165,6 +166,7 @@ const DrinkerosXperience: React.FC = () => {
   };
 
   const CTAButton: React.FC<{ children: React.ReactNode; size?: 'lg' | 'xl' }> = ({ children, size = 'lg' }) => (
+    <div>
     <button
       onClick={scrollToOffer}
       className={`dx-cta group relative inline-flex items-center justify-center gap-2 rounded-full font-extrabold text-white transition-transform duration-300 hover:scale-[1.03] overflow-hidden isolate ${size === 'xl' ? 'px-10 py-6 text-xl' : 'px-8 py-5 text-base sm:text-lg'}`}
@@ -172,6 +174,8 @@ const DrinkerosXperience: React.FC = () => {
       <span className="dx-cta-liquid" aria-hidden="true" />
       <span className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">{children}</span>
     </button>
+    <GuaranteeNote />
+    </div>
   );
 
   return (
@@ -313,6 +317,13 @@ const DrinkerosXperience: React.FC = () => {
 
           <div className="flex justify-center mt-4">
             <CTAButton size="lg">QUERO VIRAR DRINKERO(A)</CTAButton>
+          </div>
+          <div className="mx-auto mt-8 flex max-w-xl items-center gap-6 text-left">
+            <img src={brunoHero} alt="Bruno Abreu, professor do Drinkeros Xperience" loading="lazy" className="h-36 w-28 shrink-0 object-contain" />
+            <div>
+              <h2 className="font-bold text-amber-300">Aprenda com Bruno Abreu</h2>
+              <p className="mt-2 text-sm leading-relaxed text-white/75">Criador do Drinkeros e do Método Áureo das proporções dos drinks. Aprenda receitas e técnicas para criar seus próprios drinks.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -506,6 +517,7 @@ const DrinkerosXperience: React.FC = () => {
               </button>
             </div>
 
+            <GuaranteeNote />
             <img src={pagamentos} alt="Formas de pagamento" loading="lazy" className="w-full max-w-md mx-auto opacity-90" />
 
             <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-white/70">

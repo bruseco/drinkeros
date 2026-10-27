@@ -1,20 +1,15 @@
 .quiz-watch-cue {
   position: absolute;
+  z-index: 10;
   left: 0;
-  top: calc(50% - 22px);
-  width: calc((100% - 260px) / 2 - 4px);
-  font-size: 10px;
-  animation: quiz-watch-point 1s ease-in-out infinite;
-  text-shadow: 2px 2px 0 #000, -1px -1px 0 #000;
-}
-.quiz-watch-cue svg { filter: drop-shadow(2px 2px 0 #000); }
-@keyframes quiz-watch-point {
-  0%, 100% { transform: translateX(-3px); }
-  50% { transform: translateX(3px); }
+  top: 39%;
+  width: 110px;
+  transform: rotate(35deg);
+  filter: drop-shadow(2px 3px 0 #000);
 }
 @media (max-width: 360px) {
-  .quiz-watch-cue { width: calc((100% - 220px) / 2 - 4px); font-size: 8px; }
+  .quiz-watch-cue { width: 90px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .quiz-watch-cue { animation: none; }
+  .quiz-watch-cue { display: none; }
 }

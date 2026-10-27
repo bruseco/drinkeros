@@ -13,6 +13,15 @@ export type {
 export default function QuizCourseBody(p: CourseLandingProps) {
   return (
     <div className="quiz-offer-body">
+      {p.instructorSrc && (
+        <section className="quiz-teacher-intro">
+          <img src={p.instructorSrc} alt={p.instructorName || "Professor do curso"} loading="lazy" />
+          <div>
+            <h2>Aprenda com {p.instructorName}</h2>
+            <p>{p.aboutInstructor?.paragraphs[0] || "Conheça as técnicas e coloque o conteúdo do curso em prática, no seu ritmo."}</p>
+          </div>
+        </section>
+      )}
       <section>
         <h2>{p.whatYouLearnTitle || "O que você vai aprender"}</h2>
         <div className="quiz-content-grid">

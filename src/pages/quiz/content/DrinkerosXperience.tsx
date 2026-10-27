@@ -209,6 +209,9 @@ export default function QuizXperienceBody() {
     <QuizCourseBody
       slug={SLUG}
       brand="Drinkeros Xperience"
+      instructorSrc={brunoHero}
+      instructorName="Bruno Abreu"
+      aboutInstructor={{name: "Bruno Abreu", photoSrc: brunoHero, paragraphs: ["Criador do Drinkeros e do Método Áureo das proporções dos drinks. No Xperience, Bruno ensina receitas e técnicas para você preparar seus próprios drinks."]}}
       tagline=""
       subheadline=""
       ctaHero=""
