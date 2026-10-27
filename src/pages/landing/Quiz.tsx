@@ -1,3 +1,4 @@
+import QuizResultVideo from "../quiz/QuizResultVideo";
 import {assignQuizVariant,quizExperimentMetadata,type QuizVariant} from "@/lib/quizExperiment";
 import {QUIZ_ART} from "../quiz/quizArt";
 import QuizFooter from '../quiz/QuizFooter';
@@ -132,7 +133,7 @@ export default function Quiz() {
         path="/quiz"
       />
       {preview && <p role="status" className="text-center p-2 bg-amber-900 text-white">Prévia {variant.toUpperCase()} · funil do quiz e compra desativados</p>}
-      <header className="sticky top-0 z-10 quiz-header" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      {stage.kind !== 'result' && <header className="sticky top-0 z-10 quiz-header" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="mx-auto flex max-w-xl items-center gap-3 px-4 py-3">
           {stage.kind === 'question' ? (
             <button onClick={back} aria-label="Voltar" className="rounded-full p-2 text-muted-foreground hover:text-foreground">
@@ -147,9 +148,9 @@ export default function Quiz() {
         <div className="h-1 w-full bg-foreground/10" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
           <div className="quiz-progress h-full transition-[width] duration-500 ease-out" style={{ width: `${progress}%` }} />
         </div>
-      </header>
+      </header>}
 
-      <main className="mx-auto max-w-xl px-4 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6">
+      <main className={`mx-auto max-w-xl px-4 pb-[calc(2rem+env(safe-area-inset-bottom))] ${stage.kind === 'result' ? 'pt-4' : 'pt-6'}`}>
         <div key={JSON.stringify(stage)} className={anim}>
           {stage.kind === 'intro' && (
             <section className="flex min-h-[70dvh] flex-col justify-center text-center">
@@ -205,15 +206,13 @@ export default function Quiz() {
             const p = PROFILES[stage.profile];
             return (
               <section className="text-center">
-                <div className="quiz-photo relative mx-auto mb-6 aspect-square w-full max-w-xs overflow-hidden rounded-3xl">
-                  <img src={IMAGES[p.image]} alt={p.title} className="h-full w-full object-cover" />
-                </div>
+                <QuizResultVideo key={stage.profile} profile={stage.profile} poster={IMAGES[p.image]} />
                 <p className="text-xs font-semibold uppercase tracking-[0.25em] quiz-accent-text">Resultado</p>
-                <h1 className="mt-2 font-display text-3xl font-bold">{p.title}</h1>
-                <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-muted-foreground">{p.text}</p>
-                <p className="mt-5 text-sm">Caminho recomendado: <strong>{p.product}</strong></p>
+                <h1 className="mt-2 font-display text-2xl font-bold">{p.title}</h1>
+                <p className="mx-auto mt-2 max-w-md text-base leading-snug text-muted-foreground">{p.text}</p>
+                <p className="mt-3 text-sm">Caminho recomendado: <strong>{p.product}</strong></p>
                 {checkoutError&&<p role="alert" className="mt-4 text-destructive">{checkoutError}</p>}
-                <button onClick={() => clickCta(stage.profile)} className="quiz-result-offer-cta quiz-cta mt-6 flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-4 text-lg font-bold">
+                <button onClick={() => clickCta(stage.profile)} className="quiz-result-offer-cta quiz-cta mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-4 text-lg font-bold">
                   {p.cta} <ArrowRight className="h-5 w-5 shrink-0" />
                 </button>
                 <button onClick={restart} className="mx-auto mt-5 flex items-center gap-2 text-sm text-muted-foreground underline underline-offset-4">
