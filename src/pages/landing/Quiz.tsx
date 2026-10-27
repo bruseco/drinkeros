@@ -1,3 +1,4 @@
+import QuizFooter from '../quiz/QuizFooter';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
@@ -201,7 +202,7 @@ export default function Quiz() {
                 <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-muted-foreground">{p.text}</p>
                 <p className="mt-5 text-sm">Caminho recomendado: <strong>{p.product}</strong></p>
                 {checkoutError&&<p role="alert" className="mt-4 text-destructive">{checkoutError}</p>}
-                <button onClick={() => clickCta(stage.profile)} className="quiz-cta mt-6 flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-4 text-lg font-bold">
+                <button onClick={() => clickCta(stage.profile)} className="quiz-result-offer-cta quiz-cta mt-6 flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-4 text-lg font-bold">
                   {p.cta} <ArrowRight className="h-5 w-5 shrink-0" />
                 </button>
                 <button onClick={restart} className="mx-auto mt-5 flex items-center gap-2 text-sm text-muted-foreground underline underline-offset-4">
@@ -212,6 +213,7 @@ export default function Quiz() {
           })()}
         </div>
       </main>
+      {stage.kind==='result'&&<QuizFooter/>}
     </div>
   );
 }

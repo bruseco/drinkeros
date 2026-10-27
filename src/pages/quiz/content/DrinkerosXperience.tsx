@@ -1,3 +1,4 @@
+import { Briefcase, Martini, PartyPopper } from "lucide-react";
 import QuizCourseBody from "../QuizCourseBody";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -221,14 +222,14 @@ export default function QuizXperienceBody() {
         glow3: "",
       }}
       learnItems={learnItems.map((x, i) => ({
-        title: `Aula ${i + 1}`,
+        title: `Módulo ${i + 1}`,
         description: x.html.replace(/<[^>]*>/g, ""),
         imageSrc: x.img,
       }))}
-      profiles={perfilItems.map((x) => ({
+      profiles={perfilItems.map((x, index) => ({
         title: x.title,
         description: x.desc,
-        icon: Check,
+        icon: [PartyPopper, Martini, Briefcase][index],
       }))}
       bonus={bonusItems.map((x) => ({
         title: x.title,

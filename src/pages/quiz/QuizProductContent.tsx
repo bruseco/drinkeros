@@ -1,6 +1,5 @@
+import { useQuizPack } from "./useQuizPack";
 import { lazy, Suspense } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { type ProfileId } from "@/lib/quizLogic";
 import ClubRecipeLoop from "@/components/landing/ClubRecipeLoop";
 import ClubFavoriteDemo from "@/components/landing/ClubFavoriteDemo";
@@ -15,21 +14,7 @@ const pages = {
   eventos: lazy(() => import("./content/BarParaEventos")),
 };
 function PackContent() {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["quiz-pack-content"],
-    queryFn: async () => {
-      const c = await supabase.from("combos").select("id,name,description").eq(
-        "slug",
-        "pacote-6-e-books",
-      ).maybeSingle();
-      if (c.error || !c.data) throw Error("Combo não encontrado");
-      const ebooks = await supabase.from("combo_ebooks").select(
-        "ebook:ebooks(name,description,cover_image_url)",
-      ).eq("combo_id", c.data.id);
-      if (ebooks.error) throw ebooks.error;
-      return { ...c.data, ebooks: ebooks.data };
-    },
-  });
+  const { data, isLoading, isError } = useQuizPack();
   return (
     <div className="quiz-offer-body">
       <section>

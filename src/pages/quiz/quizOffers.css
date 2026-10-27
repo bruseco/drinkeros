@@ -193,3 +193,16 @@
     margin-top: 12px;
   }
 }
+
+/* Quiz-only presentation; original product pages retain their existing styles. */
+.quiz-offer-buy { min-height:116px; display:flex; align-items:center; justify-content:center; padding:36px 14px; }
+.quiz-result-offer-cta { min-height:112px; }
+.quiz-product-video { display:block; width:100%; max-width:350px; aspect-ratio:1; object-fit:contain; margin:24px auto 16px; border-radius:16px; background:#000; }
+.quiz-profile-title { display:flex; align-items:center; gap:10px; }
+.quiz-profile-title svg { width:24px; height:24px; color:#facc15; flex:none; }
+.quiz-pack-logo { display:block; width:126px; height:24px; object-fit:contain; margin:0 auto 8px; }
+.quiz-pack-cover { display:block; width:100%; max-width:280px; height:150px; object-fit:contain; margin:0 auto 10px; }
+.quiz-pack-offer .quiz-offer-hero { padding-top:16px; }
+.quiz-pack-offer .quiz-offer-hero h1 { font-size:24px; line-height:1.1; margin:8px 0; }
+.quiz-pack-offer .quiz-offer-price { margin:10px 0 4px; line-height:1.1; }
+.quiz-pack-offer .quiz-offer-price strong { font-size:40px; line-height:1.1; }

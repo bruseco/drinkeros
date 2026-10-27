@@ -1,3 +1,4 @@
+import QuizPurchaseButton from "./QuizPurchaseButton";
 import type { CourseLandingProps } from "../landing/CourseLanding";
 export type {
   BonusItem,
@@ -26,6 +27,7 @@ export default function QuizCourseBody(p: CourseLandingProps) {
           ))}
         </div>
       </section>
+      {p.slug === "drinkeros-xperience" && <QuizPurchaseButton />}
       {!!p.modules?.length && (
         <section>
           <h2>Conteúdo do curso</h2>
@@ -42,7 +44,10 @@ export default function QuizCourseBody(p: CourseLandingProps) {
           <h2>Para quem é este curso?</h2>
           {p.profiles.map((x) => (
             <article key={x.title}>
-              <h3>{x.title}</h3>
+              <h3 className="quiz-profile-title">
+                <x.icon aria-hidden="true" />
+                {x.title}
+              </h3>
               <p>{x.description}</p>
             </article>
           ))}
@@ -62,6 +67,7 @@ export default function QuizCourseBody(p: CourseLandingProps) {
           </div>
         </section>
       )}
+      {p.slug === "drinkeros-xperience" && <QuizPurchaseButton />}
       {!!p.testimonials?.length && (
         <section>
           <h2>Depoimentos de alunos</h2>
@@ -96,6 +102,7 @@ export default function QuizCourseBody(p: CourseLandingProps) {
             "Experimente o conteúdo. Se não for para você, solicite o reembolso dentro do prazo de garantia."}
         </p>
       </section>
+      {p.slug === "drinkeros-xperience" && <QuizPurchaseButton />}
       <section>
         <h2>Perguntas frequentes</h2>
         {p.faq.map((x) => (
