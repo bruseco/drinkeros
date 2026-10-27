@@ -2386,6 +2386,61 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_captured_leads: {
+        Row: {
+          capi_sent_at: string | null
+          consent_at: string
+          consent_text: string
+          crm_lead_id: string
+          event_id: string
+          id: string
+          product: string
+          session_id: string
+        }
+        Insert: {
+          capi_sent_at?: string | null
+          consent_at?: string
+          consent_text: string
+          crm_lead_id: string
+          event_id?: string
+          id?: string
+          product: string
+          session_id: string
+        }
+        Update: {
+          capi_sent_at?: string | null
+          consent_at?: string
+          consent_text?: string
+          crm_lead_id?: string
+          event_id?: string
+          id?: string
+          product?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_captured_leads_crm_lead_id_fkey"
+            columns: ["crm_lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_captured_leads_product_fkey"
+            columns: ["product"]
+            isOneToOne: false
+            referencedRelation: "quiz_offer_prices"
+            referencedColumns: ["product"]
+          },
+          {
+            foreignKeyName: "quiz_captured_leads_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_offer_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quiz_offer_prices: {
         Row: {
           active: boolean
@@ -4622,6 +4677,20 @@ export type Database = {
         }
       }
       purge_expired_welcome_passwords: { Args: never; Returns: undefined }
+      quiz_capture_lead: {
+        Args: {
+          _consent: boolean
+          _hash: string
+          _name: string
+          _phone: string
+          _product: string
+        }
+        Returns: {
+          capi_sent_at: string
+          event_id: string
+          lead_id: string
+        }[]
+      }
       quiz_claim_payment: {
         Args: {
           _amount: number

@@ -15,6 +15,13 @@
       "when": 1793125988725,
       "tag": "0001_quiz_exclusive_offers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793126012267,
+      "tag": "0002_quiz_consented_leads",
+      "breakpoints": true
     }
   ]
 }
