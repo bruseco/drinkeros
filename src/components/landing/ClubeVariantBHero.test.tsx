@@ -13,7 +13,13 @@ describe('exclusive B hero', () => {
     expect(screen.queryByText('Desconto de lançamento')).toBeNull();
     expect(screen.getByText('R$ 87')).toBeTruthy();
     expect(screen.getByText('Caipirinhas')).toBeTruthy();
-    expect(screen.getAllByRole('listitem')).toHaveLength(3);
+    expect(screen.getAllByRole('listitem')).toHaveLength(4);
+    expect(screen.queryByText('/ ano')).toBeNull();
+    const access = screen.getByText('Um ano de acesso para aproveitar todos esses benefícios.');
+    expect(access.previousElementSibling?.className).toBe('club-b-hero-price');
+    expect(screen.getByText('Pesquise os drinks por ingredientes.')).toBeTruthy();
+    const loop = screen.getByRole('img', { name: 'Uma seleção de drinks do Clube dos Drinkeros' });
+    expect(loop.previousElementSibling?.className).toBe('club-b-hero-categories');
     fireEvent.click(screen.getByRole('button', { name: 'Quero entrar p/ o Clube' }));
     expect(buy).toHaveBeenCalledTimes(1);
   });
