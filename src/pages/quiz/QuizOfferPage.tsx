@@ -141,7 +141,7 @@ export default function QuizOfferPage({ product }: { product: ProfileId }) {
       setBusy(false);
     }
   };
-  const alternative = quote
+  const alternative = quote && quote.recommended === product
     ? allowedQuizProducts(quote.recommended, quote.path).find((p) =>
       p !== product
     )
@@ -218,7 +218,7 @@ export default function QuizOfferPage({ product }: { product: ProfileId }) {
         <div className="quiz-avatar-placeholder">
           Vídeo de apresentação do seu perfil — em breve
         </div>
-        {alternative && (
+        {alternative && altQuote && (
           <Link className="quiz-plan-b" to={alternativeUrl}>
             {quote?.path === "casa"
               ? `Prefere começar por ${
