@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import ClubeVariantBHero, { preserveClubBAdParams } from './ClubeVariantBHero';
+vi.mock('./useViewportMotion', () => ({ useViewportMotion: () => true }));
 afterEach(cleanup);
 
 describe('exclusive B hero', () => {

@@ -1,7 +1,7 @@
 /* Exclusive to B: the sticky banner occupies its real height above the hero. */
 .club-public.club-variant-b > .club-discount-banner { position:sticky; top:0; }
 .club-variant-b .club-b-mobile-hero { padding:24px 20px 20px; }
-.club-variant-b .club-b-hero-content { position:relative; max-width:620px; margin:0 auto; }
+.club-variant-b .club-b-hero-content { position:relative; width:100%; min-width:0; max-width:620px; margin:0 auto; }
 .club-variant-b .club-b-hero-logo { display:block; width:240px; max-width:100%; height:auto; margin:0 auto 18px; }
 .club-variant-b .club-b-mobile-hero h1 { max-width:620px; margin:0 auto 12px; font-size:clamp(28px,4.5vw,44px); line-height:1.13; font-weight:500; letter-spacing:-.035em; filter:none; }
 .club-variant-b .club-b-mobile-hero h1 strong { color:var(--club-gold); font-weight:800; }
@@ -35,3 +35,24 @@
 .club-variant-b .club-b-hero-categories span:nth-child(2) { color:#f04b91; }
 .club-variant-b .club-b-hero-categories span:nth-child(3) { color:#c568ff; }
 .club-variant-b .club-b-hero-cta { background:linear-gradient(180deg,#568e34,#225c19); color:#fff; border-color:#7dbd5c; box-shadow:0 0 23px #4c972c3d,0 9px 28px #0007,inset 0 1px 0 #e9ffd780; }
+
+/* New B first fold: keep recipe categories on the next screen. */
+.club-variant-b .club-b-mobile-hero { min-height:100svh; display:flex; align-items:center; justify-content:center; padding-block:28px; }
+.club-variant-b .club-b-hero-logo { margin-bottom:22px; }
+.club-variant-b .club-b-hero-categories { gap:8px 12px; margin-bottom:18px; line-height:1.5; }
+.club-variant-b .club-b-hero-subtitle { margin-bottom:18px; }
+.club-variant-b .club-b-hero-cta { min-height:84px; }
+.club-variant-b .club-b-hero-icons > svg:first-child { animation:club-purchase-arrow 1s ease-in-out infinite; animation-play-state:paused; }
+.club-variant-b .club-b-hero-loop { display:flex; width:100%; overflow:hidden; margin-top:18px; mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent); }
+.club-variant-b .club-b-hero-loop > div { display:flex; width:max-content; animation:club-public-strip 25s linear infinite; animation-play-state:paused; }
+.club-variant-b .club-b-hero-loop img { display:block; flex:none; height:84px; width:auto; max-width:none; }
+.club-variant-b .club-b-hero-down { width:28px; height:28px; margin:18px auto 0; color:var(--club-gold); animation:club-b-down 1.5s ease-in-out infinite; animation-play-state:paused; }
+.club-variant-b .club-b-hero-content[data-motion-active="true"] .club-b-hero-loop > div,
+.club-variant-b .club-b-hero-content[data-motion-active="true"] .club-b-hero-icons > svg:first-child,
+.club-variant-b .club-b-hero-content[data-motion-active="true"] .club-b-hero-down { animation-play-state:running; }
+@keyframes club-b-down { 0%,100% { transform:translateY(0); } 50% { transform:translateY(6px); } }
+@media(prefers-reduced-motion:reduce) {
+  .club-variant-b .club-b-hero-loop > div,
+  .club-variant-b .club-b-hero-icons > svg:first-child,
+  .club-variant-b .club-b-hero-down { animation:none; }
+}

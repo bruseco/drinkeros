@@ -30,6 +30,7 @@ import ClubeIntroStickyBar from '@/components/user/ClubeIntroStickyBar';
 import ClubePublicLanding from '@/components/landing/ClubePublicLanding';
 import ClubeVariantBLanding from '@/components/landing/ClubeVariantBLanding';
 import { preserveClubBAdParams } from '@/components/landing/ClubeVariantBHero';
+import { fetchPublicClubOffer } from '@/lib/publicClubOffer';
 import { usePublicClubeOffer } from '@/hooks/usePublicClubeOffer';
 import { usePublicClubBackendReady } from '@/hooks/usePublicClubBackendReady';
 import { useClubFunnelMilestones } from '@/hooks/useClubFunnelMilestones';
@@ -439,6 +440,14 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
       chosenOffer ?? ((promo.isLoading || promo.isActive) ? 'intro' : 'full');
     setLoading(true);
     try {
+      if (publicPage && staticVariant) {
+        if (!publicBackendReady) throw new Error('Aguarde a confirmação da oferta antes de continuar.');
+        // B has no gift dialog: activate the existing server offer before opening checkout.
+        const confirmed = await fetchPublicClubOffer(true);
+        if (Number(confirmed.price) !== effectivePromoPrice || offer !== 'intro') {
+          throw new Error('Não foi possível confirmar o valor anunciado. Recarregue a página para consultar a oferta atual.');
+        }
+      }
       const amount = offer === 'intro' ? effectivePromoPrice : 197;
 
       trackInitiateCheckout({
@@ -492,7 +501,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
     unlocked={staticVariant || unlocked}
     savings={effectiveSavings}
     offerDeadline={publicBackendReady ? promo.eligibleUntilMs : 0}
-    loading={loading || promo.isLoading || !publicAbReady}
+    loading={loading || promo.isLoading || !publicAbReady || (staticVariant && !publicBackendReady)}
     onSubscribe={() => handleSubscribe('card')}
     reveal={staticVariant ? null : <ClubeDiscountReveal open={revealOpen} onClose={handleRevealClose} newVisitor savings={effectiveSavings} />}
   />;
