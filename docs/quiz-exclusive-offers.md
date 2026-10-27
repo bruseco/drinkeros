@@ -35,6 +35,7 @@ Migrações, em ordem:
 1. `20261027190000_quiz_exclusive_offers.sql`: preços, sessões, prazo, atribuição e trava de tentativa de pagamento.
 2. `20261027190100_quiz_consented_leads.sql`: captura consentida em `crm_leads`, ID estável de Lead e conversão vinculada ao pedido.
 3. `20261027190200_quiz_admin_reporting.sql`: consultas administrativas de funis, respostas e leads.
+4. `20261027190300_quiz_migration_ledger.sql`: reconcilia os registros Supabase depois da aplicação pelo controle Drizzle do Lovable, sem executar o SQL de negócio novamente.
 
 As tabelas de sessões/tokens não têm leitura pública. RPCs de preço/captura são exclusivas do serviço; o endpoint público valida o token e as respostas. Relatórios verificam a permissão administrativa no servidor.
 
@@ -150,3 +151,18 @@ Arquivos por etapa e estado final da instalação são registrados na entrega. A
 
 - `src/pages/quiz/QuizOfferPage.tsx`: plano B só na oferta recomendada; uma falha de métricas não bloqueia o checkout.
 - `src/pages/quiz/QuizOfferPage.test.tsx`: preço do plano B cotado pelo servidor e ausência de sugestão mais cara após a alternativa.
+
+## Registro da instalação
+
+O Lovable aplicou as três migrações de negócio, instalou `quiz-offer` e `create-mp-payment` e gerou automaticamente:
+
+- `drizzle/migrations/0001_quiz_exclusive_offers.sql`
+- `drizzle/migrations/0002_quiz_consented_leads.sql`
+- `drizzle/migrations/0003_quiz_admin_reporting.sql`
+- `drizzle/migrations/meta/0001_snapshot.json`
+- `drizzle/migrations/meta/0002_snapshot.json`
+- `drizzle/migrations/meta/0003_snapshot.json`
+- `drizzle/migrations/meta/_journal.json`
+- `src/integrations/supabase/types.ts`
+
+As cópias SQL foram comparadas com os arquivos de origem; a única diferença era a quebra de linha final. A quarta migração registra as versões canônicas em `supabase_migrations.schema_migrations` para impedir que uma futura execução Supabase tente recriar as mesmas tabelas. Ambos os registros foram preservados. Não reaplicar as três migrações de negócio manualmente neste banco.
