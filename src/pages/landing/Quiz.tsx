@@ -179,10 +179,10 @@ export default function Quiz() {
                       <button
                         key={o.key}
                         onClick={() => answer(stage.index, o.key)}
-                        className={`quiz-card flex w-full items-center gap-4 rounded-2xl p-4 text-left transition-all duration-200 active:scale-[0.98] ${isSel ? 'quiz-card-selected' : ''}`}
+                        className={`quiz-card flex w-full items-center gap-4 rounded-2xl p-4 text-left transition-all duration-200 active:scale-[0.98] ${variant === 'b' ? 'flex-col text-center sm:flex-row sm:text-left' : ''} ${isSel ? 'quiz-card-selected' : ''}`}
                       >
-                        <span className="quiz-icon flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl">
-                          {variant === 'b' ? <img src={QUIZ_ART[q.id][o.key]} alt="" width={96} height={96} className="h-full w-full object-cover" decoding="async" /> : <Icon className="h-10 w-10" />}
+                        <span className={`quiz-icon flex shrink-0 items-center justify-center overflow-hidden rounded-xl ${variant === 'b' ? 'h-48 w-48' : 'h-24 w-24'}`}>
+                          {variant === 'b' ? <img src={QUIZ_ART[q.id][o.key]} alt="" width={192} height={192} className="h-full w-full object-cover" decoding="async" /> : <Icon className="h-10 w-10" />}
                         </span>
                         <span className="text-[17px] font-medium leading-snug">{o.label}</span>
                       </button>
