@@ -2386,6 +2386,234 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_captured_leads: {
+        Row: {
+          capi_sent_at: string | null
+          consent_at: string
+          consent_text: string
+          crm_lead_id: string
+          event_id: string
+          id: string
+          product: string
+          session_id: string
+        }
+        Insert: {
+          capi_sent_at?: string | null
+          consent_at?: string
+          consent_text: string
+          crm_lead_id: string
+          event_id?: string
+          id?: string
+          product: string
+          session_id: string
+        }
+        Update: {
+          capi_sent_at?: string | null
+          consent_at?: string
+          consent_text?: string
+          crm_lead_id?: string
+          event_id?: string
+          id?: string
+          product?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_captured_leads_crm_lead_id_fkey"
+            columns: ["crm_lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_captured_leads_product_fkey"
+            columns: ["product"]
+            isOneToOne: false
+            referencedRelation: "quiz_offer_prices"
+            referencedColumns: ["product"]
+          },
+          {
+            foreignKeyName: "quiz_captured_leads_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_offer_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_offer_prices: {
+        Row: {
+          active: boolean
+          full_price: number
+          product: string
+          product_type: string
+          quiz_price: number
+          slug: string
+        }
+        Insert: {
+          active?: boolean
+          full_price: number
+          product: string
+          product_type: string
+          quiz_price: number
+          slug: string
+        }
+        Update: {
+          active?: boolean
+          full_price?: number
+          product?: string
+          product_type?: string
+          quiz_price?: number
+          slug?: string
+        }
+        Relationships: []
+      }
+      quiz_offer_sessions: {
+        Row: {
+          answers: Json
+          arrived_at: string | null
+          attribution: Json
+          created_at: string
+          expires_at: string | null
+          id: string
+          path: string
+          recommended: string
+          token_hash: string
+        }
+        Insert: {
+          answers: Json
+          arrived_at?: string | null
+          attribution?: Json
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          path: string
+          recommended: string
+          token_hash: string
+        }
+        Update: {
+          answers?: Json
+          arrived_at?: string | null
+          attribution?: Json
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          path?: string
+          recommended?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_offer_sessions_recommended_fkey"
+            columns: ["recommended"]
+            isOneToOne: false
+            referencedRelation: "quiz_offer_prices"
+            referencedColumns: ["product"]
+          },
+        ]
+      }
+      quiz_payment_attempts: {
+        Row: {
+          amount: number
+          attempt_id: string
+          created_at: string
+          external_reference: string | null
+          mp_id: string | null
+          product: string
+          session_id: string
+          status: string
+          token_hash: string
+        }
+        Insert: {
+          amount: number
+          attempt_id?: string
+          created_at?: string
+          external_reference?: string | null
+          mp_id?: string | null
+          product: string
+          session_id: string
+          status?: string
+          token_hash: string
+        }
+        Update: {
+          amount?: number
+          attempt_id?: string
+          created_at?: string
+          external_reference?: string | null
+          mp_id?: string | null
+          product?: string
+          session_id?: string
+          status?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_payment_attempts_product_fkey"
+            columns: ["product"]
+            isOneToOne: false
+            referencedRelation: "quiz_offer_prices"
+            referencedColumns: ["product"]
+          },
+          {
+            foreignKeyName: "quiz_payment_attempts_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_offer_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_payment_attributions: {
+        Row: {
+          amount: number
+          attribution: Json
+          created_at: string
+          gateway: string
+          path: string
+          product: string
+          product_id: string
+          session_id: string
+          transaction_id: string
+        }
+        Insert: {
+          amount: number
+          attribution?: Json
+          created_at?: string
+          gateway: string
+          path: string
+          product: string
+          product_id: string
+          session_id: string
+          transaction_id: string
+        }
+        Update: {
+          amount?: number
+          attribution?: Json
+          created_at?: string
+          gateway?: string
+          path?: string
+          product?: string
+          product_id?: string
+          session_id?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_payment_attributions_product_fkey"
+            columns: ["product"]
+            isOneToOne: false
+            referencedRelation: "quiz_offer_prices"
+            referencedColumns: ["product"]
+          },
+          {
+            foreignKeyName: "quiz_payment_attributions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_offer_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rand_closing_state: {
         Row: {
           id: boolean
@@ -4449,6 +4677,95 @@ export type Database = {
         }
       }
       purge_expired_welcome_passwords: { Args: never; Returns: undefined }
+      quiz_admin_answers: {
+        Args: { _path?: string; _since?: string; _until?: string }
+        Returns: {
+          answer: string
+          count: number
+          path: string
+          question: string
+        }[]
+      }
+      quiz_admin_leads: {
+        Args: {
+          _offset?: number
+          _path?: string
+          _product?: string
+          _purchased?: boolean
+          _since?: string
+          _until?: string
+        }
+        Returns: {
+          answers: Json
+          attribution: Json
+          consent_at: string
+          created_at: string
+          displayed_price: number
+          id: string
+          name: string
+          path: string
+          phone: string
+          product: string
+          purchased: boolean
+        }[]
+      }
+      quiz_admin_metrics: {
+        Args: { _since?: string; _until?: string }
+        Returns: {
+          count: number
+          event: string
+          path: string
+          product: string
+        }[]
+      }
+      quiz_capture_lead: {
+        Args: {
+          _consent: boolean
+          _hash: string
+          _name: string
+          _phone: string
+          _product: string
+        }
+        Returns: {
+          capi_sent_at: string
+          event_id: string
+          lead_id: string
+        }[]
+      }
+      quiz_claim_payment: {
+        Args: {
+          _amount: number
+          _hash: string
+          _product: string
+          _session: string
+        }
+        Returns: boolean
+      }
+      quiz_complete: {
+        Args: {
+          _answers: Json
+          _attribution: Json
+          _hash: string
+          _path: string
+          _product: string
+        }
+        Returns: string
+      }
+      quiz_quote: {
+        Args: { _activate?: boolean; _hash: string; _product: string }
+        Returns: {
+          active: boolean
+          attribution: Json
+          expires_at: string
+          full_price: number
+          path: string
+          price: number
+          product: string
+          recommended: string
+          server_now: string
+          session_id: string
+        }[]
+      }
       recalc_yearly_winner_stats: {
         Args: { _winner_id: string }
         Returns: undefined

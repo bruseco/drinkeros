@@ -8,6 +8,27 @@
       "when": 1793028460525,
       "tag": "0000_purchases_meta_capi_once",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793125988725,
+      "tag": "0001_quiz_exclusive_offers",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793126012267,
+      "tag": "0002_quiz_consented_leads",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793126039412,
+      "tag": "0003_quiz_admin_reporting",
+      "breakpoints": true
     }
   ]
 }
