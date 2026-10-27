@@ -16,14 +16,13 @@ export function preserveClubBAdParams(destination: string, sourceSearch: string)
 
 type Props = { price: number; loading: boolean; onSubscribe: () => void; pocketRef?: Ref<HTMLParagraphElement> };
 export default function ClubeVariantBHero({ price, loading, onSubscribe, pocketRef }: Props) {
-  const discounted = price < 97;
   return <div className="club-b-hero-content">
     <img className="club-b-hero-logo" src="/club-landing/logo.png" alt="Clube dos Drinkeros" width="500" height="140" fetchPriority="high" />
-    <h1>Mais de <strong>1.000 receitas de drinks em vídeo,</strong> por R$ {price} o ano.</h1>
+    <h1>Mais de <strong>1.000 receitas de drinks.</strong></h1>
+    <p className="club-b-hero-categories"><span>Caipirinhas</span><span>Batidas</span><span>Xaropes artesanais</span></p>
     <p className="club-b-hero-subtitle">Do drink fácil pra festa ao clássico de bar. Aprende assistindo, faz em casa.</p>
     <div className="club-b-hero-offer">
-      <span className="club-b-hero-badge">{discounted ? 'Desconto de lançamento' : 'Acesso ao Clube por um ano'}</span>
-      <p className="club-b-hero-price">{discounted && <del>R$ 97</del>}<strong>R$ {price}</strong><span>/ ano</span></p>
+      <p className="club-b-hero-price"><strong>R$ {price}</strong><span>/ ano</span></p>
     </div>
     <button type="button" className="club-b-hero-cta" disabled={loading} onClick={onSubscribe}>
       <span>{loading ? 'Abrindo checkout…' : 'Quero entrar p/ o Clube'}</span>

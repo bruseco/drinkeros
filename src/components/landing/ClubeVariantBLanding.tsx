@@ -311,7 +311,6 @@ export default function ClubeVariantBLanding(props: Props) {
   return <div className={`club-public club-variant-b${props.staticVariant ? ' club-static' : ''}${props.unlocked ? ' club-unlocked' : ''}`} ref={props.scrollRef}>
     <div className="club-brick-image" ref={brick} data-motion-active={brickActive} aria-hidden="true"/>
     {props.reveal}
-    {props.unlocked && <PublicOfferBanner savings={props.savings} deadline={props.offerDeadline} />}
     <button ref={floatingCta} type="button" className={`club-floating-cta${showFloatingCta ? ' club-cta-visible' : ''}`} aria-hidden={!showFloatingCta} tabIndex={showFloatingCta?0:-1} disabled={!showFloatingCta || (props.unlocked && props.loading)} onClick={props.unlocked ? props.onSubscribe : scrollToPricing}><span className="club-cta-copy"><span>Quero entrar p/ o</span><strong>CLUBE</strong></span><ClubButtonIcons /></button>
     <header className="club-public-hero club-b-mobile-hero" ref={hero}>
       <ClubeVariantBHero price={props.heroPrice} loading={props.loading} onSubscribe={props.onSubscribe} pocketRef={pocket} />
@@ -334,7 +333,6 @@ export default function ClubeVariantBLanding(props: Props) {
       <div className="club-offer">
         <ul className="club-benefits" ref={benefits} data-motion-active={benefitsMotion}>{[{text:'Acesso a mais de 1.000 receitas em vídeo',value:47},{text:'Mais de 40 receitas de xaropes artesanais',value:53},{text:'Organizador de festas: crie listas de favoritos e gere listas de compras',value:97}].map(benefit => <li key={benefit.text}><Check aria-hidden="true" /><span>{benefit.text.startsWith('Organizador de festas:')?<><b className="club-benefit-highlight">Organizador de festas</b>{benefit.text.slice('Organizador de festas'.length)}</>:benefit.text}</span><strong>R$ {benefit.value}</strong></li>)}</ul>
         <p className="club-access-label">* Você tem um ano de acesso para usar todos esses benefícios.</p>
-        {props.unlocked && <p className="club-comparison"><X aria-hidden="true" /><span>Quanto você pagaria</span><del>R$ {props.fullPrice}</del></p>}
         {!props.unlocked && <p className="club-total-label">Total</p>}
         <div className="club-price" ref={props.registerPriceCard}><span>R$</span> {props.price}</div>
         <button ref={purchase} type="button" data-motion-active={purchaseVisible} className="club-purchase" disabled={props.loading} onClick={props.onSubscribe}><span className="club-purchase-copy">{props.loading ? 'Abrindo checkout…' : 'Quero entrar p/ o Clube'}</span><ClubButtonIcons /></button>

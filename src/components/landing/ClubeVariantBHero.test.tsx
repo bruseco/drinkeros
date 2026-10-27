@@ -7,9 +7,11 @@ describe('exclusive B hero', () => {
   it('shows the annual promise, offer and benefits, and uses the supplied purchase callback', () => {
     const buy = vi.fn();
     render(<ClubeVariantBHero price={87} loading={false} onSubscribe={buy} />);
-    expect(screen.getByRole('heading', { level: 1 }).textContent).toContain('por R$ 87 o ano');
-    expect(screen.getByText('R$ 97').tagName).toBe('DEL');
-    expect(screen.getByText('Desconto de lançamento')).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toContain('1.000 receitas de drinks.');
+    expect(screen.queryByText('R$ 97')).toBeNull();
+    expect(screen.queryByText('Desconto de lançamento')).toBeNull();
+    expect(screen.getByText('R$ 87')).toBeTruthy();
+    expect(screen.getByText('Caipirinhas')).toBeTruthy();
     expect(screen.getAllByRole('listitem')).toHaveLength(3);
     fireEvent.click(screen.getByRole('button', { name: 'Quero entrar p/ o Clube' }));
     expect(buy).toHaveBeenCalledTimes(1);

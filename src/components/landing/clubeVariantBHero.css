@@ -1,7 +1,8 @@
-/* Exclusive to the B hero: no selector changes the original landing or lower sections. */
+/* Exclusive to B: the sticky banner occupies its real height above the hero. */
+.club-public.club-variant-b > .club-discount-banner { position:sticky; top:0; }
 .club-variant-b .club-b-mobile-hero { padding:24px 20px 20px; }
 .club-variant-b .club-b-hero-content { position:relative; max-width:620px; margin:0 auto; }
-.club-variant-b .club-b-hero-logo { display:block; width:160px; height:auto; margin:0 auto 18px; }
+.club-variant-b .club-b-hero-logo { display:block; width:240px; max-width:100%; height:auto; margin:0 auto 18px; }
 .club-variant-b .club-b-mobile-hero h1 { max-width:620px; margin:0 auto 12px; font-size:clamp(28px,4.5vw,44px); line-height:1.13; font-weight:500; letter-spacing:-.035em; filter:none; }
 .club-variant-b .club-b-mobile-hero h1 strong { color:var(--club-gold); font-weight:800; }
 .club-variant-b .club-b-hero-subtitle { max-width:450px; margin:0 auto 16px; font-size:15px; line-height:1.45; color:#ddd3e1; }
@@ -9,7 +10,7 @@
 .club-variant-b .club-b-hero-badge { display:inline-block; padding:3px 10px; border:1px solid #a3e63560; border-radius:999px; color:#c8f486; background:#a3e63512; font-size:11px; font-weight:700; }
 .club-variant-b .club-b-hero-price { display:flex; align-items:baseline; justify-content:center; gap:10px; margin:4px 0 0; line-height:1.1; }
 .club-variant-b .club-b-hero-price del { font-size:20px; color:#c9bccf; }
-.club-variant-b .club-b-hero-price strong { font-size:60px; letter-spacing:-.05em; font-weight:800; color:var(--club-gold); }
+.club-variant-b .club-b-hero-price strong { font-size:60px; letter-spacing:-.05em; font-weight:800; color:#a3e635; }
 .club-variant-b .club-b-hero-price > span { font-size:15px; color:#ddd3e1; }
 .club-variant-b .club-b-hero-cta { display:flex; align-items:center; justify-content:center; gap:12px; width:100%; max-width:440px; min-height:64px; margin:0 auto; padding:14px 18px; border:1px solid #ffe4a3; border-radius:999px; background:linear-gradient(135deg,#fff0b7 0%,#edc064 35%,#d69a2d 70%,#ffe2a0 100%); color:#241809; font:800 18px/1.2 Montserrat,Arial,sans-serif; box-shadow:inset 0 2px 1px #fff8,inset 0 -3px 2px #8d55094d,0 8px 24px #edc06440; }
 .club-variant-b .club-b-hero-cta:disabled { cursor:wait; opacity:.65; }
@@ -23,8 +24,14 @@
 .club-variant-b .club-b-hero-drinks { display:block; width:100%; height:56px; object-fit:cover; object-position:center; margin:0 auto; border-radius:8px; }
 @media(max-width:450px) {
   .club-variant-b .club-b-mobile-hero { padding:18px 20px 16px; }
-  .club-variant-b .club-b-hero-logo { width:140px; margin-bottom:14px; }
+  .club-variant-b .club-b-hero-logo { width:200px; margin-bottom:14px; }
   .club-variant-b .club-b-mobile-hero h1 { font-size:28px; }
   .club-variant-b .club-b-hero-subtitle { font-size:14px; margin-bottom:12px; }
   .club-variant-b .club-b-hero-price strong { font-size:56px; }
 }
+
+.club-variant-b .club-b-hero-categories { display:flex; flex-wrap:wrap; justify-content:center; gap:6px 12px; margin:0 auto 12px; font-size:13px; font-weight:700; }
+.club-variant-b .club-b-hero-categories span:nth-child(1) { color:#71cb55; }
+.club-variant-b .club-b-hero-categories span:nth-child(2) { color:#f04b91; }
+.club-variant-b .club-b-hero-categories span:nth-child(3) { color:#c568ff; }
+.club-variant-b .club-b-hero-cta { background:linear-gradient(180deg,#568e34,#225c19); color:#fff; border-color:#7dbd5c; box-shadow:0 0 23px #4c972c3d,0 9px 28px #0007,inset 0 1px 0 #e9ffd780; }
