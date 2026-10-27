@@ -317,7 +317,7 @@ export default function ClubeVariantBLanding(props: Props) {
     <header className="club-public-hero club-b-mobile-hero" ref={hero}>
       <ClubeVariantBHero price={props.heroPrice} loading={props.loading} onSubscribe={props.onSubscribe} pocketRef={pocket} />
     </header>
-    {landingCategories.map((category,index) => props.staticVariant ? <section key={category.id} className={`club-static-category club-${category.id}`} aria-label={category.label}>
+    {landingCategories.map((category,index) => props.staticVariant ? <section key={category.id} id={index === 0 ? 'clube-receitas-detalhes' : undefined} className={`club-static-category club-${category.id}`} aria-label={category.label}>
       <ClubCategoryTitle category={category} />
       {category.subtitle && <p className="club-category-subtitle">{category.subtitle}</p>}
       <div className="club-static-recipes">{(variantBSelection[category.id as keyof typeof variantBSelection] ?? []).map(title=>category.recipes.find(recipe=>recipe.title===title)).filter((recipe): recipe is NonNullable<typeof recipe>=>!!recipe).map((recipe,index)=><figure key={`${recipe.title}-${index}`}><img src={recipe.image} alt={recipe.title} loading="lazy"/></figure>)}</div>

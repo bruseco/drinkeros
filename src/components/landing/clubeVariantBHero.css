@@ -79,3 +79,6 @@
 
 .club-variant-b .club-b-organizer-link { color:#ffeb00; font-weight:800; text-decoration:underline; text-underline-offset:3px; text-shadow:0 0 10px #ffeb0055; }
 .club-variant-b #clube-organizador { scroll-margin-top:20px; }
+
+.club-variant-b .club-b-hero-learn-more { display:block; width:fit-content; margin:18px auto 0; color:var(--club-gold); font-size:10px; font-weight:700; letter-spacing:.14em; text-decoration:none; }
+.club-variant-b .club-b-hero-learn-more + .club-b-hero-down { margin-top:4px; }

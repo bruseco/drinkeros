@@ -25,7 +25,7 @@ export default function ClubeVariantBHero({ price, loading, onSubscribe, pocketR
     <h1>App com mais de <strong className="club-b-hero-number"><AnimatedClubCount value={1000} start={motionActive} /></strong><br />receitas de drinks em vídeo.</h1>
     <p className="club-b-hero-categories" ref={pocketRef}>{[
       ['Caipirinhas', '#71cb55'], ['Batidas', '#f04b91'], ['Xaropes artesanais', '#c568ff'],
-      ['Frozens', '#36d9e3'], ['Clássicos e variações', '#ffd68a'], ['Shots', '#ff963c'], ['Drinks de galera', '#f04b91'],
+      ['Frozens', '#36d9e3'], ['Clássicos e variações', '#ffd68a'], ['Shots', '#ff963c'], ['Drinks de litro', '#f04b91'],
     ].map(([label, color]) => <span key={label} style={{ color }}>{label}</span>)}</p>
     <div className="club-b-hero-offer">
       <p className="club-b-hero-price"><strong>R$ {price}</strong></p>
@@ -37,6 +37,7 @@ export default function ClubeVariantBHero({ price, loading, onSubscribe, pocketR
     </button>
     <ul className="club-b-hero-benefits">{['Mais de 1.000 receitas em vídeo', 'Mais de 40 xaropes artesanais', 'Até 80% de desconto nos cursos', 'Organizador de festas — escolha os drinks e o número de pessoas. O sistema calcula quanto comprar.'].map(text => <li key={text}><Check aria-hidden="true" />{text.startsWith('Organizador de festas') ? <span><a className="club-b-organizer-link" href="#clube-organizador" onClick={event => { const target = event.currentTarget.closest('.club-public')?.querySelector('#clube-organizador'); if (target) { event.preventDefault(); target.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); } }}>Organizador de festas</a>{text.slice('Organizador de festas'.length)}</span> : text}</li>)}</ul>
     <div className="club-b-hero-loop" role="img" aria-label="Uma seleção de drinks do Clube dos Drinkeros"><div>{[0, 1].map(copy => <img key={copy} src={drinksStrip} alt="" width="1200" height="150" />)}</div></div>
+    <a className="club-b-hero-learn-more" href="#clube-receitas-detalhes" onClick={event => { const target = event.currentTarget.closest('.club-public')?.querySelector('#clube-receitas-detalhes'); if (target) { event.preventDefault(); target.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); } }}>SAIBA MAIS</a>
     <ArrowDown className="club-b-hero-down" aria-hidden="true" />
   </div>;
 }
