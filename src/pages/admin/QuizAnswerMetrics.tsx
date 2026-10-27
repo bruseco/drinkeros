@@ -13,7 +13,7 @@ export default function QuizAnswerMetrics({range,dates=EMPTY_FUNNEL_DATES}:{rang
   return (data??[]) as AnswerCount[];
  }});
  return <section className="space-y-4" aria-labelledby="quiz-answer-heading">
-  <div><h2 id="quiz-answer-heading" className="text-xl font-semibold">Respostas por pergunta</h2><p className="text-sm text-muted-foreground">Contagens por sessão no período selecionado. Os percentuais usam o total de respostas da própria pergunta.</p></div>
+  <div><h2 id="quiz-answer-heading" className="text-xl font-semibold">Histórico: respostas do quiz anterior</h2><p className="text-sm text-muted-foreground">Contagens por sessão no período selecionado. Os percentuais usam o total de respostas da própria pergunta.</p></div>
   {isLoading&&!data?<p className="text-sm text-muted-foreground">Carregando respostas…</p>:isError?<div role="alert" className="rounded-lg border p-4"><p>Não foi possível carregar as respostas do quiz.</p><Button variant="outline" size="sm" className="mt-2" onClick={()=>void refetch()}>Tentar novamente</Button></div>:<div className="grid gap-4 xl:grid-cols-2">{(Object.keys(QUESTIONS) as QuestionId[]).map((id,index)=>{
    const question=QUESTIONS[id],rows=(data??[]).filter(row=>row.question===id);
    const total=rows.reduce((sum,row)=>sum+Number(row.count),0);

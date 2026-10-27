@@ -1,3 +1,4 @@
+import {PROFILES} from './quizLogic';
 import type { FunnelEvent } from '@/lib/funnelTracking';
 
 export interface FunnelStepDef {
@@ -26,6 +27,7 @@ export interface FunnelDef {
   productType?: 'course' | 'combo' | 'ebook' | 'package' | 'club';
   productSlug?: string;
   abVariant?: 'a' | 'b';
+  quizProduct?: string;
 }
 
 const clubFunnel: FunnelDef = {
@@ -44,6 +46,7 @@ const clubFunnel: FunnelDef = {
   };
 
 export const FUNNELS: FunnelDef[] = [
+  ...Object.values(PROFILES).map((p):FunnelDef=>({key:`quiz-${p.id}`,pageKey:`quiz-offer-${p.id}`,quizProduct:p.id,name:`Quiz — ${p.product}`,description:'Oferta exclusiva do quiz, com compras vinculadas ao pedido.',publicPath:p.path,steps:[{key:'offer',event:'quiz_offer_viewed',label:'Viu a oferta'},{key:'checkout',event:'quiz_checkout_clicked',label:'Clicou para comprar'},{key:'arrived',event:'quiz_checkout_viewed',label:'Chegou ao checkout'},{key:'purchase',label:'Compra aprovada'}]})),
   {...clubFunnel,abVariant:'a',name:'Funil Clube dos Drinkeros — teste A'},
   {...clubFunnel,key:'clube-receitas-b',pageKey:'clube-receitas-b',publicPath:'/clube-receitas-b',abVariant:'b',name:'Funil Clube dos Drinkeros — teste B'},
   {
@@ -73,12 +76,15 @@ export const FUNNELS: FunnelDef[] = [
     steps: [
       { key: 'pageview', event: 'pageview', label: 'Acessou o quiz', hint: 'Visitantes únicos' },
       { key: 'started', event: 'quiz_started', label: 'Começou o quiz' },
-      { key: 'q1', event: 'quiz_q1_answered', label: 'Respondeu a pergunta 1' },
-      { key: 'q2', event: 'quiz_q2_answered', label: 'Respondeu a pergunta 2' },
-      { key: 'q3', event: 'quiz_q3_answered', label: 'Respondeu a pergunta 3' },
+      { key: 'q1', event: 'quiz_p1_answered', label: 'Respondeu a pergunta 1' },
+      { key: 'q2', event: 'quiz_p2_answered', label: 'Respondeu a pergunta 2' },
+      { key: 'q3', event: 'quiz_p3_answered', label: 'Respondeu a pergunta 3 (só empreender indeciso)' },
       { key: 'result', event: 'quiz_result', label: 'Viu o resultado' },
       { key: 'cta', event: 'quiz_cta_clicked', label: 'Clicou para a landing' },
-      { key: 'landing', event: 'quiz_landing_viewed', label: 'Chegou à landing indicada' },
+      { key: 'landing', event: 'quiz_offer_viewed', label: 'Viu sua oferta exclusiva' },
+      { key: 'checkout_click', event: 'quiz_checkout_clicked', label: 'Clicou para comprar' },
+      { key: 'lead', event: 'quiz_lead_captured', label: 'Enviou WhatsApp com consentimento' },
+      { key: 'expired', event: 'quiz_discount_expired', label: 'Desconto expirou' },
       { key: 'checkout', event: 'quiz_checkout_viewed', label: 'Chegou ao checkout da landing' },
     ],
   },

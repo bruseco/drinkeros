@@ -4,10 +4,11 @@ import { quizJourneyAt } from '@/lib/quizJourney';
 import { trackFunnel } from '@/lib/funnelTracking';
 
 export default function QuizJourneyTracker() {
-  const { pathname } = useLocation();
+  const { pathname,search } = useLocation();
   useEffect(() => {
+    if(new URLSearchParams(search).get('quiz')==='1')return;
     const step = quizJourneyAt(pathname);
     if (step) trackFunnel('quiz', step.event, { metadata: step.metadata });
-  }, [pathname]);
+  }, [pathname,search]);
   return null;
 }

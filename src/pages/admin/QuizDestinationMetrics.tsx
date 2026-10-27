@@ -17,7 +17,7 @@ export default function QuizDestinationMetrics({ range, dates }: { range: Funnel
     },
   });
   return <section className="space-y-4" aria-labelledby="quiz-destinations-heading">
-    <div><h2 id="quiz-destinations-heading" className="text-xl font-semibold">Do quiz até o checkout</h2>
+    <div><h2 id="quiz-destinations-heading" className="text-xl font-semibold">Histórico: destinos do quiz anterior</h2>
       <p className="text-sm text-muted-foreground">Destino indicado pelo quiz e continuidade na mesma sessão. O período seleciona os cliques de saída; acompanhamos a navegação por até duas horas, dentro do fim do período.</p></div>
     {isError ? <p role="alert" className="text-destructive">Não foi possível carregar os destinos do quiz.</p> : isLoading ? <p>Carregando destinos…</p> : <div className="grid gap-4 lg:grid-cols-2">{targets.map(([path, product]) => {
       const row = data?.find(r => r.destination === path);

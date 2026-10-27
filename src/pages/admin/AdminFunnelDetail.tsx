@@ -1,3 +1,4 @@
+import QuizOfferMetrics from './QuizOfferMetrics';
 import QuizDestinationMetrics from './QuizDestinationMetrics';
 import React, { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
@@ -143,6 +144,7 @@ const AdminFunnelDetail: React.FC = () => {
         )}
       </div>
       {funnel.key === 'rand' && <RandUpsellMetrics range={range} dates={dates} />}
+      {funnel.key === 'quiz' && <QuizOfferMetrics range={range} dates={dates} />}
       {funnel.key === 'quiz' && <QuizDestinationMetrics range={range} dates={dates} />}
       {funnel.key === 'quiz' && <QuizAnswerMetrics range={range} dates={dates} />}
     </div>
