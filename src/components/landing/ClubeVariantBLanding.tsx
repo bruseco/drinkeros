@@ -327,7 +327,7 @@ export default function ClubeVariantBLanding(props: Props) {
     <section className="club-tools" aria-label="Organize seus drinks">
       <article className="club-feature"><p className="club-eyebrow club-video-eyebrow"><span>Receitas em vídeo</span><svg role="img" aria-label="YouTube" viewBox="0 0 28 20"><rect width="28" height="20" rx="5" fill="#fff"/><path d="m11 5 8 5-8 5Z" fill="#111"/></svg></p><h2>Assista como preparar.</h2><p>Todas as receitas foram realizadas e testadas.</p><ClubRecipeLoop /></article>
       <article className="club-feature"><h2>Salve suas receitas.</h2><p>Monte listas de favoritos para cada ocasião.</p><ClubFavoriteDemo /></article>
-      <article className="club-feature club-shopping-feature"><h2>Organizador de festa</h2><p>Monte sua lista e gere o checklist de compras para a sua festa.</p><ClubShoppingDemo /></article>
+      <article id="clube-organizador" className="club-feature club-shopping-feature"><h2>Organizador de festa</h2><p>Monte sua lista e gere o checklist de compras para a sua festa.</p><ClubShoppingDemo /></article>
       <article className="club-feature club-community-feature"><h2>Comunidade.</h2><p>Compartilhe e descubra receitas com outros usuários.</p><ClubCommunityDemo /></article>
     </section>
     <section id="clube-pricing" className="club-public-pricing" ref={pricing}>

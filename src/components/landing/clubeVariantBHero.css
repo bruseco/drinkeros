@@ -76,3 +76,6 @@
 .club-variant-b .club-b-hero-content[data-motion-active="true"] .club-b-hero-number { animation-play-state:running; }
 @keyframes club-b-number-glow { 50% { text-shadow:0 0 12px #ffeb00bb,0 0 28px #ffc40099; } }
 @media(prefers-reduced-motion:reduce) { .club-variant-b .club-b-mobile-hero h1 .club-b-hero-number { animation:none; } }
+
+.club-variant-b .club-b-organizer-link { color:#ffeb00; font-weight:800; text-decoration:underline; text-underline-offset:3px; text-shadow:0 0 10px #ffeb0055; }
+.club-variant-b #clube-organizador { scroll-margin-top:20px; }
