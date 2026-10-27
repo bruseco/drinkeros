@@ -114,6 +114,7 @@ describe("isolated quiz checkout", () => {
       .toBeTruthy();
   });
   it("resumes an accepted pending payment without rendering another charge form", async () => {
+    m.quote.mockResolvedValue(quote(97));
     m.call.mockResolvedValue({
       id: "mp-existing",
       status: "pending",
@@ -124,6 +125,8 @@ describe("isolated quiz checkout", () => {
     expect(await screen.findByLabelText("Código Pix")).toHaveValue(
       "pix-existing",
     );
+    expect(screen.getByText(/R\$\s*87,00/)).toBeTruthy();
+    expect(screen.queryByText(/R\$\s*97,00/)).toBeNull();
     expect(screen.queryByRole("button", { name: /Pagar/ })).toBeNull();
     expect(m.invoke.mock.calls.filter(([name]) => name === "create-mp-payment"))
       .toHaveLength(0);

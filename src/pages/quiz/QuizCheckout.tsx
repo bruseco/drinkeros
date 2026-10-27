@@ -179,7 +179,7 @@ export default function QuizCheckout() {
         </Link>
         <h1 className="mt-6 text-2xl font-bold">{profile.product}</h1>
         {quote && (
-          <p className="my-5 text-4xl font-extrabold">{money(quote.price)}</p>
+          <p className="my-5 text-4xl font-extrabold">{money(Number(result?.amount ?? quote.price))}</p>
         )}
         <p className="mb-5 text-sm">
           Cartão ou Pix pelo Mercado Pago. O acesso chega no e-mail após a
