@@ -8,6 +8,13 @@
       "when": 1793028460525,
       "tag": "0000_purchases_meta_capi_once",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793125988725,
+      "tag": "0001_quiz_exclusive_offers",
+      "breakpoints": true
     }
   ]
 }
