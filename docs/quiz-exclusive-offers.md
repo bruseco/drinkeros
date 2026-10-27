@@ -81,3 +81,67 @@ Não preencher cartão real nem confirmar Pix nos testes de interface. As verifi
 - Compilação, TypeScript e verificação Deno das duas funções.
 
 Arquivos por etapa e estado final da instalação são registrados na entrega. A confirmação de recebimento do Lead pela Meta depende do ambiente configurado; deduplicação foi implementada pelo ID, sem envio de leads reais de teste.
+
+## Arquivos por etapa
+
+### feat(quiz): caminhos casa profissional e empreender com atribuição preservada
+
+- `src/lib/funnelTracking.ts`
+- `src/lib/quizJourney.test.ts`
+- `src/lib/quizJourney.ts`
+- `src/lib/quizLegacyLogic.ts`
+- `src/lib/quizLogic.test.ts`
+- `src/lib/quizLogic.ts`
+- `src/lib/quizOffer.ts`
+- `src/pages/admin/QuizAnswerMetrics.tsx`
+- `src/pages/admin/QuizDestinationMetrics.tsx`
+- `src/pages/landing/Quiz.tsx`
+- `supabase/functions/_shared/quizRules.ts`
+
+### feat(quiz): validar ofertas e prazo no servidor com pagamento Mercado Pago
+
+- `supabase/config.toml`
+- `supabase/functions/_shared/quizOffer.ts`
+- `supabase/functions/create-mp-payment/index.ts`
+- `supabase/functions/quiz-offer/index.ts`
+- `supabase/migrations/20261027190000_quiz_exclusive_offers.sql`
+
+### feat(quiz): páginas exclusivas e checkout com preço confirmado
+
+- `src/App.tsx`
+- `src/lib/quizInstallments.ts`
+- `src/pages/Checkout.tsx`
+- `src/pages/quiz/QuizCheckout.test.tsx`
+- `src/pages/quiz/QuizCheckout.tsx`
+- `src/pages/quiz/QuizCourseBody.tsx`
+- `src/pages/quiz/QuizOfferPage.tsx`
+- `src/pages/quiz/QuizProductContent.tsx`
+- `src/pages/quiz/content/BarParaEventos.tsx`
+- `src/pages/quiz/content/BartenderABordo.tsx`
+- `src/pages/quiz/content/DrinkDeliveryEngarrafados.tsx`
+- `src/pages/quiz/content/DrinkerosXperience.tsx`
+- `src/pages/quiz/content/MixologiaAvancada.tsx`
+- `src/pages/quiz/quizOffers.css`
+
+### feat(quiz): leads consentidos no CRM e conversão por pedido
+
+- `supabase/migrations/20261027190100_quiz_consented_leads.sql`
+
+### feat(quiz): métricas por caminho e produto e painel de leads
+
+- `src/components/QuizJourneyTracker.tsx`
+- `src/hooks/usePageFunnel.ts`
+- `src/lib/funnels.ts`
+- `src/lib/quizOffer.ts`
+- `src/pages/admin/AdminFunnelDetail.tsx`
+- `src/pages/admin/QuizAnswerMetrics.tsx`
+- `src/pages/admin/QuizDestinationMetrics.tsx`
+- `src/pages/admin/QuizOfferMetrics.tsx`
+- `supabase/migrations/20261027190200_quiz_admin_reporting.sql`
+
+### test(quiz): validar ofertas consentimento e retomada sem cobrança
+
+- `docs/quiz-exclusive-offers.md`
+- `src/lib/quizOfferDb.test.ts`
+- `src/pages/admin/AdminFunnels.test.tsx`
+- `src/test/setup.ts`
