@@ -1,0 +1,12 @@
+.quiz-watch-cue {
+  animation: quiz-watch-point 1s ease-in-out infinite;
+  text-shadow: 2px 2px 0 #000, -1px -1px 0 #000;
+}
+.quiz-watch-cue svg { filter: drop-shadow(2px 2px 0 #000); }
+@keyframes quiz-watch-point {
+  0%, 100% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .quiz-watch-cue { animation: none; }
+}
