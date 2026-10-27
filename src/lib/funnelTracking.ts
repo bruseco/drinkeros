@@ -16,6 +16,7 @@ export type FunnelEvent =
   | 'offer_2_revealed'
   | 'checkout_2_started'
   | 'subscription_confirmed'
+  | 'quiz_p1_answered' | 'quiz_p2_answered' | 'quiz_p3_answered' | 'quiz_offer_viewed' | 'quiz_checkout_clicked' | 'quiz_lead_captured' | 'quiz_discount_expired'
   | 'quiz_started'
   | 'quiz_q1_answered'
   | 'quiz_q2_answered'

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { funnelPeriodBounds, type FunnelDates, type FunnelRange } from '@/lib/funnelPeriod';
-import { PROFILES } from '@/lib/quizLogic';
+import { PROFILES } from '@/lib/quizLegacyLogic';
 
 type Counts = { destination: string; clicks: number; landing_views: number; checkout_views: number };
 const targets = [...new Map(Object.values(PROFILES).map(p => [p.path, p.product])).entries()];

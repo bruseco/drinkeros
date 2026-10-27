@@ -25,8 +25,8 @@ export function quizJourneyAt(path: string): { event: 'quiz_landing_viewed' | 'q
       sessionStorage.setItem(KEY, JSON.stringify(j));
       return { event: 'quiz_landing_viewed', metadata };
     }
-    if (j.landed && path === `/checkout/course${destination}`) return { event: 'quiz_checkout_viewed', metadata };
-    if (Object.values(PROFILES).some(p => p.path === path) || path.startsWith('/checkout/')) sessionStorage.removeItem(KEY);
+    if (j.landed && path === `/checkout/${PROFILES[j.profile].productType}/${PROFILES[j.profile].slug}`) return { event: 'quiz_checkout_viewed', metadata };
+    if (Object.values(PROFILES).some(p => p.path === path || `/${p.slug}` === path) || path.startsWith('/checkout/')) sessionStorage.removeItem(KEY);
   } catch { /* malformed or blocked storage must not interrupt navigation */ }
   return null;
 }

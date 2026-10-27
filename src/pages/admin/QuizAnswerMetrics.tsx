@@ -1,7 +1,7 @@
 import {useQuery} from '@tanstack/react-query';
 import {supabase} from '@/integrations/supabase/client';
 import {funnelPeriodBounds,EMPTY_FUNNEL_DATES,type FunnelDates,type FunnelRange} from '@/lib/funnelPeriod';
-import {QUESTIONS,type QuestionId} from '@/lib/quizLogic';
+import {QUESTIONS,type QuestionId} from '@/lib/quizLegacyLogic';
 import {Button} from '@/components/ui/button';
 type AnswerCount={question:string;answer:string|null;count:number};
 const format=(n:number)=>n.toLocaleString('pt-BR');

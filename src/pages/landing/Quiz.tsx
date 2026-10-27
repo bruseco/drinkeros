@@ -5,12 +5,13 @@ import {
   Ship, Shuffle, Sparkles, Sprout, Store, Target, Trophy, Truck, Wallet, Wand2, type LucideIcon,
 } from 'lucide-react';
 import { rememberQuizJourney } from '@/lib/quizJourney';
+import { completeQuiz } from '@/lib/quizOffer';
 import { SeoHead } from '@/components/SeoHead';
 import { trackFunnel, trackFunnelAsync } from '@/lib/funnelTracking';
 import { trackFbEvent, waitForPixelFlush } from '@/lib/metaPixel';
 import {
   QUESTIONS, PROFILES, computeProfile, getQuestionOrder, buildDestinationUrl,
-  type Answers, type AnswerKey, type QuizIcon, type ProfileId,
+  quizPath, cleanQuizAnswers, quizAdParams, type Answers, type AnswerKey, type QuizIcon, type ProfileId,
 } from '@/lib/quizLogic';
 import imgHobbie from '@/assets/landing/classicos/profile-hobbie.jpg';
 import imgBartender from '@/assets/landing/classicos/profile-bartender.jpg';
@@ -31,6 +32,7 @@ type Stage = { kind: 'intro' } | { kind: 'question'; index: number } | { kind: '
 export default function Quiz() {
   const location = useLocation();
   const [stage, setStage] = useState<Stage>({ kind: 'intro' });
+  const [checkoutError,setCheckoutError]=useState('');
   const [answers, setAnswers] = useState<Answers>({});
   const [selected, setSelected] = useState<AnswerKey | null>(null);
   const [dir, setDir] = useState<'fwd' | 'back'>('fwd');
@@ -38,7 +40,7 @@ export default function Quiz() {
 
   const order = useMemo(() => getQuestionOrder(answers), [answers]);
 
-  useEffect(() => { trackFunnel(PAGE_KEY, 'pageview'); }, []);
+  useEffect(() => { trackFunnel(PAGE_KEY, 'pageview', {metadata:quizAdParams(location.search)}); }, []);
 
   const go = (next: Stage, direction: 'fwd' | 'back' = 'fwd') => {
     setDir(direction);
@@ -52,7 +54,7 @@ export default function Quiz() {
   };
 
   const start = () => {
-    trackFunnel(PAGE_KEY, 'quiz_started');
+    trackFunnel(PAGE_KEY, 'quiz_started', {metadata:quizAdParams(location.search)});
     go({ kind: 'question', index: 0 });
   };
 
@@ -61,11 +63,12 @@ export default function Quiz() {
     setSelected(key);
     const qid = order[index];
     const nextAnswers: Answers = { ...answers, [qid]: key };
+    if(qid==='q1'){Object.keys(nextAnswers).forEach(q=>{if(q!=='q1')delete nextAnswers[q as keyof Answers];});}
     // Remove respostas posteriores que não se aplicam mais (ex.: saiu do caminho de negócio)
     const nextOrder = getQuestionOrder(nextAnswers);
-    (['q1', 'q2', 'q3', 'q4'] as const).forEach((q) => { if (!nextOrder.includes(q)) delete nextAnswers[q]; });
+    (['q1','q2_casa','q2_profissional','q2_empreender','q3'] as const).forEach((q) => { if (!nextOrder.includes(q)) delete nextAnswers[q]; });
     setAnswers(nextAnswers);
-    trackFunnel(PAGE_KEY, `quiz_${qid}_answered` , { metadata: { answer: key } });
+    trackFunnel(PAGE_KEY, qid==='q1'?'quiz_p1_answered':qid==='q3'?'quiz_p3_answered':'quiz_p2_answered', {metadata:{...quizAdParams(location.search),path:quizPath(nextAnswers),question:qid,answer:key}});
 
     window.setTimeout(() => {
       if (index + 1 < nextOrder.length) {
@@ -76,7 +79,7 @@ export default function Quiz() {
         window.setTimeout(() => {
           go({ kind: 'result', profile });
           const p = PROFILES[profile];
-          trackFunnel(PAGE_KEY, 'quiz_result', { metadata: { profile } });
+          trackFunnel(PAGE_KEY, 'quiz_result', { metadata: {...quizAdParams(location.search), profile, product:profile, path:quizPath(nextAnswers), answers:cleanQuizAnswers(nextAnswers)} });
           trackFbEvent('ViewContent', {
             content_name: p.title, content_category: 'quiz', content_type: 'quiz_result', content_ids: [profile],
           }, { dedupeKey: `quiz:result:${profile}` });
@@ -95,15 +98,15 @@ export default function Quiz() {
 
   const clickCta = async (profile: ProfileId) => {
     const p = PROFILES[profile];
-    trackFbEvent('Lead', { content_name: p.product, content_category: 'quiz', content_ids: [profile] }, { dedupeKey: `quiz:lead:${profile}` });
+    try { await completeQuiz(answers, location.search); } catch { setCheckoutError('Não foi possível liberar sua oferta. Tente novamente.'); return; }
     rememberQuizJourney(profile);
-    await trackFunnelAsync(PAGE_KEY, 'quiz_cta_clicked', { metadata: { profile, destination: p.path } });
+    await trackFunnelAsync(PAGE_KEY, 'quiz_cta_clicked', { metadata: {...quizAdParams(location.search), profile, product:profile, path:quizPath(answers), destination:p.path} });
     await waitForPixelFlush();
     window.location.href = buildDestinationUrl(p, location.search);
   };
 
   const progress =
-    stage.kind === 'question' ? ((stage.index + (selected ? 1 : 0)) / order.length) * 100
+    stage.kind === 'question' ? ((stage.index + (selected ? 1 : 0)) / Math.max(2,order.length)) * 100
       : stage.kind === 'intro' ? 0 : 100;
 
   const anim = leaving
@@ -114,7 +117,7 @@ export default function Quiz() {
     <div className="quiz-root min-h-[100dvh] text-foreground">
       <SeoHead
         title="Descubra seu perfil de Drinkero | Quiz Drinkeros"
-        description="Responda 4 perguntas rápidas e descubra o caminho certo pra você no mundo dos drinks."
+        description="Responda 2 ou 3 perguntas rápidas e descubra o caminho certo pra você no mundo dos drinks."
         path="/quiz"
       />
       <header className="sticky top-0 z-10 quiz-header" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
@@ -126,7 +129,7 @@ export default function Quiz() {
           ) : <span className="w-9" />}
           <img src={logo} alt="Drinkeros" className="mx-auto h-7 w-auto" />
           <span className="w-9 text-right text-xs text-muted-foreground">
-            {stage.kind === 'question' ? `${stage.index + 1}/${order.length}` : ''}
+            {stage.kind === 'question' ? `${stage.index + 1}/${Math.max(2,order.length)}` : ''}
           </span>
         </div>
         <div className="h-1 w-full bg-foreground/10" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
@@ -143,7 +146,7 @@ export default function Quiz() {
                 Qual é o seu momento no mundo dos drinks?
               </h1>
               <p className="mx-auto mt-4 max-w-sm text-muted-foreground">
-                Responda até 4 perguntas rápidas e descubra o caminho certo pra você. Leva menos de 1 minuto.
+                Responda 2 ou 3 perguntas rápidas e descubra o caminho certo pra você. Leva menos de 1 minuto.
               </p>
               <button onClick={start} className="quiz-cta mx-auto mt-8 flex w-full max-w-sm items-center justify-center gap-2 rounded-2xl px-6 py-4 text-lg font-bold">
                 Descobrir meu perfil <ArrowRight className="h-5 w-5" />
@@ -197,6 +200,7 @@ export default function Quiz() {
                 <h1 className="mt-2 font-display text-3xl font-bold">{p.title}</h1>
                 <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-muted-foreground">{p.text}</p>
                 <p className="mt-5 text-sm">Caminho recomendado: <strong>{p.product}</strong></p>
+                {checkoutError&&<p role="alert" className="mt-4 text-destructive">{checkoutError}</p>}
                 <button onClick={() => clickCta(stage.profile)} className="quiz-cta mt-6 flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-4 text-lg font-bold">
                   {p.cta} <ArrowRight className="h-5 w-5 shrink-0" />
                 </button>
