@@ -1,3 +1,4 @@
+import {resolveQuizQuote,recordQuizPayment,QuizPriceChanged,quizPaymentHash} from '../_shared/quizOffer.ts';
 import {recordClubAbAttribution} from '../_shared/clubAbAttribution.ts';
 // Checkout transparente: cria pagamento direto via API do Mercado Pago (Cartão ou Pix)
 // usando o token gerado pelo Payment Brick no frontend.
@@ -135,17 +136,18 @@ serve(async (req) => {
       } catch (_) { /* visitante */ }
     }
 
-    if (product_type === "club" && !userId) {
+    if (product_type === "club" && !userId && !body.quiz_offer_token) {
       throw new Error("Faça login para assinar o Clube dos Drinkeros");
     }
-    const publicAmount = product_type === 'club' && product.slug === 'clube-anual'
+    const quizQuote=body.quiz_offer_token ? await resolveQuizQuote(supabase,body.quiz_offer_token,product_type,slug,body.expected_amount) : null;
+    const publicAmount = product_type === 'club' && product.slug === 'clube-anual' && !quizQuote
       ? await publicClubPrice(supabase,userId!,body.expected_amount,!!body.public_offer_token) : null;
     const publicOffer=publicAmount !== null;
     if (publicOffer) product = { ...product, price: publicAmount };
 
     // Desconto Jovem Bartender (≤24 anos): R$27 no clube-anual.
     let youthDiscount = false;
-    if (product_type === "club" && product.slug === "clube-anual" && userId && !publicOffer) {
+    if (product_type === "club" && product.slug === "clube-anual" && userId && !publicOffer && !quizQuote) {
       const { data: prof } = await supabase
         .from("profiles")
         .select("birth_date")
@@ -169,7 +171,7 @@ serve(async (req) => {
     const VIP_BASE_PERCENT = 50;
     const VIP_INTRO_WINDOW_DAYS = 7;
     let vipPercent = 0;
-    if (isVip && product_type !== "club") {
+    if (isVip && product_type !== "club" && !quizQuote) {
       if (!introStartedAt) vipPercent = VIP_INTRO_PERCENT;
       else {
         const days = (Date.now() - new Date(introStartedAt).getTime()) / 86400000;
@@ -216,7 +218,7 @@ serve(async (req) => {
       }
     }
 
-    const finalPrice = couponPrice !== null ? Math.min(couponPrice, vipPrice) : vipPrice;
+    const finalPrice = quizQuote ? quizQuote.price : couponPrice !== null ? Math.min(couponPrice, vipPrice) : vipPrice;
 
 
     // ===== Dados fiscais (NFS-e/NIBO) — best effort, sem bloquear o pagamento =====
@@ -255,7 +257,8 @@ serve(async (req) => {
 
 
 
-    const externalRef = `${product_type}:${product.id}:${userId || "guest"}:${Date.now()}`;
+    const quizAttemptHash=quizQuote ? await quizPaymentHash(body.quiz_offer_token,quizQuote.product) : null;
+    let externalRef = `${product_type}:${product.id}:${userId || "guest"}:${quizAttemptHash ? `quiz-${quizAttemptHash}` : Date.now()}`;
     const payerEmail = formData?.payer?.email || userEmail || "comprador@drinkeros.com";
 
 
@@ -273,6 +276,7 @@ serve(async (req) => {
       notification_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/mercadopago-webhook`,
       statement_descriptor: "DRINKEROS",
       metadata: {
+        ...(quizQuote?{...quizQuote.attribution,quiz_session_id:quizQuote.session_id,quiz_product:quizQuote.product,quiz_path:quizQuote.path}:{}),
         product_type,
         product_id: product.id,
         product_slug: product.slug,
@@ -307,9 +311,21 @@ serve(async (req) => {
       if (formData.issuer_id) paymentBody.issuer_id = formData.issuer_id;
     }
 
-    const idempotencyKey = `${externalRef}:${Math.random().toString(36).slice(2, 10)}`;
+    let idempotencyKey = quizAttemptHash ? `quiz-${quizAttemptHash}` : `${externalRef}:${Math.random().toString(36).slice(2, 10)}`;
 
-    if(product_type==='club'&&product.slug==='clube-anual')await publicClubPrice(supabase,userId!,finalPrice,!!body.public_offer_token);
+    if(quizQuote)await resolveQuizQuote(supabase,body.quiz_offer_token,product_type,slug,finalPrice);
+    if(!quizQuote&&product_type==='club'&&product.slug==='clube-anual')await publicClubPrice(supabase,userId!,finalPrice,!!body.public_offer_token);
+    if(quizQuote&&quizAttemptHash){
+      const claim=await supabase.rpc('quiz_claim_payment',{_hash:quizAttemptHash,_session:quizQuote.session_id,_product:quizQuote.product,_amount:finalPrice});
+      if(claim.error)throw Error('Não foi possível preparar o pagamento. Tente novamente.');
+      if(!claim.data)return new Response(JSON.stringify({error:'Já existe uma tentativa deste pagamento. Aguarde a confirmação; não pague novamente.',code:'quiz_payment_pending'}),{status:409,headers:{...corsHeaders,'Content-Type':'application/json'}});
+    }
+    if(quizAttemptHash){
+      const attempt=await supabase.from('quiz_payment_attempts').select('attempt_id').eq('token_hash',quizAttemptHash).single();
+      if(attempt.error)throw Error('Não foi possível preparar a tentativa.');
+      externalRef+=`:${attempt.data.attempt_id}`;paymentBody.external_reference=externalRef;idempotencyKey=`quiz-${attempt.data.attempt_id}`;
+      const saved=await supabase.from('quiz_payment_attempts').update({external_reference:externalRef}).eq('token_hash',quizAttemptHash);if(saved.error)throw Error('Não foi possível preparar o pagamento.');
+    }
     const mpResp = await fetch(`${MP_API}/v1/payments`, {
       method: "POST",
       headers: {
@@ -322,10 +338,13 @@ serve(async (req) => {
 
     const mpData = await mpResp.json();
     if (!mpResp.ok) {
+      if(quizAttemptHash&&mpResp.status<500)await supabase.from('quiz_payment_attempts').update({status:'failed'}).eq('token_hash',quizAttemptHash);
       console.error("[create-mp-payment] MP error:", mpData);
       throw new Error(mpData?.message || "Falha ao processar pagamento");
     }
 
+    if(quizAttemptHash)await supabase.from('quiz_payment_attempts').update({status:'accepted',mp_id:String(mpData.id)}).eq('token_hash',quizAttemptHash);
+    if(quizQuote)await recordQuizPayment(supabase,quizQuote,'mercado_pago',String(mpData.id),String(product.id),finalPrice);
     if(product_type==='club')await recordClubAbAttribution(supabase,body.club_ab_variant,{payment_id:String(mpData.id)});
 
     console.log("[create-mp-payment] payment created:", {
@@ -427,6 +446,7 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
+    if(err instanceof QuizPriceChanged)return new Response(JSON.stringify({error:err.message,code:'quiz_price_changed',amount:err.amount}),{status:409,headers:{...corsHeaders,'Content-Type':'application/json'}});
     if (err instanceof PublicClubPriceChanged) return new Response(JSON.stringify({error:err.message,code:'public_club_price_changed',amount:err.amount}),{status:409,headers:{...corsHeaders,'Content-Type':'application/json'}});
     console.error("[create-mp-payment]", err);
     return new Response(

@@ -58,3 +58,6 @@ verify_jwt = true
 
   [functions.club-guest-checkout]
     verify_jwt = false
+
+[functions.quiz-offer]
+verify_jwt = false
