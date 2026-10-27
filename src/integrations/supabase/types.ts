@@ -4677,6 +4677,47 @@ export type Database = {
         }
       }
       purge_expired_welcome_passwords: { Args: never; Returns: undefined }
+      quiz_admin_answers: {
+        Args: { _path?: string; _since?: string; _until?: string }
+        Returns: {
+          answer: string
+          count: number
+          path: string
+          question: string
+        }[]
+      }
+      quiz_admin_leads: {
+        Args: {
+          _offset?: number
+          _path?: string
+          _product?: string
+          _purchased?: boolean
+          _since?: string
+          _until?: string
+        }
+        Returns: {
+          answers: Json
+          attribution: Json
+          consent_at: string
+          created_at: string
+          displayed_price: number
+          id: string
+          name: string
+          path: string
+          phone: string
+          product: string
+          purchased: boolean
+        }[]
+      }
+      quiz_admin_metrics: {
+        Args: { _since?: string; _until?: string }
+        Returns: {
+          count: number
+          event: string
+          path: string
+          product: string
+        }[]
+      }
       quiz_capture_lead: {
         Args: {
           _consent: boolean
