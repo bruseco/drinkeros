@@ -25,6 +25,9 @@ export const WhatsAppFloatingButton: React.FC = () => {
   const location = useLocation();
   const { pathname } = location;
 
+  // Both quiz variants and their previews share this route.
+  if (pathname.replace(/\/+$/, '') === '/quiz') return null;
+
   const isSalesPage =
     SALES_PATHS.has(pathname) ||
     isPackageLanding(pathname) ||
