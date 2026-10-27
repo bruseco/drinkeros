@@ -74,17 +74,17 @@ export default function QuizResultVideo(
   return (
     <div
       ref={wrapper}
-      className="mx-auto mb-3 flex w-full max-w-[352px] items-center justify-end gap-2 sm:block sm:max-w-[260px]"
+      className="relative mx-auto mb-3 w-full max-w-[352px] sm:max-w-[260px]"
     >
       <div
         aria-hidden="true"
-        className="quiz-watch-cue flex w-16 shrink-0 flex-col items-center text-yellow-300 sm:hidden"
+        className="quiz-watch-cue flex flex-col items-center text-yellow-300 sm:hidden"
         style={{ animationPlayState: cueActive ? "running" : "paused" }}
       >
-        <span className="text-sm font-black uppercase">Assista</span>
-        <ArrowRight strokeWidth={3.5} className="h-10 w-10" />
+        <span className="font-black uppercase">Assista</span>
+        <ArrowRight strokeWidth={3.5} className="h-7 w-7" />
       </div>
-      <div className="relative aspect-square w-full min-w-0 max-w-[260px] max-[360px]:max-w-[220px] shrink overflow-hidden rounded-2xl bg-black">
+      <div className="relative mx-auto aspect-square w-full min-w-0 max-w-[260px] max-[360px]:max-w-[220px] shrink overflow-hidden rounded-2xl bg-black">
         {failed
           ? (
             <img
