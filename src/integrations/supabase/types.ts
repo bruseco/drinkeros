@@ -4278,6 +4278,15 @@ export type Database = {
           question: string
         }[]
       }
+      get_quiz_destination_metrics: {
+        Args: { _since?: string; _until?: string }
+        Returns: {
+          checkout_views: number
+          clicks: number
+          destination: string
+          landing_views: number
+        }[]
+      }
       get_retention_metrics: {
         Args: { p_seven_days_ago: string; p_thirty_days_ago: string }
         Returns: Json
