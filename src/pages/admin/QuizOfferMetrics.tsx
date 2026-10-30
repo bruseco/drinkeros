@@ -26,14 +26,21 @@ export default function QuizOfferMetrics(
     [tab, setTab] = useState("metrics"),
     [offset, setOffset] = useState(0);
   const b = funnelPeriodBounds(range, dates),
-    params = { _since: b?.since, _until: b?.until };
+    periodKey = [range, dates.from, dates.to];
+  // Rolling periods contain the current time. Compute bounds when fetching,
+  // never use them as query keys: every response would otherwise start a new query.
+  const queryParams = () => {
+    const bounds = funnelPeriodBounds(range, dates);
+    return { _since: bounds?.since, _until: bounds?.until };
+  };
   const metrics = useQuery({
-    queryKey: ["quiz-offer-metrics", params],
+    queryKey: ["quiz-offer-metrics", ...periodKey],
     enabled: !!b,
+    refetchInterval: 30_000,
     queryFn: async () => {
       const { data, error } = await supabase.rpc(
         "quiz_admin_experiment" as never,
-        params as never,
+        queryParams() as never,
       );
       if (error) throw error;
       return data as Array<
@@ -48,12 +55,13 @@ export default function QuizOfferMetrics(
     },
   });
   const answers = useQuery({
-    queryKey: ["quiz-new-answers", params, path],
+    queryKey: ["quiz-new-answers", ...periodKey, path],
     enabled: !!b && tab === "metrics",
+    refetchInterval: 30_000,
     queryFn: async () => {
       const { data, error } = await supabase.rpc(
         "quiz_admin_answers" as never,
-        { ...params, _path: path || null } as never,
+        { ...queryParams(), _path: path || null } as never,
       );
       if (error) throw error;
       return data as Array<
@@ -62,13 +70,20 @@ export default function QuizOfferMetrics(
     },
   });
   const leads = useQuery({
-    queryKey: ["quiz-offer-leads", params, path, product, purchased, offset],
+    queryKey: [
+      "quiz-offer-leads",
+      ...periodKey,
+      path,
+      product,
+      purchased,
+      offset,
+    ],
     enabled: !!b && tab === "leads",
     queryFn: async () => {
       const { data, error } = await supabase.rpc(
         "quiz_admin_leads" as never,
         {
-          ...params,
+          ...queryParams(),
           _path: path || null,
           _product: product || null,
           _purchased: purchased === "" ? null : purchased === "yes",
@@ -154,7 +169,7 @@ export default function QuizOfferMetrics(
           </label>
         )}
       </div>
-      {tab === "metrics" && (
+      {tab === "metrics" && metrics.isSuccess && (
         <section
           className="grid gap-3 sm:grid-cols-2"
           aria-label="Comparação das versões do quiz"
@@ -205,7 +220,17 @@ export default function QuizOfferMetrics(
       </p>
       {tab === "metrics"
         ? (metrics.isError
-          ? <p role="alert">Não foi possível carregar o novo funil.</p>
+          ? (
+            <div role="alert">
+              <p>Não foi possível carregar o novo funil.</p>
+              <button
+                className="underline"
+                onClick={() => void metrics.refetch()}
+              >
+                Tentar novamente
+              </button>
+            </div>
+          )
           : metrics.isLoading
           ? <p>Carregando…</p>
           : (
@@ -296,7 +321,19 @@ export default function QuizOfferMetrics(
             Respostas do quiz por pergunta · todas as versões
           </h3>
           {answers.isError
-            ? <p role="alert">Não foi possível carregar as respostas.</p>
+            ? (
+              <div role="alert">
+                <p>Não foi possível carregar as respostas.</p>
+                <button
+                  className="underline"
+                  onClick={() => void answers.refetch()}
+                >
+                  Tentar novamente
+                </button>
+              </div>
+            )
+            : answers.isLoading
+            ? <p role="status">Carregando respostas…</p>
             : Object.values(QUESTIONS).map((q) => {
               const rows = (answers.data || []).filter((r) =>
                   r.question === q.id

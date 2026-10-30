@@ -18,6 +18,7 @@ vi.mock("@tanstack/react-query", () => ({
         count: 2,
       }]
       : [],
+    isSuccess: true,
     isLoading: false,
     isError: false,
   }),
