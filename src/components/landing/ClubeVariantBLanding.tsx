@@ -221,6 +221,14 @@ function PublicOfferBanner({ savings, deadline }: { savings: number; deadline: n
 }
 
 export default function ClubeVariantBLanding(props: Props) {
+  const [desktopTestimonials, setDesktopTestimonials] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 1024px)');
+    const update = () => setDesktopTestimonials(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
   const landingCategories=useClubLandingCovers(fallbackCategories);
   const brick=useRef<HTMLDivElement>(null);
   const brickActive=useViewportMotion(brick);
@@ -345,7 +353,7 @@ export default function ClubeVariantBLanding(props: Props) {
         <p className="club-payment-note">R$ 7 por mês no cartão de crédito, com renovação automática. Cancele quando quiser; o acesso segue até o fim do período pago.</p>
       </div>
     </section>
-    <section className="club-public-testimonials"><h2>Olhe o que o pessoal acha da gente. <span aria-hidden="true">👀</span></h2><TestimonialsCarousel hideHeading staticLayout={props.staticVariant} /></section>
+    <section className="club-public-testimonials"><h2>Olhe o que o pessoal acha da gente. <span aria-hidden="true">👀</span></h2><TestimonialsCarousel hideHeading staticLayout={props.staticVariant && !desktopTestimonials} /></section>
     <section className="club-faq"><h2>Ficou alguma dúvida?</h2>
       <details><summary>Preciso ter experiência?</summary><p>Você pode acompanhar o preparo em vídeo e escolher as receitas que combinam com os ingredientes que tem.</p></details>
       <details><summary>Posso usar no celular?</summary><p>Sim. Acesse o aplicativo pelo navegador do seu celular e salve suas receitas favoritas na sua conta.</p></details>
