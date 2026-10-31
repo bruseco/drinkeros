@@ -209,6 +209,7 @@ export type Database = {
         Row: {
           activation_claimed_at: string | null
           amount: number
+          billing_months: number
           created_at: string
           email: string
           id: string
@@ -221,6 +222,7 @@ export type Database = {
         Insert: {
           activation_claimed_at?: string | null
           amount: number
+          billing_months?: number
           created_at?: string
           email: string
           id?: string
@@ -233,6 +235,7 @@ export type Database = {
         Update: {
           activation_claimed_at?: string | null
           amount?: number
+          billing_months?: number
           created_at?: string
           email?: string
           id?: string
@@ -4260,6 +4263,13 @@ export type Database = {
           id: string
         }[]
       }
+      claim_club_monthly_checkout: {
+        Args: { _email: string; _hash: string }
+        Returns: {
+          claimed: boolean
+          id: string
+        }[]
+      }
       claim_whatsapp_queue_items: {
         Args: { batch_size?: number }
         Returns: {
@@ -4537,6 +4547,10 @@ export type Database = {
           token: string
         }[]
       }
+      grant_club_monthly_period: {
+        Args: { _end: string; _start: string; _user_id: string }
+        Returns: undefined
+      }
       grant_combo_access: {
         Args: {
           _amount: number
@@ -4684,6 +4698,16 @@ export type Database = {
           count: number
           path: string
           question: string
+        }[]
+      }
+      quiz_admin_experiment: {
+        Args: { _since?: string; _until?: string }
+        Returns: {
+          count: number
+          event: string
+          path: string
+          product: string
+          variant: string
         }[]
       }
       quiz_admin_leads: {
