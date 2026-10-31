@@ -28,8 +28,8 @@ export default function ClubeVariantBHero({ price, loading, onSubscribe, pocketR
       ['Frozens', '#36d9e3'], ['Clássicos e variações', '#ffd68a'], ['Shots', '#ff963c'], ['Drinks de litro', '#f04b91'],
     ].map(([label, color]) => <span key={label} style={{ color }}>{label}</span>)}</p>
     <div className="club-b-hero-offer">
-      <p className="club-b-hero-price"><strong>R$ {price}</strong></p>
-      <p className="club-b-hero-access">12 meses de acesso ao aplicativo.</p>
+      <p className="club-b-hero-price"><strong>R$ {price}</strong> / mês</p>
+      <p className="club-b-hero-access">Assinatura mensal no cartão. Cancele quando quiser.</p>
     </div>
     <button type="button" className="club-b-hero-cta" disabled={loading} onClick={onSubscribe}>
       <span>{loading ? 'Abrindo checkout…' : 'Quero entrar p/ o Clube'}</span>

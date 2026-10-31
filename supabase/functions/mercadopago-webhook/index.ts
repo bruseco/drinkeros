@@ -1,3 +1,4 @@
+import { paidMonthlyPeriod } from "../_shared/clubMonthly.ts";
 // Webhook do Mercado Pago: recebe notificações de pagamento, busca detalhes via API,
 // registra evento e libera acesso ao produto (curso/ebook/combo/pacote) quando approved.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
@@ -355,9 +356,17 @@ serve(async (req) => {
       const guestId = externalRef?.startsWith("club-guest:") ? externalRef.split(":")[1] : null;
       let guest: any = null;
       if (guestId) {
-        const result = await supabase.from("club_guest_checkouts").select("id,email,amount").eq("id",guestId).maybeSingle();
+        const result = await supabase.from("club_guest_checkouts").select("id,email,amount,billing_months").eq("id",guestId).maybeSingle();
         if(result.error || !result.data || Number(result.data.amount)!==Number(ap?.transaction_amount || pre?.auto_recurring?.transaction_amount)) throw new Error("Invalid guest subscription");
         guest=result.data;
+      }
+      const monthlyB = guest?.billing_months === 1;
+      let monthlyPeriod: ReturnType<typeof paidMonthlyPeriod> | null = null;
+      if (monthlyB) {
+        if (pre?.auto_recurring?.frequency !== 1 || pre?.auto_recurring?.frequency_type !== 'months' || Number(pre?.auto_recurring?.transaction_amount) !== 7 || !ap?.payment?.id) throw Error('Invalid monthly subscription');
+        const paidResponse = await fetch(`${MP_API}/v1/payments/${encodeURIComponent(ap.payment.id)}`, {headers:{Authorization:`Bearer ${mpToken}`}});
+        if (!paidResponse.ok) throw Error('Cannot verify monthly payment');
+        monthlyPeriod = paidMonthlyPeriod(await paidResponse.json());
       }
       const payerEmail = guest?.email || pre?.payer_email;
       const payerName = pre?.payer_first_name || null;
@@ -381,7 +390,7 @@ serve(async (req) => {
 
       const isAnnual = pre?.auto_recurring?.frequency === 12;
       const now = new Date();
-      const periodEnd = new Date(now.getTime() + (isAnnual ? 365 : 31) * 24 * 60 * 60 * 1000);
+      const periodEnd = monthlyPeriod?.end || new Date(now.getTime() + (isAnnual ? 365 : 31) * 24 * 60 * 60 * 1000);
 
       const { data: existing } = await supabase
         .from("vip_payments").select("id")
@@ -397,7 +406,7 @@ serve(async (req) => {
           status: "paid",
           payment_method: "card",
           paid_at: now.toISOString(),
-          period_start: now.toISOString(),
+          period_start: (monthlyPeriod?.start || now).toISOString(),
           period_end: periodEnd.toISOString(),
           metadata: {
             source: "mercadopago",
@@ -408,6 +417,10 @@ serve(async (req) => {
         vipPaymentId = createdVip?.id ?? null;
       }
 
+      if (monthlyPeriod) {
+        const grant = await supabase.rpc('grant_club_monthly_period', {_user_id:userId,_start:monthlyPeriod.start.toISOString(),_end:monthlyPeriod.end.toISOString()});
+        if (grant.error) throw grant.error;
+      } else {
       await supabase.from("user_plans").upsert({
         user_id: userId,
         plan: "vip",
@@ -415,6 +428,8 @@ serve(async (req) => {
         activated_at: now.toISOString(),
         expires_at: periodEnd.toISOString(),
       }, { onConflict: "user_id" });
+
+      }
 
       await recordPurchase(supabase, {
         userId,
@@ -485,8 +500,9 @@ serve(async (req) => {
 
     if(externalRef?.startsWith("club-guest:")) {
       const guestId=externalRef.split(":")[1];
-      const result=await supabase.from("club_guest_checkouts").select("id,email,amount,method").eq("id",guestId).maybeSingle();
+      const result=await supabase.from("club_guest_checkouts").select("id,email,amount,method,billing_months").eq("id",guestId).maybeSingle();
       if(result.error || !result.data || Number(result.data.amount)!==Number(payment.transaction_amount))throw new Error("Invalid guest payment");
+      if(result.data.billing_months===1)throw Error("Monthly access requires an approved subscription invoice");
       payerEmail=result.data.email;
       metadata.product_type="club";metadata.product_id="club";metadata.product_slug="clube-anual";metadata.access_period_days=365;metadata.guest_checkout_id=guestId;
       // Guest references never supply an authenticated user ID.

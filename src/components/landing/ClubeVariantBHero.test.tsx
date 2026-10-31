@@ -6,17 +6,17 @@ vi.mock('./ClubePublicLanding', () => ({ AnimatedClubCount: ({ value }: { value:
 afterEach(cleanup);
 
 describe('exclusive B hero', () => {
-  it('shows the annual promise, offer and benefits, and uses the supplied purchase callback', () => {
+  it('shows the monthly promise, offer and benefits, and uses the supplied purchase callback', () => {
     const buy = vi.fn();
-    render(<ClubeVariantBHero price={87} loading={false} onSubscribe={buy} />);
+    render(<ClubeVariantBHero price={7} loading={false} onSubscribe={buy} />);
     expect(screen.getByRole('heading', { level: 1 }).textContent).toContain('App com mais de 1.000receitas de drinks em vídeo.');
     expect(screen.queryByText('R$ 97')).toBeNull();
     expect(screen.queryByText('Desconto de lançamento')).toBeNull();
-    expect(screen.getByText('R$ 87')).toBeTruthy();
+    expect(screen.getByText('R$ 7')).toBeTruthy();
     expect(screen.getByText('Caipirinhas')).toBeTruthy();
     expect(screen.getAllByRole('listitem')).toHaveLength(4);
     expect(screen.queryByText('/ ano')).toBeNull();
-    const access = screen.getByText('12 meses de acesso ao aplicativo.');
+    const access = screen.getByText('Assinatura mensal no cartão. Cancele quando quiser.');
     expect(access.previousElementSibling?.className).toBe('club-b-hero-price');
     expect(screen.queryByText('Pesquise os drinks por ingredientes.')).toBeNull();
     expect(screen.getByRole('link', { name: 'Organizador de festas' }).getAttribute('href')).toBe('#clube-organizador');

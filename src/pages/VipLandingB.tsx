@@ -30,7 +30,6 @@ import ClubeIntroStickyBar from '@/components/user/ClubeIntroStickyBar';
 import ClubePublicLanding from '@/components/landing/ClubePublicLanding';
 import ClubeVariantBLanding from '@/components/landing/ClubeVariantBLanding';
 import { preserveClubBAdParams } from '@/components/landing/ClubeVariantBHero';
-import { fetchPublicClubOffer } from '@/lib/publicClubOffer';
 import { usePublicClubeOffer } from '@/hooks/usePublicClubeOffer';
 import { usePublicClubBackendReady } from '@/hooks/usePublicClubBackendReady';
 import { useClubFunnelMilestones } from '@/hooks/useClubFunnelMilestones';
@@ -404,7 +403,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
     content_name: 'Clube dos Drinkeros',
     content_category: 'clube',
     content_type: 'product',
-    value: promo.price,
+    value: publicPage && staticVariant ? 7 : promo.price,
     currency: 'BRL',
   });
 
@@ -440,22 +439,15 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
       chosenOffer ?? ((promo.isLoading || promo.isActive) ? 'intro' : 'full');
     setLoading(true);
     try {
-      if (publicPage && staticVariant) {
-        if (!publicBackendReady) throw new Error('Aguarde a confirmação da oferta antes de continuar.');
-        // B has no gift dialog: activate the existing server offer before opening checkout.
-        const confirmed = await fetchPublicClubOffer(true);
-        if (Number(confirmed.price) !== effectivePromoPrice || offer !== 'intro') {
-          throw new Error('Não foi possível confirmar o valor anunciado. Recarregue a página para consultar a oferta atual.');
-        }
-      }
-      const amount = offer === 'intro' ? effectivePromoPrice : 197;
+      const monthly = publicPage && staticVariant;
+      const amount = monthly ? 7 : offer === 'intro' ? effectivePromoPrice : 197;
 
       trackInitiateCheckout({
         amount,
         currency: 'BRL',
-        product_name: 'Clube dos Drinkeros · Anual',
+        product_name: monthly ? 'Clube dos Drinkeros · Mensal' : 'Clube dos Drinkeros · Anual',
         product_type: 'subscription',
-        dedupe_key: 'clube-anual',
+        dedupe_key: monthly ? 'clube-mensal-b' : 'clube-anual',
       });
       rememberClubCheckoutVariant(publicPage ? (staticVariant ? 'b' : _ab.readVariant('clube-receitas')) : null);
       trackAbConversion(publicPage ? 'clube-receitas' : 'clube');
@@ -465,14 +457,14 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
         {
           amountCents: amount * 100,
           userId: user?.id ?? null,
-          metadata: { offer, provider: 'mercadopago' },
+          metadata: { offer:monthly?'monthly-b':offer, provider: 'mercadopago', ...(monthly?{billing_months:1}:{}) },
         },
       );
       await waitForPixelFlush();
 
       // Mercado Pago checkout transparente (cartão recorrente + PIX) na página /checkout
       navigate(publicPage && staticVariant
-        ? preserveClubBAdParams(publicBackendReady ? '/checkout/club/clube-anual?oferta=publica' : '/checkout/club/clube-anual', location.search)
+        ? preserveClubBAdParams('/checkout/club/clube-mensal-b', location.search)
         : publicPage&&publicBackendReady ? '/checkout/club/clube-anual?oferta=publica' : '/checkout/club/clube-anual');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Tente novamente em alguns instantes.';
@@ -492,16 +484,16 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
 
   const PublicLanding = staticVariant ? ClubeVariantBLanding : ClubePublicLanding;
   if (publicPage) return <PublicLanding
-    heroPrice={promo.isActive || promo.isLoading ? effectivePromoPrice : promo.fullPrice}
+    heroPrice={staticVariant ? 7 : promo.isActive || promo.isLoading ? effectivePromoPrice : promo.fullPrice}
     staticVariant={staticVariant}
     scrollRef={landingScrollRef}
     registerPriceCard={registerPriceCard}
-    price={<PriceAmount value={staticVariant ? (promo.isActive || promo.isLoading ? effectivePromoPrice : promo.fullPrice) : displayPrice} />}
+    price={<PriceAmount value={staticVariant ? 7 : displayPrice} />}
     fullPrice={promo.fullPrice}
     unlocked={staticVariant || unlocked}
     savings={effectiveSavings}
     offerDeadline={publicBackendReady ? promo.eligibleUntilMs : 0}
-    loading={loading || promo.isLoading || !publicAbReady || (staticVariant && !publicBackendReady)}
+    loading={loading || !publicAbReady || (!staticVariant && promo.isLoading)}
     onSubscribe={() => handleSubscribe('card')}
     reveal={staticVariant ? null : <ClubeDiscountReveal open={revealOpen} onClose={handleRevealClose} newVisitor savings={effectiveSavings} />}
   />;

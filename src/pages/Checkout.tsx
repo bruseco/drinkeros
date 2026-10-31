@@ -38,7 +38,7 @@ const CLUB_PRODUCTS: Record<string, Product> = {
     slug: "clube-anual",
     price: 97,
     cover_image_url: null,
-    description: "Acesso por 12 meses às receitas exclusivas e benefícios do Clube.",
+    description: "Receitas em vídeo, xaropes e organizador de festas — tudo liberado por 12 meses.",
   },
   clube: {
     id: "club",
@@ -73,6 +73,7 @@ export default function Checkout() {
   const [guest,setGuest]=useState<boolean|null>(null);
   useEffect(()=>{let live=true;supabase.auth.getSession().then(({data:{session}})=>{if(live)setGuest(!session)}).catch(()=>{if(live)setGuest(true)});return()=>{live=false}},[]);
   if(quizRequested)return <QuizCheckout/>;
+  if(productType==='club'&&slug==='clube-mensal-b')return <GuestClubCheckout monthly/>;
   if(productType==='club'&&slug==='clube-anual'){
     if(guest===null)return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin"/></div>;
     if(guest)return <GuestClubCheckout/>;

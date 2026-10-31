@@ -8,7 +8,7 @@ function setup({row=baseRow as any,purchase=null as any,user=null as any,claimed
  const admin={from:vi.fn((table:string)=>{
   let operation='select',changes:any=null;
   const q:any={select:()=>q,eq:()=>q,is:()=>q,gte:()=>q,order:()=>q,limit:()=>q,update:(value:any)=>{operation='update';changes=value;return q},maybeSingle:async()=>({data:table==='club_guest_checkouts'?current:table==='clube_public_offers'?offer:purchase,error:null}),then:(resolve:any)=>{if(operation==='update'){updates.push(changes);current={...current,...changes};return Promise.resolve(resolve({data:[{id:current.id}],error:null}))}return Promise.resolve(resolve({data:[],error:null}))}};return q;
- }),rpc:vi.fn(async()=>{if(!current)current={...baseRow};return{data:[{claimed}],error:null}}),auth:{admin:{getUserById:vi.fn(async()=>({data:{user},error:null})),updateUserById:vi.fn(async()=>{activations++;return{error:null}})}}};
+ }),rpc:vi.fn(async(name,args)=>{if(!current)current={...baseRow,amount:name==='claim_club_monthly_checkout'?7:args?._amount||97,billing_months:name==='claim_club_monthly_checkout'?1:12};return{data:[{claimed}],error:null}}),auth:{admin:{getUserById:vi.fn(async()=>({data:{user},error:null})),updateUserById:vi.fn(async()=>{activations++;return{error:null}})}}};
  const gateway=vi.fn(async(input:any,init:any)=>{const url=String(input);if(url.includes('/preapproval/search'))return new Response(JSON.stringify({results:[]}),{status:200});if(url.includes('/authorized_payments/search'))return new Response(JSON.stringify({results:invoices}),{status:200});if(url.includes('/mercadopago-webhook'))return new Response('{}',{status:200});if(init?.method==='POST')return new Response(JSON.stringify({id:'pre-1',status:'authorized'}),{status:200});return new Response('{}',{status:200})});
  vi.stubGlobal('fetch',gateway);vi.stubGlobal('AbortSignal',{timeout:()=>undefined});
  const request=async(body:any)=>{const response=await handleGuestCheckout(new Request('https://test/checkout',{method:'POST',body:JSON.stringify({checkout_token:token,...body})}),{admin,mpToken:'fake',supabaseUrl:'https://local',serviceKey:'internal'});return{status:response.status,body:await response.json()}};
@@ -62,4 +62,28 @@ it.each(['card','pix'])('uses the server R$87 quote for new %s payments',async(m
  await s.request({action:'create',method,public_offer_token:'b'.repeat(64),expected_amount:87,formData:{token:'card',payer:{email:'buyer@example.com'}}});
  const call=s.gateway.mock.calls.find(([url,init])=>init?.method==='POST'&&!String(url).includes('/mercadopago-webhook'));
  expect(call).toBeDefined();const payload=JSON.parse(call![1].body as string);expect(method==='card'?payload.auto_recurring.transaction_amount:payload.transaction_amount).toBe(87);
+});
+
+it('prices the monthly B subscription on the server and refuses Pix or tampered prices',async()=>{
+ const s=setup({row:null});
+ expect((await s.request({action:'quote',billing_plan:'monthly-b'})).body.price).toBe(7);
+ expect((await s.request({action:'create',billing_plan:'monthly-b',method:'pix',expected_amount:7,formData:{payer:{email:'buyer@example.com'}}})).status).toBe(400);
+ expect((await s.request({action:'create',billing_plan:'monthly-b',method:'card',expected_amount:1,formData:{token:'fake',payer:{email:'buyer@example.com'}}})).status).toBe(409);
+ expect(s.gateway).not.toHaveBeenCalled();
+});
+it('creates exactly one R$7 monthly card subscription and never grants access from authorization alone',async()=>{
+ const s=setup({row:null});
+ const input={action:'create',billing_plan:'monthly-b',method:'card',expected_amount:7,frequency:12,amount:1,formData:{token:'fake',payer:{email:'buyer@example.com'}}};
+ expect((await s.request(input)).body.status).toBe('pending');
+ const create=s.gateway.mock.calls.filter(([url,init])=>String(url).endsWith('/preapproval')&&init?.method==='POST');
+ expect(create).toHaveLength(1);
+ const payload=JSON.parse(String(create[0][1].body));
+ expect(payload.auto_recurring).toEqual({frequency:1,frequency_type:'months',transaction_amount:7,currency_id:'BRL'});
+ expect(payload.external_reference).toContain(':clube');
+ await s.request(input);
+ expect(s.gateway.mock.calls.filter(([url,init])=>String(url).endsWith('/preapproval')&&init?.method==='POST')).toHaveLength(1);
+ expect(s.activations).toBe(0);
+});
+it('does not reuse annual checkout tokens for monthly subscriptions',async()=>{
+ const s=setup();expect((await s.request({action:'status',billing_plan:'monthly-b'})).status).toBe(409);expect(s.gateway).not.toHaveBeenCalled();
 });

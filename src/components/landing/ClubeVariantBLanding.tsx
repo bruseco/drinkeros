@@ -6,9 +6,9 @@ import drinkerosLogo from '@/assets/logotipo-drinkeros.png';
 import { Link } from 'react-router-dom';
 import payVisa from '@/assets/pagamento-visa.png';
 import payMaster from '@/assets/pagamento-mastercard.png';
-import payApple from '@/assets/pagamento-apple.png';
-import payGoogle from '@/assets/pagamento-google.png';
-import payPix from '@/assets/pagamento-pix.png';
+
+
+
 import TestimonialsCarousel from './TestimonialsCarousel';
 import ClubRecipeLoop from './ClubRecipeLoop';
 import ClubFavoriteDemo from './ClubFavoriteDemo';
@@ -334,15 +334,15 @@ export default function ClubeVariantBLanding(props: Props) {
       <h2>Entre para o Clube!</h2>
       <div className="club-offer">
         <ul className="club-benefits" ref={benefits} data-motion-active={benefitsMotion}>{[{text:'Acesso a mais de 1.000 receitas em vídeo',value:47},{text:'Mais de 40 receitas de xaropes artesanais',value:53},{text:'Organizador de festas: crie listas de favoritos e gere listas de compras',value:97}].map(benefit => <li key={benefit.text}><Check aria-hidden="true" /><span>{benefit.text.startsWith('Organizador de festas:')?<><b className="club-benefit-highlight">Organizador de festas</b>{benefit.text.slice('Organizador de festas'.length)}</>:benefit.text}</span><strong>R$ {benefit.value}</strong></li>)}</ul>
-        <p className="club-access-label">* Você tem um ano de acesso para usar todos esses benefícios.</p>
-        <p className="club-comparison"><X aria-hidden="true" /><span>Quanto você pagaria</span><del>R$ {props.fullPrice}</del></p>
+        <p className="club-access-label">Acesso a todos esses benefícios enquanto sua assinatura estiver ativa.</p>
+
         {!props.unlocked && <p className="club-total-label">Total</p>}
-        <div className="club-price" ref={props.registerPriceCard}><span>R$</span> {props.price}</div>
+        <div className="club-price" ref={props.registerPriceCard}><span>R$</span> {props.price}<span> / mês</span></div>
         <button ref={purchase} type="button" data-motion-active={purchaseVisible} className="club-purchase" disabled={props.loading} onClick={props.onSubscribe}><span className="club-purchase-copy">{props.loading ? 'Abrindo checkout…' : 'Quero entrar p/ o Clube'}</span><ClubButtonIcons /></button>
         <div className="club-payment-brands" aria-label="Meios de pagamento">
-          {[[payVisa, 'Visa'], [payMaster, 'Mastercard'], [payApple, 'Apple Pay'], [payGoogle, 'Google Pay'], [payPix, 'Pix']].map(([src, alt]) => <span key={alt}><img src={src} alt={alt} width="42" height="20" /></span>)}
+          {[[payVisa, 'Visa'], [payMaster, 'Mastercard']].map(([src, alt]) => <span key={alt}><img src={src} alt={alt} width="42" height="20" /></span>)}
         </div>
-        <p className="club-payment-note">Pagamento por cartão ou Pix. No cartão, renovação automática pelo valor contratado enquanto a assinatura permanecer ativa. No Pix, acesso por 12 meses. Após cancelamento, uma nova contratação segue a oferta vigente.</p>
+        <p className="club-payment-note">R$ 7 por mês no cartão de crédito, com renovação automática. Cancele quando quiser; o acesso segue até o fim do período pago.</p>
       </div>
     </section>
     <section className="club-public-testimonials"><h2>Olhe o que o pessoal acha da gente. <span aria-hidden="true">👀</span></h2><TestimonialsCarousel hideHeading staticLayout={props.staticVariant} /></section>
