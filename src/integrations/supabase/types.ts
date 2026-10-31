@@ -4686,6 +4686,16 @@ export type Database = {
           question: string
         }[]
       }
+      quiz_admin_experiment: {
+        Args: { _since?: string; _until?: string }
+        Returns: {
+          count: number
+          event: string
+          path: string
+          product: string
+          variant: string
+        }[]
+      }
       quiz_admin_leads: {
         Args: {
           _offset?: number
