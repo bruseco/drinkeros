@@ -11,6 +11,7 @@ import {
   logPurchaseResolutionFailure,
 } from "../_shared/resolveBuyerUser.ts";
 import { sendPurchaseEmails } from "../_shared/sendPurchaseEmails.ts";
+import { resolveStripeEventScope } from "../_shared/stripeEventScope.ts";
 
 const log = (step: string, details?: unknown) => {
   console.log(`[stripe-webhook] ${step}${details ? " — " + JSON.stringify(details) : ""}`);
@@ -40,6 +41,24 @@ serve(async (req) => {
   } catch (err) {
     log("invalid-signature", { error: (err as Error).message });
     return new Response(`Webhook Error: ${(err as Error).message}`, { status: 400 });
+  }
+
+  // Signature verification comes first. Ownership and product validation come
+  // before even creating the database client (including access/CAPI side effects).
+  let scope;
+  try {
+    scope = await resolveStripeEventScope(event, (id) => stripe.subscriptions.retrieve(id));
+  } catch (err) {
+    log("ownership-check-error", { eventId: event.id, error: (err as Error).message });
+    return new Response("Ownership check unavailable", { status: 500 });
+  }
+  if (!scope.allowed) {
+    log(scope.reason === "foreign_app" ? "ignored_foreign_event" : "ignored_unknown_product", {
+      eventId: event.id, type: event.type, objectId: event.data.object.id, reason: scope.reason,
+    });
+    return new Response(JSON.stringify({ received: true, ignored: true, reason: scope.reason }), {
+      status: 200, headers: { "Content-Type": "application/json" },
+    });
   }
 
   const supabase = createClient(
@@ -117,7 +136,7 @@ serve(async (req) => {
         currency: (p.currency || "BRL").toUpperCase(),
         status: p.status,
         transaction_id: p.transactionId,
-        metadata: p.metadata || {},
+        metadata: { ...p.metadata, app: "drinkeros" },
         buyer_email: p.buyerEmail ?? null,
         buyer_name: p.buyerName ?? null,
         user_was_created: !!p.userWasCreated,
@@ -228,11 +247,16 @@ serve(async (req) => {
     log("event", { type: event.type, id: event.id });
 
     switch (event.type) {
-      case "checkout.session.completed": {
+      case "checkout.session.completed":
+      case "checkout.session.async_payment_succeeded": {
         const session = event.data.object as Stripe.Checkout.Session;
         const customerId = (session.customer as string) || null;
         const subscriptionId = (session.subscription as string) || null;
         const meta = (session.metadata || {}) as Record<string, string>;
+        if (session.payment_status !== "paid") {
+          log("checkout-not-paid", { sessionId: session.id, payment_status: session.payment_status });
+          break;
+        }
 
         // Caso: compra de curso ou ebook (mode=payment, metadata.product_type)
         if (session.mode === "payment" && (meta.product_type === "course" || meta.product_type === "ebook")) {
@@ -376,7 +400,8 @@ serve(async (req) => {
           break;
         }
 
-        // Caso original: assinatura VIP recorrente (ex.: plan_kind=club_card_subscription)
+        // No fallback: only an explicitly owned, recognized subscription reaches here.
+        if (scope.kind !== "club_subscription") break;
         // Gate de validação: só processa pagamento válido.
         if (
           session.mode === "subscription" &&
@@ -479,7 +504,7 @@ serve(async (req) => {
               plan_kind: meta.plan_kind || null,
               customer_email:
                 session.customer_details?.email ?? session.customer_email ?? null,
-              recorded_from: "checkout.session.completed",
+              recorded_from: event.type,
             },
           };
 
@@ -548,7 +573,7 @@ serve(async (req) => {
       case "invoice.paid": {
         const invoice = event.data.object as Stripe.Invoice;
         const customerId = invoice.customer as string;
-        const subscriptionId = (invoice.subscription as string) || null;
+        const subscriptionId = scope.subscriptionId;
 
         const userId = await resolveUserId({
           customerId,
@@ -620,7 +645,7 @@ serve(async (req) => {
           status: "failed",
           payment_method: "card",
           stripe_customer_id: customerId,
-          stripe_subscription_id: (invoice.subscription as string) || null,
+          stripe_subscription_id: scope.subscriptionId,
           stripe_invoice_id: invoice.id,
           metadata: { event_id: event.id, reason: "payment_failed" },
         });

@@ -53,9 +53,9 @@ serve(async (req) => {
       success_url: `${origin}/vip?vip=success`,
       cancel_url: `${origin}/vip?vip=cancel`,
       subscription_data: {
-        metadata: { user_id: user.id },
+        metadata: { app: "drinkeros", plan_kind: "club_card_subscription", user_id: user.id },
       },
-      metadata: { user_id: user.id },
+      metadata: { app: "drinkeros", plan_kind: "club_card_subscription", user_id: user.id },
     });
 
     return new Response(JSON.stringify({ url: session.url }), {

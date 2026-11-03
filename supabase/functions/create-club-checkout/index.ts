@@ -130,6 +130,7 @@ serve(async (req) => {
       success_url: `${origin}/pv-clube-b?clube=success`,
       cancel_url: `${origin}/pv-clube-b?clube=cancel`,
       metadata: {
+        app: "drinkeros",
         user_id: user.id,
         plan_kind: isCard ? "club_card_subscription" : "club_pix_annual",
         offer,
@@ -143,6 +144,7 @@ serve(async (req) => {
     if (isCard) {
       sessionParams.subscription_data = {
         metadata: {
+          app: "drinkeros",
           user_id: user.id,
           plan_kind: "club_card_subscription",
           offer,
@@ -151,6 +153,7 @@ serve(async (req) => {
     } else {
       sessionParams.payment_intent_data = {
         metadata: {
+          app: "drinkeros",
           user_id: user.id,
           plan_kind: "club_pix_annual",
           offer,

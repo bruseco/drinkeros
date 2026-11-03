@@ -51,11 +51,13 @@ serve(async (req) => {
       success_url: `${origin}/vip?vip=success`,
       cancel_url: `${origin}/vip?vip=cancel`,
       metadata: {
+        app: "drinkeros",
         user_id: user.id,
         plan_kind: "vip_annual_one_time",
       },
       payment_intent_data: {
         metadata: {
+          app: "drinkeros",
           user_id: user.id,
           plan_kind: "vip_annual_one_time",
         },

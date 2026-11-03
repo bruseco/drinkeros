@@ -85,7 +85,7 @@ serve(async (req) => {
           name: (product as any).name,
           description: (product as any).description ?? undefined,
           images: (product as any).cover_image_url ? [(product as any).cover_image_url] : undefined,
-          metadata: { source_product_id: (product as any).id, source_table: table },
+          metadata: { app: "drinkeros", source_product_id: (product as any).id, source_table: table },
         });
         stripeProductId = created.id;
       }
@@ -142,7 +142,7 @@ serve(async (req) => {
               name: `${(product as any).name} (Sócio do Clube -${vipPercent}%)`,
               description: (product as any).description ?? undefined,
               images: (product as any).cover_image_url ? [(product as any).cover_image_url] : undefined,
-              metadata: { source_product_id: (product as any).id },
+              metadata: { app: "drinkeros", source_product_id: (product as any).id },
             },
           },
         }
@@ -163,12 +163,14 @@ serve(async (req) => {
           installments: { enabled: true },
         },
       },
-      success_url: `${origin}/${product.slug}?checkout=success`,
-      cancel_url: `${origin}/${product.slug}?checkout=cancel`,
+      success_url: `${origin}/${(product as any).slug}?checkout=success`,
+      cancel_url: `${origin}/${(product as any).slug}?checkout=cancel`,
+      payment_intent_data: { metadata: { app: "drinkeros", product_type, product_id: (product as any).id } },
       metadata: {
+        app: "drinkeros",
         product_type,
-        product_id: product.id,
-        product_slug: product.slug,
+        product_id: (product as any).id,
+        product_slug: (product as any).slug,
         user_id: userId || "",
         vip_discount_applied: applyDiscount ? "true" : "false",
         vip_discount_percent: applyDiscount ? String(vipPercent) : "0",
