@@ -391,9 +391,12 @@ serve(async (req) => {
       const isAnnual = pre?.auto_recurring?.frequency === 12;
       const now = new Date();
       const periodEnd = monthlyPeriod?.end || new Date(now.getTime() + (isAnnual ? 365 : 31) * 24 * 60 * 60 * 1000);
+      // Same existing purchase/idempotency key, shared with the admin report.
+      // A subscription ID cannot identify a charge: each renewal is a new sale.
+      const purchaseTransactionId = guest && ap?.payment?.id ? String(ap.payment.id) : String(resourceId);
 
       const { data: existing } = await supabase
-        .from("vip_payments").select("id")
+        .from("vip_payments").select("id,metadata")
         .eq("metadata->>mp_authorized_payment_id", String(resourceId))
         .maybeSingle();
 
@@ -412,9 +415,15 @@ serve(async (req) => {
             source: "mercadopago",
             mp_authorized_payment_id: String(resourceId),
             mp_preapproval_id: String(preapprovalId),
+            purchase_transaction_id: purchaseTransactionId,
           },
         }).select("id").maybeSingle();
         vipPaymentId = createdVip?.id ?? null;
+      } else if (existing && existing.metadata?.purchase_transaction_id !== purchaseTransactionId) {
+        const { error: referenceError } = await supabase.from("vip_payments").update({
+          metadata: { ...existing.metadata, purchase_transaction_id: purchaseTransactionId },
+        }).eq("id", vipPaymentId);
+        if (referenceError) throw referenceError;
       }
 
       if (monthlyPeriod) {
@@ -439,7 +448,7 @@ serve(async (req) => {
         amountPaid: Number(ap?.transaction_amount || pre?.auto_recurring?.transaction_amount || 0),
         currency: "BRL",
         status: "approved",
-        transactionId: guest && ap?.payment?.id ? String(ap.payment.id) : String(resourceId),
+        transactionId: purchaseTransactionId,
         niboOrderId: vipPaymentId ? `vip:${vipPaymentId}` : null,
         metadata: { mp_preapproval_id: String(preapprovalId), ...(guest ? {guest_checkout_id:guest.id}: {}) },
         buyerEmail: payerEmail,
