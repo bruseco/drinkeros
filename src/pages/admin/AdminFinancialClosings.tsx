@@ -34,6 +34,8 @@ type ClosingDatabase = { public: Omit<Database['public'], 'Tables' | 'Functions'
   } };
   Functions: Database['public']['Functions'] & { mark_rand_closing_paid: {
     Args: { p_month: string; p_draft_id: string }; Returns: Closing;
+  }; record_rand_closing_settled: {
+    Args: { p_month: string; p_draft_id: string; p_rand_cents: number }; Returns: Closing;
   }; view_rand_closings: { Args: Record<string, never>; Returns: Closing[] } };
 } };
 const db = supabase as unknown as SupabaseClient<ClosingDatabase>;
@@ -60,6 +62,7 @@ export default function AdminFinancialClosings({ readOnly = false }: { readOnly?
   const { isSuperAdmin, user } = useAuth();
   const [month, setMonth] = useState(suggestedMonth);
   const [confirm, setConfirm] = useState<Closing | null>(null);
+  const [existingSettlement, setExistingSettlement] = useState(false);
   const client = useQueryClient();
   const query = useQuery({
     queryKey: ['rand-closings', readOnly ? user?.id : 'admin'], enabled: readOnly ? !!user : isSuperAdmin,
@@ -121,7 +124,9 @@ export default function AdminFinancialClosings({ readOnly = false }: { readOnly?
   const markPaid = useMutation({
     mutationFn: async (closing: Closing) => {
       if (readOnly) throw new Error('Acesso somente para visualização.');
-      const { error } = await db.rpc('mark_rand_closing_paid', { p_month: closing.month, p_draft_id: closing.draft_id });
+      const { error } = existingSettlement
+        ? await db.rpc('record_rand_closing_settled', { p_month: closing.month, p_draft_id: closing.draft_id, p_rand_cents: closing.report.rand_cents })
+        : await db.rpc('mark_rand_closing_paid', { p_month: closing.month, p_draft_id: closing.draft_id });
       if (error) throw error;
     },
     onSuccess: () => { setConfirm(null); client.invalidateQueries({ queryKey: ['rand-closings'] }); toast.success('Fechamento marcado como acertado.'); },
@@ -182,9 +187,9 @@ export default function AdminFinancialClosings({ readOnly = false }: { readOnly?
           Acertado em {dateLabel(closing.paid_at!)}. Este demonstrativo está preservado; alterações posteriores entram no próximo fechamento.</p>
           : readOnly ? <p className="mt-4 text-sm text-muted-foreground">Fechamento pendente. A atualização e o registro dos repasses são feitos pela administração.</p> : <div className="mt-5 space-y-3">
             {!eligible && <p className="text-sm text-muted-foreground">Disponível para acerto a partir de {availableOn(month).split('-').reverse().join('/')}.</p>}
-            {stale && <p className="text-sm text-muted-foreground">Atualize os dados antes de marcar como acertado.</p>}
+            {stale && <p className="text-sm text-muted-foreground">Para um novo repasse, atualize o demonstrativo. Se estes valores já foram acertados, registre o acerto preservando o demonstrativo salvo.</p>}
             {report.net_cents < 0 && <Alert><AlertDescription>Os ajustes superaram as vendas. Mantenha este mês pendente para compensar o saldo no próximo fechamento.</AlertDescription></Alert>}
-            <Button disabled={!eligible || stale || refresh.isPending || refresh.isError || markPaid.isPending || report.net_cents < 0} onClick={() => setConfirm(closing)}>
+            <Button disabled={!eligible || refresh.isPending || refresh.isError || markPaid.isPending || report.net_cents < 0} onClick={() => { setExistingSettlement(stale); setConfirm(closing); }}>
               {markPaid.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Marcar como acertado</Button>
             <p className="text-xs text-muted-foreground">Esse botão registra que os repasses foram feitos. Ele não transfere dinheiro.</p>
           </div>}
@@ -214,9 +219,10 @@ export default function AdminFinancialClosings({ readOnly = false }: { readOnly?
       {!query.data?.length && <p className="py-4 text-sm text-muted-foreground">Nenhum fechamento registrado.</p>}
     </CardContent></Card>
     <AlertDialog open={!!confirm} onOpenChange={open => { if (!open && !markPaid.isPending) setConfirm(null); }}>
-      <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Confirmar os repasses de {confirm && monthLabel(confirm.month)}?</AlertDialogTitle>
+      <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{existingSettlement ? 'Registrar acerto já realizado' : 'Confirmar os repasses'} de {confirm && monthLabel(confirm.month)}?</AlertDialogTitle>
         <AlertDialogDescription>Confirme apenas se os valores já foram acertados: RAND {confirm && brl(confirm.report.rand_cents)} e Drinkeros {confirm && brl(confirm.report.drinkeros_cents)}.
-          O demonstrativo será preservado e estornos posteriores serão ajustados no próximo fechamento.</AlertDialogDescription></AlertDialogHeader>
+          {existingSettlement && ' Este registro confirma um acerto já realizado fora do sistema, sem atualizar ou recalcular os valores salvos.'}
+          {' '}O demonstrativo será preservado e estornos posteriores serão ajustados no próximo fechamento.</AlertDialogDescription></AlertDialogHeader>
         <AlertDialogFooter><AlertDialogCancel disabled={markPaid.isPending}>Cancelar</AlertDialogCancel>
           <AlertDialogAction disabled={markPaid.isPending} onClick={e => { e.preventDefault(); if (confirm) markPaid.mutate(confirm); }}>
             {markPaid.isPending ? 'Registrando…' : 'Os repasses foram acertados'}</AlertDialogAction></AlertDialogFooter>

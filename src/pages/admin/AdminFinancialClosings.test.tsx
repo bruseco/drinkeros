@@ -82,6 +82,23 @@ describe('financial closing admin flow', () => {
     expect(screen.getByRole('button', { name: 'Atualizar demonstrativo' })).toBeDisabled();
     expect(screen.queryByRole('button', { name: 'Marcar como acertado' })).not.toBeInTheDocument();
   });
+  it('lets the administrator attest an existing settlement without refreshing the saved amount', async () => {
+    const saved = { ...fixture('2020-09'), synced_at: '2020-10-07T11:58:17Z' };
+    mocks.rows = [saved];
+    show();
+    fireEvent.change(screen.getByLabelText('Mês do pagamento do cliente'), { target: { value: '2020-09' } });
+    const button = await screen.findByRole('button', { name: 'Marcar como acertado' });
+    expect(button).toBeEnabled();
+    fireEvent.click(button);
+    expect(mocks.rpc).not.toHaveBeenCalled();
+    expect(screen.getByRole('alertdialog')).toHaveTextContent('Registrar acerto já realizado de setembro de 2020');
+    expect(screen.getByRole('alertdialog')).toHaveTextContent('sem atualizar ou recalcular os valores salvos');
+    fireEvent.click(screen.getByRole('button', { name: 'Os repasses foram acertados' }));
+    await waitFor(() => expect(mocks.rpc).toHaveBeenCalledWith('record_rand_closing_settled', {
+      p_month: saved.month, p_draft_id: saved.draft_id, p_rand_cents: 5520,
+    }));
+    expect(mocks.invoke).not.toHaveBeenCalled();
+  });
   it('blocks payment after a failed refresh instead of showing incomplete fees as zero', async () => {
     mocks.rows = [fixture('2020-09')];
     mocks.invoke.mockResolvedValue({ data: { error: 'Taxas reais indisponíveis.' }, error: null });
