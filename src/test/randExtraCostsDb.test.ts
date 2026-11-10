@@ -22,7 +22,10 @@ beforeAll(async () => {
     INSERT INTO auth.users VALUES('00000000-0000-0000-0000-000000000001');
     CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql AS $$SELECT '00000000-0000-0000-0000-000000000001'::uuid$$;
     CREATE FUNCTION has_role(uuid,text) RETURNS boolean LANGUAGE sql AS $$SELECT current_setting('test.admin',true)='yes'$$; SET test.admin='yes';`);
-  for (const file of ['20261007120000_rand_financial_closings.sql','20261110190000_rand_existing_settlement.sql','20261110193000_rand_extra_costs.sql']) {
+  for (const file of ['20261007120000_rand_financial_closings.sql','20261110190000_rand_existing_settlement.sql','20261110193000_rand_extra_costs.sql','20261110193100_restrict_rand_cost_writes.sql']) {
+    if (file === '20261110193000_rand_extra_costs.sql') {
+      await db.exec('ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO authenticated');
+    }
     await db.exec(readFileSync(`supabase/migrations/${file}`,'utf8'));
   }
 },30000);
@@ -83,6 +86,7 @@ it('rejects invalid inputs, other-month removals, non admins and direct client w
   await expect(add('',100)).rejects.toThrow('descrição');
   await expect(add('ManyChat',0)).rejects.toThrow('valor positivo');
   const saved = await add('ManyChat',1000);
+  expect((await db.query<any>(`select has_table_privilege('authenticated','rand_closing_costs','INSERT') allowed`)).rows[0].allowed).toBe(false);
   await prepare('2020-10');
   await expect(db.query('select save_rand_closing_cost($1,null,null,$2,true)', ['2020-10-01',saved.report.extra_costs[0].id])).rejects.toThrow('não encontrado');
   await db.exec(`SET ROLE authenticated; SET test.admin='no'`);

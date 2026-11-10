@@ -27,7 +27,9 @@ Os valores são manuais por mês: não existe cobrança ou repetição automáti
 
 ## Instalação e validação
 
-Aplicar `20261110193000_rand_extra_costs.sql` e publicar a interface sincronizada
+Aplicar `20261110193000_rand_extra_costs.sql` e
+`20261110193100_restrict_rand_cost_writes.sql` (revoga também permissões padrão
+do Supabase), e publicar a interface sincronizada
 no GitHub. Não exige implantação de edge function ou execução da IA do Lovable.
 Nenhuma despesa é criada na implantação, pois os valores serão informados pelo
 administrador. Setembro já acertado permanece com seu demonstrativo original.
