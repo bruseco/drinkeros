@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, Navigate } from 'react-router-dom';
-import { CheckCircle2, ChevronLeft, ChevronRight, FileText, Loader2, RefreshCw } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight, FileText, Loader2, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,6 +36,8 @@ type ClosingDatabase = { public: Omit<Database['public'], 'Tables' | 'Functions'
     Args: { p_month: string; p_draft_id: string }; Returns: Closing;
   }; record_rand_closing_settled: {
     Args: { p_month: string; p_draft_id: string; p_rand_cents: number }; Returns: Closing;
+  }; save_rand_closing_cost: {
+    Args: { p_month: string; p_description: string; p_amount_cents: number; p_cost_id?: string; p_remove?: boolean }; Returns: Closing;
   }; view_rand_closings: { Args: Record<string, never>; Returns: Closing[] } };
 } };
 const db = supabase as unknown as SupabaseClient<ClosingDatabase>;
@@ -63,6 +65,8 @@ export default function AdminFinancialClosings({ readOnly = false }: { readOnly?
   const [month, setMonth] = useState(suggestedMonth);
   const [confirm, setConfirm] = useState<Closing | null>(null);
   const [existingSettlement, setExistingSettlement] = useState(false);
+  const [costDescription, setCostDescription] = useState('');
+  const [costAmount, setCostAmount] = useState('');
   const client = useQueryClient();
   const query = useQuery({
     queryKey: ['rand-closings', readOnly ? user?.id : 'admin'], enabled: readOnly ? !!user : isSuperAdmin,
@@ -132,6 +136,23 @@ export default function AdminFinancialClosings({ readOnly = false }: { readOnly?
     onSuccess: () => { setConfirm(null); client.invalidateQueries({ queryKey: ['rand-closings'] }); toast.success('Fechamento marcado como acertado.'); },
     onError: (error: Error) => toast.error(error.message),
   });
+  const saveCost = useMutation({
+    mutationFn: async (cost: { month: string; description: string; cents: number; id?: string; remove?: boolean }) => {
+      if (readOnly || !isSuperAdmin) throw new Error('Acesso somente para visualização.');
+      const { error } = await db.rpc('save_rand_closing_cost', {
+        p_month: `${cost.month}-01`, p_description: cost.description, p_amount_cents: cost.cents,
+        ...(cost.id ? { p_cost_id: cost.id, p_remove: true } : {}),
+      });
+      if (error) throw error;
+    },
+    onSuccess: (_data, cost) => {
+      if (!cost.remove) { setCostDescription(''); setCostAmount(''); }
+      setConfirm(null);
+      client.invalidateQueries({ queryKey: ['rand-closings'] });
+      toast.success(cost.remove ? 'Custo removido do demonstrativo.' : 'Custo adicionado e saldo recalculado.');
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
   if (!readOnly && !isSuperAdmin) return <Navigate to="/admin" replace />;
   const closing = query.data?.find(c => c.month.slice(0, 7) === month);
   const report = closing?.report;
@@ -140,7 +161,8 @@ export default function AdminFinancialClosings({ readOnly = false }: { readOnly?
   const stale = !closing || Date.now() - new Date(closing.synced_at).getTime() > 10 * 60 * 1000;
   const adjustments = report?.lines.filter(l => l.adjustment) ?? [];
   const sales = report?.lines.filter(l => !l.adjustment) ?? [];
-  const selectMonth = (value: string) => { setMonth(value); setConfirm(null); setExistingSettlement(false); refresh.reset(); };
+  const selectMonth = (value: string) => { setMonth(value); setConfirm(null); setExistingSettlement(false); setCostDescription(''); setCostAmount(''); refresh.reset(); };
+  const busy = refresh.isPending || markPaid.isPending || saveCost.isPending;
   const stepMonth = (direction: number) => {
     if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return;
     const [year, number] = month.split('-').map(Number);
@@ -161,11 +183,11 @@ export default function AdminFinancialClosings({ readOnly = false }: { readOnly?
     <Card><CardContent className="flex flex-wrap items-end gap-4 pt-6">
       <div className="space-y-2"><Label htmlFor="closing-month">Mês do pagamento do cliente</Label>
         <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" size="icon" aria-label="Mês anterior" disabled={!month || refresh.isPending || markPaid.isPending} onClick={() => stepMonth(-1)}><ChevronLeft className="h-4 w-4" /></Button>
-          <Input id="closing-month" className="min-w-0" type="month" value={month} disabled={refresh.isPending || markPaid.isPending} onChange={e => selectMonth(e.target.value)} />
-          <Button type="button" variant="outline" size="icon" aria-label="Próximo mês" disabled={!month || refresh.isPending || markPaid.isPending} onClick={() => stepMonth(1)}><ChevronRight className="h-4 w-4" /></Button>
+          <Button type="button" variant="outline" size="icon" aria-label="Mês anterior" disabled={!month || busy} onClick={() => stepMonth(-1)}><ChevronLeft className="h-4 w-4" /></Button>
+          <Input id="closing-month" className="min-w-0" type="month" value={month} disabled={busy} onChange={e => selectMonth(e.target.value)} />
+          <Button type="button" variant="outline" size="icon" aria-label="Próximo mês" disabled={!month || busy} onClick={() => stepMonth(1)}><ChevronRight className="h-4 w-4" /></Button>
         </div></div>
-      {!readOnly && <Button variant="outline" disabled={!month || paid || refresh.isPending || markPaid.isPending} onClick={() => refresh.mutate(month)}>
+      {!readOnly && <Button variant="outline" disabled={!month || paid || busy} onClick={() => refresh.mutate(month)}>
         {refresh.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
         {refresh.isPending ? 'Consultando Mercado Pago…' : 'Atualizar demonstrativo'}</Button>}
       {closing && <Badge variant={paid ? 'default' : 'secondary'}>{closing.status === 'carried' ? 'Compensado' : paid ? 'Acertado' : 'Pendente'}</Badge>}
@@ -192,10 +214,37 @@ export default function AdminFinancialClosings({ readOnly = false }: { readOnly?
             ['Faturamento após estornos · base do imposto', report.tax_base_cents],
             ['Taxas reais de Pix', -report.pix_fee_cents], ['Taxas reais de cartão', -report.card_fee_cents],
             ['Imposto · 7% sobre o faturamento após estornos', -report.tax_cents],
+            ...(report.extra_costs ?? []).map(cost => [`Custo extra · ${cost.description}${cost.carried ? ` (${monthLabel(cost.month)})` : ''}`, -cost.amount_cents]),
             ['Ajustes de períodos anteriores', report.adjustments_cents], ['Saldo líquido para divisão', report.net_cents],
           ].map(([label, value]) => <div key={String(label)} className="flex justify-between gap-4 border-b pb-2">
             <dt>{label}</dt><dd className="whitespace-nowrap font-medium">{brl(Number(value))}</dd></div>)}
         </dl>
+        {!readOnly && !paid && <div className="mt-6 space-y-4 rounded-lg border p-4">
+          <h3 className="font-semibold">Custos extras</h3>
+          <p className="text-sm text-muted-foreground">Adicione as despesas deste mês. Elas são descontadas antes da divisão de 60% e 40%, sem alterar a base do imposto.</p>
+          <form className="flex flex-wrap items-end gap-3" onSubmit={event => {
+            event.preventDefault();
+            const normalized = costAmount.trim().replace(',', '.');
+            const parts = normalized.split('.');
+            const cents = /^\d+(?:\.\d{1,2})?$/.test(normalized)
+              ? Number(parts[0]) * 100 + Number((parts[1] || '').padEnd(2, '0')) : NaN;
+            if (!costDescription.trim() || !Number.isSafeInteger(cents) || cents <= 0) {
+              toast.error('Informe a descrição e um valor positivo, com até duas casas decimais.'); return;
+            }
+            saveCost.mutate({ month, description: costDescription.trim(), cents });
+          }}>
+            <div className="min-w-40 flex-1 space-y-2"><Label htmlFor="cost-description">Descrição do custo</Label>
+              <Input id="cost-description" placeholder="Ex.: ManyChat" maxLength={160} value={costDescription} disabled={busy} onChange={e => setCostDescription(e.target.value)} /></div>
+            <div className="w-40 space-y-2"><Label htmlFor="cost-amount">Valor (R$)</Label>
+              <Input id="cost-amount" inputMode="decimal" placeholder="0,00" value={costAmount} disabled={busy} onChange={e => setCostAmount(e.target.value)} /></div>
+            <Button type="submit" disabled={busy}><Plus className="mr-2 h-4 w-4" />Adicionar custo</Button>
+          </form>
+          {(report.extra_costs ?? []).filter(cost => cost.month === month).map(cost => <div key={cost.id} className="flex items-center justify-between gap-3 text-sm">
+            <span>{cost.description} · {brl(cost.amount_cents)}</span>
+            <Button type="button" variant="ghost" size="icon" aria-label={`Remover custo ${cost.description}`} disabled={busy}
+              onClick={() => saveCost.mutate({ month, description: cost.description, cents: cost.amount_cents, id: cost.id, remove: true })}><Trash2 className="h-4 w-4" /></Button>
+          </div>)}
+        </div>}
         <p className="mt-4 text-xs text-muted-foreground">{report.sales_count} vendas com saldo · {report.refund_count} vendas com estorno neste mês.
           Taxas consultadas em {dateLabel(closing.synced_at)}. Ajustes também consideram devoluções de taxas informadas pelo Mercado Pago.</p>
         {closing.status === 'carried' ? <p className="mt-4 text-sm">Saldo compensado no fechamento de {monthLabel(closing.carried_to!)}.</p> : paid ? <p className="mt-4 flex items-center gap-2 text-sm"><CheckCircle2 className="h-4 w-4" />
@@ -204,7 +253,7 @@ export default function AdminFinancialClosings({ readOnly = false }: { readOnly?
             {!eligible && <p className="text-sm text-muted-foreground">Disponível para acerto a partir de {availableOn(month).split('-').reverse().join('/')}.</p>}
             {stale && <p className="text-sm text-muted-foreground">Para um novo repasse, atualize o demonstrativo. Se estes valores já foram acertados, registre o acerto preservando o demonstrativo salvo.</p>}
             {report.net_cents < 0 && <Alert><AlertDescription>Os ajustes superaram as vendas. Mantenha este mês pendente para compensar o saldo no próximo fechamento.</AlertDescription></Alert>}
-            <Button disabled={!eligible || refresh.isPending || refresh.isError || markPaid.isPending || report.net_cents < 0} onClick={() => { setExistingSettlement(stale); setConfirm(closing); }}>
+            <Button disabled={!eligible || busy || refresh.isError || report.net_cents < 0} onClick={() => { setExistingSettlement(stale); setConfirm(closing); }}>
               {markPaid.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Marcar como acertado</Button>
             <p className="text-xs text-muted-foreground">Esse botão registra que os repasses foram feitos. Ele não transfere dinheiro.</p>
           </div>}
@@ -230,7 +279,7 @@ export default function AdminFinancialClosings({ readOnly = false }: { readOnly?
     <Card><CardHeader><CardTitle>Histórico de fechamentos</CardTitle></CardHeader><CardContent>
       <Table><TableHeader><TableRow><TableHead>Mês</TableHead><TableHead>Status</TableHead><TableHead className="text-right">RAND</TableHead><TableHead /></TableRow></TableHeader>
         <TableBody>{query.data?.map(c => <TableRow key={c.month}><TableCell>{monthLabel(c.month)}</TableCell><TableCell>{c.status === 'carried' ? 'Compensado' : c.status === 'paid' ? 'Acertado' : 'Pendente'}</TableCell>
-          <TableCell className="text-right whitespace-nowrap">{brl(c.report.rand_cents)}</TableCell><TableCell><Button variant="ghost" size="sm" onClick={() => selectMonth(c.month.slice(0, 7))}>Abrir</Button></TableCell></TableRow>)}</TableBody></Table>
+          <TableCell className="text-right whitespace-nowrap">{brl(c.report.rand_cents)}</TableCell><TableCell><Button variant="ghost" size="sm" disabled={busy} onClick={() => selectMonth(c.month.slice(0, 7))}>Abrir</Button></TableCell></TableRow>)}</TableBody></Table>
       {!query.data?.length && <p className="py-4 text-sm text-muted-foreground">Nenhum fechamento registrado.</p>}
     </CardContent></Card>
     <AlertDialog open={!!confirm} onOpenChange={open => { if (!open && !markPaid.isPending) setConfirm(null); }}>

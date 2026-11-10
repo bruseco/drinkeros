@@ -74,6 +74,31 @@ describe('financial closing admin flow', () => {
       p_month: '2020-09-01', p_draft_id: '00000000-0000-0000-0000-000000000123',
     }));
   });
+  it('adds a named monthly expense in exact cents without refreshing the gateway or marking a closing paid', async () => {
+    mocks.rows = [fixture('2020-09')];
+    show();
+    fireEvent.change(screen.getByLabelText('Mês do pagamento do cliente'), { target: { value: '2020-09' } });
+    await screen.findByRole('button', { name: 'Adicionar custo' });
+    fireEvent.change(screen.getByLabelText('Descrição do custo'), { target: { value: 'ManyChat' } });
+    fireEvent.change(screen.getByLabelText('Valor (R$)'), { target: { value: '10,50' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar custo' }));
+    await waitFor(() => expect(mocks.rpc).toHaveBeenCalledWith('save_rand_closing_cost', {
+      p_month: '2020-09-01', p_description: 'ManyChat', p_amount_cents: 1050,
+    }));
+    expect(mocks.invoke).not.toHaveBeenCalled();
+    expect(mocks.rpc.mock.calls.every(([name]) => name === 'save_rand_closing_cost')).toBe(true);
+  });
+  it('rejects an invalid expense before sending it to the server', async () => {
+    mocks.rows = [fixture('2020-09')];
+    show();
+    fireEvent.change(screen.getByLabelText('Mês do pagamento do cliente'), { target: { value: '2020-09' } });
+    await screen.findByRole('button', { name: 'Adicionar custo' });
+    fireEvent.change(screen.getByLabelText('Descrição do custo'), { target: { value: 'ManyChat' } });
+    fireEvent.change(screen.getByLabelText('Valor (R$)'), { target: { value: '-5' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar custo' }));
+    expect(mocks.rpc).not.toHaveBeenCalled();
+    expect(mocks.toastError).toHaveBeenCalled();
+  });
   it('preserves a paid statement and disables refresh', async () => {
     mocks.rows = [fixture('2020-09', 'paid')];
     show();
@@ -82,6 +107,7 @@ describe('financial closing admin flow', () => {
     expect(screen.getByRole('button', { name: 'Atualizar demonstrativo' })).toBeDisabled();
     expect(screen.queryByRole('button', { name: 'Marcar como acertado' })).not.toBeInTheDocument();
     expect(screen.getByRole('status', { name: 'Fechamento acertado' })).toHaveTextContent('Acertado');
+    expect(screen.queryByRole('button', { name: 'Adicionar custo' })).not.toBeInTheDocument();
   });
   it('navigates across year boundaries without refreshing or marking any closing', async () => {
     mocks.rows = [fixture('2020-12', 'paid'), { ...fixture('2021-01'), status: 'carried', carried_to: '2021-02-01' }];

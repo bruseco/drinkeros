@@ -42,6 +42,9 @@ export interface RandReport {
   drinkeros_cents: number;
   lines: ClosingLine[];
   carry_months: string[];
+  extra_costs?: { id: string; description: string; amount_cents: number; month: string; carried: boolean }[];
+  extra_costs_cents?: number;
+  net_before_costs_cents?: number;
 }
 
 export function brMonth(date: string): string {
