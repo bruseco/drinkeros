@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, Navigate } from 'react-router-dom';
-import { CheckCircle2, FileText, Loader2, RefreshCw } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight, FileText, Loader2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -140,16 +140,31 @@ export default function AdminFinancialClosings({ readOnly = false }: { readOnly?
   const stale = !closing || Date.now() - new Date(closing.synced_at).getTime() > 10 * 60 * 1000;
   const adjustments = report?.lines.filter(l => l.adjustment) ?? [];
   const sales = report?.lines.filter(l => !l.adjustment) ?? [];
+  const selectMonth = (value: string) => { setMonth(value); setConfirm(null); setExistingSettlement(false); refresh.reset(); };
+  const stepMonth = (direction: number) => {
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return;
+    const [year, number] = month.split('-').map(Number);
+    selectMonth(new Date(Date.UTC(year, number - 1 + direction, 15)).toISOString().slice(0, 7));
+  };
 
   return <div className="mx-auto max-w-6xl space-y-6">
+    <div className="flex flex-wrap items-start justify-between gap-4">
     <div className="flex items-center gap-3"><FileText className="h-7 w-7 text-primary" />
       <div>{!readOnly && <Link to="/admin/fechamentos" className="text-sm text-muted-foreground hover:text-primary">← Todos os parceiros</Link>}
         <h1 className="text-2xl font-bold sm:text-3xl">Fechamento RAND</h1>
         <p className="text-muted-foreground">RAND · demonstrativo mensal e controle dos repasses</p></div>
     </div>
+    {closing?.status === 'paid' && <div role="status" aria-label="Fechamento acertado" className="ml-auto inline-flex shrink-0 -rotate-6 items-center gap-2 rounded-lg border-4 border-emerald-600 bg-emerald-500/10 px-4 py-2 text-lg font-black uppercase tracking-widest text-emerald-700 dark:border-emerald-400 dark:text-emerald-400 sm:text-xl">
+      <CheckCircle2 className="h-6 w-6" aria-hidden="true" />Acertado
+    </div>}
+    </div>
     <Card><CardContent className="flex flex-wrap items-end gap-4 pt-6">
       <div className="space-y-2"><Label htmlFor="closing-month">Mês do pagamento do cliente</Label>
-        <Input id="closing-month" type="month" value={month} onChange={e => { setMonth(e.target.value); setConfirm(null); refresh.reset(); }} /></div>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" size="icon" aria-label="Mês anterior" disabled={!month || refresh.isPending || markPaid.isPending} onClick={() => stepMonth(-1)}><ChevronLeft className="h-4 w-4" /></Button>
+          <Input id="closing-month" className="min-w-0" type="month" value={month} disabled={refresh.isPending || markPaid.isPending} onChange={e => selectMonth(e.target.value)} />
+          <Button type="button" variant="outline" size="icon" aria-label="Próximo mês" disabled={!month || refresh.isPending || markPaid.isPending} onClick={() => stepMonth(1)}><ChevronRight className="h-4 w-4" /></Button>
+        </div></div>
       {!readOnly && <Button variant="outline" disabled={!month || paid || refresh.isPending || markPaid.isPending} onClick={() => refresh.mutate(month)}>
         {refresh.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
         {refresh.isPending ? 'Consultando Mercado Pago…' : 'Atualizar demonstrativo'}</Button>}
@@ -215,7 +230,7 @@ export default function AdminFinancialClosings({ readOnly = false }: { readOnly?
     <Card><CardHeader><CardTitle>Histórico de fechamentos</CardTitle></CardHeader><CardContent>
       <Table><TableHeader><TableRow><TableHead>Mês</TableHead><TableHead>Status</TableHead><TableHead className="text-right">RAND</TableHead><TableHead /></TableRow></TableHeader>
         <TableBody>{query.data?.map(c => <TableRow key={c.month}><TableCell>{monthLabel(c.month)}</TableCell><TableCell>{c.status === 'carried' ? 'Compensado' : c.status === 'paid' ? 'Acertado' : 'Pendente'}</TableCell>
-          <TableCell className="text-right whitespace-nowrap">{brl(c.report.rand_cents)}</TableCell><TableCell><Button variant="ghost" size="sm" onClick={() => { setMonth(c.month.slice(0, 7)); refresh.reset(); }}>Abrir</Button></TableCell></TableRow>)}</TableBody></Table>
+          <TableCell className="text-right whitespace-nowrap">{brl(c.report.rand_cents)}</TableCell><TableCell><Button variant="ghost" size="sm" onClick={() => selectMonth(c.month.slice(0, 7))}>Abrir</Button></TableCell></TableRow>)}</TableBody></Table>
       {!query.data?.length && <p className="py-4 text-sm text-muted-foreground">Nenhum fechamento registrado.</p>}
     </CardContent></Card>
     <AlertDialog open={!!confirm} onOpenChange={open => { if (!open && !markPaid.isPending) setConfirm(null); }}>

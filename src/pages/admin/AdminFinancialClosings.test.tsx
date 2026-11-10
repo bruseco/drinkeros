@@ -81,6 +81,21 @@ describe('financial closing admin flow', () => {
     await screen.findByText(/Este demonstrativo está preservado/);
     expect(screen.getByRole('button', { name: 'Atualizar demonstrativo' })).toBeDisabled();
     expect(screen.queryByRole('button', { name: 'Marcar como acertado' })).not.toBeInTheDocument();
+    expect(screen.getByRole('status', { name: 'Fechamento acertado' })).toHaveTextContent('Acertado');
+  });
+  it('navigates across year boundaries without refreshing or marking any closing', async () => {
+    mocks.rows = [fixture('2020-12', 'paid'), { ...fixture('2021-01'), status: 'carried', carried_to: '2021-02-01' }];
+    show();
+    fireEvent.change(screen.getByLabelText('Mês do pagamento do cliente'), { target: { value: '2020-12' } });
+    await screen.findByRole('status', { name: 'Fechamento acertado' });
+    fireEvent.click(screen.getByRole('button', { name: 'Próximo mês' }));
+    expect(screen.getByLabelText('Mês do pagamento do cliente')).toHaveValue('2021-01');
+    expect(screen.queryByRole('status', { name: 'Fechamento acertado' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Mês anterior' }));
+    expect(screen.getByLabelText('Mês do pagamento do cliente')).toHaveValue('2020-12');
+    expect(screen.getByRole('status', { name: 'Fechamento acertado' })).toBeInTheDocument();
+    expect(mocks.invoke).not.toHaveBeenCalled();
+    expect(mocks.rpc).not.toHaveBeenCalled();
   });
   it('lets the administrator attest an existing settlement without refreshing the saved amount', async () => {
     const saved = { ...fixture('2020-09'), synced_at: '2020-10-07T11:58:17Z' };
