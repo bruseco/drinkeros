@@ -108,3 +108,39 @@ it('backfills only the independently verified payment pair, idempotently', async
   expect(row).toMatchObject({ amount: '7', status: 'paid', metadata: { purchase_transaction_id: '186585013621', mp_authorized_payment_id: '7033582554' } });
   expect((await db.query(`select * from admin_orders(p_search=>'186585013621')`)).rows).toHaveLength(1);
 });
+
+
+it('excludes seven propagated modules after a delayed course update, preserving the paid sale and accesses', async () => {
+  const course = '00000000-0000-0000-0003-000000000001';
+  await db.query(`INSERT INTO courses VALUES($1,'Xperience',197)`, [course]);
+  await db.query(`INSERT INTO user_courses(id,user_id,course_id,amount,currency,source,purchased_at,mercadopago_payment_id)
+    VALUES(gen_random_uuid(),$1,$2,197,'BRL','mercadopago','2026-11-21T14:19:28Z','course-payment')`, [user,course]);
+  for (let n=1;n<=7;n++) {
+    const id = `00000000-0000-0000-0004-${String(n).padStart(12,'0')}`;
+    await db.query(`INSERT INTO packages VALUES($1,$2,null);`, [id,`Module ${n}`]);
+    await db.query(`INSERT INTO course_packages VALUES($1,$2)`, [course,id]);
+    await db.query(`INSERT INTO user_packages(id,user_id,package_id,source,purchased_at)
+      VALUES(gen_random_uuid(),$1,$2,'mercadopago','2026-11-21T14:07:53Z')`, [user,id]);
+  }
+  const report = () => db.query<any>(`select * from admin_orders(p_from=>'2026-11-21',p_to=>'2026-11-22')`);
+  expect((await report()).rows).toHaveLength(8);
+  const fix = readFileSync('supabase/migrations/20261124120000_admin_package_sales_only.sql','utf8');
+  await db.exec(fix);
+  await db.exec(fix);
+  const rows=(await report()).rows;
+  expect(rows).toHaveLength(1);
+  expect(rows[0]).toMatchObject({product_name:'Xperience',amount:'197',total_count:1});
+  expect((await db.query(`select count(*)::int n from user_packages`)).rows[0]).toMatchObject({n:7});
+});
+
+it('retains independent paid packages and canonical purchases even without legacy access payment fields', async () => {
+  const id='00000000-0000-0000-0004-000000000001';
+  await db.query(`INSERT INTO user_packages(id,user_id,package_id,amount,source,purchased_at,mercadopago_payment_id)
+    VALUES(gen_random_uuid(),$1,$2,47,'mercadopago','2027-02-01','package-payment')`, [user,id]);
+  await db.query(`INSERT INTO purchases(id,user_id,product_type,product_id,product_name,amount_paid,status,gateway,transaction_id,created_at)
+    VALUES(gen_random_uuid(),$1,'package',$2,'Standalone package',47,'approved','mercado_pago','canonical-package','2027-02-02')`,[user,id]);
+  const rows=(await db.query<any>(`select * from admin_orders(p_from=>'2027-02-01',p_to=>'2027-02-03')`)).rows;
+  expect(rows).toHaveLength(2);
+  expect(rows.reduce((s,r)=>s+Number(r.amount),0)).toBe(94);
+  expect(new Set(rows.map(r=>r.external_ref))).toEqual(new Set(['package-payment','canonical-package']));
+});
