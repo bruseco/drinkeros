@@ -1,3 +1,5 @@
+import Black80 from './pages/Black80';
+import Black80Banner from './components/Black80Banner';
 import QuizOfferPage from './pages/quiz/QuizOfferPage';
 import QuizJourneyTracker from './components/QuizJourneyTracker';
 import { Toaster } from "@/components/ui/toaster";
@@ -149,11 +151,13 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <ScrollToTop />
+          <Black80Banner />
           <QuizJourneyTracker />
           <FacebookPixel />
           <WhatsAppFloatingButton />
           <RandViewerScope><Routes>
             {/* Public routes */}
+            <Route path="/black80" element={<Black80 />} />
             <Route path="/" element={<RootRedirect />} />
             <Route path="/login" element={<Login />} />
             <Route path="/politica-de-privacidade" element={<LegalPage kind="privacy" />} />

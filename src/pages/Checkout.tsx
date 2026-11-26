@@ -1,3 +1,4 @@
+import {useBlack80} from '@/hooks/useBlack80';
 import QuizCheckout from './quiz/QuizCheckout';
 import {clubCheckoutVariant} from '@/lib/clubAbCheckout';
 import { useEffect, useMemo, useState } from "react";
@@ -106,6 +107,7 @@ function RegisteredCheckout() {
   const [addressPromptRedirect, setAddressPromptRedirect] = useState<string | null>(null);
   const [lastPaymentId, setLastPaymentId] = useState<string | null>(null);
 
+  const black80 = useBlack80();
   const vip = useVipDiscount();
   const youth = useYouthDiscount();
   const isClub = productType === "club";
@@ -268,12 +270,12 @@ function RegisteredCheckout() {
 
   const finalPrice = useMemo(() => {
     if (!product) return 0;
-    if (isClub) return Number(product.price);
+    if (isClub) return black80.price('club',product.slug,Number(product.price));
     const vipPrice = vipPercent > 0
       ? getVipPriceFor(product.slug, Number(product.price), vipPercent)
       : Number(product.price);
-    return couponPrice !== null ? Math.min(couponPrice, vipPrice) : vipPrice;
-  }, [product, vipPercent, isClub, couponPrice]);
+    return black80.price(productType!,product.slug,Number(product.price),couponPrice !== null ? Math.min(couponPrice, vipPrice) : vipPrice);
+  }, [product, vipPercent, isClub, couponPrice, black80.active]);
 
 
   // Etapa 3: após o pagamento, pede o endereço fiscal (não bloqueante).
@@ -351,11 +353,11 @@ function RegisteredCheckout() {
   }, [pixPaymentId, paid, navigate, product, isClub]);
 
   useEffect(()=>{
-    if(!hasPublicOffer||!publicOfferDeadline||paid||pixPaymentId)return;
+    if(black80.active||!hasPublicOffer||!publicOfferDeadline||paid||pixPaymentId)return;
     const expire=()=>{setProduct(current=>current?{...current,price:197}:current);setPublicOfferDeadline(0);toast.info('O desconto expirou. Confira o novo valor de R$197 antes de pagar.');};
     const timer=window.setTimeout(expire,Math.max(0,publicOfferDeadline-Date.now()));
     return()=>window.clearTimeout(timer);
-  },[hasPublicOffer,publicOfferDeadline,paid,pixPaymentId]);
+  },[hasPublicOffer,publicOfferDeadline,paid,pixPaymentId,black80.active]);
 
   const refreshPublicPrice=async()=>{
     const {data,error}=await supabase.rpc('clube_public_account_quote' as never);
@@ -682,9 +684,9 @@ function RegisteredCheckout() {
                 R$ {Number(product.price).toFixed(2).replace(".", ",")}
               </span>
             </div>
-            {isVip && !isClub && (
+            {(isVip || (black80.active && product.slug!=='rand')) && !isClub && (
               <div className="flex justify-between text-sm text-primary">
-                <span>Desconto Sócio do Clube (-{vipPercent}%)</span>
+                <span>{black80.active?'BLACK80 — Black Friday':`Desconto Sócio do Clube (-${vipPercent}%)`}</span>
                 <span>−R$ {(Number(product.price) - finalPrice).toFixed(2).replace(".", ",")}</span>
               </div>
             )}

@@ -1,3 +1,4 @@
+vi.mock('@/hooks/useBlack80',()=>({useBlack80:()=>({active:false})}));
 import {afterEach,expect,it,vi} from 'vitest';
 import {cleanup,render,screen} from '@testing-library/react';
 import {MemoryRouter} from 'react-router-dom';

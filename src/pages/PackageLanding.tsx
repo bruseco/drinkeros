@@ -1,3 +1,4 @@
+import {useBlack80} from '@/hooks/useBlack80';
 import React, { useEffect } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,7 @@ const PackageLanding: React.FC = () => {
   const { data: courseModules = [] } = useCoursePackages(course?.id || '');
   const { data: userPlan } = useUserPlan();
   const isVip = !!userPlan?.isVip;
+  const black80 = useBlack80();
   const vip = useVipDiscount();
 
   const isLoading = pkgLoading || courseLoading || ebookLoading;
@@ -106,7 +108,7 @@ const PackageLanding: React.FC = () => {
     (isPackage && (item as any).price)
   );
   const price = (item as any).price ? Number((item as any).price) : null;
-  const finalPrice = price !== null && isVip ? applyVipDiscountFor(price, vip.percent) : price;
+  const finalPrice = price === null ? null : black80.price(isCourse?'course':isEbook?'ebook':'package',(item as any).slug,price,isVip ? applyVipDiscountFor(price,vip.percent) : price);
   const formattedPrice = finalPrice !== null ? formatBRL(finalPrice) : null;
   const formattedOriginalPrice = price !== null && isVip ? formatBRL(price) : null;
 

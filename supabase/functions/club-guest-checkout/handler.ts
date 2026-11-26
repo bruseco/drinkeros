@@ -1,3 +1,4 @@
+import {loadBlack80, black80Price, black80Active} from '../_shared/black80.ts';
 import {recordClubAbAttribution} from '../_shared/clubAbAttribution.ts';
 import { approvedInvoice, guestCanActivate, guestTokenHash, validGuestToken } from '../_shared/clubGuest.ts';
 
@@ -6,7 +7,7 @@ const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,
 const site='https://drinkeros.com';
 export async function handleGuestCheckout(req:Request,{admin,mpToken,supabaseUrl,serviceKey}:{admin:any;mpToken:string;supabaseUrl:string;serviceKey:string}){
  if(req.method==='OPTIONS')return new Response(null,{headers:cors});
- if(req.method==='GET')return json({club_guest_checkout_version:2,club_monthly_b_version:1,club_ab_attribution_version:1});
+ if(req.method==='GET')return json({club_guest_checkout_version:2,club_monthly_b_version:1,club_ab_attribution_version:1,black80_version:1});
  if(req.method!=='POST')return json({error:'Método inválido'},405);
  try{
   const body=await req.json();
@@ -29,6 +30,8 @@ export async function handleGuestCheckout(req:Request,{admin,mpToken,supabaseUrl
   const read=async()=>{const result=await admin.from('club_guest_checkouts').select('*').eq('token_hash',hash).maybeSingle();if(result.error)throw result.error;return result.data;};
   const quote=async()=>{
    if(monthly)return {price:7,billing_months:1};
+   const campaign=await loadBlack80(admin);
+   if(black80Active(campaign))return {price:47};
    if(!validGuestToken(body.public_offer_token))return {price:197};
    const offerHash=await guestTokenHash(body.public_offer_token);
    const {data,error}=await admin.from('clube_public_offers').select('user_id,expires_at').eq('token_hash',offerHash).maybeSingle();

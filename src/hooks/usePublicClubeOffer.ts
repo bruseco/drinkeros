@@ -1,9 +1,11 @@
+import {useBlack80} from './useBlack80';
 import { useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { fetchPublicClubOffer, type PublicClubOffer } from '@/lib/publicClubOffer';
 import type { ClubeIntroOfferState } from './useClubeIntroOffer';
 export function usePublicClubeOffer(enabled: boolean): ClubeIntroOfferState {
+  const black80=useBlack80();
   const { user, isLoading: authLoading } = useAuth();
   const queryClient = useQueryClient();
   const startedVisit=useRef(false);
@@ -21,7 +23,7 @@ export function usePublicClubeOffer(enabled: boolean): ClubeIntroOfferState {
   useEffect(()=>{if(!enabled||!localDeadline)return;const timer=setInterval(()=>setNow(Date.now()),500);return()=>clearInterval(timer)},[enabled,localDeadline]);
   const row = query.data?.row;
   const active = !!row && (!row.revealed_at || localDeadline>now);
-  return { isLoading:enabled&&(authLoading||query.isLoading),isActive:active,eligibleUntilMs:localDeadline,
-    hasRevealed:!!row?.revealed_at,price:active&&row?.revealed_at?Number(row.price):197,promoPrice:87,fullPrice:197,
+  return { isLoading:enabled&&(authLoading||query.isLoading),isActive:active||black80.active,eligibleUntilMs:localDeadline,
+    hasRevealed:black80.active||!!row?.revealed_at,price:black80.active?47:active&&row?.revealed_at?Number(row.price):197,promoPrice:black80.active?47:87,fullPrice:197,
     markRevealed:async()=>{const next:PublicClubOffer=await fetchPublicClubOffer(true);queryClient.setQueryData(key,{row:next,receivedAt:Date.now()});setNow(Date.now())} };
 }

@@ -1,3 +1,4 @@
+import {useBlack80} from '@/hooks/useBlack80';
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
@@ -30,6 +31,7 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
   const [dismissed, setDismissed] = useState(false);
   const timerRef = useRef<number | null>(null);
   const vip = useVipDiscount();
+  const black80=useBlack80();
 
   // Dismiss apenas em memória — refresh ou troca de página reativa o banner
   useEffect(() => {
@@ -66,7 +68,7 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
     setDismissed(true);
   };
 
-  if (!visible || dismissed) return null;
+  if (!visible || dismissed || black80.active) return null;
 
   // Banner promocional para VISITANTES (não-sócios) — sempre mostra a oferta máxima (intro 80%)
   const displayPercent = vip.percent || VIP_DISCOUNT_INTRO_PERCENT;

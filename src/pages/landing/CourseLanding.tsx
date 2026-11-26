@@ -1,3 +1,4 @@
+import {useBlack80} from '@/hooks/useBlack80';
 import GuaranteeNote from "@/components/landing/GuaranteeNote";
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -371,8 +372,9 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
     return () => { cancelled = true; };
   }, [couponTokenParam, funnelPageKey, slug]);
 
+  const black80 = useBlack80();
   const vipFinalPrice = isVip ? getVipPriceFor(slug, basePrice, vip.percent) : basePrice;
-  const finalPrice = coupon ? Math.min(coupon.price, vipFinalPrice) : vipFinalPrice;
+  const finalPrice = black80.price(checkoutPath?.includes('/combo/')?'combo':'course',slug,basePrice,coupon ? Math.min(coupon.price, vipFinalPrice) : vipFinalPrice);
 
   // Parcelamento com juros do cliente (Mercado Pago: 4,49% a.m. compostos)
   const INSTALLMENT_RATE = 0.0449;
@@ -383,7 +385,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const installments = installmentValue.toFixed(2).replace('.', ',');
 
   /* ===== Presente de desconto (preço oficial → preço real animado) ===== */
-  const giftEnabled = !!giftOfficialPrice && giftOfficialPrice > finalPrice && !isVip && !coupon;
+  const giftEnabled = !!giftOfficialPrice && giftOfficialPrice > finalPrice && !isVip && !coupon && !black80.active;
   const giftStorageKey = `gift-reveal:${slug}`;
   const [giftRevealed, setGiftRevealed] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -572,7 +574,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   }, [coupon]);
 
   // Preço exibido na seção de oferta
-  const shownPrice = coupon
+  const shownPrice = black80.active && slug!=='rand' ? finalPrice : coupon
     ? displayPrice ?? coupon.previousPrice
     : giftEnabled && !giftRevealed
     ? (giftOfficialPrice as number)

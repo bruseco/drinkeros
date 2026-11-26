@@ -1,3 +1,4 @@
+import {loadBlack80, black80Price, black80Active} from '../_shared/black80.ts';
 // Cria preferência de Checkout Pro do Mercado Pago para curso, ebook, combo ou pacote.
 // Suporta usuários logados (vincula user_id) e visitantes (coleta email no MP).
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
@@ -21,6 +22,8 @@ const TABLE_MAP: Record<ProductType, string> = {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  if(req.method==='GET') return new Response(JSON.stringify({black80_version:1}),{headers:{...corsHeaders,'Content-Type':'application/json'}});
 
   try {
     const mpToken = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
@@ -94,12 +97,14 @@ serve(async (req) => {
     // Preço VIP fixo por produto (sincronizado com src/lib/vipDiscount.ts)
     const VIP_FIXED_PRICE_BY_SLUG: Record<string, number> = { "classicos-destilados": 197 };
     const vipFixed = VIP_FIXED_PRICE_BY_SLUG[product.slug];
-    const finalPrice = applyDiscount
+    const normalPrice = applyDiscount
       ? (vipFixed !== undefined
         ? Math.min(vipFixed, basePrice)
         : Math.round(basePrice * (1 - vipPercent / 100) * 100) / 100)
       : basePrice;
 
+    const campaign = product.slug==='rand' ? null : await loadBlack80(supabase);
+    const finalPrice = black80Price(product_type, product.slug, basePrice, normalPrice, campaign);
     const origin = req.headers.get("origin") || "https://drinkeros.com";
     const externalRef = `${product_type}:${product.id}:${userId || "guest"}:${Date.now()}`;
 

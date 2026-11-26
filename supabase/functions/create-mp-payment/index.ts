@@ -1,3 +1,4 @@
+import {loadBlack80, black80Price, black80Active} from '../_shared/black80.ts';
 import {resolveQuizQuote,recordQuizPayment,QuizPriceChanged,quizPaymentHash} from '../_shared/quizOffer.ts';
 import {recordClubAbAttribution} from '../_shared/clubAbAttribution.ts';
 // Checkout transparente: cria pagamento direto via API do Mercado Pago (Cartão ou Pix)
@@ -62,7 +63,7 @@ const CLUB_PRODUCTS: Record<string, { id: string; name: string; slug: string; pr
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  if (req.method === 'GET') return new Response(JSON.stringify({public_club_offer_version:2,club_ab_attribution_version:1}),{headers:{...corsHeaders,'Content-Type':'application/json'}});
+  if (req.method === 'GET') return new Response(JSON.stringify({public_club_offer_version:2,club_ab_attribution_version:1,black80_version:1}),{headers:{...corsHeaders,'Content-Type':'application/json'}});
 
   try {
     const mpToken = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
@@ -218,7 +219,12 @@ serve(async (req) => {
       }
     }
 
-    const finalPrice = quizQuote ? quizQuote.price : couponPrice !== null ? Math.min(couponPrice, vipPrice) : vipPrice;
+    const campaign = product.slug==='rand' ? null : await loadBlack80(supabase);
+    const normalPrice = quizQuote ? quizQuote.price : couponPrice !== null ? Math.min(couponPrice, vipPrice) : vipPrice;
+    const finalPrice = black80Price(product_type, product.slug, basePrice, normalPrice, campaign);
+    if(black80Active(campaign) && product.slug!=='rand' && Number(body.expected_amount)!==finalPrice) {
+      throw new Error('O preço foi atualizado. Recarregue a página e confira o valor antes de pagar.');
+    }
 
 
     // ===== Dados fiscais (NFS-e/NIBO) — best effort, sem bloquear o pagamento =====
@@ -313,6 +319,8 @@ serve(async (req) => {
 
     let idempotencyKey = quizAttemptHash ? `quiz-${quizAttemptHash}` : `${externalRef}:${Math.random().toString(36).slice(2, 10)}`;
 
+    const campaignNow=product.slug==='rand'?null:await loadBlack80(supabase);
+    if(black80Price(product_type,product.slug,basePrice,normalPrice,campaignNow)!==finalPrice) throw new Error('A promoção foi atualizada. Confira o novo valor antes de pagar.');
     if(quizQuote)await resolveQuizQuote(supabase,body.quiz_offer_token,product_type,slug,finalPrice);
     if(!quizQuote&&product_type==='club'&&product.slug==='clube-anual')await publicClubPrice(supabase,userId!,finalPrice,!!body.public_offer_token);
     if(quizQuote&&quizAttemptHash){

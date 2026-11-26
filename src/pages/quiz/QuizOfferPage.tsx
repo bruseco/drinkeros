@@ -1,3 +1,4 @@
+import {useBlack80} from '@/hooks/useBlack80';
 import QuizPurchaseButton, { QuizPurchaseContext } from "./QuizPurchaseButton";
 import QuizFooter from "./QuizFooter";
 import QuizPackHero from "./QuizPackHero";
@@ -22,6 +23,7 @@ import "./quizOffers.css";
 const money = (n: number) =>
   n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 export default function QuizOfferPage({ product }: { product: ProfileId }) {
+  const black80=useBlack80();
   const [quote, setQuote] = useState<QuizQuote | null>(null),
     [error, setError] = useState(""),
     [remaining, setRemaining] = useState(0),
@@ -85,7 +87,7 @@ export default function QuizOfferPage({ product }: { product: ProfileId }) {
       );
       setRemaining(secs);
       if (deadline.current && secs === 0 && quote?.active) {
-        setQuote((q) => q ? { ...q, price: q.full_price, active: false } : q);
+        setQuote((q) => q ? { ...q, price: black80.active?q.price:q.full_price, active: false } : q);
         if (!expiryLogged.current) {
           expiryLogged.current = true;
           void trackQuizOffer(quote, "quiz_discount_expired");
@@ -99,7 +101,7 @@ export default function QuizOfferPage({ product }: { product: ProfileId }) {
     };
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [quote, metadata, refresh]);
+  }, [quote, metadata, refresh,black80.active]);
   const buy = async () => {
     if (busy || !quote) return;
     setBusy(true);
@@ -126,7 +128,7 @@ export default function QuizOfferPage({ product }: { product: ProfileId }) {
     : undefined;
   const altQuote = quote?.alternatives?.find((q) => q.product === alternative);
   const alternativePrice = altQuote
-    ? money(quote?.active ? altQuote.price : altQuote.full_price)
+    ? money(altQuote.price)
     : "";
   const alternativeUrl = alternative
     ? `${PROFILES[alternative].path}?${new URLSearchParams(
@@ -141,7 +143,7 @@ export default function QuizOfferPage({ product }: { product: ProfileId }) {
         }`}
       >
         <div className="quiz-offer-banner" role="status">
-          {quote
+          {black80.active ? "BLACK80 — oferta de Black Friday até 05/12, sem acumular descontos." : quote
             ? (quote.active
               ? (
                 <>
@@ -173,7 +175,7 @@ export default function QuizOfferPage({ product }: { product: ProfileId }) {
           <h1>{profile.title}</h1>
           <p>{profile.text}</p>
           {error && <p role="alert">{error}</p>}
-          {quote
+          {black80.active ? "BLACK80 — oferta de Black Friday até 05/12, sem acumular descontos." : quote
             ? (
               <>
                 <div className="quiz-offer-price">

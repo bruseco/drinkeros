@@ -3,12 +3,12 @@ import {handleGuestCheckout} from '../../supabase/functions/club-guest-checkout/
 import {approvedInvoice,guestCanActivate} from '../../supabase/functions/_shared/clubGuest';
 const token='a'.repeat(64);
 const baseRow={id:'00000000-0000-0000-0000-000000000001',token_hash:token,email:'buyer@example.com',method:'card',amount:97,status:'pending',mp_id:'pre-1',created_at:new Date().toISOString(),last_checked_at:null,activation_claimed_at:null};
-function setup({row=baseRow as any,purchase=null as any,user=null as any,claimed=true,offer={user_id:null,expires_at:new Date(Date.now()+900000).toISOString()},invoices=[] as any[]}={}){
+function setup({campaign=false,row=baseRow as any,purchase=null as any,user=null as any,claimed=true,offer={user_id:null,expires_at:new Date(Date.now()+900000).toISOString()},invoices=[] as any[]}={}){
  let current=row;let activations=0;const updates:any[]=[];
  const admin={from:vi.fn((table:string)=>{
   let operation='select',changes:any=null;
   const q:any={select:()=>q,eq:()=>q,is:()=>q,gte:()=>q,order:()=>q,limit:()=>q,update:(value:any)=>{operation='update';changes=value;return q},maybeSingle:async()=>({data:table==='club_guest_checkouts'?current:table==='clube_public_offers'?offer:purchase,error:null}),then:(resolve:any)=>{if(operation==='update'){updates.push(changes);current={...current,...changes};return Promise.resolve(resolve({data:[{id:current.id}],error:null}))}return Promise.resolve(resolve({data:[],error:null}))}};return q;
- }),rpc:vi.fn(async(name,args)=>{if(!current)current={...baseRow,amount:name==='claim_club_monthly_checkout'?7:args?._amount||97,billing_months:name==='claim_club_monthly_checkout'?1:12};return{data:[{claimed}],error:null}}),auth:{admin:{getUserById:vi.fn(async()=>({data:{user},error:null})),updateUserById:vi.fn(async()=>{activations++;return{error:null}})}}};
+ }),rpc:vi.fn(async(name,args)=>{if(name==='public_black80_campaign')return {data:[{enabled:campaign}],error:null};if(!current)current={...baseRow,amount:name==='claim_club_monthly_checkout'?7:args?._amount||97,billing_months:name==='claim_club_monthly_checkout'?1:12};return{data:[{claimed}],error:null}}),auth:{admin:{getUserById:vi.fn(async()=>({data:{user},error:null})),updateUserById:vi.fn(async()=>{activations++;return{error:null}})}}};
  const gateway=vi.fn(async(input:any,init:any)=>{const url=String(input);if(url.includes('/preapproval/search'))return new Response(JSON.stringify({results:[]}),{status:200});if(url.includes('/authorized_payments/search'))return new Response(JSON.stringify({results:invoices}),{status:200});if(url.includes('/mercadopago-webhook'))return new Response('{}',{status:200});if(init?.method==='POST')return new Response(JSON.stringify({id:'pre-1',status:'authorized'}),{status:200});return new Response('{}',{status:200})});
  vi.stubGlobal('fetch',gateway);vi.stubGlobal('AbortSignal',{timeout:()=>undefined});
  const request=async(body:any)=>{const response=await handleGuestCheckout(new Request('https://test/checkout',{method:'POST',body:JSON.stringify({checkout_token:token,...body})}),{admin,mpToken:'fake',supabaseUrl:'https://local',serviceKey:'internal'});return{status:response.status,body:await response.json()}};
@@ -25,7 +25,7 @@ it('replaying create never submits another charge',async()=>{
 });
 it('rejects a fabricated/expired price before creating any charge',async()=>{
  const s=setup({row:null});const result=await s.request({action:'create',method:'card',expected_amount:97,formData:{token:'card',payer:{email:'buyer@example.com'}}});
- expect(result.status).toBe(409);expect(result.body.amount).toBe(197);expect(s.admin.rpc).not.toHaveBeenCalled();expect(s.gateway).not.toHaveBeenCalled();
+ expect(result.status).toBe(409);expect(result.body.amount).toBe(197);expect(s.admin.rpc.mock.calls.some(([name])=>name.startsWith('claim_'))).toBe(false);expect(s.gateway).not.toHaveBeenCalled();
 });
 it('does not allow low prices from an account-bound offer for a guest',async()=>{
  const s=setup({row:null,offer:{user_id:'existing',expires_at:new Date(Date.now()+900000).toISOString()}});const result=await s.request({action:'quote',public_offer_token:'b'.repeat(64)});expect(result.status).toBe(503);
@@ -86,4 +86,21 @@ it('creates exactly one R$7 monthly card subscription and never grants access fr
 });
 it('does not reuse annual checkout tokens for monthly subscriptions',async()=>{
  const s=setup();expect((await s.request({action:'status',billing_plan:'monthly-b'})).status).toBe(409);expect(s.gateway).not.toHaveBeenCalled();
+});
+
+
+it('quotes and creates one annual R$47 subscription during BLACK80 while monthly stays R$7',async()=>{
+ vi.useFakeTimers();vi.setSystemTime(new Date('2026-11-27T12:00:00-03:00'));
+ try {
+  const s=setup({campaign:true,row:null});
+  expect((await s.request({action:'quote'})).body.price).toBe(47);
+  expect((await s.request({action:'quote',billing_plan:'monthly-b'})).body.price).toBe(7);
+  const response=await s.request({action:'create',method:'card',expected_amount:47,formData:{token:'fake-card',payer:{email:'buyer@example.com'}}});
+  expect(response.body.status).toBe('pending');
+  const posts=()=>s.gateway.mock.calls.filter(([url,init])=>String(url).endsWith('/preapproval')&&init?.method==='POST');
+  expect(posts()).toHaveLength(1);
+  expect(JSON.parse(String(posts()[0][1].body)).auto_recurring).toMatchObject({transaction_amount:47,frequency:12});
+  await s.request({action:'create',method:'card',expected_amount:47});
+  expect(posts()).toHaveLength(1);expect(s.activations).toBe(0);
+ }finally{vi.useRealTimers()}
 });

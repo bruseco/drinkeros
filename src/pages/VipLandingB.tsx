@@ -1,3 +1,4 @@
+import {useBlack80} from '@/hooks/useBlack80';
 import {rememberClubCheckoutVariant} from '@/lib/clubAbCheckout';
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
@@ -212,7 +213,8 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
   const promo = publicPage&&publicBackendReady ? publicPromo : legacyPromo;
   const youth = useYouthDiscount();
   // Preço efetivo após considerar Jovem Bartender (≤24 anos): R$47.
-  const effectivePromoPrice = youth.isYouth ? youth.price : promo.promoPrice;
+  const black80=useBlack80();
+  const effectivePromoPrice = black80.active ? 47 : youth.isYouth ? youth.price : promo.promoPrice;
   const effectiveSavings = promo.fullPrice - effectivePromoPrice;
 
   // ===== Reveal cinematográfico do desconto de R$100 =====
@@ -239,7 +241,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
   const revealTimerRef = React.useRef<number | null>(null);
   const priceSettleTimerRef = React.useRef<number | null>(null);
   const revealScheduledRef = React.useRef(false);
-  const canRevealIntro = !(publicPage && staticVariant) && promo.isActive && !promo.hasRevealed && !promo.isLoading;
+  const canRevealIntro = !black80.active && !(publicPage && staticVariant) && promo.isActive && !promo.hasRevealed && !promo.isLoading;
 
   const scheduleReveal = React.useCallback((trigger: string) => {
     if (!canRevealIntro || revealScheduledRef.current || revealTimerRef.current !== null) return;
@@ -436,7 +438,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
   ) => {
     if (loading) return;
     const offer: 'intro' | 'full' =
-      chosenOffer ?? ((promo.isLoading || promo.isActive) ? 'intro' : 'full');
+      black80.active ? 'intro' : chosenOffer ?? ((promo.isLoading || promo.isActive) ? 'intro' : 'full');
     setLoading(true);
     try {
       const monthly = publicPage && staticVariant;
@@ -488,7 +490,7 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
     staticVariant={staticVariant}
     scrollRef={landingScrollRef}
     registerPriceCard={registerPriceCard}
-    price={<PriceAmount value={staticVariant ? 7 : displayPrice} />}
+    price={<PriceAmount value={staticVariant ? 7 : black80.active ? 47 : displayPrice} />}
     fullPrice={promo.fullPrice}
     unlocked={staticVariant || unlocked}
     savings={effectiveSavings}
@@ -679,14 +681,14 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
               )}
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-xl font-light text-purple-300">R$</span>
-                <PriceAmount value={displayPrice} className="text-6xl font-black viplanding-gold-text" />
+                <PriceAmount value={black80.active?47:displayPrice} className="text-6xl font-black viplanding-gold-text" />
                 <span className="text-sm text-purple-300 ml-1">/ ano</span>
               </div>
               <p className="text-sm text-purple-200 mt-1">
                 {unlocked ? (
                   <>Você economiza <strong className="text-yellow-300">R$ {effectiveSavings}</strong> agora.</>
                 ) : (
-                  <>Equivale a <strong className="text-white">{(displayPrice / 12).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} por mês</strong> no plano anual.</>
+                  <>Equivale a <strong className="text-white">{((black80.active?47:displayPrice) / 12).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} por mês</strong> no plano anual.</>
                 )}
               </p>
               {unlocked && youth.isYouth && (
@@ -875,10 +877,10 @@ const VipLandingB: React.FC<{ publicPage?: boolean; staticVariant?: boolean }> =
                 )}
                 <div className="flex items-baseline justify-center gap-1">
                   <span className="text-2xl font-light text-purple-300">R$</span>
-                  <PriceAmount value={displayPrice} className="text-7xl font-black viplanding-gold-text" />
+                  <PriceAmount value={black80.active?47:displayPrice} className="text-7xl font-black viplanding-gold-text" />
                 </div>
                 <div className="text-sm text-purple-300">
-                  por ano{unlocked ? ` · economize R$ ${effectiveSavings}` : ` · equivalente a ${(displayPrice / 12).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/mês`}
+                  por ano{unlocked ? ` · economize R$ ${effectiveSavings}` : ` · equivalente a ${((black80.active?47:displayPrice) / 12).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/mês`}
                 </div>
                 {unlocked && youth.isYouth && (
                   <div className="mt-2 text-[12px] text-yellow-200 leading-snug px-2">

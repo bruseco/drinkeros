@@ -1,3 +1,4 @@
+import {useBlack80} from '@/hooks/useBlack80';
 import React, { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams, Navigate } from 'react-router-dom';
 import {
@@ -35,6 +36,7 @@ const EbookLanding: React.FC = () => {
   const { data: ebook, isLoading } = useEbookBySlug(slug ?? '');
   const { data: userPlan } = useUserPlan();
   const { data: ownedEbookIds } = useUserEbooks();
+  const black80 = useBlack80();
   const vip = useVipDiscount();
   const isVip = !!userPlan?.isVip;
   const isOwned = !!ebook && (ownedEbookIds ?? []).includes(ebook.id);
@@ -92,7 +94,7 @@ const EbookLanding: React.FC = () => {
   const content = EBOOK_CONTENT[slug ?? ''];
 
   const basePrice = ebook.price ? Number(ebook.price) : 0;
-  const finalPrice = isVip ? applyVipDiscountFor(basePrice, vip.percent) : basePrice;
+  const finalPrice = black80.price('ebook',ebook.slug,basePrice,isVip ? applyVipDiscountFor(basePrice, vip.percent) : basePrice);
   const installments = basePrice > 0 ? (finalPrice / 12).toFixed(2).replace('.', ',') : '0,00';
 
   const handleBuy = async () => {

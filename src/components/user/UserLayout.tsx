@@ -1,3 +1,4 @@
+import Black80Banner from '@/components/Black80Banner';
 import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -71,6 +72,7 @@ export const UserLayout: React.FC = () => {
       <PwaSplashScreen />
       <UserSidebar />
       <div className="flex flex-1 flex-col min-w-0">
+        <Black80Banner member />
         <FiscalPendingBanner />
         <VipDiscountCountdownBanner />
         <UserNavbar />
