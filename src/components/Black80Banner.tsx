@@ -33,12 +33,11 @@ export function Black80BannerContent({serverOffsetMs=0,onExpire,compactOnly=fals
   </div>
  </aside></div>}
  {(compactOnly||compact)&&<aside aria-label="Resumo da oferta Black Friday" className="fixed inset-x-0 top-0 z-[70] border-b border-pink-300/40 bg-pink-600 text-white shadow-lg">
-  <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
-   <div className="min-w-0"><p className="text-sm font-black sm:text-base">BLACK80 · 80% OFF <span className="hidden sm:inline">nos produtos participantes</span></p>
-    <p className="text-[11px] leading-snug sm:text-xs">Até 05/12, às 23h59 · Brasília <span className="hidden sm:inline">· Clube anual R$47 · RAND e mensal fora</span></p>
-    <Black80Countdown compact serverOffsetMs={serverOffsetMs} onExpire={onExpire}/>
+  <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-2.5 sm:gap-6 sm:px-6">
+   <div className="min-w-0"><p className="text-xs font-black leading-tight sm:text-base">BLACK80 · 80% OFF<span className="hidden sm:inline"> nos produtos participantes</span></p>
+    <p className="mt-1 text-[10px] leading-snug sm:text-xs">Até 05/12 · Clube anual R$47</p>
    </div>
-   <Link to="/black80" className="flex shrink-0 items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-black text-pink-900 sm:text-sm">Ver ofertas <ArrowRight aria-hidden="true" className="h-4 w-4"/></Link>
+   <div className="shrink-0 rounded-xl border border-pink-300/40 bg-pink-950 px-2 py-2 sm:px-4"><Black80Countdown compact serverOffsetMs={serverOffsetMs} onExpire={onExpire}/></div>
   </div>
  </aside>}</>;
 }
