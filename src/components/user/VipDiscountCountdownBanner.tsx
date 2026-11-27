@@ -1,3 +1,4 @@
+import { useBlack80 } from '@/hooks/useBlack80';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { X, Sparkles, Gem } from 'lucide-react';
@@ -23,6 +24,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
 export const VipDiscountCountdownBanner: React.FC<Props> = ({ forceShowOnProduct = false }) => {
   const vip = useVipDiscount();
+  const black80 = useBlack80();
   const [dismissedIntro, setDismissedIntro] = useState(false);
   const [dismissedBase, setDismissedBase] = useState(false);
   const [now, setNow] = useState(() => Date.now());
@@ -44,7 +46,7 @@ export const VipDiscountCountdownBanner: React.FC<Props> = ({ forceShowOnProduct
     return () => clearInterval(id);
   }, [inFinalDay]);
 
-  if (!vip.ready || !vip.isVip || vip.isLifetime) return null;
+  if (black80.active || !vip.ready || !vip.isVip || vip.isLifetime) return null;
 
   if (vip.isIntroActive) {
     if (dismissedIntro) return null;

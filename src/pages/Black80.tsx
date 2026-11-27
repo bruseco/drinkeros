@@ -1,3 +1,4 @@
+import { black80CourseDetails } from '@/lib/black80CourseDetails';
 import Black80Countdown from '@/components/Black80Countdown';
 import { ArrowRight, Check, Play, Heart, ListChecks, Users } from 'lucide-react';
 import drinksStrip from '@/assets/1000-drinks.jpg';
@@ -52,7 +53,7 @@ export default function Black80() {
    ].filter(group=>group.items.length>0).map(group=><section key={group.title} className="mt-14 border-t border-purple-400/20 pt-9" aria-label={group.title}>
     <h2 className="text-4xl font-black tracking-tight sm:text-5xl">{group.title}</h2><p className="mt-3 text-muted-foreground">{group.description}</p>
     <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{group.items.map((p:any)=><article key={p.type+p.id} className="overflow-hidden rounded-xl border bg-card">
-    {p.cover_image_url&&<img src={p.cover_image_url} alt="" loading="lazy" className="h-44 w-full object-contain"/>}<div className="p-5"><h3 className="font-bold">{p.name}</h3><p className="mt-2"><del className="mr-2 text-muted-foreground">{formatBRL(Number(p.price))}</del><strong className="text-xl text-green-500">{formatBRL(campaign.price(p.type,p.slug,Number(p.price)))}</strong></p><Link className="mt-4 block rounded-lg bg-primary p-3 text-center font-bold text-primary-foreground" to={`/checkout/${p.type}/${p.slug}`}>Aproveitar BLACK80 →</Link></div>
+    {p.cover_image_url&&<img src={p.cover_image_url} alt="" loading="lazy" className="h-44 w-full object-contain"/>}<div className="p-5"><h3 className="font-bold">{p.name}</h3>{p.type==='course'&&black80CourseDetails[p.slug]&&<p className="mt-3 text-sm leading-relaxed text-muted-foreground">{black80CourseDetails[p.slug].description}</p>}<p className="mt-2"><del className="mr-2 text-muted-foreground">{formatBRL(Number(p.price))}</del><strong className="text-xl text-green-500">{formatBRL(campaign.price(p.type,p.slug,Number(p.price)))}</strong></p><Link className="mt-4 block rounded-lg bg-primary p-3 text-center font-bold text-primary-foreground" to={`/checkout/${p.type}/${p.slug}`}>Aproveitar BLACK80 →</Link>{p.type==='course'&&black80CourseDetails[p.slug]?.path&&<Link className="mt-3 block rounded-lg border border-purple-400/40 px-3 py-3 text-center text-sm font-semibold hover:bg-purple-500/10" to={black80CourseDetails[p.slug].path!}>Ver mais detalhes</Link>}</div>
    </article>)}</div></section>)}
   </>}
  </div></main>;

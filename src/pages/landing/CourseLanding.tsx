@@ -373,6 +373,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   }, [couponTokenParam, funnelPageKey, slug]);
 
   const black80 = useBlack80();
+  const black80Eligible = black80.active && !['rand','classicos-destilados'].includes(slug);
   const vipFinalPrice = isVip ? getVipPriceFor(slug, basePrice, vip.percent) : basePrice;
   const finalPrice = black80.price(checkoutPath?.includes('/combo/')?'combo':'course',slug,basePrice,coupon ? Math.min(coupon.price, vipFinalPrice) : vipFinalPrice);
 
@@ -1382,7 +1383,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
             )}
 
             <div className="text-center mb-6" ref={priceAnchorRef}>
-              {isVip ? (
+              {(isVip || black80Eligible) ? (
                 <>
                   <div
                     className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-3"
@@ -1393,8 +1394,8 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                   >
                     <Crown className="h-4 w-4" style={{ color: theme.accent }} />
                     <span className="text-sm font-bold uppercase tracking-wide" style={{ color: theme.accent }}>
-                      Preço exclusivo Sócio do Clube · {vip.percent}% OFF
-                      {vip.isIntroActive && vip.hoursRemaining > 0 && (
+                      {black80Eligible ? 'BLACK80 · Oferta Black Friday' : `Preço exclusivo Sócio do Clube · ${vip.percent}% OFF`}
+                      {!black80Eligible && vip.isIntroActive && vip.hoursRemaining > 0 && (
                         <> · {vip.hoursRemaining <= 24 ? 'expira HOJE!' : `expira em ${vip.daysRemaining} ${vip.daysRemaining === 1 ? 'dia' : 'dias'}`}</>
                       )}
                     </span>
@@ -1416,7 +1417,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
                     </strong>
                   </p>
                   <p className="text-xs mt-2" style={{ color: theme.accent }}>
-                    Esse valor especial é só para você que já é Sócio do Clube. 💜
+                    {black80Eligible ? 'Oferta válida até 5 de dezembro de 2026, às 23h59 de Brasília.' : 'Esse valor especial é só para você que já é Sócio do Clube. 💜'}
                   </p>
                 </>
               ) : (

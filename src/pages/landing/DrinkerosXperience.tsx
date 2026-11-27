@@ -1,3 +1,4 @@
+import { useBlack80 } from '@/hooks/useBlack80';
 import GuaranteeNote from "@/components/landing/GuaranteeNote";
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -143,7 +144,8 @@ const DrinkerosXperience: React.FC = () => {
   const basePrice = dbPrice ?? 497;
   const vip = useVipDiscount();
   const { data: totalStudents } = useTotalStudents();
-  const finalPrice = isVip ? applyVipDiscountFor(basePrice, vip.percent) : basePrice;
+  const black80 = useBlack80();
+  const finalPrice = black80.price('course', SLUG, basePrice, isVip ? applyVipDiscountFor(basePrice, vip.percent) : basePrice);
   const installments = (finalPrice / 12).toFixed(2).replace('.', ',');
 
   const handleBuy = async () => {
@@ -182,7 +184,7 @@ const DrinkerosXperience: React.FC = () => {
     <div className="min-h-screen bg-[#0b0b0d] text-white overflow-x-hidden">
       <VipDiscountCountdownBanner forceShowOnProduct />
       {!isVip && (
-        <VipFloatingBanner watchTargetId="dx-matricule-cta" basePrice={basePrice} productName="Drinkeros Xperience" />
+        <VipFloatingBanner watchTargetId="dx-matricule-cta" basePrice={basePrice} slug={SLUG} productName="Drinkeros Xperience" />
       )}
       {/* Animação do gradiente do hero */}
       <style>{`
@@ -460,13 +462,13 @@ const DrinkerosXperience: React.FC = () => {
             </p>
 
             <div className="text-center mb-6">
-              {isVip ? (
+              {(isVip || black80.active) ? (
                 <>
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-pink-500/20 border border-amber-400/40 mb-3">
                     <Crown className="h-4 w-4 text-amber-300" />
                     <span className="text-sm font-bold text-amber-200 uppercase tracking-wide">
-                      Preço exclusivo Sócio do Clube · {vip.percent}% OFF
-                      {vip.isIntroActive && vip.hoursRemaining > 0 && (
+                      {black80.active ? 'BLACK80 · Oferta Black Friday' : `Preço exclusivo Sócio do Clube · ${vip.percent}% OFF`}
+                      {!black80.active && vip.isIntroActive && vip.hoursRemaining > 0 && (
                         <> · {vip.hoursRemaining <= 24 ? 'expira HOJE!' : `expira em ${vip.daysRemaining} ${vip.daysRemaining === 1 ? 'dia' : 'dias'}`}</>
                       )}
                     </span>
