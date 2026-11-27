@@ -309,6 +309,27 @@ export type Database = {
           },
         ]
       }
+      club_paid_period_grants: {
+        Row: {
+          created_at: string
+          payment_id: string
+          period_end: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          payment_id: string
+          period_end?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          payment_id?: string
+          period_end?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       club_post_comments: {
         Row: {
           body: string
@@ -4607,6 +4628,10 @@ export type Database = {
           security_token: string
           token: string
         }[]
+      }
+      grant_club_annual_payment: {
+        Args: { _paid_at: string; _payment_id: string; _user_id: string }
+        Returns: string
       }
       grant_club_monthly_period: {
         Args: { _end: string; _start: string; _user_id: string }
