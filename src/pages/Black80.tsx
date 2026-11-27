@@ -1,4 +1,6 @@
 import Black80Countdown from '@/components/Black80Countdown';
+import { ArrowRight, Check, Play, Heart, ListChecks, Users } from 'lucide-react';
+import drinksStrip from '@/assets/1000-drinks.jpg';
 import packCover from '@/assets/quiz-pack-6-ebooks.jpg';
 import {Link} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
@@ -21,11 +23,37 @@ export default function Black80() {
   <p className="mt-2 text-sm text-muted-foreground">Válido até 5 de dezembro de 2026, às 23h59 de Brasília. Não cumulativo.</p>
   {!campaign.active?<p role="status" className="mt-8">{campaign.loading?'Conferindo promoção…':'A promoção não está ativa. Os preços regulares continuam valendo.'}</p>:<>
    <div className="mt-5 w-fit rounded-xl border border-purple-400/40 bg-purple-950 px-4 py-3 text-white"><Black80Countdown serverOffsetMs={campaign.serverOffsetMs} onExpire={campaign.refresh}/></div>
-   <Link to="/checkout/club/clube-anual" className="mt-6 block rounded-xl border border-yellow-400 p-5 font-bold">Clube anual: de R$87 por R$47 · 12 meses de acesso →</Link>
+   <section aria-labelledby="black80-club" className="relative mt-8 overflow-hidden rounded-3xl border border-purple-400/40 bg-gradient-to-br from-purple-950 via-purple-900 to-fuchsia-950 shadow-2xl shadow-purple-950/40">
+    <div className="grid items-center gap-5 p-5 sm:p-6 md:grid-cols-[1.2fr_1fr_1fr]">
+     <div>
+      <img src="/club-landing/logo.png" alt="Clube dos Drinkeros" className="mb-3 w-44 max-w-full" />
+      <h2 id="black80-club" className="text-2xl font-black leading-tight text-white sm:text-3xl">Mais de <span className="text-yellow-300">1.000 receitas</span> no seu aplicativo.</h2>
+      <p className="mt-3 text-sm text-purple-100">Drinks para cada ocasião, com o preparo em vídeo.</p>
+     </div>
+     <ul className="space-y-2 text-sm text-white">{[
+      [Play, 'Mais de 1.000 receitas em vídeo'], [Check, 'Mais de 40 xaropes artesanais'],
+      [ListChecks, 'Organizador de festas e lista de compras'], [Heart, 'Suas receitas favoritas'], [Users, 'Comunidade de receitas'],
+     ].map(([Icon,text]) => { const FeatureIcon=Icon as typeof Play; return <li key={String(text)} className="flex items-start gap-2"><FeatureIcon aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-yellow-300"/><span>{String(text)}</span></li>; })}</ul>
+     <div className="rounded-xl border border-white/15 bg-black/20 p-4">
+      <p className="text-xs font-semibold text-purple-200">BLACK FRIDAY · PLANO ANUAL</p>
+      <p className="mt-2 text-white"><del className="mr-2 text-sm text-purple-300">R$87</del><strong className="text-4xl font-black">R$47</strong><span className="ml-1 text-sm text-purple-100">/ ano</span></p>
+      <p className="mt-1 text-xs text-purple-100">12 meses de acesso ao aplicativo</p>
+      <Link to="/checkout/club/clube-anual" className="mt-3 flex min-h-12 items-center justify-center gap-2 rounded-lg bg-yellow-300 px-3 py-3 text-center text-sm font-bold text-purple-950 transition-colors hover:bg-yellow-200">Quero entrar para o Clube <ArrowRight aria-hidden="true" className="h-4 w-4 shrink-0"/></Link>
+      <p className="mt-2 text-center text-xs text-purple-200">15 dias de garantia para experimentar com tranquilidade.</p>
+     </div>
+    </div>
+    <img src={drinksStrip} alt="Uma seleção de drinks do Clube" className="h-14 w-full object-cover sm:h-16" />
+   </section>
    {isLoading&&<p>Carregando produtos…</p>}{error&&<p role="alert">Não foi possível carregar as ofertas. Atualize a página.</p>}
-   <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{data.map((p:any)=><article key={p.type+p.id} className="overflow-hidden rounded-xl border bg-card">
-    {p.cover_image_url&&<img src={p.cover_image_url} alt="" loading="lazy" className="h-44 w-full object-contain"/>}<div className="p-5"><h2 className="font-bold">{p.name}</h2><p className="mt-2"><del className="mr-2 text-muted-foreground">{formatBRL(Number(p.price))}</del><strong className="text-xl text-green-500">{formatBRL(campaign.price(p.type,p.slug,Number(p.price)))}</strong></p><Link className="mt-4 block rounded-lg bg-primary p-3 text-center font-bold text-primary-foreground" to={`/checkout/${p.type}/${p.slug}`}>Aproveitar BLACK80 →</Link></div>
-   </article>)}</div>
+   {[
+    {title:'Cursos',description:'Aprenda novas técnicas e dê o próximo passo na coquetelaria.',items:data.filter((p:any)=>p.type==='course')},
+    {title:'E-books',description:'Suas próximas receitas favoritas, reunidas para consultar quando quiser.',items:data.filter((p:any)=>p.type==='ebook'||p.slug==='pacote-6-e-books')},
+    {title:'Pacotes',description:'Mais conteúdo para ampliar seu repertório.',items:data.filter((p:any)=>p.type!=='course'&&p.type!=='ebook'&&p.slug!=='pacote-6-e-books')},
+   ].filter(group=>group.items.length>0).map(group=><section key={group.title} className="mt-14 border-t border-purple-400/20 pt-9" aria-label={group.title}>
+    <h2 className="text-4xl font-black tracking-tight sm:text-5xl">{group.title}</h2><p className="mt-3 text-muted-foreground">{group.description}</p>
+    <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{group.items.map((p:any)=><article key={p.type+p.id} className="overflow-hidden rounded-xl border bg-card">
+    {p.cover_image_url&&<img src={p.cover_image_url} alt="" loading="lazy" className="h-44 w-full object-contain"/>}<div className="p-5"><h3 className="font-bold">{p.name}</h3><p className="mt-2"><del className="mr-2 text-muted-foreground">{formatBRL(Number(p.price))}</del><strong className="text-xl text-green-500">{formatBRL(campaign.price(p.type,p.slug,Number(p.price)))}</strong></p><Link className="mt-4 block rounded-lg bg-primary p-3 text-center font-bold text-primary-foreground" to={`/checkout/${p.type}/${p.slug}`}>Aproveitar BLACK80 →</Link></div>
+   </article>)}</div></section>)}
   </>}
  </div></main>;
 }
