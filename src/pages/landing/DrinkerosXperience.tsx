@@ -482,7 +482,7 @@ const DrinkerosXperience: React.FC = () => {
                     em até <strong className="text-amber-300">12x R$ {installments}</strong>
                   </p>
                   <p className="text-xs text-amber-300/90 mt-2">
-                    Esse valor especial é só para você que já é Sócio do Clube. 💜
+                    {black80.active ? 'Oferta válida até 5 de dezembro de 2026, às 23h59 de Brasília.' : 'Esse valor especial é só para você que já é Sócio do Clube. 💜'}
                   </p>
                 </>
               ) : (
