@@ -34,7 +34,7 @@ it('pins a compact offer only after scrolling past the full banner and disconnec
  expect(screen.queryByRole('complementary',{name:'Resumo da oferta Black Friday'})).toBeNull();
  update(false,-1);
  expect(screen.getByRole('complementary',{name:'Resumo da oferta Black Friday'})).toHaveClass('fixed','top-0');
- expect(screen.getByText(/Até 05\/12 · Clube anual/)).toBeInTheDocument();
+ expect(screen.getByText('Válido até 05/12. APROVEITE!')).toBeInTheDocument();
  update(true,180);
  expect(screen.queryByRole('complementary',{name:'Resumo da oferta Black Friday'})).toBeNull();
  view.unmount();expect(disconnect).toHaveBeenCalled();vi.unstubAllGlobals();

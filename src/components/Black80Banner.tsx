@@ -35,7 +35,7 @@ export function Black80BannerContent({serverOffsetMs=0,onExpire,compactOnly=fals
  {(compactOnly||compact)&&<aside aria-label="Resumo da oferta Black Friday" className="fixed inset-x-0 top-0 z-[70] border-b border-pink-300/40 bg-pink-600 text-white shadow-lg">
   <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-2.5 sm:gap-6 sm:px-6">
    <div className="min-w-0"><p className="text-base font-black leading-tight text-yellow-300 sm:text-2xl">BLACK80 · 80% OFF<span className="hidden text-sm font-semibold text-white sm:inline"> nos produtos participantes</span></p>
-    <p className="mt-1 text-[10px] leading-snug sm:text-xs">Até 05/12 · Clube anual R$47</p>
+    <p className="mt-1 text-[10px] leading-snug sm:text-xs">Válido até 05/12. APROVEITE!</p>
    </div>
    <div className="shrink-0 rounded-xl border border-pink-300/40 bg-pink-950 px-2 py-2 sm:px-4"><Black80Countdown compact serverOffsetMs={serverOffsetMs} onExpire={onExpire}/></div>
   </div>
