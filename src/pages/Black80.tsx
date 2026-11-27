@@ -1,3 +1,4 @@
+import Black80Countdown from '@/components/Black80Countdown';
 import packCover from '@/assets/quiz-pack-6-ebooks.jpg';
 import {Link} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
@@ -19,6 +20,7 @@ export default function Black80() {
   <p className="mt-3">80% de desconto nos produtos participantes, aplicado automaticamente. Clube anual por R$47. RAND e Clube mensal mantêm suas condições.</p>
   <p className="mt-2 text-sm text-muted-foreground">Válido até 5 de dezembro de 2026, às 23h59 de Brasília. Não cumulativo.</p>
   {!campaign.active?<p role="status" className="mt-8">{campaign.loading?'Conferindo promoção…':'A promoção não está ativa. Os preços regulares continuam valendo.'}</p>:<>
+   <div className="mt-5 w-fit rounded-xl border border-purple-400/40 bg-purple-950 px-4 py-3 text-white"><Black80Countdown serverOffsetMs={campaign.serverOffsetMs} onExpire={campaign.refresh}/></div>
    <Link to="/checkout/club/clube-anual" className="mt-6 block rounded-xl border border-yellow-400 p-5 font-bold">Clube anual: de R$87 por R$47 · 12 meses de acesso →</Link>
    {isLoading&&<p>Carregando produtos…</p>}{error&&<p role="alert">Não foi possível carregar as ofertas. Atualize a página.</p>}
    <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{data.map((p:any)=><article key={p.type+p.id} className="overflow-hidden rounded-xl border bg-card">

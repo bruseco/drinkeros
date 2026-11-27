@@ -9,6 +9,6 @@ export function useBlack80() {
   },refetchInterval:30000,staleTime:10000,retry:1});
   const campaign=query.data?.campaign;
   const now=campaign?.server_now ? Date.parse(campaign.server_now)+Date.now()-query.data!.receivedAt : Date.now();
-  return {active:!query.isError && black80Active(campaign,now),loading:query.isLoading,
+  return {active:!query.isError && black80Active(campaign,now),loading:query.isLoading,serverOffsetMs:campaign?.server_now ? Date.parse(campaign.server_now)-query.data!.receivedAt : 0,refresh:query.refetch,
     price:(type:string,slug:string,base:number,current=base)=>black80Price(type,slug,base,current,query.isError?null:campaign,now)};
 }
