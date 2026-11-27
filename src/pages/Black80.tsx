@@ -23,8 +23,8 @@ export default function Black80() {
   <p className="mt-3">80% de desconto nos produtos participantes, aplicado automaticamente. Clube anual por R$47. RAND e Clube mensal mantêm suas condições.</p>
   <p className="mt-2 text-sm text-muted-foreground">Válido até 5 de dezembro de 2026, às 23h59 de Brasília. Não cumulativo.</p>
   {!campaign.active?<p role="status" className="mt-8">{campaign.loading?'Conferindo promoção…':'A promoção não está ativa. Os preços regulares continuam valendo.'}</p>:<>
-   <div className="mt-5 w-fit rounded-xl border border-purple-400/40 bg-purple-950 px-4 py-3 text-white"><Black80Countdown serverOffsetMs={campaign.serverOffsetMs} onExpire={campaign.refresh}/></div>
-   <section aria-labelledby="black80-club" className="relative mt-8 overflow-hidden rounded-3xl border border-purple-400/40 bg-gradient-to-br from-purple-950 via-purple-900 to-fuchsia-950 shadow-2xl shadow-purple-950/40">
+   <div className="mt-5 w-fit rounded-xl border border-pink-400/40 bg-pink-950 px-4 py-3 text-white"><Black80Countdown serverOffsetMs={campaign.serverOffsetMs} onExpire={campaign.refresh}/></div>
+   <section aria-labelledby="black80-club" className="relative mt-8 overflow-hidden rounded-3xl border border-purple-400/40 bg-gradient-to-br from-pink-950 via-pink-800 to-pink-600 shadow-2xl shadow-purple-950/40">
     <div className="grid items-center gap-5 p-5 sm:p-6 md:grid-cols-[1.2fr_1fr_1fr]">
      <div>
       <img src="/club-landing/logo.png" alt="Clube dos Drinkeros" className="mb-3 w-44 max-w-full" />
