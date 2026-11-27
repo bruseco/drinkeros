@@ -36,6 +36,13 @@
       "when": 1793436420747,
       "tag": "0004_club_b_monthly_card",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795772262792,
+      "tag": "0005_tighten_funnel_and_club_settings_policies",
+      "breakpoints": true
     }
   ]
 }
