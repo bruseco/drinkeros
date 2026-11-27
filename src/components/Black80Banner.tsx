@@ -5,7 +5,7 @@ import {Link,useLocation} from 'react-router-dom';
 import {useBlack80} from '@/hooks/useBlack80';
 
 /** Presentation is separate so a local preview cannot enable prices or payments. */
-export function Black80BannerContent({serverOffsetMs=0,onExpire}:{serverOffsetMs?:number;onExpire?:()=>unknown}={}) {
+export function Black80BannerContent({serverOffsetMs=0,onExpire,compactOnly=false}:{serverOffsetMs?:number;onExpire?:()=>unknown;compactOnly?:boolean}={}) {
  const bannerRef=useRef<HTMLDivElement>(null);
  const [compact,setCompact]=useState(false);
  useEffect(()=>{
@@ -15,7 +15,7 @@ export function Black80BannerContent({serverOffsetMs=0,onExpire}:{serverOffsetMs
   observer.observe(banner);
   return()=>observer.disconnect();
  },[]);
- return <><div ref={bannerRef}><aside aria-label="Promoção Black Friday" className="relative z-[60] overflow-hidden border-b border-fuchsia-300/40 text-white shadow-[0_6px_30px_rgba(219,39,119,0.3)]" style={{background:'linear-gradient(110deg, #9d174d 0%, #db2777 45%, #ec4899 100%)'}}>
+ return <>{compactOnly?<div aria-hidden="true" className="h-16"/>:<div ref={bannerRef}><aside aria-label="Promoção Black Friday" className="relative z-[60] overflow-hidden border-b border-fuchsia-300/40 text-white shadow-[0_6px_30px_rgba(219,39,119,0.3)]" style={{background:'linear-gradient(110deg, #9d174d 0%, #db2777 45%, #ec4899 100%)'}}>
   <div aria-hidden="true" className="pointer-events-none absolute -top-24 right-16 h-64 w-64 rounded-full bg-fuchsia-300/20 blur-3xl"/>
   <div className="relative mx-auto flex max-w-7xl flex-col items-center gap-3 px-4 py-4 sm:flex-row sm:justify-between sm:gap-6 sm:px-6 lg:py-5">
    <div className="flex items-center gap-3 sm:gap-5">
@@ -31,8 +31,8 @@ export function Black80BannerContent({serverOffsetMs=0,onExpire}:{serverOffsetMs
     <p className="text-center text-[11px] leading-snug text-pink-100">RAND e Clube mensal não participam.<br className="hidden sm:block"/>{' '}Clube anual por <strong className="text-white">R$47</strong>.</p>
    </div>
   </div>
- </aside></div>
- {compact&&<aside aria-label="Resumo da oferta Black Friday" className="fixed inset-x-0 top-0 z-[70] border-b border-pink-300/40 bg-pink-600 text-white shadow-lg">
+ </aside></div>}
+ {(compactOnly||compact)&&<aside aria-label="Resumo da oferta Black Friday" className="fixed inset-x-0 top-0 z-[70] border-b border-pink-300/40 bg-pink-600 text-white shadow-lg">
   <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
    <div className="min-w-0"><p className="text-sm font-black sm:text-base">BLACK80 · 80% OFF <span className="hidden sm:inline">nos produtos participantes</span></p>
     <p className="text-[11px] leading-snug sm:text-xs">Até 05/12, às 23h59 · Brasília <span className="hidden sm:inline">· Clube anual R$47 · RAND e mensal fora</span></p>
@@ -47,5 +47,5 @@ export default function Black80Banner({member=false}:{member?:boolean}) {
  // All customer-facing routes, including login, quiz, checkout and RAND.
  // On RAND the explicit exception remains visible; its price never changes.
  if(!campaign.active || pathname.startsWith('/admin') || pathname.startsWith('/fechamentos') || (!member && (pathname==='/app'||pathname.startsWith('/app/'))))return null;
- return <Black80BannerContent key={pathname} serverOffsetMs={campaign.serverOffsetMs} onExpire={campaign.refresh}/>;
+ return <Black80BannerContent key={pathname} compactOnly={pathname.replace(/\/+$/,'')==='/black80'} serverOffsetMs={campaign.serverOffsetMs} onExpire={campaign.refresh}/>;
 }

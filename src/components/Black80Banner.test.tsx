@@ -39,3 +39,10 @@ it('pins a compact offer only after scrolling past the full banner and disconnec
  expect(screen.queryByRole('complementary',{name:'Resumo da oferta Black Friday'})).toBeNull();
  view.unmount();expect(disconnect).toHaveBeenCalled();vi.unstubAllGlobals();
 });
+
+it.each(['/black80','/black80/'])('shows only the pinned compact bar immediately on the promotion page: %s',path=>{
+ render(<MemoryRouter initialEntries={[path]}><Black80Banner/></MemoryRouter>);
+ expect(screen.queryByRole('complementary',{name:'Promoção Black Friday'})).toBeNull();
+ expect(screen.getByRole('complementary',{name:'Resumo da oferta Black Friday'})).toHaveClass('fixed','top-0');
+ expect(screen.getAllByRole('complementary')).toHaveLength(1);
+});
