@@ -95,6 +95,21 @@ export type Database = {
         }
         Relationships: []
       }
+      black80_campaign: {
+        Row: {
+          enabled: boolean
+          id: boolean
+        }
+        Insert: {
+          enabled?: boolean
+          id?: boolean
+        }
+        Update: {
+          enabled?: boolean
+          id?: boolean
+        }
+        Relationships: []
+      }
       certificate_layout_settings: {
         Row: {
           date_font_size: number
@@ -2617,6 +2632,47 @@ export type Database = {
           },
         ]
       }
+      rand_closing_costs: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          description: string
+          id: string
+          month: string
+          recognized_in: string | null
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          description: string
+          id?: string
+          month: string
+          recognized_in?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          description?: string
+          id?: string
+          month?: string
+          recognized_in?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rand_closing_costs_recognized_in_fkey"
+            columns: ["recognized_in"]
+            isOneToOne: false
+            referencedRelation: "rand_financial_closings"
+            referencedColumns: ["month"]
+          },
+        ]
+      }
       rand_closing_state: {
         Row: {
           id: boolean
@@ -4249,6 +4305,11 @@ export type Database = {
           user_id: string
         }[]
       }
+      black80_active: { Args: never; Returns: boolean }
+      black80_price: {
+        Args: { _base: number; _current: number; _slug: string; _type: string }
+        Returns: number
+      }
       can_edit: { Args: { _user_id: string }; Returns: boolean }
       can_view_rand_closing: { Args: never; Returns: boolean }
       claim_club_guest_checkout: {
@@ -4690,6 +4751,13 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      public_black80_campaign: {
+        Args: never
+        Returns: {
+          enabled: boolean
+          server_now: string
+        }[]
+      }
       purge_expired_welcome_passwords: { Args: never; Returns: undefined }
       quiz_admin_answers: {
         Args: { _path?: string; _since?: string; _until?: string }
@@ -4790,6 +4858,10 @@ export type Database = {
           session_id: string
         }[]
       }
+      rand_report_with_costs: {
+        Args: { p_month: string; p_report: Json }
+        Returns: Json
+      }
       recalc_yearly_winner_stats: {
         Args: { _winner_id: string }
         Returns: undefined
@@ -4797,6 +4869,26 @@ export type Database = {
       record_engagement_prompt: {
         Args: { _action: string; _prompt: string }
         Returns: undefined
+      }
+      record_rand_closing_settled: {
+        Args: { p_draft_id: string; p_month: string; p_rand_cents: number }
+        Returns: {
+          base_revision: number
+          carried_to: string | null
+          draft_id: string
+          month: string
+          paid_at: string | null
+          paid_by: string | null
+          report: Json
+          status: string
+          synced_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rand_financial_closings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       resolve_redirect_link: { Args: { link_code: string }; Returns: string }
       retrigger_clube_intro_offer: {
@@ -4813,6 +4905,32 @@ export type Database = {
           p_recipe_id: string
         }
         Returns: string
+      }
+      save_rand_closing_cost: {
+        Args: {
+          p_amount_cents: number
+          p_cost_id?: string
+          p_description: string
+          p_month: string
+          p_remove?: boolean
+        }
+        Returns: {
+          base_revision: number
+          carried_to: string | null
+          draft_id: string
+          month: string
+          paid_at: string | null
+          paid_by: string | null
+          report: Json
+          status: string
+          synced_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "rand_financial_closings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       search_club_recipes: {
         Args: { _limit?: number; _q: string }
