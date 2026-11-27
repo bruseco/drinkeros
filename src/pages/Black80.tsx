@@ -1,3 +1,4 @@
+import packCover from '@/assets/quiz-pack-6-ebooks.jpg';
 import {Link} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
 import {supabase} from '@/integrations/supabase/client';
@@ -7,10 +8,10 @@ export default function Black80() {
  const campaign=useBlack80();
  const {data=[],isLoading,error}=useQuery({queryKey:['black80-products'],queryFn:async()=>{
   const groups=await Promise.all(['courses','ebooks','combos','packages'].map(async(table)=>{
-   let q=(supabase.from as any)(table).select('id,name,slug,price,cover_image_url').eq('is_active',true).gt('price',0).neq('slug','rand');
+   let q=(supabase.from as any)(table).select('id,name,slug,price,cover_image_url').eq('is_active',true).gt('price',0).neq('slug','rand').neq('slug','pacote-business');
    if(table!=='ebooks')q=q.eq('is_available_for_sale',true);
    const {data,error}=await q;if(error)throw error;
-   return (data||[]).map((p:any)=>({...p,type:({courses:'course',ebooks:'ebook',combos:'combo',packages:'package'} as Record<string,string>)[table]}));
+   return (data||[]).map((p:any)=>({...p,cover_image_url:p.cover_image_url||(p.slug==='pacote-6-e-books'?packCover:null),type:({courses:'course',ebooks:'ebook',combos:'combo',packages:'package'} as Record<string,string>)[table]}));
   }));return groups.flat();
  }});
  return <main className="min-h-screen bg-background px-4 py-8 text-foreground"><div className="mx-auto max-w-6xl">
