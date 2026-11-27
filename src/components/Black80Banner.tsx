@@ -15,7 +15,7 @@ export function Black80BannerContent({serverOffsetMs=0,onExpire,compactOnly=fals
   observer.observe(banner);
   return()=>observer.disconnect();
  },[]);
- return <>{compactOnly?<div aria-hidden="true" className="h-16"/>:<div ref={bannerRef}><aside aria-label="Promoção Black Friday" className="relative z-[60] overflow-hidden border-b border-fuchsia-300/40 text-white shadow-[0_6px_30px_rgba(219,39,119,0.3)]" style={{background:'linear-gradient(110deg, #9d174d 0%, #db2777 45%, #ec4899 100%)'}}>
+ return <>{compactOnly?<div aria-hidden="true" className="h-24"/>:<div ref={bannerRef}><aside aria-label="Promoção Black Friday" className="relative z-[60] overflow-hidden border-b border-fuchsia-300/40 text-white shadow-[0_6px_30px_rgba(219,39,119,0.3)]" style={{background:'linear-gradient(110deg, #9d174d 0%, #db2777 45%, #ec4899 100%)'}}>
   <div aria-hidden="true" className="pointer-events-none absolute -top-24 right-16 h-64 w-64 rounded-full bg-fuchsia-300/20 blur-3xl"/>
   <div className="relative mx-auto flex max-w-7xl flex-col items-center gap-3 px-4 py-4 sm:flex-row sm:justify-between sm:gap-6 sm:px-6 lg:py-5">
    <div className="flex items-center gap-3 sm:gap-5">
@@ -36,6 +36,7 @@ export function Black80BannerContent({serverOffsetMs=0,onExpire,compactOnly=fals
   <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
    <div className="min-w-0"><p className="text-sm font-black sm:text-base">BLACK80 · 80% OFF <span className="hidden sm:inline">nos produtos participantes</span></p>
     <p className="text-[11px] leading-snug sm:text-xs">Até 05/12, às 23h59 · Brasília <span className="hidden sm:inline">· Clube anual R$47 · RAND e mensal fora</span></p>
+    <Black80Countdown compact serverOffsetMs={serverOffsetMs} onExpire={onExpire}/>
    </div>
    <Link to="/black80" className="flex shrink-0 items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-black text-pink-900 sm:text-sm">Ver ofertas <ArrowRight aria-hidden="true" className="h-4 w-4"/></Link>
   </div>

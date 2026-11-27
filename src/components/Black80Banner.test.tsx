@@ -45,4 +45,5 @@ it.each(['/black80','/black80/'])('shows only the pinned compact bar immediately
  expect(screen.queryByRole('complementary',{name:'Promoção Black Friday'})).toBeNull();
  expect(screen.getByRole('complementary',{name:'Resumo da oferta Black Friday'})).toHaveClass('fixed','top-0');
  expect(screen.getAllByRole('complementary')).toHaveLength(1);
+ expect(screen.getByRole('timer')).toHaveTextContent('Termina em');
 });
