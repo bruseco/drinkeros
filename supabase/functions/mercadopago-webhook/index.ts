@@ -143,7 +143,12 @@ async function resolveOrCreateBuyer(supabase: any, args: {
 
 async function grantClubAccess(supabase: any, userId: string, payment: any, paymentId: string, periodDays: number): Promise<string | null> {
   const now = new Date();
-  const periodEnd = new Date(now.getTime() + periodDays * 24 * 60 * 60 * 1000);
+  let periodEnd = new Date(now.getTime() + periodDays * 24 * 60 * 60 * 1000);
+  if (periodDays >= 365) {
+    const grant = await supabase.rpc('grant_club_annual_payment', {_user_id:userId,_payment_id:String(paymentId),_paid_at:payment?.date_approved || now.toISOString()});
+    if (grant.error) throw grant.error;
+    if (grant.data) periodEnd = new Date(grant.data);
+  }
 
   const { data: existingPayment } = await supabase
     .from("vip_payments")
@@ -151,16 +156,7 @@ async function grantClubAccess(supabase: any, userId: string, payment: any, paym
     .eq("metadata->>mercadopago_payment_id", String(paymentId))
     .maybeSingle();
 
-  if (existingPayment?.id) {
-    await supabase.from("user_plans").upsert({
-      user_id: userId,
-      plan: "vip",
-      source: "mercadopago",
-      activated_at: now.toISOString(),
-      expires_at: periodEnd.toISOString(),
-    }, { onConflict: "user_id" });
-    return existingPayment.id;
-  }
+  if (existingPayment?.id) return existingPayment.id;
 
   const { data: createdPayment } = await supabase.from("vip_payments").insert({
     user_id: userId,
@@ -174,13 +170,10 @@ async function grantClubAccess(supabase: any, userId: string, payment: any, paym
     metadata: { mercadopago_payment_id: String(paymentId), source: "mercadopago" },
   }).select("id").maybeSingle();
 
-  await supabase.from("user_plans").upsert({
-    user_id: userId,
-    plan: "vip",
-    source: "mercadopago",
-    activated_at: now.toISOString(),
-    expires_at: periodEnd.toISOString(),
-  }, { onConflict: "user_id" });
+  if (periodDays < 365) {
+    const grant = await supabase.rpc('grant_club_monthly_period', {_user_id:userId,_start:now.toISOString(),_end:periodEnd.toISOString()});
+    if (grant.error) throw grant.error;
+  }
 
   return createdPayment?.id ?? null;
 }
@@ -390,10 +383,16 @@ serve(async (req) => {
 
       const isAnnual = pre?.auto_recurring?.frequency === 12;
       const now = new Date();
-      const periodEnd = monthlyPeriod?.end || new Date(now.getTime() + (isAnnual ? 365 : 31) * 24 * 60 * 60 * 1000);
+      let periodEnd = monthlyPeriod?.end || new Date(now.getTime() + (isAnnual ? 365 : 31) * 24 * 60 * 60 * 1000);
       // Same existing purchase/idempotency key, shared with the admin report.
       // A subscription ID cannot identify a charge: each renewal is a new sale.
       const purchaseTransactionId = guest && ap?.payment?.id ? String(ap.payment.id) : String(resourceId);
+      if (isAnnual) {
+        const grant = await supabase.rpc('grant_club_annual_payment', {_user_id:userId,_payment_id:purchaseTransactionId,_paid_at:ap?.payment?.date_approved || ap?.debit_date || now.toISOString()});
+        if (grant.error) throw grant.error;
+        if (grant.data) periodEnd = new Date(grant.data);
+      }
+
 
       const { data: existing } = await supabase
         .from("vip_payments").select("id,metadata")
@@ -429,15 +428,9 @@ serve(async (req) => {
       if (monthlyPeriod) {
         const grant = await supabase.rpc('grant_club_monthly_period', {_user_id:userId,_start:monthlyPeriod.start.toISOString(),_end:monthlyPeriod.end.toISOString()});
         if (grant.error) throw grant.error;
-      } else {
-      await supabase.from("user_plans").upsert({
-        user_id: userId,
-        plan: "vip",
-        source: "mercadopago",
-        activated_at: now.toISOString(),
-        expires_at: periodEnd.toISOString(),
-      }, { onConflict: "user_id" });
-
+      } else if (!isAnnual) {
+        const grant = await supabase.rpc('grant_club_monthly_period', {_user_id:userId,_start:now.toISOString(),_end:periodEnd.toISOString()});
+        if (grant.error) throw grant.error;
       }
 
       await recordPurchase(supabase, {
