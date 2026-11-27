@@ -46,8 +46,8 @@ export default function Black80() {
    </section>
    {isLoading&&<p>Carregando produtos…</p>}{error&&<p role="alert">Não foi possível carregar as ofertas. Atualize a página.</p>}
    {[
-    {title:'Cursos',description:'Aprenda novas técnicas e dê o próximo passo na coquetelaria.',items:data.filter((p:any)=>p.type==='course')},
-    {title:'E-books',description:'Suas próximas receitas favoritas, reunidas para consultar quando quiser.',items:data.filter((p:any)=>p.type==='ebook'||p.slug==='pacote-6-e-books')},
+    {title:'Cursos',description:'Aprenda novas técnicas e dê o próximo passo na coquetelaria.',items:data.filter((p:any)=>p.type==='course').sort((a:any,b:any)=>{const order=['drinkeros-xperience','mixologia-avancada','producao-de-ingredientes-artesanais','bar-p-eventos'];const rank=(slug:string)=>order.includes(slug)?order.indexOf(slug):order.length;return rank(a.slug)-rank(b.slug)})},
+    {title:'E-books',description:'Suas próximas receitas favoritas, reunidas para consultar quando quiser.',items:data.filter((p:any)=>p.type==='ebook'||p.slug==='pacote-6-e-books').sort((a:any,b:any)=>{const rank=(slug:string)=>slug==='drinks-tematicos'?0:slug==='pacote-6-e-books'?1:2;return rank(a.slug)-rank(b.slug)})},
     {title:'Pacotes',description:'Mais conteúdo para ampliar seu repertório.',items:data.filter((p:any)=>p.type!=='course'&&p.type!=='ebook'&&p.slug!=='pacote-6-e-books')},
    ].filter(group=>group.items.length>0).map(group=><section key={group.title} className="mt-14 border-t border-purple-400/20 pt-9" aria-label={group.title}>
     <h2 className="text-4xl font-black tracking-tight sm:text-5xl">{group.title}</h2><p className="mt-3 text-muted-foreground">{group.description}</p>
