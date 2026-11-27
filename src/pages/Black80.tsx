@@ -1,6 +1,5 @@
 import black80Hero from '@/assets/black80-hero-approved.jpg';
 import { black80CourseDetails } from '@/lib/black80CourseDetails';
-import Black80Countdown from '@/components/Black80Countdown';
 import { ArrowRight, Check, Play, Heart, ListChecks, Users } from 'lucide-react';
 import drinksStrip from '@/assets/1000-drinks.jpg';
 import packCover from '@/assets/quiz-pack-6-ebooks.jpg';
@@ -24,7 +23,6 @@ export default function Black80() {
   {!campaign.active?<p role="status" className="mt-8">{campaign.loading?'Conferindo promoção…':'A promoção não está ativa. Os preços regulares continuam valendo.'}</p>:<>
    <img src={black80Hero} alt="Black Friday Drinkeros. BLACK80: 80% OFF nos cursos e e-books participantes. Clube anual por R$47. Até 5 de dezembro, às 23h59 de Brasília." width="1983" height="793" fetchPriority="high" className="block h-auto w-full rounded-2xl border border-pink-400/30" />
    <p className="sr-only">Desconto aplicado automaticamente. Oferta não cumulativa.</p>
-   <div className="mt-5 w-fit rounded-xl border border-pink-400/40 bg-pink-950 px-4 py-3 text-white"><Black80Countdown serverOffsetMs={campaign.serverOffsetMs} onExpire={campaign.refresh}/></div>
    <section aria-labelledby="black80-club" className="relative mt-8 overflow-hidden rounded-3xl border border-purple-400/40 bg-gradient-to-br from-purple-950 via-purple-900 to-fuchsia-950 shadow-2xl shadow-purple-950/40">
     <div className="grid items-center gap-5 p-5 sm:p-6 md:grid-cols-[1.2fr_1fr_1fr]">
      <div>
