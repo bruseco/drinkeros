@@ -68,7 +68,7 @@ const VipFloatingBanner: React.FC<VipFloatingBannerProps> = ({
     setDismissed(true);
   };
 
-  if (!visible || dismissed || black80.active) return null;
+  if (!visible || dismissed || (black80.active && !['rand','classicos-destilados'].includes(slug||''))) return null;
 
   // Banner promocional para VISITANTES (não-sócios) — sempre mostra a oferta máxima (intro 80%)
   const displayPercent = vip.percent || VIP_DISCOUNT_INTRO_PERCENT;

@@ -385,7 +385,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   const installments = installmentValue.toFixed(2).replace('.', ',');
 
   /* ===== Presente de desconto (preço oficial → preço real animado) ===== */
-  const giftEnabled = !!giftOfficialPrice && giftOfficialPrice > finalPrice && !isVip && !coupon && !black80.active;
+  const giftEnabled = !!giftOfficialPrice && giftOfficialPrice > finalPrice && !isVip && !coupon && (!black80.active || ['rand','classicos-destilados'].includes(slug));
   const giftStorageKey = `gift-reveal:${slug}`;
   const [giftRevealed, setGiftRevealed] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -574,7 +574,7 @@ const CourseLanding: React.FC<CourseLandingProps> = ({
   }, [coupon]);
 
   // Preço exibido na seção de oferta
-  const shownPrice = black80.active && slug!=='rand' ? finalPrice : coupon
+  const shownPrice = black80.active && !['rand','classicos-destilados'].includes(slug) ? finalPrice : coupon
     ? displayPrice ?? coupon.previousPrice
     : giftEnabled && !giftRevealed
     ? (giftOfficialPrice as number)

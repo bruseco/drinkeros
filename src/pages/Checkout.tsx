@@ -684,9 +684,9 @@ function RegisteredCheckout() {
                 R$ {Number(product.price).toFixed(2).replace(".", ",")}
               </span>
             </div>
-            {(isVip || (black80.active && product.slug!=='rand')) && !isClub && (
+            {(isVip || (black80.active && !['rand','classicos-destilados'].includes(product.slug))) && !isClub && (
               <div className="flex justify-between text-sm text-primary">
-                <span>{black80.active?'BLACK80 — Black Friday':`Desconto Sócio do Clube (-${vipPercent}%)`}</span>
+                <span>{black80.active && !['rand','classicos-destilados'].includes(product.slug)?'BLACK80 — Black Friday':`Desconto Sócio do Clube (-${vipPercent}%)`}</span>
                 <span>−R$ {(Number(product.price) - finalPrice).toFixed(2).replace(".", ",")}</span>
               </div>
             )}

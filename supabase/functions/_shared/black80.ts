@@ -6,7 +6,7 @@ export function black80Active(campaign: Black80Campaign | null | undefined, now 
 }
 /** No stacking. RAND and monthly subscriptions keep their existing conditions. */
 export function black80Price(type: string, slug: string, base: number, current: number, campaign: Black80Campaign | null | undefined, now = Date.now()) {
-  if (!black80Active(campaign, now) || slug === 'rand') return current;
+  if (!black80Active(campaign, now) || ['rand','classicos-destilados'].includes(slug)) return current;
   if (type === 'club') return slug === 'clube-anual' ? Math.min(current, 47) : current;
   if (!['course','ebook','combo','package'].includes(type) || !Number.isFinite(base) || base <= 0) return current;
   return Math.min(current, Math.round(base * 20) / 100);

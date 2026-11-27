@@ -11,7 +11,8 @@ describe('BLACK80 server and display pricing',()=>{
  });
  it('takes 80% from the catalog base in cents without stacking VIP or quiz discounts',()=>{
   expect(black80Price('course','mixologia-avancada',797,297,enabled,now)).toBe(159.4);
-  expect(black80Price('course','classicos-destilados',697,197,enabled,now)).toBe(139.4);
+  expect(black80Price('course','classicos-destilados',697,197,enabled,now)).toBe(197);
+  expect(black80Price('course','classicos-destilados',697,697,enabled,now)).toBe(697);
   expect(black80Price('ebook','ebook',27,27,enabled,now)).toBe(5.4);
   expect(black80Price('combo','pacote-6-e-books',147,47,enabled,now)).toBe(29.4);
   expect(black80Price('course','special',100,10,enabled,now)).toBe(10);

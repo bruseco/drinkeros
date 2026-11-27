@@ -17,6 +17,7 @@ beforeAll(async()=>{
  INSERT INTO quiz_offer_sessions VALUES('${user}','quiz','casa','xperience',now()-interval '1 hour',now()-interval '40 minutes','{}');
  INSERT INTO quiz_offer_prices VALUES('xperience','course','drinkeros-xperience',497,197,true),('clube','club','clube-anual',97,87,true);`);
  await db.exec(readFileSync('supabase/migrations/20261126120000_black80_campaign.sql','utf8'));
+ await db.exec(readFileSync('supabase/migrations/20261127140000_black80_exclude_rand_course.sql','utf8'));
 },30000);
 afterAll(async()=>{await db?.close()});
 it('ships disabled, retaining regular expired annual and quiz prices',async()=>{
@@ -31,6 +32,7 @@ it('applies promotional quotes without resetting quiz deadlines or altering excl
  expect((await db.query<any>("select * from quiz_quote('quiz','xperience')")).rows[0]).toMatchObject({price:'99.40',active:false});
  expect((await db.query<any>("select * from quiz_quote('quiz','clube')")).rows[0].price).toBe('47');
  expect((await db.query<any>('select * from clube_public_checkout_quote($1)',[user])).rows[0].price).toBe('47');
+ expect((await db.query<any>("select black80_price('course','classicos-destilados',697,697) regular,black80_price('course','classicos-destilados',697,197) vip")).rows[0]).toMatchObject({regular:'697',vip:'197'});
  expect((await db.query<any>("select black80_price('combo','rand',197,197) p,black80_price('club','clube-mensal-b',7,7) m")).rows[0]).toMatchObject({p:'197',m:'7'});
  expect((await db.query<any>("select expires_at from quiz_offer_sessions")).rows[0].expires_at).toEqual(before);
 });
